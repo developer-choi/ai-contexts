@@ -2,10 +2,18 @@
 1. 여러 컴퓨터마다 동일한 내용이 ~/.gemini/GEMINI.md에 포함시키려고 작성했습니다.
 2. 기존 ~/.gemini/GEMINI.md 에 있는 내용을 유지한상태로 아래 내용을 포함해주세요.
 
-# **[중요] 최우선 작업 규칙**
+# **[IMPORTANT] Top Priority Work Rules**
 
-## **프로젝트별 규칙 확인 (필수)**
-- 모든 프로젝트마다 공통적으로 적용되야 하는 규칙들은 `~/WebstormProjects/ai-contexts/docs/for-all-projects` 에 있습니다.
-- 프로젝트별 고유한 코딩 스타일, 아키텍처, 규칙은 `docs/contexts/` 폴더에 정의되어 있습니다. (없는 프로젝트도 있습니다.)
-- **작업 시작 전, `docs/contexts/` 폴더 안의 모든 파일을 반드시 정독하고, 모든 지시를 빠짐없이 따라야 한다.**
-- 이 규칙을 따르지 않는 것은 심각한 오류로 간주됩니다.
+## Reading Non-ASCII Files on Windows (Fix for Garbled Text)
+When reading files with non-ASCII characters (e.g., Korean) located outside the allowed workspace on Windows, standard shell output often gets garbled. To read them correctly and efficiently:
+
+1. **Copy** the target file to the current project's temporary directory.
+   Command: `copy "<TARGET_FILE_PATH>" "<TEMP_DIR>\<FILENAME>"`
+2. **Read** the copied file using the `read_file` tool.
+3. **Delete** the copied file to clean up.
+
+## **Check Project-Specific Rules (Mandatory)**
+- Rules applicable to all projects are located in `~/WebstormProjects/ai-contexts/docs/for-all-projects`.
+- Project-specific rules are defined in the `docs/contexts/` folder. (Some projects may not have this.)
+- **Before starting work, you must read all files in the `docs/contexts/` folder and follow all instructions without exception.**
+- Failure to follow these rules is considered a serious error.
