@@ -1,8 +1,6 @@
 # 일일 작업 회고 피드백 가이드
 
-Claude가 제공할 수 있는 일일 작업 피드백 유형들입니다.
-
-## Claude가 스캔할 프로젝트 경로
+## 스캔할 프로젝트 경로
 
 ### ~/workspace/langdy/*
 - langdy-admin
