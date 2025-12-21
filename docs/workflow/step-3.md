@@ -2,7 +2,7 @@
 이 단계는 `/plan/commit-sequence.md`에 정의된 커밋들의 상세 명세서를 작성하기 위해, 우선 **파일 뼈대(Skeleton)를 생성하는 단계**입니다.
 
 # 참고 자료
-- `docs/workflow/background.md`
+- [background.md](./background.md)
 - `/plan/motivation.md` (Step 1에서 생성됨)
 - `/plan/commit-sequence.md` (Step 2에서 생성됨)
 - [기획서 링크]
@@ -15,8 +15,8 @@
 `/plan/commit-sequence.md`에 있는 커밋 목록 중 **다음에 작업할 커밋(들)**에 대해,
 `/plan/tasks/` 폴더 아래에 Markdown 파일을 생성하고 기본 정보를 작성해주세요.
 
-**파일 명명 규칙**: `/plan/tasks/[순서]_[커밋키워드].md`
-(예: `/plan/tasks/01_feat_button.md`)
+**파일 명명 규칙**: `/plan/tasks/[순서]-[작업키워드].md`
+(예: `/plan/tasks/01-feat-button.md`)
 
 ## 작성 양식
 아래 양식 그대로 작성하여 파일을 생성해주세요.

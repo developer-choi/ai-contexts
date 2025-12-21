@@ -5,7 +5,7 @@
 - 작은 커밋을 순서 잘 맞춰서 쌓아야 리뷰하기도 편합니다.
 
 # 참고 자료
-- `docs/workflow/background.md`
+1. [background.md](./background.md)
 - `/plan/motivation.md` (Step 1에서 생성됨)
 - [기획서 링크]
 - [피그마 링크]

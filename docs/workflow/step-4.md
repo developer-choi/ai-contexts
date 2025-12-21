@@ -2,7 +2,7 @@
 이 단계는 Step 3에서 생성된 **Task Detail 문서**에 사용자가 추가로 제공할 정보(피그마, 타입, 참고 코드 등)를 반영하여 **최종 개발 명세서**를 완성하는 단계입니다.
 
 # 참고 자료
-- `docs/workflow/background.md`
+- [background.md](./background.md)
 - `/plan/motivation.md` (Step 1에서 생성됨)
 - `/plan/commit-sequence.md` (Step 2에서 생성됨)
 - [기획서 링크]
@@ -24,13 +24,13 @@ AI는 즉시 작업을 일시 중단하고, 사용자에게 **"작업을 위해 
 사용자는 작업의 종류에 따라 아래 정보들을 AI에게 반드시 제공해야 합니다.
 AI는 아래 정보가 포함되었는지 확인한 후 Task Detail 문서를 작성하세요.
 ### 1. 컴포넌트 개발인 경우
-- **참고 템플릿**: `docs/workflow/requirements/template/component.md`
+- **참고 템플릿**: `./template/component.md`
 - **필수 포함 항목**:
   - Props Interface
   - 피그마 링크
 
 ### 2. 함수 / 훅 / 클래스 개발인 경우
-- **참고 템플릿**: `docs/workflow/requirements/template/function-hooks-class.md`
+- **참고 템플릿**: `./template/function-hooks-class.md`
 - **필수 포함 항목**:
   - Input / Output 타입 정의
 
@@ -68,5 +68,5 @@ AI는 최종적으로 아래와 같은 구조로 문서를 완성해야 합니�
 - 핵심 코드 스니펫 (Interface, 시그니처 등)
 
 유형은 2가지가 있습니다.
-- `docs/workflow/requirements/template/component.md`
-- `docs/workflow/requirements/template/function-hooks-class.md`
+- [Component](./template/component.md)
+- [Function, Hooks, Class](./template/function-hooks-class.md)
