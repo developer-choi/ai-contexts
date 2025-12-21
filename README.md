@@ -6,9 +6,10 @@
 
 ## 종류
 
-### docs/for-all-projects
-- 모든 프로젝트에 공통적으로 적용되는 개발 규칙과 컨벤션을 정의했습니다.
-- 👉 [RTL 테스트 코드 작성 가이드라인](docs/for-all-projects/test/queries.md)
+### docs/workflow
+- AI와 함께 효율적으로 코드를 작성하기 위한 **[계획] -> [설계] -> [구현]** 워크플로우를 정의했습니다.
+- AI가 주도적으로 스캐폴딩을 잡고, 사용자가 구체화하는 방법입니다.
+- 👉 [AI 협업 워크플로우 가이드](docs/workflow/index.md)
 
 ### docs/self-help
 - 지속적인 성장을 위한 Context를 모았습니다.
