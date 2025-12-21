@@ -70,6 +70,9 @@ function deprecatedSomeFunction() {}
   - 게시글이 없을 때 보여줄 `EmptyContent` 컴포넌트 미리 구현.
   - 리스트/상세 등에서 공통으로 쓸 날짜 포매팅 함수 구현.
   - **효과**: 이렇게 엣지 케이스용 컴포넌트까지 미리 만들어두면, 나중에 API 연동 시 로직에만 집중할 수 있어 커밋이 깔끔해집니다.
+- **[중요] 작업 우선순위 (Dependency Order)**:
+  - 의존성 관리를 위해 **도메인에 종속되지 않는 공통 모듈(Common Type/Component/Utils)**을 가장 먼저 작업하세요.
+  - 그 후에 이를 사용하는 **특정 도메인에 종속되는 모듈**을 작업해야 합니다.
 
 ### Phase 2. 통합 및 연동 준비 (Integration Level)
 **5. 더미(Mock) 기반 통합 구현**
