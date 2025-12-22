@@ -1,43 +1,52 @@
 # 전 프로젝트 공통 컨텍스트 가이드
 
-이 폴더(`docs/for-all-projects`)는 모든 프로젝트에서 공통적으로 준수해야 할 개발 규칙과 가이드라인을 담고 있습니다.
-AI의 **토큰 효율성**과 **컨텍스트 명확성**을 위해, 작업 목적에 따라 필요한 폴더만 선별적으로 로드하여 사용해야 합니다.
+이 문서는 AI가 사용자의 요청 의도를 분석하고, `docs/for-all-projects/` 하위의 적절한 컨텍스트 폴더를 **스스로 선별하여 로드**하기 위한 규칙을 정의합니다.
 
-## 폴더 구조 및 역할
+AI는 사용자의 명시적인 지시가 없더라도, 아래 규칙에 따라 필요한 문서를 먼저 읽고 작업을 시작해야 합니다.
 
-### 1. `common/` (항상 필수)
-> **모든 작업의 베이스**입니다. 어떤 요청이든 이 폴더는 반드시 읽어야 합니다.
-- **포함 내용:** 개발 원칙, AI 태도, Git 커밋/Add 규칙, 작업 완료 후 필수 체크리스트.
+## 폴더별 역할 및 포함 내용
 
-### 2. `coding/` (코드 작성 모드)
-> **기능 구현, 버그 수정, 리팩토링** 등 프로덕션 코드를 작성할 때 사용합니다.
-- **포함 내용:** Naming 규칙, TypeScript 패턴, 컴포넌트/함수 작성법, 스타일 가이드.
+### 1. `common/` (Base Context)
+> **필수 로드**: 모든 작업의 기본이 되는 원칙입니다.
+- **포함 내용**: 개발 원칙, AI 태도, Git 커밋/Add 규칙, 작업 완료 후 체크리스트.
 
-### 3. `testing/` (테스트 모드)
-> **테스트 코드를 작성하거나 수정**할 때 사용합니다.
-- **포함 내용:** RTL(React Testing Library) 쿼리 우선순위, `describe/it` 구조, 테스트 파일명 규칙.
+### 2. `coding/` (Implementation Context)
+> **사용 시점**: 프로덕션 코드 작성, 수정, 리팩토링 시.
+- **포함 내용**: Naming, TypeScript, Component, Function, Style 등 구현 규칙.
 
-### 4. `review/` (리뷰 모드)
-> **작성된 코드를 검수**하거나 PR 리뷰를 시뮬레이션할 때 사용합니다.
-- **포함 내용:** 코드 리뷰 체크리스트, 안티 패턴 점검.
+### 3. `testing/` (Test Context)
+> **사용 시점**: 테스트 코드 작성, 수정, 분석 시.
+- **포함 내용**: RTL 쿼리 우선순위, Test 파일명 규칙, `describe/it` 패턴.
+
+### 4. `review/` (Review Context)
+> **사용 시점**: 코드 리뷰, PR 작성, 코드 품질 검수 요청 시.
+- **포함 내용**: 리뷰 체크리스트, 안티 패턴 점검, PR 가이드.
 
 ---
 
-## AI 프롬프트 가이드 (Best Practice)
+## AI 컨텍스트 로딩 전략 (Context Loading Strategy)
 
-작업 유형에 따라 아래 조합으로 컨텍스트를 주입하세요.
+사용자의 요청(Intent)에 따라 다음 조합으로 문서를 로드하세요.
 
-### 기능 구현 시 (Coding Mode)
-> "새로운 기능 구현해줘. **`common`이랑 `coding` 폴더** 읽고 규칙 준수해."
-- **로드:** `common/` + `coding/`
-- **배제:** `testing/`, `review/` (불필요한 테스트 규칙/리뷰 체크리스트 제외)
+### 1. 기능 구현 및 버그 수정 (Implementation)
+> **User Intent**: "이 기능 만들어줘", "버그 고쳐줘", "이거 리팩토링 해줘"
+- **Load Path**:
+    1.  `docs/for-all-projects/common`
+    2.  `docs/for-all-projects/coding`
+- **Action**: 구현 규칙을 숙지한 상태에서 코드를 작성합니다.
 
-### 테스트 작성 시 (Testing Mode)
-> "이 컴포넌트 테스트 짜줘. **`common`이랑 `testing` 폴더** 읽고 짜."
-- **로드:** `common/` + `testing/`
-- **배제:** `coding/` (구현 상세 규칙 제외), `review/`
+### 2. 테스트 코드 작성 (Testing)
+> **User Intent**: "테스트 짜줘", "테스트 깨지는데 고쳐줘"
+- **Load Path**:
+    1.  `docs/for-all-projects/common`
+    2.  `docs/for-all-projects/testing`
+- **Action**: `coding` 규칙보다는 테스트 작성 패턴과 쿼리 우선순위에 집중합니다.
 
-### 코드 리뷰 시 (Review Mode)
-> "작성한 코드 리뷰해줘. **`common`, `coding`, `testing`, `review` 폴더** 다 참고해서 봐줘."
-- **로드:** `common/` + `coding/` + `testing/` + `review/`
-- **설명:** 프로덕션 코드 규칙(`coding`)과 테스트 코드 규칙(`testing`)을 모두 대조하고, 점검표(`review`)를 통해 엄격하게 검수합니다.
+### 3. 코드 리뷰 및 PR (Review)
+> **User Intent**: "이 코드 리뷰해줘", "PR 내용 봐줘", "내 코드 어때?"
+- **Load Path**:
+    1.  `docs/for-all-projects/common`
+    2.  `docs/for-all-projects/coding` (코드 품질 기준)
+    3.  `docs/for-all-projects/testing` (테스트 유무 확인)
+    4.  `docs/for-all-projects/review` (검수 체크리스트)
+- **Action**: 단순 생성이 아니라, 엄격한 기준(`review/`)을 적용하여 비판적으로 분석합니다.
