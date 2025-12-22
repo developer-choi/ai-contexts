@@ -1,4 +1,7 @@
 # TypeScript 사용 패턴
+
+> **심화 내용 참고:** [TypeScript Advanced Patterns](./typescript-advanced.md) - 정교한 타입 정의, Optional 속성 관리 및 리팩토링 가이드
+
 ## 타입 vs 인터페이스
 
 **Interface 사용 (선호)**
