@@ -103,3 +103,6 @@ export default class StackUsingArray<D> extends Stack<D> {
   readonly capacity: number;
 }
 ```
+
+## 주의사항
+- **any, as 지양**: 가급적 사용하지 않는 방향으로 작업합니다.

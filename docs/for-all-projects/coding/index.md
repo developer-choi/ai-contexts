@@ -15,6 +15,9 @@ abstract push(data: D): void;
 abstract pop(): D;
 ```
 
+### 기존 코드 수정 시
+기존 코드 라인이 지워진게 아니라면, 그 기존 코드 라인 위에있는 주석도 제발 지우지 말아주세요
+
 ---
 
 ## Tanstack Query useMutation() 작성방식
@@ -47,14 +50,3 @@ try {
   // 에러 시 로직
 }
 ```
-
----
-
-## Git
-### add 명령어 주의사항
-git add -A 절대 금지 (untracked 파일 포함 위험)
-
-git add [특정파일] 만 사용
-
-### 작업 단위
-임의의 소스코드 추가 & 수정작업을 다 한 경우, 커밋을 꼭 남겨야합니다.
