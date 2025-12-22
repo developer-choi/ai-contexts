@@ -1,4 +1,6 @@
-# React 컴포넌트 패턴
+# React 컴포넌트 작성 패턴
+
+> **설계 원칙 참고:** [Component Design Patterns](./component-design.md) - 기본값 설정, 전역 상태 관리, 이벤트 리스너 등 설계 철학
 
 ##  함수형 컴포넌트
 - **100% 함수형 컴포넌트** 사용
@@ -9,7 +11,7 @@
 export default function Button({children, loading, ...rest}: ButtonProps) {
   return (
     <button {...rest}>
-      {loading ? <LoadingSpinner /> : children}
+    {loading ? <LoadingSpinner /> : children}
     </button>
   );
 }
@@ -18,7 +20,7 @@ export default function Button({children, loading, ...rest}: ButtonProps) {
 export const Button = ({children, loading, ...rest}: ButtonProps) => {
   return (
     <button {...rest}>
-      {loading ? <LoadingSpinner /> : children}
+    {loading ? <LoadingSpinner /> : children}
     </button>
   );
 };
