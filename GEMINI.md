@@ -45,3 +45,7 @@ const LINE_1 = {
 **✅ Allowed (의미 확장/고유 명사)**
 - `## Track 2. 문제 해결 논리 검증` (Track 2라는 식별자와 한글 제목의 결합)
 - `## AI의 역할 (Quiz Runner)` (역할의 구체적인 모드 명시)
+
+---
+## 상시 숙지해야하는 명령어 모음
+[for-all-projects의 README.md](docs/for-all-projects/README.md) 참고
