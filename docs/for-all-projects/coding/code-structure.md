@@ -33,6 +33,21 @@ function someFunction() {
 }
 ```
 
+### 단일 문장 중괄호 사용
+`if` 문에 실행 코드가 한 줄만 있더라도, 가독성과 잠재적 버그 방지를 위해 항상 **중괄호(`{ }`)**를 사용합니다.
+
+**❌ Bad (중괄호 생략)**
+```typescript
+if (!cookie) return null;
+```
+
+**✅ Good (중괄호 포함)**
+```typescript
+if (!cookie) {
+  return null;
+}
+```
+
 ### 삼항 연산자 배치
 삼항 연산자에서도 결과값이 짧은 쪽을 왼쪽에 배치하는 것을 선호합니다.
 
