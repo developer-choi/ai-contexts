@@ -57,7 +57,27 @@ function deprecatedSomeFunction() {}
 - 모든 구현의 기준이 되는 타입 파일을 가장 먼저 커밋합니다.
 - **이유**: 컴포넌트, 함수 등 모든 코드의 기반이 되므로 가장 먼저 확정되어야 작업 순서가 깔끔해집니다.
 
-**4. 단위 모듈 및 마크업 (Unit Level)**
+**4. API 호출 함수 (API Client)**
+- **특징**: API 명세가 확정되었거나 서버 개발이 완료된 경우, 실제 데이터를 주고받는 함수를 작성합니다.
+- (만약 API가 개발되지않았다면 이 단계는 건너뜁니다.)
+- **이유**: 타입을 기반으로 API 함수를 미리 정의해두면, 이후 Hooks나 컴포넌트 구현 시 데이터 흐름을 명확히 파악하며 작업할 수 있습니다. (API가 이미 있다면 굳이 Mock을 만들지 않고 이 단계에서 바로 연동 준비를 합니다.)
+- **작업 대상**: `axios` 또는 `fetch`를 사용하는 API 서비스 함수
+
+```typescript
+export interface BoardListApiRequest {
+  page: number;
+}
+
+export interface BoardListApiResponse {
+  list: Board[];
+}
+
+export async function getBoardListApi(request: BoardListApiRequest): BoardListApiResponse {
+  return fetch('/path', request);
+}
+```
+
+**5. 단위 모듈 및 마크업 (Unit Level)**
 - **특징**: 로직 없이 마크업만 있거나, 외부 의존성 없는 순수 함수. (유닛 테스트 가능)
 - **작업 대상**:
   1. 공통 UI 컴포넌트 (도메인 비종속. 예: `Button`)
@@ -75,22 +95,16 @@ function deprecatedSomeFunction() {}
   - 그 후에 이를 사용하는 **특정 도메인에 종속되는 모듈**을 작업해야 합니다.
 
 ### Phase 2. 통합 및 연동 준비 (Integration Level)
-**5. 더미(Mock) 기반 통합 구현**
-- **특징**: 실제 API 없이도 UI 흐름과 상호작용이 동작해야 합니다. (통합 테스트 가능)
+**6. 더미(Mock) 기반 통합 구현**
+- **특징**: 실제 API 연동 전이거나, API 호출 함수(Step 4)를 아직 만들지 않은 경우 UI 흐름과 상호작용이 동작하도록 합니다. (통합 테스트 가능)
 - **작업 대상**:
-  1. **Mock API**: 항상 성공하거나 실패하는 더미 데이터를 반환하는 함수 구현 (`getBoardListApi`).
+  1. **Mock API**: (필요 시) 항상 성공하거나 실패하는 더미 데이터를 반환하는 함수 구현.
   2. **Hooks**: 더미 데이터 / 더미콜백을 사용하는 `useQuery`나 폼 핸들러(`useForm`) 구현.
   3. **페이지/컨테이너 조립**: 앞서 만든 단위 컴포넌트들을 조합하여 페이지 완성.
   4. **유효성 검증**: 진입 시점의 데이터 검증 로직 구현.
-- **예시 (게시글 리스트)**:
-  - `getBoardListApi()`를 만들고 고정된 더미 데이터를 반환하게 함.
-  - `/board/list?type=UNKNOWN` 접근 시 유효성 검증 로직 구현.
-  - 데이터 유무에 따라 UI가 잘 노출되는지 확인 (데이터 로직은 다음 작업에서 연결).
-- **예시 (게시글 수정)**:
-  - `useBoardForm()` 훅을 만들고 `label`, `placeholder`, `onChange()` 등에 고정 값 / 콜백을 전달하여 폼 UI 확인.
 
 ### Phase 3. 실전 배치 (Implementation)
-**6. API 연동 및 엣지 케이스 완성**
+**7. API 연동 및 엣지 케이스 완성**
 - **작업 대상**:
   1. Mock API를 **실제 API 호출**로 교체.
   2. 더미 데이터 제거.
