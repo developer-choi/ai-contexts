@@ -69,3 +69,24 @@ const LINE_2 = {
   TOP: 15,
 };
 ```
+
+## 3. 불필요한 중간 변수 제거 (Inline Variable)
+단 한 번만 사용되는 값은 변수에 할당하지 않고 즉시 사용(Inline)합니다.
+변수명을 짓는 비용을 줄이고, 코드의 호흡을 간결하게 유지하기 위함입니다.
+
+**❌ Bad (불필요한 변수 할당)**
+```typescript
+export function setAuthInfo(authInfo: AuthInfo): void {
+  // cookieStore 변수는 바로 아래에서 한 번 쓰고 끝납니다. 굳이 만들 필요가 없습니다.
+  const cookieStore = cookies();
+  cookieStore.set(COOKIE_NAME, authInfo.accessToken, { ... });
+}
+```
+
+**✅ Good (즉시 사용)**
+```typescript
+export function setAuthInfo(authInfo: AuthInfo): void {
+  // 변수 없이 체이닝으로 바로 처리
+  cookies().set(COOKIE_NAME, authInfo.accessToken, { ... });
+}
+```
