@@ -75,7 +75,17 @@ AI는 최종적으로 아래와 같은 구조로 문서를 완성해야 합니�
 아래 내용을 작성합니다.
 - 성공/실패/엣지 케이스 시나리오
 - 테스트 케이스 (Checklist)
-- 핵심 코드 스니펫 (Interface, 시그니처 등)
+- **모듈/함수 시그니처 (구현 단위)**: 해당 파일에서 구현해야 할 모든 공개(public/export) 모듈 단위를 명시하세요.
+  - 예 (calculator.ts):
+    - `add(a: number, b: number): number`
+    - `subtract(a: number, b: number): number`
+    - `multiply(a: number, b: number): number`
+- **핵심 코드 스니펫 (Core Code Snippets)**:
+  - **외부 시스템 상호작용**: 함수 본문 내에서 다음과 같은 외부 저장소나 API와 상호작용하는 핵심 로직이 있다면 반드시 포함하세요.
+    - 브라우저 저장소: `localStorage`, `sessionStorage`, `IndexedDB` 등.
+    - Next.js 서버 기능: `cookies()`, `headers()`, `revalidatePath()` 등.
+    - 외부 API 호출 로직의 핵심 파라미터 구성.
+  - **복잡한 알고리즘**: 복잡한 계산이나 변환이 필요한 로직의 초안(Draft).
 
 유형은 2가지가 있습니다.
 - [Component](./template/component.md)
