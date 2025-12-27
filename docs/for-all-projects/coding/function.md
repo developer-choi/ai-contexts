@@ -68,16 +68,26 @@ function sort(param: SortParam) { }
 
 ## 반환 타입
 
-**명시적 반환 타입 지정 (선호)**
-```typescript
-// ✅ Good
-function bruteForceTwoSum(array: number[], target: number): boolean {
-  // ...
-  return false;
-}
+**반환 타입 명시 기준**
+기본적으로 **TypeScript의 Type Inference(타입 추론)** 기능을 최대한 활용합니다. 명시적인 반환 타입은 아래 두 가지 경우에만 작성합니다.
 
-function calculateSum(numbers: number[]): number {
-  return numbers.reduce((sum, num) => sum + num, 0);
+1. **Type Inference가 불가능하거나 의도대로 작동하지 않는 경우**: 복잡한 제네릭 연산이나 조건부 타입이 얽혀 있어 반환값이 무엇인지 코드를 보는 것만으로는 알 수 없을 때.
+2. **함수 본문이 100줄 이상인 경우**: 함수가 너무 길어 `return` 구문을 찾기 힘들고, 함수의 최종 결과물을 상단에서 미리 확인해야 할 필요가 있을 때.
+
+그 외의 경우, 특히 호출하는 내부 메서드에 이미 Generic을 전달하여 타입이 결정되는 구조라면 반환 타입을 생략합니다.
+
+**❌ Bad (불필요한 중복 명시)**
+```typescript
+// apiClient.request<LoginResponse>에서 이미 반환 타입이 결정되므로, 중복해서 작성할 필요가 없습니다.
+export function postLoginApi(data: LoginRequest): Promise<LoginResponse> {
+  return apiClient.request<LoginResponse>("POST", "/auth/login", data);
+}
+```
+
+**✅ Good (Type Inference 활용)**
+```typescript
+export function postLoginApi(data: LoginRequest) {
+  return apiClient.request<LoginResponse>("POST", "/auth/login", data);
 }
 ```
 
