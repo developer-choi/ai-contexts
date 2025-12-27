@@ -37,6 +37,7 @@
 ### 4. 상세 명세 구체화 (Task Refinement)
 - 사전 정보 전달
   - docs/for-all-projects 하위 coding/, common/ 폴더 숙지
+  - 위에서 만들었던 모든 Context 다시 재전달
 
 - **[step-4.md](./step-4.md)**:
   - **목표**: Step 3에서 생성된 스캐폴딩 파일에 **사용자 정보(피그마, 타입 등)**를 반영하여 **완벽한 개발 명세서**를 완성합니다.
