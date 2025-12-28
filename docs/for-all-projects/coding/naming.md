@@ -33,8 +33,15 @@ function handleClick() { }
 function onClick() { }
 
 // API 함수는 접미사 'Api' 사용
+// 형식: [METHOD] + [DOMAIN] + [유형(List, Detail 등)] + Api
 function getBoardListApi() { }
-function postBoardApi() { }
+function getBoardDetailApi() { }
+function postBoardDetailApi() { }
+function patchBoardDetailApi() { }
+function deleteBoardDetailApi() { }
+
+// API 함수의 파라미터 변수명은 반드시 'request'를 사용합니다.
+function postLoginApi(request: LoginApiRequest) { }
 ```
 
 ## 클래스/컴포넌트명
@@ -59,12 +66,12 @@ interface ButtonProps { }
 interface InputProps { }
 
 // API 타입
-interface SignUpApiRequest { }
-interface SignUpApiResponse { }
+// 형식: [함수명과 동일한 Prefix] + Request / Response
+interface LoginApiRequest { }
+interface LoginApiResponse { }
 
-// Union 타입
-type ButtonSize = 'small' | 'medium' | 'large';
-type ButtonVariant = 'contained' | 'outlined';
+interface BoardListApiRequest { }
+interface BoardListApiResponse { }
 ```
 
 ### 파일명
