@@ -67,11 +67,26 @@ interface InputProps { }
 
 // API 타입
 // 형식: [함수명과 동일한 Prefix] + Request / Response
-interface LoginApiRequest { }
-interface LoginApiResponse { }
+// 중요: METHOD를 포함한 전체 함수명 Prefix를 사용
+// 예: postLoginApi → PostLoginApiRequest
+//     getBoardListApi → GetBoardListApiRequest
+interface PostLoginApiRequest { }
+interface PostLoginApiResponse { }
 
-interface BoardListApiRequest { }
-interface BoardListApiResponse { }
+interface GetBoardListApiRequest { }
+interface GetBoardListApiResponse { }
+
+interface GetBoardDetailApiRequest { }
+interface GetBoardDetailApiResponse { }
+
+interface PostBoardDetailApiRequest { }
+interface PostBoardDetailApiResponse { }
+
+interface PatchBoardDetailApiRequest { }
+interface PatchBoardDetailApiResponse { }
+
+interface DeleteBoardDetailApiRequest { }
+// DELETE는 보통 Response body 없음
 ```
 
 ### 파일명
