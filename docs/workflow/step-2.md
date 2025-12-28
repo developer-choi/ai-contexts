@@ -114,3 +114,12 @@ export async function getBoardListApi(request: BoardListApiRequest): BoardListAp
   - **성공**: 기존 더미 데이터 로직을 실제 API 응답으로 교체.
   - **실패**: API 실패 시(500 error), 이전에 만든 `ErrorComponent` 노출.
   - **엣지**: 리스트가 비어있을 경우, 이전에 만든 `EmptyContent` 노출.
+
+---
+
+## [CRITICAL] 최종 검토: 커밋 누락 확인
+`/plan/commit-sequence.md` 작성이 완료되면, 반드시 다음을 수행하세요.
+
+1. **대조 점검**: Step 1에서 작성한 `/plan/overview.md`의 **핵심 기능 목록**을 펼쳐놓습니다.
+2. **범위 확인**: 계획된 커밋들을 모두 실행했을 때, `overview.md`에 명시된 모든 기능이 빠짐없이 구현되는지 하나씩 체크합니다.
+3. **누락 보완**: 특정 기능을 구현하기 위한 커밋이 빠져있다면 즉시 추가하세요. 누락된게 있으면 안됩니다.
