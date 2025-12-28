@@ -13,28 +13,22 @@
   - 프로젝트의 **공통 경로(Context Path)**, **코드 작성 규칙(Naming, Type, Typography)**, **도메인별 레퍼런스 커밋**을 정의합니다.
   - 모든 작업 시작 시 AI가 가장 먼저 숙지해야 할 문서입니다.
 
-### 1. 목적 정의 (Motivation)
+### 1. 목적 정의 (Overview)
 - **[step-1.md](./step-1.md)**:
-  - **목표**: "왜 이 기능을 만드는가?"를 정의합니다.
-  - **Output**: `/plan/motivation.md`
+  - **목표**: "무엇을 왜 만드는가?"를 정의하고 핵심 기능 목록을 작성합니다.
+  - **Output**: `/plan/overview.md`
 
 ### 2. 커밋 계획 수립 (Commit Sequence)
 - **[step-2.md](./step-2.md)**:
   - **목표**: 구현 목표를 달성하기 위한 **커밋 단위의 로드맵**을 짭니다.
   - **Output**: `/plan/commit-sequence.md`
 
-### 3. 상세 명세 스캐폴딩 (Task Scaffolding)
-- **[step-3.md](./step-3.md)**:
-  - **목표**: 커밋 계획을 바탕으로 **개발 명세서의 뼈대(파일 경로, 목적)**를 잡습니다.
-  - **Output**: `/plan/tasks/[순서]-[작업키워드].md` **파일 생성 후 기본 내용 작성**
-
---- 
-
-### 4. 상세 명세 구체화 (Task Refinement)
+### 3. 상세 명세 작성 (Task Refinement)
 - 사전 정보 전달
   - docs/for-all-projects 하위 coding/, common/ 폴더 숙지
   - 위에서 만들었던 모든 Context 다시 재전달
 
-- **[step-4.md](./step-4.md)**:
-  - **목표**: Step 3에서 생성된 스캐폴딩 파일에 **사용자 정보(피그마, 타입 등)**를 반영하여 **완벽한 개발 명세서**를 완성합니다.
-  - **Output**: 위에서 생성된 `/plan/tasks/*.md` 파일을 **구체화**
+- **[step-3.md](./step-3.md)**:
+  - **목표**: 커밋 계획을 바탕으로 각 작업의 **상세 명세서(타입, UX, 테스트 케이스 등)**를 작성합니다.
+  - **Output**: `/plan/tasks/[순서]-[작업키워드].md`
+
