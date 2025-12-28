@@ -50,19 +50,18 @@ AI는 최종적으로 아래와 같은 구조로 문서를 완성해야 합니�
 
 ### 예상 영향 범위
 - **수정되는 파일**: 기존 코드를 수정해야 한다면 해당 파일 목록.
-- **테스트 포인트**: 이 작업으로 인해 꼭 확인해야 할 기능.
 
 ### 스펙 (Specification)
 아래 내용을 작성합니다.
 - 성공/실패/엣지 케이스 시나리오
 - 테스트 케이스 (Checklist)
-- **모듈/함수 시그니처 (구현 단위)**: 해당 파일에서 구현해야 할 모든 공개(public/export) 모듈 단위를 명시하세요.
+- **모듈/함수 시그니처 (구현 단위)**
   - 예 (calculator.ts):
     - `add(a: number, b: number): number`
     - `subtract(a: number, b: number): number`
     - `multiply(a: number, b: number): number`
 - **핵심 코드 스니펫 (Core Code Snippets)**:
-  - **외부 시스템 상호작용**: 함수 본문 내에서 다음과 같은 외부 저장소나 API와 상호작용하는 핵심 로직이 있다면 반드시 포함하세요.
+  - 함수 본문 내에서 다음과 같은 외부 저장소나 API와 상호작용하는 핵심 로직이 있는 경우에만 포함하세요. 대부분 코드 스니펫을 포함 할 일이 없습니다.
     - 브라우저 저장소: `localStorage`, `sessionStorage`, `IndexedDB` 등.
     - Next.js 서버 기능: `cookies()`, `headers()`, `revalidatePath()` 등.
     - 외부 API 호출 로직의 핵심 파라미터 구성.
