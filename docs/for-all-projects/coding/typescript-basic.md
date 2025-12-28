@@ -37,6 +37,31 @@ export type PostBoardApiRequest = Omit<BoardRow, 'pk'>;
 export type ValueOf<T> = T[keyof T];
 ```
 
+## Enum 사용 지양 (Union Type 선호)
+상수 집합을 정의할 때는 **Enum 사용을 지양**하고, **Union Type** 또는 **Const Assertion(`as const`)** 객체를 사용합니다.
+- Enum은 런타임에 불필요한 코드를 생성하며, Tree-shaking 최적화에 불리할 수 있습니다.
+- 리터럴 타입이 더 직관적이고 가볍습니다.
+
+```typescript
+// ❌ Bad (Enum 지양)
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
+
+// ✅ Good (Union Type)
+export type UserRole = 'ADMIN' | 'USER' | 'GUEST';
+
+// ✅ Good (객체 상수가 필요할 때 - as const)
+export const USER_ROLE = {
+  ADMIN: 'ADMIN',
+  USER: 'USER',
+  GUEST: 'GUEST',
+} as const;
+
+export type UserRole = typeof USER_ROLE[keyof typeof USER_ROLE]; // 타입 추출
+```
+
 ## 제네릭 활용
 
 **적극적으로 제네릭 사용**
