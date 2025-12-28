@@ -56,6 +56,8 @@
 
 2. **commit-sequence보다 부실하면 안 됩니다**: Step 3 문서는 commit-sequence와 **최소한 동일한 수준** 이상이어야 합니다.
 
+3. 다 옮겼으면, commit-sequence.md 에 있던 내용중 옮겨진 내용은 커밋메시지를 제외하고 모두 삭제합니다.
+
 ### ❌ Step 3에서 하지 말아야 할 것
 Step 4에서 추가할 내용들 (아래는 Step 3에서 작성하지 않음):
 - 타입 시그니처 상세 (Input/Output, Props 인터페이스)
