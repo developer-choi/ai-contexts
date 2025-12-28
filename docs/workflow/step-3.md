@@ -31,11 +31,37 @@
 ## 2. 예상 영향 범위
 - **수정되는 파일**: 기존 코드를 수정해야 한다면 해당 파일 목록.
 - **테스트 포인트**: 이 작업으로 인해 꼭 확인해야 할 기능.
+
+## 3. 작업 내용 (commit-sequence 내용 그대로 복사)
+**[CRITICAL]** `/plan/commit-sequence.md`에 해당 커밋에 대해 작성된 **모든 내용을 빠짐없이 복사**합니다.
+
+예시:
+```
+- `src/types/post.ts` 생성
+  - Post 인터페이스 (id, userId, title, body, category, tags, createdAt)
+  - Category Enum (NOTICE, QNA, FREE)
+  - PostListParams 인터페이스 (offset, limit, title, body, category, orderBy, order)
+  - PostListApiResponse 인터페이스 (list: Post[])
+```
 ---
 
-## 작성 시 주의사항
-- 이 단계에서는 **상세한 로직이나 타입 정의를 하지 않습니다.** (Step 4에서 진행)
-- 파일 경로와 목적만 정확하게 잡아주세요.
+## 작성 시 주의사항 (CRITICAL)
+
+### ✅ Step 3에서 해야 할 것
+1. **commit-sequence의 모든 내용을 그대로 포함**:
+   - 생성할 파일 목록
+   - 구현할 인터페이스/함수/컴포넌트 **이름**
+   - 각 모듈의 역할 및 포함 사항
+   - 더미 데이터 사용 여부 등
+
+2. **commit-sequence보다 부실하면 안 됩니다**: Step 3 문서는 commit-sequence와 **최소한 동일한 수준** 이상이어야 합니다.
+
+### ❌ Step 3에서 하지 말아야 할 것
+Step 4에서 추가할 내용들 (아래는 Step 3에서 작성하지 않음):
+- 타입 시그니처 상세 (Input/Output, Props 인터페이스)
+- 핵심 로직 스니펫 (localStorage, cookies 등)
+- 엣지 케이스 처리 방법
+- 테스트 케이스 체크리스트
 
 ## [Completion Check] 사용자 확인 요청 (User Notice)
 모든 스캐폴딩 문서 생성이 완료되면, 각 문서에 정의된 **'작업 대상 파일'들의 경로를 폴더별로 그룹화**하여 보여주세요.
