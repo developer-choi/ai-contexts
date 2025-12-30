@@ -1,6 +1,6 @@
 # Function / Hooks / Class 상세 명세 템플릿
 
-AI는 로직(함수, 훅, 클래스) 개발 스펙 작성 시 아래 항목들을 빠짐없이 검토하여 작성해야 합니다.
+로직(함수, 훅, 클래스) 개발 스펙 작성 시 아래 항목들을 빠짐없이 검토하여 작성하세요.
 
 ## 1. Input / Output
 시그니처를 명확하게 정의하세요.
@@ -29,8 +29,8 @@ function functionName(input: InputType): OutputType;
 - **Invalid Input**: `null`, `undefined`, 잘못된 포맷이 들어왔을 때 (Default 값 반환 vs Error Throw)
 - **API Error**: 네트워크 실패, 500/400 에러 시 처리 (에러 메시지 노출 등)
 
-## 4. 테스트 케이스 (Test Scenarios)
-해당 Functions, Classes, Hooks를 구현 후 검증해야 할 케이스 목록을 작성해주세요.
+## 4. 테스트 케이스
+해당 함수, 클래스, 훅을 구현 후 검증해야 할 케이스 목록을 작성합니다.
 
 ### 예시
 - [ ] 정상 입력 -> 정상 출력 확인
