@@ -9,8 +9,8 @@
 ```typescript
 interface ComponentNameProps {
   title: string;
-  isVisible?: boolean;
-  onClose?: () => void;
+  isVisible: boolean;
+  onClose: () => void;
 }
 ```
 
