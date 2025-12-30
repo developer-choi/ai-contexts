@@ -9,7 +9,7 @@
 ## 📂 파일 및 단계별 설명
 
 ### 0. 공통 컨텍스트
-- **[background.md](./background.md)**:
+- **[context-setup.md](./context-setup.md)**:
   - 프로젝트의 **공통 경로(Context Path)**, **코드 작성 규칙(Naming, Type, Typography)**, **도메인별 레퍼런스 커밋**을 정의합니다.
   - 모든 작업 시작 시 AI가 가장 먼저 숙지해야 할 문서입니다.
 
