@@ -4,9 +4,9 @@
 HTML/CSS 작성 시 디자인 값(색상, 폰트 크기 등)을 하드코딩하지 않습니다.
 
 ### Typography
-- `font-size`, `line-height`를 직접 선언하지 말고, **사전에 정의된 Typography 컴포넌트**를 사용합니다.
-- Figma 상의 **Text Style Name**과 매핑되는 컴포넌트를 찾아서 쓰세요.
-- 없다면 사용자에게 요청해야 합니다.
+- `font-size`, `line-height`를 매번 하드코딩하지 말고, 디자인 시스템 상 정의된 **타이포그래피 상수/mixin** 또는 **사전에 정의된 Typography 컴포넌트**를 사용합니다.
+- Figma 상의 **Text Style Name**과 매핑되는 스타일이나 컴포넌트를 찾아서 쓰세요.
+- 없다면 임의로 만들지 말고 사용자에게 요청해야 합니다.
 - **Usage**: 기본 속성(size, height, default color)은 건드리지 않고, 외부 여백(`margin`)이나 `color` 정도만 커스텀합니다.
 
 ### Color

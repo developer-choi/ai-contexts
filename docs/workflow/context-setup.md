@@ -37,6 +37,3 @@ AI는 관련 도메인 작업 시 해당 커밋의 변경 내역(Diff)을 분석
     - **Props 네이밍 규칙**:
         - 외국어 원문이 나오는 데이터: `expression`
         - 한국어 뜻이 나오는 데이터: `meaning`
-
-## 타이포그래피(Typography)
-- `font-size`와 `line-height`를 매번 하드코딩하지 말고, 디자인 시스템 상 정의된 타이포그래피 상수/mixin을 사용하세요.
