@@ -1,21 +1,15 @@
 # Step 5: 상세 명세 작성 (Task Refinement)
 이 단계는 `/plan/commit-sequence.md`에 정의된 각 커밋 단위 작업을 구체화하여 **최종 개발 명세서**를 완성하는 단계입니다.
 
+각 커밋 대한 **상세 명세서**를 `/plan/tasks/` 폴더 아래에 생성해주세요.
+
+**파일 명명 규칙**: `/plan/tasks/[순서]-[작업키워드].md` (예: `/plan/tasks/01-feat-button.md`)
+
 # 참고 자료
-- [background.md](./background.md)
+- `/plan/background.md` (Step 1에서 생성됨)
 - `/plan/overview.md` (Step 3에서 생성됨)
 - `/plan/commit-sequence.md` (Step 4에서 생성됨)
-- [기획서 링크]
-- [피그마 링크]
-- [회의 음성 텍스트 요약본]
-- [관련 필기]
-- [간단한 개발설계]
-
-# 요청 내용
-`/plan/commit-sequence.md`에 있는 커밋 목록을 바탕으로, 각 작업에 대한 **상세 명세서**를 `/plan/tasks/` 폴더 아래에 생성해주세요.
-
-**파일 명명 규칙**: `/plan/tasks/[순서]-[작업키워드].md`
-(예: `/plan/tasks/01-feat-button.md`)
+- 기타 사용자가 추가로 전달한 비슷한 컴포넌트나 커밋 등
 
 ## [CRITICAL] 상세 스펙 누락 금지
 AI는 사용자가 제공한 모든 정보(피그마, 타입, 요구사항)를 바탕으로, 개발자가 추가 질문 없이 바로 코드를 짤 수 있을 정도로 구체적으로 작성해야 합니다.
