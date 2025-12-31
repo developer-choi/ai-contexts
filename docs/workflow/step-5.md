@@ -79,6 +79,7 @@ AI는 최종적으로 아래와 같은 구조로 문서를 완성해야 합니�
 - **빈 데이터**: Empty 컴포넌트 노출 조건.
 
 #### 5) 핵심 코드 스니펫 (Core Code Snippets)
+- **주석 사용 금지**: 코드 스니펫 작성 시 절대 주석을 사용하지 마세요.
 - 함수 본문 내에서 다음과 같은 외부 저장소나 API와 상호작용하는 핵심 로직이 있는 경우에만 포함하세요. (대부분의 경우 생략 가능)
   - 브라우저 저장소: `localStorage`, `sessionStorage` 등.
   - Next.js 서버 기능: `cookies()`, `headers()`, `revalidatePath()` 등.

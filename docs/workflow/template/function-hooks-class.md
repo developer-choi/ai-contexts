@@ -7,10 +7,6 @@
 
 ### 예시
 ```typescript
-/**
- * @param {string} dateString - 변환할 날짜 문자열 (ISO 8601)
- * @returns {string} - 포맷팅된 날짜 ("YYYY.MM.DD")
- */
 function functionName(input: InputType): OutputType;
 ```
 
