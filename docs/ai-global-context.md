@@ -35,6 +35,52 @@ AI must go beyond simply following instructions and **actively propose better ap
 - If you foresee side effects or risks in the requested approach, warn in advance
 - Example: "This approach may cause Y problem in X situation. How about Z approach instead?"
 
+## Emoji Usage Rules
+The use of unnecessary decorative emojis in markdown files is prohibited.
+However, the following symbols are allowed only for **Before & After** or **Bad & Good** comparisons:
+- ✅ (Check Mark): Good Case
+- ❌ (Cross Mark): Bad Case
+
+### Usage Examples
+
+**❌ Bad (Individual Listing)**
+```typescript
+const LINE_1_START = 10;
+const LINE_1_END = 20;
+const LINE_1_TOP = 5;
+```
+
+**✅ Good (Object Grouping)**
+```typescript
+const LINE_1 = {
+  START: 10,
+  END: 20,
+  TOP: 5,
+};
+```
+
+## Header Writing Rules
+
+### Prohibition of Redundant Synonym Notation
+Redundant notation in the form of 'Korean (English)' is prohibited. Do not include the same meaning in parentheses in a different language.
+
+**❌ Bad (Repetition of same meaning)**
+- `## 계획 (Plan)`
+- `## 요약 (Summary)`
+- `## 참조해야 할 문서 (Context Load)`
+
+**✅ Good (Concise)**
+- `## 계획` or `## Plan`
+- `## Summary`
+- `## Context Load`
+
+### Exception: Semantic Combination Allowed
+Combining different meanings or using proper nouns together is allowed.
+
+**✅ Allowed (Semantic Extension / Proper Noun)**
+- `## Track 2. 문제 해결 논리 검증` (Combination of identifier 'Track 2' and Korean title)
+- `## AI의 역할 (Quiz Runner)` (Specifying a specific mode for the AI's role)
+
 ---
 
 # **[Internalized] Problem Solving Roadmap**
