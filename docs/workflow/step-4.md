@@ -40,7 +40,7 @@
 function deprecatedSomeFunction() {}
 ```
 
-**2. 기존 코드 리팩토링**
+**2. 기존 코드 리팩토링 (Conflict 방지)**
 - 기존 함수나 컴포넌트의 구조 변경(파라미터 타입 변경 등)이 필요하다면, 새 기능 구현 전에 먼저 수정합니다.
 - **이유**: 기능 구현 후 나중에 기존 코드를 건드리면 Rebase 시 충돌(Conflict)이 심하게 발생합니다.
     ```typescript
@@ -51,12 +51,35 @@ function deprecatedSomeFunction() {}
     function add(a: number[]) {}
     ```
 
+**3. 파일 크기 관리 (사전 분리)**
+- 기존 파일에 많은 코드를 추가해야 하는 경우, **먼저 기존 코드를 분리/리팩토링**하는 커밋을 만듭니다.
+- **감지 기준**:
+  - 기존 파일이 이미 크기(예: 150줄 이상)이고
+  - 새 기능 추가 시 코드가 증가할 것으로 예상되는 경우
+- **대응 순서**:
+  1. 첫 번째 커밋: 기존 코드를 여러 파일로 분리 (리팩토링)
+  2. 두 번째 커밋: 새 기능 추가
+- **효과**: 각 커밋의 diff가 작아져서 코드 리뷰가 쉬워집니다.
+- **예시**:
+    ```
+    ❌ Bad (1개 커밋, diff 200줄)
+    UserPage.tsx (기존 200줄) → 새 기능 추가로 400줄
+
+    ✅ Good (2개 커밋, 각 diff 관리 가능)
+    커밋 1 [refactor]: UserPage.tsx 분리
+      - UserPage.tsx → UserPage.tsx + UserProfile.tsx + UserActions.tsx
+      - 기존 기능은 그대로, 구조만 정리
+
+    커밋 2 [feat]: 새 기능 추가
+      - UserActions.tsx에 새 액션 추가 (diff 50줄)
+    ```
+
 ### Phase 1. 기초 공사 (Foundation)
-**3. 타입(Type) 정의**
+**4. 타입(Type) 정의**
 - 모든 구현의 기준이 되는 타입 파일을 가장 먼저 커밋합니다.
 - **이유**: 컴포넌트, 함수 등 모든 코드의 기반이 되므로 가장 먼저 확정되어야 작업 순서가 깔끔해집니다.
 
-**4. API 호출 함수 (API Client)**
+**5. API 호출 함수 (API Client)**
 - **특징**: 프론트 개발 시작했는데, 이미 백엔드 API 개발이 완료된 경우, 실제 데이터를 주고받는 함수를 작성합니다.
 - (만약 API가 개발되지않았다면 이 단계는 건너뜁니다.)
 - **이유**: 타입을 기반으로 API 함수를 미리 정의해두면, 이후 Hooks나 컴포넌트 구현 시 데이터 흐름을 명확히 파악하며 작업할 수 있습니다. (API가 이미 있다면 굳이 Mock을 만들지 않고 이 단계에서 바로 연동 준비를 합니다.)
@@ -76,7 +99,7 @@ export async function getBoardListApi(request: BoardListApiRequest): BoardListAp
 }
 ```
 
-**5. 단위 모듈 또는 가장 작은 컴포넌트 마크업 (Unit Level)**
+**6. 단위 모듈 또는 가장 작은 컴포넌트 마크업 (Unit Level)**
 - **특징**: 로직 없이 마크업만 있거나, 외부 의존성 없는 순수 함수. (유닛 테스트 가능)
 - **작업 대상**:
   1. 공통 UI 컴포넌트 (도메인 비종속. 예: `Button`)
@@ -94,7 +117,7 @@ export async function getBoardListApi(request: BoardListApiRequest): BoardListAp
   - 그 후에 이를 사용하는 **특정 도메인에 종속되는 모듈**을 작업해야 합니다.
 
 ### Phase 2. 통합 및 연동 준비 (Integration Level)
-**6. 더미(Mock) 기반 통합 구현**
+**7. 더미(Mock) 기반 통합 구현**
 - **특징**: 실제 API 연동 전이거나, API 호출 함수를 아직 만들지 않은 경우 UI 흐름과 상호작용이 동작하도록 합니다. (통합 테스트 가능)
 - **작업 대상**:
   1. **Mock API**: (필요 시) 항상 성공하거나 실패하는 더미 데이터를 반환하는 함수 구현.
@@ -103,7 +126,7 @@ export async function getBoardListApi(request: BoardListApiRequest): BoardListAp
   4. **유효성 검증**: 진입 시점의 데이터 검증 로직 구현.
 
 ### Phase 3. 실전 배치 (Implementation)
-**7. API 연동 및 엣지 케이스 완성**
+**8. API 연동 및 엣지 케이스 완성**
 - **작업 대상**:
   1. Mock API를 **실제 API 호출**로 교체.
   2. 더미 데이터 제거.
