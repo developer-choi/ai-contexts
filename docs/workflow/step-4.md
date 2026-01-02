@@ -5,12 +5,14 @@
 - AI가 구현할 때 **작은 단위로, 순차적으로** 진행할 수 있도록 로드맵을 그려주세요.
 - 작은 커밋을 순서 잘 맞춰서 쌓아야 리뷰하기도 편합니다.
 
-## 참고 자료
-- `/plan/background.md` (Step 1에서 생성됨)
-- `/plan/overview.md` (Step 3에서 생성됨)
-
 ## 작성 양식 (`/plan/commit-sequence.md`)
 
+### 0. 참고 자료 (References)
+- `/plan/background.md`
+- `/plan/codebase-audit.md`
+- `/plan/overview.md`
+
+### 1. 커밋 리스트
 **형식**:
 ```markdown
 - [커밋 타입]: 커밋 메시지 (3줄 미만 요약)

@@ -56,7 +56,7 @@
 
 ### 2. 참고 자료
 - 작업의 근거가 되는 문서 및 기존 코드를 링크합니다.
-- **필수 포함**: `/plan/background.md`, `/plan/overview.md`, `/plan/commit-sequence.md`
+- **필수 포함**: `/plan/background.md`, `/plan/codebase-audit.md`, `/plan/overview.md`, `/plan/commit-sequence.md`
 - **추가 포함**: 관련된 기존 컴포넌트, 유틸리티, 또는 참고할 커밋 링크.
 
 ### 3. 예상 영향 범위
