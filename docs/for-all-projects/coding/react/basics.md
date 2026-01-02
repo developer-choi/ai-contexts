@@ -40,3 +40,44 @@ function Layout(props: PropsWithChildren<LayoutProps>) {
   return <div>{props.children}</div>;
 }
 ```
+
+## 모달(Modal) / 오버레이 구현 규칙
+
+모달이나 다이얼로그를 띄울 때는 컴포넌트 내부 상태(`useState`)가 아닌 **`overlay-kit`** 라이브러리를 사용해야 합니다.
+
+### 원칙
+- **❌ Bad**: `useState` boolean 값으로 모달의 표시 여부를 제어하는 방식. (부모 컴포넌트 로직 오염)
+- **✅ Good**: `overlay-kit`을 사용하여 핸들러 내부에서 명령형으로 모달을 호출.
+
+### 구현 예시
+
+**❌ Bad (useState 사용)**
+```tsx
+const [isOpen, setIsOpen] = useState(false);
+
+return (
+  <>
+    <button onClick={() => setIsOpen(true)}>삭제</button>
+    {isOpen && <DeleteModal onClose={() => setIsOpen(false)} />}
+  </>
+);
+```
+
+**✅ Good (overlay-kit 사용)**
+```tsx
+import { overlay } from 'overlay-kit';
+
+const handleDelete = () => {
+  overlay.open(({ isOpen, close }) => (
+    <DeleteModal 
+      isOpen={isOpen} 
+      onClose={close} 
+      onConfirm={() => {
+        close();
+      }} 
+    />
+  ));
+};
+
+return <button onClick={handleDelete}>삭제</button>;
+```
