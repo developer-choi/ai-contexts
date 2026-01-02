@@ -42,15 +42,29 @@
 - **수정되는 파일**: 기존 코드를 수정해야 한다면 해당 파일 목록.
 - **의존 관계**: 이 작업이 다른 컴포넌트/함수에 미치는 영향.
 
-### 3. 핵심 코드 스니펫 (Core Code Snippets)
-**주의**: 대부분의 경우 생략 가능하며, 아래 조건에 해당할 때만 작성하세요.
+### 3. 핵심 로직 설계 (Core Logic Design)
+- **[CRITICAL] 실제 코드 작성 금지**: `const`, `function`, `async/await`, `useCallback` 등 실제 구현 코드를 절대 작성하지 마세요.
+- 대신 **의사 코드(Pseudo-code)**, **논리적 단계(Flow)**, 또는 **텍스트 서술**을 통해 로직의 흐름과 호출할 메서드만 기술하세요.
+- 개발자가 구현 방식(How)을 고민하게 하는 것이 아니라, 수행해야 할 논리(What)를 전달하는 것이 목적입니다.
 
-- **주석 사용 금지**: 코드 스니펫 작성 시 절대 주석을 사용하지 마세요.
-- 함수 본문 내에서 다음과 같은 외부 저장소나 API와 상호작용하는 핵심 로직이 있는 경우에만 포함하세요:
-  - 브라우저 저장소: `localStorage`, `sessionStorage` 등.
-  - Next.js 서버 기능: `cookies()`, `headers()`, `revalidatePath()` 등.
-  - 외부 API 호출의 핵심 파라미터 구성.
-- **복잡한 알고리즘**: 복잡한 계산이나 변환이 필요한 로직의 초안(Draft).
+**❌ Bad (실제 코드 작성 - 금지)**
+```typescript
+const handleAccept = async () => {
+  const status = await notification.checkPermission();
+  if (status === 'GRANTED') {
+    toggleNotification('PROMOTION', true);
+  }
+};
+```
+
+**✅ Good (로직 흐름 서술 - 권장)**
+1. `notification.checkPermission()` 호출하여 권한 상태 확인
+2. **GRANTED 상태인 경우**:
+   - `toggleNotification('PROMOTION', true)` API 호출
+   - 성공 토스트 노출 (포맷: `... (${dayjs().format('YYYY.MM.DD')})`)
+   - `onAccept()` 호출하여 모달 닫기
+3. **그 외 상태인 경우**:
+   - `onOpenNotificationPermissionModal()` 호출하여 기기 설정 유도 모달 오픈
 
 ### 4. 테스트 케이스
 개발 완료 후 검증해야 할 항목들을 기능별/상태별로 상세히 리스트업합니다.
