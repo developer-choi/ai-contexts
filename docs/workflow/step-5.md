@@ -14,6 +14,15 @@
 
 ---
 
+## 작성 시작 전 준비
+
+### 1. 프로젝트별 공통 문서 읽기
+- **`docs/for-all-projects/README.md`** 먼저 읽기
+- 사용자 요청 의도에 따라 `common/`, `coding/`, `testing/`, `review/` 폴더의 문서를 선별적으로 로드
+- Step 1~5 진행 중 필요에 따라 추가 참조
+
+---
+
 ## [CRITICAL] 필수 준수 사항
 
 ### 1. 진행 상황 동기화 (commit-sequence.md 업데이트)
