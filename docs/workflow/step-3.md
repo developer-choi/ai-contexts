@@ -18,8 +18,8 @@
 ## 작성 양식 (`/plan/overview.md`)
 
 ### 0. 참고 자료
-- `/plan/background.md` (Step 1에서 생성됨)
-- `/plan/codebase-audit.md` (Step 2에서 생성됨)
+- `/plan/background.md` (배경 파악 단계에서 생성됨)
+- `/plan/codebase-audit.md` (PR 분할 전략 수립 단계에서 생성됨 - 있는 경우만)
 
 ### 1. 이 PR의 목표
 - **이 PR에서 구현할 기능**: 이번 PR에서 구현할 기능만 나열
