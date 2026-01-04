@@ -53,3 +53,38 @@ ai-contexts/
 
 - [instructions/conventions/README.md](instructions/conventions/README.md)
 - → AI가 상황에 맞게 파일 선택, README는 폴더 수준만 설명
+
+### 가이드와 템플릿은 통합
+
+가이드와 템플릿을 분리하면 내용이 중복되고 동기화 문제가 발생합니다.
+**템플릿 안에 설명을 대괄호 `[ ]`로 통합하세요.**
+
+**❌ 나쁜 예 (분리):**
+```markdown
+## 포함시켜야 할 내용
+1. 폴더 개요
+   - 이 폴더가 뭔지
+   - 언제 쓰는지
+
+## 템플릿
+# 개요
+[설명]
+```
+→ 같은 내용을 두 곳에 작성, 동기화 필요, 유지보수 어려움
+
+**✅ 좋은 예 (통합):**
+- [meta/instructions-README-guide.md](meta/instructions-README-guide.md)
+- → 템플릿 안에 설명 통합, 한 곳만 관리
+
+**핵심:** "무엇을 써야 하는가"는 템플릿 대괄호 `[ ]` 안에 주석으로 작성
+
+---
+
+## instructions/ 하위 README.md 작성 가이드
+
+**중요**: 이 가이드는 **`instructions/` 폴더 하위의 README.md만** 해당됩니다.
+최상위 README.md나 다른 폴더의 README는 해당사항 없습니다.
+
+`instructions/` 하위에서 README.md를 새로 작성하거나 수정할 때는 반드시 다음 가이드를 따르세요:
+
+**[meta/instructions-README-guide.md](meta/instructions-README-guide.md)**
