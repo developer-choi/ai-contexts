@@ -4,6 +4,18 @@
 
 ---
 
+## instructions 폴더 사용법
+
+사용자가 **"ai-contexts"** 키워드와 함께 요청하면:
+
+1. [instruction-map.md](instruction-map.md) 파일을 읽으세요
+2. 해당 파일의 검색 규칙에 따라 적절한 문서를 찾으세요
+3. 찾은 문서를 로드하고 작업을 진행하세요
+
+**instruction-map.md가 모든 검색 로직과 경로 매핑을 담당합니다.**
+
+---
+
 ## 선택적 로딩 원칙 (Critical)
 
 ### ⚠️ README.md는 목차일 뿐입니다

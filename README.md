@@ -4,6 +4,21 @@
 
 ---
 
+## 프로젝트 구조 개요
+
+```
+ai-contexts/
+├─ instructions/      # AI가 작업 시 따를 규칙
+│  ├─ workflow/       # 협업 워크플로우
+│  ├─ conventions/    # 공통 코딩 규칙
+│  └─ self-help/      # 문제 해결 방법론
+├─ meta/              # 프로젝트 관리 가이드
+├─ archives/          # 보관 자료
+└─ README.md          # 프로젝트 전체 개요
+```
+
+---
+
 ## 종류
 
 ### instructions/workflow
