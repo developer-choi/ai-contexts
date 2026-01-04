@@ -40,7 +40,7 @@ Google Docs에 있는 필기 내용을 목적에 맞게 3개 레포로 분산 �
 - **독자**: 채용 담당자, 나 (나중에 회고)
 - **내용**:
   - 코드 (hooks, utils, components 등)
-  - 설계 문서 (`docs/`)
+  - 설계 문서 (`instructions/`)
     - roadmap 형식 (문제 정의 → Root Cause → 해결 → Trade-off)
     - "왜 이렇게 만들었는가" 중심
   - **예제 페이지** (실제 동작 확인용)
@@ -78,7 +78,7 @@ Google Docs에 있는 필기 내용을 목적에 맞게 3개 레포로 분산 �
   ```markdown
   ## Infinite Scroll
   - useInfiniteScroll hook 사용 (직접 구현 X)
-  - 상세: ~/react-playground/docs/hooks/useInfiniteScroll.md
+  - 상세: ~/react-playground/instructions/hooks/useInfiniteScroll.md
   ```
 
 ---
@@ -149,7 +149,7 @@ Google Docs에 있는 필기 내용을 목적에 맞게 3개 레포로 분산 �
 ```markdown
 Google Docs: [FACT] IntersectionObserver 정리
     ↓
-fact-archive/docs/web/api/intersection-observer.md
+fact-archive/instructions/web/api/intersection-observer.md
 
 # IntersectionObserver
 
@@ -164,7 +164,7 @@ fact-archive/docs/web/api/intersection-observer.md
 ```markdown
 Google Docs: [DESIGN] useInfiniteScroll 삽질 기록
     ↓
-react-playground/docs/hooks/useInfiniteScroll.md (설계 문서)
+react-playground/instructions/hooks/useInfiniteScroll.md (설계 문서)
 react-playground/src/examples/InfiniteScrollExample.tsx (예제 페이지)
 
 # useInfiniteScroll
@@ -185,11 +185,11 @@ react-playground/src/examples/InfiniteScrollExample.tsx (예제 페이지)
 
 ### 4단계: ai-contexts 업데이트
 ```markdown
-ai-contexts/docs/contexts/react-playground.md
+ai-contexts/instructions/contexts/react-playground.md
 
 ## Infinite Scroll
 - useInfiniteScroll hook 사용
-- 상세: ~/react-playground/docs/hooks/useInfiniteScroll.md
+- 상세: ~/react-playground/instructions/hooks/useInfiniteScroll.md
 ```
 
 ---
@@ -223,7 +223,7 @@ A. 뷰포트와 요소 교차 관찰 API
 
 ### 마이그레이션 후
 
-#### ✅ fact-archive/docs/web/api/intersection-observer.md
+#### ✅ fact-archive/instructions/web/api/intersection-observer.md
 ```markdown
 # IntersectionObserver
 
@@ -241,10 +241,10 @@ A. 뷰포트와 요소 교차 관찰 API
 - Viewport tracking
 
 ## 참고 자료
-- [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+- [MDN](https://developer.mozilla.org/en-US/instructions/Web/API/Intersection_Observer_API)
 ```
 
-#### ✅ react-playground/docs/hooks/useInfiniteScroll.md
+#### ✅ react-playground/instructions/hooks/useInfiniteScroll.md
 ```markdown
 # useInfiniteScroll
 
@@ -314,14 +314,14 @@ useInfiniteScroll({
   - 2회차 이후 정상 동작 확인
 ```
 
-#### ✅ ai-contexts/docs/contexts/react-playground.md
+#### ✅ ai-contexts/instructions/contexts/react-playground.md
 ```markdown
 ## Infinite Scroll
 - **정책**: `useInfiniteScroll` hook 사용 (직접 IntersectionObserver 구현 X)
 - **이유**:
   - listEndDom cleanup 로직이 이미 구현됨
   - tanstack-query와 통합되어 있음
-- **상세**: `~/react-playground/docs/hooks/useInfiniteScroll.md` 참고
+- **상세**: `~/react-playground/instructions/hooks/useInfiniteScroll.md` 참고
 ```
 
 ---

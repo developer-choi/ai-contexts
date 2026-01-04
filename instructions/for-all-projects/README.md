@@ -1,6 +1,6 @@
 # 전 프로젝트 공통 컨텍스트 가이드
 
-이 문서는 AI가 사용자의 요청 의도를 분석하고, `docs/for-all-projects/` 하위의 적절한 컨텍스트 폴더를 **스스로 선별하여 로드**하기 위한 규칙을 정의합니다.
+이 문서는 AI가 사용자의 요청 의도를 분석하고, `instructions/for-all-projects/` 하위의 적절한 컨텍스트 폴더를 **스스로 선별하여 로드**하기 위한 규칙을 정의합니다.
 
 AI는 사용자의 명시적인 지시가 없더라도, 아래 규칙에 따라 필요한 문서를 먼저 읽고 작업을 시작해야 합니다.
 
@@ -31,22 +31,22 @@ AI는 사용자의 명시적인 지시가 없더라도, 아래 규칙에 따라 
 ### 1. 기능 구현 및 버그 수정 (Implementation)
 > **User Intent**: "이 기능 만들어줘", "버그 고쳐줘", "이거 리팩토링 해줘"
 - **Load Path**:
-    1.  `docs/for-all-projects/common`
-    2.  `docs/for-all-projects/coding`
+    1.  `instructions/for-all-projects/common`
+    2.  `instructions/for-all-projects/coding`
 - **Action**: 구현 규칙을 숙지한 상태에서 코드를 작성합니다.
 
 ### 2. 테스트 코드 작성 (Testing)
 > **User Intent**: "테스트 짜줘", "테스트 깨지는데 고쳐줘"
 - **Load Path**:
-    1.  `docs/for-all-projects/common`
-    2.  `docs/for-all-projects/testing`
+    1.  `instructions/for-all-projects/common`
+    2.  `instructions/for-all-projects/testing`
 - **Action**: `coding` 규칙보다는 테스트 작성 패턴과 쿼리 우선순위에 집중합니다.
 
 ### 3. 코드 리뷰 및 PR (Review)
 > **User Intent**: "이 코드 리뷰해줘", "PR 내용 봐줘", "내 코드 어때?"
 - **Load Path**:
-    1.  `docs/for-all-projects/common`
-    2.  `docs/for-all-projects/coding` (코드 품질 기준)
-    3.  `docs/for-all-projects/testing` (테스트 유무 확인)
-    4.  `docs/for-all-projects/review` (검수 체크리스트)
+    1.  `instructions/for-all-projects/common`
+    2.  `instructions/for-all-projects/coding` (코드 품질 기준)
+    3.  `instructions/for-all-projects/testing` (테스트 유무 확인)
+    4.  `instructions/for-all-projects/review` (검수 체크리스트)
 - **Action**: 단순 생성이 아니라, 엄격한 기준(`review/`)을 적용하여 비판적으로 분석합니다.

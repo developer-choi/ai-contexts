@@ -18,7 +18,7 @@ AI는 이 문서를 받았을 때, 다음 플로우를 **순서대로 자동으�
 ## 0. 시작 전 준비
 
 ### 레포지토리 Context 정보 수집
-- `docs/workflow/context-setup.md` 양식에 맞춰 사용자로부터 정보 수집
+- `instructions/workflow/context-setup.md` 양식에 맞춰 사용자로부터 정보 수집
 - **실무 프로젝트**: 반드시 필요
 - **채용 과제 등**: 없을 수 있음 (생략 가능)
 

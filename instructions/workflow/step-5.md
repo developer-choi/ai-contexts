@@ -2,7 +2,7 @@
 
 이 단계는 `/plan/commit-sequence.md`에 정의된 각 커밋 단위 작업을 구체화하여 **최종 개발 명세서**를 완성하는 단계입니다.
 
-> **[roadmap](docs/self-help/roadmap.md) 연결**: 4단계 - 구현의 여정
+> **[roadmap](instructions/self-help/roadmap.md) 연결**: 4단계 - 구현의 여정
 >
 > 선택한 기술을 실제로 어떻게 적용했는지 설명합니다.
 > - **구현 상세**: 구체적으로 어떻게 코드로 구현했는가?
@@ -17,7 +17,7 @@
 ## 작성 시작 전 준비
 
 ### 1. 프로젝트별 공통 문서 읽기
-- **`docs/for-all-projects/README.md`** 먼저 읽기
+- **`instructions/for-all-projects/README.md`** 먼저 읽기
 - 사용자 요청 의도에 따라 `common/`, `coding/`, `testing/`, `review/` 폴더의 문서를 선별적으로 로드
 - Step 1~5 진행 중 필요에 따라 추가 참조
 

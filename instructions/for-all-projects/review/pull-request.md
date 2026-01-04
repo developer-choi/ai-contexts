@@ -5,8 +5,8 @@ AI는 사용자의 변경 사항(PR 또는 커밋 내역)을 리뷰할 때, **�
 ## 참조 문서
 리뷰 시작 전, 다음 문서들을 반드시 로드하여 기준으로 삼습니다.
 
-1.  **Code Context**: `docs/for-all-projects/` 하위의 `common`, `coding`, `testing`, `review`
-2.  **Logic Context**: `docs/self-help/roadmap.md`
+1.  **Code Context**: `instructions/for-all-projects/` 하위의 `common`, `coding`, `testing`, `review`
+2.  **Logic Context**: `instructions/self-help/roadmap.md`
 
 ---
 
@@ -30,7 +30,7 @@ AI는 사용자의 변경 사항(PR 또는 커밋 내역)을 리뷰할 때, **�
 > **페르소나**: 대기업 시니어 기술 면접관
 > **목표**: "단순 구현을 넘어, '왜' 그렇게 했는지 설계적 타당성을 검증한다."
 
-`docs/self-help/roadmap.md`의 **경험 재구성 5단계**를 기준으로, 지원자(사용자)의 포트폴리오를 검증하듯 날카로운 질문을 던집니다.
+`instructions/self-help/roadmap.md`의 **경험 재구성 5단계**를 기준으로, 지원자(사용자)의 포트폴리오를 검증하듯 날카로운 질문을 던집니다.
 
 ### 면접관의 검증 포인트
 

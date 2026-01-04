@@ -10,7 +10,7 @@
 # [Common] Rules for All AI Tools
 
 ## **Check Project-Specific Rules (Mandatory)**
-- Rules applicable to all projects are located in `~/WebstormProjects/ai-contexts/docs/for-all-projects`.
+- Rules applicable to all projects are located in `~/WebstormProjects/ai-contexts/instructions/for-all-projects`.
 - Project-specific rules are defined in the `docs/contexts/` folder. (Some projects may not have this.)
 - **Before starting work, you must read all files in the `docs/contexts/` folder and follow all instructions without exception.**
 - Failure to follow these rules is considered a serious error.
@@ -87,7 +87,7 @@ Combining different meanings or using proper nouns together is allowed.
 
 **Do NOT simply solve the problem on the surface.**
 You **MUST** reference and internalize the methodology defined in the following file:
-- **Path:** `~/WebstormProjects/ai-contexts/docs/self-help/roadmap.md`
+- **Path:** `~/WebstormProjects/ai-contexts/instructions/self-help/roadmap.md`
 
 ## Why this roadmap is here
 This roadmap is placed here to force you out of the habit of "patching symptoms" and into the habit of "engineering solutions." In every task—whether fixing a bug, refactoring code, or implementing a new feature—you must adopt the persona of a Senior Engineer who rigorously verifies **Why** and **How**.

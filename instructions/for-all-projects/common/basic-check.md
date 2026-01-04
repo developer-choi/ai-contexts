@@ -17,4 +17,4 @@
     - `any` (불가피한 경우 제외하고 지양)
 
 ## 3. 컨벤션 준수 확인
-- `docs/for-all-projects` 하위의 해당 모드(`coding`, `testing` 등) 가이드라인을 위반하지 않았는지 자가 점검하세요.
+- `instructions/for-all-projects` 하위의 해당 모드(`coding`, `testing` 등) 가이드라인을 위반하지 않았는지 자가 점검하세요.
