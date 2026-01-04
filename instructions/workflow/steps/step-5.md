@@ -105,12 +105,12 @@ const handleAccept = async () => {
 ### 1. 컴포넌트 개발인 경우
 **추가 필수 항목**: Props Interface, 데이터 표시 형식, UX 워크플로우, 상태 피드백, 스타일링 & 엣지 케이스
 
-**템플릿**: [`./template/component.md`](./template/component.md)
+**템플릿**: [`./template/component.md`](../template/component.md)
 
 ### 2. 함수 / 훅 / 클래스 개발인 경우
 **추가 필수 항목**: 모듈/함수 시그니처, 핵심 로직, 예외 처리
 
-**템플릿**: [`./template/function-hooks-class.md`](./template/function-hooks-class.md)
+**템플릿**: [`./template/function-hooks-class.md`](../template/function-hooks-class.md)
 
 ---
 

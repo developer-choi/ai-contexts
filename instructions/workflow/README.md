@@ -12,7 +12,7 @@ AI는 이 문서를 받았을 때, 다음 플로우를 **순서대로 자동으�
 
 ## 0. 시작 전 준비
 
-**레포지토리 Context 정보 수집**: `instructions/workflow/context-setup.md` 양식에 맞춰 사용자로부터 정보 수집
+**레포지토리 Context 정보 수집**: `instructions/workflow/template/context-setup.md` 양식에 맞춰 사용자로부터 정보 수집
    - **실무 프로젝트**: 반드시 필요
    - **채용 과제 등**: 없을 수 있음 (생략 가능)
 
@@ -21,12 +21,12 @@ AI는 이 문서를 받았을 때, 다음 플로우를 **순서대로 자동으�
 ## 1. 작업 진행
 아래 내용을 순서대로 진행해야하며, 상세내용은 링크에서 순서대로 확인하면 됨.
 
-- [step-1.md](./step-1.md) - 문제의 발견과 배경 파악
-- [step-2.md](./step-2.md) - PR 분할 전략 수립
-- [step-3.md](./step-3.md) - 핵심 과제 정의 및 기술 전략 수립
-- [step-4.md](./step-4.md) - 커밋 시퀀스(작업 계획) 작성
-- [step-5.md](./step-5.md) - 상세 명세 작성
-- [step-6.md](./step-6.md) - 최종 점검 및 PR & QA 준비
+- [step-1.md](steps/step-1.md) - 문제의 발견과 배경 파악
+- [step-2.md](steps/step-2.md) - PR 분할 전략 수립
+- [step-3.md](steps/step-3.md) - 핵심 과제 정의 및 기술 전략 수립
+- [step-4.md](steps/step-4.md) - 커밋 시퀀스(작업 계획) 작성
+- [step-5.md](steps/step-5.md) - 상세 명세 작성
+- [step-6.md](steps/step-6.md) - 최종 점검 및 PR & QA 준비
 
 
 ### [CRITICAL] 모든 단계에서 지켜야 할 원칙
