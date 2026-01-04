@@ -22,3 +22,8 @@ ai-contexts/
 │  └─ self-help/         # 학습 & 성장
 └─ meta/                 # 프로젝트 관리 가이드
 ```
+
+---
+
+## 유지보수 방법
+[CONTRIBUTING.md](./CONTRIBUTING.md)를 참고하세요.
