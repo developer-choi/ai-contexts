@@ -6,6 +6,22 @@
 
 ---
 
+## 프로젝트 구조 상세
+
+```
+ai-contexts/
+├─ instructions/                    # AI 작업 지침, 가장 많은 명령문이 포함되어있음
+├─ instruction-map.md               # 문서 라우팅 맵 (사용자 요청 → 찾아야 할 문서 매핑)
+│
+│
+├─ CONTRIBUTING.md                  # 프로젝트 관리 가이드 최상위 문서
+└─ meta/                            # 프로젝트 관리 가이드
+   ├─ AGENT.md                      # AI가 따라야 할 전역 규칙
+   └─ instructions-README-guide.md  # instructions/ 하위 README.md 작성 표준
+```
+
+---
+
 ## 핵심 원칙
 
 ### 커맨드는 instruction-map.md 에만
