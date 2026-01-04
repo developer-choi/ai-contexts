@@ -5,7 +5,7 @@ AI는 사용자의 변경 사항(PR 또는 커밋 내역)을 리뷰할 때, **�
 ## 참조 문서
 리뷰 시작 전, 다음 문서들을 반드시 로드하여 기준으로 삼습니다.
 
-1.  **Code Context**: `instructions/for-all-projects/` 하위의 `common`, `coding`, `testing`, `review`
+1.  **Code Context**: `instructions/conventions/` 하위의 `common`, `coding`, `testing`, `review`
 2.  **Logic Context**: `instructions/self-help/roadmap.md`
 
 ---
