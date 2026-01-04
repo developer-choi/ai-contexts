@@ -2,7 +2,7 @@
 
 이 단계는 작업의 **배경**, **목적**, 그리고 **문제가 있다면 Root Cause**를 명확히 하고, 관련 자료를 정리하는 단계입니다.
 
-> **[roadmap](docs/self-help/roadmap.md) 연결**:
+> **[roadmap](instructions/self-help/roadmap.md) 연결**:
 >
 > - **문제/버그가 있는 경우**: roadmap 1-2단계(문제의 발견과 Root Cause 찾기) 수행 필수
 > - **단순 기능 추가인 경우**: Root Cause 불필요, 배경/목적만 정리
@@ -69,7 +69,7 @@
   <!-- 왜 해결되어야 하는가? 측정 가능한 지표로 작성 -->
 
 - **Root Cause (근본 원인)**:
-  <!-- docs/self-help/roadmap.md 1-2단계 참고 -->
+  <!-- instructions/self-help/roadmap.md 1-2단계 참고 -->
   - 앱 설치 시 Push 권한 팝업이 너무 이른 시점(온보딩 첫 화면)에 노출되어 유저가 거부하는 비율이 높음
   - 한번 거부한 유저에게 재동의를 유도하는 UI/UX가 없어 영구적으로 수신 불가 상태 유지
 
