@@ -55,6 +55,7 @@ instructions/self-help/tech-trends.md
 instructions/self-help/roadmap.md
 ```
 - 문제해결과정 수립 & 진행
+- 프로젝트 README 작성
 
 ---
 
