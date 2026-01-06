@@ -31,17 +31,6 @@ instructions/workflow/README.md
 ## 2. 학습 & 성장
 
 ```bash
-instructions/self-help/review-study.md
-```
-- 얕은복습
-
-```bash
-instructions/recruitment/technical-interview.md
-```
-- 깊은복습
-- 기술면접
-
-```bash
 instructions/self-help/review-work.md
 ```
 - 업무회고
