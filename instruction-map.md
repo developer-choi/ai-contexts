@@ -73,3 +73,12 @@ instructions/recruitment/recruitment-trend.md
 instructions/clone-code-markup.md
 ```
 - 마크업 클론코딩
+
+---
+
+## 6. 문서 관리
+
+```bash
+meta/instruction-guide.md
+```
+- 명령문(.md) 작성 및 검증 가이드
