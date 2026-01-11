@@ -156,9 +156,17 @@ export async function getBoardListApi(request: BoardListApiRequest): BoardListAp
 >
 > **다음 Step으로 넘어가기 전 확인사항**:
 >
+> **이번 단계에서 작성한 commit-sequence.md를 읽고 이해하셨나요?**
+> - `/plan/commit-sequence.md`
+>
 > □ 각 커밋의 의존 관계가 명확한가요?
 > □ 순서가 논리적으로 맞나요?
 > □ 너무 큰 커밋은 없나요? (필요시 분할)
+> □ 이해가 안 되거나 불필요한 내용이 있나요?
+>
+> ⚠️ **커밋 계획을 충분히 이해하지 못한 상태에서 다음 단계로 넘어가면, 잘못된 상세 명세가 작성되고 구현도 틀어집니다.**
+>
+> **이해가 안 되거나 불필요한 내용이 있다면 지금 수정하고 넘어가야 합니다.**
 >
 > **[중요] 다음 Step 진행 방식**:
 >
