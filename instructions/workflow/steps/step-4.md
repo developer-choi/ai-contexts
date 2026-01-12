@@ -36,7 +36,7 @@ Step 3에서 작성한 `/plan/overview.md`의 **"3. 핵심 기술적 과제 및 
 - **성공**: [정상 동작]
 - **실패**: [에러 처리 방법]
 - **엣지 케이스**: [빈 데이터, 권한 거부 등 특수 상황]
-- **영향 범위**: [수정할 컴포넌트/페이지]
+- **수정/추가 파일**: [구체적인 파일 경로 목록]
 ```
 
 ---
@@ -47,13 +47,12 @@ Step 3에서 작성한 `/plan/overview.md`의 **"3. 핵심 기술적 과제 및 
 
 - **상태별 대응**: 로딩, 성공, 실패, 엣지 케이스를 어떻게 처리할지
 - **핵심 흐름**: 3-5단계로 요약한 큰 흐름
-- **영향 범위**: 어떤 파일/컴포넌트를 수정하는지
+- **수정/추가할 파일 목록**: 이번 PR에서 건드릴 파일 경로 리스트 (예: `src/pages/EventPage.tsx`)
 - **중요한 비즈니스 로직**: 2주 재노출 기준, 권한 체크 시점 등
 - **중요한 분기점**: 언제 어떤 조건으로 분기하는지
 
 ### ❌ 쓰지 않을 것 (AI가 판단 가능)
 
-- 구체적인 파일 경로 (`src/components/...`)
 - Props 타입 상세 정의 (`title: string, onClose: () => void`)
 - 변수명/함수명
 - 10단계 이상의 상세 로직 (5단계 이내로 요약)
@@ -75,7 +74,10 @@ Step 3에서 작성한 `/plan/overview.md`의 **"3. 핵심 기술적 과제 및 
 - **권한 거부/미설정**: 설정 유도 모달(NotificationPermissionModal) 오픈
 - **API 실패**: 에러 토스트 노출, 모달은 유지 (재시도 가능)
 - **재노출 로직**: localStorage에 마지막 닫은 시각 저장, 2주(14일) 후 재노출
-- **영향 범위**: 이벤트 페이지, 공지사항 페이지만 수정, 기존 모달 로직 영향 없음
+- **수정/추가 파일**:
+  - `src/pages/EventPage.tsx` (독려 모달 통합)
+  - `src/pages/NoticePage.tsx` (독려 모달 통합)
+  - `src/hooks/useNotificationModal.ts` (새로 생성)
 
 ### 예시 2: 무한 스크롤
 
@@ -88,7 +90,10 @@ Step 3에서 작성한 `/plan/overview.md`의 **"3. 핵심 기술적 과제 및 
 - **스크롤 감지**: Intersection Observer로 sentinel div 감지 시 fetchNextPage 호출
 - **네트워크 에러**: ErrorComponent 노출 (재시도 버튼 포함)
 - **빈 리스트**: data.pages[0].list.length === 0일 때 EmptyContent 노출
-- **영향 범위**: BoardList 페이지만, 기존 API/타입 변경 없음
+- **수정/추가 파일**:
+  - `src/pages/BoardListPage.tsx` (무한 스크롤 적용)
+  - `src/hooks/useInfiniteScroll.ts` (새로 생성)
+  - `src/components/BoardCard.tsx` (기존 활용)
 
 ---
 
