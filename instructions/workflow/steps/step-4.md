@@ -1,4 +1,4 @@
-# Step 3.5: 구현 방침 상세화 (Implementation Guidelines)
+# Step 4: 구현 방침 상세화 (Implementation Guidelines)
 
 > **⚠️ 이 단계는 Step 3에서 기술 전략이 확정된 후에 진행합니다.**
 >
