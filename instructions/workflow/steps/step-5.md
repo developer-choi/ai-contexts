@@ -14,15 +14,6 @@
 
 ---
 
-## 작성 시작 전 준비
-
-### 1. 프로젝트별 공통 문서 읽기
-- **`instructions/conventions/README.md`** 먼저 읽기
-- 사용자 요청 의도에 따라 `common/`, `coding/`, `testing/`, `review/` 폴더의 문서를 선별적으로 로드
-- Step 1~5 진행 중 필요에 따라 추가 참조
-
----
-
 ## [CRITICAL] 필수 준수 사항
 
 ### 1. 진행 상황 동기화 (commit-sequence.md 업데이트)
@@ -44,13 +35,10 @@
 ```
 
 ### 2. 상세 스펙 작성 원칙 (로직 중심, 코드 배제)
-- **[CRITICAL] 코드 블록(```) 사용 금지**: 변수명이나 함수명은 인라인 코드(\` \`)로 언급하되, 구현 코드를 통째로 작성하는 멀티라인 코드 블록은 작성하지 마세요.
-- **논리적 서술**: "A 함수를 호출하여 B 값을 확인하고, 조건 C를 만족하면 D를 실행한다"와 같이 **자연어**나 **순서도(Flow)**로 로직을 설명하세요.
-- **의도 명시**: "왜 이 로직이 필요한지", "어떤 엣지 케이스를 막아야 하는지"에 집중하세요.
-- **예외 처리 보완**: 사용자가 제공한 정보를 그대로 복사하지 말고, 개발자 관점에서 누락된 예외 상황을 보완하세요.
+로딩, 성공, 실패, 엣지 (목록없음 등) 명세 필수
 
 ### 3. 문서의 일회성
-- **커밋 후 가치 소멸**: `tasks/*.md` 문서는 해당 커밋을 작성하기 위한 **임시 설계도**입니다.
+- **커밋 후 가치 소멸**: 해당 PR을 작성하기 위한 **임시 설계도**입니다.
 - **최신화 불필요**: 코드가 커밋(`git commit`)된 이후에는, 실제 코드가 Source of Truth가 됩니다. 나중에 로직이 변경되더라도 이 문서를 다시 열어 수정(동기화)하지 마세요.
 
 ---
@@ -68,33 +56,9 @@
 - **필수 포함**: `/plan/background.md`, `/plan/codebase-audit.md`, `/plan/overview.md`, `/plan/commit-sequence.md`
 - **추가 포함**: 관련된 기존 컴포넌트, 유틸리티, 또는 참고할 커밋 링크.
 
-### 3. 예상 영향 범위
+### 3. 예상 영향 범위 리스트업 << 너무 많다? 그럼 이 PR이 큰것 ㅇㅇ. 그러니 PR 다시 쪼개야한다는 신호.
 - **수정되는 파일**: 기존 코드를 수정해야 한다면 해당 파일 목록.
 - **의존 관계**: 이 작업이 다른 컴포넌트/함수에 미치는 영향.
-
-### 4. 핵심 로직 설계 (Core Logic Design)
-- **[CRITICAL] 실제 코드 작성 금지**: `const`, `function`, `async/await`, `useCallback` 등 실제 구현 코드를 절대 작성하지 마세요.
-- 대신 **의사 코드(Pseudo-code)**, **논리적 단계(Flow)**, 또는 **텍스트 서술**을 통해 로직의 흐름과 호출할 메서드만 기술하세요.
-- 개발자가 구현 방식(How)을 고민하게 하는 것이 아니라, 수행해야 할 논리(What)를 전달하는 것이 목적입니다.
-
-**❌ Bad (실제 코드 작성 - 금지)**
-```typescript
-const handleAccept = async () => {
-  const status = await notification.checkPermission();
-  if (status === 'GRANTED') {
-    toggleNotification('PROMOTION', true);
-  }
-};
-```
-
-**✅ Good (로직 흐름 서술 - 권장)**
-1. `notification.checkPermission()` 호출하여 권한 상태 확인
-2. **GRANTED 상태인 경우**:
-   - `toggleNotification('PROMOTION', true)` API 호출
-   - 성공 토스트 노출 (포맷: `... (${dayjs().format('YYYY.MM.DD')})`)
-   - `onAccept()` 호출하여 모달 닫기
-3. **그 외 상태인 경우**:
-   - `onOpenNotificationPermissionModal()` 호출하여 기기 설정 유도 모달 오픈
 
 ---
 
@@ -124,6 +88,7 @@ const handleAccept = async () => {
 
 ---
 
+// TODO overview.md의 안내사항이랑 잘 합쳐야.
 ## [AI 필수] 커밋 완료 후 안내
 
 각 그룹의 커밋 구현이 완료될 때마다 사용자에게 다음과 같이 안내하세요:
