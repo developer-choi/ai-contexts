@@ -100,7 +100,11 @@ function deprecatedSomeFunction() {}
 
 ---
 
-## [AI 필수] commit-sequence.md 작성 완료 후 안내
+## [CRITICAL] 다음 단계로 넘어가기 전 필수 확인
+
+**⚠️ commit-sequence.md 작성을 완료한 후, 다음 단계(구현)로 넘어가기 전에 사용자 확인이 필요합니다.**
+
+### AI의 필수 질문 (다음 단계 진행 전)
 
 사용자에게 다음과 같이 안내하세요:
 
