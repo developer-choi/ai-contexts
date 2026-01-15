@@ -127,3 +127,6 @@ When reading files with non-ASCII characters (e.g., Korean) located outside the 
    Command: `copy "<TARGET_FILE_PATH>" "<TEMP_DIR>\<FILENAME>"`
 2. **Read** the copied file using the `read_file` tool.
 3. **Delete** the copied file to clean up.
+
+## Gemini Added Memories
+- Never perform any task (lint fixes, refactoring, file creation, etc.) that the user has not explicitly instructed. Only execute exactly what is instructed. Avoid any proactive suggestions or actions that deviate from the specific request.
