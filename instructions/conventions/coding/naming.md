@@ -75,18 +75,6 @@ interface PostLoginApiResponse { }
 
 interface GetBoardListApiRequest { }
 interface GetBoardListApiResponse { }
-
-interface GetBoardDetailApiRequest { }
-interface GetBoardDetailApiResponse { }
-
-interface PostBoardDetailApiRequest { }
-interface PostBoardDetailApiResponse { }
-
-interface PatchBoardDetailApiRequest { }
-interface PatchBoardDetailApiResponse { }
-
-interface DeleteBoardDetailApiRequest { }
-// DELETE는 보통 Response body 없음
 ```
 
 ### 파일명
@@ -125,24 +113,3 @@ interface DeleteBoardDetailApiRequest { }
   - 의미를 알 수 없는 숫자(0, 1, -1 같은 단순 인덱스/증감 제외)를 코드에 직접 쓰지 마세요.
   - 반드시 의미 있는 이름을 가진 상수로 정의해서 사용해야 합니다.
   - 특히 시간(ms), 횟수, 제한값, 특정 상태 코드 등은 반드시 상수화합니다.
-
-```typescript
-// ✅ Good
-const MAX_RETRY_COUNT = 3;
-const ANIMATION_DURATION_MS = 300;
-const STATUS_COMPLETED = 4;
-
-if (count > MAX_RETRY_COUNT) { ... }
-setTimeout(handler, ANIMATION_DURATION_MS);
-
-// ❌ Bad
-if (count > 3) { ... } // 3이 무엇을 의미하는지 불명확
-setTimeout(handler, 300);
-if (status === 4) { ... }
-```
-
-```typescript
-const CAPACITY = 4;
-const LINE_HEIGHT_BY_SIZE = { small: 1.2, medium: 1.5, large: 1.8 };
-const LOGIN_URL = '/login';
-```

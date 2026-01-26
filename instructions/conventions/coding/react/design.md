@@ -8,22 +8,7 @@
     - `onClick` 핸들러도 없고 `href`도 없을 때, 임의로 `?page=2` 같은 링크를 생성하면 안 됩니다.
     - 차라리 아무 동작도 하지 않거나, `defaultHref` 같은 명시적인 Props를 요구해야 합니다.
 
-## 2. 조건부 렌더링
-컴포넌트를 보여줄지 말지 결정할 때, 내부에서 `visible` Props를 받는 것보다 **부모에서 조건부 렌더링**을 하는 것을 선호합니다.
-
-- **장점**: 불필요한 Props(`visible`)를 줄일 수 있다. 안그래도 props 많아지면 보기 힘든데 하나라도 줄여야한다.
-
-**❌ Bad (Props로 제어)**
-```tsx
-<SomeComponent visible={isVisible} prop1={...} />
-```
-
-**✅ Good (조건부 렌더링)**
-```tsx
-{isVisible && <SomeComponent prop1={...} />}
-```
-
-## 3. Window EventListener 등록 시점
+## 2. Window EventListener 등록 시점
 `scroll`, `keydown` 등의 전역 이벤트 리스너는 **"페이지가 유효하게 이용 가능한 상태"**일 때만 등록해야 합니다.
 
 - **이유**: 데이터가 없거나 에러가 난 빈 화면에서 스크롤/키보드 이벤트가 불필요하게 동작하여 버그를 유발할 수 있습니다.

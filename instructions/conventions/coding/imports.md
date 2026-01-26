@@ -12,12 +12,3 @@ import {Button} from '@/components/element/Button';
 // ❌ Bad
 import {fetchFromClient} from '../../../utils/extend/library/fetch/fromClient';
 ```
-
-## Type Import
-- `type` 키워드를 명시하여 컴파일 단계에서 제거될 수 있음을 알립니다.
-
-```typescript
-// ✅ Good
-import {type MouseEvent, type ComponentPropsWithRef} from 'react';
-import type {NextRequest} from 'next/server';
-```

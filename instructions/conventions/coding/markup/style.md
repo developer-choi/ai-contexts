@@ -21,16 +21,9 @@
 }
 ```
 
-### @use 지시어 (구식 @import 대신)
-```scss
-@use "@/styles/util";
-@use "@/styles/color";
+### @use 지시어 사용
+@import 대신 @use를 사용해야합니다.
 
-.button {
-  background-color: color.$primary;
-  padding: util.spacing(2);
-}
-```
 
 ### Dart Sass 모듈 시스템 필수
 - @use 'sass:list', @use 'sass:map' 사용
@@ -38,7 +31,7 @@
 
 ---
 
-## classnames 라이브러리
+## classnames 라이브러리 사용
 
 ```typescript
 import classNames from 'classnames';
