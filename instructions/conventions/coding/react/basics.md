@@ -41,7 +41,7 @@ function Layout(props: PropsWithChildren<LayoutProps>) {
 }
 ```
 
-## 모달(Modal) / 오버레이 구현 규칙
+## 모달 / 오버레이 구현 규칙
 
 모달이나 다이얼로그를 띄울 때는 컴포넌트 내부 상태(`useState`)가 아닌 **`overlay-kit`** 라이브러리를 사용해야 합니다.
 

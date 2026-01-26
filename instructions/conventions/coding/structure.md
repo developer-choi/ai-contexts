@@ -1,6 +1,6 @@
-# 코드 구조화 및 가독성 (Code Structure & Readability)
+# 코드 구조화 및 가독성
 
-## 1. 조건문 작성 순서 (Early Return)
+## 1. 조건문 작성 순서
 사람은 코드를 **위에서 아래로**, **왼쪽에서 오른쪽으로** 읽습니다. 이 인지 흐름을 방해하지 않도록 코드를 배치해야 합니다.
 
 ### 짧은 조건 우선 처리
@@ -56,7 +56,7 @@ if (!cookie) {
 const value = isError ? null : (veryLongExpression + complexCalculation);
 ```
 
-## 2. 상수 그룹화 (Classify Constants)
+## 2. 상수 그룹화
 관련된 상수가 여러 개 있을 때는 개별 변수로 나열(`const A_1 = ...`)하지 말고, **객체로 묶어서(`const A = { ... }`)** 관리하세요.
 
 **❌ Bad (개별 나열)**
@@ -85,7 +85,7 @@ const LINE_2 = {
 };
 ```
 
-## 3. 불필요한 중간 변수 제거 (Inline Variable)
+## 3. 불필요한 중간 변수 제거
 단 한 번만 사용되는 값은 변수에 할당하지 않고 즉시 사용(Inline)합니다.
 변수명을 짓는 비용을 줄이고, 코드의 호흡을 간결하게 유지하기 위함입니다.
 

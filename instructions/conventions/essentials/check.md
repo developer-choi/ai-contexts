@@ -10,7 +10,7 @@
     - Lint Check (eslint)
     - Unit Tests
 
-## 2. 안전성 체크 (Strict)
+## 2. 안전성 체크
 - **Warning Suppression 금지**: 다음 코드가 포함되어 있다면 즉시 수정하세요.
     - `ts-ignore`
     - `eslint-disable`

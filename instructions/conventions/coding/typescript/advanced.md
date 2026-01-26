@@ -1,6 +1,6 @@
 # TypeScript Advanced Patterns
 
-## 1. 정교한 타입 정의 (Precise Typing)
+## 1. 정교한 타입 정의
 
 ### Template Literal Types 활용
 문자열이지만 특정한 패턴(숫자 등)만 허용해야 할 때, `string` 대신 템플릿 리터럴 타입을 사용하여 정확도를 높입니다.
