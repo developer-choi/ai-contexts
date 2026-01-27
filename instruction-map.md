@@ -56,6 +56,12 @@ instructions/conventions/README.md
 - 코드작성 / 코드수정 / 버그수정 / 리팩토링
 - 코드리뷰 / 커밋리뷰 / PR리뷰
 
+```bash
+instructions/code-quality/README.md
+```
+- 코드 품질 리뷰 (응집도, 결합도, 구조 검증)
+- 읽기 쉬운 코드 / 유지보수하기 쉬운 코드 / 테스트하기 쉬운 코드
+
 ---
 
 ## 4. 취업 준비

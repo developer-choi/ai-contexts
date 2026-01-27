@@ -11,7 +11,6 @@
 
 ## 1. 공통 점검 사항
 - **[필수]** `../coding` 폴더 하위의 모든 규칙(Naming, TypeScript, Component 등)을 준수했는지 확인합니다.
-- **[필수]** `../../code-quality/README.md`를 참고하여 코드 품질 측면에서도 리뷰합니다.
 - **[필수]** `any`, `as` 타입 단언이 불필요하게 사용되지 않았는지 확인합니다.
 - **[필수]** `ts-ignore`, `eslint-disable` 등 경고 무시 코드가 없는지 확인합니다.
 
