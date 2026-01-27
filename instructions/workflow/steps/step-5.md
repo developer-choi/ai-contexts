@@ -36,8 +36,10 @@ function deprecatedSomeFunction() {}
 - **이유**: 나중에 수정하면 Rebase 시 Conflict 폭발
 
 **3. 파일 분리**
-- 150줄+ 파일에 코드 추가 예정이면 먼저 분리
-- **예시**: UserPage (200줄) → UserPage + UserProfile + UserActions로 분리 후 → 새 기능 추가
+- 새 기능 추가로 관심사/책임이 많아질 것 같으면, 역할 기반으로 먼저 분리 (단순 추출 X)
+- **신호**: 파일 코드라인 수가 많다면 관심사가 많아졌을 가능성이 있으니 점검
+- **예시**: UserPage → 역할별로 UserProfile + UserActions 분리 후 → 새 기능 추가
+- **이유**: 나중에 분리하면 Rebase 시 Conflict 발생, 코드 추가 후 분리하면 변경 범위 파악이 어려움
 
 ### Phase 1. 기초 공사
 
