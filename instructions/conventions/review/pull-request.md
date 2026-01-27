@@ -7,7 +7,6 @@ AI는 사용자의 변경 사항(PR 또는 커밋 내역)을 리뷰할 때, **�
 
 1.  **Code Context**: `instructions/conventions/` 하위의 `common`, `coding`, `testing`, `review`
 2.  **Logic Context**: `instructions/self-help/roadmap.md`
-3.  **References**: `instructions/conventions/references/` (선언적 코드 작성 등 기준 자료)
 
 ---
 

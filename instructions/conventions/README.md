@@ -12,8 +12,7 @@ conventions/
 ├─ essentials/    # 프로젝트 핵심 가치 및 필수 점검 사항
 ├─ coding/        # 언어 및 프레임워크별 작성 규칙 (공통, TypeScript, React, 마크업)
 ├─ testing/       # 테스트 코드 작성 규칙
-├─ review/        # 코드 리뷰 및 PR 작성 가이드
-└─ references/    # 참고 자료 (외부 아티클 등)
+└─ review/        # 코드 리뷰 및 PR 작성 가이드
 ```
 
 ---
@@ -50,5 +49,3 @@ conventions/
 3. **테스트 확인**: `testing/` 폴더의 모든 파일을 읽으세요.
 
 4. **리뷰 체크리스트**: `review/` 폴더의 모든 파일을 읽으세요.
-
-5. **기준 자료**: `references/` 폴더의 문서들을 기준으로 삼으세요. (선언적 코드 작성 등)
