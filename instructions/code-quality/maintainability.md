@@ -1,4 +1,4 @@
-# 유지보수하기 쉬운 코드
+# 수정하기 쉬운 코드
 
 응집도가 높은 코드
 - Coincidental cohesion

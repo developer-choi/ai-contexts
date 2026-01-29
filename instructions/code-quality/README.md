@@ -15,5 +15,5 @@
 
 ## 목차
 1. [읽기 쉬운 코드](./readability.md)
-2. [유지보수하기 쉬운 코드](./maintainability.md)
+2. [수정하기 쉬운 코드](./maintainability.md)
 3. [테스트하기 쉬운 코드](./testability.md)
