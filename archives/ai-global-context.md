@@ -9,12 +9,6 @@
 
 # [Common] Rules for All AI Tools
 
-## **Check Project-Specific Rules (Mandatory)**
-- Rules applicable to all projects are located in `~/WebstormProjects/ai-contexts/instructions/conventions`.
-- Project-specific rules are defined in the `docs/contexts/` folder. (Some projects may not have this.)
-- **Before starting work, you must read all files in the `docs/contexts/` folder and follow all instructions without exception.**
-- Failure to follow these rules is considered a serious error.
-
 ## Language Preference
 - **Always respond in Korean.** (Exception: Code, specific English terminology)
 
