@@ -50,3 +50,26 @@ try {
   // 에러 핸들링
 }
 ```
+
+## API 함수 구현 패턴
+
+### Response.data 반환 원칙
+API 호출 함수 내부에서 응답 객체(Response)를 그대로 반환하지 않고, 반드시 **데이터(JSON 등)를 추출하여 반환**합니다.
+- `React Query` 사용 시, `status`나 `headers` 같은 불필요한 메타 데이터가 상태에 저장되는 실수를 방지하기 위함입니다.
+
+**❌ Bad (Response 객체 전체 반환)**
+```typescript
+export function getUserApi() {
+  // fetch Response 객체가 그대로 반환됨 (실수 유발 가능)
+  return fetch('/api/users/me');
+}
+```
+
+**✅ Good (Data 추출 후 반환)**
+```typescript
+export async function getUserApi() {
+  const response = await fetch('/api/users/me');
+  const data: UserResponse = await response.json();
+  return data;
+}
+```
