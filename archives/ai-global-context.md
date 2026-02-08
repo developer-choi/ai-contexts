@@ -38,3 +38,10 @@ When reading files with non-ASCII characters (e.g., Korean) located outside the 
 
 ## Gemini Added Memories
 - Never perform any task (lint fixes, refactoring, file creation, etc.) that the user has not explicitly instructed. Only execute exactly what is instructed. Avoid any proactive suggestions or actions that deviate from the specific request.
+
+---
+
+# [Claude Code Only]
+
+## Plan Mode for Large Changes
+- If you expect to generate or modify more than 100 lines of code, you must enter `plan mode` to establish a plan and obtain user confirmation before starting any actual modifications.
