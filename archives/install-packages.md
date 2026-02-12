@@ -43,9 +43,6 @@ https://tanstack.com/query/latest/docs/framework/react/quick-start
 yarn add overlay-kit
 ```
 
-https://github.com/toss/overlay-kit?tab=readme-ov-file#example
-- Overlay Provider
-
 ---
 
 ### 기타
