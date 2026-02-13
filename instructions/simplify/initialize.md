@@ -4,6 +4,15 @@
 
 ---
 
+## 핵심 원칙
+
+**⚠️ 이 프로젝트는 코드 읽기 전용입니다**:
+- **테스트/빌드 실행 금지**: `yarn test`, `tsc`, `npm run build` 등 실행하지 마세요
+- **의존성 설치 불필요**: `yarn install`, `npm install` 실행하지 마세요
+- **목적**: 소스 코드만 읽고 이해하는 것
+
+---
+
 ## 1. 사용자에게 초기 라이브러리 세팅 요청
 
 1. 라이브러리 선정
@@ -52,15 +61,19 @@ git push -u origin main
 
 ### package.json
 
+**⚠️ 중요**: 이 프로젝트는 코드만 읽으므로 실행/빌드/테스트 관련 설정을 모두 제거합니다.
+
 학습용 프로젝트이므로 실행에 필요한 설정을 제거합니다:
 
-- `scripts` — 빌드/테스트/린트 등 모든 스크립트 제거
+- `scripts` — 빌드/테스트/린트 등 모든 스크립트 제거 (실행하지 않으므로)
 - `devDependencies` — 전부 제거
 - `dependencies` — 전부 제거 (코드만 읽으므로 설치 불필요)
 - 배포 관련 필드 — `publishConfig`, `repository`, `bugs`, `homepage`, `funding`, `engines` 등 제거
 - 빌드 관련 필드 — `main`, `module`, `exports`, `types`, `files`, `sideEffects` 등 제거
 
 남겨야 할 필드: `name`, `version`, `description`, `private: true`
+
+**이유**: `yarn install`, `yarn test`, `tsc` 등을 실행할 일이 없으므로 관련 설정 제거
 
 ---
 
