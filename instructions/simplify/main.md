@@ -30,7 +30,9 @@
 
 **계획서**
 - 양식: (이 저장소) `format/commit.md`
-- 예시: (간소화 프로젝트) `instructions/simplification-patterns.md`
+- 반복 패턴 참고: (간소화 프로젝트) `instructions/simplification-patterns.md`
+  - 여러 파일에서 공통되는 삭제 패턴 확인
+  - 이 대상에도 해당 패턴이 적용되는지 검토
 
 **핵심 규칙:**
 1. 각 커밋마다 "무엇을", "왜 불필요한가", "삭제 대상", "커밋" 4개 섹션 필수
@@ -38,7 +40,6 @@
 3. **⭐ 계획서의 커밋 번호와 실제 커밋 번호 반드시 일치**
    - 총 11개면 → 1/11, 2/11, ..., 11/11
    - 여러 커밋 합치기 가능하나 계획서에 미리 명시 (예: "Commit 3-4: 기능 A, B 함께 삭제")
-4. 구체적인 커밋 예시는 (간소화 프로젝트) `instructions/simplification-patterns.md` 참고
 
 ### 2. 사용자 승인 대기 ✋
 
@@ -101,7 +102,9 @@
 - [ ] (이 저장소) `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
 - [ ] (이 저장소) `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
 - [ ] (간소화 프로젝트) `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
-- [ ] (간소화 프로젝트) `instructions/simplification-patterns.md` — 라이브러리 특화 삭제 패턴 추가/수정?
+- [ ] (간소화 프로젝트) `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
+  - ⚠️ 특정 파일 하나의 작업 내역이 아님
+  - 2개 이상의 파일/컴포넌트에서 공통되는 패턴만 기록
 
 #### 양식 문서
 - [ ] (이 저장소) `[타입]/format/original.md` — 원본 분석 양식 개선할 점?
