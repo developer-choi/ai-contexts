@@ -325,3 +325,36 @@ function Dialog({ open, onClose, children }) {
   // 함수 파라미터에서 직접 기본값 설정
 }
 ```
+
+---
+
+## SSR 마운트 안전성 패턴 제거
+
+**무엇을**: SSR(서버사이드 렌더링) 환경에서 hydration 오류를 방지하는 mounted 상태 패턴
+
+**왜 불필요한가**:
+
+- **학습 목적**:
+    - 클라이언트 전용 학습 환경에서 SSR 대응 코드는 불필요
+    - 핵심 로직을 가리는 부가 코드
+- **복잡도**:
+    - `useState(false)` + `useLayoutEffect(() => setMounted(true), [])` 조합
+    - mounted 여부에 따른 조건부 렌더링 (`mounted ? ... : null`)
+- **현실**: Next.js 등 SSR 프레임워크 없이는 의미 없음
+
+**삭제 대상**:
+- `const [mounted, setMounted] = useState(false)`
+- `useLayoutEffect(() => setMounted(true), [])`
+- `mounted && ...` 조건부 렌더링 → 직접 렌더링으로 대체
+
+**예시**:
+```javascript
+// ❌ 삭제 대상
+const [mounted, setMounted] = React.useState(false);
+useLayoutEffect(() => setMounted(true), []);
+const container = mounted && globalThis?.document?.body;
+return container ? ReactDOM.createPortal(children, container) : null;
+
+// ✅ 단순화 결과
+return ReactDOM.createPortal(children, document.body);
+```
