@@ -73,7 +73,17 @@ instructions/recruitment/recruitment-trend.md
 
 ---
 
-## 5. 기타
+## 5. 라이브러리 간소화
+
+```bash
+instructions/simplify/README.md
+```
+- 라이브러리 소스코드 간소화 / 단순화
+- 간소화 프로젝트 초기 세팅
+
+---
+
+## 6. 기타
 
 ```bash
 instructions/clone-code-markup.md
@@ -82,7 +92,7 @@ instructions/clone-code-markup.md
 
 ---
 
-## 6. 문서 관리
+## 7. 문서 관리
 
 ```bash
 meta/instruction-guide.md
