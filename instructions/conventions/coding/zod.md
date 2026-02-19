@@ -83,6 +83,25 @@ const BoardOriginalSchema = z.object({
 });
 ```
 
+### `z.string()`은 자유 텍스트 전용입니다
+
+형식이 정해진 문자열에 `z.string()`만 쓰면 아무 문자열이나 통과합니다. 대응하는 Zod 메서드가 있으면 반드시 사용합니다.
+
+```typescript
+// ❌ 형식 검증 없음 — 아무 문자열이나 통과
+createdAt: z.string()
+email: z.string()
+
+// ✅ 형식에 맞는 메서드 사용
+createdAt: z.string().datetime()
+startDate: z.string().date()
+email: z.string().email()
+profileUrl: z.string().url()
+userId: z.string().uuid()
+```
+
+`z.string()`에 `.min()/.max()`만 붙이는 것은 `postTitle`, `postContent`처럼 형식 제약이 없는 자유 텍스트에만 사용합니다.
+
 ### 에러 메시지 반드시 지정
 
 `z.enum()`, `z.string()`, `.min()`, `.max()` 등에 사용자 & 개발자가 볼 메시지를 명시합니다.
