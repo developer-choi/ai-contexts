@@ -81,8 +81,8 @@ import { Theme } from '@radix-ui/themes';
 import { OverlayProvider } from 'overlay-kit';
 import { ToastContainer } from 'react-toastify';
 import "@radix-ui/themes/styles.css";
-import "@/styles/reset.css";
-import "@/styles/global.css";
+import "@/shared/styles/reset.css";
+import "@/shared/styles/global.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
