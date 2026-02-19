@@ -54,6 +54,35 @@ const UpdateLessonSchema = CreateLessonSchema.extend({
 });
 ```
 
+### 중첩 스키마는 변수로 분리합니다
+
+`z.array(z.string().max(...)).max(...)`처럼 스키마 안에 스키마가 들어가면, 체이닝 흐름이 끊기고 안쪽/바깥쪽 제약이 헷갈립니다.
+안쪽 스키마를 변수로 꺼내면 각각이 체이닝으로 읽힙니다.
+
+```typescript
+// ❌ 안쪽 .max()가 문자열 제한인지 배열 제한인지 한눈에 안 보임
+tagList: z.array(
+  z.string().max(20, '태그는 20자 이내로 입력하세요')
+).max(10, '태그는 최대 10개까지 가능합니다'),
+
+// ✅ 안쪽 스키마를 변수로 분리
+const tagSchema = z.string()
+  .max(20, '태그는 20자 이내로 입력하세요');
+
+tagList: z.array(tagSchema)
+  .max(10, '태그는 최대 10개까지 가능합니다'),
+```
+
+`z.enum()`이나 `z.union()` 등도 동일합니다. 원본 스키마 위에 변수로 분리합니다.
+
+```typescript
+const boardTypeEnum = z.enum(BOARD_TYPES.values);
+
+const BoardOriginalSchema = z.object({
+  boardType: boardTypeEnum,
+});
+```
+
 ### 에러 메시지 반드시 지정
 
 `z.enum()`, `z.string()`, `.min()`, `.max()` 등에 사용자 & 개발자가 볼 메시지를 명시합니다.
