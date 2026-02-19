@@ -54,13 +54,12 @@ const UpdateLessonSchema = CreateLessonSchema.extend({
 });
 ```
 
-### 중첩 스키마는 변수로 분리합니다
+### 중첩 스키마는 안쪽/바깥쪽 양쪽에 메서드가 있을 때 변수로 분리합니다
 
-`z.array(z.string().max(...)).max(...)`처럼 스키마 안에 스키마가 들어가면, 체이닝 흐름이 끊기고 안쪽/바깥쪽 제약이 헷갈립니다.
-안쪽 스키마를 변수로 꺼내면 각각이 체이닝으로 읽힙니다.
+`z.array(z.string().max(20)).max(10)` — 안쪽 `.max()`가 문자열 제한인지 배열 제한인지 눈으로 구분하기 어렵습니다. 안쪽 스키마를 변수로 꺼내면 각 메서드가 어느 레벨에 걸리는지 명확해집니다.
 
 ```typescript
-// ❌ 안쪽 .max()가 문자열 제한인지 배열 제한인지 한눈에 안 보임
+// ❌ .max()가 어느 레벨 제한인지 헷갈림
 tagList: z.array(
   z.string().max(20, '태그는 20자 이내로 입력하세요')
 ).max(10, '태그는 최대 10개까지 가능합니다'),
@@ -73,14 +72,38 @@ tagList: z.array(tagSchema)
   .max(10, '태그는 최대 10개까지 가능합니다'),
 ```
 
-`z.enum()`이나 `z.union()` 등도 동일합니다. 원본 스키마 위에 변수로 분리합니다.
+안쪽에 메서드가 없으면 분리할 필요 없습니다.
 
 ```typescript
-const boardTypeEnum = z.enum(BOARD_TYPES.values);
+// 분리 불필요 — 헷갈릴 게 없음
+z.array(z.string())
+z.array(z.string()).max(10)
+```
 
-const BoardOriginalSchema = z.object({
-  boardType: boardTypeEnum,
-});
+### 독립된 스키마 조합은 감싸기, 속성 추가는 체이닝을 사용합니다
+
+Zod에는 같은 동작을 감싸기(wrapper)와 체이닝 두 가지로 쓸 수 있는 메서드가 있습니다.
+
+| 감싸기 | 체이닝 |
+|--------|--------|
+| `z.union([a, b])` | `a.or(b)` |
+| `z.intersection(a, b)` | `a.and(b)` |
+
+**독립된 스키마를 조합**할 때는 감싸기를 사용합니다. "둘 중 하나" / "둘 다"라는 구조가 먼저 보입니다.
+
+```typescript
+// ❌ .or()가 체인 끝에 묻혀서 놓치기 쉬움
+z.string().email('이메일 형식이 아닙니다').or(z.literal(''))
+
+// ✅ 처음부터 "둘 중 하나" 구조가 보임
+z.union([z.literal(''), z.string().email('이메일 형식이 아닙니다')])
+```
+
+**하나의 스키마에 속성을 추가**할 때는 체이닝을 사용합니다. `.optional()`, `.nullable()`, `.default()` 등이 해당합니다.
+
+```typescript
+z.string().email('이메일 형식이 아닙니다').optional()
+z.number().int().nullable()
 ```
 
 ### `z.string()`은 자유 텍스트 전용입니다
