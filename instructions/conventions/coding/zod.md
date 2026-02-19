@@ -150,7 +150,7 @@ z.string().min(1).max(100)
 
 // ✅
 z.enum(['online', 'offline'], {
-  errorMap: () => ({ message: '수업 유형을 선택해주세요' }),
+  error: '수업 유형을 선택해주세요',
 })
 z.string()
   .min(1, '제목을 입력해주세요')
