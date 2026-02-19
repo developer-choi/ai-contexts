@@ -124,17 +124,23 @@ z.number().int().nullable()
 
 형식이 정해진 문자열에 `z.string()`만 쓰면 아무 문자열이나 통과합니다. 대응하는 Zod 메서드가 있으면 반드시 사용합니다.
 
+string format 검증은 `z.string().email()` 같은 체이닝이 아닌 **top-level API**를 사용합니다.
+
 ```typescript
 // ❌ 형식 검증 없음 — 아무 문자열이나 통과
 createdAt: z.string()
 email: z.string()
 
-// ✅ 형식에 맞는 메서드 사용
-createdAt: z.string().datetime()
-startDate: z.string().date()
+// ❌ 체이닝 — 사용하지 않음
 email: z.string().email()
-profileUrl: z.string().url()
-userId: z.string().uuid()
+createdAt: z.string().datetime()
+
+// ✅ top-level API 사용
+email: z.email()
+createdAt: z.iso.datetime()
+startDate: z.iso.date()
+profileUrl: z.url()
+userId: z.uuid()
 ```
 
 `z.string()`에 `.min()/.max()`만 붙이는 것은 `postTitle`, `postContent`처럼 형식 제약이 없는 자유 텍스트에만 사용합니다.
