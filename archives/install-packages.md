@@ -32,8 +32,15 @@ yarn add @tanstack/react-query
 ```bash
 yarn add -D @tanstack/eslint-plugin-query
 ```
+```typescript
+import pluginQuery from "@tanstack/eslint-plugin-query";
 
-https://tanstack.com/query/latest/docs/framework/react/quick-start
+export default defineConfig([
+  ...pluginQuery.configs["flat/recommended"]
+])
+```
+
+https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query
 - eslint 테스트 + 에디터 eslint 설정
 
 ---
@@ -74,8 +81,8 @@ import { Theme } from '@radix-ui/themes';
 import { OverlayProvider } from 'overlay-kit';
 import { ToastContainer } from 'react-toastify';
 import "@radix-ui/themes/styles.css";
-import "@/styles/reset.css";
-import "@/styles/global.css";
+import "@/shared/styles/reset.css";
+import "@/shared/styles/global.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {
