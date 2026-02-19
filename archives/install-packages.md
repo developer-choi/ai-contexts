@@ -33,7 +33,7 @@ yarn add @tanstack/react-query
 yarn add -D @tanstack/eslint-plugin-query
 ```
 
-https://tanstack.com/query/latest/docs/framework/react/quick-start
+https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query
 - eslint 테스트 + 에디터 eslint 설정
 
 ---
