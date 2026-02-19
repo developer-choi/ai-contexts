@@ -32,6 +32,13 @@ yarn add @tanstack/react-query
 ```bash
 yarn add -D @tanstack/eslint-plugin-query
 ```
+```typescript
+import pluginQuery from "@tanstack/eslint-plugin-query";
+
+export default defineConfig([
+  ...pluginQuery.configs["flat/recommended"]
+])
+```
 
 https://tanstack.com/query/latest/docs/eslint/eslint-plugin-query
 - eslint 테스트 + 에디터 eslint 설정
