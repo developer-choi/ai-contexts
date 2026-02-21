@@ -1,3 +1,29 @@
+## CSS 기본값 속성 사용 금지
+
+브라우저 기본값과 동일한 CSS 속성은 작성하지 않습니다.
+
+```scss
+// ❌ Bad - 브라우저 기본값과 동일
+.text {
+  font-weight: 400;
+  font-style: normal;
+  text-align: left;
+  opacity: 1;
+  visibility: visible;
+  overflow: visible;
+}
+
+// ✅ Good - 기본값이 아닌 것만 명시
+.text {
+  font-weight: 700;
+}
+```
+
+기본값을 반복 작성하면 의도가 불분명해지고 불필요한 코드가 늘어납니다.
+값을 명시한다는 것은 "기본값에서 변경했다"는 의도를 담아야 합니다.
+
+---
+
 ## SCSS 사용
 
 ### CSS Modules
