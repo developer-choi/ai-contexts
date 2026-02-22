@@ -11,7 +11,7 @@
 ```tsx
 // ✅ Good — 컴포넌트는 성공 케이스만 담당
 function ProductList() {
-  const { data } = useSuspenseQuery(productQueries.list());
+  const { data } = useSuspenseQuery(productQueries.list.options());
   return data.items.map(/* ... */);
 }
 
@@ -26,7 +26,7 @@ function ProductList() {
 ```tsx
 // ❌ Bad — 컴포넌트 안에서 로딩/에러 분기
 function ProductList() {
-  const { data, isLoading, isError } = useQuery(productQueries.list());
+  const { data, isLoading, isError } = useQuery(productQueries.list.options());
   if (isLoading) return <Skeleton />;
   if (isError) return <Error />;
   return data.items.map(/* ... */);
@@ -40,8 +40,8 @@ function ProductList() {
 도메인별 `queries.ts` 파일에 `queryOptions` 팩토리를 객체로 그룹핑합니다.
 
 - **네이밍**: `{domain}Queries` (예: `productQueries`, `organizationQueries`)
-- **메서드**: `list`, `detail` 등 용도별로 구분
-- **`listKey`**: list 계열 쿼리의 key prefix를 별도 메서드로 노출하여, invalidation 시 필터 조합과 무관하게 한 번에 무효화
+- **구조**: `list`, `detail` 등 용도별로 구분하고, 각 항목은 `key`와 `options`를 가진 객체
+- **`key`**: queryKey를 반환하는 함수. invalidation 시 `key()`만 참조하여 필터 조합과 무관하게 무효화 가능
 
 ```typescript
 // ✅ Good — src/organization/queries.ts
@@ -49,21 +49,29 @@ import { queryOptions } from "@tanstack/react-query";
 import { organizationApi } from "./api";
 
 export const organizationQueries = {
-  listKey: (tenantId: string) => ["organizations", tenantId],
-  list: (tenantId: string, filters?: OrganizationListFilters) => {
-    const resolved = { page: 1, search: "", ...filters };
-    return queryOptions({
-      queryKey: [...organizationQueries.listKey(tenantId), resolved],
-      queryFn: () =>
-        organizationApi.getOrganizations({ tenantId, ...resolved }),
-    });
+  list: {
+    key: (tenantId: string) => ["organizations", tenantId],
+    options: (tenantId: string, filters?: OrganizationListFilters) => {
+      const resolved = { page: 1, search: "", ...filters };
+      return queryOptions({
+        queryKey: [...organizationQueries.list.key(tenantId), resolved],
+        queryFn: () =>
+          organizationApi.getOrganizations({ tenantId, ...resolved }),
+      });
+    },
   },
-  detail: (organizationId: string) =>
-    queryOptions({
-      queryKey: ["organization", organizationId],
-      queryFn: () => organizationApi.getOrganization(organizationId),
-    }),
+  detail: {
+    key: (organizationId: string) => ["organization", organizationId],
+    options: (organizationId: string) =>
+      queryOptions({
+        queryKey: organizationQueries.detail.key(organizationId),
+        queryFn: () => organizationApi.getOrganization(organizationId),
+      }),
+  },
 };
+
+// invalidation — key()로 필터 무관하게 무효화
+queryClient.invalidateQueries({ queryKey: organizationQueries.list.key(tenantId) });
 ```
 
 ---
@@ -90,12 +98,15 @@ list 쿼리에 필터가 있으면, 기본값을 spread로 resolve한 뒤 queryK
 
 ```typescript
 // ✅ Good — 기본값이 명시적, queryKey에 resolve된 값 포함
-list: (tenantId: string, filters?: ListFilters) => {
-  const resolved = { page: 1, search: "", ...filters };
-  return queryOptions({
-    queryKey: [...queries.listKey(tenantId), resolved],
-    queryFn: () => api.getList({ tenantId, ...resolved }),
-  });
+list: {
+  key: (tenantId: string) => ["items", tenantId],
+  options: (tenantId: string, filters?: ListFilters) => {
+    const resolved = { page: 1, search: "", ...filters };
+    return queryOptions({
+      queryKey: [...queries.list.key(tenantId), resolved],
+      queryFn: () => api.getList({ tenantId, ...resolved }),
+    });
+  },
 },
 ```
 
