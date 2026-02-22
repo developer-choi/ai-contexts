@@ -13,6 +13,7 @@
 - `/plan/background.md`
 - `/plan/codebase-audit.md` (있는 경우)
 - `/plan/overview.md`
+- `/plan/overview.md`에 리스트업된 **참고 컨벤션** 파일들 (코드 작성 전 반드시 읽기)
 
 ---
 
