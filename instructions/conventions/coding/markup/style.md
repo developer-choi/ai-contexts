@@ -50,6 +50,16 @@
 ### @use 지시어 사용
 @import 대신 @use를 사용해야합니다.
 
+네임스페이스를 명시적으로 사용합니다.
+
+```scss
+// ✅ Good
+@use "@/shared/styles/variables";
+
+.title {
+  color: variables.$color-text-primary;
+}
+```
 
 ### Dart Sass 모듈 시스템 필수
 - @use 'sass:list', @use 'sass:map' 사용
