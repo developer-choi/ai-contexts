@@ -68,43 +68,18 @@ export const organizationQueries = {
 
 ---
 
-## API 함수 분리
+## queryFn에서 API 함수 호출
 
-### HTTP 클라이언트
-
-`ky` 라이브러리로 공유 인스턴스를 생성합니다. `prefixUrl`은 환경변수로 관리합니다.
+`queryFn`에 fetch/ky 등 HTTP 호출을 직접 작성하지 않고, `api.ts`에 정의된 API 함수를 호출합니다.
 
 ```typescript
-// shared/api/client.ts
-import ky from 'ky';
-
-export const api = ky.create({
-  prefixUrl: process.env.NEXT_PUBLIC_API_BASE_URL,
-});
-```
-
-### API 함수
-
-`queryFn`에 인라인 호출을 넣지 않고, 별도 `api.ts`에서 `{domain}Api` 객체로 그룹핑합니다.
-
-```typescript
-// ✅ Good
-// api.ts
-import { api } from '@/shared/api/client';
-
-export const productApi = {
-  getProducts: (params: GetProductsParams) =>
-    api.get('api/products', { searchParams: params }).json<PaginatedResponse<Product>>(),
-};
-
-// queries.ts — queryFn은 api 함수를 호출만
+// ✅ Good — queryFn은 api 함수를 호출만
 queryFn: () => productApi.getProducts({ page }),
 ```
 
 ```typescript
-// ❌ Bad — queryFn 안에 fetch 로직 직접 작성
-queryFn: () =>
-  fetch('/api/products').then(res => res.json()),
+// ❌ Bad — queryFn 안에 HTTP 호출 직접 작성
+queryFn: () => fetch('/api/products').then(res => res.json()),
 ```
 
 ---
