@@ -1,6 +1,6 @@
 # Step 5: 구현
 
-`/plan/overview.md` 구현 방침을 바탕으로 **코드 작성 및 커밋** 단계입니다.
+`/plan/pr{N}/overview.md` 구현 방침을 바탕으로 **코드 작성 및 커밋** 단계입니다.
 
 **목표**:
 - overview.md에 정의된 기능 구현
@@ -12,8 +12,8 @@
 
 - `/plan/background.md`
 - `/plan/codebase-audit.md` (있는 경우)
-- `/plan/overview.md`
-- `/plan/overview.md`에 리스트업된 **참고 컨벤션** 파일들 (코드 작성 전 반드시 읽기)
+- `/plan/pr{N}/overview.md`
+- `/plan/pr{N}/overview.md`에 리스트업된 **참고 컨벤션** 파일들 (코드 작성 전 반드시 읽기)
 
 ---
 
@@ -82,7 +82,7 @@ function deprecatedSomeFunction() {}
 
 > "모든 구현 완료.
 >
-> - [ ] `/plan/overview.md`의 모든 핵심 기능이 구현되었는지 확인해주세요.
+> - [ ] `/plan/pr{N}/overview.md`의 모든 핵심 기능이 구현되었는지 확인해주세요.
 > - [ ] 누락된 기능이 있다면 말씀해주세요.
 >
 > 문제없으면 다음 단계(최종 점검)로 넘어갈게요."

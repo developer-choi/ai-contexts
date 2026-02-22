@@ -4,7 +4,7 @@ Step 6 완료 후, PR 본문을 작성하는 단계입니다.
 
 ---
 
-## 1. PR 본문 작성 (`/plan/pr.md`)
+## 1. PR 본문 작성 (`/plan/pr{N}/pr-body.md`)
 
 [문제 해결 로드맵](../../self-help/roadmap.md)을 참고하여 작성하세요.
 

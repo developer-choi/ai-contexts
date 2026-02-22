@@ -7,11 +7,11 @@
 
 ## 작성 지침
 - **간결함**: 화려한 수식어나 마케팅적 표현은 배제하고 담백하게 작성하세요.
-- **개요 중심**: 기획서의 내용을 /plan/overview.md에 모두 옮겨 단권화하지 마세요.
+- **개요 중심**: 기획서의 내용을 overview.md에 모두 옮겨 단권화하지 마세요.
 
 ---
 
-## 작성 양식 (`/plan/overview.md`)
+## 작성 양식 (`/plan/pr{N}/overview.md`)
 
 ### 0. 참고 자료
 - `/plan/background.md`
@@ -74,7 +74,7 @@ overview.md 작성 후 사용자에게 확인 요청:
 > 다음 문서들을 모두 이해하셨나요?
 > - `/plan/background.md`
 > - `/plan/codebase-audit.md` (있는 경우)
-> - `/plan/overview.md`
+> - `/plan/pr{N}/overview.md`
 >
 > ⚠️ **모르는 부분이 있으면 다음 단계부터 문제가 발생합니다.**
 >

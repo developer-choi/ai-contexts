@@ -32,8 +32,7 @@ AI는 작업이 작다고 판단되면 제안하세요:
 ## [CRITICAL] 진행 원칙
 
 **한 번에 하나의 PR, 하나의 구체적인 기능**만 다룹니다.
-- 하나의 `/plan/overview.md` = 하나의 PR
-- 여러 PR 나눌 경우, 각각 별도의 `overview.md` 작성
+- 하나의 `/plan/pr{N}/overview.md` = 하나의 PR
 
 ---
 
@@ -73,7 +72,7 @@ AI는 작업이 작다고 판단되면 제안하세요:
 
 **핵심:**
 - `project.md`는 전체 프로젝트 동안 유지
-- `overview.md`는 각 PR마다 생성/삭제 반복
+- `overview.md`는 각 PR 디렉토리(`/plan/pr{N}/`)에 생성
 
 ---
 
