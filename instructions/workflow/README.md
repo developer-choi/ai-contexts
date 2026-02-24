@@ -6,9 +6,6 @@ AI와 함께 효율적으로 코드 작성하기 위한 전체 프로세스입�
 
 ## 시작 전 준비
 
-### 사용자 안내
-- 모든 step 시작 전 Gemini CLI에 `instructions/conventions/README.md` 전달
-
 ### AI 안내
 - `instructions/workflow/template/context-setup.md` 양식으로 레포지토리 Context 수집
   - **실무 프로젝트**: 필수

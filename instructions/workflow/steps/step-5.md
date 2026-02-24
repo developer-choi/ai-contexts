@@ -101,11 +101,7 @@ function deprecatedSomeFunction() {}
 
 > "Phase [N] ([Phase 이름]) 완료.
 >
-> Gemini CLI로 코드 풀질 검증 후 리뷰 부탁드립니다.
->
-> **Gemini CLI 검증 항목**:
-> 1. 테스트 스크립트 실행 (`package.json`의 scripts 확인)
-> 2. 컨벤션 준수 확인 (`instructions/conventions/README.md` 참고)
+> 리뷰 부탁드립니다.
 
 ### 모든 Phase 완료 시
 

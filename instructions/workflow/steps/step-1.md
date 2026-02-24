@@ -97,13 +97,4 @@ background.md 작성을 완료한 후, 사용자에게 다음과 같이 물어�
 >
 > ---
 >
-> **다음 단계(Step 2: PR 분할 전략 수립)는 Gemini CLI에게 맡기세요.**
->
-> **Gemini CLI에게 다음과 같이 요청하세요:**
-> ```
-> 다음 파일들을 읽고 Step 2부터 시작해줘:
-> - /plan/background.md
-> - instructions/workflow/steps/step-2.md
-> ```
->
-> **Gemini가 project.md 작성을 완료하고 승인받으면, 저에게 돌아와서 Step 3부터 진행하시면 됩니다.**"
+> **다음 단계(Step 2: PR 분할 전략 수립)를 진행하시겠습니까?**"
