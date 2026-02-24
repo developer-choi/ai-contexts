@@ -39,15 +39,24 @@ AI와 함께 효율적으로 코드 작성하기 위한 전체 프로세스입�
 
 ## 작업 진행 순서
 
+### 초기 1회 (전체 작업 시작 시)
+
 | 단계 | 내용 | Plan Mode |
 |------|------|-----------|
 | [step-1.md](steps/step-1.md) | 배경 파악 및 문제 정의 | 선택적 (버그/성능 문제 시) |
 | [step-2.md](steps/step-2.md) | PR 분할 전략 수립 | 선택적 (Codebase Audit 시) |
+
+### PR마다 반복 (Step 3 ~ 7)
+
+| 단계 | 내용 | Plan Mode |
+|------|------|-----------|
 | [step-3.md](steps/step-3.md) | 핵심 과제 정의 및 기술 전략 수립 | **필수** |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 | **필수** |
 | [step-5.md](steps/step-5.md) | 구현 | **Phase마다 필수** |
 | [step-6.md](steps/step-6.md) | 최종 점검 및 PR 준비 | 불필요 |
 | [step-7.md](steps/step-7.md) | PR 본문 작성 | 불필요 |
+
+> PR #1 완료 후 PR #2를 시작할 때는 Step 3부터 진행합니다. `background.md`와 `project.md`는 이미 작성되어 있으므로 Step 1~2는 스킵합니다.
 
 ### Plan Mode란?
 Claude Code의 plan mode는 **코드를 수정하기 전에 코드베이스를 탐색하고 구현 전략을 수립**하는 모드입니다. 코드 탐색이 필요한 단계에서 활용하면 AI가 근거 있는 판단을 내릴 수 있습니다.
