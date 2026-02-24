@@ -13,7 +13,20 @@
 - `/plan/background.md`
 - `/plan/codebase-audit.md` (있는 경우)
 - `/plan/pr{N}/overview.md`
-- `/plan/pr{N}/overview.md`에 리스트업된 **참고 컨벤션** 파일들 (코드 작성 전 반드시 읽기)
+---
+
+## 참고 컨벤션 탐색
+
+Phase 진행 전, `instructions/conventions/coding/` 하위 파일 **제목**을 훑고 이번 PR 작업과 관련된 파일을 리스트업하여 `/plan/pr{N}/overview.md`에 추가합니다. 파일 내용은 읽지 않고 제목만 보고 판단합니다.
+
+```markdown
+### 참고 컨벤션
+- `폴더경로/파일명.md`
+- `폴더경로/파일명.md`
+- `폴더경로/파일명.md`
+```
+
+> 이 목록의 파일은 **코드 작성 전 반드시 읽기**.
 
 ---
 
@@ -85,7 +98,7 @@ function deprecatedSomeFunction() {}
 ### Phase 완료 전 자가 점검
 
 사용자에게 보고하기 전, 다음을 수행:
-1. overview.md에 리스트업된 **참고 컨벤션 파일을 다시 열어** 작성한 코드와 대조
+1. overview.md의 **참고 컨벤션** 파일을 다시 열어 작성한 코드와 대조
 2. 위반 사항이 있으면 수정 후 커밋
 3. 응집도/결합도 관점에서 리뷰
 

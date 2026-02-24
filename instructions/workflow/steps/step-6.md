@@ -16,7 +16,7 @@
 ## 2. 통합 검증 및 최종 보고서 작성
 
 **상세 기준**:
-- [코드 품질 및 리뷰 기준](../../conventions/README.md): `coding`, `testing`, `review` 규칙 준수
+- `instructions/conventions/review/`, `instructions/conventions/testing/` 파일들 (검증 전 반드시 읽기)
 - [작업 회고 및 셀프 리뷰](../../self-help/review-work.md): 작업 효율성, 커밋 품질
 - [코드 퀄리티 리뷰](../../code-quality/README.md)
 
