@@ -2,9 +2,9 @@
 
 > **설계 원칙 참고:** [Component Design Patterns](design.md) - 기본값 설정, 전역 상태 관리, 이벤트 리스너 등 설계 철학
 
-## 컴포넌트 파일 내 코드 순서
+## 파일 내 코드 순서
 
-컴포넌트 파일 내부의 코드는 아래 순서를 따릅니다. 사람은 위에서 아래로 읽으므로, **핵심(Props, 컴포넌트)이 먼저** 오고 부수적인 것(상수, 유틸)은 뒤로 보냅니다.
+컴포넌트, 훅, 유틸 등 모든 파일의 코드는 아래 순서를 따릅니다. 사람은 위에서 아래로 읽으므로, **핵심(타입, export 함수)이 먼저** 오고 부수적인 것(상수, 유틸)은 뒤로 보냅니다.
 
 1. Props 타입 정의 (`interface`, `type`)
 2. `export default` 컴포넌트 함수
@@ -27,6 +27,27 @@ const DUMMY_ITEMS = ['a', 'b', 'c'];
 function formatPrice(price: number): string {
   return price.toLocaleString('ko-KR');
 }
+```
+
+---
+
+## useCallback / useMemo 수동 사용 금지
+
+React Compiler가 활성화된 프로젝트에서는 `useCallback`과 `useMemo`를 수동으로 사용하지 않습니다. 컴파일러가 자동으로 메모이제이션을 처리합니다.
+
+React Compiler는 React 19에서 기본 활성화가 아니며 별도 설정이 필요합니다. 작업 전 프로젝트 설정을 확인하세요.
+- Next.js: `next.config.js`의 `reactCompiler: true`
+- Vite: `vite.config.ts`의 `reactCompiler` 플러그인
+- Babel: `babel-plugin-react-compiler`
+
+```tsx
+// ❌ Bad — React Compiler 활성화 시
+const handleClick = useCallback(() => { /* ... */ }, [dep]);
+const computed = useMemo(() => calculate(value), [value]);
+
+// ✅ Good — React Compiler가 자동 처리
+const handleClick = () => { /* ... */ };
+const computed = calculate(value);
 ```
 
 ---
