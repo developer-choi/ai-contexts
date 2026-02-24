@@ -31,6 +31,53 @@ function formatPrice(price: number): string {
 
 ---
 
+## Named Import 사용
+
+`React.useEffect`, `React.useState` 등 네임스페이스 접근 대신 named import를 사용합니다.
+
+```tsx
+// ❌ Bad
+React.useEffect(() => { /* ... */ }, []);
+React.useState(0);
+
+// ✅ Good
+import { useEffect, useState } from 'react';
+
+useEffect(() => { /* ... */ }, []);
+useState(0);
+```
+
+---
+
+## children props는 PropsWithChildren 사용
+
+children을 받는 컴포넌트는 `PropsWithChildren`을 사용합니다.
+
+```tsx
+// ❌ Bad
+function Layout({ children }: { children: ReactNode }) {
+  return <main>{children}</main>;
+}
+
+// ✅ Good
+import { PropsWithChildren } from 'react';
+
+function Layout({ children }: PropsWithChildren) {
+  return <main>{children}</main>;
+}
+
+// ✅ Good — 다른 props도 있는 경우
+interface SidebarProps {
+  title: string;
+}
+
+function Sidebar({ title, children }: PropsWithChildren<SidebarProps>) {
+  return <aside><h2>{title}</h2>{children}</aside>;
+}
+```
+
+---
+
 ## useCallback / useMemo 수동 사용 금지
 
 React Compiler가 활성화된 프로젝트에서는 `useCallback`과 `useMemo`를 수동으로 사용하지 않습니다. 컴파일러가 자동으로 메모이제이션을 처리합니다.
