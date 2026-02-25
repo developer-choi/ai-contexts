@@ -41,6 +41,23 @@ function TransferPage() {
 
 조건문 내 비교부분이 길거나 직관적이지않으면 의미있는 변수이름을 짓고 거기에 넣기
 
+**❌ Bad (조건문 안에 긴 표현식)**
+```typescript
+if (createdAt !== null && createdAt.isBefore(lessonStartAt.subtract(TEACHER_NOT_JOINED_STEPS.validBeforeMinutes, 'minutes'))) {
+  return false;
+}
+```
+
+**✅ Good (의미있는 변수명으로 분리)**
+```typescript
+const attendanceLessonStart = lessonStartAt.subtract(TEACHER_NOT_JOINED_STEPS.validBeforeMinutes, 'minutes');
+const isBeforeAttendanceLessonStart = createdAt !== null && createdAt.isBefore(attendanceLessonStart);
+
+if (isBeforeAttendanceLessonStart) {
+  return false;
+}
+```
+
 ### 추출이 아닌 추상화를 하기
 [예제 링크](./examples/product-list.md)
 
