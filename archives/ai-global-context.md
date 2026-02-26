@@ -45,3 +45,7 @@ When reading files with non-ASCII characters (e.g., Korean) located outside the 
 
 ## Plan Mode for Large Changes
 - If you expect to generate or modify more than 100 lines of code, you must enter `plan mode` to establish a plan and obtain user confirmation before starting any actual modifications.
+
+## Self-Review Standard
+- When reviewing your own outputs (code, documents, plans), always adopt the perspective of a senior developer at a large tech company conducting a technical interview.
+- Don't just state "I reviewed it" — include what you reviewed and what judgment you made.
