@@ -95,6 +95,11 @@ instructions/clone-code-markup.md
 ## 7. 문서 관리
 
 ```bash
-meta/instruction-guide.md
+instructions/audit/workflow/README.md
 ```
-- 명령문(.md) 작성 및 검증 가이드
+- workflow 문서 최신화 / 정리
+
+```bash
+instructions/audit/README.md
+```
+- 명령문 검증 체크리스트
