@@ -12,6 +12,7 @@ workflow 파일은 전체 흐름과 순서가 중요하므로, 먼저 전체를 
 
 ## 특화 항목
 
+- **인덱스 동기화**: step 파일의 추가/삭제/제목·역할 변경이 `README.md`의 작업 진행 순서 테이블에 반영되어 있는지. base audit [checklist/consistency.md](../checklist/consistency.md)의 "참조 완결성" 항목을 **특히 엄격하게** 적용한다
 - **중복**: 여러 파일에 같은/비슷한 내용이 존재
 - **오래된 내용**: 현재 프로세스와 맞지 않는 규칙이나 설명
 - **규칙 위반**: CONTRIBUTING.md 원칙에 어긋나는 부분 (예: 커맨드/사용법이 instruction-map 외부에 존재)
