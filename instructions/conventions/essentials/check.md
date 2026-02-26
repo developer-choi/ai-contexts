@@ -14,6 +14,7 @@
 - **Warning Suppression 금지**: 다음 코드가 포함되어 있다면 즉시 수정하세요.
     - `ts-ignore`
     - `eslint-disable`
+    - `as` 타입 단언
     - `any` (불가피한 경우 제외하고 지양)
 
 ## 3. 컨벤션 준수 확인
