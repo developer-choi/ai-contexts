@@ -29,7 +29,7 @@
 ```
 User: "로그인 기능 만들어줘"
 AI:
-1. instructions/conventions/README.md 읽음
+1. instructions/coding-standards/README.md 읽음
 2. common/ 전체 읽음
 3. coding/ 전체 읽음
 4. testing/ 전체 읽음

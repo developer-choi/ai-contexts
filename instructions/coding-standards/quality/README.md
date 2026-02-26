@@ -14,6 +14,6 @@
 - **구조 검증**: "현재 데이터 구조가 UI 형태와 1:1로 매칭되지 않아 불필요한 변환 로직이 발생합니다."
 
 ## 목차
-1. [읽기 쉬운 코드](./readability.md)
-2. [수정하기 쉬운 코드](./maintainability.md)
-3. [테스트하기 쉬운 코드](./testability.md)
+1. [읽기 쉬운 코드](readability.md)
+2. [수정하기 쉬운 코드](maintainability.md)
+3. [테스트하기 쉬운 코드](testability.md)

@@ -49,7 +49,7 @@ ai-contexts/
 ├─ instruction-map.md    # 문서 라우팅 맵
 ├─ instructions/         # AI 작업 규칙
 │  ├─ workflow/          # 6단계 개발 프로세스
-│  ├─ conventions/       # 코딩 컨벤션
+│  ├─ coding-standards/  # 코딩 컨벤션
 │  └─ self-help/         # 학습 & 성장
 └─ meta/                 # 프로젝트 관리 가이드
 ```

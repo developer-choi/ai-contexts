@@ -11,7 +11,7 @@ AI 에이전트가 적절한 컨텍스트 문서를 찾아 로드하기 위한 �
 
 1. **파일명/폴더명 매칭**: 아래 목록에서 파일명/폴더명으로 검색 후 매칭되는게 있다면 사용자 승인없이 불러옵니다.
    - 예: "review-study" → `instructions/**/review-study.md` 검색
-   - 예: "conventions" → `instructions/conventions/README.md` 검색
+   - 예: "coding-standards" → `instructions/coding-standards/README.md` 검색
 
 2. **설명 기반 매칭**: 위 방법 실패 시 각 항목의 설명(불렛 포인트)에서 의미 매칭 후 사용자 승인 요청을 거쳐야합니다.
    - 예: "복습하자" → 설명 검색 → "instructions/self-help/review-study.md 불러올까요?"
@@ -51,14 +51,10 @@ instructions/self-help/roadmap.md
 ## 3. 개발 작업
 
 ```bash
-instructions/conventions/README.md
+instructions/coding-standards/README.md
 ```
 - 코드작성 / 코드수정 / 버그수정 / 리팩토링
 - 코드리뷰 / 커밋리뷰 / PR리뷰
-
-```bash
-instructions/code-quality/README.md
-```
 - 코드 품질 리뷰 (응집도, 결합도, 구조 검증)
 - 읽기 쉬운 코드 / 유지보수하기 쉬운 코드 / 테스트하기 쉬운 코드
 
@@ -100,9 +96,9 @@ instructions/audit/workflow/README.md
 - workflow 문서 최신화 / 정리
 
 ```bash
-instructions/audit/conventions/README.md
+instructions/audit/coding-standards/README.md
 ```
-- conventions 문서 최신화 / 정리
+- coding-standards 문서 최신화 / 정리
 
 ```bash
 instructions/audit/README.md

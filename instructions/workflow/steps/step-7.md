@@ -12,7 +12,7 @@ Step 6 완료 후, PR 본문을 작성하는 단계입니다.
 
 ## 2. 작성 전 체크리스트
 
-- **문서 톤 규칙 로드**: `instructions/conventions/writing/` 파일들을 읽기
+- **문서 톤 규칙 로드**: `instructions/coding-standards/writing/` 파일들을 읽기
 - **이전 PR 본문 참고**: 이전 PR의 `pr-body.md`를 읽고, 이미지 배치·섹션 구조·서술 패턴을 맞추기
 - **말투 일관성**: 작성 완료 후 전체를 훑어 음슴체/습니다체 혼용이 없는지 확인
 

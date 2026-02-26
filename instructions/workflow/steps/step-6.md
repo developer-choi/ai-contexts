@@ -17,9 +17,9 @@
 ## 2. 통합 검증 및 최종 보고서 작성
 
 **상세 기준**:
-- `instructions/conventions/review/`, `instructions/conventions/testing/` 파일들 (검증 전 반드시 읽기)
+- `instructions/coding-standards/testing/` 파일들 (검증 전 반드시 읽기)
 - [작업 회고 및 셀프 리뷰](../../self-help/review-work.md): 작업 효율성, 커밋 품질
-- [코드 퀄리티 리뷰](../../code-quality/README.md)
+- [코드 퀄리티 리뷰](../../coding-standards/quality/README.md)
 
 ### 검증 수행 항목
 

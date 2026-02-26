@@ -59,7 +59,7 @@ if (isBeforeAttendanceLessonStart) {
 ```
 
 ### 추출이 아닌 추상화를 하기
-[예제 링크](./examples/product-list.md)
+[예제 링크](examples/product-list.md)
 
 ### 짧은 조건 코드 우선 작성
 `if - else if - else` 구문이나 삼항 연산자를 사용할 때, **코드가 짧은 블록을 먼저 작성**하고 빠르게 `return` 하세요.

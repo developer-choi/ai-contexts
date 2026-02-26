@@ -17,6 +17,6 @@ workflow 파일은 전체 흐름과 순서가 중요하므로, 먼저 전체를 
 - **오래된 내용**: 현재 프로세스와 맞지 않는 규칙이나 설명
 - **규칙 위반**: CONTRIBUTING.md 원칙에 어긋나는 부분 (예: 커맨드/사용법이 instruction-map 외부에 존재)
 - **구조 문제**: 한 파일이 과도하게 비대하거나, 분리/통합이 필요한 경우
-- **컨벤션 커버리지**: `instructions/conventions/`와 `instructions/code-quality/` 하위 모든 파일을 읽고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다
+- **컨벤션 커버리지**: `instructions/coding-standards/` 하위 모든 파일을 읽고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다
   - 어떤 step에서도 참조되지 않는 규칙이 있는지
   - 참조 시점이 부적절한 규칙이 있는지 (예: 코딩 컨벤션이 구현 step이 아닌 곳에만 있는 경우)

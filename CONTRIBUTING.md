@@ -58,7 +58,7 @@ ai-contexts/
 - [instruction-map.md](instruction-map.md)
 - → 파일 추가/삭제 시마다 README 수정 필요
 
-- [instructions/conventions/README.md](instructions/conventions/README.md)
+- [instructions/coding-standards/README.md](instructions/coding-standards/README.md)
 - → AI가 상황에 맞게 파일 선택, README는 폴더 수준만 설명
 
 ### 가이드와 템플릿은 통합

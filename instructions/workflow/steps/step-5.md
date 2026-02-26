@@ -50,9 +50,7 @@ function deprecatedSomeFunction() {}
 
 ### 1. 참고 컨벤션 탐색 (최초 1회)
 
-`instructions/conventions/essentials/` 하위 파일을 **무조건 읽습니다** (필수 규칙).
-
-`instructions/conventions/coding/`, `instructions/code-quality/` 하위 파일 **제목**을 훑고 이번 PR 작업과 관련된 파일을 리스트업하여 `/plan/pr{N}/overview.md`에 추가합니다. 파일 내용은 읽지 않고 제목만 보고 판단합니다.
+`instructions/coding-standards/` 하위 파일 **제목**을 훑고 이번 PR 작업과 관련된 파일을 리스트업하여 `/plan/pr{N}/overview.md`에 추가합니다. 파일 내용은 읽지 않고 제목만 보고 판단합니다.
 
 ```markdown
 ## 참고 컨벤션
