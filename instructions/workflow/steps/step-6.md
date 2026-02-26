@@ -73,3 +73,9 @@
 
 ### 가이드 업데이트
 - 개선 필요 부분이 있으면 `instructions/workflow/*.md` 수정 제안
+
+---
+
+## [CRITICAL] 사용자 확인 필수
+
+> "review.md 작성 완료. 확인해주세요."
