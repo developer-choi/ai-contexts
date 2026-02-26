@@ -83,3 +83,16 @@ ai-contexts/
 - 템플릿 안에 설명 통합, 한 곳만 관리
 
 **핵심:** "무엇을 써야 하는가"는 템플릿 대괄호 `[ ]` 안에 주석으로 작성
+
+---
+
+## 스킬 배포
+
+이 프로젝트에서 만든 스킬을 실제로 사용하려면 `~/.claude/skills/`로 배포해야 합니다.
+
+```bash
+bash scripts/deploy-skills.sh
+```
+
+- `ai-contexts/.claude/skills/` → `~/.claude/skills/`로 덮어쓰기 복사
+- 새 컴퓨터에서는 git pull 후 이 스크립트를 실행하면 됩니다
