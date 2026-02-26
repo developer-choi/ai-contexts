@@ -100,6 +100,11 @@ instructions/audit/workflow/README.md
 - workflow 문서 최신화 / 정리
 
 ```bash
+instructions/audit/conventions/README.md
+```
+- conventions 문서 최신화 / 정리
+
+```bash
 instructions/audit/README.md
 ```
 - 명령문 검증 체크리스트
