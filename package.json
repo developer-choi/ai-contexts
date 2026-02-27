@@ -2,5 +2,8 @@
   "name": "ai-contexts",
   "version": "1.0.0",
   "description": "",
-  "private": false
+  "private": false,
+  "scripts": {
+    "deploy": "node scripts/deploy.js"
+  }
 }
