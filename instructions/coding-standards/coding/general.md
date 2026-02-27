@@ -1,5 +1,11 @@
 # General Coding Conventions
 
+## eslint-disable 금지
+
+`eslint-disable` 주석으로 린트 경고를 무시하지 않습니다. 린트 에러는 올바르게 해결하세요.
+
+---
+
 ## 주석 작성 스타일
 
 ### JSDoc 활용

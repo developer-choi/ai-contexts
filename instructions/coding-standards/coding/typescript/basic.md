@@ -62,6 +62,14 @@ export const USER_ROLE = {
 export type UserRole = typeof USER_ROLE[keyof typeof USER_ROLE]; // 타입 추출
 ```
 
+## any 절대 금지
+
+`any`는 **절대 사용하지 않습니다**. 사용자가 명시적으로 요청하고 다른 대안이 완전히 없음을 설득한 경우에만 최후의 수단으로 허용합니다.
+
+## ts-ignore 금지
+
+`@ts-ignore`는 사용하지 않습니다. 타입 에러는 무시하지 말고 올바르게 해결하세요.
+
 ## 타입 단언 최소화
 
 ```typescript
