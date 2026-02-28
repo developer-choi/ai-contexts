@@ -1,5 +1,32 @@
 # TanStack Query 작성 패턴
 
+## useMutation — mutateAsync 선호
+
+`mutate` (콜백 방식) 대신 **`mutateAsync` + `try-catch`** (Promise 방식)을 선호합니다. 비동기 흐름 제어가 더 명확하고 에러 핸들링이 직관적입니다.
+
+**❌ Bad (Callback pattern)**
+```typescript
+const { mutate } = useMutation(mutationFn, {
+  onSuccess: () => { /* ... */ },
+  onError: () => { /* ... */ },
+});
+mutate(variables);
+```
+
+**✅ Good (Async/Await pattern)**
+```typescript
+const { mutateAsync } = useMutation(mutationFn);
+
+try {
+  await mutateAsync(variables);
+  // 성공 로직
+} catch (error) {
+  // 에러 핸들링
+}
+```
+
+---
+
 ## useSuspenseQuery 우선 사용
 
 데이터 fetching에는 `useQuery` 대신 `useSuspenseQuery`를 사용합니다.

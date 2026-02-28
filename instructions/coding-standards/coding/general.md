@@ -30,33 +30,6 @@ abstract pop(): D;
 
 ---
 
-## 라이브러리 사용 패턴
-
-### Tanstack Query (useMutation)
-- `mutate` (콜백 방식) 대신 **`mutateAsync` + `try-catch`** (Promise 방식)을 선호합니다.
-- 비동기 흐름 제어가 더 명확하고 에러 핸들링이 직관적입니다.
-
-**❌ Bad (Callback pattern)**
-```typescript
-const { mutate } = useMutation(mutationFn, {
-  onSuccess: () => { /* ... */ },
-  onError: () => { /* ... */ },
-});
-mutate(variables);
-```
-
-**✅ Good (Async/Await pattern)**
-```typescript
-const { mutateAsync } = useMutation(mutationFn);
-
-try {
-  await mutateAsync(variables);
-  // 성공 로직
-} catch (error) {
-  // 에러 핸들링
-}
-```
-
 ## API 함수 구현 패턴
 
 ### Response.data 반환 원칙
