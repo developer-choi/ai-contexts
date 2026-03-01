@@ -21,9 +21,7 @@ coding-standards/
 │
 ├── coding/                    # 코드 작성 규칙
 │   ├── general.md
-│   ├── imports.md
 │   ├── naming.md
-│   ├── structure.md
 │   ├── zod.md
 │   ├── markup/
 │   │   ├── html.md
@@ -49,7 +47,6 @@ coding-standards/
 │
 ├── testing/                   # 테스트 코드 작성 규칙
 │   ├── convention.md
-│   ├── pattern.md
 │   └── queries.md
 │
 ├── writing/                   # 코드 산출물 문서 작성 톤
@@ -67,14 +64,11 @@ coding-standards/
 
 ## 미결 사항
 
-- [ ] coding/, testing/, writing/ 파일 내용 리뷰 미완료 — 리뷰 후 추가 이동/병합 발생 가능
-- [ ] zod.md "미정리" 섹션 결론 후 본문 반영 필요
-  - DTO 때문에 타입을 이중 선언해야 할 때 폴더/파일 구성 방안
-  - 스키마 파일 하나에 CRUD + 폼 + 필터폼 전부 작성하기 어려운 문제 — 파일 분할 기준
+- [ ] coding/ 파일 내용 리뷰 미완료 — react/, markup/ 미완료. 리뷰 후 추가 이동/병합 발생 가능
 
 ## 남은 작업 순서
 
-1. coding/, testing/, writing/ 파일 내용 리뷰 → 미결 사항 확정
+1. coding/ 파일 내용 리뷰 → 미결 사항 확정 (testing/, writing/ 완료)
 2. 미결 사항 일괄 결정
 3. 내용 수정 반영 (파일 내용 확정)
 4. 영향 범위 파악
