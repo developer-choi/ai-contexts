@@ -30,7 +30,6 @@ coding-standards/
 │   │   ├── api.md
 │   │   ├── basics.md
 │   │   ├── button.md
-│   │   ├── design.md         # quality? coding? 리뷰 후 결정
 │   │   ├── error-handling.md
 │   │   └── tanstack-query.md
 │   └── typescript/
@@ -56,20 +55,16 @@ coding-standards/
     └── rules.md
 ```
 
-## 리뷰 필요 후 결정할 파일
-
-| 파일 | 현재 위치 | 이슈 | 예상 행선지 |
-|------|-----------|------|-------------|
-| design.md | coding/react/ | 원칙 성격 → quality? coding? | 리뷰 후 결정 |
-
 ## 미결 사항
 
-- [ ] coding/ 파일 내용 리뷰 미완료 — react/, markup/ 미완료. 리뷰 후 추가 이동/병합 발생 가능
+- [ ] zod.md "미정리" 섹션 결론 후 본문 반영 필요
+  - DTO 때문에 타입을 이중 선언해야 할 때 폴더/파일 구성 방안
+  - 스키마 파일 하나에 CRUD + 폼 + 필터폼 전부 작성하기 어려운 문제 — 파일 분할 기준
 
 ## 남은 작업 순서
 
-1. coding/ 파일 내용 리뷰 → 미결 사항 확정 (testing/, writing/ 완료)
-2. 미결 사항 일괄 결정
+1. ~~coding/, testing/, writing/ 파일 내용 리뷰~~ ✅ 전체 완료
+2. 미결 사항 일괄 결정 (zod.md)
 3. 내용 수정 반영 (파일 내용 확정)
 4. 영향 범위 파악
 5. 참조 경로 일괄 수정
