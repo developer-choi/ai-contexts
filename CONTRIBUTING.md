@@ -61,6 +61,21 @@ ai-contexts/
 - [instructions/coding-standards/README.md](instructions/coding-standards/README.md)
 - → AI가 상황에 맞게 파일 선택, README는 폴더 수준만 설명
 
+### 미정리 메모는 가장 가까운 TODO.md에
+
+가이드 문서 본문에 "미정리", "TBD", "TODO" 같은 미해결 메모를 남기지 마세요. AI가 해당 규칙을 적용할 때 판단할 수 없습니다.
+
+미해결 사항은 해당 문서와 가장 가까운 경로의 `TODO.md`에 적으세요.
+
+```
+coding-standards/
+├── TODO.md          ← coding-standards 하위 문서의 미결 사항은 여기에
+├── coding/
+│   └── zod.md
+└── testing/
+    └── convention.md
+```
+
 ### 가이드와 템플릿은 통합
 
 가이드와 템플릿을 분리하면 내용이 중복되고 동기화 문제가 발생합니다.
