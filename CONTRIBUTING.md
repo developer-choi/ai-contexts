@@ -101,6 +101,15 @@ coding-standards/
 
 ---
 
+## 문서 작성 규칙
+
+md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
+
+- [writing/tone.md](instructions/coding-standards/writing/tone.md) — 문서 톤 (습니다체, 문장 역할)
+- [audit/checklist/style.md](instructions/audit/checklist/style.md) — 서식 (이모지 규칙, 헤더 텍스트 규칙)
+
+---
+
 ## 스킬 배포
 
 이 프로젝트에서 만든 스킬을 실제로 사용하려면 `~/.claude/skills/`로 배포해야 합니다.
