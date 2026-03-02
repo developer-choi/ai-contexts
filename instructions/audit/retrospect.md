@@ -7,14 +7,14 @@
 > - **AUDIT_SOURCE**: 검증 규칙 파일 (예: checklist/consistency.md)
 > - **AUDIT_RESULT.md**: 검증 산출물
 
-## 1. 자유 검토
+## Step 1. 자유 검토
 
 AUDIT_SOURCE와 무관하게 AUDIT_TARGET을 처음부터 다시 보고, AUDIT_SOURCE가 잡지 못한 문제를 찾는다.
 
 - AUDIT_SOURCE 항목에 해당하지 않지만 문제가 있는 부분이 있는지
 - AUDIT_SOURCE가 다루지 않는 관점(구조, 분량, 존재 의의 등)에서 문제가 없는지
 
-## 2. AUDIT_SOURCE 회고
+## Step 2. AUDIT_SOURCE 회고
 
 AUDIT_SOURCE 실행 결과를 되돌아본다.
 
@@ -23,7 +23,7 @@ AUDIT_SOURCE 실행 결과를 되돌아본다.
 - 자유 검토에서 발견한 문제: AUDIT_SOURCE의 어디에 어떤 항목을 추가하면 잡을 수 있었는지 특정
 - 누락한 절차가 있다면: 무엇을 누락했고, 왜 누락했는지(지시가 모호/단순 실수/불필요) 원인 분석
 
-## 3. AUDIT_SOURCE 개선 기회 제안
+## Step 3. AUDIT_SOURCE 개선 기회 제안
 
 착안점 예시:
 
@@ -33,6 +33,6 @@ AUDIT_SOURCE 실행 결과를 되돌아본다.
 - **누락된 AUDIT_SOURCE 단계**: 기존 step 사이에 빠진 단계가 있다면 추가 제안
 - **도구/자동화 기회**: 수작업으로 한 것 중 스크립트나 도구로 대체할 수 있는 것
 
-## 4. 기록
+## Step 4. 기록
 
 자유 검토, AUDIT_SOURCE 회고, 개선 기회 제안 결과를 AUDIT_RESULT.md에 기록한다. 각 지적/제안에는 **AUDIT_SOURCE 개선 제안**(어떤 AUDIT_SOURCE 파일의 어디에 어떤 항목을 추가/수정해야 하는지)을 함께 적는다. AUDIT_TARGET 수정과 AUDIT_SOURCE 수정을 명확히 구분하여 기록한다.
