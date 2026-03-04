@@ -35,4 +35,4 @@ AUDIT_SOURCE 실행 결과를 되돌아본다.
 
 ## Step 4. 기록
 
-자유 검토, AUDIT_SOURCE 회고, 개선 기회 제안 결과를 AUDIT_RESULT.md에 기록한다. 각 지적/제안에는 **AUDIT_SOURCE 개선 제안**(어떤 AUDIT_SOURCE 파일의 어디에 어떤 항목을 추가/수정해야 하는지)을 함께 적는다. AUDIT_TARGET 수정과 AUDIT_SOURCE 수정을 명확히 구분하여 기록한다.
+위 1~3단계의 결과를 AUDIT_RESULT에 반영한다. 기록 형식은 SKILL.md의 지시를 따른다.
