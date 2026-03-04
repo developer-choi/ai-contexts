@@ -2,6 +2,13 @@
 
 아래 항목이 명령문에 포함되어 있는지 확인하세요.
 
+## Frontmatter (SKILL.md 전용)
+
+Claude Skills의 frontmatter 스펙에 따라 점검한다. (참고: https://docs.anthropic.com/en/docs/claude-code/skills)
+
+- `description`이 있는지 — 없으면 적절한 내용으로 제안한다
+- `description`에 사용자가 자연스럽게 쓸 키워드가 포함되어 있는지 — 트리거 확률에 직접 영향
+
 ## 맥락 정보
 
 - 이 작업을 왜 하는지 (목적/배경)
