@@ -18,6 +18,7 @@
 2. 문서 종류를 판별하고, 해당 체크리스트를 0단계부터 순서대로 전부 순회한다. 각 단계 안에 "필요 여부 판단" 항목이 있으므로, 해당하지 않는 단계는 그 시점에서 스킵한다. 특화 체크리스트가 있는 경우, `specialized/` 하위에서 해당 대상의 지시서를 찾아 추가 순회한다. 현재 등록된 특화 대상:
    - [coding-standards.md](specialized/coding-standards.md) — `contexts/coding-standards/` 리뷰 시
    - [workflow.md](specialized/workflow.md) — `skills/workflow/` 리뷰 시
+   - [audit-internal.md](specialized/audit-internal.md) — `audit/` 내부 파일 리뷰 시
 3. **[CRITICAL] 자유 검토 및 프로세스 회고 — 이 단계가 검증의 핵심이다. 생략하면 검증이 완료된 것으로 보지 않는다.** `retrospect.md`의 범용 절차를 실행한다. audit 맥락에서 기록 형식은 아래와 같다:
    - AUDIT_TARGET 관련 발견(문제점/제안)은 `## AUDIT_TARGET` 섹션에 기록한다.
    - AUDIT_SOURCE 개선 항목은 `## AUDIT_SOURCE 개선` 섹션에 기록한다.
