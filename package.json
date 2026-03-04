@@ -2,5 +2,9 @@
   "name": "ai-contexts",
   "version": "1.0.0",
   "description": "",
-  "private": false
+  "private": false,
+  "scripts": {
+    "update": "bash scripts/update.sh",
+    "uninstall": "bash scripts/uninstall.sh"
+  }
 }

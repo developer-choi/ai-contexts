@@ -72,6 +72,14 @@ AI가 instruction-map.md를 참조해서 적절한 문서를 찾아 로드합니
 
 ---
 
+## Getting Started
+
+설치 및 사용 방법은 [Installation Guide](meta/INSTALLATION_GUIDE.md)를 참고해주세요.
+
+> **현재 상태**: `deploy/` 폴더 구조로의 마이그레이션이 진행 중입니다. 현재는 복사 방식(`scripts/update.sh`, 사용자 지정 접두사)으로 배포하며, 향후 Stow 심링크로 전환 예정입니다.
+
+---
+
 ## 프로젝트 관리 방법
 
 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참고해주세요.
