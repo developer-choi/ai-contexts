@@ -19,7 +19,7 @@
 **상세 기준**:
 - `instructions/coding-standards/testing/` 파일들 (검증 전 반드시 읽기)
 - [작업 회고 및 셀프 리뷰](../../self-help/review-work.md): 작업 효율성, 커밋 품질
-- [코드 퀄리티 리뷰](../../coding-standards/quality/README.md)
+- [코드 퀄리티 리뷰](../../../deploy/contexts/coding-standards/quality/README.md)
 
 ### 검증 수행 항목
 
