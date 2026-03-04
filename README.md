@@ -38,7 +38,7 @@ instruction-map.md가 라우팅 역할을 합니다. 사용자가 "복습하자"
 
 모든 명령문은 이 원칙에 따라 설계됩니다.
 
-**검증 체크리스트**: [instructions/audit/README.md](instructions/audit/README.md)
+**검증 체크리스트**: [deploy/skills/audit/SKILL.md](deploy/skills/audit/SKILL.md)
 
 ---
 
