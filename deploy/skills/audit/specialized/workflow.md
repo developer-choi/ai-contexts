@@ -2,7 +2,7 @@
 
 `skills/workflow/` 리뷰 시 base audit(`audit/SKILL.md`)의 **명령문** 체크리스트를 순회한 뒤, 아래 항목을 추가 순회한다.
 
-- `audit/workflow = audit(범용) + workflow 특화 규칙`
+- `specialized/workflow = audit(범용) + workflow 특화 규칙`
 - audit에 이미 있는 규칙을 중복 작성하지 않는다
 
 ## 진행 방식
