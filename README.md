@@ -97,11 +97,11 @@ ai-contexts/
 ├── deploy/                  # 배포 대상 (→ ~/.claude/)
 │   ├── rules/               #   전역 AI 행동 규칙
 │   ├── skills/audit/        #   Audit 스킬 (체크리스트, 회고, 출력 포맷)
+│   ├── skills/simplify/     #   라이브러리 소스 단순화 가이드
 │   └── contexts/            #   보조 문서 (문제 해결 로드맵 등)
 ├── instructions/            # 레거시 폴더 (deploy/ 또는 archives/ 로 가기 이전 기존 폴더)
 │   ├── workflow/            #   8단계 개발 프로세스
 │   ├── coding-standards/    #   코딩 컨벤션, 품질, 테스트, 문체
-│   ├── simplify/            #   라이브러리 소스 단순화 가이드
 │   └── self-help/           #   학습 & 성장
 ├── meta/                    # 프로젝트 관리 (설치 가이드, 아키텍처 결정)
 ├── scripts/                 # 배포 스크립트 (update.sh, uninstall.sh)

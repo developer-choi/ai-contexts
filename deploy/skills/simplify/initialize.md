@@ -140,11 +140,11 @@ simplified-[라이브러리명]/
 
 1. **코드베이스 구조 문서**
    - **파일 경로**: `docs/codebase-structure.md`
-   - **양식**: (이 저장소) `format/codebase-structure.md`
+   - **양식**: `format/codebase-structure.md`
 
 2. **분석 대상 목록 초기화**
    - **파일 경로**: `docs/analysis-queue.md`
-   - **양식**: (이 저장소) `format/analysis-queue.md`
+   - **양식**: `format/analysis-queue.md`
    - 코드베이스 구조 분석을 기반으로 전체 분석 대상을 나열
    - "제외 대상" 섹션에 간소화하지 않을 파일 목록 작성 (이유 포함)
 
@@ -158,7 +158,7 @@ simplified-[라이브러리명]/
 
 해당 라이브러리 특화 유지 패턴입니다. 작업하면서 축적합니다.
 
-- **스캐폴딩**: (이 저장소) `[타입]/format/keep-patterns.md` 양식을 기반으로 생성
+- **스캐폴딩**: `[타입]/format/keep-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 예상되는 유지 패턴을 초안으로 작성
 - 라이브러리 종류와 무관한 공통 유지 패턴은 ai-contexts의 `common-keep-patterns.md`에 있으므로 중복 작성하지 않음
 
@@ -173,7 +173,7 @@ simplified-[라이브러리명]/
 - 예: ❌ "Dialog.tsx의 backdrop 제거" → 이건 특정 파일 작업 기록
 
 **작성 가이드**:
-- **스캐폴딩**: (이 저장소) `[타입]/format/simplification-patterns.md` 양식을 기반으로 생성
+- **스캐폴딩**: `[타입]/format/simplification-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 **예상되는 반복 패턴**을 초안으로 작성
 - 단순화 작업을 진행하면서 **패턴별로 실제 적용 예시**(커밋 해시 선택사항) 추가
 - 라이브러리 종류와 무관한 공통 패턴은 ai-contexts의 `common-simplification-patterns.md`에 있으므로 중복 작성하지 않음

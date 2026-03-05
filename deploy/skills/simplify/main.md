@@ -30,7 +30,7 @@
 - `ExitPlanMode`로 사용자 승인 요청
 
 **계획서**
-- 양식: (이 저장소) `format/commit.md`
+- 양식: `format/commit.md`
 - 반복 패턴 참고: (간소화 프로젝트) `instructions/simplification-patterns.md`
   - 여러 파일에서 공통되는 삭제 패턴 확인
   - 이 대상에도 해당 패턴이 적용되는지 검토
@@ -57,7 +57,7 @@
 - 상세한 내부 구현 설명은 불필요 (simplified.md에서 다룸)
 
 **⭐ 이 단계에서 작성하는 이유**: 아직 원본 파일이 수정되지 않은 상태이므로 git history를 뒤질 필요가 없습니다.
-- **양식:** (이 저장소) `[타입]/format/original.md`
+- **양식:** `[타입]/format/original.md`
 
 **⚠️ 별도 커밋 필수**: 원본 문서 작성을 완료한 후 **반드시 별도의 커밋으로 먼저 저장**해야 합니다.
 - 원본 문서만 따로 커밋: `git add docs/[카테고리]/[대상명]-original.md && git commit -m "docs: [대상명] 원본 분석 문서 작성"`
@@ -84,7 +84,7 @@
 
 **⚠️ 중요**: 커밋 정리를 완료 한 후 반드시 이어서 아래의 문서를 작성해야합니다.
 - **파일경로:** docs/[카테고리]/[대상명]-simplified.md
-- **양식:** (이 저장소) `[타입]/format/simplified.md`
+- **양식:** `[타입]/format/simplified.md`
 
 **📌 문서 목적**: 단순화된 코드의 **상세 학습 가이드**
 - 핵심 학습 포인트, 동작 흐름, 플로우차트, 시나리오 예시 등
@@ -109,22 +109,22 @@
 이번 작업에서 발견한 새로운 패턴이나 변경사항을 각 문서에 반영하세요:
 
 #### 패턴 문서
-- [ ] (이 저장소) `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
-- [ ] (이 저장소) `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
+- [ ] `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
+- [ ] `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
 - [ ] (간소화 프로젝트) `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
 - [ ] (간소화 프로젝트) `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
   - ⚠️ 특정 파일 하나의 작업 내역이 아님
   - 2개 이상의 파일/컴포넌트에서 공통되는 패턴만 기록
 
 #### 양식 문서
-- [ ] (이 저장소) `[타입]/format/original.md` — 원본 분석 양식 개선할 점?
-- [ ] (이 저장소) `[타입]/format/simplified.md` — 단순화 분석 양식 개선할 점?
-- [ ] (이 저장소) `format/commit.md` — 계획서 양식 개선할 점?
+- [ ] `[타입]/format/original.md` — 원본 분석 양식 개선할 점?
+- [ ] `[타입]/format/simplified.md` — 단순화 분석 양식 개선할 점?
+- [ ] `format/commit.md` — 계획서 양식 개선할 점?
 
 **판단 기준**:
 - 이번에 처음 본 패턴인가? → 추가
 - 기존 패턴의 예외가 발견됐는가? → 수정
-- 다른 라이브러리에도 적용될 패턴인가? → 공통(이 저장소)에 추가
+- 다른 라이브러리에도 적용될 패턴인가? → 공통(이 스킬 폴더)에 추가
 - 이 라이브러리에만 해당되는가? → 특화(간소화 프로젝트)에 추가
 
 ### Step 7. 분석 목록 업데이트 ✅
@@ -151,4 +151,4 @@ git commit -m "docs: 분석 목록 업데이트 ([대상명] 완료)"
 - **커밋 메시지와 계획서 번호 일치**
 - **테스트/빌드 실행 금지**: 이 프로젝트는 코드 읽기 전용이므로 `yarn test`, `tsc`, `npm run build` 등 실행하지 마세요
 - 기본 동작 유지
-- 유지 패턴은 (이 저장소) `common-keep-patterns.md` 및 (간소화 프로젝트) `instructions/keep-patterns.md` 참고
+- 유지 패턴은 `common-keep-patterns.md` 및 (간소화 프로젝트) `instructions/keep-patterns.md` 참고
