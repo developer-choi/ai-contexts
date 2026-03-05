@@ -60,6 +60,42 @@ echo "---"
 echo "복사 완료: ${copied}개"
 echo ""
 
+# --- OpenCode commands 자동 생성 ---
+OPENCODE_CMD_DIR="$HOME/.config/opencode/commands"
+skills_src="$SRC_DIR/skills"
+
+if [ -d "$skills_src" ]; then
+  mkdir -p "$OPENCODE_CMD_DIR"
+  oc_generated=0
+
+  for skill_dir in "$skills_src"/*/; do
+    [ -d "$skill_dir" ] || continue
+    skill_md="$skill_dir/SKILL.md"
+    [ -f "$skill_md" ] || continue
+
+    # 디렉토리명에서 name, frontmatter에서 description 파싱
+    skill_name=$(basename "$skill_dir")
+    skill_desc=$(sed -n 's/^description: *//p' "$skill_md" | tr -d '\r' | head -1)
+
+    [ -z "$skill_name" ] && continue
+    [ -z "$skill_desc" ] && continue
+
+    cmd_file="$OPENCODE_CMD_DIR/$skill_name.md"
+    cat > "$cmd_file" <<EOF
+---
+description: $skill_desc
+---
+
+Load the "$skill_name" skill and execute it with the following context: \$ARGUMENTS
+EOF
+    echo "  GENCMD  opencode/commands/$skill_name.md"
+    oc_generated=$((oc_generated + 1))
+  done
+
+  echo "OpenCode commands 생성: ${oc_generated}개"
+  echo ""
+fi
+
 # --- 검증 ---
 echo "검증 중..."
 failed=0
