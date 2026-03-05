@@ -1,7 +1,7 @@
 # [라이브러리명] 특화 유지 패턴
 
 > [라이브러리명] 간소화 시 반드시 유지해야 할 패턴
-> 공통 유지 패턴은 ai-contexts의 `common-keep-patterns.md` 참고
+> 공통 유지 패턴은 SIMPLIFY_SOURCE `common-keep-patterns.md` 참고
 
 ---
 

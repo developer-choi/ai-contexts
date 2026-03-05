@@ -1,7 +1,7 @@
 # [라이브러리명] 특화 삭제 패턴
 
 > [라이브러리명] 간소화 시 **여러 파일/컴포넌트에서 반복적으로** 제거하는 패턴 모음
-> 공통 삭제 패턴은 ai-contexts의 `common-simplification-patterns.md` 참고
+> 공통 삭제 패턴은 SIMPLIFY_SOURCE `common-simplification-patterns.md` 참고
 
 <ai-only>
 이 문서는 패턴 카탈로그이다.

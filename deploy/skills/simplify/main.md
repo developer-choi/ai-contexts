@@ -31,7 +31,7 @@
 
 **계획서**
 - 양식: `format/commit.md`
-- 반복 패턴 참고: (간소화 프로젝트) `instructions/simplification-patterns.md`
+- 반복 패턴 참고: SIMPLIFY_TARGET`instructions/simplification-patterns.md`
   - 여러 파일에서 공통되는 삭제 패턴 확인
   - 이 대상에도 해당 패턴이 적용되는지 검토
 
@@ -109,23 +109,23 @@
 이번 작업에서 발견한 새로운 패턴이나 변경사항을 각 문서에 반영하세요:
 
 #### 패턴 문서
-- [ ] `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
-- [ ] `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
-- [ ] (간소화 프로젝트) `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
-- [ ] (간소화 프로젝트) `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
+- [ ] SIMPLIFY_SOURCE `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
+- [ ] SIMPLIFY_SOURCE `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
+- [ ] SIMPLIFY_TARGET `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
+- [ ] SIMPLIFY_TARGET `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
   - ⚠️ 특정 파일 하나의 작업 내역이 아님
   - 2개 이상의 파일/컴포넌트에서 공통되는 패턴만 기록
 
 #### 양식 문서
-- [ ] `[타입]/format/original.md` — 원본 분석 양식 개선할 점?
-- [ ] `[타입]/format/simplified.md` — 단순화 분석 양식 개선할 점?
-- [ ] `format/commit.md` — 계획서 양식 개선할 점?
+- [ ] SIMPLIFY_SOURCE `[타입]/format/original.md` — 원본 분석 양식 개선할 점?
+- [ ] SIMPLIFY_SOURCE `[타입]/format/simplified.md` — 단순화 분석 양식 개선할 점?
+- [ ] SIMPLIFY_SOURCE `format/commit.md` — 계획서 양식 개선할 점?
 
 **판단 기준**:
 - 이번에 처음 본 패턴인가? → 추가
 - 기존 패턴의 예외가 발견됐는가? → 수정
-- 다른 라이브러리에도 적용될 패턴인가? → 공통(이 스킬 폴더)에 추가
-- 이 라이브러리에만 해당되는가? → 특화(간소화 프로젝트)에 추가
+- 다른 라이브러리에도 적용될 패턴인가? → 공통(SIMPLIFY_SOURCE)에 추가
+- 이 라이브러리에만 해당되는가? → 특화(SIMPLIFY_TARGET)에 추가
 
 ### Step 7. 분석 목록 업데이트 ✅
 
@@ -151,4 +151,4 @@ git commit -m "docs: 분석 목록 업데이트 ([대상명] 완료)"
 - **커밋 메시지와 계획서 번호 일치**
 - **테스트/빌드 실행 금지**: 이 프로젝트는 코드 읽기 전용이므로 `yarn test`, `tsc`, `npm run build` 등 실행하지 마세요
 - 기본 동작 유지
-- 유지 패턴은 `common-keep-patterns.md` 및 (간소화 프로젝트) `instructions/keep-patterns.md` 참고
+- 유지 패턴은 SIMPLIFY_SOURCE `common-keep-patterns.md` 및 SIMPLIFY_TARGET `instructions/keep-patterns.md` 참고

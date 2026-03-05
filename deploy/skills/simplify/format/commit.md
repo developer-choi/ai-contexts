@@ -3,7 +3,7 @@
 <ai-only>
 이 문서는 특정 대상의 실제 커밋 계획서이다.
 - [대상명] 하나를 간소화하기 위한 구체적인 커밋 순서
-- `instructions/simplification-patterns.md`는 여러 대상에서 반복되는 패턴 (별도 문서)
+- SIMPLIFY_TARGET `instructions/simplification-patterns.md`는 여러 대상에서 반복되는 패턴 (별도 문서)
 </ai-only>
 
 ### 현재 상태
