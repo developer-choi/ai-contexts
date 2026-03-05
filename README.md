@@ -1,44 +1,104 @@
 # AI Contexts
 
-AI 에이전트와 체계적으로 협업하기 위한 프롬프트 (markdown)를 모아둔 저장소입니다.
+Claude Code와 체계적으로 협업하기 위한 프롬프트(markdown) 저장소입니다.
+규칙, 워크플로우, 검증 체크리스트를 구조화하여 `~/.claude/`에 배포합니다.
 
 ---
 
-## 목표와 한계
+## 목표
 
-**완성도와 시간**을 둘 다 챙기기 위해 제가 하던 일을 AI에게 **100%** 위임하는 방향으로 진행하고 있습니다.
-- 문제 정의부터 배포까지 [workflow.md](instructions/workflow/README.md)
-- 문제 해결방법 선택하기 [roadmap.md](deploy/contexts/self-help/roadmap.md)
+**완성도와 시간**을 둘 다 챙기기 위해 제가 하던 일을 AI에게 **100% 위임**하는 방향으로 진행하고 있습니다.
 
-이 과정을 반복하면 언젠가는 100% 위임에 도달할 것입니다.
+- 문제 정의부터 배포까지 — [Workflow](instructions/workflow/README.md)
+- 문제 해결 방법 선택 — [Roadmap](deploy/contexts/self-help/roadmap.md)
 
-그때부터는 반대로 일부를 제가 직접 하려고 합니다. 토큰이 무제한이 아니고, AI가 아직 덜 발전했기 때문입니다.
-
-저는 이 방향성이 맞다고 생각합니다. AI가 계속 발전하면 결국 대부분의 작업을 AI가 대체할 것이기 때문입니다.
+이 과정을 반복하면 언젠가 100% 위임에 도달할 것입니다.
+그때부터는 반대로 일부를 직접 하려고 합니다. 토큰이 무제한이 아니고, AI가 아직 덜 발전했기 때문입니다.
 
 ---
 
-## 접근 방법
+## 핵심 기능
 
-### 구조화된 instruction 시스템
+### 1. Audit Skill — 프롬프트 검증 시스템
 
-모든 규칙과 워크플로우를 마크다운 파일로 구조화했습니다. AI가 필요한 시점에 필요한 문서만 로드할 수 있도록 설계했습니다.
+AI 프롬프트(md 파일)의 품질을 **체크리스트 기반으로 평가**하는 도구입니다.
 
-instruction-map.md가 라우팅 역할을 합니다. 사용자가 "복습하자"라고 하면 AI가 자동으로 review-study.md를 찾아 로드합니다.
+```
+/audit 파일경로
+```
+
+**예시** — 규칙과 AI 행동 가이드가 동일 내용을 반복하는 프롬프트를 검증하면:
+
+```markdown
+# AUDIT_RESULT — CONVENTIONS.md
+
+### 지적 1 — 규칙과 AI 행동 가이드 중복
+- 위치: CONVENTIONS.md:2-5
+- 문제: "규칙"과 "AI 행동 가이드"가 동일한 내용을 반복.
+        규칙을 그대로 복사한 검증은 토큰만 낭비한다.
+- 권장: AI 행동 가이드를
+        "위 규칙이 모두 반영되었는지 자가 검토하세요" 한 줄로 대체
+```
+
+**체크리스트:**
+
+| # | 관점 | 검증 내용 |
+|---|------|-----------|
+| 0 | 내부 정합성 | 자기모순, 중복, 모호한 참조, 암묵적 전제가 없는가 |
+| 1 | 명확성 | 행동 동사, 맥락, 출력 형식이 지정되어 있는가 |
+| 2 | 예시 | Bad/Good 대비로 기대 출력을 보여주는가 |
+| 3 | 구조화 | 긴 자료는 상단, 지시는 하단으로 배치했는가 |
+| 4 | 파일 분리 | 지시와 참고자료가 적절히 나뉘어 있는가 |
+| 5 | 역할 | AI의 전문성, 행동 패턴, 톤이 구체적으로 정의되어 있는가 |
+| 6 | 순서 | 단계별로 설계되고 완료 조건이 있는가 |
+
+**체크리스트 자가 개선** — 매 검증이 끝나면 AI가 자유 검토 & 회고를 통해 체크리스트 자체의 빈틈을 찾고 개선안을 함께 제안합니다. 사람이 승인하면 체크리스트가 강화되고, 다음 검증부터 같은 패턴을 더 잘 잡습니다.
+
+자세한 내용: [deploy/skills/audit/README.md](deploy/skills/audit/README.md)
+
+### 2. Workflow — 8단계 개발 프로세스
+
+AI 주도의 구조화된 개발 워크플로우입니다.
+
+**초기 설정 (1회)**
+- Step 1: 배경 & 문제 정의
+- Step 2: PR 분리 전략
+
+**PR 단위 반복 (Step 3–8)**
+- Step 3: 핵심 작업 정의 & 기술 전략
+- Step 4: 상세 구현 계획
+- Step 5: 구현
+- Step 6: 최종 리뷰
+- Step 7: PR 본문 작성
+- Step 8: 워크플로우 회고
+
+핵심 원칙: 기억 의존 금지(매 단계 산출물 재확인), 단계 간 사용자 승인 필수, Plan Mode 적용(Step 3–5)
+
+자세한 내용: [instructions/workflow/README.md](instructions/workflow/README.md)
+
+### 3. 배포 시스템
+
+`deploy/` 폴더의 프롬프트 파일을 `~/.claude/`로 자동 복사합니다.
+
+```bash
+npm run update     # deploy/ → ~/.claude/ 배포 (대화형 경로 지정)
+npm run uninstall  # 배포된 파일만 선택 제거
+```
+
+배포 대상:
+- `deploy/rules/` — 전역 AI 행동 규칙
+- `deploy/skills/` — Audit 등 스킬 정의
+- `deploy/contexts/` — 문제 해결 로드맵 등 보조 문서
+
+---
+
+## 설계 원칙
 
 ### AI 주도 설계
 
-**"사용자가 명령문을 잘 기억해서 잘 명령하는 게 아니라, AI가 명령문을 잘 기억하고 사용자를 잘 리드하는 것"**
-
-규칙이 많아지면 사용자가 모든 걸 완벽히 기억하는 건 불가능합니다. 따라서:
-
-- **AI가 주도적으로 안내**: 다음 단계 제안, 선택지 제시, 결정 지점마다 가이드 제공
-- **잘못된 요청 제지**: 사용자가 비효율적이거나 잘못된 방향으로 가려 할 때 AI가 제지하고 대안 제시
-- **사용자는 편하게**: 모든 디테일을 기억할 필요 없이, AI의 안내를 따라가기만 하면 됨
-
-모든 명령문은 이 원칙에 따라 설계됩니다.
-
-**검증 체크리스트**: [deploy/skills/audit/SKILL.md](deploy/skills/audit/SKILL.md)
+- **AI가 주도적으로 안내** — 다음 단계 제안, 선택지 제시, 결정 지점마다 가이드
+- **잘못된 요청 제지** — 비효율적 방향으로 가려 할 때 AI가 제지하고 대안 제시
+- **사용자는 판단만** — AI가 제안하고, 사용자는 승인/거절/방향 수정만 하면 됨
 
 ---
 
@@ -46,40 +106,34 @@ instruction-map.md가 라우팅 역할을 합니다. 사용자가 "복습하자"
 
 ```
 ai-contexts/
-├─ instruction-map.md    # 문서 라우팅 맵
-├─ instructions/         # AI 작업 규칙
-│  ├─ workflow/          # 6단계 개발 프로세스
-│  ├─ coding-standards/  # 코딩 컨벤션
-│  └─ self-help/         # 학습 & 성장
-└─ meta/                 # 프로젝트 관리 가이드
+├── deploy/                  # 배포 대상 (→ ~/.claude/)
+│   ├── rules/               #   전역 AI 행동 규칙
+│   ├── skills/audit/        #   Audit 스킬 (체크리스트, 회고, 출력 포맷)
+│   └── contexts/            #   보조 문서 (문제 해결 로드맵 등)
+├── instructions/            # 레거시 폴더 (deploy/ 또는 archives/ 로 가기 이전 기존 폴더)
+│   ├── workflow/            #   8단계 개발 프로세스
+│   ├── coding-standards/    #   코딩 컨벤션, 품질, 테스트, 문체
+│   ├── simplify/            #   라이브러리 소스 단순화 가이드
+│   └── self-help/           #   학습 & 성장
+├── meta/                    # 프로젝트 관리 (설치 가이드, 아키텍처 결정)
+├── scripts/                 # 배포 스크립트 (update.sh, uninstall.sh)
+└── package.json             # npm run update / uninstall
 ```
-
----
-
-## 사용법
-
-Claude Code나 다른 AI 에이전트에서 "ai-contexts" 키워드와 함께 요청하면 됩니다.
-
-```
-"ai-contexts로 워크플로우 시작하자"
-"ai-contexts로 복습하자"
-"ai-contexts conventions 적용해서 코드 작성해줘"
-```
-
-AI가 instruction-map.md를 참조해서 적절한 문서를 찾아 로드합니다.
-
-자세한 내용은 [instruction-map.md](./instruction-map.md)를 참고해주세요.
 
 ---
 
 ## Getting Started
 
-설치 및 사용 방법은 [Installation Guide](meta/INSTALLATION_GUIDE.md)를 참고해주세요.
+```bash
+git clone https://github.com/langdy/ai-contexts.git
+cd ai-contexts
+npm run update   # 대화형으로 배포 경로 지정 (기본: ~/.claude)
+```
 
-> **현재 상태**: `deploy/` 폴더 구조로의 마이그레이션이 진행 중입니다. 현재는 복사 방식(`scripts/update.sh`, 사용자 지정 접두사)으로 배포하며, 향후 Stow 심링크로 전환 예정입니다.
+자세한 설치 방법: [meta/INSTALLATION_GUIDE.md](meta/INSTALLATION_GUIDE.md)
 
 ---
 
-## 프로젝트 관리 방법
+## Contributing
 
 [CONTRIBUTING.md](./CONTRIBUTING.md)를 참고해주세요.
