@@ -5,18 +5,6 @@ Claude Code와 체계적으로 협업하기 위한 프롬프트(markdown) 저장
 
 ---
 
-## 목표
-
-**완성도와 시간**을 둘 다 챙기기 위해 제가 하던 일을 AI에게 **100% 위임**하는 방향으로 진행하고 있습니다.
-
-- 문제 정의부터 배포까지 — [Workflow](instructions/workflow/README.md)
-- 문제 해결 방법 선택 — [Roadmap](deploy/contexts/self-help/roadmap.md)
-
-이 과정을 반복하면 언젠가 100% 위임에 도달할 것입니다.
-그때부터는 반대로 일부를 직접 하려고 합니다. 토큰이 무제한이 아니고, AI가 아직 덜 발전했기 때문입니다.
-
----
-
 ## 핵심 기능
 
 ### 1. Audit Skill — 프롬프트 검증 시스템
