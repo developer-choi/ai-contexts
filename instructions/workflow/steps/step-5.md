@@ -50,7 +50,7 @@ function deprecatedSomeFunction() {}
 
 ### Step 5.5. 참고 컨벤션 탐색 (최초 1회)
 
-`instructions/coding-standards/` 하위 파일 **제목**을 훑고 이번 PR 작업과 관련된 파일을 리스트업하여 `/plan/pr{N}/overview.md`에 추가합니다. 파일 내용은 읽지 않고 제목만 보고 판단합니다.
+[coding-standards/README.md](../../../deploy/contexts/coding-standards/README.md)를 참조하여 이번 PR 작업에 필요한 컨벤션 파일을 찾고, `/plan/pr{N}/overview.md`에 리스트업합니다.
 
 ```markdown
 ## 참고 컨벤션
