@@ -60,6 +60,39 @@ echo "---"
 echo "복사 완료: ${copied}개"
 echo ""
 
+# --- settings.json 병합 ---
+SETTINGS_SRC="$SRC_DIR/settings.json"
+SETTINGS_TARGET="$TARGET_DIR/settings.json"
+
+if [ -f "$SETTINGS_SRC" ]; then
+  if [ -f "$SETTINGS_TARGET" ]; then
+    echo "settings.json 병합 중..."
+    node -e "
+      const fs = require('fs');
+      const [targetPath, sourcePath] = process.argv.slice(1);
+      const target = JSON.parse(fs.readFileSync(targetPath, 'utf8'));
+      const source = JSON.parse(fs.readFileSync(sourcePath, 'utf8'));
+      function merge(t, s) {
+        for (const [key, value] of Object.entries(s)) {
+          if (Array.isArray(value) && Array.isArray(t[key])) {
+            t[key] = [...new Set([...t[key], ...value])];
+          } else if (value && typeof value === 'object' && !Array.isArray(value) && t[key] && typeof t[key] === 'object') {
+            merge(t[key], value);
+          } else {
+            t[key] = value;
+          }
+        }
+      }
+      merge(target, source);
+      fs.writeFileSync(targetPath, JSON.stringify(target, null, 2) + '\n');
+    " "$SETTINGS_TARGET" "$SETTINGS_SRC"
+    echo "  MERGE  settings.json"
+  else
+    cp "$SETTINGS_SRC" "$SETTINGS_TARGET"
+    echo "  COPY   settings.json"
+  fi
+fi
+
 # --- OpenCode commands 자동 생성 ---
 OPENCODE_CMD_DIR="$HOME/.config/opencode/commands"
 skills_src="$SRC_DIR/skills"

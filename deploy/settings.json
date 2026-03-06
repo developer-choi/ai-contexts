@@ -1,0 +1,17 @@
+{
+  "allowedTools": [
+    "Bash(git *)",
+    "Bash(cd *)",
+    "Bash(cat *)",
+    "Bash(ls *)",
+    "Bash(echo *)",
+    "Bash(npm *)",
+    "Bash(npx *)",
+    "Bash(node *)",
+    "Bash(which *)",
+    "Read",
+    "Glob",
+    "Grep",
+    "Search"
+  ]
+}
