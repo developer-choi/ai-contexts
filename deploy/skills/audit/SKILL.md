@@ -56,7 +56,8 @@ argument-hint: [대상 파일/디렉토리 경로]
 | ---- | ------------------------------------------------- | --------------------------------------------------------------------- |
 | 0    | [consistency.md](checklist/consistency.md)         | 내부 정합성 (중복, 모호한 참조, 암묵적 전제)                          |
 | 1    | [guide.md](checklist/guide.md)                     | 기준 명확성, 다른 문서와 정합성, 분량 균형, 문서 존재 가치, 빠진 영역 |
-| 2    | [style.md](checklist/style.md)                     | 서식 (이모지, 헤더, 텍스트 규칙)                                      |
+| 2    | [readme.md](checklist/readme.md)                   | README.md 전용: 사람 전용 소개 문서인지, AI 지시문 혼입 여부          |
+| 3    | [style.md](checklist/style.md)                     | 서식 (이모지, 헤더, 텍스트 규칙)                                      |
 
 ### 템플릿
 
