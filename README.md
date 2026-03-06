@@ -62,7 +62,7 @@ AI 주도의 구조화된 개발 워크플로우입니다.
 
 핵심 원칙: 기억 의존 금지(매 단계 산출물 재확인), 단계 간 사용자 승인 필수, Plan Mode 적용(Step 3–5)
 
-자세한 내용: [instructions/workflow/README.md](instructions/workflow/README.md)
+자세한 내용: [deploy/skills/workflow/README.md](deploy/skills/workflow/README.md)
 
 ### 3. 배포 시스템
 
