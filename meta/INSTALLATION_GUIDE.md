@@ -4,7 +4,7 @@
 
 ## 프롬프트 가져가기
 
-레포: https://github.com/langdy/ai-contexts
+레포: https://github.com/developer-choi/ai-contexts
 
 `deploy/` 폴더가 배포 소스입니다. 필요한 파일을 여기서 가져가세요.
 
