@@ -82,7 +82,7 @@ AI 프롬프트를 잘 작성하고 싶었습니다.
 
 ### 예시
 
-`checklist/consistency.md`에는 "모호한 참조가 없는지" 항목이 있습니다.
+[checklist/consistency.md](checklist/consistency.md)에는 "모호한 참조가 없는지" 항목이 있습니다.
 
 그런데 검증 중 AI가 "모호한 참조는 아니지만, 섹션 제목과 내용이 불일치하는 문제"를 발견합니다.
 기존 체크리스트에 이 항목이 없으므로, AI가 추가를 제안합니다:
