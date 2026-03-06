@@ -50,7 +50,7 @@ function deprecatedSomeFunction() {}
 
 ### Step 5.5. 참고 컨벤션 탐색 (최초 1회)
 
-[coding-standards/README.md](../../../deploy/contexts/coding-standards/README.md)를 참조하여 이번 PR 작업에 필요한 컨벤션 파일을 찾고, `/plan/pr{N}/overview.md`에 리스트업합니다.
+[coding-standards/README.md](../../../contexts/coding-standards/README.md)를 참조하여 이번 PR 작업에 필요한 컨벤션 파일을 찾고, `/plan/pr{N}/overview.md`에 리스트업합니다.
 
 ```markdown
 ## 참고 컨벤션
