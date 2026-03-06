@@ -18,7 +18,6 @@
 
 **상세 기준**:
 - [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 테스트·품질 관련 컨벤션을 찾아 로드 (검증 전 반드시 읽기)
-- [작업 회고 및 셀프 리뷰](../../../contexts/self-help/review-work.md): 작업 효율성, 커밋 품질
 
 ### 검증 수행 항목
 
