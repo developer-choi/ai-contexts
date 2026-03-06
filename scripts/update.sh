@@ -86,7 +86,7 @@ if [ -d "$skills_src" ]; then
 description: $skill_desc
 ---
 
-Load the "$skill_name" skill and execute it with the following context: \$ARGUMENTS
+Read the file $TARGET_DIR/skills/$skill_name/SKILL.md and follow its instructions with the following context: \$ARGUMENTS
 EOF
     echo "  GENCMD  opencode/commands/$skill_name.md"
     oc_generated=$((oc_generated + 1))
