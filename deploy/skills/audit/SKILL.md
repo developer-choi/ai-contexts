@@ -24,6 +24,7 @@ argument-hint: [대상 파일/디렉토리 경로]
    - [coding-standards.md](specialized/coding-standards.md) — `contexts/coding-standards/` 리뷰 시
    - [workflow.md](specialized/workflow.md) — `skills/workflow/` 리뷰 시
    - [audit-internal.md](specialized/audit-internal.md) — `audit/` 내부 파일 리뷰 시
+   - [rules.md](specialized/rules.md) — `rules/` 리뷰 시
 3. **[CRITICAL] 자유 검토 및 프로세스 회고 — 이 단계가 검증의 핵심이다. 생략하면 검증이 완료된 것으로 보지 않는다.** `retrospect.md`의 범용 절차를 실행한다.
 4. 2~3의 결과를 합쳐 `output.md` 형식에 따라 AUDIT_RESULT.md로 출력한다.
 5. `output.md`의 **CLI 안내** 섹션에 따라 사용자에게 안내한다.
