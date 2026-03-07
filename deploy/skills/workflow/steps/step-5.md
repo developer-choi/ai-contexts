@@ -76,7 +76,8 @@ function deprecatedSomeFunction() {}
      Commit 3: 커밋 메시지
      ```
 2. 사용자 승인 후, **계획된 커밋 순서대로 1커밋씩 실행**
-   - 1커밋 = 코드 작성 → 빌드 확인 → 즉시 커밋
+   - 1커밋 = 코드 작성 → 빌드 확인 → prettier → 즉시 커밋
+   - **prettier**: 프로젝트 최상위에 prettier 설정 파일이 있으면, staged 파일에 `npx prettier --write $(git diff --cached --name-only)` 실행 후 재스테이징
    - 다음 커밋 작업은 이전 커밋 완료 후 시작
    - "커밋할까요?" 질문 금지. 바로 커밋할 것
 3. 커밋 누락 확인 (uncommitted 변경사항 없는지 점검)
