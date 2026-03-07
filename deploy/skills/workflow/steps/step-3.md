@@ -17,8 +17,8 @@
 ## 작성 양식 (`/plan/pr{N}/overview.md`)
 
 ### 0. 참고 자료
-- `/plan/background.md`
-- `/plan/codebase-audit.md` (있는 경우만)
+- `/plan/project.md`의 현재 PR **참고** 목록에 명시된 background 파일 (project.md가 없으면 `/plan/background/` 전체)
+- `/plan/codebase-audit.md` (있는 경우)
 
 ### 1. 이 PR의 목표
 

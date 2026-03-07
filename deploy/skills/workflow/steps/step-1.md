@@ -15,3 +15,5 @@
 | 신규 기능 / 리팩토링 | `workflow_spec-review` | 기획서·피그마·이슈 기반 배경 파악 |
 | 버그 / 성능 문제 | `workflow_bug-investigation` | 증상·Root Cause 분석 |
 | 채용 과제 | `workflow_recruitment-review` | 과제 요구사항 리뷰 |
+
+모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.

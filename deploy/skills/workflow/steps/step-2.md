@@ -56,6 +56,7 @@ PR 분할 초안 작성 후, 각 PR별로 사용자에게 확인:
 ## PR 분할 전략
 
 ### PR #1: 네이티브 브릿지 API
+**참고**: background/analysis.md
 **범위:**
 - 알림 권한 상태 조회 API
 - 알림 권한 요청 트리거 API
@@ -65,10 +66,12 @@ PR 분할 초안 작성 후, 각 PR별로 사용자에게 확인:
 - [ ] 권한 요청 팝업 문구 확정
 
 ### PR #2: 공통 모달 컴포넌트
+**참고**: background/global.md, background/page-2.md
 (위와 동일)
 ```
 
 **핵심:**
+- 각 PR에 `/plan/background/` 하위의 **참고** 파일을 명시 — 이후 step에서 해당 PR 작업 시 참조할 배경 문서
 - `project.md`는 전체 프로젝트 동안 유지
 - `overview.md`는 각 PR 디렉토리(`/plan/pr{N}/`)에 생성
 

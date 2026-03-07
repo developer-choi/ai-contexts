@@ -21,6 +21,13 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 ---
 
+## 산출물: `/plan/background/`
+
+- `global.md` — 전체 서비스 맥락, 공통 컴포넌트, 기획자/디자이너 질문 목록
+- `page-N.md` — 페이지별 분석 결과
+
+---
+
 ## Phase 1. 준비
 
 ### 1-1. 맥락 수집
@@ -41,7 +48,7 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 ### 1-3. 산출물 생성
 
-[output-template.md](./output-template.md)의 global.md 템플릿을 **그대로 복사**하여 산출물 디렉토리에 `global.md`를 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 디렉토리 경로를 사용자에게 안내합니다.
+[output-template.md](./output-template.md)의 global.md 템플릿을 **그대로 복사**하여 `/plan/background/`에 `global.md`를 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 디렉토리 경로를 사용자에게 안내합니다.
 
 ---
 
@@ -51,7 +58,7 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 ### 2-0. 다음 페이지 준비
 
-한 페이지의 리뷰가 끝나면, [output-template.md](./output-template.md)의 page-N.md 템플릿을 **그대로 복사**하여 다음 `page-N.md`를 산출물 디렉토리에 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 페이지명만 해당 페이지에 맞게 채웁니다. 사용자에게 다음을 안내합니다:
+한 페이지의 리뷰가 끝나면, [output-template.md](./output-template.md)의 page-N.md 템플릿을 **그대로 복사**하여 다음 `page-N.md`를 `/plan/background/`에 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 페이지명만 해당 페이지에 맞게 채웁니다. 사용자에게 다음을 안내합니다:
 
 - page-N.md를 채우고 스크린샷 폴더에 캡처를 넣은 뒤 알려주세요
 - 해당 없는 섹션은 삭제하지 말고 `- 없음`으로 채워주세요
