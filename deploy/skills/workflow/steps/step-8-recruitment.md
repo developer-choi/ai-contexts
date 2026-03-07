@@ -8,13 +8,27 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
   - **단, README에서 `plan/` 내 이미지를 참조하는 경우, 해당 이미지는 삭제하지 않고 md 파일만 삭제**
 - 그 외 커밋 순서 정리하면서 동시에 코드리뷰
 
-## Step 8.6. PR 작성 — 사용자에게 안내
+## Step 8.6. 제출 직전 수정 점검 — AI + 사용자
+
+커밋 정리 과정에서 마지막에 수정한 내용이 있으면, 제출 전에 반드시 점검합니다.
+
+1. PR 순서대로 커밋 목록을 나열하고, 커밋 정리 중 추가/수정한 커밋을 표시한다
+2. 사용자에게 확인한다:
+   > "커밋 정리 중 코드를 수정한 부분이 있나요?"
+3. 수정이 있으면 AI가 해당 변경의 영향 범위를 분석하여 보고한다:
+   - 수정된 파일을 참조하는 다른 파일이 있는지
+   - 기존 동작이 변경될 가능성이 있는지
+4. 영향 범위가 크다고 판단되면 해당 부분을 다시 테스트하도록 안내한다
+
+---
+
+## Step 8.7. PR 작성 — 사용자에게 안내
 
 - `/plan/pr{N}/pr-body.md`를 기반으로 GitHub PR 작성
 - PR body의 커밋 링크, 이미지 링크가 모두 유효한지 확인
 - PR 본문을 `coding-standards/universal/writing/` 컨벤션과 대조하여 부정확한 표현이 없는지 검토
 
-## Step 8.7. README.md / MAIL.md 작성 — AI 작업
+## Step 8.8. README.md / MAIL.md 작성 — AI 작업
 
 `/plan/background/requirement.md`와 `/plan/pr{N}/pr-body.md`를 모두 읽고 다음 문서를 작성하여 사용자에게 제시합니다.
 
@@ -31,28 +45,28 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
 5. PR 링크별 요약
 6. `/plan/background/requirement.md`에 따라 추가 섹션 (기술 선택 근거, 완성/미완성 등)
 
-## Step 8.8. 배포 및 정상 동작 확인 — 사용자에게 안내
+## Step 8.9. 배포 및 정상 동작 확인 — 사용자에게 안내
 
 - Vercel(또는 해당 플랫폼)에 배포
 - 배포된 URL에서 주요 기능이 정상 동작하는지 확인
 - 환경변수가 배포 환경에 올바르게 설정되었는지 확인
 
-## Step 8.9. README 최종 점검 — 사용자에게 안내
+## Step 8.10. README 최종 점검 — 사용자에게 안내
 
 - 배포 링크가 실제로 접속 가능한지 확인
 - 프로젝트 실행 방법대로 따라했을 때 정상 동작하는지 확인
 - 이미지가 모두 정상 렌더링되는지 GitHub에서 확인 (로컬 경로가 아닌 상대 경로)
 
-## Step 8.10. GitHub 저장소 설정 — 사용자에게 안내
+## Step 8.11. GitHub 저장소 설정 — 사용자에게 안내
 
 - Private repository 확인
 - `.env.local`이 `.gitignore`에 포함되어 push되지 않는지 확인
 - `plan/` 폴더 등 제출에 불필요한 파일이 포함되어 있지 않은지 확인
 
-## Step 8.11. Collaborator 초대 — 사용자에게 안내
+## Step 8.12. Collaborator 초대 — 사용자에게 안내
 
 - 과제 안내에 명시된 GitHub 계정을 해당 저장소의 collaborator로 초대
 
-## Step 8.12. 메일 발송 — 사용자에게 안내
+## Step 8.13. 메일 발송 — 사용자에게 안내
 
 - MAIL.md 내용을 메일로 발송
