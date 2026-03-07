@@ -17,3 +17,13 @@
 | 채용 과제 | `workflow_recruitment-review` | 과제 요구사항 리뷰 |
 
 모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.
+
+---
+
+## 추가 맥락 수집
+
+스킬 실행 전후로, 사용자에게 추가 맥락이 있는지 확인합니다:
+
+> "추가로 참고할 자료가 있나요? (예: 사내 컨벤션 가이드, 기획자/디자이너 전달사항, 기존 기술 스택 제약 등)"
+
+있다면 내용을 요약하여 적절한 파일명으로 `/plan/background/`에 저장합니다. (예: `background/team-conventions.md`, `background/designer-notes.md`)

@@ -16,7 +16,7 @@ Step 6 완료 후, PR 본문을 작성하는 단계입니다.
 ## Step 7.2. PR 본문 작성 (`/plan/pr{N}/pr-body.md`)
 
 ### 참고 자료
-- `/plan/project.md`의 현재 PR **참고** 목록에 명시된 background 파일
+- `/plan/project.md`의 **공통 참고** + 현재 PR **참고**에 명시된 background 파일
 - `/plan/pr{N}/overview.md`
 - `/plan/pr{N}/review.md` (있는 경우)
 - 커밋 로그

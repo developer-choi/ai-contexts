@@ -37,6 +37,18 @@
 1. **의존성 순서**: 공통 모듈 → 개별 페이지
 2. **기술적 과제는 다음 단계에서** — 이 단계는 PR 분할에만 집중
 
+## Background 참고자료 매핑
+
+PR 분할 시, `/plan/background/` 하위 파일을 읽고 각 PR에 관련 파일을 매핑합니다.
+
+1. `/plan/background/` 하위 파일 목록을 확인한다
+2. 각 파일의 내용을 파악하고, 어떤 PR에 관련되는지 판단한다
+3. PR별 **참고** 항목에 관련 background 파일을 명시한다
+
+> 모든 PR에 공통으로 필요한 파일(예: 전체 맥락, 사내 컨벤션)은 `project.md`의 **공통 참고**에 한 번만 명시합니다. PR별 **참고**에는 해당 PR에만 관련된 파일만 명시합니다.
+
+---
+
 ## 기획 점검 (TODO 식별)
 
 PR 분할 초안 작성 후, 각 PR별로 사용자에게 확인:
@@ -53,10 +65,14 @@ PR 분할 초안 작성 후, 각 PR별로 사용자에게 확인:
 ### 예시
 
 ```markdown
+## 공통 참고
+- background/analysis.md
+- background/company-conventions.md
+
 ## PR 분할 전략
 
 ### PR #1: 네이티브 브릿지 API
-**참고**: background/analysis.md
+**참고**: background/page-1.md
 **범위:**
 - 알림 권한 상태 조회 API
 - 알림 권한 요청 트리거 API
@@ -71,7 +87,7 @@ PR 분할 초안 작성 후, 각 PR별로 사용자에게 확인:
 ```
 
 **핵심:**
-- 각 PR에 `/plan/background/` 하위의 **참고** 파일을 명시 — 이후 step에서 해당 PR 작업 시 참조할 배경 문서
+- **공통 참고**: 모든 PR에 공통인 background 파일. **PR별 참고**: 해당 PR에만 관련된 background 파일
 - `project.md`는 전체 프로젝트 동안 유지
 - `overview.md`는 각 PR 디렉토리(`/plan/pr{N}/`)에 생성
 
