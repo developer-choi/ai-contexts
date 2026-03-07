@@ -39,7 +39,7 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 | [step-1.md](steps/step-1.md) | 배경 파악 및 문제 정의 |
 | [step-2.md](steps/step-2.md) | PR 분할 전략 수립 |
 
-### PR마다 반복 (Step 3 ~ 8)
+### PR마다 반복 (Step 3 ~ 7)
 
 | 단계 | 내용 |
 |------|------|
@@ -48,9 +48,16 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 | [step-5.md](steps/step-5.md) | 구현 |
 | [step-6.md](steps/step-6.md) | 최종 점검 |
 | [step-7.md](steps/step-7.md) | PR 본문 작성 |
-| [step-8.md](steps/step-8.md) | 워크플로우 회고 |
 
 > PR #1 완료 후 PR #2를 시작할 때는 Step 3부터 진행합니다.
+
+### 마무리 (모든 PR 완료 후 1회)
+
+| 단계 | 내용 |
+|------|------|
+| [step-8.md](steps/step-8.md) | 워크플로우 회고 + 프로젝트 유형별 제출 마무리 |
+
+> 모든 PR의 Step 3~7이 끝난 뒤, 마지막에 1회만 수행합니다.
 
 ## [CRITICAL] 지킬 원칙
 
