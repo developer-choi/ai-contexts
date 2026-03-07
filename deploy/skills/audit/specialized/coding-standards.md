@@ -18,7 +18,7 @@ coding-standards 파일은 각각 독립적이므로, **파일 단위로 개별 
 
 추가로 다음을 점검한다:
 
-- **coding vs quality 분류**: 형식 규약(맞다/틀리다)은 `coding/`에, 품질 원칙(정도의 문제)은 `quality/`에 있는지
+- **personal vs universal 분류**: 회사에서도 적용 가능한 범용 규칙은 `universal/`에, 개인 프로젝트 전용 규칙은 `personal/`에 있는지
 
 ### 기타 항목
 
