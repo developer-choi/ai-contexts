@@ -66,10 +66,10 @@
 ## API 목록
 
 ### [API 이름]
-- method
-- parameter
-- success response 
-- error response
+- method: [GET/POST/PUT/DELETE]
+- parameter: [요청 파라미터]
+- success response: [성공 응답 형태]
+- error response: [에러 응답 형태]
 - 에러처리: [모달 or Error Boundary]
 - 로딩처리: [버튼 로딩 or 스켈레톤]
 - 성공처리: [특별한 동작이 필요한 경우 작성]
