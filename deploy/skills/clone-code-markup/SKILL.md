@@ -7,7 +7,7 @@ argument-hint: [클론 대상 URL 또는 스크린샷]
 
 ## 작업 전 준비
 
-[coding-standards/README.md](../../contexts/coding-standards/README.md)의 상황별 참조 가이드를 읽고, 현재 작업에 해당하는 폴더(coding/markup/ 등)의 필요한 파일을 선택적으로 로드한다.
+[coding-standards/README.md](../../contexts/coding-standards/README.md)를 읽고, 현재 작업에 필요한 컨벤션 파일을 선택적으로 로드한다.
 
 ## 규칙
 
