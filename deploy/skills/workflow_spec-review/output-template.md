@@ -61,6 +61,7 @@
 
 ```markdown
 # [페이지명]
+- URL: [/path/:param]
 - [간단한 역할]
 
 ## API 목록
