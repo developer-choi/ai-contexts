@@ -33,13 +33,7 @@ npm run update   # deploy/ → ~/.claude/ 배포
 
 ## 문서 분류 체계
 
-모든 md 파일은 다음 세 가지 유형 중 하나입니다.
-
-| 유형 | 설명 | 예시 |
-|------|------|------|
-| **Command** | AI가 실행할 지시 | `SKILL.md`, `CLAUDE.md` |
-| **Guide** | AI가 참조할 규칙/컨벤션 | 코딩 컨벤션, `CONVENTIONS.md` |
-| **Template** | 채워넣는 양식 | PR 템플릿, `context-setup.md` |
+모든 md 파일은 명령문 / 가이드 / 템플릿 중 하나로 분류됩니다. 정의와 판별 기준은 [audit SKILL.md](deploy/skills/audit/SKILL.md)의 "문서 종류" 섹션을 참고하세요.
 
 ---
 
