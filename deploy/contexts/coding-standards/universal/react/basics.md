@@ -89,6 +89,14 @@ const containerRef = useRef<HTMLDivElement>(null);
 
 ---
 
+## mutationKey는 소비처가 있을 때만 사용
+
+`mutationKey`는 `useIsMutating()`, `useMutationState()` 등으로 해당 mutation의 상태를 외부에서 관찰할 때 필요합니다. 소비처 없이 습관적으로 지정하지 않습니다.
+
+- 참고: https://github.com/TanStack/query/discussions/6093
+
+---
+
 ## Window EventListener 등록 시점
 `scroll`, `keydown` 등의 전역 이벤트 리스너는 **"페이지가 유효하게 이용 가능한 상태"**일 때만 등록해야 합니다.
 
