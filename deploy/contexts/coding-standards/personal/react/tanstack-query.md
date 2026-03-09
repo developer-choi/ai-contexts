@@ -101,6 +101,23 @@ export const organizationQueries = {
 queryClient.invalidateQueries({ queryKey: organizationQueries.list.key(tenantId) });
 ```
 
+```typescript
+// ❌ Bad — options 내부에서 key()를 참조하지 않고 queryKey를 직접 조립
+export const organizationQueries = {
+  list: {
+    key: (tenantId: string) => ["organizations", tenantId],
+    options: (tenantId: string, filters?: OrganizationListFilters) => {
+      const resolved = { page: 1, search: "", ...filters };
+      return queryOptions({
+        queryKey: ["organizations", tenantId, resolved], // key()를 안 쓰고 직접 작성
+        queryFn: () =>
+          organizationApi.getOrganizations({ tenantId, ...resolved }),
+      });
+    },
+  },
+};
+```
+
 ---
 
 ## queryFn에서 API 함수 호출
