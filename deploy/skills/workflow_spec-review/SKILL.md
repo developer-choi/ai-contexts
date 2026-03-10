@@ -40,7 +40,7 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 ### Step 1.3. 산출물 생성
 
-[output-template.md](./output-template.md)의 global.md 템플릿을 **그대로 복사**하여 `/plan/background/`에 `global.md`를 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 디렉토리 경로를 사용자에게 안내합니다.
+[output-template.md](./output-template.md)의 global.md 템플릿과 page-N.md 템플릿을 **그대로 복사**하여 `/plan/background/`에 `global.md`와 `page-1.md`를 생성합니다. placeholder(`[...]`)를 제거하거나 변형하지 않습니다. 디렉토리 경로를 사용자에게 안내합니다.
 
 ---
 
