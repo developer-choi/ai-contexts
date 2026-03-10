@@ -84,7 +84,7 @@
 
 ```markdown
 # [페이지명]
-- URL: [/path/:param]
+- URL: [/path/:param?key=value]
 - 렌더링 방식: [SSG / Streaming / CSR]
 - [간단한 역할]
 
