@@ -130,6 +130,7 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 - 사용자 플로우 / 상태 전이 → [flow.md](./checklist/flow.md)
 - 엣지케이스 → [edge-cases.md](./checklist/edge-cases.md)
 - 데이터 / API → [data.md](./checklist/data.md)
+- URL / 라우팅 / 렌더링 → [routing.md](./checklist/routing.md)
 
 ### 디자인 (시안이 있을 때 추가)
 
