@@ -84,9 +84,12 @@
 
 ```markdown
 # [페이지명]
-- URL: [/path/:param?key=value]
-- 렌더링 방식: [SSG / Streaming / CSR]
+- URL: [/path/:param]
 - [간단한 역할]
+
+## 페이지 렌더링
+- 서버 캐싱: [static / revalidate / dynamic]
+- 컴포넌트: [Server / Client]
 
 ## 페이지 메타데이터
 - 타이틀: [브라우저 탭에 표시될 페이지 제목]
