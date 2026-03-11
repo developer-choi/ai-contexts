@@ -115,9 +115,8 @@
 
 ## API 목록
 
-### [API 이름]
+### [GET/POST/PUT/DELETE] [API 이름]
 
-- method: [GET/POST/PUT/DELETE]
 - parameter: [요청 파라미터]
 - success response: [성공 응답 형태]
 - error response: [에러 응답 형태]
