@@ -77,12 +77,8 @@ ai-contexts/
 ├── deploy/                          # 배포 대상 (→ ~/.claude/)
 │   ├── rules/                       #   전역 AI 행동 규칙
 │   ├── skills/audit/                #   Audit 스킬 (체크리스트, 회고, 출력 포맷)
-│   ├── skills/simplify/             #   라이브러리 소스 단순화 가이드
 │   ├── skills/workflow/             #   8단계 개발 프로세스
-│   ├── skills/clone-code-markup/    #   웹 페이지 클론 코딩
 │   └── contexts/                    #   보조 문서 (코딩 컨벤션, 셀프헬프 등)
-├── meta/                    # 프로젝트 관리 (설치 가이드, 아키텍처 결정)
-├── scripts/                 # 배포 스크립트 (update.sh, uninstall.sh)
 └── package.json             # npm run update / uninstall
 ```
 
