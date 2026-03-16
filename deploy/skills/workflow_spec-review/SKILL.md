@@ -64,6 +64,7 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 사용자가 이미 채운 항목은 건너뛰고, 비어 있는 항목과 AI가 추가로 발견한 문제만 제시합니다. 사용자가 page-N.md를 채우지 않고 캡처만 제출한 경우, AI가 분석 결과를 대화로 제시하고 항목별로 논의합니다.
 
+0. **페이지 유형 식별**: 이 페이지의 특성(폼, 리스트, 상세, 순차 플로우 등)을 식별하고, 해당하는 [page-type 체크리스트](#페이지-특성별-해당-유형일-때-추가)를 추가 적용합니다.
 1. **컴포넌트 제안**: 이 페이지의 UI를 어떤 컴포넌트 단위로 분리할지 제안합니다. 사용자의 확인을 받은 뒤 산출물에 기록합니다.
 2. **모호한 부분**: 기획서에서 정의되지 않았거나 불명확한 부분을 짚고, 왜 문제인지 설명합니다.
 3. **엣지케이스**: 해당 화면에서 발생 가능한 엣지케이스를 선제시합니다. [edge-cases.md](./checklist/edge-cases.md)의 카테고리를 기반으로 점검합니다.
@@ -129,3 +130,12 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 - 공통 (항상) → [common.md](./checklist/design/common.md)
 - 컴포넌트 시안 → [component.md](./checklist/design/component.md)
 - 페이지 시안 → [page.md](./checklist/design/page.md)
+
+### 페이지 특성별 (해당 유형일 때 추가)
+
+페이지의 구조적 특성에 따라 추가 점검합니다. 한 페이지가 여러 특성을 가질 수 있습니다.
+
+- 폼 → [form.md](./page-type/form.md)
+- 리스트 → [list.md](./page-type/list.md)
+- 순차 플로우 → [sequential-flow.md](./page-type/sequential-flow.md)
+- 상세 → [detail.md](./page-type/detail.md)
