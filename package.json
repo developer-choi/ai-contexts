@@ -5,6 +5,12 @@
   "private": false,
   "scripts": {
     "update": "bash scripts/update.sh",
-    "uninstall": "bash scripts/uninstall.sh"
+    "uninstall": "bash scripts/uninstall.sh",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "husky": "^9.1.7"
   }
 }
