@@ -21,6 +21,14 @@
 - 동일 패턴을 여러 파일에 반복 적용하는 작업(마이그레이션, 리팩토링 등)은 1개에만 먼저 적용하고 사용자 확인을 받는다.
 - 확정 전에 나머지를 대량으로 진행하지 않는다.
 
+## 프로젝트 약어
+- 모든 프로젝트는 `~/WebstormProjects/main/` 하위에 위치한다.
+- AC = ai-contexts
+- DP = dsa-playground
+- KA = knowledge-archive
+- MP = monorepo-playground
+- TP = test-playground
+
 ## 커밋 시 파일 범위 제한
 - 다른 세션에서 별도의 AI 에이전트가 동시에 작업 중일 수 있다.
 - 커밋할 때는 본인이 직접 수정한 파일만 포함한다.
