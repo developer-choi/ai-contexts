@@ -10,15 +10,16 @@
 
 점검 항목은 **2개의 축**으로 구성됩니다.
 
-### 관심사별 (모든 페이지에 적용)
+### 점검 항목 (checklist/)
 
 | 파일 | 점검 내용 |
 |---|---|
 | [overview.md](./checklist/overview.md) | 점검 항목 총괄 (목적, 플로우, 상태, 엣지케이스, 데이터, 비기능, 라우팅, 일정) |
 | [flow.md](./checklist/flow.md) | 사용자 플로우, 상태 전이 |
-| [edge-cases.md](./checklist/edge-cases.md) | 빈 상태, 에러, 권한, 극단값, 타이밍 |
-| [data.md](./checklist/data.md) | API, 입력 검증, 데이터 갱신/의존성 |
+| [edge-cases.md](./checklist/edge-cases.md) | 에러, 권한, 극단값, 타이밍 |
+| [data.md](./checklist/data.md) | API, 데이터 갱신/의존성 |
 | [routing.md](./checklist/routing.md) | URL 설계, 렌더링 전략, 레이아웃 |
+| [features.md](./checklist/features.md) | 기능별 점검 (결제, 파일 업로드, 예약, 실시간 데이터) |
 | [design/](./checklist/design/) | 디자인 점검 (크기 정책, 토큰, 인터랙션, 반응형) |
 
 ### 페이지 특성별 (해당 유형일 때만 추가 적용)
