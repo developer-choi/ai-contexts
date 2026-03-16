@@ -14,7 +14,7 @@
 
 | 파일 | 점검 내용 |
 |---|---|
-| [overview.md](./checklist/overview.md) | 점검 항목 총괄 (목적, 플로우, 상태, 엣지케이스, 데이터, 비기능, 라우팅, 일정) |
+| [overview.md](./checklist/overview.md) | 점검 항목 총괄 (목적, 플로우, 상태, 엣지케이스, 데이터, 비기능, 라우팅) |
 | [flow.md](./checklist/flow.md) | 사용자 플로우, 상태 전이 |
 | [edge-cases.md](./checklist/edge-cases.md) | 에러, 권한, 극단값, 타이밍 |
 | [data.md](./checklist/data.md) | API, 데이터 갱신/의존성 |

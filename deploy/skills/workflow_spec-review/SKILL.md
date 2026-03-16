@@ -1,5 +1,5 @@
 ---
-description: 피그마 기획서/디자인 시안을 개발자 관점에서 리뷰한다. 모호한 부분, 엣지케이스, 일정 리스크를 찾아내고, 디자인 시안이 있으면 레이아웃 구조까지 분석하여 산출물을 만든다.
+description: 피그마 기획서/디자인 시안을 개발자 관점에서 리뷰한다. 모호한 부분, 엣지케이스를 찾아내고 산출물을 만든다.
 argument-hint: [피그마 캡처 또는 기획서 경로]
 ---
 
@@ -64,8 +64,8 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 사용자가 이미 채운 항목은 건너뛰고, 비어 있는 항목과 AI가 추가로 발견한 문제만 제시합니다. 사용자가 page-N.md를 채우지 않고 캡처만 제출한 경우, AI가 분석 결과를 대화로 제시하고 항목별로 논의합니다.
 
-1. 페이지 유형(폼, 리스트, 상세, 순차 플로우 등)을 식별하고, 해당하는 [page-type 체크리스트](#페이지-특성별-해당-유형일-때-추가)를 추가 적용합니다.
-2. [점검 항목 참조](#점검-항목-참조)의 체크리스트를 적용합니다.
+1. 페이지 유형(폼, 리스트, 상세, 순차 플로우 등)을 식별하고, 해당하는 `page-type/` 체크리스트를 추가 적용합니다.
+2. `checklist/`와 `page-type/` 하위 체크리스트를 적용합니다.
 3. 컴포넌트 분리를 제안하고, 사용자의 확인을 받은 뒤 산출물에 기록합니다.
 4. 기획서에서 모호하거나 빠진 정의를 짚고, 왜 문제인지 설명합니다.
 5. 엣지케이스를 선제시합니다.
@@ -112,31 +112,3 @@ argument-hint: [피그마 캡처 또는 기획서 경로]
 
 산출물 작성이 끝난 뒤, [retrospect.md](./retrospect.md)의 절차를 수행합니다. 체크리스트가 잡지 못한 문제를 찾고, 체크리스트 자체의 개선 기회를 제안합니다.
 
----
-
-## 점검 항목 참조
-
-### 기획 (항상 적용)
-
-[overview.md](./checklist/overview.md)의 항목을 1번부터 순서대로 점검합니다. 상세 가이드:
-
-- 사용자 플로우 / 상태 전이 → [flow.md](./checklist/flow.md)
-- 엣지케이스 → [edge-cases.md](./checklist/edge-cases.md)
-- 데이터 / API → [data.md](./checklist/data.md)
-- URL / 라우팅 / 렌더링 → [routing.md](./checklist/routing.md)
-- 기능별 점검 → [features.md](./checklist/features.md)
-
-### 디자인 (시안이 있을 때 추가)
-
-- 공통 (항상) → [common.md](./checklist/design/common.md)
-- 컴포넌트 시안 → [component.md](./checklist/design/component.md)
-- 페이지 시안 → [page.md](./checklist/design/page.md)
-
-### 페이지 특성별 (해당 유형일 때 추가)
-
-페이지의 구조적 특성에 따라 추가 점검합니다. 한 페이지가 여러 특성을 가질 수 있습니다.
-
-- 폼 → [form.md](./page-type/form.md)
-- 리스트 → [list.md](./page-type/list.md)
-- 순차 플로우 → [sequential-flow.md](./page-type/sequential-flow.md)
-- 상세 → [detail.md](./page-type/detail.md)
