@@ -38,6 +38,13 @@ consistency.md   → 0단계 체크항목 (supporting file)
 specific.md      → 1단계 체크항목 (supporting file)
 ```
 
+## 중복 제거 시 행동 지시 보존
+
+SKILL.md에서 supporting file과 중복되는 내용을 제거할 때, 행동 지시(how to behave)와 점검 내용(what to check)을 구분했는지 확인한다.
+
+- 점검 내용 ("X가 정의되어 있는가?") → supporting file에 위임, SKILL.md에서 제거 가능
+- 행동 지시 ("AI가 X를 하라") → SKILL.md에 남겨야 함
+
 ## 분리하지 않아도 되는 경우
 
 - 프롬프트 전체가 50줄 이하로 짧은 경우
