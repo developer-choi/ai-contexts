@@ -20,12 +20,7 @@ argument-hint: [대상 파일/디렉토리 경로]
 ## AI 행동 가이드
 
 1. 검증할 문서를 가져온다. 기본 단위는 파일 1개이지만, 문서끼리 서로 참조하거나 관련성이 있으면 관련 문서를 모두 가져온다. 대상 파일이 많으면 배치를 나눠 진행할 것을 역제안한다.검증 도중 참조 문서에서 문제를 발견한 경우, AUDIT_RESULT.md `## AUDIT_TARGET` 섹션에 해당 문제를 기록하고 "이 문서도 별도 audit이 필요하다"고 남긴다. 단, 참조 문서를 전부 검증하는 것은 아니며, 순회 중 자연스럽게 눈에 띈 문제만 기록한다.
-2. 문서 종류를 판별하고, 해당 체크리스트를 0단계부터 순서대로 전부 순회한다. 각 단계 안에 "필요 여부 판단" 항목이 있으므로, 해당하지 않는 단계는 그 시점에서 스킵한다. 특화 체크리스트가 있는 경우, `specialized/` 하위에서 해당 대상의 지시서를 찾아 추가 순회한다. 현재 등록된 특화 대상:
-   - [coding-standards.md](specialized/coding-standards.md) — `contexts/coding-standards/` 리뷰 시
-   - [workflow.md](specialized/workflow.md) — `skills/workflow/` 리뷰 시
-   - [audit-internal.md](specialized/audit-internal.md) — `audit/` 내부 파일 리뷰 시
-   - [rules.md](specialized/rules.md) — `rules/` 리뷰 시
-   - [personal.md](specialized/personal.md) — 이 프로젝트(ai-contexts) 내부 문서 리뷰 시
+2. 문서 종류를 판별하고, 해당 체크리스트를 0단계부터 순서대로 전부 순회한다. 각 단계 안에 "필요 여부 판단" 항목이 있으므로, 해당하지 않는 단계는 그 시점에서 스킵한다. 특화 체크리스트가 있는 경우, [특화 순회 규칙](#특화-순회-규칙)에 따라 추가 순회한다.
 3. **[CRITICAL] 자유 검토 및 프로세스 회고 — 이 단계가 검증의 핵심이다. 생략하면 검증이 완료된 것으로 보지 않는다.** `retrospect.md`의 범용 절차를 실행한다.
 4. 2~3의 결과를 합쳐 `output.md` 형식에 따라 AUDIT_RESULT.md로 출력한다.
 5. `output.md`의 **CLI 안내** 섹션에 따라 사용자에게 안내한다.
@@ -36,6 +31,20 @@ argument-hint: [대상 파일/디렉토리 경로]
    (4) 모든 지적이 처리되어 AUDIT_RESULT.md에 내용이 없으면 파일 자체를 삭제한다.
    (5) **반려된 지적/제안 회고**: 반려 섹션의 지적이 있으면, 왜 반려됐는지 되짚는다. (예: 근거가 약했는가? 문서 의도를 오해했는가? 사용자의 맥락을 놓쳤는가?) 이 회고를 이번 세션의 이후 배치 리뷰에 반영한다.
 7. 다음 배치로 넘어가기 전에 반드시 묻는다: "아쉬운 점이 있으셨나요? (놓친 지적, 기대했던 피드백 등)"
+
+## 특화 순회 규칙
+
+검증 대상이 아래 경로에 해당하면, base 체크리스트 순회 후 해당 특화 체크리스트를 추가 순회한다.
+
+| 대상 경로                      | 특화 체크리스트                                          |
+| ------------------------------ | -------------------------------------------------------- |
+| `deploy/contexts/coding-standards/`   | [coding-standards.md](specialized/coding-standards.md) |
+| `deploy/skills/workflow/`             | [workflow.md](specialized/workflow.md)                  |
+| `deploy/skills/audit/`               | [audit-internal.md](specialized/audit-internal.md)     |
+| `deploy/rules/`                      | [rules.md](specialized/rules.md)                       |
+| `deploy/` 내부 문서                   | [personal.md](specialized/personal.md)                 |
+| `deploy/skills/workflow_spec-review/` | [spec-review.md](specialized/spec-review.md)           |
+| `deploy/skills/audit/specialized/`    | [specialized.md](checklist/specialized.md)             |
 
 ## 체크리스트
 
