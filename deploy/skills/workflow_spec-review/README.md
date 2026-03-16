@@ -20,6 +20,7 @@
 | [data.md](./checklist/data.md) | API, 데이터 갱신/의존성 |
 | [routing.md](./checklist/routing.md) | URL 설계, 렌더링 전략, 레이아웃 |
 | [features.md](./checklist/features.md) | 기능별 점검 (결제, 파일 업로드, 예약, 실시간 데이터) |
+| [cross-page.md](./checklist/cross-page.md) | 페이지 간 점검 (데이터 흐름, 이탈/복귀, 공통 엣지케이스) |
 | [design/](./checklist/design/) | 디자인 점검 (크기 정책, 토큰, 인터랙션, 반응형) |
 
 ### 페이지 특성별 (해당 유형일 때만 추가 적용)
