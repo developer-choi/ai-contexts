@@ -20,6 +20,8 @@ module.exports = {
         'spec-review',
         // deploy/rules/
         'global',
+        // deploy/
+        'settings',
       ],
     ],
     'scope-empty': [2, 'never'],
