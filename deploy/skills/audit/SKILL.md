@@ -29,6 +29,5 @@ argument-hint: [대상 파일/디렉토리 경로]
 | ------------------------------------- | ------------------------------------------------------ |
 | `deploy/contexts/coding-standards/`   | [coding-standards.md](specialized/coding-standards.md) |
 | `deploy/skills/workflow/`             | [workflow.md](specialized/workflow.md)                 |
-| `deploy/rules/`                      | [rules.md](specialized/rules.md)                       |
 | `deploy/` 내부 문서                   | [personal.md](specialized/personal.md)                 |
 | `deploy/skills/workflow_spec-review/` | [spec-review.md](specialized/spec-review.md)           |
