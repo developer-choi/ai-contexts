@@ -1,6 +1,6 @@
 # spec-review 특화 체크리스트
 
-`skills/workflow_spec-review/` 리뷰 시 base audit(`audit/SKILL.md`)의 체크리스트를 순회한 뒤, 아래 항목을 추가 순회한다.
+`skills/workflow_spec-review/` 리뷰 시 추가로 점검하는 항목.
 
 ## 배경
 
