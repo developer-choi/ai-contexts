@@ -8,9 +8,14 @@ module.exports = {
       [
         // deploy/skills/
         'audit',
+        'backlog',
         'clone-code-markup',
         'code-review',
         'discussion',
+        'pr-comment-respond',
+        'pr-comment-write',
+        'pre-exit',
+        'skill-creator-wrapper',
         'simplify',
         'tech-trends',
         'workflow',
