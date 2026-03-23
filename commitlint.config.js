@@ -12,6 +12,7 @@ module.exports = {
         'clone-code-markup',
         'code-review',
         'discussion',
+        'doc-router',
         'pr-comment-respond',
         'pr-comment-write',
         'pre-exit',
