@@ -13,7 +13,7 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 
 ### 1. 기존 백로그 파악
 
-`plan/backlog/` 하위 파일을 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
+`plan/backlog/` 하위(tier-1~4/, index.md)를 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
 
 ### 2. 기존 스킬 파악
 
@@ -49,22 +49,33 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 - **추가**: 기존 항목에 새 내용이 붙으면 해당 섹션에 병합
 - **신규**: 새 항목이면 추가
 
-### 4. 구체화 수준 판단
+### 4. 배치 판단
 
-- **구체화된 항목** (기능, 동기, 절차 등이 어느 정도 잡힌 것) -> 별도 `plan/backlog/{skill-name}.md` 파일
-- **모호한 항목** (한두 줄 메모 수준) -> `plan/backlog/index.md`에 항목으로 추가
+#### A. 파일 vs index.md
+
+- **구체화된 항목** (기능, 동기, 절차 등이 어느 정도 잡힌 것) → 별도 `plan/backlog/tier-{n}/{skill-name}.md` 파일
+- **모호한 항목** (한두 줄 메모 수준) → `plan/backlog/index.md`에 항목으로 추가
 - **100줄 이상**: index.md 내 특정 항목이 100줄 이상이면 반드시 별도 파일로 분리한다
 - 기존에 index.md에 있던 것이 구체화되면 별도 파일로 승격하고 index.md에서 제거
+
+#### B. tier 배치
+
+별도 파일로 분리할 때 아래 기준으로 tier 폴더에 배치한다:
+
+- **tier-1**: 스킬 만드는 데 직접 영향
+- **tier-2**: 스킬 만드는 데 간접 영향 (재료가 되는 스킬) / 공부에 직접 영향
+- **tier-3**: 사용 빈도 극높음
+- **tier-4**: 나머지
 
 ---
 
 ## 산출물 형식
 
-### 개별 파일: `plan/backlog/{skill-name}.md`
+### 개별 파일: `plan/backlog/tier-{n}/{skill-name}.md`
 
 ```markdown
 ---
-status: draft | concrete
+status: ready | not-ready
 related-skill: deploy/skills/pre-exit/  # 기존 스킬 개선이면
 ---
 
@@ -97,6 +108,17 @@ related-skill: deploy/skills/pre-exit/  # 기존 스킬 개선이면
 ## {항목 제목}
 - 한두 줄 메모
 ```
+
+---
+
+## 리뷰 모드
+
+기존 백로그를 순회하며 사용자와 함께 구체화하고 ready 태깅하는 모드.
+
+1. `plan/backlog/` 하위 파일을 tier-1부터 순서대로 순회한다
+2. 각 항목을 사용자에게 요약 설명한다
+3. 사용자와 대화하며 부족한 부분을 구체화한다
+4. 충분히 구체화되면 `status: ready`로 변경한다
 
 ---
 
