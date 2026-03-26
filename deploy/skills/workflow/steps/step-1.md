@@ -28,8 +28,6 @@ Step 1 시작 시, 사용자에게 프로젝트 유형을 확인합니다.
 | 신규 기능 / 리팩토링 | [spec-review](../spec-review/SKILL.md) | 기획서·피그마·이슈 기반 배경 파악 |
 | 채용 과제 | [recruitment-review](../recruitment-review/SKILL.md) | 과제 요구사항 리뷰 |
 
-> 버그/성능 문제는 Step 3에서 [bug-investigation](../bug-investigation/SKILL.md)로 다룬다.
-
 모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.
 
 ---
