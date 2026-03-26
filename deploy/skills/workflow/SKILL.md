@@ -43,13 +43,17 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 
 | 단계 | 내용 |
 |------|------|
-| [step-3.md](steps/step-3.md) | 핵심 과제 정의 및 기술 전략 수립 |
+| [step-3.md](steps/step-3.md) | 과제 정의 (신규 작업 / QA 대응) |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 |
 | [step-5.md](steps/step-5.md) | 구현 |
 | [step-6.md](steps/step-6.md) | 최종 점검 |
 | [step-7.md](steps/step-7.md) | PR 본문 작성 |
 
 > PR #1 완료 후 PR #2를 시작할 때는 Step 3부터 진행합니다.
+
+### QA/리뷰 대응 (PR 올린 후)
+
+PR을 올린 뒤 리뷰 피드백을 받으면, Step 3(QA 대응 모드) → Step 4~6을 재반복한다. Step 3이 진입 경로를 감지하여 자동으로 모드를 전환한다.
 
 ### 마무리 (모든 PR 완료 후 1회)
 
