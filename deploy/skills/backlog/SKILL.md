@@ -38,7 +38,7 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 
 각 항목을 아래 중 하나로 분류한다:
 
-- **기존 스킬 개선**: `deploy/skills/`에 이미 있는 스킬의 개선. frontmatter `related-skill`에 경로를 명시한다.
+- **기존 스킬 개선**: `deploy/skills/`에 이미 있는 스킬의 개선. frontmatter `target`에 경로를 명시한다.
 - **신규 스킬**: 기존에 없는 새로운 스킬.
 
 ### 3. 기존 백로그와 병합
@@ -76,7 +76,7 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 ```markdown
 ---
 status: ready | not-ready
-related-skill: deploy/skills/pre-exit/  # 기존 스킬 개선이면
+target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 ---
 
 # {스킬명}
@@ -117,8 +117,9 @@ related-skill: deploy/skills/pre-exit/  # 기존 스킬 개선이면
 
 1. `plan/backlog/` 하위 파일을 tier-1부터 순서대로 순회한다
 2. 각 항목을 사용자에게 요약 설명한다
-3. 사용자와 대화하며 부족한 부분을 구체화한다
-4. 충분히 구체화되면 `status: ready`로 변경한다
+3. `target`이 있으면 해당 스킬의 현재 SKILL.md를 읽고, 현재 구조와 대조하여 백로그를 더 정확하게 기술한다
+4. 사용자와 대화하며 부족한 부분을 구체화한다
+5. 충분히 구체화되면 `status: ready`로 변경한다
 
 ---
 
