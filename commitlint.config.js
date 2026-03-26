@@ -17,6 +17,8 @@ module.exports = {
         'simplify',
         'tech-trends',
         'workflow',
+        // deploy/contexts/
+        'coding-standards',
         // deploy/rules/
         'global',
         // deploy/
