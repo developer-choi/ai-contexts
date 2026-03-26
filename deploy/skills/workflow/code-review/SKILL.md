@@ -1,5 +1,5 @@
 ---
-description: 코드 품질을 검증하고 리뷰 보고서를 작성합니다. 독립 실행(남의 코드 리뷰) 또는 워크플로우 step-6에서 호출.
+description: 코드 품질을 검증하고 리뷰 보고서를 작성합니다. 워크플로우 step-6에서 호출.
 argument-hint: (리뷰 대상 — PR 번호, 브랜치, 파일 경로 등)
 ---
 
@@ -18,7 +18,7 @@ argument-hint: (리뷰 대상 — PR 번호, 브랜치, 파일 경로 등)
 
 PR 전체 리뷰 시, PR 본문(description)과 커밋 히스토리도 함께 읽고 변경 의도를 파악한다.
 
-확인 후 [coding-standards/README.md](../../contexts/coding-standards/README.md)에서 관련 컨벤션을 로드한다.
+확인 후 [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 관련 컨벤션을 로드한다.
 
 ## 리뷰
 

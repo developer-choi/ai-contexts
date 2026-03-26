@@ -1,6 +1,6 @@
 ---
 description: 버그·성능 문제의 증상과 Root Cause를 분석하고 /plan/background/analysis.md를 작성합니다.
-argument-hint: (인자 없음 — workflow step-1에서 호출)
+argument-hint: (인자 없음 — workflow step-3에서 호출)
 ---
 
 # Bug Investigation

@@ -20,4 +20,4 @@ Plan mode로 진행하세요 — 모듈 간 의존성과 파일 구조를 직접
 
 ## 산출물
 
-`/plan/codebase-audit.md` ([템플릿](../workflow/template/codebase-audit.md))
+`/plan/codebase-audit.md` ([템플릿](../template/codebase-audit.md))
