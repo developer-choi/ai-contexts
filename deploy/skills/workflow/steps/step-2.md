@@ -17,7 +17,7 @@
 
 ## 스킬 제안
 
-기존 코드를 건드리는 작업이면 `workflow_codebase-audit` 스킬을 제안합니다.
+기존 코드를 건드리는 작업이면 [codebase-audit](../codebase-audit/SKILL.md) 스킬을 제안합니다.
 
 ---
 

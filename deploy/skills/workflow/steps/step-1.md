@@ -25,9 +25,9 @@ Step 1 시작 시, 사용자에게 프로젝트 유형을 확인합니다.
 
 | 작업 종류 | 스킬 | 설명 |
 |----------|------|------|
-| 신규 기능 / 리팩토링 | `workflow_spec-review` | 기획서·피그마·이슈 기반 배경 파악 |
-| 버그 / 성능 문제 | `workflow_bug-investigation` | 증상·Root Cause 분석 |
-| 채용 과제 | `workflow_recruitment-review` | 과제 요구사항 리뷰 |
+| 신규 기능 / 리팩토링 | [spec-review](../spec-review/SKILL.md) | 기획서·피그마·이슈 기반 배경 파악 |
+| 버그 / 성능 문제 | [bug-investigation](../bug-investigation/SKILL.md) | 증상·Root Cause 분석 |
+| 채용 과제 | [recruitment-review](../recruitment-review/SKILL.md) | 과제 요구사항 리뷰 |
 
 모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.
 

@@ -1,6 +1,6 @@
 # spec-review 특화 체크리스트
 
-`skills/workflow_spec-review/` 리뷰 시 추가로 점검하는 항목.
+`skills/workflow/spec-review/` 리뷰 시 추가로 점검하는 항목.
 
 ## 배경
 
