@@ -18,7 +18,7 @@
 
 ## Step 6.2. 코드 리뷰
 
-`code-review` 스킬을 실행합니다. 결과를 `/plan/pr{N}/review.md`에 작성합니다.
+[code-review](../code-review/SKILL.md) 스킬을 실행합니다. 결과를 `/plan/pr{N}/review.md`에 작성합니다.
 
 ---
 
