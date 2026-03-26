@@ -9,20 +9,14 @@ module.exports = {
         // deploy/skills/
         'backlog',
         'clone-code-markup',
-        'code-review',
         'discussion',
         'doc-router',
-        'pr-comment-respond',
         'pr-comment-write',
         'pre-exit',
         'scw',
         'simplify',
         'tech-trends',
         'workflow',
-        'bug-investigation',
-        'codebase-audit',
-        'recruitment-review',
-        'spec-review',
         // deploy/rules/
         'global',
         // deploy/
