@@ -25,8 +25,18 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
 ## 3. PR 작성 — 사용자에게 안내
 
 - `/plan/pr{N}/pr-body.md`를 기반으로 GitHub PR 작성
-- PR body의 커밋 링크, 이미지 링크가 모두 유효한지 확인
 - PR 본문을 `coding-standards/universal/writing/` 컨벤션과 대조하여 부정확한 표현이 없는지 검토
+
+## 3-1. PR 본문 검증 — AI 작업
+
+사용자가 GitHub PR URL을 제공하면, `gh pr view`로 실제 올라간 본문을 읽고 검증한다.
+
+- 원본 프로젝트 용어 잔재 (상품, product, 과제 등)
+- 커밋 링크가 올바른 레포/커밋을 가리키는지
+- 이미지가 깨지지 않는지 (URL 유효성)
+- TODO, 플레이스홀더가 남아있지 않은지
+- 수치 불일치 (제목의 수치와 본문의 수치가 다른 경우)
+- 이미지 플레이스홀더가 남아있지 않은지 (`[좌측 이미지]`, `[스크린샷]` 등 캡처 전 임시 텍스트)
 
 ## 4. README.md / MAIL.md 작성 — AI 작업
 
