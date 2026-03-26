@@ -15,7 +15,7 @@ module.exports = {
         'pr-comment-respond',
         'pr-comment-write',
         'pre-exit',
-        'skill-creator-wrapper',
+        'scw',
         'simplify',
         'tech-trends',
         'workflow',

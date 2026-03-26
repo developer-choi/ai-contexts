@@ -4,7 +4,7 @@
 
 1. 요청된 수정을 수행
 2. 패턴성 판단 (동일 요청 재발 가능성 — 전환 문장, 이모지, 중복 병기 등)
-3. 패턴성이면, scw의 특화 체크리스트(`deploy/skills/skill-creator-wrapper/specialized/`)에 추가할 규칙을 구체적 문안과 함께 역제안
+3. 패턴성이면, scw의 특화 체크리스트(`deploy/skills/scw/specialized/`)에 추가할 규칙을 구체적 문안과 함께 역제안
 
 ## 백로그 브랜치 규칙
 
