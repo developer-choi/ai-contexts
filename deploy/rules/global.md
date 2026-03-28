@@ -23,6 +23,7 @@
 - DP = dsa-playground
 - KA = knowledge-archive
 - MP = monorepo-playground
+- DC = developer-choi
 - TP = test-playground
 
 ## 새 파일 생성 후 즉시 git add
