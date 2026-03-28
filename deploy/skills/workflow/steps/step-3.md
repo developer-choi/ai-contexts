@@ -29,9 +29,13 @@
 
 ## 신규 작업 모드
 
-### 버그/성능 문제인 경우
+### 스킬 로드
 
-[bug-investigation](../bug-investigation/SKILL.md)를 실행하여 증상과 Root Cause를 분석한다. 산출물은 `/plan/background/analysis.md`.
+아래 조건에 해당하는 스킬을 **모두** 로드합니다. 여러 개면 위에서부터 순서대로 하나씩 실행합니다.
+
+| 순서 | 조건 | 스킬 | 설명 |
+|:---:|------|------|------|
+| 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 증상과 Root Cause 분석. 산출물: `/plan/background/analysis.md` |
 
 ### 기술 전략 수립
 
