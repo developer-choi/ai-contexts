@@ -127,9 +127,11 @@ PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3
 - 필요한 맥락이 부족하면 사용자에게 질문한다
 - 이전 step을 거치지 않고 진입해도 자연스럽게 대응 (step 스킵 허용)
 
+### `.gitignore` 대상 plan 파일
+- `/plan/project.md`, `/plan/interview-prep.md`는 `.gitignore`에 포함되어 커밋되지 않음
+
 ### 면접 대비 메모 (채용과제만)
 - 논의 중 "넘어가자", "안 하기로" 같은 판단이 나오면 `/plan/interview-prep.md`에 기록할지 사용자에게 확인
-- `/plan/interview-prep.md`는 `.gitignore`에 포함되어 커밋되지 않음
 
 ### AI 패턴
 - 먼저 생각 제시 → 사용자 의견 구하기 (멈추고 대기)
