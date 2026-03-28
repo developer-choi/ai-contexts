@@ -16,7 +16,10 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 
 분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락(다른 PR 정보, 논의 이력 등)은 구현 시 불필요하고 오히려 집중을 방해한다. IMPLEMENTATION_SESSION은 overview.md와 컨벤션만으로 깨끗하게 시작한다.
 
-PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 IMPLEMENTATION_SESSION을 별도로 시작하도록 안내한다.
+PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 안내한다:
+
+> 모든 PR의 계획이 완료되었습니다. 구현은 **새 세션**에서 진행해야 합니다.
+> 새 Claude Code 세션을 열고, `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr{N}/overview.md` 기반으로 구현합니다"라고 말씀해주세요.
 
 ## 구조
 

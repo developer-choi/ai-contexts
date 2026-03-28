@@ -30,6 +30,18 @@
 5. 수정 필요 시 implementation 서브에이전트에 수정 지시
 6. 다음 phase
 
+### 서브에이전트 지시 템플릿
+
+**implementation 서브에이전트에 전달할 것:**
+- overview.md의 해당 phase 섹션
+- 코딩 컨벤션 경로
+- phase 범위 제한 (이 phase만 구현)
+
+**리뷰 서브에이전트에 전달할 것:**
+- `git diff` 결과 (이번 phase 커밋의 diff)
+- 담당 컨벤션 문서 (그룹당 1~2개)
+- 리뷰 관점 지시 (해당 컨벤션 위반만 집중)
+
 ---
 
 ## [CRITICAL] 한번에 전부 구현 금지
