@@ -37,6 +37,11 @@
 - 피드백 메모리(`.claude/` 로컬 메모리)를 사용하지 않는다. git으로 관리되지 않아 컴퓨터 간 공유가 안 되기 때문이다.
 - 사용자가 교정하거나 확인한 작업 방식, 반복해서는 안 되는 실수 등 모든 종류의 피드백은 AC(ai-contexts)의 `deploy/rules/feedback.md`에 저장한다.
 
+## ~/.claude 하위 파일 직접 수정 금지
+- `~/.claude/` 하위의 md 파일(rules, contexts 등)을 직접 수정하지 않는다.
+- 수정이 필요하면 AC(`~/WebstormProjects/main/ai-contexts/`)에서 원본을 수정한다.
+- `~/.claude/`로의 동기화는 AC 프로젝트의 `npm run update` 스크립트로 수행한다.
+
 ## 커밋 시 파일 범위 제한
 - 다른 세션에서 별도의 AI 에이전트가 동시에 작업 중일 수 있다.
 - 커밋할 때는 본인이 직접 수정한 파일만 포함한다.
