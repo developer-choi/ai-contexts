@@ -36,6 +36,7 @@
 | 순서 | 조건 | 스킬 | 설명 |
 |:---:|------|------|------|
 | 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 증상과 Root Cause 분석. 산출물: `/plan/background/analysis.md` |
+| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | 필수 참조. 이 가이드의 순서와 항목 기준으로 설치 범위 논의 |
 
 ### 기술 전략 수립
 

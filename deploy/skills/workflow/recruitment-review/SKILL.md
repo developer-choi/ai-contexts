@@ -17,6 +17,13 @@ Step 1에서 사용자가 `/plan/background/`에 작성한 원본 자료 3개:
 
 이후 step(과제 정의, 리뷰 등)에서 원본을 직접 참조하여 누락/개선점을 확인한다.
 
+## 패키지 설치 PR 가이드
+
+채용과제에서 패키지 설치 PR을 논의할 때, [install-packages.md](install-packages.md)를 **반드시** 참조한다.
+이 가이드의 순서와 필수 항목을 기준으로 설치 범위를 사용자와 논의한다.
+
+---
+
 ## 산출물: `/plan/background/`
 
 - `analysis.md` — 분석 결과
