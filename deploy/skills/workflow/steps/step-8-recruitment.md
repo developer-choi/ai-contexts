@@ -1,6 +1,6 @@
 # 채용 과제 제출 마무리
 
-Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{N}/pr-body.md`를 참조합니다.
+`/plan/`에서 과제 요구사항과 각 PR의 pr-body를 찾아 참조합니다.
 
 ## 1. 커밋 정리 — 사용자에게 안내
 
@@ -24,7 +24,7 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
 
 ## 3. PR 작성 — 사용자에게 안내
 
-- `/plan/pr{N}/pr-body.md`를 기반으로 GitHub PR 작성
+- `/plan/`의 pr-body를 기반으로 GitHub PR 작성
 - PR 본문을 `coding-standards/universal/writing/` 컨벤션과 대조하여 부정확한 표현이 없는지 검토
 
 ## 3-1. PR 본문 검증 — AI 작업
@@ -40,7 +40,7 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
 
 ## 4. README.md / MAIL.md 작성 — AI 작업
 
-`/plan/background/requirement.md`와 `/plan/pr{N}/pr-body.md`를 모두 읽고 다음 문서를 작성하여 사용자에게 제시합니다.
+`/plan/`에서 과제 요구사항과 각 PR의 pr-body를 모두 읽고 다음 문서를 작성하여 사용자에게 제시합니다.
 
 1. **README.md** — 과제 요구사항에 맞는 프로젝트 소개 문서
 2. **MAIL.md** — 제출 시 보낼 메일 본문 초안
@@ -53,7 +53,7 @@ Step 1에서 작성한 `/plan/background/requirement.md`와 각 PR의 `/plan/pr{
 3. 실행 방법
 4. 폴더 구조
 5. PR 링크별 요약
-6. `/plan/background/requirement.md`에 따라 추가 섹션 (기술 선택 근거, 완성/미완성 등)
+6. 과제 요구사항에 따라 추가 섹션 (기술 선택 근거, 완성/미완성 등)
 
 ## 5. 배포 및 정상 동작 확인 — 사용자에게 안내
 

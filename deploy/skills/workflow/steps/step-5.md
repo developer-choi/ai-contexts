@@ -2,15 +2,7 @@
 
 > **이 단계의 목표: 구현 방침에 따라 코드를 작성한다**
 
-`/plan/pr{N}/overview.md` 구현 방침을 바탕으로 코드 작성 및 커밋.
-
----
-
-## 선행조건 자가체크
-
-시작 전에 아래 자료가 존재하는지 확인한다. 없으면 사용자에게 요청하고 `/plan/background/`에 저장한다.
-
-- **컨벤션 문서** — step 3에서 수집되었으면 패스
+`/plan/`에서 구현 방침을 찾아 읽고, 코드 작성 및 커밋.
 
 ---
 
@@ -26,7 +18,7 @@
 
 ## 참고 컨벤션 (최초 1회)
 
-[coding-standards/README.md](../../../contexts/coding-standards/README.md)를 참조하여 이번 PR 작업에 필요한 컨벤션을 확인한다.
+[coding-standards/README.md](../../../contexts/coding-standards/README.md)와 프로젝트의 컨벤션을 참조하여 이번 PR 작업에 필요한 규칙을 확인한다.
 
 ---
 
