@@ -8,4 +8,4 @@
 
 ## PR 본문 작성 (`/plan/pr{N}/pr-body.md`)
 
-`/plan/`의 산출물과 커밋 로그를 기반으로 PR 본문을 작성한다.
+`/plan/`의 산출물과 커밋 로그를 기반으로 PR 본문을 작성한다. [writing-guide/](../../../contexts/writing-guide/)의 톤·구조 규칙을 적용한다.

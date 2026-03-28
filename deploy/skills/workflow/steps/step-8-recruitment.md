@@ -25,7 +25,7 @@
 ## 3. PR 작성 — 사용자에게 안내
 
 - `/plan/`의 pr-body를 기반으로 GitHub PR 작성
-- PR 본문을 `coding-standards/universal/writing/` 컨벤션과 대조하여 부정확한 표현이 없는지 검토
+- PR 본문을 [writing-guide/](../../../contexts/writing-guide/) 컨벤션과 대조하여 부정확한 표현이 없는지 검토
 
 ## 3-1. PR 본문 검증 — AI 작업
 

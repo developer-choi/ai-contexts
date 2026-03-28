@@ -22,7 +22,6 @@
 | `typescript/` | TypeScript 타입 패턴 |
 | `quality/` | 품질 원칙 (가독성, 유지보수성) |
 | `testing/` | 테스트 작성 규칙 |
-| `writing/` | 문서 작성 톤 |
 | `git/` | Git 작업 규칙 |
 | `markup/` | HTML/CSS 마크업 규칙 |
 

@@ -82,5 +82,6 @@ coding-standards/
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-- [writing/tone.md](deploy/contexts/coding-standards/universal/writing/tone.md) — 문서 톤 (습니다체, 문장 역할)
+- [writing-guide/tone.md](deploy/contexts/writing-guide/tone.md) — 문서 톤 (습니다체, 문장 역할)
+- [writing-guide/pr-body.md](deploy/contexts/writing-guide/pr-body.md) — PR 본문 작성 구조
 - [audit/checklist/style.md](deploy/skills/audit/checklist/style.md) — 서식 (이모지 규칙, 헤더 텍스트 규칙)
