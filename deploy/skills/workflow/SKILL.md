@@ -40,17 +40,22 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 | [step-1.md](steps/step-1.md) | 배경 파악 및 문제 정의 |
 | [step-2.md](steps/step-2.md) | PR 분할 전략 수립 |
 
-### PR마다 반복 (Step 3 ~ 7)
+### 계획 반복 (모든 PR에 대해 Step 3 → 4)
 
 | 단계 | 내용 |
 |------|------|
 | [step-3.md](steps/step-3.md) | 과제 정의 (신규 작업 / QA 대응) |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 |
+
+> PR #1의 Step 3→4 완료 후 PR #2의 Step 3→4로 진행. 모든 PR의 계획이 끝난 뒤 구현으로 넘어갑니다.
+
+### 구현 반복 (PR별 Step 5 ~ 7)
+
+| 단계 | 내용 |
+|------|------|
 | [step-5.md](steps/step-5.md) | 구현 |
 | [step-6.md](steps/step-6.md) | 최종 점검 |
 | [step-7.md](steps/step-7.md) | PR 본문 작성 |
-
-> PR #1 완료 후 PR #2를 시작할 때는 Step 3부터 진행합니다.
 
 ### QA/리뷰 대응 (PR 올린 후)
 
