@@ -23,10 +23,10 @@
 
 아래 조건에 해당하는 스킬을 **모두** 로드합니다. 여러 개면 위에서부터 순서대로 하나씩 실행합니다.
 
-| 순서 | 조건 | 스킬 | 설명 |
-|:---:|------|------|------|
-| 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 증상과 Root Cause 분석. 산출물: `/plan/background/analysis.md` |
-| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | 필수 참조. 이 가이드의 순서와 항목 기준으로 설치 범위 논의 |
+| 순서 | 조건 | 스킬 | 실행 | 설명 |
+|:---:|------|------|------|------|
+| 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 서브에이전트 | 증상과 Root Cause 분석. 산출물: `/plan/background/analysis.md` |
+| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | — | 필수 참조. 설치 범위 논의 |
 
 ### page.md → overview.md 변환 + 기술 전략 수립
 
