@@ -27,6 +27,7 @@ Step 1에서 사용자가 `/plan/background/`에 작성한 원본 자료 3개:
 ## 산출물: `/plan/background/`
 
 - `analysis.md` — 분석 결과
+- `service-analysis.md` — 대상 서비스 분석 ([가이드](service-analysis.md))
 
 ## 핵심 원칙: 원본과의 중복 금지
 
@@ -58,6 +59,11 @@ Step 1에서 사용자가 `/plan/background/`에 작성한 원본 자료 3개:
 기술 선택이 필요한 지점을 나열하고, 각각의 선택지와 판단 기준을 제시합니다.
 사용자와 논의하여 확정합니다.
 
-### 4. 모호한 부분 및 질문 목록
+### 4. 서비스 분석
+
+대상 서비스를 조사하여 [service-analysis.md 가이드](service-analysis.md)의 필수 분석 항목에 따라 정리합니다.
+산출물: `/plan/background/service-analysis.md`
+
+### 5. 모호한 부분 및 질문 목록
 
 과제 설명에서 불명확한 부분을 짚고, 채용 담당자에게 질문할지 / 본인 판단으로 결정할지 사용자와 논의합니다.
