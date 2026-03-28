@@ -44,6 +44,10 @@ skill-creator 플러그인을 사용하되, 이 프로젝트에서는 추가로 
 - 스킬을 처음 만들 때 gotchas는 비워둔다
 - 실사용 중 AI가 반복 실패하는 패턴을 발견하면 SKILL.md에 gotchas 섹션으로 추가
 
+## 서브에이전트 위임 구조 테스트
+
+스킬 내부에서 Agent tool로 서브에이전트를 띄우는 패턴은 skill-creator 표준 방식(서브에이전트에서 스킬 실행)으로 테스트할 수 없다. 이 경우 메인 에이전트가 직접 오케스트레이터 역할을 수행한다. 상세는 [eval-delegation.md](eval-delegation.md) 참조.
+
 ## 정리
 
 - 벤치마크/테스트 완료 후, 작업 중 생성한 workspace 폴더(테스트 문서, eval 결과 등)를 삭제한다
