@@ -1,3 +1,7 @@
+---
+tags: [file-folder-structure]
+---
+
 # General Coding Conventions
 
 ## 주석 작성 스타일

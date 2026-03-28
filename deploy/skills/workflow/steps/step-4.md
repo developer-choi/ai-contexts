@@ -8,6 +8,12 @@ Step 3이 "뭘 쓸지"를 결정했다면, 이 단계는 "어떻게 구현할지
 
 ---
 
+## 코딩 스탠다드 참조
+
+[coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 `file-folder-structure` 태그가 붙은 문서를 확인하고, 파일·컴포넌트 구조 설계에 반영한다.
+
+---
+
 ## [CRITICAL] PR 분할 재검토
 
 작업량이 많아 보이면 PR 분할을 제안한다:
