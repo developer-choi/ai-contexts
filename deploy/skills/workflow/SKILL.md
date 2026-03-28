@@ -7,19 +7,20 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 
 ## 세션
 
-워크플로우는 두 개의 독립된 세션(메인 에이전트)으로 나뉜다. 각 메인 에이전트는 자신의 step 안에서 서브에이전트를 띄워 작업을 위임할 수 있다.
+워크플로우는 PLANNING_SESSION 1개와 **PR마다 별도의 IMPLEMENTATION_SESSION**으로 나뉜다. 각 메인 에이전트는 자신의 step 안에서 서브에이전트를 띄워 작업을 위임할 수 있다.
 
 | 세션 | 담당 | 컨텍스트 |
 |------|------|----------|
-| **PLANNING_SESSION** | Step 1~4 + 회고 | 기획서, 요구사항, 기술 전략, PR 분할 |
-| **IMPLEMENTATION_SESSION** | Step 5~8 + 회고 | `/plan/pr{N}/overview.md` + 컨벤션. 이 PR 하나에 집중 |
+| **PLANNING_SESSION** (1개) | Step 1~4 + 회고 | 기획서, 요구사항, 기술 전략, PR 분할 |
+| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | 해당 PR의 `/plan/pr{N}/overview.md` + 컨벤션. 이 PR 하나에만 집중 |
 
-분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락(다른 PR 정보, 논의 이력 등)은 구현 시 불필요하고 오히려 집중을 방해한다. IMPLEMENTATION_SESSION은 overview.md와 컨벤션만으로 깨끗하게 시작한다.
+분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락은 구현 시 불필요하고 오히려 집중을 방해한다. 마찬가지로, 다른 PR의 구현 맥락도 현재 PR에 불필요하다. 각 IMPLEMENTATION_SESSION은 해당 PR의 overview.md와 컨벤션만으로 깨끗하게 시작한다.
 
 PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 안내한다:
 
-> 모든 PR의 계획이 완료되었습니다. 구현은 **새 세션**에서 진행해야 합니다.
-> 새 Claude Code 세션을 열고, `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr{N}/overview.md` 기반으로 구현합니다"라고 말씀해주세요.
+> 모든 PR의 계획이 완료되었습니다. 구현은 **PR마다 새 세션**에서 진행합니다.
+> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr1/overview.md` 기반으로 구현합니다"라고 말씀해주세요.
+> 하나의 PR이 끝나면(Step 7 완료), 다시 새 세션을 열어 다음 PR을 진행합니다.
 
 ## 구조
 
@@ -77,7 +78,11 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 | [step-3.md](steps/step-3.md) | 과제 정의 (신규 작업 / QA 대응) |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 |
 
-> PR #1의 Step 3→4 완료 후 PR #2의 Step 3→4로 진행. 모든 PR의 계획이 끝난 뒤 구현으로 넘어갑니다.
+> PR #1의 Step 3→4 완료 후 PR #2의 Step 3→4로 진행. 모든 PR의 계획이 끝나면 PLANNING_SESSION 회고 후 구현으로 넘어갑니다.
+
+### PLANNING_SESSION 회고 (계획 완료 후 1회)
+
+모든 PR의 계획이 끝나면, [step-8-retrospect.md](steps/step-8-retrospect.md)로 회고를 수행한 뒤 구현 세션 안내를 출력한다.
 
 ### 구현 반복 (PR별 Step 5 ~ 7) — IMPLEMENTATION_SESSION
 
@@ -89,7 +94,7 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 
 ### QA/리뷰 대응 (PR 올린 후)
 
-PR을 올린 뒤 리뷰 피드백을 받으면, Step 3(QA 대응 모드) → Step 4~6을 재반복한다. Step 3이 진입 경로를 감지하여 자동으로 모드를 전환한다.
+PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3(QA 대응 모드) → Step 4~6을 통합 수행한다. QA 대응 세션은 PLANNING/IMPLEMENTATION 경계 없이 계획부터 구현까지 하나의 세션에서 처리한다. Step 3이 진입 경로를 감지하여 자동으로 QA 대응 모드로 전환한다.
 
 ### 마무리 (모든 PR 완료 후 1회)
 
@@ -97,7 +102,9 @@ PR을 올린 뒤 리뷰 피드백을 받으면, Step 3(QA 대응 모드) → Ste
 |------|------|
 | [step-8.md](steps/step-8.md) | 워크플로우 회고 + 프로젝트 유형별 제출 마무리 |
 
-> 모든 PR의 Step 3~7이 끝난 뒤, 마지막에 1회만 수행합니다. 회고는 PLANNING_SESSION과 IMPLEMENTATION_SESSION 양쪽에서 각각 수행한다. 채용 마무리는 IMPLEMENTATION_SESSION에서 수행한다.
+> 마지막 PR의 IMPLEMENTATION_SESSION에서 1회만 수행합니다. 회고는 PLANNING_SESSION(계획 완료 시)과 마지막 IMPLEMENTATION_SESSION에서 각각 수행한다. 채용 마무리는 마지막 IMPLEMENTATION_SESSION에서 수행한다.
+>
+> **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막. 모든 PR 계획은 PLANNING_SESSION에서 완료되므로 `/plan/`에 전체 PR 목록이 존재한다.
 
 ## [CRITICAL] 지킬 원칙
 
