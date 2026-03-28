@@ -8,6 +8,12 @@ Step 3이 "뭘 쓸지"를 결정했다면, 이 단계는 "어떻게 구현할지
 
 ---
 
+## page.md 잔여 흡수
+
+spec-review 산출물(page.md, global.md, layout.md)이 남아 있으면 나머지를 모두 흡수하고 원본을 삭제한다.
+
+---
+
 ## 코딩 스탠다드 참조
 
 [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 `file-folder-structure` 태그가 붙은 문서를 확인하고, 파일·컴포넌트 구조 설계에 반영한다.

@@ -38,7 +38,9 @@
 | 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 증상과 Root Cause 분석. 산출물: `/plan/background/analysis.md` |
 | 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | 필수 참조. 이 가이드의 순서와 항목 기준으로 설치 범위 논의 |
 
-### 기술 전략 수립
+### page.md → overview.md 변환 + 기술 전략 수립
+
+spec-review 산출물(page.md, global.md, layout.md)을 기반으로 overview.md를 작성한다.
 
 이 단계는 "뭘 쓸지"를 결정한다. "어떻게 구현할지"는 Step 4에서 다루므로, 여기서는 기술 선택의 근거에만 집중한다.
 
