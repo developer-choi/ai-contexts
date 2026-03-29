@@ -4,22 +4,39 @@ tags: [file-folder-structure]
 
 # General Coding Conventions
 
-## 주석 작성 스타일
+## 주석 전면 금지
 
-### JSDoc 활용
-함수나 클래스의 동작, 특히 **예외 상황**을 명시할 때 JSDoc을 적극 활용합니다.
+주석은 아래 허용 목록을 제외하고 **전부 금지**입니다. 사용자의 명시적 허락 없이는 절대 작성하지 않습니다.
+
+### 허용되는 주석
+
+- **JSDoc `@throws`** — 함수의 예외 상황 명시
 
 ```typescript
 /**
  * @throws {RangeError} Stack overflow if capacity is exceeded.
  */
 abstract push(data: D): void;
-
-/**
- * @throws {RangeError} Stack underflow if empty.
- */
-abstract pop(): D;
 ```
+
+- **eslint-disable** — personal이 아닌 universal/general.md의 예외 조건에 한함
+
+### 금지 예시
+
+```typescript
+// ❌ 섹션 구분
+// --- Types ---
+// === Styles ===
+
+// ❌ 코드 설명
+// 사용자 정보를 가져온다
+const user = await getUser();
+
+// ❌ TODO
+// TODO: 나중에 리팩토링
+```
+
+코드가 주석 없이 이해되지 않는다면, 변수명/함수명을 개선하거나 파일을 분리하는 것이 올바른 해결책입니다.
 
 ---
 
