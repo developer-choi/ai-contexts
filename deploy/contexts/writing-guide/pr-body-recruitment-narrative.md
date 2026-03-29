@@ -1,6 +1,8 @@
-# PR 본문 작성 구조
+# PR 본문 작성 구조 — 서사형
 
-PR body, 기술 문서 등 **독자를 설득해야 하는 문서**에 적용합니다.
+사고 과정과 서사로 설득하는 PR에 적용합니다.
+
+> 예시: [Feature static checking](https://github.com/developer-choi/frontend-test-v2-for-tester/pull/2)
 
 ---
 
