@@ -63,7 +63,28 @@ describe.each(algorithms)('정렬 알고리즘 > $name', ({fn}) => {
 });
 ```
 
-## 6. 값 리터럴 직접 전달 선호
+## 6. it 설명은 사용자 행동 기반
+
+구현 상세(변수명, 상태명)가 아닌 사용자 행동으로 작성합니다.
+
+```typescript
+// ❌
+it('selectedCategoryId가 있으면 해당 카테고리의 콘테스트만 표시된다', ...)
+
+// ✅
+it('카테고리를 선택하면 해당 카테고리의 콘테스트만 표시된다', ...)
+```
+
+## 7. UI 문구 하드코딩 방지
+
+UI에 표시되는 문구는 언제든 바뀔 수 있으므로, 테스트에 직접 하드코딩하지 않습니다.
+
+```typescript
+// ❌
+expect(screen.getByText('콘테스트가 없습니다')).toBeInTheDocument()
+```
+
+## 8. 값 리터럴 직접 전달 선호
 
 ```typescript
 // ✅ Good
