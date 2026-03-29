@@ -18,6 +18,10 @@ tags: [file-folder-structure]
 
 ## 4. 테스트 구조
 
+### describe 제목
+- 함수 테스트: `describe('함수명()', ...)` — 괄호 `()`를 포함합니다.
+- 컴포넌트 테스트: `describe('컴포넌트명', ...)` — 괄호 없이 이름만 사용합니다.
+
 **describe/it 블록**
 ```typescript
 describe('findKthElement()', () => {
