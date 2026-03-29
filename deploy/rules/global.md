@@ -18,12 +18,12 @@
 - 확정 전에 나머지를 대량으로 진행하지 않는다.
 
 ## 프로젝트 약어
-- 모든 프로젝트는 `~/WebstormProjects/main/` 하위에 위치한다.
+- 기본 경로: `~/WebstormProjects/main/`
 - AC = ai-contexts
 - DP = dsa-playground
 - KA = knowledge-archive
 - MP = monorepo-playground
-- DC = developer-choi
+- DC = developer-choi (`~/WebstormProjects/my-else/developer-choi`)
 - TP = test-playground
 
 ## 서브에이전트 적극 활용
