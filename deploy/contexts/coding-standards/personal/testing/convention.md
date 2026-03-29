@@ -9,7 +9,8 @@ tags: [file-folder-structure]
 - **위치**: 대상 파일과 **동일한 폴더**에 위치시킵니다. (불가피한 경우 바로 상위 폴더)
 
 ## 2. describe/it 설명 언어
-`describe`와 `it` 설명은 한국어로 작성합니다.
+- describe 카테고리는 영어로 작성합니다 (`General cases`, `Error cases`, `Edge cases` 등).
+- it 설명은 한국어로 작성합니다.
 
 ## 3. 알고리즘 테스트
 - 알고리즘 구현 테스트의 경우, 다양한 Edge Case 와 Boundary Case를 포함해야 합니다.
@@ -25,19 +26,19 @@ tags: [file-folder-structure]
 **describe/it 블록**
 ```typescript
 describe('findKthElement()', () => {
-  describe('일반 케이스', () => {
+  describe('General cases', () => {
     it('k 번째로 큰 값을 잘 찾아야 한다.', () => {
       expect(findKthElement([1, 2, 3], 3, 'largest')).toBe(1);
     });
   });
 
-  describe('경계값 케이스', () => {
+  describe('Boundary cases', () => {
     it('배열의 길이가 1개인 경우에는 항상 그 요소가 반환되야한다.', () => {
       expect(findKthElement([1], 1, 'largest')).toBe(1);
     });
   });
 
-  describe('엣지 케이스', () => {
+  describe('Edge cases', () => {
     it('배열의 길이보다 k값이 더 큰 경우 에러가 던져져야 한다.', () => {
       expect(() => findKthElement([100], 2, 'largest')).toThrow(TypeError);
     });
@@ -84,7 +85,11 @@ UI에 표시되는 문구는 언제든 바뀔 수 있으므로, 테스트에 직
 expect(screen.getByText('콘테스트가 없습니다')).toBeInTheDocument()
 ```
 
-## 8. 값 리터럴 직접 전달 선호
+## 8. 테스트 중복 케이스 금지
+
+동작이 동일한 입력을 여러 개 넣지 않는다.
+
+## 9. 값 리터럴 직접 전달 선호
 
 ```typescript
 // ✅ Good
