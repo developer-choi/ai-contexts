@@ -92,6 +92,24 @@ import {fetchFromClient} from '../../../utils/extend/library/fetch/fromClient';
 
 ---
 
+## 아무것도 안 하는 래핑 함수/훅 금지
+
+한 줄짜리 래핑을 위해 별도 함수나 훅을 만들지 않습니다. 로직이 추가될 때 분리합니다.
+
+```typescript
+// ❌ 래핑만 하는 훅
+export default function useCategories() {
+  return useSuspenseQuery(contestQueries.categories.options());
+}
+
+// ❌ 래핑만 하는 함수
+function getUser() {
+  return fetchUser();
+}
+```
+
+---
+
 ## 조건문 중괄호 강제
 
 `if` 문에 실행 코드가 한 줄만 있더라도, 가독성과 잠재적 버그 방지를 위해 항상 **중괄호(`{ }`)**를 사용합니다.
