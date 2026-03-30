@@ -11,6 +11,16 @@
 - [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 관련 컨벤션 로드
 - `/plan/pr{N}/overview.md`의 구현 방침 확인
 
+### 피그마 컴포넌트 매칭표 (실무 프로젝트 + 피그마 MCP 연결 시)
+
+> 채용과제는 피그마 dev 권한이 없으므로 해당 없음
+
+1. 사용자에게 **디자인시스템 원본 레포 경로** 요청
+2. 원본 소스(TSX props interface + SCSS/CSS module)를 읽어 매칭표 생성
+3. `/plan/background/figma-component-mapping.md`에 저장 ([템플릿](../template/figma-component-mapping.md) 참조)
+4. 마크업 시 피그마 CSS 토큰을 매칭표와 대조하여 props 결정
+5. 새 컴포넌트 발견 시 매칭표에 추가
+
 ---
 
 ## 사이클 (phase마다 반복)
@@ -33,6 +43,7 @@
   - `git diff` 결과 (이번 커밋의 diff)
   - 담당 컨벤션 문서 (그룹당 1~2개)
   - 리뷰 관점 지시 (해당 컨벤션 위반만 집중)
+  - 매칭표 (`/plan/background/figma-component-mapping.md`) — 마크업 관련 커밋일 때
 - 이슈 발견 → 메인이 수정 → amend → 같은 서브에이전트에 재리뷰 요청 (수렴할 때까지)
 - 리뷰 결과를 사용자에게 보고
 
@@ -60,6 +71,18 @@
 - 커밋 목록
 - 리뷰 결과 요약
 - 수정 사항 (있는 경우)
+
+## 마크업 서브에이전트 필수 첨부물
+
+마크업 구현을 서브에이전트에 위임할 때 반드시 전달:
+
+1. **매칭표** (`/plan/background/figma-component-mapping.md`) — props 결정 기준
+2. **기존 mixin/레이아웃 패턴** — page-container 등이 이미 제공하는 padding/gap 정보. 중복 방지
+3. **"피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"** 명시 지침 — 스크린샷 보고 감으로 작성 금지
+4. **"하드코딩 금지, 토큰만 사용"** 규칙 — `16px` 대신 `var(--semantic-padding-lg)`
+5. **구현 후 피그마 자동 대조 단계** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
+
+---
 
 ## gotchas
 
