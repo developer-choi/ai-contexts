@@ -45,6 +45,11 @@
 - 수정이 필요하면 AC(`~/WebstormProjects/main/ai-contexts/`)에서 원본을 수정한다.
 - `~/.claude/`로의 동기화는 AC 프로젝트의 `npm run update` 스크립트로 수행한다.
 
+## 커밋 단위 (기본 가이드, 구체적 규칙이 있으면 그쪽 우선)
+- 컴포넌트: [component-name].tsx + [component-name].module.scss(필요시) + [component-name].test.tsx(필요시) 를 한 커밋
+- 유틸: [util-name].ts + [util-name].test.ts(필요시) 를 한 커밋
+- 서로 다른 컴포넌트/유틸을 하나의 커밋에 섞지 않는다
+
 ## 커밋 시 파일 범위 제한
 - 다른 세션에서 별도의 AI 에이전트가 동시에 작업 중일 수 있다.
 - 커밋 대상: 이 세션에서 수정·생성한 파일 (서브에이전트 위임 포함)
