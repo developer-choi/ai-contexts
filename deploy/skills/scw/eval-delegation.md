@@ -41,9 +41,11 @@ skill-creator의 표준 eval(서브에이전트에서 스킬 실행)은 **스킬
 
 ### 2단계: E2E (메인 직접 실행)
 
+> ⚠️ 아래 결과는 이전 구조(implementation 서브에이전트 사용) 기준. 현재 step-5는 메인 에이전트가 직접 구현하고, 서브에이전트는 리뷰만 담당.
+
 메인 에이전트가 가상 프로젝트(sum/multiply)에서 step-5 오케스트레이션을 직접 수행.
 
-- implementation 서브에이전트 → 코드 작성
+- implementation 서브에이전트 → 코드 작성 (현재는 메인이 직접 수행)
 - review 서브에이전트 → diff 리뷰
 - 2 phase 사이클 완료, 커밋 순서 확인
 
@@ -59,6 +61,6 @@ eval 과정에서 스킬 문서 개선 6건 반영:
 1. N개 서브에이전트 인스턴스 병렬 실행 규칙
 2. step-5 리뷰 서브에이전트 병렬 명시
 3. step-6 병렬 + Gap Analysis 코드 접근 경계
-4. implementation git 권한 대응
-5. 서브에이전트 지시 템플릿
+4. ~~implementation git 권한 대응~~ (implementation 스킬 삭제됨)
+5. ~~서브에이전트 지시 템플릿~~ (메인 직접 구현으로 전환)
 6. 세션 전환 안내 구체적 문구
