@@ -27,6 +27,7 @@ module.exports = {
         'workflow',
         // deploy/contexts/
         'coding-standards',
+        'writing-guide',
         // deploy/rules/
         'global',
         // deploy/
