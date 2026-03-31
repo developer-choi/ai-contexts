@@ -48,6 +48,10 @@
 - AC의 `plan/` 외 파일 변경은 master 또는 fix/, feature/ 등 작업 브랜치에서 커밋한다
 - 두 종류의 변경을 같은 커밋에 섞지 않는다
 
+## 페이지 경로 보고 시 클릭 가능한 URL
+- 페이지 경로를 사용자에게 알려줄 때 `/some/path`만 쓰지 않는다.
+- `package.json`에서 dev 서버 프로토콜·도메인·포트를 파악하여 `http://localhost:3000/some/path` 형태의 전체 URL로 제공한다.
+
 ## ~/.claude 하위 파일 직접 수정 금지
 - `~/.claude/` 하위의 md 파일(rules, contexts 등)을 직접 수정하지 않는다.
 - 수정이 필요하면 AC(`~/WebstormProjects/main/ai-contexts/`)에서 원본을 수정한다.
