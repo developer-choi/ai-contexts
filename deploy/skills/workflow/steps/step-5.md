@@ -1,86 +1,98 @@
 # Step 5: 구현
 
-> **이 단계의 목표: 구현 방침에 따라 코드를 작성한다**
+> **이 단계의 목표: 팀을 spawn하고 구현 방침에 따라 코드를 작성한다**
 
-메인 에이전트가 직접 코드를 작성하고 커밋한다. 리뷰만 서브에이전트에 위임한다.
-
----
-
-## 사전 준비
-
-- [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 관련 컨벤션 로드
-- `/plan/pr{N}/overview.md`의 구현 방침 확인
-
-### 피그마 컴포넌트 매칭표 (실무 프로젝트 + 피그마 MCP 연결 시)
-
-> 채용과제는 피그마 dev 권한이 없으므로 해당 없음
-
-1. 사용자에게 **디자인시스템 원본 레포 경로** 요청
-2. 원본 소스(TSX props interface + SCSS/CSS module)를 읽어 매칭표 생성
-3. `/plan/background/figma-component-mapping.md`에 저장 ([템플릿](../template/figma-component-mapping.md) 참조)
-4. 마크업 시 피그마 CSS 토큰을 매칭표와 대조하여 props 결정
-5. 새 컴포넌트 발견 시 매칭표에 추가
+Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드를 작성한다. 커밋마다 리뷰 파이프라인을 수행한다.
 
 ---
 
-## 사이클 (phase마다 반복)
+## 팀 Spawn
 
-1. 메인 에이전트가 해당 phase 구현 → commit
-2. 사용자에게 보고
-3. 커밋 리뷰 (아래 2단계 리뷰 참조)
-4. 다음 phase
+step-5 진입 시 아래 팀을 spawn한다.
 
-### 커밋 리뷰 — 2단계
+```
+Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
+├── Markup Implementer (sonnet) — 마크업 구현
+├── Feature Implementer (sonnet) — 로직 구현
+├── Figma Reviewer (sonnet) — 피그마 토큰 대조 (Markup Implementer 커밋에서만)
+├── Convention Reviewer ×N (sonnet) — 컨벤션 기계적 대조
+└── Advanced Reviewer (opus) — coding standard 판단 + 자유 리뷰
+```
 
-커밋 하나를 대상으로, 자가 점검 → 서브에이전트 리뷰 순서로 진행한다.
+### Spawn 시 컨텍스트 주입
 
-**1차: 메인 자가 점검** (추가 컨텍스트 비용 0 — 컨벤션과 코드를 이미 보유)
-- 이슈 발견 → 수정 → amend → 재점검 (수렴할 때까지)
+에이전트는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위를 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 각 에이전트에게 전달한다.
 
-**2차: 서브에이전트 리뷰** (자가 점검으로 못 잡는 맹점 보완)
-- 컨벤션을 주제 단위로 묶어 서브에이전트 생성. 그룹핑은 AI 재량. **병렬 실행**
-- 전달할 것:
-  - `git diff` 결과 (이번 커밋의 diff)
-  - 담당 컨벤션 문서 (그룹당 1~2개)
-  - 리뷰 관점 지시 (해당 컨벤션 위반만 집중)
-  - 매칭표 (`/plan/background/figma-component-mapping.md`) — 마크업 관련 커밋일 때
-- 이슈 발견 → 메인이 수정 → amend → 같은 서브에이전트에 재리뷰 요청 (수렴할 때까지)
-- 리뷰 결과를 사용자에게 보고
+| 에이전트 | Lead가 주입하는 컨텍스트 |
+|----------|--------------------------|
+| Markup Implementer | 매칭표, 디자인시스템 소스, 스타일 컨벤션, 기존 mixin/레이아웃 패턴 |
+| Feature Implementer | 구현 방침, 비즈니스 로직 컨벤션, 참조할 기존 코드 경로 |
+| Figma Reviewer | 매칭표 (`figma-component-mapping.md`) |
+| Convention Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중) |
+| Advanced Reviewer | [code-review](../code-review/SKILL.md) 절차, coding standards |
+
+리뷰어는 [code-review](../code-review/SKILL.md)의 절차를 따른다.
+
+### Markup Implementer 필수 지침
+
+Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
+
+1. **"피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"** — 스크린샷 보고 감으로 작성 금지
+2. **"하드코딩 금지, 토큰만 사용"** — `16px` 대신 `var(--semantic-padding-lg)`
+3. **구현 후 피그마 자동 대조** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
+
+### Convention Reviewer 분할
+
+Lead가 [coding-standards/](../../../contexts/coding-standards/), [conventions/](../../../contexts/conventions/), 프로젝트별 컨벤션 폴더 하위의 **폴더구조·파일명만** 살펴보고 주제별로 N개 reviewer를 spawn한다.
+
+- 몇 개로 나눌지는 Lead 재량
 
 ---
 
-## [CRITICAL] 한번에 전부 구현 금지
+## 리뷰 파이프라인
 
-단계별로 나눠서 진행하고, 각 단계 완료 후 사용자 리뷰를 받는다.
+커밋마다 아래 파이프라인을 수행한다. **단계 간은 직렬, Convention 내부만 병렬.**
 
-### 필수 승인 체크포인트
+### Markup Implementer 파이프라인 (3단계)
 
-**테스트 코드 작성 후** — 테스트 코드는 이후 구현의 TDD 목표 기준이 된다. 반드시 사용자 승인을 받은 뒤 구현에 착수한다.
+```
+1. Figma Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
+       ↓
+2. Convention Reviewer ×N (병렬) → Lead 종합 → Markup Implementer → 반복 (0건까지)
+       ↓
+3. Advanced Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
+```
 
----
+### Feature Implementer 파이프라인 (2단계)
 
-## 참고 컨벤션
+```
+1. Convention Reviewer ×N (병렬) → Lead 종합 → Feature Implementer → 반복 (0건까지)
+       ↓
+2. Advanced Reviewer ↔ Feature Implementer (직접 루프, 0건까지)
+```
 
-[coding-standards/README.md](../../../contexts/coding-standards/README.md)를 참조하여 리뷰 서브에이전트에 전달할 컨벤션을 확인한다.
+### Figma Reviewer (Markup Implementer 커밋만)
 
----
+- Figma Reviewer ↔ Markup Implementer 직접 DM으로 루프
+- Lead 개입 없음
+- 0건이면 Lead에게 보고
 
-## 보고 내용
+### Convention Reviewer ×N
 
-각 phase 완료 시:
-- 커밋 목록
-- 리뷰 결과 요약
-- 수정 사항 (있는 경우)
+- Convention Reviewer ×N 병렬 리뷰
+- 결과를 Lead에게 제출
+- Lead가 종합:
+  - 중복 이슈 제거
+  - sonnet 결과의 신뢰도 판단
+  - 이상해 보이면 사용자에게 확인
+  - 검증된 이슈만 Implementer에게 한번에 전달
+- Implementer 수정 후 → Convention ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
 
-## 마크업 서브에이전트 필수 첨부물
+### Advanced Reviewer
 
-마크업 구현을 서브에이전트에 위임할 때 반드시 전달:
-
-1. **매칭표** (`/plan/background/figma-component-mapping.md`) — props 결정 기준
-2. **기존 mixin/레이아웃 패턴** — page-container 등이 이미 제공하는 padding/gap 정보. 중복 방지
-3. **"피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"** 명시 지침 — 스크린샷 보고 감으로 작성 금지
-4. **"하드코딩 금지, 토큰만 사용"** 규칙 — `16px` 대신 `var(--semantic-padding-lg)`
-5. **구현 후 피그마 자동 대조 단계** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
+- Advanced Reviewer ↔ Implementer 직접 DM으로 루프
+- Lead 개입 없음
+- 0건이면 Lead에게 보고
 
 ---
 
@@ -88,3 +100,14 @@
 
 - 기존 모듈을 대체할 때 바로 삭제하지 말고 `@deprecated` 처리 먼저. 다른 곳에서 참조 중일 수 있다.
 - 새 파일/모듈을 만들기 전에 프로젝트에 같은 역할의 코드가 이미 있는지 확인한다. 기존 API, 타입, 컴포넌트를 재사용할 수 있으면 새로 만들지 않는다.
+
+---
+
+## 마무리
+
+- 전체 리뷰 완료 후, Lead가 사용자에게 리뷰 결과 보고
+  - 커밋 목록
+  - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
+  - 수정 사항 (있는 경우)
+- 사용자가 직접 코드 확인
+- **리뷰어를 shutdown하지 않음** (pre-exit 회고용 — Lead가 리뷰어에게 반복 패턴, 빈출 위반 유형 등을 질문 가능)
