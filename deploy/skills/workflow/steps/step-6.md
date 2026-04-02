@@ -6,22 +6,6 @@
 
 ---
 
-## 스킬 로드
-
-| 순서 | 조건 | 스킬 | 실행 | 설명 |
-|:---:|------|------|------|------|
-| 1 | 코드 리뷰 | [code-review](../code-review/SKILL.md) | 서브에이전트 | 코드 품질 검증 |
-
----
-
-## 선행조건 자가체크
-
-시작 전에 아래 자료가 존재하는지 확인한다. 없으면 사용자에게 요청한다.
-
-- **리뷰 규칙** — step 3에서 수집되었으면 패스
-
----
-
 ## 리뷰 모드
 
 사용자에게 확인한다:
@@ -32,6 +16,15 @@
 | **남의 코드** | 타인의 PR 리뷰 (리뷰 대상은 해당 작성자가 수정한 코드에 한정) |
 
 남의 코드 리뷰 시 PR 본문과 커밋 히스토리도 함께 읽고 변경 의도를 파악한다.
+
+---
+
+## 새 Spawn
+
+step-5 리뷰어와 별개로 아래를 새로 spawn한다. 컨텍스트 주입은 [step-5.md](step-5.md)와 동일한 기준 (Figma Reviewer 제외).
+
+- `convention-reviewer-final` ×N (sonnet) — Convention Reviewer와 동일한 분할 기준
+- `advanced-reviewer-final` (opus) — coding standard 판단 + 자유 리뷰
 
 ---
 
@@ -54,25 +47,39 @@
 
 ---
 
-## Step 6.2. 코드 리뷰
+## Step 6.2. 리뷰 파이프라인
 
-[coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 관련 컨벤션을 로드하고, 코드를 검증한다. 컨벤션 기반 검증 + 전문가 판단.
+Lead가 [coding-standards/](../../../contexts/coding-standards/), [conventions/](../../../contexts/conventions/)에서 관련 컨벤션을 확인하고 Convention-final / Advanced-final에게 전달한다.
 
-### 서브에이전트 리뷰 (전부 병렬)
+PR 전체 diff를 대상으로 아래 파이프라인을 수행한다. **단계 간 직렬, Convention 내부만 병렬.**
 
-아래 서브에이전트들을 **동시에** 실행한다.
+```
+1. Convention-final ×N (병렬) → Lead 종합 → Implementer → 반복 (0건까지)
+       ↓
+2. Advanced-final ↔ Implementer (직접 루프, 0건까지)
+```
 
-**컨벤션 리뷰** — 컨벤션 문서 1개당 서브에이전트 1개. 각 에이전트는 전체 수정 파일을 해당 컨벤션 관점에서만 리뷰한다 (좁고 깊게). Step 5의 커밋별 리뷰와 상호보완적이다 — Step 5는 변경 단위, Step 6은 전체 PR 단위.
+### 1단계: Convention-final ×N
 
-**자유 리뷰** — 구현 의도·컨벤션 없이 코드만 보는 외부 리뷰어 서브에이전트 1개. 실제 PR 리뷰어와 같은 조건에서, 코드가 스스로 설명하지 못하는 부분·불필요한 복잡성·이상한 네이밍 등을 짚는다. 남의 코드 리뷰 시에는 내가 작성한 코멘트의 타당성을 검증한다.
+- Convention-final ×N 병렬 리뷰 (PR 전체 diff 대상)
+- 결과를 Lead에게 제출
+- Lead가 종합 (중복 제거 + 이상한 지적은 사용자에게 확인)
+- 검증된 이슈만 Implementer에게 한번에 전달
+- Implementer 수정 후 → Convention-final ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
 
-### 수정
+### 2단계: Advanced-final
 
-리뷰에서 지적된 사항은 메인 에이전트가 직접 수정하고 커밋한다. 메인 에이전트가 Step 5에서 코드를 직접 작성했으므로, 구현 의도를 보존하면서 정확하게 수정할 수 있다.
+- Advanced-final ↔ Implementer 직접 DM으로 루프
+- Lead 개입 없음
+- 0건이면 Lead에게 보고
+- **자유 리뷰 포함**: 구현 의도·컨벤션 없이 코드만 보는 외부 리뷰어 시점. 코드가 스스로 설명하지 못하는 부분·불필요한 복잡성·이상한 네이밍 등을 짚는다.
+- **남의 코드 리뷰 시**: Advanced-final이 내가 작성한 코멘트의 타당성을 검증한다
 
-### 산출물
+---
 
-결과를 `/plan/pr{N}/review.md`에 작성합니다.
+## 산출물
+
+결과를 `/plan/pr{N}/review.md`에 작성한다.
 
 ### 코멘트 연동 (남의 코드)
 
@@ -85,5 +92,6 @@
 산출물 작성 후 사용자에게 다음을 요약하여 보고:
 
 - Gap Analysis 결과 (계획 대비 추가/변경된 커밋이 있는 경우)
-- 코드 리뷰에서 발견된 Critical/Minor 이슈 요약
-- 자유 리뷰 결과
+- Convention-final: 발견된 Critical/Minor 이슈 요약
+- Advanced-final: 자유 리뷰 결과
+- 수정 사항
