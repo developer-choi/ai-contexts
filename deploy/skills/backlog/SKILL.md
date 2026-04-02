@@ -11,6 +11,16 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 
 모든 프로젝트의 백로그를 AC에서 중앙 관리한다. 타 프로젝트(MP, DC 등) 전용 항목도 AC의 `plan/backlog/`에 기록한다.
 
+## 워크트리
+
+백로그 파일은 상시 워크트리에서 관리한다. AC 본체(master)에서 브랜치를 전환하지 않는다.
+
+- **경로**: `~/WebstormProjects/main/ai-contexts-backlog/`
+- **자동 생성**: 워크트리가 없으면 AC 본체에서 생성한다:
+  ```
+  git worktree add ~/WebstormProjects/main/ai-contexts-backlog backlog
+  ```
+
 ---
 
 ## 준비
@@ -138,34 +148,22 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 
 ---
 
-## 브랜치 관리
+## 백로그 정리
 
-### 구조
+사용자가 "백로그 정리", "커밋 정리" 등을 요청하면 실행한다.
 
-backlog 브랜치 = master HEAD + plan/ 커밋. master의 모든 파일이 있고, 그 위에 `plan/` 폴더가 추가된 형태다.
+### 1. 내용 정리
 
-- `plan/` 변경은 backlog 브랜치에서만 커밋한다
-- `plan/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
-- master와 backlog는 서로 병합하지 않는다
+리뷰 모드로 항목을 순회하며 정리/삭제/구체화한다.
 
-### 평소
+### 2. 커밋 정리
 
-백로그를 추가·수정할 때마다 자유롭게 커밋을 쌓는다. 스쿼시하지 않는다. 커밋이 나뉘어 있어야 사용자가 `git diff`로 새로 추가된 항목을 확인할 수 있다.
+최신 master 위에 plan/ 스쿼시 커밋 1개만 남긴다.
 
-### master 동기화
+1. plan/ 폴더를 임시 위치에 복사
+2. `git reset --hard origin/master`
+3. plan/ 폴더를 복원
+4. `git add plan/ && git commit`
+5. `git push --force origin backlog`
 
-backlog 브랜치가 master보다 뒤처지면 master를 rebase한다:
-
-```
-git checkout backlog && git rebase master
-```
-
-### 스쿼시 (정리 시점)
-
-사용자가 백로그 검토·정리를 완료한 뒤 "백로그 정리", "브랜치 정리", "커밋 정리" 등을 요청하면 실행한다.
-
-1. master를 rebase하여 최신 상태로 맞춘다
-2. master 이후의 plan/ 커밋들을 1개로 스쿼시한다
-3. `origin/backlog`에 force-push한다
-
-결과: backlog = master HEAD + plan/ 스쿼시 커밋 1개.
+결과: backlog = 최신 master + plan/ 커밋 1개.
