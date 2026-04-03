@@ -89,7 +89,6 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 
 ```markdown
 ---
-status: ready | not-ready
 target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 ---
 
@@ -99,19 +98,44 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 
 (왜 필요한지)
 
-## {기능 1}
+## {기능 1} `ready`
 
 - 세부 내용
 - 세부 내용
 
-## {기능 2}
+## {기능 2} `not-ready`
+
+- 세부 내용
+
+## {기능 3} `done`
 
 - 세부 내용
 ```
 
 기능 단위로 섹션을 나눈다. 각 섹션 안에서 세부 내용을 정리한다.
 
-### 인덱스: `plan/backlog/index.md`
+상태는 섹션 제목 뒤에 인라인 코드로 표기한다:
+
+- **`not-ready`**: 아직 구체화 필요 (기본값, 생략 가능)
+- **`ready`**: 구체화 완료, skill-creator로 넘길 수 있음
+- **`done`**: 구현 완료
+
+### 티어별 인덱스: `plan/backlog/tier-{n}/index.md`
+
+각 tier 폴더에 `index.md`를 상시 유지한다. 해당 tier에 속한 항목들의 현황을 한눈에 볼 수 있는 파일이다.
+
+```markdown
+# Tier-{n}
+
+| 파일 | 상태 요약 |
+|------|-----------|
+| workflow-convention-preload.md | 기능1 `ready`, 기능2 `not-ready` |
+| workflow-figma-mapping.md | 전체 `ready` |
+```
+
+별도 파일이 추가·변경될 때마다 해당 tier의 index.md도 함께 갱신한다.
+
+### 미분류 인덱스: `plan/backlog/index.md`
 
 ```markdown
 # 미분류
@@ -133,7 +157,7 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 2. 각 항목을 사용자에게 요약 설명한다
 3. `target`이 있으면 해당 스킬의 현재 SKILL.md를 읽고, 현재 구조와 대조하여 백로그를 더 정확하게 기술한다
 4. 사용자와 대화하며 부족한 부분을 구체화한다
-5. 충분히 구체화되면 `status: ready`로 변경한다
+5. 충분히 구체화된 섹션은 제목에 `ready`를 표기한다
 
 ---
 
