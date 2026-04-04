@@ -35,6 +35,7 @@ rules/universal/react/button.md
 principles/personal/general.md [file-folder-structure]
 principles/personal/quality/co-location.md [file-folder-structure]
 principles/personal/react/basics.md
+principles/personal/react/error-handling.md
 principles/personal/typescript/advanced.md
 principles/universal/quality/maintainability.md [file-folder-structure]
 principles/universal/quality/readability.md
