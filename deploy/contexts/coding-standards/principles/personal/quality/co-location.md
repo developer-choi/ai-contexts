@@ -1,7 +1,3 @@
----
-tags: [file-folder-structure]
----
-
 # Co-location: 재사용하지 않으면 같은 파일에 둔다
 
 ## 원칙

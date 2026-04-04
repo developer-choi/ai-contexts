@@ -1,7 +1,3 @@
----
-tags: [file-folder-structure]
----
-
 # General Coding Conventions
 
 ## 주석 전면 금지

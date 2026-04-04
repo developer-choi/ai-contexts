@@ -1,7 +1,3 @@
----
-tags: [file-folder-structure]
----
-
 # 수정하기 쉬운 코드
 
 응집도가 높은 코드
