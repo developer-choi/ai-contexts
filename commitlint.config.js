@@ -25,6 +25,7 @@ module.exports = {
         'simplify',
         'tech-trends',
         'workflow',
+        'writer',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
