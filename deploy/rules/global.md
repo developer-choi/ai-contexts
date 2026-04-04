@@ -48,6 +48,12 @@
 - AC의 `plan/` 외 파일 변경은 master 또는 fix/, feature/ 등 작업 브랜치에서 커밋한다
 - 두 종류의 변경을 같은 커밋에 섞지 않는다
 
+## 외부 프로젝트 수정 시 worktree 감지
+- 현재 작업 중인 프로젝트가 아닌 다른 프로젝트를 수정할 때, 아래 조건 중 하나라도 해당하면 브랜치 직접 전환 대신 worktree를 사용한다:
+  1. uncommitted changes 존재
+  2. 현재 브랜치가 master/main이 아님
+  3. 현재 브랜치에 푸시하지 않은 커밋 존재
+
 ## 페이지 경로 보고 시 클릭 가능한 URL
 - 페이지 경로를 사용자에게 알려줄 때 `/some/path`만 쓰지 않는다.
 - `package.json`에서 dev 서버 프로토콜·도메인·포트를 파악하여 `http://localhost:3000/some/path` 형태의 전체 URL로 제공한다.
