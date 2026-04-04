@@ -22,7 +22,7 @@ Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 
 | `markup.md` | 시각적 구조, 레이아웃, 디자인시스템 | Markup Implementer |
 | `logic.md` | API 호출, Hook 동작, 페이지 Flow, 에러/로딩 | Feature Implementer |
 | `test-cases.md` | 테스트케이스 | Reviewer |
-| `implementation.md` | 구현 순서, 구현 방침 | Implementer |
+| `implementation.md` | 구현 순서 (기존 모듈 대체 시 `@deprecated` 선행), 구현 방침 | Implementer |
 
 ## 구현 컨텍스트 수집
 
