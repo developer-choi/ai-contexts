@@ -10,6 +10,10 @@
 
 - 구체적인 개수를 본문에 하드코딩하지 않는다 (예: "5개 파일을 파생" → "파생 산출물을 생성"). 개수가 바뀌면 본문도 업데이트해야 하므로 유지보수 부담이 생긴다. 테이블이나 목록으로 항목을 나열하면 개수는 자동으로 드러난다.
 
+## coding-standards 파일 관리
+
+- `deploy/contexts/coding-standards/` 하위 파일을 추가·삭제·이동할 때 `map.md`를 함께 갱신한다
+
 ## 백로그 관리
 
 - `plan/` 하위의 백로그 파일은 상시 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)에서 관리한다
