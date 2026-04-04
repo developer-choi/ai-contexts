@@ -49,3 +49,8 @@ argument-hint: [대상 파일/디렉토리 경로 또는 스킬 설명]
 | `deploy/contexts/coding-standards/` | [coding-standards.md](specialized/coding-standards.md) |
 | `deploy/skills/workflow/` | [workflow.md](specialized/workflow.md) |
 | `deploy/skills/workflow/spec-review/` | [spec-review.md](specialized/spec-review.md) |
+
+## Eval
+
+- eval은 반드시 sonnet 모델로 실행한다. 이유: 스킬은 비용 효율적인 모델이 이해할 수 있는 수준으로 작성돼야 한다. opus에서만 동작하는 스킬은 실용적이지 않다.
+- 서브에이전트 위임 구조 테스트는 [eval-delegation.md](eval-delegation.md) 참조.
