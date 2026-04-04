@@ -25,6 +25,9 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 - 같은 step에서 호출되는 스킬들이 **동일한 산출물 디렉토리**를 사용하는지 (예: step-1 스킬 → `/plan/background/`)
 - 산출물 경로가 스킬의 SKILL.md와 step 파일 **양쪽에** 명시되어 있는지
 - 다음 step의 **참고 자료**가 이전 step의 산출물 경로와 일치하는지
+- Lead가 `/plan/` 하위를 탐색하여 산출물을 파악하고 팀에게 분배하는지
+- 파생 산출물이 소비자 테이블(step-4)대로 올바른 에이전트에게 전달되는지
+- 구현 완료 후 소비된 산출물이 삭제되는지 (overview.md 제외)
 
 ### 스킬 로드 테이블 정합성
 
@@ -36,6 +39,17 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 - 하나의 세션/에이전트가 이후 step에서 불필요한 컨텍스트를 누적하고 있지 않은가
 - 분리가 필요하다면 서브에이전트(일회성 분석)로 충분한가, 별도 세션(지속적 작업)이 필요한가
+- 에이전트가 스스로 폴더를 탐색(glob/grep)하지 않고, Lead가 주입한 경로의 파일만 읽는지
+- Markup/Feature Implementer의 컨텍스트가 격리되는지 (CSS 컨텍스트가 Feature에 오염되지 않는지)
+
+### 팀 에이전트 소통 구조
+
+- Figma Reviewer ↔ Implementer, Advanced Reviewer ↔ Implementer가 Lead 개입 없이 직접 루프하는지
+- Convention Reviewer ×N 결과만 Lead가 종합하는지 (sonnet 오탐 필터링)
+- Markup 파이프라인이 3단계(Figma → Convention → Advanced)인지
+- Feature 파이프라인이 2단계(Convention → Advanced)인지
+- 리뷰어는 code-review SKILL.md의 절차를 따르는지
+- 계획과 달라지는 경우 사용자에게 보고하는지
 
 ### 컨벤션 커버리지
 
