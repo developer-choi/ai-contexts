@@ -54,7 +54,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 컨벤션 커버리지
 
-`contexts/coding-standards/` 하위 모든 파일을 읽고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다.
+`contexts/coding-standards/map.md`를 읽고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다.
 
 - 어떤 step에서도 참조되지 않는 코딩 규칙이 있는지
 - 참조 시점이 부적절한 규칙이 있는지 (예: 코딩 컨벤션이 구현 step이 아닌 곳에만 있는 경우)

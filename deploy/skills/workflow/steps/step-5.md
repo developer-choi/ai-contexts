@@ -45,7 +45,7 @@ Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
 
 ### Convention Reviewer 분할
 
-Lead가 [coding-standards/](../../../contexts/coding-standards/), 프로젝트별 컨벤션 폴더 하위의 **폴더구조·파일명만** 살펴보고 주제별로 N개 reviewer를 spawn한다.
+Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md), 프로젝트별 컨벤션 폴더를 확인하고 주제별로 N개 reviewer를 spawn한다.
 
 - 몇 개로 나눌지는 Lead 재량
 

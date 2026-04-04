@@ -18,7 +18,7 @@ argument-hint: (리뷰 대상 — PR 번호, 브랜치, 파일 경로 등)
 
 PR 전체 리뷰 시, PR 본문(description)과 커밋 히스토리도 함께 읽고 변경 의도를 파악한다.
 
-확인 후 [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 관련 컨벤션을 로드한다.
+확인 후 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 컨벤션을 로드한다.
 
 ## 리뷰
 

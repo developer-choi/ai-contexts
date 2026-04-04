@@ -1,6 +1,6 @@
 # Coding-Standards 특화 체크리스트
 
-`contexts/coding-standards/` 리뷰 시 추가로 점검하는 항목.
+`contexts/coding-standards/` 리뷰 시 추가로 점검하는 항목. 파일 목록은 `map.md` 참조.
 
 ## [CRITICAL] 분류 검증
 
