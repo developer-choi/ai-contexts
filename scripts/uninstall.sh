@@ -47,6 +47,19 @@ for category in $CATEGORIES; do
   done
 done
 
+# --- deploy/ 루트의 단독 파일 제거 (settings.json, CLAUDE.md 등) ---
+for file in "$SRC_DIR"/*; do
+  [ -f "$file" ] || continue
+  file_name="$(basename "$file")"
+  target_path="$TARGET_DIR/$file_name"
+
+  if [ -f "$target_path" ]; then
+    rm -f "$target_path"
+    echo "  DEL   $file_name"
+    removed=$((removed + 1))
+  fi
+done
+
 # --- OpenCode commands 제거 ---
 OPENCODE_CMD_DIR="$HOME/.config/opencode/commands"
 skills_src="$SRC_DIR/skills"
