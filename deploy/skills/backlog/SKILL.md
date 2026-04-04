@@ -76,7 +76,7 @@ argument-hint: [구두 필기 또는 메모 파일 경로]
 파일명은 아래 중 하나로 한다:
 
 - `deploy/skills/` 하위 스킬명 (예: `workflow.md`, `scw.md`)
-- `deploy/contexts/` 하위 폴더명 (예: `coding-standards.md`, `conventions.md`)
+- `deploy/contexts/` 하위 폴더명 (예: `coding-standards.md`)
 - 프로젝트명 (예: `monorepo-playground.md`, `dsa-playground.md`)
 - 그 외 역할 단위 (예: `rules.md`, `agent.md`, `gotchas.md`)
 
