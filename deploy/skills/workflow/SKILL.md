@@ -12,14 +12,14 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 | 세션 | 담당 | 컨텍스트 |
 |------|------|----------|
 | **PLANNING_SESSION** (1개) | Step 1~4 + 회고 | 기획서, 요구사항, 기술 전략, PR 분할 |
-| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | 해당 PR의 `/plan/pr{N}/overview.md` + 컨벤션. 이 PR 하나에만 집중 |
+| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | 해당 PR의 `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
 
-분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락은 구현 시 불필요하고 오히려 집중을 방해한다. 마찬가지로, 다른 PR의 구현 맥락도 현재 PR에 불필요하다. 각 IMPLEMENTATION_SESSION은 해당 PR의 overview.md와 컨벤션만으로 깨끗하게 시작한다.
+분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락은 구현 시 불필요하고 오히려 집중을 방해한다. 마찬가지로, 다른 PR의 구현 맥락도 현재 PR에 불필요하다. 각 IMPLEMENTATION_SESSION은 해당 PR의 `/plan/pr{N}/` 산출물과 컨벤션만으로 깨끗하게 시작한다.
 
 PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 안내한다:
 
 > 모든 PR의 계획이 완료되었습니다. 구현은 **PR마다 새 세션**에서 진행합니다.
-> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr1/overview.md` 기반으로 구현합니다"라고 말씀해주세요.
+> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr1/` 기반으로 구현합니다"라고 말씀해주세요.
 > 하나의 PR이 끝나면(Step 7 완료), 다시 새 세션을 열어 다음 PR을 진행합니다.
 
 ## 구조
@@ -35,6 +35,18 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
   - **실무 프로젝트**: 필수
   - **채용 과제 등**: 생략 가능
 
+## /plan/ 폴더 구조
+
+```
+/plan/
+  background/
+    read-only/     ← 사용자 제공 원본 (삭제 불가)
+    (AI 산출물)    ← 소비 후 삭제
+  pr{N}/
+    overview.md    ← step-3 산출물
+    (파생 산출물)  ← step-4 산출물, 구현 후 삭제
+```
+
 ## 금지 작업
 
 사용자가 요청 시 제지하고 직접 수행 안내:
@@ -42,11 +54,6 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 ### 1. 라이브러리 초기 셋팅
 - 새로운 라이브러리/프레임워크의 초기 설치 및 환경 구성
 - 이유: 공식 문서 보고 사용자가 직접 구축
-
-### 2. 역주행 금지
-- 구현 단계 진입 후 계획 문서(`/plan/pr{N}/overview.md`) 수정 위해 되돌아가지 말기
-- 기획 변경 시 코드에 바로 반영, 나중에 기획서와 대조
-- **전진(Forward Only)**: 문서는 완벽할 필요 없음. 완벽해야 할 건 기획서, 디자인
 
 ## 작업 진행 순서
 

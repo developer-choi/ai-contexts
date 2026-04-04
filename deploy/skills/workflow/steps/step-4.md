@@ -4,19 +4,29 @@
 
 > **Plan mode 필수**. Step 3에서 승인된 과제에 대해서만 작성한다.
 
-Step 3이 "뭘 쓸지"를 결정했다면, 이 단계는 "어떻게 구현할지"의 큰 그림을 잡는다. `/plan/pr{N}/overview.md`에 구현 방침을 추가한다. Step 3의 기술 선택·결정·근거를 반복하지 않는다.
+Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 구현할지"를 상세화한다. overview.md를 기반으로 파생 산출물을 생성한다. Step 3의 기술 선택·결정·근거를 반복하지 않는다.
 
 ---
 
-## page.md 잔여 흡수
+## 잔여 산출물 소비
 
-spec-review 산출물(page.md, global.md, layout.md)이 남아 있으면 나머지를 모두 흡수하고 원본을 삭제한다.
+`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, 아래 파생 산출물로 분배한다. 소비된 원본은 삭제한다 (`read-only/` 하위는 삭제하지 않는다).
 
 ---
+
+## 파생 산출물
+
+| 파일 | 내용 | 소비자 |
+|------|------|--------|
+| `interface.md` | 파일 위치, props, 함수 시그니처 | 전원 (공유 계약) |
+| `markup.md` | 시각적 구조, 레이아웃, 디자인시스템 | Markup Implementer |
+| `logic.md` | API 호출, Hook 동작, 페이지 Flow, 에러/로딩 | Feature Implementer |
+| `test-cases.md` | 테스트케이스 | Reviewer |
+| `implementation.md` | 구현 순서, 구현 방침 | Implementer |
 
 ## 구현 컨텍스트 수집
 
-IMPLEMENTATION_SESSION에서 Lead가 팀에게 컨텍스트를 주입할 때, overview.md에 적힌 경로를 기반으로 분배한다. 따라서 이 단계에서 구현에 필요한 컨텍스트를 미리 수집하여 overview.md에 **구체적인 파일 경로로** 명시해야 한다.
+IMPLEMENTATION_SESSION에서 Lead가 팀에게 컨텍스트를 주입할 때, 산출물에 적힌 경로를 기반으로 분배한다. 따라서 이 단계에서 구현에 필요한 컨텍스트를 미리 수집하여 **각 파일에 맞는 경로를 해당 파일에** 명시해야 한다.
 
 사용자에게 질문하여 수집한다:
 - 관련 컨벤션 경로 (프로젝트별 컨벤션이 있는지)
@@ -28,8 +38,10 @@ IMPLEMENTATION_SESSION에서 Lead가 팀에게 컨텍스트를 주입할 때, ov
 [coding-standards/README.md](../../../contexts/coding-standards/README.md)에서 `file-folder-structure` 태그가 붙은 문서를 확인하고, 파일·컴포넌트 구조 설계에 반영한다.
 
 MP(`~/WebstormProjects/main/monorepo-playground`)의 `docs/best-practices-map.md`를 확인하여 현재 구현에 매칭되는 패턴이 있는지 탐색한다.
-- 매칭되는 엔트리가 있으면 overview.md에 참조 패턴으로 기록한다
+- 매칭되는 엔트리가 있으면 해당 산출물에 참조 패턴으로 기록한다
 - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
+
+결정 가능한 컨벤션은 전부 산출물에 녹인다 (파일 경로, 토큰 사용 규칙, 에러처리 전략 등). 이를 통해 이후 구현 단계에서 컨벤션 원본을 가급적 덜 볼 수 있게 한다.
 
 ---
 
@@ -42,17 +54,17 @@ MP(`~/WebstormProjects/main/monorepo-playground`)의 `docs/best-practices-map.md
 
 ---
 
-## overview.md 리뷰
+## 산출물 리뷰
 
-구현 방침 작성이 끝나면, 서브에이전트로 overview.md를 리뷰한다.
+파생이 끝나면, 서브에이전트로 전체 산출물을 리뷰한다.
 
-- overview.md에 적힌 내용 기반으로 관련 코딩 컨벤션을 찾아 대조한다 (컴포넌트 설계가 있으면 컴포넌트 컨벤션, 테스트 계획이 있으면 테스트 컨벤션)
+- 각 산출물에 적힌 내용 기반으로 관련 코딩 컨벤션을 찾아 대조한다 (컴포넌트 설계가 있으면 컴포넌트 컨벤션, 테스트 계획이 있으면 테스트 컨벤션)
 - 모순, 누락, 컨벤션 위반이 발견되면 사용자에게 보고한다
 
 ---
 
 ## 보고 내용
 
-- 추가된 구현 방침 핵심 요약
+- 파생된 산출물 핵심 요약
 - PR 분할 재검토 필요 여부
-- overview.md 리뷰 결과
+- 산출물 리뷰 결과

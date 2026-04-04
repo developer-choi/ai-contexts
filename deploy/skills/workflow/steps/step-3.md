@@ -28,19 +28,19 @@
 | 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 서브에이전트 | 증상과 Root Cause 분석. 산출물: `/plan/background/bug-analysis.md` |
 | 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | — | 필수 참조. 설치 범위 논의 |
 
-### page.md → overview.md 변환 + 기술 전략 수립
+### overview.md 생성 + 기술 전략 수립
 
-spec-review 산출물(page.md, global.md, layout.md)을 기반으로 overview.md를 작성한다.
+`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 산출물을 읽고, overview.md를 작성한다. 이 단계에서는 읽기만 하며, 원본 산출물을 삭제하지 않는다 (소비는 Step 4에서).
 
-이 단계는 "뭘 쓸지"를 결정한다. "어떻게 구현할지"는 Step 4에서 다루므로, 여기서는 기술 선택의 근거에만 집중한다.
+이 단계는 "무엇을 구현할지"를 결정한다. "어떻게 구현할지"는 Step 4에서 다루므로, 여기서는 기술 선택의 근거에만 집중한다.
 
 ### 산출물: `/plan/pr{N}/overview.md`
 
-PR별로 아래 항목을 포함한다:
+PR별로 아래 항목을 포함한다. 상세 스펙이나 구체적 기술 키워드(라이브러리명, px값 등)는 넣지 않는다 — 의도 수준만 기술한다.
 - 참고 자료
 - 이 PR의 목표
-- 디자인 및 레이아웃 컨셉 (피그마 없는 경우)
-- 핵심 기술적 과제 및 기술 전략 (선택지 비교 + 결정 근거)
+- 기술 선택과 근거 (선택지 비교 + 결정)
+- 범위 요약 (뭘 만드는지의 경계)
 
 ### [CRITICAL] Project 문서 간소화
 
