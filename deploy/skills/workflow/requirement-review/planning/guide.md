@@ -31,6 +31,7 @@
 
 - `/plan/background/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트, TODO 목록
 - `/plan/pr{N}/page.md` — **생성**. 페이지별 분석 결과 (N은 사용자 플로우 순서)
+- `/plan/background/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
 
 ### 분석 과정
 
