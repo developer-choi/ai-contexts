@@ -14,8 +14,8 @@ step-5 진입 시 아래 팀을 spawn한다.
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
-├── Markup Implementer (sonnet) — 마크업 구현
-├── Feature Implementer (sonnet) — 로직 구현
+├── Markup Implementer (sonnet) — 마크업 전용 (CSS, 최소한의 컴포넌트 props). 로직·테스트 작성 안 함
+├── Feature Implementer (sonnet) — 로직 구현 + 테스트 작성 + React.memo 등 성능 최적화
 ├── Figma Reviewer (sonnet) — 피그마 토큰 대조 (Markup Implementer 커밋에서만)
 ├── Convention Reviewer ×N (sonnet) — 컨벤션 기계적 대조
 └── Advanced Reviewer (opus) — coding standard 판단 + 자유 리뷰
