@@ -15,7 +15,7 @@
 
 #### 산출물 생성
 
-[output-template.md](../output-template.md)의 global.md 템플릿을 `/plan/background/global.md`에, page.md 템플릿을 `/plan/pr1/page.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
+[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/global.md`에, page.md 템플릿을 `/plan/pr1/page.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
 
 ### 입력 자료
 
@@ -36,7 +36,7 @@
 
 #### 자료 받기
 
-한 페이지의 리뷰가 끝나면, [output-template.md](../output-template.md)의 page.md 템플릿으로 다음 `/plan/pr{N}/page.md`를 생성합니다. 사용자에게 다음 페이지 자료를 요청합니다.
+한 페이지의 리뷰가 끝나면, [output-template.md](./output-template.md)의 page.md 템플릿으로 다음 `/plan/pr{N}/page.md`를 생성합니다. 사용자에게 다음 페이지 자료를 요청합니다.
 
 사용자가 자료를 제출하면, 이미지인 경우 `/plan/pr{N}/` 하위로 이동합니다. 1장이면 `page.png`, 여러 장이면 식별 가능한 이름을 붙입니다 (예: `page-list.png`, `page-detail.png`).
 
