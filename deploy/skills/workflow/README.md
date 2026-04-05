@@ -14,6 +14,56 @@
 
 워크플로우의 각 단계는 작업 종류(기능 개발, 버그 수정, 채용 과제 등)에 따라 다른 전문 스킬을 호출합니다. 워크플로우 자체는 "언제 어떤 스킬을 호출할지"를 판단하는 오케스트레이터 역할을 합니다.
 
+## 에이전트 구조
+
+이 워크플로우는 세 종류의 에이전트를 조합합니다.
+
+### 메인 에이전트 (Lead)
+
+전체 흐름을 관리합니다. 사용자와 소통하고, 각 단계에서 어떤 스킬을 호출할지 판단하고, 에이전트들에게 필요한 정보를 전달합니다.
+
+### Agent Teams (Step 5)
+
+구현과 리뷰 단계에서는 Claude Code의 [Agent Teams](https://code.claude.com/docs/en/agent-teams) 기능으로 역할별 AI 팀을 구성합니다.
+
+- **Lead** — 사용자 소통 + 리뷰 종합
+- **Markup Implementer** — 마크업 전용
+- **Feature Implementer** — 로직 + 테스트
+- **Figma Reviewer** — 디자인 시안과 코드 비교
+- **Convention Reviewer** — 코딩 규칙 검증
+- **Advanced Reviewer** — 코드 품질 심층 리뷰
+
+Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을 리뷰합니다. 이슈가 있으면 Reviewer가 Implementer에게 직접 전달하고, 이슈가 0건이 될 때까지 반복합니다. 컨벤션 검증만 여러 리뷰어가 동시에 수행하고, 나머지 단계는 순서대로 진행됩니다.
+
+> "Agent teams let you coordinate multiple Claude Code instances working together. One session acts as the team lead, coordinating work, assigning tasks, and synthesizing results. Teammates work independently, each in its own context window, and communicate directly with each other."
+> — [Claude Code Docs: Agent Teams](https://code.claude.com/docs/en/agent-teams)
+
+### 서브에이전트
+
+에이전트 간 소통이 필요 없는 단독 작업을 위임할 때 사용합니다. Agent Teams와 달리 결과만 보고받는 구조입니다.
+
+### 왜 팀을 선택했나요?
+
+서브에이전트는 작업을 마치면 종료됩니다. Agent Teams의 에이전트는 세션이 끝날 때까지 살아 있습니다. 여러 커밋에 걸쳐 리뷰 맥락이 누적되므로, 커밋이 쌓일수록 더 정확한 리뷰가 가능합니다. 작업이 끝난 뒤에는 에이전트에게 회고를 요청할 수도 있습니다.
+
+> "Unlike subagents, which run within a single session and can only report back to the main agent, you can also interact with individual teammates directly without going through the lead."
+> — [Claude Code Docs: Agent Teams](https://code.claude.com/docs/en/agent-teams)
+
+### 왜 구현자와 리뷰어를 분리했나요?
+
+코드를 작성한 에이전트가 직접 리뷰하면, 자기가 작성한 방향에 치우쳐서 문제를 놓치기 쉽습니다. 독립된 리뷰어가 처음 보는 시선으로 코드를 검토해야 실제 문제를 잡아낼 수 있습니다.
+
+> "Sequential investigation suffers from anchoring: once one theory is explored, subsequent investigation is biased toward it."
+> — [Claude Code Docs: Agent Teams](https://code.claude.com/docs/en/agent-teams)
+
+### 왜 리뷰어를 여러 명으로 나눴나요?
+
+비용 효율 때문입니다. 코딩 규칙 대조처럼 기계적인 검증은 가벼운 모델(Sonnet)이 잘 처리합니다. 설계 판단이나 자유 리뷰처럼 깊은 사고가 필요한 작업은 무거운 모델(Opus)에게 맡깁니다. 각 모델이 잘하는 영역에 집중시켜서 비용 대비 리뷰 품질을 높입니다.
+
+### 왜 0건이 될 때까지 반복하나요?
+
+리뷰에서 발견한 이슈를 수정한 뒤 다시 확인하면, 여전히 문제가 남아 있는 경우가 있습니다. 한 번 리뷰로는 충분하지 않기 때문에, 이슈가 0건이 나올 때까지 리뷰-수정 사이클을 반복합니다.
+
 ## 8단계 흐름
 
 ### Step 1. 배경 파악
@@ -39,11 +89,11 @@
 
 ### Step 5. 구현
 
-팀을 spawn하고 Implementer가 코드를 작성합니다. 커밋마다 3단계 리뷰 파이프라인(Figma → Convention ×N → Advanced)을 수행합니다.
+Agent Teams로 역할별 AI 팀을 구성하고, Implementer가 코드를 작성합니다. 커밋마다 디자인 대조 → 컨벤션 검증 → 고급 리뷰 순서로 3단계 리뷰를 수행합니다.
 
 ### Step 6. 최종 점검
 
-step-5 리뷰어의 편향을 방지하기 위해 새 리뷰어를 spawn하고, PR 전체 diff를 대상으로 재검증합니다.
+구현 단계의 리뷰어가 같은 코드를 반복해서 보면 편향이 생길 수 있습니다. 이를 방지하기 위해 새로운 리뷰어를 투입하고, PR 전체 변경사항을 처음부터 다시 검증합니다.
 
 ### Step 7. PR 본문 작성
 
