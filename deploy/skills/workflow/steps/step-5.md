@@ -112,7 +112,6 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
   - 수정 사항 (있는 경우)
 - 사용자가 직접 코드 확인
-- **리뷰어를 shutdown하지 않음** (pre-exit 회고용 — Lead가 리뷰어에게 반복 패턴, 빈출 위반 유형 등을 질문 가능)
 
 ---
 

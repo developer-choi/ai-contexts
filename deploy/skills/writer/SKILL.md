@@ -11,7 +11,6 @@ argument-hint: [create (기본) | report]
 
 - writer 팀 에이전트(`deploy/agents/writer.md`)가 현재 팀에 없으면 스폰한다
 - 이미 떠 있으면 기존 에이전트에 SendMessage로 전달한다
-- 세션 종료 전까지 에이전트를 유지한다 (교정 사례 축적을 위해)
 
 ## 모드
 
