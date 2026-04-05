@@ -26,6 +26,7 @@ module.exports = {
         'tech-trends',
         'workflow',
         'writer',
+        'full-refresh',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
