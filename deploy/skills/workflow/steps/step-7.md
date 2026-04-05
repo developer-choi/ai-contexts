@@ -4,7 +4,7 @@
 
 ## 준비
 
-`/plan/`에서 이전 PR의 pr-body.md가 있으면 읽고, 섹션 구조·서술 패턴을 맞춘다.
+`/plan/`에서 이전 PR의 pr-body.md가 있으면 읽고, 섹션 구조·서술 패턴을 맞춘다. step-6 산출물도 참조한다.
 
 ## PR 본문 작성 (`/plan/pr{N}/pr-body.md`)
 

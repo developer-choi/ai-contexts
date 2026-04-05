@@ -25,3 +25,5 @@
 
 ## 6. URL / 라우팅 / 렌더링 → [routing.md](./routing.md)
 
+## 7. 기능별 점검 → [features.md](./features.md)
+
