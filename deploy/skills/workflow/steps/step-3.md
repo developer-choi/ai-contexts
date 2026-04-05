@@ -26,7 +26,7 @@
 | 순서 | 조건 | 스킬 | 실행 | 설명 |
 |:---:|------|------|------|------|
 | 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 서브에이전트 | 증상과 Root Cause 분석. 산출물: `/plan/background/bug-analysis.md` |
-| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../recruitment-review/install-packages.md) | — | 필수 참조. 설치 범위 논의 |
+| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../requirement-review/recruitment/install-packages.md) | — | 필수 참조. 설치 범위 논의 |
 
 ### overview.md 생성 + 기술 전략 수립
 

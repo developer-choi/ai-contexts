@@ -20,8 +20,7 @@
 
 프로젝트의 현재 상황과 요구사항을 수집합니다. 기획서, 피그마, 버그 리포트 등 주어진 자료를 읽고 "무엇을 왜 해야 하는지"를 정리합니다. 작업 종류에 따라 다른 스킬이 호출됩니다.
 
-- [spec-review](spec-review/README.md) — 기획서의 빠진 부분과 모호한 점을 점검
-- [recruitment-review](recruitment-review/README.md) — 채용 과제 요구사항 분석 및 어필 포인트 발굴
+- [requirement-review](requirement-review/SKILL.md) — 기획서, 디자인 시안, 채용과제 요구사항을 개발자 관점에서 리뷰
 - [bug-investigation](bug-investigation/README.md) — 버그의 근본 원인 추적 및 수정 방안 제안
 
 ### Step 2. PR 분할

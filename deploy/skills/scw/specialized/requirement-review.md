@@ -1,10 +1,10 @@
-# spec-review 특화 체크리스트
+# requirement-review 특화 체크리스트
 
-`skills/workflow/spec-review/` 리뷰 시 추가로 점검하는 항목.
+`skills/workflow/requirement-review/` 리뷰 시 추가로 점검하는 항목.
 
 ## 배경
 
-spec-review는 output-template(산출물 양식), checklist(점검 항목), SKILL.md(실행 흐름) 3계층으로 구성된다. 각 계층이 독립적으로 수정되므로, 계층 간 참조가 빠지기 쉽다.
+requirement-review는 output-template(산출물 양식), checklist(점검 항목), SKILL.md(실행 흐름), guide.md(입력 타입별 가이드)로 구성된다. 각 계층이 독립적으로 수정되므로, 계층 간 참조가 빠지기 쉽다.
 
 ## 특화 항목
 

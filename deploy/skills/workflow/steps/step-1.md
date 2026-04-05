@@ -12,8 +12,8 @@
 
 | 순서 | 조건 | 스킬 | 설명 |
 |:---:|------|------|------|
-| 1 | 신규 기능 / 리팩토링 | [spec-review](../spec-review/SKILL.md) | 기획서·피그마·이슈 기반 배경 파악 |
-| 2 | 채용 과제 | [recruitment-review](../recruitment-review/SKILL.md) | 과제 요구사항 리뷰 |
+| 1 | 신규 기능 / 리팩토링 | [requirement-review](../requirement-review/SKILL.md) planning | 기획서·피그마·이슈 기반 배경 파악 |
+| 2 | 채용 과제 | [requirement-review](../requirement-review/SKILL.md) recruitment | 과제 요구사항 리뷰 |
 
 모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.
 
@@ -21,7 +21,7 @@
 
 ## 중복 조기 발견
 
-spec-review 또는 codebase-audit 단계에서 디자인·컴포넌트 중복이 있으면 선제적으로 짚는다. 나중에 통합 얘기를 꺼내면 중복 QA가 발생하므로, 초기에 발견하는 것이 비용이 적다.
+requirement-review 또는 codebase-audit 단계에서 디자인·컴포넌트 중복이 있으면 선제적으로 짚는다. 나중에 통합 얘기를 꺼내면 중복 QA가 발생하므로, 초기에 발견하는 것이 비용이 적다.
 
 ---
 

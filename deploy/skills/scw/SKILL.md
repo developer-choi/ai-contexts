@@ -48,7 +48,7 @@ argument-hint: [대상 파일/디렉토리 경로 또는 스킬 설명]
 |-----------|-----------|
 | `deploy/contexts/coding-standards/` | [coding-standards.md](specialized/coding-standards.md) |
 | `deploy/skills/workflow/` | [workflow.md](specialized/workflow.md) |
-| `deploy/skills/workflow/spec-review/` | [spec-review.md](specialized/spec-review.md) |
+| `deploy/skills/workflow/requirement-review/` | [requirement-review.md](specialized/requirement-review.md) |
 
 ## Eval
 
