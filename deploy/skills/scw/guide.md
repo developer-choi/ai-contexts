@@ -7,6 +7,13 @@ skill-creator 플러그인을 사용하되, 이 프로젝트에서는 추가로 
 스킬을 만들기 전에 아래 블로그를 읽어라. how 최소화, gotchas 축적 등 이 가이드의 원칙이 여기서 나왔다:
 - https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
 
+## skill-discovery
+
+신규 스킬을 만들기 전에, 기존 스킬 중 유사한 것을 탐색하여 구조/패턴을 참고한다.
+
+- `deploy/skills/` 하위 SKILL.md들의 description을 읽어 유사 스킬 탐색
+- 유사 스킬이 있으면 구조를 참고하여 신규 스킬 설계
+
 ## how 최소화 원칙
 
 - 새 스킬이든 기존 스킬 개선이든, what(무엇을 하라)만 남기고 how(어떻게 하라)는 최소화한다
