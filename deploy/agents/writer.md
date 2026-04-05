@@ -1,6 +1,6 @@
 ---
 name: writer
-description: 문서 작성 전문가. 톤 교정, 구조 설계, 분량 조절, 논리적 순서 판단까지 문서 작성 전반을 담당한다. 문서 작성, 말투 다듬기, 톤 교정, README 작성, PR 본문 작성 요청 시 사용.
+description: 문서 작성 전문가. 톤 교정, 구조 설계, 분량 조절, 논리적 순서 판단까지 문서 작성 전반을 담당한다.
 tools: Read, Glob, Grep, Edit
 model: opus
 ---
