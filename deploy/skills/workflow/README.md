@@ -42,12 +42,11 @@ Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을
 
 에이전트 간 소통이 필요 없는 단독 작업을 위임할 때 사용합니다. Agent Teams와 달리 결과만 보고받는 구조입니다.
 
+## 설계 근거
+
 ### 왜 팀을 선택했나요?
 
 서브에이전트는 작업을 마치면 종료됩니다. Agent Teams의 에이전트는 세션이 끝날 때까지 살아 있습니다. 여러 커밋에 걸쳐 리뷰 맥락이 누적되므로, 커밋이 쌓일수록 더 정확한 리뷰가 가능합니다. 작업이 끝난 뒤에는 에이전트에게 회고를 요청할 수도 있습니다.
-
-> "Unlike subagents, which run within a single session and can only report back to the main agent, you can also interact with individual teammates directly without going through the lead."
-> — [Claude Code Docs: Agent Teams](https://code.claude.com/docs/en/agent-teams)
 
 ### 왜 구현자와 리뷰어를 분리했나요?
 
@@ -58,7 +57,11 @@ Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을
 
 ### 왜 리뷰어를 여러 명으로 나눴나요?
 
-비용 효율 때문입니다. 코딩 규칙 대조처럼 기계적인 검증은 가벼운 모델(Sonnet)이 잘 처리합니다. 설계 판단이나 자유 리뷰처럼 깊은 사고가 필요한 작업은 무거운 모델(Opus)에게 맡깁니다. 각 모델이 잘하는 영역에 집중시켜서 비용 대비 리뷰 품질을 높입니다.
+두 가지 이유입니다.
+
+첫째, **리뷰 정확도**입니다. 컨벤션 종류가 많아서 하나의 리뷰어가 모든 규칙을 동시에 보면 놓치는 것이 생깁니다. 종류별로 분리하면 각자 맡은 규칙에만 집중할 수 있습니다.
+
+둘째, **비용 효율**입니다. 리뷰어를 나눈 김에 작업 성격에 맞게 모델도 다르게 배정했습니다. 기계적인 검증은 가벼운 모델(Sonnet)에게, 깊은 사고가 필요한 리뷰는 무거운 모델(Opus)에게 맡깁니다.
 
 ### 왜 0건이 될 때까지 반복하나요?
 
