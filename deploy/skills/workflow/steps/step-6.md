@@ -67,7 +67,7 @@ PR 전체 diff를 대상으로 아래 파이프라인을 수행한다. **단계 
 - 결과를 Lead에게 제출
 - Lead가 종합 (중복 제거 + 이상한 지적은 사용자에게 확인)
 - 검증된 이슈만 Implementer에게 한번에 전달
-- Implementer 수정 후 → Convention-final ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
+- Implementer 수정 후 → Convention-final ×N 병렬 재검증 (수정 커밋 diff만 대상) → Lead 종합 → 반복 (0건까지)
 
 ### 2단계: Advanced-final
 
