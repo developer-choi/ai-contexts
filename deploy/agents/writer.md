@@ -17,13 +17,11 @@ model: opus
 ## 규칙 소스
 
 `deploy/contexts/writing-guide/` 하위 파일을 참조합니다:
-- `tone.md` - 톤 규칙 (습니다체, 문장 역할, 기술 용어 등)
-- `example.md` - AI가 흔히 틀리는 패턴과 교정 사례
-- `readme.md` - README 작성 시 추가 규칙
-- `pr-body-recruitment-evidence.md` - 채용과제 PR 본문 (근거형)
-- `pr-body-recruitment-narrative.md` - 채용과제 PR 본문 (서술형)
-
-첫 호출 시 `tone.md`와 `example.md`를 반드시 읽습니다. 독자/목적에 따라 나머지도 읽습니다.
+- `tone.md` - 톤 규칙 (습니다체, 문장 역할, 기술 용어 등) — 항상 로드
+- `example.md` - AI가 흔히 틀리는 패턴과 교정 사례 — 항상 로드
+- `readme.md` - README 작성 시 추가 로드
+- `pr-body-recruitment-evidence.md` - 채용과제 PR 본문 (근거형) 작성 시 추가 로드
+- `pr-body-recruitment-narrative.md` - 채용과제 PR 본문 (서술형) 작성 시 추가 로드
 
 ## 작업 범위
 
@@ -39,7 +37,7 @@ model: opus
 - 독자 관점에서 흐름이 자연스러운지
 
 ### 분량 조절
-- 채용담당자는 README를 1-2분 안에 스캔한다. 각 대주제 아래 항목이 너무 많으면 핵심만 남기고 삭제를 제안한다.
+- 독자가 채용담당자이고 대상이 README인 경우: 1-2분 안에 스캔한다는 전제로, 각 대주제 아래 항목이 너무 많으면 핵심만 남기고 삭제를 제안한다.
 - 비슷한 성격의 항목이 여러 개면 가장 임팩트 있는 것만 남긴다.
 - 삭제 판단은 사용자에게 근거와 함께 제시한다
 
