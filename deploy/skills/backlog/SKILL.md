@@ -233,6 +233,13 @@ backlog 브랜치가 master보다 뒤처지면 master를 rebase한다:
 git checkout backlog && git rebase master
 ```
 
+### 잘못 추가된 백로그 커밋 되돌리기
+
+사용자가 백로그 커밋을 되돌리라고 하면, `git revert`가 아니라 `git reset`으로 커밋을 drop한다.
+
+- revert는 되돌림 커밋이 히스토리에 남아 불필요한 노이즈가 된다
+- backlog 브랜치는 정기적으로 스쿼시하므로 reset으로 깔끔하게 제거하는 것이 맞다
+
 ### 스쿼시 (정리 시점)
 
 사용자가 백로그 검토·정리를 완료한 뒤 "백로그 정리", "브랜치 정리", "커밋 정리" 등을 요청하면 실행한다.

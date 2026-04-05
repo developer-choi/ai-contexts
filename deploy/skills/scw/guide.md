@@ -84,7 +84,7 @@ skill-creator의 Capture Intent / Interview 단계에서, 사용자에게 바로
 
 ## 정리
 
-- 벤치마크/테스트 완료 후, 작업 중 생성한 workspace 폴더(테스트 문서, eval 결과 등)를 삭제한다
+- **벤치마크/테스트 완료 후 workspace 폴더 삭제 필수**: 작업 중 생성한 workspace 폴더(테스트 문서, eval 결과, 임시 산출물 등)를 반드시 삭제한다. 커밋 전에 `rm -rf`로 제거하고, 삭제 여부를 확인한 뒤 다음 단계로 넘어간다. workspace 폴더가 남은 채로 작업을 종료하지 않는다.
 
 ## gotchas
 
