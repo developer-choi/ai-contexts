@@ -1,0 +1,6 @@
+---
+target: deploy/rules/
+---
+
+# Rules
+
