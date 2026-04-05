@@ -79,6 +79,8 @@
 - 컴포넌트: [component-name].tsx + [component-name].module.scss(필요시) + [component-name].test.tsx(필요시) 를 한 커밋
 - 유틸: [util-name].ts + [util-name].test.ts(필요시) 를 한 커밋
 - 서로 다른 컴포넌트/유틸을 하나의 커밋에 섞지 않는다
+- 마이그레이션/설계 문서와 실제 코드/프롬프트 변경을 같은 커밋에 섞지 않는다
+- squash 시 같은 종류끼리 묶는다 (마이그레이션 문서끼리, 구현 커밋끼리)
 
 ## 팀 에이전트 shutdown 금지
 - 팀 에이전트에게 shutdown 요청을 사용자의 명시적 요청 없이 보내지 않는다.
