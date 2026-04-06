@@ -5,11 +5,11 @@ argument-hint: [대상 파일/디렉토리 경로 또는 스킬 설명]
 
 # Skill Creator & Prompt Auditor
 
-스킬의 생성/개선과 프롬프트 문서의 품질 검증을 담당한다.
+**[CRITICAL] skill-creator 플러그인 로드를 시도한다. 실패하면 즉시 중단하고 사용자에게 skill-creator 설치가 필요하다고 안내한다.**
 
 ## 스킬 생성/개선
 
-스킬을 만들거나 개선할 때 [guide.md](guide.md)의 규칙을 따른다. skill-creator 플러그인은 벤치마크 시 호출한다.
+스킬을 만들거나 개선할 때 [guide.md](guide.md)의 규칙을 따른다.
 
 ## 프롬프트 감사
 
