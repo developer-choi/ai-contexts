@@ -86,3 +86,10 @@ function someFunction() {
 }
 ```
 
+삼항 연산자에서도 결과값이 짧은 쪽을 왼쪽에 배치하는 것을 선호합니다.
+
+```typescript
+// ✅ Good
+const value = isError ? null : (veryLongExpression + complexCalculation);
+```
+

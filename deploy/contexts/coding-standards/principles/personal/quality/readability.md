@@ -36,17 +36,6 @@ function TransferPage() {
 
 ---
 
-## 삼항 연산자 배치
-
-삼항 연산자에서 결과값이 짧은 쪽을 왼쪽에 배치하는 것을 선호합니다.
-
-```typescript
-// ✅ Good
-const value = isError ? null : (veryLongExpression + complexCalculation);
-```
-
----
-
 ## 상수 그룹화
 **❌ Bad (개별 나열)**
 ```typescript
