@@ -18,6 +18,8 @@ argument-hint: [project] (생략 시 프로젝트 목록부터 시작)
 | `node kpi.js sessions <project>` | 세션 목록 조회 |
 | `node kpi.js detail <session-id>` | 세션 상세: 시작/종료 시각, 사용자 입력 목록 |
 
+사용자가 명시적으로 끝낼 때까지 추가 탐색 요청을 받는다.
+
 ## 정제 규칙
 
 - 오탈자 교정, 비문 정리 수준만 허용
