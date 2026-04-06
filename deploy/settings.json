@@ -11,6 +11,16 @@
             "statusMessage": "Checking for npx..."
           }
         ]
+      },
+      {
+        "matcher": "SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const m=j.tool_input.message;if(typeof m===\"object\"&&m!==null&&m.type===\"shutdown_request\")process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"팀 에이전트 shutdown 금지. 사용자가 /exit으로 직접 세션을 종료하므로 AI가 shutdown을 보낼 필요가 없습니다.\"}}))'",
+            "statusMessage": "Checking shutdown request..."
+          }
+        ]
       }
     ]
   },
