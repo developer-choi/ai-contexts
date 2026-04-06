@@ -180,6 +180,73 @@ When to use:
 
 - https://claude.com/blog/common-workflow-patterns-for-ai-agents-and-when-to-use-them (Evaluator-optimizer workflows 섹션)
 
+## [not-ready] 피그마 MCP 원본을 대조용 디자인 값 문서로 캐싱
+
+### 동기
+
+/workflow step 4, 5(마크업 대조/리뷰)에서 피그마 디자인 값과 구현 코드를 1:1 대조할 때, 매번 피그마 MCP를 새로 호출하면:
+- MCP 호출 비용(토큰, 시간) 발생
+- 세션마다 MCP 변환 결과가 미묘하게 달라질 수 있어 대조 기준이 일관되지 않음
+- 같은 노드를 여러 세션에서 반복 읽게 됨
+
+### MCP 출력의 특성
+
+피그마 MCP `get_design_context`는 피그마 레이어 트리를 React+Tailwind 코드로 **자동 변환**하여 반환한다. 피그마 원본 레이어 트리를 직접 주는 것이 아님.
+
+변환된 코드의 className 안에 디자인 토큰명/폴백값/수치가 포함되어 있음:
+- `gap-[var(--semantic/gap/sm,8px)]`
+- `h-[48px]`
+- `text-[color:var(--semantic/color/text/primary,#353535)]`
+- `border border-[var(--semantic/color/state/error/foreground,#ff3b30)]`
+
+이 정보로 **신뢰도 높게 대조 가능한 것**: 간격, 패딩, 높이, 색상, 보더, 모서리, 타이포그래피, 토큰 사용 여부, 하드코딩 여부.
+
+**대조 불가한 것**: div 중첩 깊이, HTML 요소 선택(div vs section 등). MCP 변환 레이어가 임의로 변환하므로.
+
+### 하고 싶은 것
+
+피그마 노드를 MCP로 읽은 뒤, 원본 React+Tailwind 코드에서 대조에 필요한 값만 추출하여 구조화된 md 문서로 변환하고 캐싱한다.
+
+#### 변환 규칙
+
+- `data-name` 기준으로 컴포넌트별 섹션 분리 (_Input, _Leading, _InputText, InputCaption 등)
+- 각 섹션에 CSS 속성 나열: background, height, padding, gap, border, border-radius, color, font, overflow 등
+- 값은 `var(--토큰명, 폴백값)` 또는 고정값 형태 그대로 유지
+- 상태별(default, focused, invalid, disabled) 차이만 별도 표기
+
+#### 변환 예시
+
+MCP 원본:
+```
+className="bg-[var(--semantic\/color\/surface\/elevated,#f2f2f2)] content-stretch flex
+gap-[var(--semantic\/gap\/sm,8px)] h-[48px] items-center
+px-[var(--semantic\/padding\/md,12px)] rounded-[var(--semantic\/border-radius\/md,16px)]"
+data-name="_Input"
+```
+
+변환 결과:
+```md
+### _Input
+- background: var(--semantic/color/surface/elevated, #f2f2f2)
+- height: 48px
+- padding-x: var(--semantic/padding/md, 12px)
+- border-radius: var(--semantic/border-radius/md, 16px)
+- gap: var(--semantic/gap/sm, 8px)
+- layout: flex, items-center
+```
+
+#### 검증
+
+변환 후 MCP 원본과 오류 0건까지 대조한다. 누락된 속성이나 잘못된 값이 없는지 확인.
+
+#### 저장 위치
+
+프로젝트의 `plan/background/figma/` 하위에 `*-design-values.md` 형태.
+
+#### 적용 범위
+
+/workflow에서 피그마 URL을 받아 스펙을 정리하는 모든 컴포넌트에 적용.
+
 ## [not-ready] Step 6 리뷰 산출물에 컨벤션 출처 명시
 
 Step 6 리뷰어가 지적사항을 작성할 때, 해당 지적의 근거가 되는 컨벤션 파일 경로를 함께 명시한다.
