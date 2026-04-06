@@ -21,7 +21,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC_DIR="$REPO_DIR/deploy"
 TARGET_DIR="$TARGET_ARG"
-CATEGORIES="rules skills contexts"
+CATEGORIES="rules skills contexts agents"
 
 if [ ! -d "$SRC_DIR" ]; then
   echo "ERROR: 소스 디렉토리를 찾을 수 없습니다: $SRC_DIR" >&2
