@@ -17,6 +17,7 @@ rules/personal/general.md [file-folder-structure]
 rules/personal/naming.md [file-folder-structure]
 rules/personal/next/basics.md
 rules/personal/react/api.md
+rules/personal/markup/style.md
 rules/personal/react/basics.md
 rules/personal/react/react-hook-form.md
 rules/personal/react/tanstack-query.md
