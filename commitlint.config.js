@@ -27,6 +27,7 @@ module.exports = {
         'workflow',
         'writer',
         'full-refresh',
+        'kpi',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
