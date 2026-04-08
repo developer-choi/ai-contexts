@@ -127,7 +127,7 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 - 세부 내용
 - 세부 내용
 
-## [not-ready] {기능 2}
+## [draft] {기능 2}
 
 - 세부 내용
 ```
@@ -136,7 +136,8 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 
 상태는 섹션 제목 앞에 `[상태]` 형식으로 표기한다:
 
-- **`[not-ready]`**: 아직 구체화 필요 (기본값, 생략 가능)
+- **`[ideation]`**: 아이디어 단계, 브레인스토밍 중. 윤곽이 잡히지 않음
+- **`[draft]`**: 윤곽은 잡혔으나 AI가 바로 실행할 수 없는 상태 (기본값, 생략 가능)
 - **`[ready]`**: 이 내용을 그대로 AI에게 전달하면 AI가 바로 실행할 수 있을 만큼 구체적인 상태
 
 ### 인수인계 품질 기준
@@ -162,7 +163,7 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
 
 | 파일 | 상태 요약 |
 |------|-----------|
-| workflow-convention-preload.md | 기능1 `ready`, 기능2 `not-ready` |
+| workflow-convention-preload.md | 기능1 `ready`, 기능2 `draft` |
 | workflow-figma-mapping.md | 전체 `ready` |
 ```
 
@@ -193,7 +194,7 @@ target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
    - 사용자가 아이디에이션하려는 느낌이 보이면 충분히 대화한다. AI가 먼저 다음 항목으로 넘어가지 않는다
    - 사용자가 "넘어가자", "다음", "패스" 등 명시적으로 말할 때만 다음 항목으로 이동한다
    - 항목을 보여준 뒤 "이건?" 같은 되물음 금지. 사용자가 반응할 때까지 기다린다
-5. 충분히 구체화된 섹션은 제목에 `[ready]`를 표기한다
+5. 충분히 구체화된 섹션은 제목에 `[ready]`를 표기한다. 아직 브레인스토밍 단계이면 `[ideation]`, 윤곽은 잡혔으나 실행 불가이면 `[draft]`를 표기한다
 
 ---
 
