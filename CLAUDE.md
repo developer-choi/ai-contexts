@@ -19,3 +19,26 @@
 - `plan/` 하위의 백로그 파일은 상시 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)에서 관리한다
 - AC 본체에서 backlog 브랜치로 전환하지 않는다
 - 워크트리가 없으면 `git worktree add`로 자동 생성한다
+
+### 티어 기준
+
+| Tier | 기준 |
+|------|------|
+| 1 | 다음 작업에서 바로 착수할 항목 |
+| 2 | 가까운 시일 내 착수할 항목 |
+| 3 | 언젠가 할 항목 |
+| 4 | 우선순위 낮음 / 아이디어 단계 |
+
+### 상태
+
+| 상태 | 의미 |
+|------|------|
+| `ready` | 수정 대상·내용이 확정되어 바로 구현 가능 |
+| `draft` | 방향은 잡혔으나 설계·범위 구체화 필요 |
+| `ideation` | 아이디어만 있는 단계 |
+
+### 파일 구조
+
+- `plan/backlog/index.md` — 미분류 아이디어 (아직 tier 파일에 배치하지 않은 것)
+- `plan/backlog/tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
+- `plan/backlog/tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
