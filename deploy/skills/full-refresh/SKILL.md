@@ -15,6 +15,7 @@ argument-hint: [기간 (기본값: 7d) — 예: 7d, 14d, 30d]
 | AC | `~/WebstormProjects/main/ai-contexts` | scw-refresh (하단 참조) | — |
 | KQ | `~/WebstormProjects/my-else/knowledge-quiz` | update-quiz (하단 참조) | — |
 | Blog | `~/WebstormProjects/my-else/blog` | update-blog (하단 참조) | — |
+| MP | `~/WebstormProjects/main/monorepo-playground` | 미정 | — |
 
 ## 실행 흐름
 
