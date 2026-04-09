@@ -11,6 +11,13 @@
 |------|------|-----------|
 | `file-folder-structure` | 파일·폴더 분리 기준 | Step 4에서 구현 구조 설계 시 |
 
+## 베스트프랙티스 (구현 패턴)
+
+coding-standards는 텍스트 규칙으로 표현되는 컨벤션을, 베스트프랙티스맵은 실제 코드로 정립된 구현 패턴을 다룬다.
+구현 시 아래 맵도 함께 참조한다:
+
+- MP `docs/best-practices-map.md` (`~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md`)
+
 ## rules (중간 모델 이상 대조 가능, e.g. sonnet)
 
 rules/personal/general.md [file-folder-structure]
