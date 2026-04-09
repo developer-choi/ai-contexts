@@ -8,7 +8,7 @@
 
 ## 사용 맥락
 
-- **내 코드 점검**: workflow step-6에서 호출. multi-agent 리뷰 (convention ×N + advanced)
+- **내 코드 점검**: workflow step-6에서 호출. multi-agent 리뷰 (Coding-Standards ×N + Advanced)
 - **남의 PR 리뷰**: 독립 호출. 단일 리뷰 후 사용자가 pr-comment-write로 연결 여부 결정
 
 > 자세한 내용은 [SKILL.md](SKILL.md)를 참고하세요.

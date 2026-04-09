@@ -27,18 +27,16 @@
 
 ## Step 6.2. 리뷰 파이프라인
 
-`/code-review`를 호출하여 PR 전체 diff를 리뷰한다.
-
-Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 컨벤션을 확인하고 code-review에 context로 전달한다. mode는 "내 코드".
+Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 coding-standards를 선별하고, `/code-review`를 advanced 모드로 호출한다.
 
 ```
-code-review → 이슈 목록 → Implementer 수정 → code-review (수정 diff만) → 반복 (0건까지)
+code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
 
-- code-review가 이슈 목록을 반환하면, 검증된 이슈만 Implementer에게 한번에 전달
+- code-review에 전달하는 입력: PR diff, coding-standards 목록, 리뷰 모드(advanced)
+- code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
 - 수정은 step-5의 Markup/Feature Implementer가 수행한다
-- Implementer 수정 후, code-review를 수정 커밋 diff만 대상으로 재호출
-- 0건이 나올 때까지 반복
+- advanced 모드 내부에서 coding-standards 통과 후 자동으로 opus 리뷰까지 진행된다
 
 ---
 
