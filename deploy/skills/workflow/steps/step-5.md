@@ -13,11 +13,11 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 step-5 진입 시 아래 팀을 spawn한다.
 
 ```
-Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
+Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합
 ├── Markup Implementer (sonnet) — 마크업 전용 (CSS, 최소한의 컴포넌트 props). 로직·테스트 작성 안 함
 ├── Feature Implementer (sonnet) — 로직 구현 + 테스트 작성 + React.memo 등 성능 최적화
 ├── Figma Reviewer (sonnet) — 피그마 토큰 대조 (Markup Implementer 커밋에서만)
-├── Convention Reviewer ×N (sonnet) — 컨벤션 기계적 대조
+├── Coding-Standards Reviewer ×N (sonnet) — 컨벤션 기계적 대조
 └── Advanced Reviewer (opus) — coding standard 판단 + 자유 리뷰
 ```
 
@@ -30,7 +30,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
 | Markup Implementer | step-4 파생 산출물 중 마크업 관련, 매칭표, 디자인시스템 소스, 기존 mixin/레이아웃 패턴, map.md 중 마크업 관련 rules |
 | Feature Implementer | step-4 파생 산출물 중 로직 관련, 참조할 기존 코드 경로, map.md 중 로직 관련 rules |
 | Figma Reviewer | 매칭표 |
-| Convention Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중) |
+| Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중) |
 | Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, coding standards, step-4 산출물 중 테스트 관련 |
 
 리뷰어는 [code-review](../../code-review/SKILL.md)의 절차를 따른다.
@@ -47,7 +47,7 @@ Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
 2. **"하드코딩 금지, 토큰만 사용"** — `16px` 대신 `var(--semantic-padding-lg)`
 3. **구현 후 피그마 자동 대조** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
 
-### Convention Reviewer 분할
+### Coding-Standards Reviewer 분할
 
 Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
 
@@ -57,14 +57,14 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 
 ## 리뷰 파이프라인
 
-커밋마다 아래 파이프라인을 수행한다. **단계 간은 직렬, Convention 내부만 병렬.**
+커밋마다 아래 파이프라인을 수행한다. **단계 간은 직렬, Coding-Standards 내부만 병렬.**
 
 ### Markup Implementer 파이프라인 (3단계)
 
 ```
 1. Figma Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
        ↓
-2. Convention Reviewer ×N (병렬) → Lead 종합 → Markup Implementer → 반복 (0건까지)
+2. Coding-Standards Reviewer ×N (병렬) → Lead 종합 → Markup Implementer → 반복 (0건까지)
        ↓
 3. Advanced Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
 ```
@@ -72,7 +72,7 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 ### Feature Implementer 파이프라인 (2단계)
 
 ```
-1. Convention Reviewer ×N (병렬) → Lead 종합 → Feature Implementer → 반복 (0건까지)
+1. Coding-Standards Reviewer ×N (병렬) → Lead 종합 → Feature Implementer → 반복 (0건까지)
        ↓
 2. Advanced Reviewer ↔ Feature Implementer (직접 루프, 0건까지)
 ```
@@ -83,9 +83,9 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 - Lead 개입 없음
 - 0건이면 Lead에게 보고
 
-### Convention Reviewer ×N
+### Coding-Standards Reviewer ×N
 
-- Convention Reviewer ×N 병렬 리뷰
+- Coding-Standards Reviewer ×N 병렬 리뷰
 - 지적사항에는 근거가 되는 컨벤션 파일 경로를 함께 명시한다 (예: `rules/personal/naming.md — camelCase 규칙 위반`)
 - 결과를 Lead에게 제출
 - Lead가 종합:
@@ -93,7 +93,7 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
   - sonnet 결과의 신뢰도 판단
   - 이상해 보이면 사용자에게 확인
   - 검증된 이슈만 Implementer에게 한번에 전달
-- Implementer 수정 후 → Convention ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
+- Implementer 수정 후 → Coding-Standards ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
 
 ### Advanced Reviewer
 
