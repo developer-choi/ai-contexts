@@ -5,7 +5,7 @@
 ## 완료된 단계
 
 1. **의도 파악**: 내 PR에 달린 코멘트를 분류하고 유형별 대응 전략을 세움
-2. **SKILL.md 드래프트 작성**: 5단계 절차 (수집 → 분류 → 유형별 대응 → 답글 준비 → 전체 점검)
+2. **SKILL.md 드래프트 작성**: 6단계 절차 (수집 → 분류 → 유형별 대응 → 동일 패턴 탐색 → 답글 작성 → 전체 점검)
 3. **테스트 케이스**: 출력이 주관적이므로 formal eval 스킵. 실사용으로 바이브 체크.
 
 ## 남은 단계
@@ -18,13 +18,13 @@
 ## 관련 백로그/스킬
 
 - `plan/backlog/pr-comment-receive.md` — 이 스킬의 원본 백로그
-- `deploy/skills/pr-comment-write/` — 답글 작성은 이 스킬이 담당
+- `deploy/skills/pr-comment-write/` — 남의 PR 코멘트 작성 전용
 - `plan/backlog/pr-review.md` — 남의 PR 리뷰 플로우 (별도)
 
 ## 설계 결정
 
 | 항목 | 결정 | 이유 |
 |------|------|------|
-| 답글 작성 | pr-comment-write에 위임 | 스킬 분리 (분석 vs 작성) |
+| 답글 작성 | 스킬 내부에서 처리 (/write-doc으로 톤 다듬기) | 내 PR 답글은 pr-comment-write의 검증(변경 범위, PR 본문 대조)이 불필요 |
 | 재발 방지 메모 | backlog에 축적 | backlog 스킬이 이미 존재 |
 | 코멘트 입력 | 사용자가 직접 제공 | GitHub API 의존 최소화 |

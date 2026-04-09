@@ -31,9 +31,9 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
 | Feature Implementer | step-4 파생 산출물 중 로직 관련, 참조할 기존 코드 경로, map.md 중 로직 관련 rules |
 | Figma Reviewer | 매칭표 |
 | Convention Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중) |
-| Advanced Reviewer | [code-review](../code-review/SKILL.md) 절차, coding standards, step-4 산출물 중 테스트 관련 |
+| Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, coding standards, step-4 산출물 중 테스트 관련 |
 
-리뷰어는 [code-review](../code-review/SKILL.md)의 절차를 따른다.
+리뷰어는 [code-review](../../code-review/SKILL.md)의 절차를 따른다.
 
 ### 매칭표 생성 (실무 프로젝트만)
 
