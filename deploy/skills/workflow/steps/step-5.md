@@ -101,6 +101,10 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 - Lead 개입 없음
 - 0건이면 Lead에게 보고
 
+### 커밋 정리
+
+파이프라인이 0건으로 통과하면, 원본 커밋과 리뷰 수정 커밋들을 하나의 커밋으로 스쿼시한다. 스쿼시 후 다음 구현 커밋을 쌓는다.
+
 ---
 
 ## gotchas
