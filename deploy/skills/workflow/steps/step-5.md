@@ -35,6 +35,10 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Convention 리뷰 종합
 
 리뷰어는 [code-review](../code-review/SKILL.md)의 절차를 따른다.
 
+### 매칭표 생성 (실무 프로젝트만)
+
+실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer spawn 전에 [figma-component-mapping/guide.md](../figma-component-mapping/guide.md)에 따라 매칭표를 생성하고 컨텍스트에 포함한다.
+
 ### Markup Implementer 필수 지침
 
 Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
