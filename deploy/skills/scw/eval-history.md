@@ -24,6 +24,29 @@
 
 "Step 4 끝났습니다" → IMPLEMENTATION_SESSION 전환 안내 여부. skill-creator 표준으로 검증 가능. PASS.
 
+## 4단계: step-5 풀 플로우 + 게이트 차단 (code-review 분리 후)
+
+code-review 독립 스킬 분리(76c2915~9e11801) 후 step-5 오케스트레이션 검증. eval-delegation 방식.
+
+### 시나리오 A — 풀 플로우 (클린 코드)
+
+- mock: React UserCard 컴포넌트 + useUserData hook
+- 팀: 7개 에이전트 (markup-impl, feature-impl, figma-reviewer, cs-naming/react/style, advanced-reviewer)
+- 검증 항목 10개 → 10/10 PASS (게이트 차단 경로만 부분 PASS)
+- Figma→CS→Advanced, CS→Advanced 파이프라인 순서 정상
+- Lead 종합 필터링: cs-style 5건을 토큰 미존재로 전건 기각 — 적절한 판단
+
+### 시나리오 B — 게이트 차단 (의도적 위반)
+
+- mock: 의도적 컨벤션 위반 8건 (naming 4, react 2, style 2)
+- 1차 CS → 8건 검증 → GATE BLOCKED (Advanced 미실행) → fix → 재CS 0건 → Advanced 진행
+- 게이트 차단 경로 PASS
+
+### 교훈
+
+- 1차에서 게이트 차단 미테스트 → 클린 코드만으로는 차단 경로 발동 불가
+- eval-delegation.md에 gotcha 추가: "mock은 스킬의 모든 조건 분기를 트리거해야 한다"
+
 ## 성과
 
 eval 과정에서 스킬 문서 개선 4건 반영:
