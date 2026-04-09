@@ -20,7 +20,6 @@ rules/personal/react/api.md
 rules/personal/markup/style.md
 rules/personal/react/basics.md
 rules/personal/react/react-hook-form.md
-rules/personal/react/tanstack-query.md
 rules/personal/testing/convention.md [file-folder-structure]
 rules/personal/testing/queries.md
 rules/personal/typescript/basic.md
@@ -36,8 +35,6 @@ rules/universal/react/button.md
 principles/personal/general.md [file-folder-structure]
 principles/personal/quality/co-location.md [file-folder-structure]
 principles/personal/quality/readability.md
-principles/personal/react/basics.md
-principles/personal/react/error-handling.md
 principles/personal/typescript/advanced.md
 principles/universal/quality/maintainability.md [file-folder-structure]
 principles/universal/quality/readability.md
