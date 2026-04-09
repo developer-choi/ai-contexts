@@ -86,6 +86,7 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 ### Convention Reviewer ×N
 
 - Convention Reviewer ×N 병렬 리뷰
+- 지적사항에는 근거가 되는 컨벤션 파일 경로를 함께 명시한다 (예: `rules/personal/naming.md — camelCase 규칙 위반`)
 - 결과를 Lead에게 제출
 - Lead가 종합:
   - 중복 이슈 제거

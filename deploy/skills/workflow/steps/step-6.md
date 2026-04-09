@@ -64,6 +64,7 @@ PR 전체 diff를 대상으로 아래 파이프라인을 수행한다. **단계 
 ### 1단계: Convention-final ×N
 
 - Convention-final ×N 병렬 리뷰 (PR 전체 diff 대상)
+- 지적사항에는 근거가 되는 컨벤션 파일 경로를 함께 명시한다 (예: `rules/personal/naming.md — camelCase 규칙 위반`)
 - 결과를 Lead에게 제출
 - Lead가 종합 (중복 제거 + 이상한 지적은 사용자에게 확인)
 - 검증된 이슈만 Implementer에게 한번에 전달
