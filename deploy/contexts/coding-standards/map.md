@@ -1,5 +1,11 @@
 # coding-standards
 
+## 역할
+
+명시적 규칙을 모아둔 곳. AI가 코드를 대조할 때 "~해라, ~금지" 형태로 참조한다.
+
+코드 예제로 보여줄 수 있는 패턴은 MP `docs/best-practices-map.md`에 코드로 추가한다. 같은 주제라도 역할이 다르므로 양쪽에 공존할 수 있다 — 여기에는 명시적 규칙, MP에는 따라할 코드.
+
 ## 로드 규칙
 
 - 회사 프로젝트: universal/ 만
@@ -35,7 +41,6 @@ rules/universal/general.md
 rules/universal/markup/html.md
 rules/universal/markup/style.md
 rules/universal/react/basics.md
-rules/universal/react/button.md
 
 ## principles (최상위 모델 판단 필요, e.g. opus)
 

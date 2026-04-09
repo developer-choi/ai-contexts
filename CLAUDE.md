@@ -13,6 +13,7 @@
 ## coding-standards 파일 관리
 
 - `deploy/contexts/coding-standards/` 하위 파일을 추가·삭제·이동할 때 `map.md`를 함께 갱신한다
+- 내용을 추가·수정·삭제할 때 `map.md` 상단의 "역할" 섹션을 확인하고, 코드 예제로 보여줄 수 있는 내용이면 MP `docs/best-practices-map.md`에 추가하는 것을 먼저 검토한다
 
 ## 백로그 관리
 
