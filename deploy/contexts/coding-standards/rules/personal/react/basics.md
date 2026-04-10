@@ -47,12 +47,6 @@ useState(0);
 
 ---
 
-## `<button>` 직접 사용 금지
-
-HTML 네이티브 `<button>`을 직접 사용하지 않는다. 프로젝트의 공통 `<Button>` 컴포넌트를 찾아서 사용한다.
-
----
-
 ## children props는 PropsWithChildren 사용
 
 children을 받는 컴포넌트는 `PropsWithChildren`을 사용합니다.

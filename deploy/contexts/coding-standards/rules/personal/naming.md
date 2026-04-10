@@ -4,7 +4,6 @@
 - 예시: `array.map(t => t.some)`이 아니라 `array.map(topic => topic.some)` 이런식이 되야합니다.
 
 ## 변수명
-- **camelCase** 사용
 - boolean 변수는 `is`, `has`, `should` 접두사 사용
 
  ```typescript
@@ -21,7 +20,6 @@ const error = true;
 ```
 
 ## 함수명
-- **camelCase** 사용
 - 동사로 시작하는 이름
 - 이벤트 핸들러는 `on` 또는 `handle` 접두사
 
@@ -45,7 +43,6 @@ function postLoginApi(request: LoginApiRequest) { }
 ```
 
 ## 클래스/컴포넌트명
-- **PascalCase** 사용
 
 ```typescript
 // ✅ Good
@@ -57,7 +54,6 @@ function StarScore({ score }: StarScoreProps) { }
 ```
 
 ### 타입/인터페이스명
-- **PascalCase** 사용
 - 접미사 패턴 활용
 
 ```typescript
@@ -108,10 +104,3 @@ interface GetBoardListApiResponse { }
 - `array.ts` 안의 `heavyCalculation()`이 커질 경우, `heavyCalculation.ts`로 분리하고 `export default function heavyCalculation() { ... }` 형태로 관리한다.
 
   폴더명도 동일한 개념을 따른다. 폴더명은 해당 폴더가 다루는 기능/도메인을 나타내며, 내부에 관련된 여러 파일이 위치한다.
-
-### 상수명
-- **UPPER_SNAKE_CASE** 사용
-- **[CRITICAL] 매직 넘버(숫자 리터럴) 사용 금지**:
-  - 의미를 알 수 없는 숫자(0, 1, -1 같은 단순 인덱스/증감 제외)를 코드에 직접 쓰지 마세요.
-  - 반드시 의미 있는 이름을 가진 상수로 정의해서 사용해야 합니다.
-  - 특히 시간(ms), 횟수, 제한값, 특정 상태 코드 등은 반드시 상수화합니다.

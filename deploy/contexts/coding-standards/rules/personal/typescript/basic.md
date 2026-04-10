@@ -37,39 +37,6 @@ export type PostBoardApiRequest = Omit<BoardRow, 'pk'>;
 export type ValueOf<T> = T[keyof T];
 ```
 
-## Enum 사용 지양 (Union Type 선호)
-상수 집합을 정의할 때는 **Enum 사용을 지양**하고, **Union Type** 또는 **Const Assertion(`as const`)** 객체를 사용합니다.
-- Enum은 런타임에 불필요한 코드를 생성하며, Tree-shaking 최적화에 불리할 수 있습니다.
-- 리터럴 타입이 더 직관적이고 가볍습니다.
-
-```typescript
-// ❌ Bad (Enum 지양)
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
-
-// ✅ Good (Union Type)
-export type UserRole = 'ADMIN' | 'USER' | 'GUEST';
-
-// ✅ Good (객체 상수가 필요할 때 - as const)
-export const USER_ROLE = {
-  ADMIN: 'ADMIN',
-  USER: 'USER',
-  GUEST: 'GUEST',
-} as const;
-
-export type UserRole = typeof USER_ROLE[keyof typeof USER_ROLE]; // 타입 추출
-```
-
-## any 절대 금지
-
-`any`는 **절대 사용하지 않습니다**. 사용자가 명시적으로 요청하고 다른 대안이 완전히 없음을 설득한 경우에만 최후의 수단으로 허용합니다.
-
-## ts-ignore 금지
-
-`@ts-ignore`는 사용하지 않습니다. 타입 에러는 무시하지 말고 올바르게 해결하세요.
-
 ## 추상 메소드 구현 시 반환 타입 재선언 금지
 
 abstract class의 메소드를 구현할 때 반환 타입을 다시 적지 않는다. 추상 클래스가 이미 시그니처를 정의하므로 TypeScript가 호환성을 체크하고 추론한다.
