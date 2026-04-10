@@ -63,9 +63,6 @@
 
 ## Git
 
-### 새 파일 생성 후 즉시 git add
-- 새 파일을 생성한 경우에만 즉시 `git add`로 스테이징한다.
-
 ### 커밋 단위 (기본 가이드, 구체적 규칙이 있으면 그쪽 우선)
 - 컴포넌트: [component-name].tsx + [component-name].module.scss(필요시) + [component-name].test.tsx(필요시) 를 한 커밋
 - 유틸: [util-name].ts + [util-name].test.ts(필요시) 를 한 커밋
@@ -76,8 +73,6 @@
 ### 커밋 시 파일 범위 제한
 - 다른 세션에서 별도의 AI 에이전트가 동시에 작업 중일 수 있다.
 - 커밋 대상: 이 세션에서 수정·생성한 파일 (서브에이전트 위임 포함)
-- `git add`는 파일을 개별 지정한다. `git add .`, `git add -A`, `git commit -a` 금지.
-- 커밋 전 `git status`로 staging area를 확인한다. 본인 작업이 아닌 파일이 staged 상태이면 `git restore --staged <file>`로 제거한 뒤 커밋한다.
 
 ### git push는 사용자 지시 필요
 - `git push`는 사용자가 명시적으로 지시한 경우에만 실행한다.
