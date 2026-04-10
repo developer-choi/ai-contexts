@@ -29,10 +29,4 @@
 - `width: 100%` — Block 요소는 기본적으로 부모 너비를 채우므로 불필요
 - `display: flex` — 자식 요소 배치나 정렬 목적 없이 컨테이너에만 적용된 경우 불필요
 
----
-
-## SCSS 사용
-
-### Dart Sass 모듈 시스템
-- @use 'sass:list', @use 'sass:map' 사용
 
