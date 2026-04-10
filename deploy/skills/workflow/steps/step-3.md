@@ -26,8 +26,7 @@
 | 순서 | 조건 | 스킬 | 실행 | 설명 |
 |:---:|------|------|------|------|
 | 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 서브에이전트 | 증상과 Root Cause 분석. 산출물: `/plan/background/bug-analysis.md` |
-| 2 | 채용과제 + 패키지 설치 PR | [install-packages](../requirement-review/recruitment/install-packages.md) | — | 필수 참조. 설치 범위 논의 |
-| 3 | 채용과제 + 마크업 미완성 | — | 별도 세션 | 마크업 전용 플래닝세션을 워크트리로 병렬 진행 (Step 3→4→5 참조). 디자인시스템 컴포넌트는 마크업 세션에서 함께 구축 |
+| 2 | 채용과제 | [prefer-packages](../requirement-review/recruitment/prefer-packages.md) | — | 선호 패키지 참조 |
 
 ### 컨벤션 사전 참조
 
