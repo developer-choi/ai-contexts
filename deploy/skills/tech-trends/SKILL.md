@@ -1,6 +1,6 @@
 ---
 description: 생소한 기술 트렌드를 프론트엔드 개발자 관점에서 쉽고 깊이 있게 설명한다.
-argument-hint: [기술명 또는 아티클 URL]
+argument-hint: "[기술명 또는 아티클 URL]"
 ---
 
 # 기술 트렌드 탐색

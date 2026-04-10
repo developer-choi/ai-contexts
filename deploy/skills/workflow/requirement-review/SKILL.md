@@ -1,6 +1,6 @@
 ---
 description: 기획서, 디자인 시안, 채용과제 요구사항을 개발자 관점에서 리뷰한다. 모호한 부분, 엣지케이스를 찾아내고 산출물을 만든다.
-argument-hint: <입력 타입(planning, design, recruitment)> [캡처 또는 자료 경로]
+argument-hint: "<입력 타입(planning, design, recruitment)> [캡처 또는 자료 경로]"
 ---
 
 # 요구사항 리뷰

@@ -1,6 +1,6 @@
 ---
 description: 라이브러리 소스코드를 학습용으로 간소화하는 워크플로우 가이드
-argument-hint: [init | 작업 단계]
+argument-hint: "[init | 작업 단계]"
 ---
 
 # AI 행동 가이드

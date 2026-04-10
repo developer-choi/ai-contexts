@@ -1,6 +1,6 @@
 ---
 description: 문서를 작성하거나 다듬는다. 문서 작성, 말투 교정, 구조 다듬기, README·PR 본문 작성 요청 시 사용.
-argument-hint: [create (기본) | report]
+argument-hint: "[create (기본) | report]"
 ---
 
 # write-doc

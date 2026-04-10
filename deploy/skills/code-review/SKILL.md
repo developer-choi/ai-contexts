@@ -1,6 +1,6 @@
 ---
 description: 코드 변경사항을 리뷰하고 이슈 목록을 산출한다. 코드리뷰, PR 리뷰, 코드 점검 요청 시 사용.
-argument-hint: [PR URL 또는 브랜치] [--coding-standards 경로...] [--extra-standards 경로...] [--mode default|advanced]
+argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extra-standards 경로...] [--mode default|advanced]"
 ---
 
 # Code Review
