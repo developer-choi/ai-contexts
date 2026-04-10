@@ -43,3 +43,10 @@
 - `plan/backlog/index.md` — 미분류 아이디어 (아직 tier 파일에 배치하지 않은 것)
 - `plan/backlog/tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
 - `plan/backlog/tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
+
+## 임시 호환 파일 (삭제 예정)
+
+GitHub 외부 링크(이력서 등)의 404 방지를 위해 옛 경로에 README를 복제해둔 파일. 외부 링크가 새 경로로 전환되면 삭제한다.
+
+- `deploy/skills/workflow/spec-review/README.md` → 원본: `deploy/skills/workflow/requirement-review/README.md`
+- `deploy/skills/workflow/code-review/README.md` → 원본: `deploy/skills/code-review/README.md`
