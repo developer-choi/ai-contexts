@@ -1,29 +1,5 @@
 {
   "model": "opus",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));if(/(?:^|&&|\\|\\||[;|]|\\$\\(|`)\\s*npx\\b/.test(j.tool_input.command))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"npx is not allowed. Use npm scripts instead.\"}}))'",
-            "statusMessage": "Checking for npx..."
-          }
-        ]
-      },
-      {
-        "matcher": "SendMessage",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const m=j.tool_input.message;if(typeof m===\"object\"&&m!==null&&m.type===\"shutdown_request\")process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"팀 에이전트 shutdown 금지. 사용자가 /exit으로 직접 세션을 종료하므로 AI가 shutdown을 보낼 필요가 없습니다.\"}}))'",
-            "statusMessage": "Checking shutdown request..."
-          }
-        ]
-      }
-    ]
-  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
@@ -68,6 +44,57 @@
       "WebFetch",
       "WebSearch",
       "Write"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const{execSync}=require(\"child_process\");const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const p=j.tool_input.file_path;try{execSync(`git ls-files --error-unmatch \"${p}\"`,{stdio:\"pipe\"})}catch{try{execSync(`git add \"${p}\"`,{stdio:\"pipe\"});process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:`새 파일 자동 staged: ${p}`}}))}catch(e){}}'",
+            "statusMessage": "Auto-staging new file..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\s+(add\\s+(-A|\\.)(?=\\s|$)|commit\\s+-a(?=\\s|$))/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"git add . / git add -A / git commit -a 금지. 파일을 개별 지정하세요.\"}}))'",
+            "statusMessage": "Checking git add pattern..."
+          },
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));if(/(?:^|&&|\\|\\||[;|]|\\$\\(|`)\\s*npx\\b/.test(j.tool_input.command))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"npx is not allowed. Use npm scripts instead.\"}}))'",
+            "statusMessage": "Checking for npx..."
+          },
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\s+commit\\s+(-\\S+\\s+)*(-m|--message)\\b/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"bare git commit 금지. staging area race condition 방지를 위해 파일을 직접 지정하세요: git commit <files> -m msg\"}}))'",
+            "statusMessage": "Checking git commit pattern..."
+          },
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\s+(commit|push)\\b.*--no-verify\\b/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"--no-verify 금지. pre-commit hook을 우회하지 마세요.\"}}))'",
+            "statusMessage": "Checking --no-verify flag..."
+          }
+        ]
+      },
+      {
+        "matcher": "SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const m=j.tool_input.message;if(typeof m===\"object\"&&m!==null&&m.type===\"shutdown_request\")process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"팀 에이전트 shutdown 금지. 사용자가 /exit으로 직접 세션을 종료하므로 AI가 shutdown을 보낼 필요가 없습니다.\"}}))'",
+            "statusMessage": "Checking shutdown request..."
+          }
+        ]
+      }
     ]
   }
 }
