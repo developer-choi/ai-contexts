@@ -82,6 +82,11 @@
             "type": "command",
             "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\s+(commit|push)\\b.*--no-verify\\b/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"--no-verify 금지. pre-commit hook을 우회하지 마세요.\"}}))'",
             "statusMessage": "Checking --no-verify flag..."
+          },
+          {
+            "type": "command",
+            "command": "node ~/.claude/hooks/check-git-push.js",
+            "statusMessage": "Checking git push policy..."
           }
         ]
       },
