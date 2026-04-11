@@ -6,10 +6,8 @@
 
 #### recruitment와 함께 실행되는 경우
 
-- "기획서" 입력 자료는 이미 수집된 `/plan/background/과제요구사항.md`로 대체된다.
+- `/plan/background/` 하위 자료(과제요구사항, cross-analysis, 디자인 시안 등)를 기반으로 페이지별 분석을 수행한다.
 - 맥락 수집 질문 중 서비스 설명·기능 요약·신규 여부는 recruitment 단계에서 확인되었으므로 생략한다.
-- global.md의 서비스 맥락 섹션은 `/plan/background/cross-analysis.md`를 참조하고 중복 작성하지 않는다.
-- "자료 받기" 단계에서 새 자료를 요청하는 대신, 과제요구사항.md에서 페이지별로 구분하여 순서대로 처리한다.
 - checklist/overview.md의 "목적/배경 파악"은 과제의 기능 범위와 구현 목표로 대체하여 읽는다.
 
 #### 맥락 수집
