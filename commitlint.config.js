@@ -40,5 +40,6 @@ module.exports = {
     'scope-empty': [2, 'never'],
     'subject-case': [0],
     'subject-korean': [2, 'always'],
+    'body-max-line-length': [2, 'always', 200],
   },
 };
