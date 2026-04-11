@@ -24,7 +24,7 @@ AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고,
 
 ### 산출물
 
-- `/plan/background/cross-analysis.md` — 분석 결과. 페이지별 내용은 planning/design 루프에서 page.md로 이관되고 원본에서 삭제된다. 서비스 분석·평가 기준 추론 등 비페이지 내용은 Step 3-4에서 overview.md 작성 시 소비된다.
+- `/plan/background/cross-analysis.md` — 분석 결과
 - `/plan/background/service-analysis.md` — 대상 서비스 분석 ([가이드](service-analysis.md))
 
 ### 분석 과정
@@ -54,7 +54,7 @@ AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고,
 - 목업에서 명시된 것과 추론이 필요한 것을 구분
 - 화면 간 네비게이션 흐름을 파악
 
-figma 등 정밀 디자인 시안이 별도로 있는 경우, design 플래그를 함께 켠 상태로 호출했는지 사용자에게 확인한다. 켜져 있으면 recruitment 완료 후 페이지 단위 루프(design)가 이어서 실행된다.
+UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면, 사용자에게 design 플래그를 켤지 확인한다.
 
 정독과 병렬 분석이 모두 끝나면 발견 사항을 공유한다.
 
