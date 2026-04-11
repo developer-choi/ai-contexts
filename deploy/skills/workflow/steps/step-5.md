@@ -10,7 +10,9 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 팀 Spawn
 
-step-5 진입 시 **TeamCreate로** 아래 팀을 spawn한다. Agent(서브에이전트)가 아닌 TeamCreate(팀 에이전트)를 사용해야 다라운드 SendMessage 소통이 가능하다.
+[team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
+
+step-5 진입 시 아래 팀을 spawn한다.
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합

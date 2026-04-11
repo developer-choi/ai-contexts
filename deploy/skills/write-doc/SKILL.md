@@ -9,6 +9,8 @@ argument-hint: "[create (기본) | report]"
 
 ## 에이전트 관리
 
+[team-agent](../../contexts/team-agent.md)의 규칙을 따른다.
+
 - editor 팀 에이전트(`deploy/agents/editor.md`)가 현재 팀에 없으면 스폰한다
 - 이미 떠 있으면 기존 에이전트에 SendMessage로 전달한다
 
