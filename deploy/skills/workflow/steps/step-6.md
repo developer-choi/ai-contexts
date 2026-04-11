@@ -53,3 +53,9 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 - Gap Analysis 결과 (계획 대비 추가/변경된 커밋이 있는 경우)
 - code-review 결과: 발견된 Critical/Minor 이슈 요약
 - 수정 사항
+
+---
+
+## 산출물 정리
+
+리뷰 파이프라인이 완료되고 모든 이슈가 수정 커밋에 반영된 것을 확인한 뒤, `/plan/pr{N}/review.md`를 삭제한다. 리뷰 결과는 코드에 반영된 중간 산출물이므로 더 이상 유지할 필요가 없다.
