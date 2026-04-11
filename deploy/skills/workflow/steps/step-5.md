@@ -126,4 +126,4 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 
 ## 산출물 소비
 
-구현이 완료되면, Lead가 step-4 파생 산출물(overview.md 제외)을 `/plan/pr{N}/`에서 삭제한다. overview.md는 Step 6·7에서 필요하므로 남긴다.
+구현이 완료되면, Lead가 코드에 1:1로 반영된 내용(구현 지시·인터페이스 명세 등)을 `/plan/pr{N}/`에서 정리한다. 파일 전체가 해당하면 파일을 삭제하고, 일부만 해당하면 해당 내용만 제거한다. 판단·결정·방향을 담은 내용은 Step 7에서 PR 본문에 녹인 뒤 정리하므로 이 단계에서는 유지한다.
