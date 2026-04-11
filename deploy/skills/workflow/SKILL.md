@@ -13,7 +13,7 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 |------|------|----------|
 | **BACKGROUND_SESSION** (1개) | Step 1~2 | 기획서, 요구사항 → `/plan/background/`, `/plan/project.md` |
 | **PLANNING_SESSION** (PR당 1개) | Step 3~4 | `/plan/project.md` + `/plan/background/` → `/plan/pr{N}/` |
-| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
+| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
 
 BACKGROUND_SESSION이 Step 2까지 완료하면, 사용자에게 다음과 같이 안내한다:
 
@@ -79,15 +79,11 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 
 PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3(QA 대응 모드) → Step 4~6을 통합 수행한다. QA 대응 세션은 PLANNING/IMPLEMENTATION 경계 없이 계획부터 구현까지 하나의 세션에서 처리한다. Step 3이 진입 경로를 감지하여 자동으로 QA 대응 모드로 전환한다.
 
-### 마무리 (모든 PR 완료 후 1회)
+### 채용과제 마무리 (마지막 PR 완료 후, 채용과제만)
 
-| 단계 | 내용 |
-|------|------|
-| [step-8.md](steps/step-8.md) | 워크플로우 회고 + 프로젝트 유형별 제출 마무리 |
+마지막 PR의 IMPLEMENTATION_SESSION에서 Step 7 이후 [recruitment](recruitment/SKILL.md)를 호출한다.
 
-> 마지막 PR의 IMPLEMENTATION_SESSION에서 1회만 수행합니다.
->
-> **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막.
+**마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막.
 
 ## [CRITICAL] 지킬 원칙
 
