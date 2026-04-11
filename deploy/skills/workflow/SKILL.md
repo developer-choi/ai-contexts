@@ -7,20 +7,24 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 
 ## 세션
 
-워크플로우는 PLANNING_SESSION 1개와 **PR마다 별도의 IMPLEMENTATION_SESSION**으로 나뉜다. PLANNING_SESSION은 메인 에이전트가 주도하며, IMPLEMENTATION_SESSION은 팀 기반으로 동작한다 (상세는 [step-5.md](steps/step-5.md) 참조).
+워크플로우는 **BACKGROUND_SESSION** 1개, **PR마다 별도의 PLANNING_SESSION**, **PR마다 별도의 IMPLEMENTATION_SESSION**으로 나뉜다. 각 세션은 해당 단계에 필요한 산출물만 파일로 읽어 시작한다. 이전 세션의 대화 맥락은 불필요하고 오히려 집중을 방해한다.
 
 | 세션 | 담당 | 컨텍스트 |
 |------|------|----------|
-| **PLANNING_SESSION** (1개) | Step 1~4 + 회고 | 기획서, 요구사항, 기술 전략, PR 분할 |
-| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | 해당 PR의 `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
+| **BACKGROUND_SESSION** (1개) | Step 1~2 | 기획서, 요구사항 → `/plan/background/`, `/plan/project.md` |
+| **PLANNING_SESSION** (PR당 1개) | Step 3~4 | `/plan/project.md` + `/plan/background/` → `/plan/pr{N}/` |
+| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 (마지막 PR에서 Step 8 포함) | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
 
-분리하는 이유: PLANNING_SESSION이 쌓은 기획 맥락은 구현 시 불필요하고 오히려 집중을 방해한다. 마찬가지로, 다른 PR의 구현 맥락도 현재 PR에 불필요하다. 각 IMPLEMENTATION_SESSION은 해당 PR의 `/plan/pr{N}/` 산출물과 컨벤션만으로 깨끗하게 시작한다.
+BACKGROUND_SESSION이 Step 2까지 완료하면, 사용자에게 다음과 같이 안내한다:
+
+> 배경 파악과 PR 분할이 완료되었습니다. 계획은 **PR마다 새 세션**에서 진행합니다.
+> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 3부터 시작합니다. `/plan/pr1/` 기반으로 계획합니다"라고 말씀해주세요.
 
 PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 안내한다:
 
-> 모든 PR의 계획이 완료되었습니다. 구현은 **PR마다 새 세션**에서 진행합니다.
-> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr1/` 기반으로 구현합니다"라고 말씀해주세요.
-> 하나의 PR이 끝나면(Step 7 완료), 다시 새 세션을 열어 다음 PR을 진행합니다.
+> PR #{N}의 계획이 완료되었습니다. 구현은 새 세션에서 진행합니다.
+> 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr{N}/` 기반으로 구현합니다"라고 말씀해주세요.
+> 다음 PR의 계획이 남아있다면, 구현 전에 새 세션에서 Step 3부터 계획을 먼저 진행합니다.
 
 ## 구조
 
@@ -49,27 +53,21 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 
 ## 작업 진행 순서
 
-### 초기 1회 (전체 작업 시작 시)
+### BACKGROUND_SESSION (1회)
 
 | 단계 | 내용 |
 |------|------|
 | [step-1.md](steps/step-1.md) | 배경 파악 및 문제 정의 |
 | [step-2.md](steps/step-2.md) | PR 분할 전략 수립 |
 
-### 계획 반복 (모든 PR에 대해 Step 3 → 4)
+### PLANNING_SESSION (PR당 1개)
 
 | 단계 | 내용 |
 |------|------|
 | [step-3.md](steps/step-3.md) | 과제 정의 (신규 작업 / QA 대응) |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 |
 
-> PR #1의 Step 3→4 완료 후 PR #2의 Step 3→4로 진행. 모든 PR의 계획이 끝나면 PLANNING_SESSION 회고 후 구현으로 넘어갑니다.
-
-### PLANNING_SESSION 회고 (계획 완료 후 1회)
-
-모든 PR의 계획이 끝나면, [step-8-retrospect.md](steps/step-8-retrospect.md)로 회고를 수행한 뒤 구현 세션 안내를 출력한다.
-
-### 구현 반복 (PR별 Step 5 ~ 7) — IMPLEMENTATION_SESSION
+### IMPLEMENTATION_SESSION (PR당 1개)
 
 | 단계 | 내용 |
 |------|------|
@@ -87,9 +85,9 @@ PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3
 |------|------|
 | [step-8.md](steps/step-8.md) | 워크플로우 회고 + 프로젝트 유형별 제출 마무리 |
 
-> 마지막 PR의 IMPLEMENTATION_SESSION에서 1회만 수행합니다. 회고는 PLANNING_SESSION(계획 완료 시)과 마지막 IMPLEMENTATION_SESSION에서 각각 수행한다. 채용 마무리는 마지막 IMPLEMENTATION_SESSION에서 수행한다.
+> 마지막 PR의 IMPLEMENTATION_SESSION에서 1회만 수행합니다.
 >
-> **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막. 모든 PR 계획은 PLANNING_SESSION에서 완료되므로 `/plan/`에 전체 PR 목록이 존재한다.
+> **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막.
 
 ## [CRITICAL] 지킬 원칙
 
