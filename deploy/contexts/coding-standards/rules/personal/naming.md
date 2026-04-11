@@ -30,16 +30,6 @@ function calculateTotal() { }
 function handleClick() { }
 function onClick() { }
 
-// API 함수는 접미사 'Api' 사용
-// 형식: [METHOD] + [DOMAIN] + [유형(List, Detail 등)] + Api
-function getBoardListApi() { }
-function getBoardDetailApi() { }
-function postBoardDetailApi() { }
-function patchBoardDetailApi() { }
-function deleteBoardDetailApi() { }
-
-// API 함수의 파라미터 변수명은 반드시 'request'를 사용합니다.
-function postLoginApi(request: LoginApiRequest) { }
 ```
 
 ## 클래스/컴포넌트명
@@ -61,16 +51,6 @@ function StarScore({ score }: StarScoreProps) { }
 interface ButtonProps { }
 interface InputProps { }
 
-// API 타입
-// 형식: [함수명과 동일한 Prefix] + Request / Response
-// 중요: METHOD를 포함한 전체 함수명 Prefix를 사용
-// 예: postLoginApi → PostLoginApiRequest
-//     getBoardListApi → GetBoardListApiRequest
-interface PostLoginApiRequest { }
-interface PostLoginApiResponse { }
-
-interface GetBoardListApiRequest { }
-interface GetBoardListApiResponse { }
 ```
 
 ### 파일명
