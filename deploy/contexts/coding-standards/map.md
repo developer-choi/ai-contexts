@@ -18,6 +18,7 @@
 1. 아래 rules, principles 목록의 폴더명·파일명을 전부 훑고, 현재 작업과 관련된 파일을 선별한다
 2. 선별한 파일을 Read한다. 파일명만 보고 판단하지 않는다
 3. [CRITICAL] MP [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)에서 현재 작업과 관련된 패턴이 있는지 확인한다
+4. 매칭되는 패턴이 있으면 해당 문서의 코드 스타일을 엄격하게 따른다. 프로젝트 상황과 맞지 않아 판단이 어려운 부분은 임의로 변형하지 않고 사용자에게 명시적으로 확인한다.
 
 ## 태그
 
