@@ -1,18 +1,13 @@
 # 마크업 및 디자인 시스템 가이드
 
 ## 1. 디자인 시스템 준수
-HTML/CSS 작성 시 디자인 값(색상, 폰트 크기 등)을 하드코딩하지 않습니다.
 
-### Typography
-- `font-size`, `line-height`를 매번 하드코딩하지 말고, 디자인 시스템 상 정의된 **타이포그래피 상수/mixin** 또는 **사전에 정의된 Typography 컴포넌트**를 사용합니다.
-- Figma 상의 **Text Style Name**과 매핑되는 스타일이나 컴포넌트를 찾아서 쓰세요.
-- 없다면 임의로 만들지 말고 사용자에게 요청해야 합니다.
-- **Usage**: 기본 속성(size, height, default color)은 건드리지 않고, 외부 여백(`margin`)이나 `color` 정도만 커스텀합니다.
+### 디자인 값 하드코딩 금지 (Stylelint 강제)
+색상, font-size, line-height, padding, margin 등의 하드코딩은 Stylelint 커스텀 룰(`mp/no-hardcoded-colors`, `mp/no-hardcoded-values`)이 차단한다.
 
-### Color
-- 헥사 코드(`#123456`)를 직접 사용하지 않습니다.
-- 반드시 프로젝트에 정의된 **Color Variable** (SCSS 변수, styled-components 테마 객체 등)을 사용하세요.
-- 만약 필요한 컬러 값이 정의되어 있지 않다면, 임의로 만들지 말고 사용자에게 요청해야 합니다.
+### 디자인 토큰이 없는 경우
+- 필요한 색상/타이포/스페이싱 변수가 프로젝트에 정의되어 있지 않다면, 임의로 만들지 말고 사용자에게 요청해야 합니다.
+- Typography: Figma 상의 **Text Style Name**과 매핑되는 스타일이나 컴포넌트를 찾아서 쓰세요.
 
 ## 2. 시맨틱 마크업
 태그는 시각적 모양이 아니라 **의미와 기능**에 맞게 선택해야 합니다.
