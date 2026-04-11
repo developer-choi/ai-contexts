@@ -8,14 +8,15 @@
 
 ## 스킬 로드
 
-아래 조건에 해당하는 스킬을 **모두** 로드합니다. 여러 개면 위에서부터 순서대로 하나씩 실행합니다.
+아래 플래그를 조건에 맞게 켜서 [requirement-review](../requirement-review/SKILL.md)를 호출한다. 여러 개를 동시에 켤 수 있다.
 
-| 순서 | 조건 | 스킬 | 설명 |
-|:---:|------|------|------|
-| 1 | 신규 기능 / 리팩토링 | [requirement-review](../requirement-review/SKILL.md) planning | 기획서·피그마·이슈 기반 배경 파악 |
-| 2 | 채용 과제 | [requirement-review](../requirement-review/SKILL.md) recruitment | 과제 요구사항 리뷰 |
+| 플래그 | 켜는 조건 | 실행 | 설명 |
+|--------|-----------|------|------|
+| `recruitment` | 채용 과제 | 메인 | 과제 요구사항 리뷰 |
+| `planning` | 신규 기능 / 리팩토링 / 채용과제에 페이지 단위 기획이 있음 (UI 목업, 기능 명세 포함) | 메인 | 기획서·피그마·이슈 기반 배경 파악 |
+| `design` | 디자인 시안(Figma 등)이 별도로 있음 | 메인 | 디자인 시안 리뷰 |
 
-모든 스킬의 산출물은 `/plan/background/`에 생성됩니다.
+배경 산출물은 `/plan/background/`에, 페이지별 산출물은 `/plan/pr{N}/`에 생성됩니다.
 
 ---
 
