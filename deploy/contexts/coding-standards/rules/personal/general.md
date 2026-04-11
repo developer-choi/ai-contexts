@@ -15,6 +15,13 @@
 abstract push(data: D): void;
 ```
 
+- **네이밍·타입으로 전달 안 되는 why** — 의도적 선택의 이유가 코드에 보이지 않을 때
+
+```typescript
+/* 4xx/5xx에서도 throw하지 않는다 — 에러 판단은 편의 메소드가 담당 */
+abstract request(url: string, options: Options): Promise<RawResponse>;
+```
+
 - **eslint-disable** — personal이 아닌 universal/general.md의 예외 조건에 한함
 
 ### 금지 예시
