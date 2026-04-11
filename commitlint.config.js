@@ -28,6 +28,7 @@ module.exports = {
         'writer',
         'full-refresh',
         'kpi',
+        'write-doc',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
