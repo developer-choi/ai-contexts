@@ -13,6 +13,12 @@
 - 회사 프로젝트: universal/ 만
 - 개인 프로젝트: universal/ + personal/
 
+### [CRITICAL] 탐색 절차
+
+1. 아래 rules, principles 목록의 폴더명·파일명을 전부 훑고, 현재 작업과 관련된 파일을 선별한다
+2. 선별한 파일을 Read한다. 파일명만 보고 판단하지 않는다
+3. [CRITICAL] MP [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)에서 현재 작업과 관련된 패턴이 있는지 확인한다
+
 ## 태그
 
 | 태그 | 의미 | 사용 시점 |
@@ -21,9 +27,7 @@
 
 ## 구현 패턴
 
-아래 맵도 함께 참조한다:
-
-- MP `docs/best-practices-map.md` (`~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md`)
+탐색 절차 3번 참조.
 
 ## rules (중간 모델 이상 대조 가능, e.g. sonnet)
 

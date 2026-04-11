@@ -10,7 +10,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 팀 Spawn
 
-[team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
+[CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
 step-5 진입 시 아래 팀을 spawn한다.
 

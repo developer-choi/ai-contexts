@@ -5,7 +5,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 # Skill Creator & Prompt Auditor
 
-**[CRITICAL] skill-creator 플러그인 로드를 시도한다. 실패하면 즉시 중단하고 사용자에게 skill-creator 설치가 필요하다고 안내한다.**
+[CRITICAL] [skill-creator](skill-creator) 플러그인을 로드한다. 실패하면 즉시 중단하고 사용자에게 skill-creator 설치가 필요하다고 안내한다.
 
 ## 스킬 생성/개선
 
