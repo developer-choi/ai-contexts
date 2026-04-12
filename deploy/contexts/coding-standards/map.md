@@ -15,20 +15,15 @@
 
 ### [CRITICAL] 탐색 절차
 
-1. 아래 rules, principles 목록의 폴더명·파일명을 전부 훑고, 현재 작업과 관련된 파일을 선별한다
+1. 이 문서 하단의 rules·principles 파일 리스트와 MP [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)를 함께 훑고, 현재 작업과 관련된 파일을 선별한다
 2. 선별한 파일을 Read한다. 파일명만 보고 판단하지 않는다
-3. [CRITICAL] MP [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)에서 현재 작업과 관련된 패턴이 있는지 확인한다
-4. 매칭되는 패턴이 있으면 해당 문서의 코드 스타일을 엄격하게 따른다. 프로젝트 상황과 맞지 않아 판단이 어려운 부분은 임의로 변형하지 않고 사용자에게 명시적으로 확인한다.
+3. 매칭되는 패턴이 있으면 해당 문서의 코드 스타일을 엄격하게 따른다. 프로젝트 상황과 맞지 않아 판단이 어려운 부분은 임의로 변형하지 않고 사용자에게 명시적으로 확인한다.
 
 ## 태그
 
 | 태그 | 의미 | 사용 시점 |
 |------|------|-----------|
 | `file-folder-structure` | 파일·폴더 분리 기준 | Step 4에서 구현 구조 설계 시 |
-
-## 구현 패턴
-
-탐색 절차 3번 참조.
 
 ## rules (중간 모델 이상 대조 가능, e.g. sonnet)
 
