@@ -8,6 +8,16 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ---
 
+## 브랜치 생성
+
+구현 세션 시작 시 작업 내용에 맞는 브랜치를 새로 생성한다. 이전 세션의 브랜치를 이어서 사용하지 않는다.
+
+- 브랜치명: `feature/{짧은-설명}` (예: `feature/login-form`)
+- base: 프로젝트의 기본 브랜치 (main 또는 master)
+- 이전 브랜치가 남아 있어도 새로 딴다 — 세션마다 깨끗한 상태에서 시작
+
+---
+
 ## 팀 Spawn
 
 [CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
