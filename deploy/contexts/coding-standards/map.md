@@ -39,8 +39,6 @@ rules/personal/react/api.md
 rules/personal/markup/style.md
 rules/personal/react/basics.md
 rules/personal/react/react-hook-form.md
-rules/personal/testing/convention.md [file-folder-structure]
-rules/personal/testing/queries.md
 rules/personal/typescript/basic.md
 rules/personal/zod.md [file-folder-structure]
 rules/universal/general.md
@@ -56,7 +54,7 @@ principles/personal/quality/readability.md
 principles/personal/typescript/advanced.md
 principles/universal/quality/maintainability.md [file-folder-structure]
 principles/universal/quality/readability.md
-principles/universal/quality/testability.md
+principles/universal/testability.md
 principles/universal/quality/examples/product-list.md
 principles/universal/react/basics.md
 principles/universal/typescript/advanced.md
