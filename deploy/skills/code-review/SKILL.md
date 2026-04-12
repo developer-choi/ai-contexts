@@ -31,8 +31,9 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
-2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 리뷰 대상에 관련된 coding-standards를 선택하여 로드한다
-3. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
+2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 탐색 절차를 따라 관련 rules·principles 파일을 선별·로드한다
+3. [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)를 읽고, 리뷰 대상과 관련된 구현 패턴이 있는지 확인한다. 관련 패턴이 있으면 해당 섹션도 로드한다
+4. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
 
 ### 2. 리뷰 대상 파악
 
