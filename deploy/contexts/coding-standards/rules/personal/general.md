@@ -86,3 +86,42 @@ import {Button} from '@/components/element/Button';
 import {fetchFromClient} from '../../../utils/extend/library/fetch/fromClient';
 ```
 
+---
+
+## 반환값·Props는 관심사별로 그룹핑
+
+함수(훅, 유틸)의 반환값이나 컴포넌트 Props가 2개 이상의 관심사를 포함할 때, 플랫하게 나열하지 않고 관심사별 객체로 그룹핑한다.
+
+```tsx
+// ❌ Bad — 관심사가 섞여서 소비처에서 구분이 안 됨
+function useProductFilter() {
+  return { sortBy, gender, brandIds, isActive, handleSortChange, handleGenderToggle, handleReset };
+}
+
+// ✅ Good — 현재값(sortBy, filter)과 핸들러가 분리
+function useProductFilter() {
+  return {
+    sortBy,
+    filter: { gender, brandIds, isActive },
+    handlers: { handleSortChange, handleGenderToggle, handleFilterReset },
+  };
+}
+```
+
+---
+
+## 반환 타입은 재사용할 때만 명시
+
+다른 모듈에서 같은 타입을 import하여 사용하지 않는 한, 함수의 반환 타입을 명시적으로 정의하지 않는다. TypeScript 자동 추론에 맡긴다.
+
+```tsx
+// ❌ Bad — 이 타입을 다른 곳에서 import하지 않는데 명시
+interface UseProductFilterReturn { ... }
+export default function useProductFilter(): UseProductFilterReturn { ... }
+
+// ✅ Good — 반환 타입 자동 추론
+export default function useProductFilter() {
+  return { sortBy, filter, handlers };
+}
+```
+
