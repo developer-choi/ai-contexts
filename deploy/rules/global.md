@@ -96,6 +96,10 @@
 - 서브에이전트 호출 시 지시한 작업에 적합한 모델을 opus / sonnet 중 선택한다. 기본은 sonnet이며, 아래에 해당하면 opus를 사용한다.
   - opus: 코드 리뷰, /workflow 산출물 문서 분석
 
+### Agent Teams 우선 사용
+- 사용자 또는 스킬이 "팀 에이전트", "Agent Teams", `TeamCreate`를 언급하면, 일반 서브에이전트(Agent 도구에 subagent_type만 지정) 대신 반드시 Agent Teams(`team_name` 지정)로 구성한다.
+- 일반 서브에이전트로 대체하지 않는다. Teams 구성이 불가능한 사유가 있으면 실행 전에 사용자에게 보고한다.
+
 
 ## 프로젝트 설정
 
