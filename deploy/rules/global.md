@@ -113,8 +113,13 @@
 - TP = test-playground
 
 ### 피드백 저장
-- 피드백 메모리(`.claude/` 로컬 메모리)를 사용하지 않는다. git으로 관리되지 않아 컴퓨터 간 공유가 안 되기 때문이다.
-- 사용자가 교정하거나 확인한 작업 방식, 반복해서는 안 되는 실수 등 피드백을 저장해야 할 때는 `/backlog` 스킬을 사용한다.
+- Claude 내장 auto memory를 사용하지 않는다 (설정으로 비활성화됨).
+  - 저장 위치: `~/.claude/projects/<프로젝트 경로>/memory/`
+  - 구조: `MEMORY.md`(인덱스) + 개별 파일(`feedback_*.md`, `project_*.md`, `user_*.md`, `reference_*.md`)
+  - git 미추적, 컴퓨터 간 공유 불가, 테스트 불가
+- 세션 중 사용자가 교정하거나 지적한 것은 문제의 맥락에 직접 규칙+사례로 심는다
+  (coding-standards, writing-guide, 해당 스킬, MP best-practices-map 등).
+- 구체적인 절차는 `/pre-exit` 스킬이 안내한다.
 
 ### worktree 감지
 - 아래 조건 중 하나라도 해당하면 브랜치 직접 전환 대신 worktree를 사용한다:
