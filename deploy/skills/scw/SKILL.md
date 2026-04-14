@@ -49,6 +49,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | `deploy/contexts/coding-standards/` | [coding-standards.md](specialized/coding-standards.md) |
 | `deploy/skills/workflow/` | [workflow.md](specialized/workflow.md) |
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](specialized/requirement-review.md) |
+| `deploy/contexts/writing-guide/` | [writing-guide.md](specialized/writing-guide.md) |
 
 ## 기능테스트
 
