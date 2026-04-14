@@ -69,24 +69,20 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 
 ## 리뷰 파이프라인
 
-커밋마다 아래 파이프라인을 수행한다. **단계 간은 직렬, Coding-Standards 내부만 병렬.**
+커밋마다 아래 파이프라인을 수행한다. **Coding-Standards ×N과 Advanced Reviewer는 병렬 실행.**
 
-### Markup Implementer 파이프라인 (3단계)
+### Markup Implementer 파이프라인 (2단계)
 
 ```
 1. Figma Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
        ↓
-2. Coding-Standards Reviewer ×N (병렬) → Lead 종합 → Markup Implementer → 반복 (0건까지)
-       ↓
-3. Advanced Reviewer ↔ Markup Implementer (직접 루프, 0건까지)
+2. Coding-Standards Reviewer ×N + Advanced Reviewer (전부 병렬) → Lead 종합 → Markup Implementer → 반복 (0건까지)
 ```
 
-### Feature Implementer 파이프라인 (2단계)
+### Feature Implementer 파이프라인 (1단계)
 
 ```
-1. Coding-Standards Reviewer ×N (병렬) → Lead 종합 → Feature Implementer → 반복 (0건까지)
-       ↓
-2. Advanced Reviewer ↔ Feature Implementer (직접 루프, 0건까지)
+Coding-Standards Reviewer ×N + Advanced Reviewer (전부 병렬) → Lead 종합 → Feature Implementer → 반복 (0건까지)
 ```
 
 ### Figma Reviewer (Markup Implementer 커밋만)
@@ -95,23 +91,18 @@ Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 
 - Lead 개입 없음
 - 0건이면 Lead에게 보고
 
-### Coding-Standards Reviewer ×N
+### Coding-Standards Reviewer ×N + Advanced Reviewer (병렬)
 
-- Coding-Standards Reviewer ×N 병렬 리뷰
-- 지적사항에는 근거가 되는 컨벤션 파일 경로를 함께 명시한다 (예: `rules/personal/naming.md — camelCase 규칙 위반`)
-- 결과를 Lead에게 제출
+- Coding-Standards Reviewer ×N과 Advanced Reviewer를 동시에 실행한다
+- Coding-Standards: 지적사항에는 근거가 되는 컨벤션 파일 경로를 함께 명시한다 (예: `rules/personal/naming.md — camelCase 규칙 위반`)
+- 모든 리뷰어가 결과를 Lead에게 제출
 - Lead가 종합:
+  - Coding-Standards와 Advanced 결과를 병합
   - 중복 이슈 제거
   - sonnet 결과의 신뢰도 판단
   - 이상해 보이면 사용자에게 확인
   - 검증된 이슈만 Implementer에게 한번에 전달
-- Implementer 수정 후 → Coding-Standards ×N 병렬 재검증 → Lead 종합 → 반복 (0건까지)
-
-### Advanced Reviewer
-
-- Advanced Reviewer ↔ Implementer SendMessage로 직접 루프
-- Lead 개입 없음
-- 0건이면 Lead에게 보고
+- Implementer 수정 후 → 전체 병렬 재검증 → Lead 종합 → 반복 (0건까지)
 
 ### 커밋 정리
 

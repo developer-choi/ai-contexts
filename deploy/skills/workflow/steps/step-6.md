@@ -36,7 +36,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 - code-review에 전달하는 입력: PR diff, coding-standards 목록, 리뷰 모드(advanced)
 - code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
 - 수정은 step-5의 Markup/Feature Implementer가 수행한다
-- advanced 모드 내부에서 coding-standards 통과 후 자동으로 opus 리뷰까지 진행된다
+- advanced 모드 내부에서 coding-standards ×N과 opus 리뷰가 병렬 실행된다
 
 ---
 
