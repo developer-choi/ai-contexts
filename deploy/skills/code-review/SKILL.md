@@ -53,10 +53,13 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 
 [CRITICAL] [team-agent](../../contexts/team-agent.md)의 규칙에 따라 팀을 구성한다.
 
-1. **Coding-Standards 페이즈**: Coding-Standards Reviewer ×N (sonnet) 병렬 리뷰. coding-standards 영역별로 분할한다. Lead가 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
-2. **이슈가 있으면**: coding-standards 이슈만 반환. Advanced 페이즈 실행하지 않음.
-3. **0건이면**: Advanced Reviewer (opus) 실행 — diff만 전달, coding-standards 문서 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚되, 아래 관점을 반드시 포함한다:
-   - **책임 과다 / 추상화 필요성**: 함수·컴포넌트가 여러 관심사를 동시에 담당하고 있는지, 분리·추상화가 필요한 지점이 있는지 검토한다.
+Coding-Standards Reviewer ×N (sonnet)과 Advanced Reviewer (opus)를 **병렬 실행**한다.
+
+- **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
+- **Advanced Reviewer**: diff만 전달, coding-standards 문서 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚되, 아래 관점을 반드시 포함한다:
+  - **책임 과다 / 추상화 필요성**: 함수·컴포넌트가 여러 관심사를 동시에 담당하고 있는지, 분리·추상화가 필요한 지점이 있는지 검토한다.
+
+Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
 
 #### 테스트 리뷰 관점
 
