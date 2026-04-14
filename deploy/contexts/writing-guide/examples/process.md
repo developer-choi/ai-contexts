@@ -93,7 +93,7 @@ AI가 작성한 문장과 사용자가 확정한 문장을 기록합니다.
 
 ## 삭제 섹션 부활
 
-> 관련: pr-body-recruitment-narrative.md
+> 관련: templates/pr-body/recruitment-narrative.md
 
 **상황**: 사용자가 초안에서 "배경", "AppProvider", "sass+디자인토큰" 섹션을 삭제한 뒤 피드백을 남김. 메인이 재작성하면서 삭제된 섹션을 다시 추가함.
 

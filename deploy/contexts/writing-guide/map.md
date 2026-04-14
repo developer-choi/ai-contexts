@@ -33,12 +33,14 @@
 
 ## 파일 리스트
 
+이 디렉토리(`deploy/contexts/writing-guide/`) 기준 상대 경로:
+
 tone.md [always]
-example-tone.md [always]
-example-structure.md [always]
-example-accuracy.md [always]
-example-process.md [always]
+examples/tone.md [always]
+examples/structure.md [always]
+examples/accuracy.md [always]
+examples/process.md [always]
 readme-guide.md [readme]
 requirements.md
-pr-body-recruitment-narrative.md [pr]
-pr-body-recruitment-evidence.md [pr]
+templates/pr-body/recruitment-narrative.md [pr]
+templates/pr-body/recruitment-evidence.md [pr]

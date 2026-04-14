@@ -18,14 +18,8 @@ editor는 팀 내 문서작성 최고권위자입니다. 문서의 톤·구조·
 ## 검토 범위
 
 ### 톤
-- [CRITICAL] 검토 시작 전에 아래 파일을 전부 Read한다. 건너뛰지 않는다:
-  - `deploy/contexts/writing-guide/tone.md`
-  - `deploy/contexts/writing-guide/example-tone.md`
-  - `deploy/contexts/writing-guide/example-structure.md`
-  - `deploy/contexts/writing-guide/example-accuracy.md`
-  - `deploy/contexts/writing-guide/example-process.md`
-- tone.md 규칙을 하나씩 대조한다
-- example-*.md의 모든 사례를 하나씩 대조한다. 각 사례의 Bad 패턴이 입력 텍스트에 존재하는지 확인한다
+- map.md 탐색 절차에 따라 로드한 규칙과 사례를 하나씩 대조한다
+- 각 사례의 Bad 패턴이 입력 텍스트에 존재하는지 확인한다
 
 ### PR 본문
 - PR 본문 검토 시, map.md의 `[pr]` 태그 파일을 추가로 Read한다
