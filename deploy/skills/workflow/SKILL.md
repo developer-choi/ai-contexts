@@ -13,7 +13,8 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 |------|------|----------|
 | **BACKGROUND_SESSION** (1개) | Step 1~2 | 기획서, 요구사항 → `/plan/background/`, `/plan/project.md` |
 | **PLANNING_SESSION** (PR당 1개) | Step 3~4 | `/plan/project.md` + `/plan/background/` → `/plan/pr{N}/` |
-| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~7 | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
+| **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~6 | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
+| **WRITING_SESSION** (PR당 1개) | Step 7 | `/plan/pr{N}/` 잔여 산출물 + 커밋 로그. 구현 맥락 없이 파일 기반으로 PR 본문 작성 |
 
 BACKGROUND_SESSION이 Step 2까지 완료하면, 사용자에게 다음과 같이 안내한다:
 
@@ -24,6 +25,11 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 
 > PR #{N}의 계획이 완료되었습니다. 구현은 새 세션에서 진행합니다.
 > 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr{N}/` 기반으로 구현합니다"라고 말씀해주세요.
+
+IMPLEMENTATION_SESSION이 Step 6까지 완료하면, 사용자에게 다음과 같이 안내한다:
+
+> PR #{N}의 구현과 점검이 완료되었습니다. PR 본문 작성은 새 세션에서 진행합니다.
+> 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 7부터 시작합니다. `/plan/pr{N}/` 기반으로 PR 본문을 작성합니다"라고 말씀해주세요.
 
 ## 구조
 
@@ -72,6 +78,11 @@ PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 
 |------|------|
 | [step-5.md](steps/step-5.md) | 구현 |
 | [step-6.md](steps/step-6.md) | 최종 점검 |
+
+### WRITING_SESSION (PR당 1개)
+
+| 단계 | 내용 |
+|------|------|
 | [step-7.md](steps/step-7.md) | PR 본문 작성 |
 
 ### QA/리뷰 대응 (PR 올린 후)
