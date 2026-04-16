@@ -1,4 +1,5 @@
-.claude
+.claude/*
+!.claude/skills/
 .idea
 node_modules
 interview-prep.md
