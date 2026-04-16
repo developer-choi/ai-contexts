@@ -37,7 +37,7 @@ const explicitTarget = cmd.match(
 const targetBranch = explicitTarget ? explicitTarget[1] : branch;
 
 // 1. 보호 브랜치 차단
-const protectedBranches = /^(master|main|develop|release)$/;
+const protectedBranches = /^(develop|release)$/;
 if (protectedBranches.test(targetBranch)) {
   deny(`${targetBranch} 브랜치에 push 금지.`);
 }
