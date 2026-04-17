@@ -36,6 +36,8 @@ module.exports = {
         'global',
         // deploy/
         'settings',
+        // else
+        'archives'
       ],
     ],
     'scope-empty': [2, 'never'],
