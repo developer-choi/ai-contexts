@@ -17,9 +17,14 @@
 - `deploy/contexts/` 하위에 `map.md`가 있는 디렉토리는, 파일을 추가·삭제·이동할 때 `map.md`를 함께 갱신한다
 - 내용을 추가·수정·삭제할 때 `map.md` 상단의 "역할" 섹션을 확인하고 적합한 위치에 배치한다
 
-### coding-standards 추가 규칙
+### coding-standards 배치 기준
 
-- 코드 예제로 보여줄 수 있는 내용은 AC가 아닌 MP `docs/best-practices-map.md`에 둔다
+AC `deploy/contexts/coding-standards/`에 둘 것:
+- 한두 줄 규칙으로 끝나는 것 (네이밍, 문법 선호, eslint 선호 등)
+- 특정 기술스택에 종속되지 않는 범용 원칙·철학. 코드 예시가 붙더라도 예시는 설명 보조일 뿐 따라 쓸 템플릿이 아님
+
+MP `docs/best-practices-map.md`에 둘 것:
+- 규칙을 예시 코드로 보여주면 이해가 훨씬 쉬워지는 구현 패턴 (API 클라이언트, 폼 처리, 오버레이 등)
 
 ## 백로그 관리
 
