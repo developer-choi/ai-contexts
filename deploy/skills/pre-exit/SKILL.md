@@ -33,7 +33,7 @@ Step 1의 각 문제에 대해:
    - 코딩 컨벤션 문제 → `deploy/contexts/coding-standards/` 또는 MP `docs/best-practices-map.md`
    - 스킬 동작 문제 → 해당 스킬의 SKILL.md 또는 specialized 체크리스트
    - 워크플로우 문제 → 해당 워크플로우 스킬
-   - 일반 AI 동작 교정 → `deploy/rules/feedback.md`
+   - 일반 AI 동작 교정 → `deploy/rules/global.md`
 
 2. **규칙 문안** — "이런 경우 이렇게 하지 마세요" 형태의 규칙 초안을 작성한다.
 
