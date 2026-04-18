@@ -29,7 +29,9 @@ module.exports = {
         'writer',
         'full-refresh',
         'kpi',
-        'write-doc',
+        'write-init',
+        'write-refine',
+        'callers',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
