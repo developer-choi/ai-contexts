@@ -17,6 +17,7 @@ module.exports = {
       [
         // deploy/skills/
         'backlog',
+        'code-review',
         'discussion',
         'doc-router',
         'pr-comment-write',
