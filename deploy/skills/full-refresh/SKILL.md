@@ -48,7 +48,11 @@ state.json을 로드하고 각 프로젝트별로 `<저장된 해시>..HEAD` 범
 - **해시 유효 + 변경 있음**: `git log --first-parent <hash>..HEAD --oneline`으로 커밋 목록 표시
 - **HEAD == 해시**: "변경 없음" 표시, Phase 3~5 스킵
 - **Orphan 해시** (rebase/force-push로 해시가 현재 브랜치에 없음): 서브에이전트에게 "직전 최신화 지점"을 재탐색시켜 해시를 복구한 뒤 진행
-- **엔트리 없음**: state.json에 엔트리 추가. Maintain 스킬 있는 프로젝트는 서브에이전트가 초기 해시를 탐색, 스킬 없는 프로젝트는 현재 최신 커밋으로 세팅
+- **엔트리 없음**: state.json에 엔트리 추가. 프로젝트 역할별로 초기 해시 산출:
+  - Readme 지배 프로젝트(AC/MP 등): README.md 마지막 **실내용 변경** 커밋. 포맷팅·리네이밍 같은 메타 커밋(style/chore)은 제외하고 커밋 메시지로 실내용 변경인지 판단
+  - Deploy 원천(KA): 파생 프로젝트(Blog/KQ) 중 최근 "KA 변환" 커밋 시점 기준, 그 시점 직전의 원천 HEAD
+  - Deploy 자체(Blog/KQ): 자체 최근 변환 커밋 SHA
+  - 역할 불명확·스킬 완전 없음: 현재 HEAD
 
 Orphan 유효성 체크:
 
