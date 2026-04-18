@@ -25,6 +25,6 @@
 
 | 항목 | 결정 | 이유 |
 |------|------|------|
-| 답글 작성 | 스킬 내부에서 처리 (/write-doc으로 톤 다듬기) | 내 PR 답글은 pr-comment-write의 검증(변경 범위, PR 본문 대조)이 불필요 |
+| 답글 작성 | 스킬 내부에서 처리 (/write-init으로 작성, write-refine은 사용자가 새 세션에서) | 내 PR 답글은 pr-comment-write의 검증(변경 범위, PR 본문 대조)이 불필요 |
 | 재발 방지 메모 | backlog에 축적 | backlog 스킬이 이미 존재 |
 | 코멘트 입력 | 사용자가 직접 제공 | GitHub API 의존 최소화 |
