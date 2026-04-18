@@ -109,7 +109,6 @@ AI가 코드를 생성하거나 수정할 때마다, 기존 동작이 깨지지 
 ### 학습
 
 - [simplify](deploy/skills/simplify/README.md) — 오픈소스 코드를 학습 목적으로 간소화
-- [tech-trends](deploy/skills/tech-trends/README.md) — 기술 트렌드를 프론트엔드 관점에서 설명
 
 ### 커뮤니케이션
 
