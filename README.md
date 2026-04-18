@@ -102,10 +102,6 @@ AI가 코드를 생성하거나 수정할 때마다, 기존 동작이 깨지지 
   - [code-review](deploy/skills/workflow/code-review/README.md) — 컨벤션과 품질 기준에 따라 코드 리뷰
   - [pr-comment-respond](deploy/skills/workflow/pr-comment-respond/README.md) — PR 리뷰 피드백에 대응
 
-### 품질 관리
-
-- [scw](deploy/skills/scw/README.md) — 스킬 생성·개선 및 프롬프트 문서 품질 검증
-
 ### 학습
 
 - [simplify](deploy/skills/simplify/README.md) — 오픈소스 코드를 학습 목적으로 간소화
