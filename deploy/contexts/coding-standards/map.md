@@ -38,9 +38,7 @@ rules/personal/react/react-hook-form.md
 rules/personal/typescript/basic.md
 rules/personal/zod.md [file-folder-structure]
 rules/universal/general.md
-rules/universal/markup/html.md
 rules/universal/markup/style.md
-rules/universal/react/basics.md
 
 ## principles (최상위 모델 판단 필요, e.g. opus)
 
