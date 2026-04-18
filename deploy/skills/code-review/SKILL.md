@@ -33,7 +33,17 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 1. 사용자에게 **리뷰 대상**을 확인받는다
 2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 탐색 절차를 따라 관련 rules·principles 파일을 선별·로드한다
 3. [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)를 읽고, 리뷰 대상과 관련된 구현 패턴이 있는지 확인한다. 관련 패턴이 있으면 해당 섹션도 로드한다
-4. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
+4. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool, 서브에이전트는 `~/.claude/skills/<name>/SKILL.md`를 Read). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
+
+   | 리뷰 대상 | 외부 스킬 |
+   |---|---|
+   | React/Next.js 컴포넌트, 데이터 페칭, 번들 최적화, 성능 | `vercel-react-best-practices` |
+   | 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
+   | UI 마크업, 접근성, UX | `web-design-guidelines` |
+
+   외부 스킬을 적용하는 리뷰는 **opus 모델**로 실행한다 (sonnet은 룰 적용·우리 컨벤션과의 충돌 판단에서 누락이 잦다).
+
+5. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
 
 ### 2. 리뷰 대상 파악
 
