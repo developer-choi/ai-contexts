@@ -1,0 +1,108 @@
+---
+description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용 (테스트 변형).
+argument-hint: <type> [<subtype>]
+---
+
+# write-init — 작업 세션용 내용 작성 (가칭)
+
+외부 공개용 텍스트의 **내용**을 풍부하게 채우는 단계. 톤·구조·분량 다듬기는 다음 단계 write-refine에서. 이 스킬은 작업 컨텍스트(git log, 코드, 대화 등)를 가진 작업 세션에서만 호출한다.
+
+## 입력
+
+`/write-init <type> [<subtype>]` 형태로 호출한다.
+
+| type | subtype | 필수/선택 | 설명 |
+|------|---------|----------|-----|
+| `pr-body` | (없음) | 선택 | 일반 PR 본문 |
+| `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 — 어필 포인트 강조 |
+| `readme` | — | — | README (subtype 미사용) |
+| `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
+| `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |
+
+subtype 누락/오타 시 메인이 한 번 묻고 진행한다. `pr-comment`는 subtype 필수.
+
+## 작업 흐름
+
+### 1. 템플릿 로드
+
+`templates/<type>.md`를 읽는다. 템플릿엔 섹션 구조와 각 섹션에 들어갈 내용 안내가 포함된다.
+
+**HTML 코멘트(`<!-- -->`) 영역은 메타 가이드**다. 메인은 참조용으로 읽되, **본문 출력에는 포함하지 않는다.** `## 본문 시작 ↓` 아래 섹션만 본문으로 사용한다.
+
+**예외 — pr-comment**: 템플릿 없음. PR 코멘트는 자유 형식이라 섹션 템플릿이 부적합. subtype(reviewer/author)에 따라 메인이 의도 중심 구조(질문/제안/해명/감사 등)를 동적으로 결정한다.
+
+### 2. 뼈대 초안 생성
+
+작업 컨텍스트와 템플릿(또는 pr-comment 동적 구조)을 결합해 뼈대를 작성한다. 메인이 컨텍스트에서 추출 가능한 것은 직접 채우고, 사용자 의도가 필요한 것만 마크로 남긴다.
+
+**컨텍스트 소스:**
+- git log, 변경 파일 (코드 diff)
+- 현재 작업 세션의 대화 — 사용자가 명시적으로 강조한 포인트("이건 리뷰어한테 강조해야 해", "트레이드오프 있어" 등)는 본문 또는 frontmatter `key_message`에 보존
+- 관련 이슈/PR 링크
+
+**마크 표기:**
+```
+## 성능 최적화
+[이번 PR에서 한 성능 개선 내용을 한두 문장으로 적어줘]
+```
+
+사용자는 마크 전체(대괄호 포함)를 자기 텍스트로 대체한다. 마크는 잘라내고 그 자리에 본문을 적는다.
+
+### 3. 사용자 채움 요청
+
+뼈대 초안 파일 경로를 사용자에게 안내하고 마크 부분 채워달라고 요청한다. type/subtype에 맞는 안내 문구를 사용한다 (예: `pr-body recruitment` → "어필하고 싶은 포인트 적어줘").
+
+### 4. 풍부 펼침
+
+사용자가 채움을 마치고 **명시적 신호**("OK", "채움 완료", "다 적었어" 등)를 보낼 때까지 대기한다. 부분 채움 중간에 추가 채움 요청 가능. 신호가 오면 사용자가 채운 텍스트를 컨텍스트와 결합해 풍부하게 펼친다. **사용자 텍스트는 그대로 보존**, 컨텍스트로 보강만 한다 — 사용자 의도 왜곡 금지.
+
+**분량 가이드 우선순위**:
+1. frontmatter `length_target` (사용자 명시) — 최우선
+2. type별 default (`templates/<type>.md`의 "subtype별 length_target default" 참조)
+3. 2-3배 휴리스틱 (templates가 없거나 default가 정의되지 않은 type 포함) — 펼침은 사용자 텍스트 분량의 2-3배를 넘지 않도록
+
+단, 1번 frontmatter 값이 2번 default와 **50% 이상 차이**나면 5단계 리뷰 시 사용자에게 한 번 확인한다 ("default는 X인데 length_target은 Y로 짧/김. 의도 맞나요?").
+
+그 이상 필요하면 5단계 리뷰에서 사용자가 추가 요청하도록 위임한다.
+
+### 5. 사용자 리뷰
+
+펼친 결과를 보여주고 빠진 내용/시각이 있는지 묻는다. 사용자가 지적하면 반영한다. **이 단계는 내용 보강만 — 톤 수정 요청이 들어오면 "그건 write-refine에서"라고 안내**한다. 사용자 OK까지 반복 (캡 없음).
+
+### 6. 패키지 생성
+
+확정된 본문을 frontmatter + 본문 단일 .md 파일로 저장한다. 파일 경로를 사용자에게 알려준다 — 새 세션에서 write-refine 입력으로 사용한다.
+
+## 패키지 형식
+
+```markdown
+---
+type: pr-body
+subtype: recruitment
+audience: 채용담당자
+audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
+purpose: 성능 최적화 어필
+key_message: 무한스크롤 도입으로 초기 렌더 시간 60% 단축
+tone_hint: 친근한 격식체, 줄글 위주, 자기 자랑 X
+length_target: 주요 섹션 3-4개, 섹션당 3-4문단
+refs:
+  git_log: a1b2c3..d4e5f6
+  related_files:
+    - src/components/InfiniteScroll/
+    - docs/perf.md
+---
+
+# PR 본문
+
+## 변경 사항
+...
+```
+
+**필수 필드** (누락 X): `type`, `subtype`, `audience`, `purpose`, `key_message`
+**선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `tone_hint`, `length_target`, `refs`
+
+frontmatter는 새 세션의 write-refine이 작업 히스토리 없이 출발할 수 있게 해주는 핵심 인터페이스다.
+
+## write-refine과의 관계
+
+write-init은 내용에만 집중. 톤·구조·분량 다듬기는 write-refine이 담당. 두 스킬을 한 작업의 두 단계로 사용한다.
