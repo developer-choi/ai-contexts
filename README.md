@@ -115,4 +115,3 @@ AI가 코드를 생성하거나 수정할 때마다, 기존 동작이 깨지지 
 
 - [pre-exit](deploy/skills/pre-exit/README.md) — 세션 종료 시 회고 및 스킬 개선
 - [backlog](deploy/skills/backlog/README.md) — 스킬 아이디어 수집 및 분류
-- [doc-router](deploy/skills/doc-router/README.md) — 문서를 적절한 위치로 분류
