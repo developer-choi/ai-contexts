@@ -41,6 +41,8 @@ module.exports = {
         'settings',
         // bench/
         'bench',
+        // wip/
+        'wip',
         // else
         'archives'
       ],
