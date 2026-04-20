@@ -12,8 +12,8 @@ argument-hint: (인자 없음 — workflow step-3에서 호출)
 ## 작성 원칙
 
 ### 1. 증상 vs 근본 원인 구분
-- **❌ Bad**: "API가 느려요"
-- **✅ Good**:
+- **(나쁜 예)**: "API가 느려요"
+- **(좋은 예)**:
   - 증상: "게시글 목록 조회 API 응답 3초 (목표: 500ms)"
   - Root Cause: "DB 인덱스 없어 Full Table Scan + N+1 쿼리"
 
