@@ -20,7 +20,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 팀 Spawn
 
-[CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
+팀 spawn은 `TeamCreate` → `Agent(team_name=...)` 순서로 호출한다 (일회성 서브에이전트가 아닌 다라운드 SendMessage 가능한 팀 에이전트를 만들기 위함). 자세한 규칙은 [team-agent](../../../contexts/team-agent.md).
 
 step-5 진입 시 아래 팀을 spawn한다.
 
