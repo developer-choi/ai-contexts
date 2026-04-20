@@ -92,7 +92,7 @@ isValid로 버튼을 비활성화하면 사용자가 뭘 고쳐야 하는지 알
 **Bad (AI)**
 
 ```
-Convention Reviewer만 N명이 병렬로 리뷰하고, 나머지 단계 간은 순차입니다.
+Coding-Standards Reviewer만 N명이 병렬로 리뷰하고, 나머지 단계 간은 순차입니다.
 ```
 
 **Good (사용자 확정)**

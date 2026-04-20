@@ -66,9 +66,9 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 ### 팀 에이전트 소통 구조
 
 - Figma Reviewer ↔ Implementer, Advanced Reviewer ↔ Implementer가 Lead 개입 없이 직접 루프하는지
-- Convention Reviewer ×N 결과만 Lead가 종합하는지 (sonnet 오탐 필터링)
-- Markup 파이프라인이 3단계(Figma → Convention → Advanced)인지
-- Feature 파이프라인이 2단계(Convention → Advanced)인지
+- Coding-Standards Reviewer ×N 결과만 Lead가 종합하는지 (sonnet 오탐 필터링)
+- Markup 파이프라인이 3단계(Figma → Coding-Standards → Advanced)인지
+- Feature 파이프라인이 2단계(Coding-Standards → Advanced)인지
 - 리뷰어는 code-review SKILL.md의 절차를 따르는지
 - 계획과 달라지는 경우 사용자에게 보고하는지
 

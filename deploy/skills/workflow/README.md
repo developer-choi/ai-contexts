@@ -30,7 +30,7 @@
 - **Markup Implementer** — 마크업 전용
 - **Feature Implementer** — 로직 + 테스트
 - **Figma Reviewer** — 디자인 시안과 코드 비교
-- **Convention Reviewer** — 코딩 규칙 검증
+- **Coding-Standards Reviewer** — 코딩 규칙 검증
 - **Advanced Reviewer** — 코드 품질 심층 리뷰
 
 Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을 리뷰합니다. 이슈가 있으면 Reviewer가 Implementer에게 직접 전달하고, 이슈가 0건이 될 때까지 반복합니다. 컨벤션 검증만 여러 리뷰어가 동시에 수행하고, 나머지 단계는 순서대로 진행됩니다.
