@@ -51,6 +51,10 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](specialized/requirement-review.md) |
 | `deploy/contexts/writing-guide/` | [writing-guide.md](specialized/writing-guide.md) |
 
+대상 경로에 `map.md`가 있으면 추가로 점검한다:
+- **동기화**: map.md의 목록과 실제 파일이 일치하는가
+- **중복**: 하위 파일 간 같거나 비슷한 내용이 있는가
+
 ## 기능테스트
 
 스킬이 **설계대로 동작하는가**를 검증한다. 출력 품질이 아니라 오케스트레이션(분기, 순서, 에이전트 구성)이 대상이다.
