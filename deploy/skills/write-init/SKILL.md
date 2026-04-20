@@ -83,7 +83,6 @@ audience: 채용담당자
 audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
 purpose: 성능 최적화 어필
 key_message: 무한스크롤 도입으로 초기 렌더 시간 60% 단축
-tone_hint: 친근한 격식체, 줄글 위주, 자기 자랑 X
 length_target: 주요 섹션 3-4개, 섹션당 3-4문단
 refs:
   git_log: a1b2c3..d4e5f6
@@ -99,7 +98,7 @@ refs:
 ```
 
 **필수 필드** (누락 X): `type`, `subtype`, `audience`, `purpose`, `key_message`
-**선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `tone_hint`, `length_target`, `refs`
+**선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `length_target`, `refs`
 
 frontmatter는 새 세션의 write-refine이 작업 히스토리 없이 출발할 수 있게 해주는 핵심 인터페이스다.
 
