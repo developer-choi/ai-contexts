@@ -35,7 +35,7 @@
 
 | 순서 | 조건 | 스킬 | 실행 | 설명 |
 |:---:|------|------|------|------|
-| 1 | 기존 코드를 건드리는 작업 | [codebase-audit](../codebase-audit/SKILL.md) | 서브에이전트 | 기존 코드 구조·패턴 파악 |
+| 1 | 기존 코드를 건드리는 작업 | [codebase-audit](../codebase-audit/SKILL.md) | 서브에이전트 | 기존 코드 구조·패턴 파악 → `/plan/background/codebase-audit.md` |
 
 ---
 
