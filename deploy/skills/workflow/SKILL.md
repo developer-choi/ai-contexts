@@ -16,20 +16,13 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 | **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~6 | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
 | **WRITING_SESSION** (PR당 1개) | Step 7 | `/plan/pr{N}/` 잔여 산출물 + 커밋 로그. 구현 맥락 없이 파일 기반으로 PR 본문 작성 |
 
-BACKGROUND_SESSION이 Step 2까지 완료하면, 사용자에게 다음과 같이 안내한다:
+각 세션의 마지막 step을 마치면 다음 세션으로의 진입 안내를 사용자에게 전달한다. 문안은 LLM이 자연스럽게 생성하되 아래 테이블의 핵심을 빠뜨리지 않는다.
 
-> 배경 파악과 PR 분할이 완료되었습니다. 계획은 **PR마다 새 세션**에서 진행합니다.
-> PR #1부터 순서대로, 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 3부터 시작합니다. `/plan/pr1/` 기반으로 계획합니다"라고 말씀해주세요.
-
-PLANNING_SESSION이 Step 4까지 완료하면, 사용자에게 다음과 같이 안내한다:
-
-> PR #{N}의 계획이 완료되었습니다. 구현은 새 세션에서 진행합니다.
-> 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 5부터 시작합니다. `/plan/pr{N}/` 기반으로 구현합니다"라고 말씀해주세요.
-
-IMPLEMENTATION_SESSION이 Step 6까지 완료하면, 사용자에게 다음과 같이 안내한다:
-
-> PR #{N}의 구현과 점검이 완료되었습니다. PR 본문 작성은 새 세션에서 진행합니다.
-> 새 Claude Code 세션을 열고 `/workflow`를 호출한 뒤 "Step 7부터 시작합니다. `/plan/pr{N}/` 기반으로 PR 본문을 작성합니다"라고 말씀해주세요.
+| 경계 | 다음 세션 진입 지침 |
+|------|---------------------|
+| Step 2 → 3 | PR #1부터 순서대로. 새 Claude Code 세션에서 `/workflow` 호출 후 "Step 3부터 시작. `/plan/pr1/` 기반으로 계획" |
+| Step 4 → 5 | 새 세션에서 `/workflow` 호출 후 "Step 5부터 시작. `/plan/pr{N}/` 기반으로 구현" |
+| Step 6 → 7 | 새 세션에서 `/workflow` 호출 후 "Step 7부터 시작. `/plan/pr{N}/` 기반으로 PR 본문 작성" |
 
 ## 구조
 
