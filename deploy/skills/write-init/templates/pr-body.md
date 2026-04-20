@@ -31,8 +31,6 @@
 
 frontmatter `length_target`이 명시되면 그쪽 우선. 없으면 위 default 적용.
 
-참고 example: `evals/integration/example-pr-body-recruitment.md`
-
 -->
 
 ## 본문 시작 ↓

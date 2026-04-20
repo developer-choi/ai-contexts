@@ -1,9 +1,9 @@
 ---
-description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용 (테스트 변형).
+description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용.
 argument-hint: <type> [<subtype>]
 ---
 
-# write-init — 작업 세션용 내용 작성 (가칭)
+# write-init — 작업 세션용 내용 작성
 
 외부 공개용 텍스트의 **내용**을 풍부하게 채우는 단계. 톤·구조·분량 다듬기는 다음 단계 write-refine에서. 이 스킬은 작업 컨텍스트(git log, 코드, 대화 등)를 가진 작업 세션에서만 호출한다.
 
@@ -19,7 +19,7 @@ argument-hint: <type> [<subtype>]
 | `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
 | `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |
 
-subtype 누락/오타 시 메인이 한 번 묻고 진행한다. `pr-comment`는 subtype 필수.
+subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
 ## 작업 흐름
 
@@ -50,20 +50,13 @@ subtype 누락/오타 시 메인이 한 번 묻고 진행한다. `pr-comment`는
 
 ### 3. 사용자 채움 요청
 
-뼈대 초안 파일 경로를 사용자에게 안내하고 마크 부분 채워달라고 요청한다. type/subtype에 맞는 안내 문구를 사용한다 (예: `pr-body recruitment` → "어필하고 싶은 포인트 적어줘").
+뼈대 초안 파일 경로를 사용자에게 안내하고 마크 부분 채워달라고 요청한다. 안내 문구는 해당 `templates/<type>.md`의 "안내 문구 매핑"을 따른다.
 
 ### 4. 풍부 펼침
 
 사용자가 채움을 마치고 **명시적 신호**("OK", "채움 완료", "다 적었어" 등)를 보낼 때까지 대기한다. 부분 채움 중간에 추가 채움 요청 가능. 신호가 오면 사용자가 채운 텍스트를 컨텍스트와 결합해 풍부하게 펼친다. **사용자 텍스트는 그대로 보존**, 컨텍스트로 보강만 한다 — 사용자 의도 왜곡 금지.
 
-**분량 가이드 우선순위**:
-1. frontmatter `length_target` (사용자 명시) — 최우선
-2. type별 default (`templates/<type>.md`의 "subtype별 length_target default" 참조)
-3. 2-3배 휴리스틱 (templates가 없거나 default가 정의되지 않은 type 포함) — 펼침은 사용자 텍스트 분량의 2-3배를 넘지 않도록
-
-단, 1번 frontmatter 값이 2번 default와 **50% 이상 차이**나면 5단계 리뷰 시 사용자에게 한 번 확인한다 ("default는 X인데 length_target은 Y로 짧/김. 의도 맞나요?").
-
-그 이상 필요하면 5단계 리뷰에서 사용자가 추가 요청하도록 위임한다.
+**분량 가이드**: frontmatter `length_target`이 있으면 그 값을 쓴다. 없으면 `templates/<type>.md`의 default를 쓰고, default도 없으면 사용자 텍스트의 2-3배를 상한으로 삼는다. 더 필요하면 5단계 리뷰에서 사용자가 추가 요청한다.
 
 ### 5. 사용자 리뷰
 
