@@ -91,7 +91,7 @@ PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3
 
 ### 채용과제 마무리 (마지막 PR 완료 후, 채용과제만)
 
-마지막 PR의 IMPLEMENTATION_SESSION에서 Step 7 이후 [recruitment](recruitment/SKILL.md)를 호출한다.
+마지막 PR의 WRITING_SESSION에서 Step 7 이후 [recruitment](recruitment/SKILL.md)를 호출한다.
 
 **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막.
 
