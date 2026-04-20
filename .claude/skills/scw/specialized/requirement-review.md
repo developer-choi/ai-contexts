@@ -15,7 +15,7 @@ output-template.md에 정의된 모든 필드/섹션이, checklist 또는 SKILL.
 - output-template.md의 각 필드를 순회하며, 해당 필드를 채우기 위한 분석/검증이 checklist 또는 SKILL.md 어딘가에 존재하는지 대조
 - 검증이 없는 필드가 있다면: 해당 필드를 검증하는 checklist 항목 추가를 제안하거나, 해당 필드가 산출물에 불필요한 것인지 질문
 
-### [CRITICAL] 점검 항목 → SKILL.md 참조 정합성
+### 점검 항목 → SKILL.md 참조 정합성
 
 checklist에 존재하는 파일이 SKILL.md의 실행 흐름에서 참조되는지 확인한다.
 
