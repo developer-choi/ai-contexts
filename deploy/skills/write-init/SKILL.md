@@ -18,6 +18,7 @@ argument-hint: <type> [<subtype>]
 | `readme` | — | — | README (subtype 미사용) |
 | `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
 | `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |
+| `resume-intro` | — | — | 이력서 한줄소개 — 수치 중심 bullet 다단 |
 
 subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
