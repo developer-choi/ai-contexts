@@ -30,6 +30,7 @@
 | `always` | 항상 로드 | 모든 문서 작업 |
 | `pr` | PR 본문 관련 | PR 작성/리뷰 시 |
 | `readme` | README 관련 | README 작성 시 |
+| `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
 
 ## 파일 리스트
 
@@ -41,6 +42,8 @@ examples/structure.md [always]
 examples/accuracy.md [always]
 examples/process.md [always]
 readme-guide.md [readme]
+resume-guide.md [resume]
+examples/resume.md [resume]
 requirements.md
 templates/pr-body/recruitment-narrative.md [pr]
 templates/pr-body/recruitment-evidence.md [pr]
