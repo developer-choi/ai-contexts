@@ -39,6 +39,8 @@ module.exports = {
         'global',
         // deploy/
         'settings',
+        // bench/
+        'bench',
         // else
         'archives'
       ],
