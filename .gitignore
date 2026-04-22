@@ -1,5 +1,5 @@
-.claude/*
-!.claude/skills/
+.claude/settings.json
+.claude/settings.local.json
 .idea
 node_modules
 interview-prep.md
