@@ -19,12 +19,7 @@
 
 ### coding-standards 배치 기준
 
-AC `deploy/contexts/coding-standards/`에 둘 것:
-- 한두 줄 규칙으로 끝나는 것 (네이밍, 문법 선호, eslint 선호 등)
-- 특정 기술스택에 종속되지 않는 범용 원칙·철학. 코드 예시가 붙더라도 예시는 설명 보조일 뿐 따라 쓸 템플릿이 아님
-
-MP `docs/best-practices-map.md`에 둘 것:
-- 규칙을 예시 코드로 보여주면 이해가 훨씬 쉬워지는 구현 패턴 (API 클라이언트, 폼 처리, 오버레이 등)
+콘텐츠를 AC `deploy/contexts/coding-standards/`에 둘지, KA·MP 등 인접 프로젝트로 보낼지는 MP `docs/meta/placement.md`의 분업 표를 따른다.
 
 ## 백로그 관리
 
