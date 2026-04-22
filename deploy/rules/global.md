@@ -127,9 +127,6 @@
 
 ### 피드백 저장
 - Claude 내장 auto memory를 사용하지 않는다 (설정으로 비활성화됨).
-  - 저장 위치: `~/.claude/projects/<프로젝트 경로>/memory/`
-  - 구조: `MEMORY.md`(인덱스) + 개별 파일(`feedback_*.md`, `project_*.md`, `user_*.md`, `reference_*.md`)
-  - git 미추적, 컴퓨터 간 공유 불가, 테스트 불가
 - 세션 중 사용자가 교정하거나 지적한 것은 문제의 맥락에 직접 규칙+사례로 심는다
   (coding-standards, writing-guide, 해당 스킬, MP best-practices-map 등).
 - 구체적인 절차는 `/pre-exit` 스킬이 안내한다.
