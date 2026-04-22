@@ -19,6 +19,7 @@ argument-hint: <type> [<subtype>]
 | `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
 | `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |
 | `resume-intro` | — | — | 이력서 한줄소개 — 수치 중심 bullet 다단 |
+| `resume-item` | — | — | 이력서 경력기술서 한 항목 — 제목/문제/해결/성과 4줄 블록. write-refine에서 시안 다양화 모드로 진입 |
 
 subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
