@@ -54,7 +54,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e 'const{execSync}=require(\"child_process\");const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const p=j.tool_input.file_path;try{execSync(`git ls-files --error-unmatch \"${p}\"`,{stdio:\"pipe\"})}catch{try{execSync(`git add \"${p}\"`,{stdio:\"pipe\"});process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:`새 파일 자동 staged: ${p}`}}))}catch(e){}}'",
+            "command": "node -e 'const{execSync}=require(\"child_process\");const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const p=j.tool_input.file_path;if(/[/\\\\](evals|workspace)[/\\\\]/.test(p))process.exit(0);try{execSync(`git ls-files --error-unmatch \"${p}\"`,{stdio:\"pipe\"})}catch{try{execSync(`git add \"${p}\"`,{stdio:\"pipe\"});process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PostToolUse\",additionalContext:`새 파일 자동 staged: ${p}`}}))}catch(e){}}'",
             "statusMessage": "Auto-staging new file..."
           }
         ]
