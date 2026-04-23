@@ -245,6 +245,8 @@ scope: global (deploy/ 전체 스캔)
 
 backlog 브랜치 = master HEAD + plan/ 커밋. master의 모든 파일이 있고, 그 위에 `plan/` 폴더가 추가된 형태다.
 
+- `plan/backlog/` = 백로그 항목
+- `plan/wip/` = 인수인계 진행중 파일
 - `plan/` 변경은 backlog 브랜치에서만 커밋한다
 - `plan/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
 - master와 backlog는 서로 병합하지 않는다
