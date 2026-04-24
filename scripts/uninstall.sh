@@ -21,7 +21,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC_DIR="$REPO_DIR/deploy"
 TARGET_DIR="$TARGET_ARG"
-CATEGORIES="rules skills contexts"
+CATEGORIES="rules skills contexts agents hooks"
 
 echo "타겟: $TARGET_DIR"
 echo "---"
@@ -59,28 +59,6 @@ for file in "$SRC_DIR"/*; do
     removed=$((removed + 1))
   fi
 done
-
-# --- OpenCode commands 제거 ---
-OPENCODE_CMD_DIR="$HOME/.config/opencode/commands"
-skills_src="$SRC_DIR/skills"
-
-if [ -d "$skills_src" ] && [ -d "$OPENCODE_CMD_DIR" ]; then
-  for skill_dir in "$skills_src"/*/; do
-    [ -d "$skill_dir" ] || continue
-    skill_md="$skill_dir/SKILL.md"
-    [ -f "$skill_md" ] || continue
-
-    skill_name=$(basename "$skill_dir")
-    [ -z "$skill_name" ] && continue
-
-    cmd_file="$OPENCODE_CMD_DIR/$skill_name.md"
-    if [ -f "$cmd_file" ]; then
-      rm -f "$cmd_file"
-      echo "  DEL   opencode/commands/$skill_name.md"
-      removed=$((removed + 1))
-    fi
-  done
-fi
 
 echo "---"
 echo "완료: ${removed}개 제거"
