@@ -50,6 +50,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | `deploy/skills/workflow/` | [workflow.md](specialized/workflow.md) |
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](specialized/requirement-review.md) |
 | `deploy/contexts/writing-guide/` | [writing-guide.md](specialized/writing-guide.md) |
+| `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation-bench.md](specialized/rule-ablation-bench.md) |
 
 대상 경로에 `map.md`가 있으면 추가로 점검한다:
 - **동기화**: map.md의 목록과 실제 파일이 일치하는가
