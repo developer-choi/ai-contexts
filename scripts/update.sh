@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # ai-contexts 배포 스크립트 (복사 방식)
-# deploy/ 안의 rules, skills, contexts를 타겟에 그대로 복사한다.
+# deploy/ 안의 카테고리 폴더를 타겟에 통째로 복사한다.
+# skills는 사용자 외부 스킬 보존을 위해 항목 단위로 복사한다.
 #
 # 사용법:
 #   ./scripts/update.sh [target]
@@ -21,7 +22,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 SRC_DIR="$REPO_DIR/deploy"
 TARGET_DIR="$TARGET_ARG"
-CATEGORIES="rules skills contexts agents hooks"
+CATEGORIES="rules contexts agents hooks"
 
 if [ ! -d "$SRC_DIR" ]; then
   echo "ERROR: 소스 디렉토리를 찾을 수 없습니다: $SRC_DIR" >&2
@@ -32,29 +33,37 @@ echo "소스: $SRC_DIR"
 echo "타겟: $TARGET_DIR"
 echo "---"
 
-# 기존 배포 파일 제거 (잔존 파일 방지)
+# 기존 배포 제거 (고아 파일 방지)
 echo "기존 파일 제거 중..."
 "$SCRIPT_DIR/uninstall.sh" "$TARGET_DIR"
 echo ""
 
 copied=0
 
+# 카테고리 폴더 통째 복사
 for category in $CATEGORIES; do
   src_cat="$SRC_DIR/$category"
   [ -d "$src_cat" ] || continue
 
-  target_cat="$TARGET_DIR/$category"
-  mkdir -p "$target_cat"
+  cp -r "$src_cat" "$TARGET_DIR/$category"
+  echo "  COPY  $category/"
+  copied=$((copied + 1))
+done
 
-  for item in "$src_cat"/*; do
+# skills: 사용자 보존 스킬과 공존해야 하므로 항목별 복사
+src_skills="$SRC_DIR/skills"
+if [ -d "$src_skills" ]; then
+  target_skills="$TARGET_DIR/skills"
+  mkdir -p "$target_skills"
+
+  for item in "$src_skills"/*; do
     [ -e "$item" ] || continue
     item_name="$(basename "$item")"
-
-    cp -r "$item" "$target_cat/$item_name"
-    echo "  COPY  $category/$item_name"
+    cp -r "$item" "$target_skills/$item_name"
+    echo "  COPY  skills/$item_name"
     copied=$((copied + 1))
   done
-done
+fi
 
 echo "---"
 echo "복사 완료: ${copied}개"
@@ -66,10 +75,6 @@ for file in "$SRC_DIR"/*; do
   file_name="$(basename "$file")"
   target_path="$TARGET_DIR/$file_name"
 
-  if [ -f "$target_path" ]; then
-    rm -f "$target_path"
-    echo "  DEL   $file_name"
-  fi
   cp "$file" "$target_path"
   echo "  COPY  $file_name"
   copied=$((copied + 1))
@@ -85,24 +90,35 @@ for category in $CATEGORIES; do
 
   target_cat="$TARGET_DIR/$category"
 
-  for item in "$src_cat"/*; do
+  if [ ! -d "$target_cat" ]; then
+    echo "  FAIL  $category/ 존재하지 않음"
+    failed=$((failed + 1))
+  elif diff -rq "$src_cat" "$target_cat" > /dev/null 2>&1; then
+    echo "  PASS  $category/"
+  else
+    echo "  FAIL  $category/ 내용 불일치"
+    failed=$((failed + 1))
+  fi
+done
+
+if [ -d "$src_skills" ]; then
+  for item in "$src_skills"/*; do
     [ -e "$item" ] || continue
     item_name="$(basename "$item")"
-    target_path="$target_cat/$item_name"
+    target_path="$TARGET_DIR/skills/$item_name"
 
     if [ ! -e "$target_path" ]; then
-      echo "  FAIL  $category/$item_name 존재하지 않음"
+      echo "  FAIL  skills/$item_name 존재하지 않음"
       failed=$((failed + 1))
     elif diff -rq "$item" "$target_path" > /dev/null 2>&1; then
-      echo "  PASS  $category/$item_name"
+      echo "  PASS  skills/$item_name"
     else
-      echo "  FAIL  $category/$item_name 내용 불일치"
+      echo "  FAIL  skills/$item_name 내용 불일치"
       failed=$((failed + 1))
     fi
   done
-done
+fi
 
-# 단독 파일 검증
 for file in "$SRC_DIR"/*; do
   [ -f "$file" ] || continue
   file_name="$(basename "$file")"
