@@ -21,37 +21,6 @@ const LessonOriginalSchema = z.object({
 위에서 만든 `LessonOriginalSchema`는 파생용 단일 원천일 뿐, 상세 API 응답 타입과 일치하지 않을 수 있습니다.
 외부에서 직접 사용하면 실제 API 형태와 다른 타입을 참조하게 됩니다.
 
-### 도메인 타입은 항상 Zod 스키마에서 추론합니다
-
-도메인 데이터의 타입은 `z.infer`로 추론합니다. 스키마 없이 `type`이나 `interface`로 직접 선언하지 않습니다.
-
-- 폼 입력 (`zodResolver`), API 응답 (`validateApiResponse`), URL 쿼리스트링 (`safeParse`) 등 외부 입력은 런타임 검증이 필요합니다.
-- 당장 런타임 검증에 안 쓰이는 파생 타입(예: `LessonRow`)도 Zod 스키마로 유지합니다.
-  - TypeScript 문법만으로는 원본의 제약(min, max 등)을 유지한 채 파생할 수 없기 때문에,
-  - `.pick()`으로 파생해야 나중에 런타임 검증이 필요해져도 제약이 보존됩니다.
-
-export 규칙은 스키마를 런타임에 쓰는지에 따라 결정합니다.
-
-```typescript
-// 런타임 검증에 쓰이는 스키마 — 스키마와 타입 모두 export
-export const CreateLessonSchema = LessonOriginalSchema.pick({ ... });
-export type CreateLessonRequest = z.infer<typeof CreateLessonSchema>;
-
-// 타입 추론만을 위한 스키마 — 타입만 export
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LessonRowSchema = LessonOriginalSchema.pick({ ... });
-export type LessonRow = z.infer<typeof LessonRowSchema>;
-```
-
-도메인 데이터가 아닌 타입(컴포넌트 Props, Server 타입, UI 전용 파생 타입, 유틸리티 타입 등)은 `type`이나 `interface`로 직접 선언합니다.
-
-```typescript
-interface LessonTableProps { ... }           // 컴포넌트 Props
-interface ServerLesson { ... }               // Server 타입 (.json<T>() 용)
-export interface LessonListApiResponse { ... } // API 응답 래퍼
-interface LessonListFilterForm { ... }       // UI 전용 파생 타입
-```
-
 ### `.partial()` 금지
 
 어떤 필드가 optional인지 스키마 정의만 보고 알 수 있어야 합니다.
@@ -92,32 +61,6 @@ tagList: z.array(tagSchema)
 // 분리 불필요 — 헷갈릴 게 없음
 z.array(z.string())
 z.array(z.string()).max(10)
-```
-
-### 독립된 스키마 조합은 감싸기, 속성 추가는 체이닝을 사용합니다
-
-Zod에는 같은 동작을 감싸기(wrapper)와 체이닝 두 가지로 쓸 수 있는 메서드가 있습니다.
-
-| 감싸기 | 체이닝 |
-|--------|--------|
-| `z.union([a, b])` | `a.or(b)` |
-| `z.intersection(a, b)` | `a.and(b)` |
-
-**독립된 스키마를 조합**할 때는 감싸기를 사용합니다. "둘 중 하나" / "둘 다"라는 구조가 먼저 보입니다.
-
-```typescript
-// ❌ .or()가 체인 끝에 묻혀서 놓치기 쉬움
-z.string().email('이메일 형식이 아닙니다').or(z.literal(''))
-
-// ✅ 처음부터 "둘 중 하나" 구조가 보임
-z.union([z.literal(''), z.string().email('이메일 형식이 아닙니다')])
-```
-
-**하나의 스키마에 속성을 추가**할 때는 체이닝을 사용합니다. `.optional()`, `.nullable()`, `.default()` 등이 해당합니다.
-
-```typescript
-z.string().email('이메일 형식이 아닙니다').optional()
-z.number().int().nullable()
 ```
 
 ### `z.string()`은 자유 텍스트 전용입니다

@@ -45,25 +45,5 @@ interface InquiryArticle {
 ```
 
 ## 빈 값(Optional, Null)에 대한 주석 규칙
-`?` (Optional), `null`, `undefined`가 포함된 타입을 정의할 때는, **"어떤 상황에서 값이 비어있는지"** 반드시 주석으로 설명해야 합니다. 그래야 사용하는 측에서 대비할 수 있습니다.
 
-```typescript
-export interface SomeProduct {
-  /**
-   * 재고가 0이거나 판매 중지된 상품일 경우 아예 키가 존재하지 않음.
-   */
-  restockDate?: string;
-
-  /**
-   * 아직 관리자 승인이 완료되지 않은 경우 null.
-   * (키는 항상 존재함)
-   */
-  approvedAt: string | null;
-  
-  /**
-   * /product/marking-list API 응답일 때만 'marking' 값으로 옴.
-   * 일반 조회 시에는 undefined.
-   */
-  status?: 'marking' | 'sold out';
-}
-```
+`?`, `null`, `undefined`가 포함된 타입 정의 시 어떤 상황에서 값이 비어있는지 반드시 주석으로 설명한다.

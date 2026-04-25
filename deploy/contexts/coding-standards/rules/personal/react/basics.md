@@ -29,24 +29,6 @@ function formatPrice(price: number): string {
 
 ---
 
-## Named Import 사용
-
-`React.useEffect`, `React.useState` 등 네임스페이스 접근 대신 named import를 사용합니다.
-
-```tsx
-// ❌ Bad
-React.useEffect(() => { /* ... */ }, []);
-React.useState(0);
-
-// ✅ Good
-import { useEffect, useState } from 'react';
-
-useEffect(() => { /* ... */ }, []);
-useState(0);
-```
-
----
-
 ## children props는 PropsWithChildren 사용
 
 children을 받는 컴포넌트는 `PropsWithChildren`을 사용합니다.

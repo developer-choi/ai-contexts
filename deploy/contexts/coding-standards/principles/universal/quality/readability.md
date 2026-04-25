@@ -28,10 +28,6 @@ function OrderPage() {
 
 ---
 
-## 변수명은 How 대신 What
-
-일관성 (= 컨벤션)
-
 ## 인지부하 낮추기
 
 조건문 내 비교부분이 길거나 직관적이지않으면 의미있는 변수이름을 짓고 거기에 넣기
@@ -55,41 +51,4 @@ if (isBeforeAttendanceLessonStart) {
 
 ### 추출이 아닌 추상화를 하기
 [예제 링크](examples/product-list.md)
-
-### 짧은 조건 코드 우선 작성
-`if - else if - else` 구문이나 삼항 연산자를 사용할 때, **코드가 짧은 블록을 먼저 작성**하고 빠르게 `return` 하세요.
-
-중요한 로직(긴 코드)이 들여쓰기 깊은 곳에 숨지 않게 합니다.
-
-**❌ Bad (긴 코드가 먼저 나옴)**
-```typescript
-function someFunction() {
-  if (condition1) {
-    // ... very long code ...
-    // ...
-    // ...
-  } else {
-    return; // 정작 예외 처리는 맨 끝에
-  }
-}
-```
-
-**✅ Good (짧은 코드 먼저, Early Return)**
-```typescript
-function someFunction() {
-  if (!condition1) {
-    return; // 예외 상황 빠르게 종료
-  }
-
-  // 핵심 로직은 들여쓰기 없이 깔끔하게
-  // ... very long code ...
-}
-```
-
-삼항 연산자에서도 결과값이 짧은 쪽을 왼쪽에 배치하는 것을 선호합니다.
-
-```typescript
-// ✅ Good
-const value = isError ? null : (veryLongExpression + complexCalculation);
-```
 
