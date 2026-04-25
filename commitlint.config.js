@@ -35,6 +35,8 @@ module.exports = {
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
+        'team-agent',
+        'self-help',
         // deploy/rules/
         'global',
         // deploy/
