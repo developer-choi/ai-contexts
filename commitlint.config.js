@@ -37,6 +37,7 @@ module.exports = {
         'writing-guide',
         'team-agent',
         'self-help',
+        'skill-self-improvement',
         // deploy/rules/
         'global',
         // deploy/
