@@ -1,8 +1,6 @@
-# 면접 준비일 (Step 1~3)
+# 면접 준비일 (Step 2~3)
 
-## Step 1. 기초 재료 준비
-
-- 내 이력, 내 포폴 기반으로 예상질문 뽑아서 대비
+> Step 1(이력·포폴 기반 예상질문)은 시점 1에서 미리 만들어둔 `personal-questions.md`로 대체된다. 모드 진입 시 자동 컨텍스트 로드.
 
 ## Step 2. 2시간 전 준비
 
@@ -32,7 +30,7 @@
 - **회사 맞춤 역질문 목록** (베이스: `reverse-interview-tech.md` + 회사 특화)
 - **회사 연계 Behavioral 답변 가이드** (베이스: `culture-fit-qa.md` + 회사 맞춤 1분 자기소개)
 - **면접 직전 리마인더** (베이스: `preflight-notes.md` + `reverse-interview-do-not-ask.md`)
-- **이력·포폴 기반 예상질문** (Step 1 산출물)
+- **이력·포폴 기반 예상질문** (베이스: `personal-questions.md`, 시점 1 산출물)
 
 ### 베이스 파일 vs 산출물
 
