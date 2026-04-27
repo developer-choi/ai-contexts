@@ -4,6 +4,8 @@
 
 ## Step 2. 2시간 전 준비
 
+AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 컨펌 후 다음으로 넘어간다. 시간은 충분 — **순서대로 누락 없이** 진행이 목적.
+
 - 회사 분석: `company-analysis/` sub-skill 호출 (산출물 없으면 생성, 있으면 갱신)
 - 컬쳐핏/Behavioral 예상 질문 뽑기 (베이스: `culture-fit-qa.md` + `personal-questions.md` + 회사 분석. 취미 같은 질문조차 회사와 연계할 답변 찾기)
 - 역질문 금지 목록 숙지 (`reverse-interview-do-not-ask.md`)
