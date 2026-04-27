@@ -32,6 +32,7 @@ module.exports = {
         'write-init',
         'write-refine',
         'callers',
+        'recruitment',
         // deploy/contexts/
         'coding-standards',
         'writing-guide',
