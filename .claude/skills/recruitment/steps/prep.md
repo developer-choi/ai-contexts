@@ -13,8 +13,8 @@ AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 
   - **컬쳐핏/임원 단독 트리거**: `culture-fit-interview/culture-fit-qa.md` + `culture-fit-interview/personal-questions.md` + 회사 분석. 취미 같은 질문조차 회사와 연계.
 - 역질문 금지 목록 숙지 (`reverse-interview-do-not-ask.md`)
 - 회사 맞춤 역질문 리스트업 (활성 모드별 베이스):
-  - **기술면접**: `reverse-interview-tech.md` + 회사 특화
-  - **컬쳐핏/임원**: `reverse-interview-culture.md` + 회사 특화
+  - **기술면접**: `technical-interview/reverse-interview.md` + 회사 특화
+  - **컬쳐핏/임원**: `culture-fit-interview/reverse-interview.md` + 회사 특화
 - 1분 자기소개 말하며 연습 (`self-introduction.md`)
 - 클로바노트 켜놓고 AI 먹이고 피드백 받기
 - **최종 요약본 생성** → `outputs/{회사명}/그 회사용 준비물.md` (활성 모드의 `templates/final-summary.md` 사용. 1-2페이지로 압축. Step 3과 entry에서 사용)
