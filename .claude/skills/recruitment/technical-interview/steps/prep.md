@@ -6,7 +6,7 @@
 
 ## Step 2. 2시간 전 준비
 
-- 회사 채용공고·서비스 분석 (꼭 AI로) — 디테일은 위 "회사 자체 분석" 섹션
+- 회사 분석: `company-analysis/` sub-skill 호출 (산출물 없으면 생성, 있으면 갱신)
 - Technical Interview 예상 질문 뽑기
 - 역질문 금지 목록 숙지 (`reverse-interview-do-not-ask.md`)
 - 역질문 리스트업: `reverse-interview-tech.md` 베이스 + 그 회사 특화 항목 → AI가 회사 분석 결과 합쳐서 그 회사용 목록 생성
@@ -27,7 +27,7 @@
 
 ### 포함 항목 (현재까지)
 
-- **회사 자체 분석**: BM, 핵심 플로우, 왜 프론트 뽑는지, 유저 가치, 내 역량 ↔ 가치 연결
+- **회사 분석** (베이스: `company-analysis/` 산출물 = `outputs/company-analysis.md`)
 - **회사 맞춤 Technical 예상질문** (베이스: 미정 + 회사 분석)
 - **회사 맞춤 역질문 목록** (베이스: `reverse-interview-tech.md` + 회사 특화)
 - **회사 연계 Behavioral 답변 가이드** (베이스: `culture-fit-qa.md` + 회사 맞춤 1분 자기소개)
