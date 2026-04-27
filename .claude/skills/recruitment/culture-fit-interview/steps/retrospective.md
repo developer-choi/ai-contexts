@@ -2,7 +2,7 @@
 
 ## Step 5. 끝난 뒤 복기
 
-- 답변 잘 못한 거 → 문서에 추가 정리 (Technical / Behavioral / Reverse)
+- 답변 잘 못한 거 → 문서에 추가 정리 (Behavioral / Reverse)
 - 별로였던 역질문 정리: 내가 원하는 걸 얻으려고 물었지만 질문이 적절치 않은 게 있었는지
 
 ---

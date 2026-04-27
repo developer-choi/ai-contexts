@@ -5,16 +5,15 @@
 ## Step 2. 2시간 전 준비
 
 - 회사 분석: `company-analysis/` sub-skill 호출 (산출물 없으면 생성, 있으면 갱신)
-- Technical Interview 예상 질문 뽑기
+- 컬쳐핏/Behavioral 예상 질문 뽑기 (베이스: `culture-fit-qa.md` + `personal-questions.md` + 회사 분석. 취미 같은 질문조차 회사와 연계할 답변 찾기)
 - 역질문 금지 목록 숙지 (`reverse-interview-do-not-ask.md`)
-- 역질문 리스트업: `reverse-interview-tech.md` 베이스 + 그 회사 특화 항목 → AI가 회사 분석 결과 합쳐서 그 회사용 목록 생성
-- Behavioral Interview: 취미 같은 질문조차 회사와 연계할 답변 찾기
+- 역질문 리스트업: `reverse-interview-culture.md` 베이스 + 그 회사 특화 항목 → AI가 회사 분석 결과 합쳐서 그 회사용 목록 생성
 - 1분 자기소개 말하며 연습
 - 클로바노트 켜놓고 AI 먹이고 피드백 받기
 
 ## Step 3. 트레이닝 (-20분까지)
 
-- Technical / Behavioral / Reverse Interview 문서 다시 보기
+- Behavioral / Reverse Interview 문서 다시 보기
 - 엘베 시간 때문에 **20분 전 출발**
 
 ---
@@ -26,8 +25,8 @@
 ### 포함 항목 (현재까지)
 
 - **회사 분석** (베이스: `company-analysis/` 산출물 = `outputs/company-analysis.md`)
-- **회사 맞춤 Technical 예상질문** (베이스: 미정 + 회사 분석)
-- **회사 맞춤 역질문 목록** (베이스: `reverse-interview-tech.md` + 회사 특화)
+- **회사 맞춤 컬쳐핏/Behavioral 예상질문** (베이스: `culture-fit-qa.md` + `personal-questions.md` + 회사 분석)
+- **회사 맞춤 역질문 목록** (베이스: `reverse-interview-culture.md` + 회사 특화)
 - **회사 연계 Behavioral 답변 가이드** (베이스: `culture-fit-qa.md` + 회사 맞춤 1분 자기소개)
 - **면접 직전 리마인더** (베이스: `preflight-notes.md` + `reverse-interview-do-not-ask.md`)
 - **이력·포폴 기반 예상질문** (베이스: `personal-questions.md`, 시점 1 산출물)
