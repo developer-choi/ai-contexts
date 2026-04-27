@@ -11,12 +11,7 @@
 
 set -euo pipefail
 
-TARGET_ARG="${1:-}"
-
-if [ -z "$TARGET_ARG" ]; then
-  read -p "타겟 경로 [$HOME/.claude]: " TARGET_ARG
-  TARGET_ARG="${TARGET_ARG:-$HOME/.claude}"
-fi
+TARGET_ARG="${1:-$HOME/.claude}"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
