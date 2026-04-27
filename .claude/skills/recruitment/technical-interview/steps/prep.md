@@ -13,6 +13,7 @@ AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 
 - Behavioral Interview: 취미 같은 질문조차 회사와 연계할 답변 찾기
 - 1분 자기소개 말하며 연습
 - 클로바노트 켜놓고 AI 먹이고 피드백 받기
+- **최종 요약본 생성** → `outputs/{회사명}/그 회사용 준비물.md` (template: `templates/final-summary.md`. 위 모든 분석·연습 결과를 1-2페이지로 압축. Step 3과 entry에서 사용)
 
 ## Step 3. 트레이닝 (-20분까지)
 
@@ -27,22 +28,4 @@ AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 
 
 ---
 
-## [draft] 그 회사용 최종 준비물 (= AI 산출물)
-
-면접 준비일에 AI가 모든 분석·생성 결과를 합쳐서 **한 파일**로 출력. 이 파일이 Step 3 트레이닝과 면접 직전에 사용자가 읽는 본물.
-
-### 포함 항목 (현재까지)
-
-- **회사 분석** (베이스: `company-analysis/` 산출물 = `outputs/company-analysis.md`)
-- **회사 맞춤 Technical 예상질문** (베이스: 미정 + 회사 분석)
-- **회사 맞춤 역질문 목록** (베이스: `reverse-interview-tech.md` + 회사 특화)
-- **회사 연계 Behavioral 답변 가이드** (베이스: `culture-fit-qa.md` + 회사 맞춤 1분 자기소개)
-- **면접 직전 리마인더** (베이스: `preflight-notes.md` + `reverse-interview-do-not-ask.md`)
-- **이력·포폴 기반 예상질문** (베이스: `personal-questions.md`, 시점 1 산출물)
-
-### 베이스 파일 vs 산출물
-
-- **베이스 파일** (`.claude/skills/recruitment/technical-interview/*.md`): 회사 무관한 템플릿/원칙. 한 번 만들고 계속 재사용
-- **산출물** (그 회사용 준비물.md): 매 면접마다 새로 생성. 베이스 + 회사 분석 결과 합성
-
-> 새 컨텍스트 파일을 만들 때마다 위 "포함 항목"에 추가할 것.
+> 최종 요약본의 형식·포함 항목은 [templates/final-summary.md](../templates/final-summary.md) 참조.
