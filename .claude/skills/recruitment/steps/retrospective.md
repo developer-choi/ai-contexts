@@ -1,8 +1,10 @@
 # 면접 직후 회고 (Step 5)
 
+> 모드 무관 공통 절차. 회고 결과를 어디에 반영할지는 활성 모드의 베이스 파일에 따른다.
+
 ## Step 5. 끝난 뒤 복기
 
-- 답변 잘 못한 거 → 문서에 추가 정리 (Technical / Behavioral / Reverse)
+- 답변 잘 못한 거 → 활성 모드의 적절한 베이스 파일에 추가 정리 (technical-questions / culture-fit-qa / personal-questions / reverse-interview-* 중 해당 파일)
 - 별로였던 역질문 정리: 내가 원하는 걸 얻으려고 물었지만 질문이 적절치 않은 게 있었는지
 
 ---
@@ -19,7 +21,7 @@ Step 5의 자동화 버전. AI가 사용자에게 면접 준비 프로세스를 
   - "면접 태도(말 천천히 등) 무너진 순간 있었어?"
   - 등등 프로세스 전 단계 순회
 - 답변에 따라 적합한 문서에 자동 반영
-  - 새로 대비할 질문 → `culture-fit-qa.md`, technical 등
+  - 새로 대비할 질문 → `culture-fit-qa.md`, `technical-questions.md`, `personal-questions.md` 등
   - 새 금지 키워드/주제 → `preflight-notes.md`
-  - 프로세스 자체의 누락 → `SKILL.md` / `TODO.md`
+  - 프로세스 자체의 누락 → `SKILL.md` / 백로그
 - 핵심: 사용자가 능동적으로 회고하는 게 아니라, AI가 가이드해서 빈 칸 못 메우게 하는 것
