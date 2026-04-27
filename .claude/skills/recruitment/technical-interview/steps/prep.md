@@ -16,7 +16,13 @@ AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 
 
 ## Step 3. 트레이닝 (-20분까지)
 
-- Technical / Behavioral / Reverse Interview 문서 다시 보기
+문서 정독은 모의면접 + 최종 요약본 1회 정독으로 대체한다 (베이스 QnA 암기 목적이었으므로).
+
+- AI와 모의면접
+  - 베이스: `technical-questions.md`, `culture-fit-qa.md`, `personal-questions.md`, `reverse-interview-tech.md` + Step 2에서 만든 회사 맞춤 예상질문 + `company-analysis/` 산출물
+  - 흐름: AI가 random 질문 → 사용자 답변(텍스트 또는 클로바노트 음성) → AI 짧은 피드백 (회사 가치 매핑·말투·논리 관점)
+  - 우선순위: 사용자가 약하다 느끼는 영역부터. Step 2의 자기소개 피드백에서 잡힌 약점이 있으면 그 영역부터.
+- 최종 요약본(`outputs/그 회사용 준비물.md`) 1회 정독
 - 엘베 시간 때문에 **20분 전 출발**
 
 ---
