@@ -134,7 +134,7 @@ KA 기반 변환이므로 Phase 3의 KA Maintain 완료 후 실행한다. KQ와 
 
 6. **결과 수신**: 사용자가 두 md를 새 세션에서 실행하고 `-result.md`를 도착시킨다. 양쪽 모두 도착하면 마무리. 어느 한쪽 누락 시 보고 + 대기.
 
-7. **state.json 갱신 + 정리**: KA·KQ·Blog의 hash와 refreshedAt을 갱신. AC backlog 브랜치에 커밋. dispatch md(`kq-...`, `blog-...`, `candidates-<SHA>.json`)는 정리.
+7. **state.json 갱신 + 정리**: KA·KQ·Blog의 hash와 refreshedAt을 갱신. AC backlog 브랜치에 커밋. **dispatch 산출물(`kq-update-quiz.md` + `-result.md`, `blog-update-blog.md` + `-result.md`, `candidates-<SHA>.json`)은 회차 종료 시점에 `git rm`으로 모두 삭제** — 다음 회차로 누적 금지. 회차 시작 시점에 `plan/full-refresh/dispatch/` 디렉토리가 비어 있어야 한다 (남아 있으면 직전 회차 정리 누락이므로 먼저 정리).
 
 #### 규칙 변경 감지
 
