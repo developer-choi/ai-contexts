@@ -92,7 +92,7 @@ Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을
 
 ### Step 5. 구현
 
-Agent Teams로 역할별 AI 팀을 구성하고, Implementer가 코드를 작성합니다. 커밋마다 디자인 대조 → 컨벤션 검증 → 고급 리뷰 순서로 3단계 리뷰를 수행합니다.
+Agent Teams로 역할별 AI 팀을 구성하고, Implementer가 코드를 작성합니다. 커밋마다 디자인 대조를 먼저 수행한 뒤, 컨벤션 검증과 고급 리뷰를 병렬로 돌립니다.
 
 ### Step 6. 최종 점검
 
