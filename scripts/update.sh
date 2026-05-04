@@ -137,3 +137,12 @@ else
   echo "검증 실패: ${failed}개 항목 확인 필요" >&2
   exit 1
 fi
+
+# --- 글로벌 git alias 등록 (git wt-add) ---
+# 새 worktree 생성 + 의존성 설치(package.json 있을 때 npm ci)를 한 번에.
+# 모든 레포에서 동작 (글로벌). 셸 무관 (git이 sh -c로 실행).
+echo ""
+echo "---"
+echo "git wt-add alias 등록 중..."
+git config --global alias.wt-add '!f() { branch="$1"; path="$2"; base="${3:-$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed s,^origin/,,)}"; base="${base:-master}"; git worktree add -b "$branch" "$path" "$base" || return $?; if [ -f "$path/package.json" ]; then ( cd "$path" && npm ci ); fi; }; f'
+echo "  OK   git wt-add 등록 완료 (사용법: git wt-add <branch> <path> [base])"

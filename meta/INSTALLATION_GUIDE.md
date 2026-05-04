@@ -8,7 +8,7 @@
 
 `deploy/` 폴더가 배포 소스입니다. 필요한 파일을 여기서 가져가세요.
 
-> 현재 컴퓨터간 프롬프트 공유방법은 간단하게 마무리 해놓고, 공유 할 프롬프트 위주로 업데이트하고있는 단계여서 그렇습니다. 
+> 현재 컴퓨터간 프롬프트 공유방법은 간단하게 마무리 해놓고, 공유 할 프롬프트 위주로 업데이트하고있는 단계여서 그렇습니다.
 
 ## 배포 (현재: 복사 방식)
 
@@ -18,15 +18,16 @@
 npm run update
 ```
 
-타겟 경로를 대화형으로 물어봅니다. 기본값은 `~/.claude`입니다.
+기본 타겟은 `~/.claude`입니다. 다른 경로로 배포하려면 `npm run update -- <타겟>`.
 
-1. 기존 배포 파일을 삭제 (`uninstall` 자동 실행)
-2. `deploy/`의 `rules/`, `skills/`, `contexts/`를 타겟에 복사
-3. `deploy/settings.json`이 있으면 타겟의 `settings.json`에 병합
-4. skills 기반으로 `~/.config/opencode/commands/`에 OpenCode 슬래시 커맨드 자동 생성
-5. 복사 결과 검증
+수행 작업 (순서):
 
-인자를 직접 지정할 수도 있습니다: `npm run update -- <타겟>`
+1. 기존 배포 파일 삭제 (`uninstall.sh` 자동 호출)
+2. `deploy/`의 카테고리 폴더(`rules/`, `contexts/`, `agents/`, `hooks/`)를 타겟에 통째로 복사
+3. `deploy/skills/` 하위는 사용자가 보존하는 외부 스킬과 공존해야 하므로 항목 단위로 복사
+4. `deploy/` 루트의 단독 파일(`settings.json`, `CLAUDE.md` 등)을 타겟에 복사 (덮어쓰기 — 병합 아님)
+5. `diff -rq`로 소스·타겟 동일성 검증
+6. 글로벌 git alias `wt-add` 등록 — 모든 레포에서 `git wt-add <branch> <path> [base]`로 새 worktree 생성 + `npm ci`(package.json 있을 때) 자동 실행
 
 ### 언인스톨
 
@@ -34,4 +35,11 @@ npm run update
 npm run uninstall
 ```
 
-타겟 경로를 대화형으로 물어봅니다. `deploy/`에 존재하는 파일과 이름이 일치하는 항목만 삭제합니다. 개인 파일은 건드리지 않습니다. OpenCode commands도 함께 제거됩니다.
+타겟 경로를 대화형으로 물어봅니다 (기본값 `~/.claude`). 인자로 지정하려면 `npm run uninstall -- <타겟>`.
+
+수행 작업:
+
+- 카테고리 폴더(`rules/`, `contexts/`, `agents/`, `hooks/`) 통째 삭제
+- `skills/` 하위에서 보존 목록(`vercel-composition-patterns`, `vercel-react-best-practices`, `web-design-guidelines`) 제외하고 모두 삭제
+- `deploy/` 루트와 같은 이름의 파일 삭제
+- 글로벌 git alias `wt-add` 제거

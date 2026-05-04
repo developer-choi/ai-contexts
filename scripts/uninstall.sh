@@ -78,3 +78,10 @@ done
 
 echo "---"
 echo "완료: ${removed}개 제거"
+
+# --- 글로벌 git alias 제거 (git wt-add) ---
+echo ""
+echo "---"
+echo "git wt-add alias 제거 중..."
+git config --global --unset alias.wt-add 2>/dev/null || true
+echo "  OK   git wt-add 제거 완료"
