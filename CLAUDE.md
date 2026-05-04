@@ -50,6 +50,10 @@
 - `plan/backlog/tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
 - `plan/backlog/tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
 
+## 배포 스크립트 관리
+
+`scripts/update.sh` 또는 `scripts/uninstall.sh`의 동작이 바뀌면 `meta/INSTALLATION_GUIDE.md`도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
+
 ## 임시 호환 파일 (삭제 예정)
 
 GitHub 외부 링크(이력서 등)의 404 방지를 위해 옛 경로에 README를 복제해둔 파일. 외부 링크가 새 경로로 전환되면 삭제한다.
