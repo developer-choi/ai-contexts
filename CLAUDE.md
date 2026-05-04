@@ -35,6 +35,11 @@
 - AC 본체에서 backlog 브랜치로 전환하지 않는다
 - 워크트리가 없으면 `git worktree add`로 자동 생성한다
 
+## README 관리
+
+- README 수정은 일반 작업에서 직접 수행하지 않는다.
+- README 변경이 필요하면 `full-refresh` 스킬 절차를 통해서만 갱신한다.
+
 ### 티어 기준
 
 | Tier | 기준 |
