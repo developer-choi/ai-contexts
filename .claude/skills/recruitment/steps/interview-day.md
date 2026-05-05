@@ -36,6 +36,7 @@ AI가 아래 항목을 위에서부터 진행 관리한다. 항목별 사용자 
 - 회사 맞춤 역질문 리스트업: 활성 모드의 `reverse-interview.md` + 회사 분석 산출물의 raw 후보. **사용자 raw 표현은 베이스 표현으로 갈음하지 말고 후보로 같이 노출**해서 사용자가 선택하도록 한다.
 - 1분 자기소개 말하며 연습 (`self-introduction.md`)
 - **최종 요약본 생성** → `outputs/final-summary.md` (활성 모드의 `templates/final-summary.md` 사용. 1-2페이지로 압축. Step 2·3에서 사용)
+- **중간 산출물 삭제** → `outputs/company-analysis.md` 삭제. 정보가 `final-summary.md`에 통합되어 중간 산출물은 제거한다. 미래 회고 시점에 필요하면 재분석.
 
 ## Step 2. 트레이닝 (-20분까지)
 
