@@ -46,6 +46,5 @@ principles/personal/quality/readability.md
 principles/personal/typescript/advanced.md
 principles/universal/quality/maintainability.md [file-folder-structure]
 principles/universal/quality/readability.md
-principles/universal/quality/examples/product-list.md
 principles/universal/react/basics.md
 principles/universal/typescript/advanced.md
