@@ -69,6 +69,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 스킬이 **설계대로 동작하는가**를 검증한다. 출력 품질이 아니라 오케스트레이션(분기, 순서, 에이전트 구성)이 대상이다.
 
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조.
+- description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. skill-creator 플러그인의 `run_loop.py`가 윈도우에서 동작 안 해 자체 도구(`scripts/bench-trigger.py`)를 둠.
 
 ## Eval
 
