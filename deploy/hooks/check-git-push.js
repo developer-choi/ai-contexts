@@ -1,6 +1,7 @@
 // git push 제어 hook
 // 1. master/main/develop/release 브랜치: push 무조건 차단
-// 2. 그 외 브랜치 force push: origin과 코드가 동일할 때만 허용
+// 2. 열린 PR이 있으면: AI 푸시 무조건 차단 (사용자가 직접 푸시)
+// 3. 그 외 브랜치 force push: origin과 코드가 동일할 때만 허용
 
 const { execSync } = require("child_process");
 
@@ -42,7 +43,24 @@ if (protectedBranches.test(targetBranch)) {
   deny(`${targetBranch} 브랜치에 push 금지.`);
 }
 
-// 2. force push 시 코드 동일 여부 확인
+// 2. 열린 PR이 있으면 푸시 전체 차단 (사용자가 직접 푸시)
+try {
+  const prState = execSync(
+    `gh pr view ${targetBranch} --json state -q .state`,
+    gitOptsQuiet,
+  )
+    .toString()
+    .trim();
+  if (prState === "OPEN") {
+    deny(
+      `${targetBranch} 브랜치에 열린 PR이 있습니다. AI는 푸시하지 않습니다 — 사용자가 직접 푸시하세요.`,
+    );
+  }
+} catch {
+  // PR 없음 또는 gh 미설치 → 통과
+}
+
+// 3. force push 시 코드 동일 여부 확인
 if (/--force\b|--force-with-lease\b/.test(cmd)) {
   try {
     execSync(`git fetch origin ${branch}`, gitOptsQuiet);
