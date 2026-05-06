@@ -1,5 +1,5 @@
 ---
-description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용.
+description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트, 블로그 포스트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용.
 argument-hint: <type> [<subtype>]
 ---
 
@@ -21,6 +21,7 @@ argument-hint: <type> [<subtype>]
 | `resume-intro` | — | — | 이력서 한줄소개 — 수치 중심 bullet 다단 |
 | `resume-item` | — | — | 이력서 경력기술서 한 항목 — 제목/문제/해결/성과 4줄 블록. write-refine에서 시안 다양화 모드로 진입 |
 | `decision` | — | — | 기술적 의사결정 문서 — 선택지 2개 이상 비교 + 장단점 + 선택 근거 |
+| `blog-post` | — | — | 블로그 포스트 — KA 외 출처(MP/AC/DC 등) 문서·코드를 변환. 프로젝트 CLAUDE.md 운영방침·frontmatter 스키마 따름 |
 
 subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
@@ -35,6 +36,8 @@ subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 **예외 — pr-comment**: 템플릿 없음. PR 코멘트는 자유 형식이라 섹션 템플릿이 부적합. subtype(reviewer/author)에 따라 메인이 의도 중심 구조(질문/제안/해명/감사 등)를 동적으로 결정한다.
 
 **예외 — readme**: `templates/readme.md` 없음. `../../contexts/writing-guide/readme-guide.md`의 구조·원칙(금지/필수 섹션)을 따라 메인이 섹션 구조를 동적으로 결정한다.
+
+**예외 — blog-post**: 템플릿 없음. 출처 문서마다 양식이 천차만별이라 고정 템플릿 부적합. 프로젝트 CLAUDE.md의 블로그 운영방침과 frontmatter 스키마(title/description/category/date/picked)에 따라 메인이 섹션 구조를 동적으로 결정한다. 출처 원본의 구조를 골격으로 삼되, 채용담당자(비개발자) 독자에 맞게 풀어쓴다. 시리즈면 출처의 cross-link 구조를 보존하며 N개 skeleton 동시 생성한다.
 
 ### 2. 뼈대 초안 생성
 
