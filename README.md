@@ -87,7 +87,6 @@ AI가 코드를 생성하거나 수정할 때마다, 기존 동작이 깨지지 
 - [workflow](deploy/skills/workflow/README.md) — 기획서나 피그마를 입력하면 PR이 나오는 7단계 프로세스
   - [requirement-review](deploy/skills/workflow/requirement-review/README.md) — 기획서·디자인 시안·채용 과제를 구현 전에 개발자 관점에서 점검
   - [bug-investigation](deploy/skills/workflow/bug-investigation/README.md) — 버그의 근본 원인 추적 및 수정 방안 제안
-  - [codebase-audit](deploy/skills/workflow/codebase-audit/README.md) — 기존 코드의 구조와 영향 범위 분석
   - [code-review](deploy/skills/workflow/code-review/README.md) — 컨벤션과 품질 기준에 따라 코드 리뷰
   - [pr-comment-respond](deploy/skills/workflow/pr-comment-respond/README.md) — PR 리뷰 피드백에 대응
 

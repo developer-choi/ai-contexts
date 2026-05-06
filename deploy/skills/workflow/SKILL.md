@@ -43,7 +43,6 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 /plan/
   background/
     read-only/          ← 사용자 제공 원본 (삭제 불가)
-    codebase-audit.md   ← step-2 codebase-audit 산출물 (기존 코드 수정 시)
     (AI 산출물)         ← 소비 후 삭제
   pr{N}/
     overview.md         ← step-3 산출물
