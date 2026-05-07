@@ -71,6 +71,10 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조.
 - description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. skill-creator 플러그인의 `run_loop.py`가 윈도우에서 동작 안 해 자체 도구(`scripts/bench-trigger.py`)를 둠.
 
+### 보강 후 재벤치 필수
+
+벤치에서 누설·이슈가 발견돼 가이드·프롬프트를 보강한 경우, **반드시 같은 시나리오로 다시 벤치를 돌려 0건 수렴 확인 후 커밋**한다. 보강만 적용하고 효과 미검증 상태로 커밋하면, 같은 누설이 다음 사용 때 재발하면서 가이드 신뢰도가 무너진다. 글로벌 "검증은 수렴할 때까지 반복" 룰의 벤치 맥락 적용 — 0건이 나올 때까지 반복(최대 10회), 각 라운드 사이 보강 변경은 별도 커밋으로 분리해 사용자가 diff로 검토 가능하게 한다.
+
 ## Eval
 
 - eval은 반드시 sonnet 모델로 실행한다. 이유: 스킬은 비용 효율적인 모델이 이해할 수 있는 수준으로 작성돼야 한다. opus에서만 동작하는 스킬은 실용적이지 않다.
