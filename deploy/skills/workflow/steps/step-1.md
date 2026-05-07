@@ -6,6 +6,12 @@
 
 ---
 
+## 자료 수집 점검
+
+아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../template/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내, 이미 받았는데 텍스트 흐림이 의심되면 영역을 짚어 다시 요청한다.
+
+---
+
 ## 스킬 로드
 
 아래 플래그를 조건에 맞게 켜서 [requirement-review](../requirement-review/SKILL.md)를 호출한다. 여러 개를 동시에 켤 수 있다.
@@ -17,6 +23,8 @@
 | `design` | 디자인 시안(Figma 등)이 별도로 있음 | 메인 | 디자인 시안 리뷰 |
 
 배경 산출물은 `/plan/background/`에, 페이지별 산출물은 `/plan/pr{N}/`에 생성됩니다.
+
+산출물(`cross-analysis.md` 등)을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다. PLAN/IMPL 세션에 미루어야 할 항목(validation 규칙, 함수 시그니처, 구현 task 단위 등)은 BG에서 적지 않는다.
 
 ---
 
