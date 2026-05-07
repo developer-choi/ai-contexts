@@ -528,3 +528,55 @@ div + handleClick 쪽도 같은 결과를 낼 수 있지만 … label 쪽에서 
 - 유지: 리드 + 핵심 비대칭 + 새 논점(비용 확장성) + 후속 전제
 - 삭제: "가능한가 vs 번거로운가" 재언급, "2차 소비자에서도 유지" 재언급, "결론이 유지됩니다" 동어 반복
 - 결론 섹션 검토 시 앞 섹션의 논점을 나열해 대조하면 중복이 드러남
+
+---
+
+## 같은 글 코드 블록 표기 일관성
+
+> 관련: tone.md "기술 용어와 사실 관계는 정확하게 사용"
+
+**배경**: 비개발자(채용담당자) 대상 블로그 포스트. 같은 글에 scss 코드 블록 두 개가 등장. "함정 코드"와 "원칙 코드"인데, 함정 쪽은 raw 값(`#eee`, `4px`), 원칙 쪽은 디자인 토큰(`variables.$gray100`, `variables.spacing(0.5)`)으로 표기가 혼재.
+
+**Bad (AI)**
+
+```scss
+/* 함정 코드 (CardSkeleton.module.scss) */
+.skeletonCard {
+  background: #eee;
+  border-radius: 4px;
+}
+
+/* 원칙 코드 (.bone) */
+.bone {
+  background: variables.$gray100;
+  border-radius: variables.spacing(0.5);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+```
+
+- 두 코드 블록이 같은 회색 박스를 정의하는데 표기가 다름 — `#eee` vs `variables.$gray100`, `4px` vs `variables.spacing(0.5)`
+- 비개발자 독자가 "왜 한쪽은 #eee고 다른 한쪽은 variables.$gray100이지?" 의문을 가짐
+- 변수/토큰 풀이를 본문에 추가해야 하거나, 의미 차이가 있는 줄로 오해할 위험
+
+**Result (사용자 확정)**
+
+raw 값으로 통일.
+
+```scss
+/* 함정 코드 */
+.skeletonCard {
+  background: #eee;
+  border-radius: 4px;
+}
+
+/* 원칙 코드 */
+.bone {
+  background: #eee;
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+```
+
+- 같은 글 안에서 같은 의미의 값은 같은 표기로 (raw 또는 변수 중 하나로 통일)
+- 비개발자 독자에게는 raw 값이 더 직관 (`#eee`=회색, `4px`=픽셀)이라 raw로 통일하는 쪽이 일반적
+- 같은 글에 여러 코드 블록이 등장하면 검토 단계에서 표기 일관성을 의무 점검
