@@ -31,6 +31,7 @@
 | `pr` | PR 본문 관련 | PR 작성/리뷰 시 |
 | `readme` | README 관련 | README 작성 시 |
 | `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
+| `decision` | 기술적 의사결정 문서 관련 | 의사결정 문서 작성/다듬기 시 (`write-init` type: `decision` 또는 `write-refine` frontmatter type: `decision`) |
 
 ## 파일 리스트
 
@@ -44,6 +45,7 @@ examples/process.md [always]
 readme-guide.md [readme]
 resume-guide.md [resume]
 examples/resume.md [resume]
+decision-guide.md [decision]
 requirements.md
 templates/pr-body/recruitment-narrative.md [pr]
 templates/pr-body/recruitment-evidence.md [pr]

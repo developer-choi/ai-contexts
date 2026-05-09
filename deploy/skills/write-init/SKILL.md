@@ -31,6 +31,8 @@ subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
 `templates/<type>.md`를 읽는다. 템플릿엔 섹션 구조와 각 섹션에 들어갈 내용 안내가 포함된다.
 
+**type별 가이드 자동 Read.** templates 처리 시 해당 `<type>-guide.md`(`../../contexts/writing-guide/` 하위)가 있으면 함께 자동 Read 한다. 현재 매핑: `resume-item`·`resume-intro` → `resume-guide.md`, `decision` → `decision-guide.md`, `readme` → `readme-guide.md`. 가이드는 type별 룰의 SSOT이고, templates는 골격만 둔다.
+
 **HTML 코멘트(`<!-- -->`) 영역은 메타 가이드**다. 메인은 참조용으로 읽되, **본문 출력에는 포함하지 않는다.** `## 본문 시작 ↓` 아래 섹션만 본문으로 사용한다.
 
 **예외 — pr-comment**: 템플릿 없음. PR 코멘트는 자유 형식이라 섹션 템플릿이 부적합. subtype(reviewer/author)에 따라 메인이 의도 중심 구조(질문/제안/해명/감사 등)를 동적으로 결정한다.
@@ -77,6 +79,8 @@ subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 확정된 본문을 frontmatter + 본문 단일 .md 파일로 저장한다. 파일 경로를 사용자에게 알려준다 — 새 세션에서 write-refine 입력으로 사용한다.
 
 ## 패키지 형식
+
+이 섹션이 패키지(frontmatter + 본문 단일 .md) 형식의 SSOT다. write-refine 등 다른 스킬은 형식 정의를 본문으로 재인용하지 말고 이 섹션을 포인터로 가리킨다.
 
 ```markdown
 ---
