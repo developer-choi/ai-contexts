@@ -64,12 +64,20 @@ if [ -d "$skills_target" ]; then
 fi
 
 # --- deploy/ 루트의 단독 파일 제거 (settings.json, CLAUDE.md 등) ---
+# settings.json은 통째 삭제하지 않고 deploy의 top-level 키만 분리한다.
+# 사용자 동적 필드(enabledPlugins 등)는 보존.
 for file in "$SRC_DIR"/*; do
   [ -f "$file" ] || continue
   file_name="$(basename "$file")"
   target_path="$TARGET_DIR/$file_name"
 
-  if [ -f "$target_path" ]; then
+  if [ "$file_name" = "settings.json" ]; then
+    if [ -f "$target_path" ]; then
+      node "$SCRIPT_DIR/split-settings.js" "$file" "$target_path"
+      echo "  SPLIT $file_name"
+      removed=$((removed + 1))
+    fi
+  elif [ -f "$target_path" ]; then
     rm -f "$target_path"
     echo "  DEL   $file_name"
     removed=$((removed + 1))

@@ -25,8 +25,10 @@ npm run update
 1. 기존 배포 파일 삭제 (`uninstall.sh` 자동 호출)
 2. `deploy/`의 카테고리 폴더(`rules/`, `contexts/`, `agents/`, `hooks/`)를 타겟에 통째로 복사
 3. `deploy/skills/` 하위는 사용자가 보존하는 외부 스킬과 공존해야 하므로 항목 단위로 복사
-4. `deploy/` 루트의 단독 파일(`settings.json`, `CLAUDE.md` 등)을 타겟에 복사 (덮어쓰기 — 병합 아님)
-5. `diff -rq`로 소스·타겟 동일성 검증
+4. `deploy/` 루트의 단독 파일을 타겟에 배포
+   - `settings.json`: 얕은 머지 — `deploy/settings.json`의 top-level 키만 타겟에 덮어쓰고, 그 외 키(예: `enabledPlugins` 같은 사용자/Claude UI 동적 필드)는 보존
+   - 그 외 파일(`CLAUDE.md` 등): 통째 덮어쓰기
+5. 검증 — 일반 파일은 `diff -rq`로 동일성, `settings.json`은 deploy의 top-level 키가 타겟에 deepEqual로 존재하는지 확인 (추가 키는 무시)
 6. 글로벌 git alias `wt-add` 등록 — 모든 레포에서 `git wt-add <branch> <path> [base]`로 새 worktree 생성 + `npm ci`(package.json 있을 때) 자동 실행
 
 ### 언인스톨
@@ -42,4 +44,5 @@ npm run uninstall
 - 카테고리 폴더(`rules/`, `contexts/`, `agents/`, `hooks/`) 통째 삭제
 - `skills/` 하위에서 보존 목록(`vercel-composition-patterns`, `vercel-react-best-practices`, `web-design-guidelines`) 제외하고 모두 삭제
 - `deploy/` 루트와 같은 이름의 파일 삭제
+  - 단, `settings.json`은 통째 삭제하지 않고 `deploy/settings.json`의 top-level 키만 타겟에서 제거. 사용자 동적 필드(`enabledPlugins` 등)는 보존. 남은 객체가 비면 파일 삭제
 - 글로벌 git alias `wt-add` 제거

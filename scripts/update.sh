@@ -65,13 +65,19 @@ echo "복사 완료: ${copied}개"
 echo ""
 
 # --- deploy/ 루트의 단독 파일 배포 (settings.json, CLAUDE.md 등) ---
+# settings.json은 사용자 동적 필드(enabledPlugins 등) 보존을 위해 얕은 머지.
 for file in "$SRC_DIR"/*; do
   [ -f "$file" ] || continue
   file_name="$(basename "$file")"
   target_path="$TARGET_DIR/$file_name"
 
-  cp "$file" "$target_path"
-  echo "  COPY  $file_name"
+  if [ "$file_name" = "settings.json" ]; then
+    node "$SCRIPT_DIR/merge-settings.js" "$file" "$target_path"
+    echo "  MERGE $file_name"
+  else
+    cp "$file" "$target_path"
+    echo "  COPY  $file_name"
+  fi
   copied=$((copied + 1))
 done
 
@@ -122,6 +128,13 @@ for file in "$SRC_DIR"/*; do
   if [ ! -f "$target_path" ]; then
     echo "  FAIL  $file_name 존재하지 않음"
     failed=$((failed + 1))
+  elif [ "$file_name" = "settings.json" ]; then
+    if node "$SCRIPT_DIR/verify-settings.js" "$file" "$target_path"; then
+      echo "  PASS  $file_name (merged)"
+    else
+      echo "  FAIL  $file_name 머지 결과 키 불일치"
+      failed=$((failed + 1))
+    fi
   elif diff -q "$file" "$target_path" > /dev/null 2>&1; then
     echo "  PASS  $file_name"
   else
