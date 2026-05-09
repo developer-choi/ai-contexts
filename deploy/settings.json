@@ -109,6 +109,11 @@
         "hooks": [
           {
             "type": "command",
+            "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\b.*--(hard|mixed)\\b/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"git reset --hard / --mixed 금지. --soft만 사용하세요. 워킹 디렉토리 미커밋 변경이 복구 불가능하게 삭제됩니다.\"}}))'",
+            "statusMessage": "Checking --hard flag..."
+          },
+          {
+            "type": "command",
             "command": "node -e 'const j=JSON.parse(require(\"fs\").readFileSync(0,\"utf8\"));const c=j.tool_input.command;if(/\\bgit\\s+(add\\s+(-A|\\.)(?=\\s|$)|commit\\s+-a(?=\\s|$))/.test(c))process.stdout.write(JSON.stringify({hookSpecificOutput:{hookEventName:\"PreToolUse\",permissionDecision:\"deny\",permissionDecisionReason:\"git add . / git add -A / git commit -a 금지. 파일을 개별 지정하세요.\"}}))'",
             "statusMessage": "Checking git add pattern..."
           },
