@@ -515,3 +515,92 @@ function TextField({ title, ...props }) {
 해당 문장 삭제.
 
 - 설명이 충분하면 결론은 독자의 몫
+
+---
+
+## em dash(—) 남용
+
+> 관련: tone.md "em dash(—) 사용 금지"
+
+**배경**: 블로그 포스트 다듬기. AI가 작성한 본문에 em dash가 24개 파일 114곳에 누적. 제목 부제, 헤딩 부제, 리스트 라벨, 인라인 강조 등 모든 위치에 등장. 사용자 자필 한국어 문서에서는 거의 쓰지 않는 문자라 "AI가 쓴 것 같다"는 인상을 줌.
+
+**Bad (AI)**
+
+```
+title: "정적 분석 — 커밋 시점에 버그를 자동으로 거르는 안전망"
+
+## 검사 도구 — 네 가지 + 포맷터
+
+- **정적 분석** — 린트가 커밋 시점에 실수를 자동 차단
+- **테스트 코드** — 기존 동작이 깨지지 않았는지 자동 확인
+
+코드를 짠 뒤에 버그를 잡는 방법은 여러 가지가 있습니다 — 사람이 리뷰하거나, 테스트를 돌리거나, AI에게 검토를 시키는 방법입니다.
+```
+
+- AI 학습 데이터에서 영문 em dash 패턴이 강화되어 한국어 문서에도 그대로 옮김
+- 한국어 키보드 입력 관습상 사람이 직접 쓰기 어려운 문자
+
+**Result (사용자 확정)**
+
+```
+title: "정적 분석: 커밋 시점에 버그를 자동으로 거르는 안전망"
+
+## 검사 도구: 네 가지 + 포맷터
+
+- **정적 분석**: 린트가 커밋 시점에 실수를 자동 차단
+- **테스트 코드**: 기존 동작이 깨지지 않았는지 자동 확인
+
+코드를 짠 뒤에 버그를 잡는 방법은 여러 가지가 있습니다. 사람이 리뷰하거나, 테스트를 돌리거나, AI에게 검토를 시키는 방법입니다.
+```
+
+- 제목·헤딩·리스트 라벨의 부제 dash → 콜론
+- 본문 인라인 강조 dash → 마침표로 문장 분리
+- 외부 인용문(`> 영문 원문`) 안 dash는 **변환하지 않고 원문 그대로 보존**
+
+---
+
+## em dash 일괄 제거 시 외부 인용문 침범
+
+> 관련: tone.md "em dash(—) 사용 금지 - 외부 인용문(`>`)은 원문 보존"
+
+**배경**: 블로그 레포 전체 em dash 일괄 제거 작업. AI가 영문 인용문(`>`) 안의 dash까지 콜론·쉼표·세미콜론으로 변환했고, 인용 출처 표기 dash(`— Kent C. Dodds`)도 제거. 사용자가 12개 파일을 통째 롤백하여 영문 인용 원문을 복구.
+
+**Bad (AI)**
+
+```
+> Everything that makes the app run: routing, entrypoints, global styles, providers.
+
+> 📁 routes: the router configuration
+> 📁 store: global store configuration
+
+> ...HTML, but before it has any CSS or necessary JavaScript, then the page...
+
+> Agents don't hand off work to each other; they operate autonomously...
+
+> Kent C. Dodds, "Write tests. Not too many. Mostly integration."
+```
+
+- 영문 원문 인용을 임의 구두점으로 변환하면 인용의 충실성이 깨짐
+- 인용 출처 표기 dash(`— 저자명`)는 인용 관습 자체이므로 제거 대상 아님
+- 같은 dash라도 한국어 본인 작성 텍스트와 영문 인용 원문은 다른 정책 필요
+
+**Result (사용자 확정)**
+
+영문 인용문은 원문 그대로 복구.
+
+```
+> Everything that makes the app run — routing, entrypoints, global styles, providers.
+
+> 📁 routes — the router configuration
+> 📁 store — global store configuration
+
+> ...HTML—but before it has any CSS or necessary JavaScript—then the page...
+
+> Agents don't hand off work to each other—they operate autonomously...
+
+> — Kent C. Dodds, "Write tests. Not too many. Mostly integration."
+```
+
+- 외부 인용문(`> `)은 원문 충실 우선 — em dash 회피 규칙 예외
+- 인용 출처 표기 dash는 보존
+- 본인이 직접 작성하는 한국어 본문·제목·헤딩·리스트·코드 주석에만 회피 규칙 적용
