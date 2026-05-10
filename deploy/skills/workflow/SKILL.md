@@ -45,9 +45,14 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
     read-only/          ← 사용자 제공 원본 (삭제 불가)
     (AI 산출물)         ← 소비 후 삭제
   pr{N}/
-    overview.md         ← step-3 산출물
-    (파생 산출물)       ← step-4 산출물, 구현 후 삭제
+    overview.md         ← step-3 산출물 (컨벤션·컨텍스트 통합)
+    decisions.md        ← step-3 산출물
+    markup.md           ← step-4 잔존 narrative (조건부)
+    logic.md            ← step-4 잔존 narrative (조건부)
+    implementation.md   ← step-4 잔존 narrative (대부분)
 ```
+
+step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
 
 ## 작업 진행 순서
 
