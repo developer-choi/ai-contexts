@@ -39,8 +39,8 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Markup Implementer | step-4 파생 산출물 중 마크업 관련, 매칭표, 디자인시스템 소스, 기존 mixin/레이아웃 패턴, map.md 중 마크업 관련 rules |
-| Feature Implementer | step-4 파생 산출물 중 로직 관련, 참조할 기존 코드 경로, map.md 중 로직 관련 rules |
+| Markup Implementer | step-4 파생 산출물 중 마크업 관련, 매칭표, 디자인시스템 소스, 기존 mixin/레이아웃 패턴, AC coding-standards/map.md + MP best-practices-map.md 중 마크업 관련 rules |
+| Feature Implementer | step-4 파생 산출물 중 로직 관련, 참조할 기존 코드 경로, AC coding-standards/map.md + MP best-practices-map.md 중 로직 관련 rules |
 | Figma Reviewer | 매칭표 |
 | Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중) |
 | Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, coding standards, step-4 산출물 중 테스트 관련 |
@@ -61,7 +61,7 @@ Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
 
 ### Coding-Standards Reviewer 분할
 
-Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)와 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
+Lead가 AC [coding-standards/map.md](../../../contexts/coding-standards/map.md) + MP `docs/best-practices-map.md` + 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
 
 - 분할 단위는 Lead 재량
 
