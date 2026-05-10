@@ -62,7 +62,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 ## 세션 회고
 
-IMPLEMENTATION_SESSION의 마지막 step이다. 보고 후:
+이 세션의 마지막 step이다. 보고 후:
 
 1. `/pre-exit` 스킬을 호출하여 세션 마무리 절차를 수행한다.
 2. 이 세션에서 새로 정립한 코드 패턴이 있으면 베스트프랙티스맵 엔트리 추가를, 선호 패키지에 변동이 있으면 목록 수정을 제안한다.
