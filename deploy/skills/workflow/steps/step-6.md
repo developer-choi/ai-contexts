@@ -24,6 +24,14 @@
 
 ---
 
+## 잔존 md 정리
+
+리뷰 파이프라인(Step 6.2) 진입 전, Lead가 잔존 md(`markup.md`, `logic.md`, `implementation.md`) 중 코드에 1:1 반영된 내용을 제거한다. stub 파일은 이미 코드의 일부이므로 별도 정리 불필요. 판단·결정·방향을 담은 내용은 step-7에서 PR 본문에 녹인 뒤 정리하므로 이 단계에서는 유지한다.
+
+잔존 md 정리는 별도 커밋으로 만든다 (소스코드 커밋에 섞지 않는다 — 글로벌 규칙 「커밋 단위」). `plan/`이 untracked 또는 `.gitignore` 정책인 프로젝트는 working tree만 변경되고 커밋은 발생하지 않는다.
+
+---
+
 ## Step 6.2. 리뷰 파이프라인
 
 Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 coding-standards를 선별하고, `/code-review`를 advanced 모드로 호출한다.
