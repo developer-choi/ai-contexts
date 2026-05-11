@@ -154,6 +154,10 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - 프로젝트 유형(회사/개인)에 맞는 경로만 포함되었는지 확인한다
 - stub 파일이 lint·tsc·prettier를 통과하는지 확인 (코드라서 가능)
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
+- **step-4 자체의 stub 작성 룰(위 「4. stub 파일 작성 룰」 섹션) 준수 여부도 직접 점검** — 특히 lint가 잡지 못하는 항목:
+  - `.module.scss`: step-4에서 결정된 토큰 매핑(markup.md)이 raw px·hex 대신 디자인 토큰 변수(`var(--...)`, `utils.map-safe-get(tokens.$variables, ...)`)로 적혀 있는지
+  - hook stub: 결정된 시그니처·반환 shape이 코드로 적혀 있고 미정 본문만 TODO/`throw new Error('not implemented')`인지
+  - `.tsx`: 조건부 렌더링의 placeholder 변수(`const isLoading = false; // TODO logic`) 패턴 준수
 
 ### 설계 타당성 역추적
 - overview.md(Step 3)와 decisions.md의 기술 결정을 기준으로, 파생 산출물(stub 코드 + 잔존 md)이 해당 결정을 충실히 반영하는지 검증한다
