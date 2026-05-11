@@ -15,40 +15,13 @@ module.exports = {
       2,
       'always',
       [
-        // deploy/skills/
-        'backlog',
-        'code-review',
-        'discussion',
-        'doc-router',
-        'pr-comment-write',
-        'pre-exit',
-        'scw',
-        'simplify',
-        'tech-trends',
-        'workflow',
-        'writer',
-        'full-refresh',
-        'kpi',
-        'write-init',
-        'write-refine',
-        'callers',
-        'recruitment',
-        // deploy/contexts/
-        'coding-standards',
-        'writing-guide',
-        'team-agent',
-        'self-help',
-        'skill-self-improvement',
-        // deploy/rules/
-        'global',
-        // deploy/
+        'skills',
+        'contexts',
+        'rules',
         'settings',
-        // bench/
         'bench',
-        // wip/
         'wip',
-        // else
-        'archives'
+        'archives',
       ],
     ],
     'scope-empty': [2, 'never'],
