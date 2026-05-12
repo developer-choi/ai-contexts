@@ -71,18 +71,35 @@ Lead가 AC [coding-standards/map.md](../../../contexts/coding-standards/map.md) 
 
 ## Step 5.2. 구현 중 공통 룰
 
-### Step 5.2.1. stub 주석 해결 시 즉시 삭제
+### Step 5.0. IMPL 시작 게이트 — `TODO [USER_REVIEW]` 잔존 검사
 
-step-4에서 stub 파일에 남긴 `// [stub]:` 본문 주석과 `/* [stub] ... */` 상단 블록은 step-4 룰(「본문 주석은 `[stub]` / `TODO` 마커 분리 필수」)에 따라 IMPL 시 일괄 처리되는 임시 마커다. step-5에서 stub을 실제 코드로 채우며 `[stub]` 주석이 가리킨 사항을 해결한 즉시 해당 주석을 삭제한다.
+step-5 진입 직후 본 PR 영역에서 `TODO [USER_REVIEW]` 잔존을 검사한다. step-4에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가.
 
-`// TODO:` 주석은 별도 처리한다 — 다음 PR 또는 별도 이슈로 이연되는 실제 후속 작업이므로 IMPL 종료 후에도 잔존 가능하다. 잔존 항목은 IMPL 종료 보고에 이연 사유와 함께 명시한다.
+```bash
+grep -rn "TODO \[USER_REVIEW\]" _fsd/<slice>/ src/<scope>/
+```
+
+- 0건 → IMPL 진행 (사용자 검토 완료)
+- 1건 이상 → **IMPL 중단**, 잔존 라인을 사용자에게 출력 + "이 항목들 검토 후 `TODO [USER_REVIEW]` 마커를 제거해주세요" 안내
+
+상단 블록(`/* TODO [USER_REVIEW] [Convention] [Reference] */`)도 같은 검사 대상. 사용자가 컨벤션·참조 정합 검토 후 블록 자체 삭제 또는 마커만 제거.
+
+### Step 5.2.1. TODO 주석 해결 시 즉시 삭제
+
+step-4 룰(「본문 주석은 `TODO [USER_REVIEW]` / `TODO [AI_IMPL]` 마커 분리 필수」)에 따라 step-5는 두 종류 TODO를 처리한다:
+
+| 마커 | 처리 방식 |
+|---|---|
+| `// TODO [USER_REVIEW]:` 잔존 | Step 5.0 게이트에서 차단되므로 IMPL 진행 중 만나면 안 됨. 만나면 즉시 사용자에게 보고 |
+| `// TODO [AI_IMPL]:` | step-5에서 코드로 채우며 즉시 삭제 |
+| `/* TODO [USER_REVIEW] [Convention] [Reference] */` 상단 블록 | 출처 확인 끝났으면 블록 전체 삭제 |
 
 원칙:
 
-- `[stub]` 주석 1건을 해결한 커밋에서 같은 커밋 안에 주석도 함께 삭제 (별도 정리 커밋 만들지 않음)
-- 해결 안 된 `[stub]`을 남긴 채 step-5 종료하지 않음 — 미해결 `[stub]`은 IMPL 종료 보고에 포함하여 사용자 검토
-- 파일 최상단의 `/* [stub] [Convention] [Reference] */` 블록도 stub 단계 임시 마커다. step-5에서 출처 확인이 끝났으면 블록 전체를 삭제한다 (IMPL 완료 시 `[stub]` 마커는 본문 주석과 상단 블록 모두 0건)
-- `// TODO:`는 IMPL 종료 시점에 잔존 가능. 종료 보고에 잔존 항목 + 이연 사유(예: "PR3에서 처리")를 명시한다
+- `TODO [AI_IMPL]` 주석 1건을 해결한 커밋에서 같은 커밋 안에 주석도 함께 삭제 (별도 정리 커밋 만들지 않음)
+- 해결 안 된 `TODO [AI_IMPL]`을 남긴 채 step-5 종료하지 않음 — 미해결은 IMPL 종료 보고에 포함하여 사용자 검토
+- 파일 최상단의 `/* TODO [USER_REVIEW] [Convention] [Reference] */` 블록도 출처 확인 완료 후 삭제 (IMPL 완료 시 모든 `TODO` 마커는 본문 주석과 상단 블록 모두 0건)
+- **코드 안 TODO는 PR 이연 항목 포함 불가** — PR 이연·외부 의존성은 `plan/{prN}/overview.md` 「열려있는 질문」 절에서 영구 관리. step-5에서 PR 이연을 코드 안에 박지 않는다
 
 ### Step 5.2.2. gotchas
 
@@ -194,7 +211,7 @@ stub만 만들고 구현에서 한 번도 건드리지 않은 파일(예: 계획
 ## Step 5.5. 마무리
 
 - **stub `*.test.tsx`의 `it.todo` 자연어와 실제 작성된 `it(...)` 케이스를 대조**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). 누락된 todo가 있으면 사용자에게 보고한다
-- **stub 본문 `// [stub]:` 주석 잔존 점검** — 0건 필수 (위 「Step 5.2.1. stub 주석 해결 시 즉시 삭제」). 잔존하면 종료 안 됨
+- **`TODO` 주석 잔존 점검** — 본 PR 영역에서 `grep -rn "TODO" _fsd/<slice>/ src/<scope>/`로 0건 확인. `TODO [USER_REVIEW]`와 `TODO [AI_IMPL]` 둘 다 0건이어야 종료 가능 (위 「Step 5.2.1. TODO 주석 해결 시 즉시 삭제」). 잔존하면 종료 안 됨
 - **stub 상단 `/* [stub] [Convention] [Reference] */` 블록 잔존 점검** — 0건 필수 (위 「Step 5.2.1. stub 주석 해결 시 즉시 삭제」). 잔존하면 종료 안 됨
 - **`// TODO:` 주석 잔존 보고** — 잔존 항목 + 이연 사유(다음 PR/이슈) 명시. 잔존 자체는 허용 (위 「Step 5.2.1. stub 주석 해결 시 즉시 삭제」)
 - 전체 리뷰 + 커밋 정리·재정렬 완료 후, Lead가 사용자에게 결과 보고
