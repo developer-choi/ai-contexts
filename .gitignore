@@ -3,6 +3,7 @@
 .claude/scheduled_tasks.lock
 .idea
 node_modules
+coverage
 interview-prep.md
 .agents/
 AGENTS.md
