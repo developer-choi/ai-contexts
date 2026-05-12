@@ -124,6 +124,7 @@
 - KA = knowledge-archive
 - MP = monorepo-playground
 - DC = developer-choi (`~/WebstormProjects/my-else/developer-choi`)
+- PP = private-playground (`~/WebstormProjects/my-else/private-playground`)
 - TP = test-playground
 
 ### 피드백 저장
