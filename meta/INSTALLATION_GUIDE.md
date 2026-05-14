@@ -22,7 +22,7 @@ npm run update
 
 수행 작업 (순서):
 
-1. 기존 배포 파일 삭제 (`uninstall.sh` 자동 호출)
+1. 기존 배포 파일 삭제 (`scripts/uninstall.js` 로직 자동 호출)
 2. `deploy/`의 카테고리 폴더(`rules/`, `contexts/`, `agents/`, `hooks/`)를 타겟에 통째로 복사
 3. `deploy/skills/` 하위는 사용자가 보존하는 외부 스킬과 공존해야 하므로 항목 단위로 복사
 4. `deploy/` 루트의 단독 파일을 타겟에 배포
@@ -30,6 +30,8 @@ npm run update
    - 그 외 파일(`CLAUDE.md` 등): 통째 덮어쓰기
 5. 검증 — 일반 파일은 `diff -rq`로 동일성, `settings.json`은 deploy의 top-level 키가 타겟에 deepEqual로 존재하는지 확인 (추가 키는 무시)
 6. 글로벌 git alias `wt-add` 등록 — 모든 레포에서 `git wt-add <branch> <path> [base]`로 새 worktree 생성 + `npm ci`(package.json 있을 때) 자동 실행
+
+`npm run update`는 Node 스크립트(`scripts/update.js`)로 실행됩니다. Windows/PowerShell 환경에서 bash 실행 정책이나 `.sh` 줄바꿈에 의존하지 않습니다.
 
 ### 언인스톨
 
@@ -46,3 +48,17 @@ npm run uninstall
 - `deploy/` 루트와 같은 이름의 파일 삭제
   - 단, `settings.json`은 통째 삭제하지 않고 `deploy/settings.json`의 top-level 키만 타겟에서 제거. 사용자 동적 필드(`enabledPlugins` 등)는 보존. 남은 객체가 비면 파일 삭제
 - 글로벌 git alias `wt-add` 제거
+
+### 로컬 스킬 배포
+
+```bash
+npm run deploy-local-skills
+```
+
+기본으로 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포를 순회합니다. 각 레포에 `.claude/skills`가 있으면 이를 Codex용 `.agents/skills`로 생성/갱신합니다.
+
+특정 루트만 지정하려면:
+
+```bash
+npm run deploy-local-skills -- ~/WebstormProjects/main
+```

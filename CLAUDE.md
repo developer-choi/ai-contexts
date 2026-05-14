@@ -77,7 +77,7 @@
 
 ## 배포 스크립트 관리
 
-`scripts/update.sh` 또는 `scripts/uninstall.sh`의 동작이 바뀌면 `meta/INSTALLATION_GUIDE.md`도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
+`scripts/update.js` 또는 `scripts/uninstall.js`의 동작이 바뀌면 `meta/INSTALLATION_GUIDE.md`도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
 
 ## 임시 호환 파일 (삭제 예정)
 

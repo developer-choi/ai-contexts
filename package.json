@@ -4,8 +4,9 @@
   "description": "",
   "private": false,
   "scripts": {
-    "update": "bash scripts/update.sh",
-    "uninstall": "bash scripts/uninstall.sh",
+    "update": "node scripts/update.js",
+    "uninstall": "node scripts/uninstall.js",
+    "deploy-local-skills": "node scripts/deploy-local-agents.js",
     "prepare": "husky"
   },
   "devDependencies": {
