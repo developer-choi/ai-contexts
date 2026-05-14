@@ -1,4 +1,5 @@
 ---
+name: doc-router
 description: 구글 문서(PDF+MD)의 혼합 콘텐츠를 KA(knowledge-archive)와 MP(monorepo-playground)의 patterns·tips로 분류·분리한다. 변환은 하지 않는다. 사용자가 PDF/MD 파일을 주면서 분류, 라우팅, 분리, 정리, 변환을 요청하면 반드시 이 스킬을 사용한다. "KA/MP로 나눠줘", "구글 문서 정리해줘", "문서 변환해줘", "이거 어디로 가야해?", "분류해줘" 등의 요청뿐 아니라, 사용자가 구글 문서 export 파일(PDF, MD)을 언급하며 학습·구현 콘텐츠를 정리하려는 맥락이라면 이 스킬이 필요하다.
 argument-hint: "[PDF 파일 경로] [MD 파일 경로]"
 ---

@@ -1,4 +1,5 @@
 ---
+name: repo-sync
 description: ~/WebstormProjects/main/ 와 ~/WebstormProjects/my-else/ 하위 1뎁스 git 레포를 일괄로 양방향 동기화한다. 현재 브랜치는 fetch + ff/push로 origin과 맞추고, 일반 브랜치에서 미커밋 변경이 있으면 WIP 커밋 후 푸시한다. 보호 브랜치(master/main/develop/release)는 자동 커밋·푸시 금지. 원격·로컬 양쪽에 새 커밋이 쌓여 fast-forward 불가능한 경우는 손대지 않고 보고. "레포 동기화", "전부 sync", "다 풀받자" 같은 일괄 동기화 요청 시 사용.
 ---
 
