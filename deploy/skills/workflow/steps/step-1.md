@@ -2,8 +2,6 @@
 
 > **이 단계의 목표: 작업의 문제/목표를 정의한다** (도메인/비즈니스 관점, 코드 분석 아님)
 
-작업의 **배경**, **목적**, **문제가 있다면 Root Cause**를 명확히 합니다.
-
 ---
 
 ## 자료 수집 점검
@@ -14,7 +12,7 @@
 
 ## 스킬 로드
 
-아래 플래그를 조건에 맞게 켜서 [requirement-review](../requirement-review/SKILL.md)를 호출한다. 여러 개를 동시에 켤 수 있다.
+아래 플래그를 조건에 맞게 켜서 [requirement-review](../requirement-review/SKILL.md)를 호출한다.
 
 | 플래그 | 켜는 조건 | 실행 | 설명 |
 |--------|-----------|------|------|
@@ -22,9 +20,7 @@
 | `planning` | 신규 기능 / 리팩토링 / 채용과제에 페이지 단위 기획이 있음 (UI 목업, 기능 명세 포함) | 메인 | 기획서·피그마·이슈 기반 배경 파악 |
 | `design` | 디자인 시안(Figma 등)이 별도로 있음 | 메인 | 디자인 시안 리뷰 |
 
-배경 산출물은 `/plan/background/`에, 페이지별 산출물은 `/plan/pr{N}/`에 생성됩니다.
-
-산출물(`cross-analysis.md` 등)을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다. PLAN/IMPL 세션에 미루어야 할 항목(validation 규칙, 함수 시그니처, 구현 task 단위 등)은 BG에서 적지 않는다.
+산출물을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다. PLAN/IMPL 세션에 미루어야 할 항목(validation 규칙, 함수 시그니처, 구현 task 단위 등)은 BG에서 적지 않는다.
 
 ---
 
