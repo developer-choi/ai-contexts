@@ -12,6 +12,8 @@
 
 ## 배포 (현재: 복사 방식)
 
+Windows에서 배포 진입점을 Node로 바꾼 배경은 [Windows Node Deploy Migration](../archives/windows-node-deploy-migration.md)에 정리되어 있습니다.
+
 ### 갱신
 
 ```bash
