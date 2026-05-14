@@ -52,6 +52,7 @@ deploy/skills/<스킬명>/
 
 ```yaml
 ---
+name: 스킬명
 description: 스킬에 대한 한 줄 설명
 argument-hint: 인자 힌트 (선택)
 ---
