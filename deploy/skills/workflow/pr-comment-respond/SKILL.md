@@ -1,4 +1,5 @@
 ---
+name: workflow-pr-comment-respond
 description: 내 PR에 달린 코멘트를 분석하고 대응 전략을 세운다. PR 코멘트 받았을 때, 리뷰 코멘트 대응, 코멘트 답변 준비 시 사용. 누군가 내 PR에 피드백을 남겼거나, 코드 리뷰 코멘트에 어떻게 대응할지 고민할 때 반드시 이 스킬을 사용한다.
 argument-hint: "[코멘트 내용 또는 PR URL]"
 ---

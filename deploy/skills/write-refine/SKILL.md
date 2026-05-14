@@ -1,4 +1,5 @@
 ---
+name: write-refine
 description: write-init이 만든 패키지(frontmatter + 본문 단일 .md)의 톤·구조·분량을 다듬는다. 작업 히스토리 없는 새 세션에서 호출. 사실 검증은 안 함 — 표현·구조·분량만 다룬다.
 argument-hint: <package-file-path>
 ---

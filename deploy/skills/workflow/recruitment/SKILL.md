@@ -1,4 +1,5 @@
 ---
+name: workflow-recruitment
 description: 채용 과제 제출 마무리. 커밋 정리, PR 작성, README, 배포 안내까지.
 argument-hint: (인자 없음 — workflow 마지막 WRITING_SESSION에서 호출)
 ---

@@ -1,4 +1,5 @@
 ---
+name: kpi
 description: Claude Code 세션 로그에서 KPI를 추출한다. 사용자와 대화하며 프로젝트·세션을 탐색하고, 선택한 세션의 사용자 입력을 정제하여 보여준다.
 argument-hint: "[project] (생략 시 프로젝트 목록부터 시작)"
 ---

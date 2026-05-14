@@ -1,4 +1,5 @@
 ---
+name: write-init
 description: 외부 공개용 텍스트(PR 본문, README, PR 코멘트, 블로그 포스트)의 내용을 풍부하게 작성한다. 작업 컨텍스트로 뼈대 초안 생성 → 사용자가 마크된 부분 채움 → 풍부하게 펼침. 톤 다듬기는 안 함 (write-refine 사용). 명시적으로 write-init을 호출할 때만 사용.
 argument-hint: <type> [<subtype>]
 ---
