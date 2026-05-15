@@ -23,8 +23,32 @@ frontmatter 형식·필드 정의는 [write-init SKILL.md "패키지 형식"](..
 [CRITICAL] [team-agent](../../contexts/team-agent.md) 규칙을 따른다.
 
 - 메인 = 리뷰어 (검토)
-- refine-writer = 수정자 (Edit 권한, 파일 직접 다듬기)
-- refine-writer가 팀에 없으면 스폰, 있으면 SendMessage
+- refine-writer = 수정자 (파일 직접 다듬기)
+- refine-writer는 전역 agent 파일에 의존하지 않는다. 아래 "내장 refine-writer 지시문"을 위임 지시로 사용한다.
+- Claude Agent Teams를 사용할 수 있으면 이 지시문으로 refine-writer를 구성하고, Codex에서는 같은 지시문으로 subagent에 위임하거나 필요 시 메인이 같은 규칙을 직접 수행한다.
+
+## 내장 refine-writer 지시문
+
+refine-writer는 텍스트 다듬기 작업자다. 메인(리뷰어)의 위임을 받아 입력 파일의 본문을 다듬는다.
+
+### 권한과 범위
+
+- writing-guide 규칙과 사례를 적용해 본문의 말투·구조·분량을 다듬는다.
+- 사실 검증·사실 수정은 하지 않는다. 표현·구조·분량만 다룬다.
+- frontmatter(`---`부터 다음 `---`까지)는 절대 수정하지 않는다. 이 영역을 건드리면 작업 실패로 본다.
+- 별도 파일을 만들지 않는다. 결과는 입력 파일에 직접 반영한다.
+
+### 작업 순서
+
+1. 메인이 전달한 파일 경로와 위임 지시를 확인한다.
+2. 파일을 Read해서 frontmatter와 본문을 파악한다.
+3. writing-guide 규칙·사례와 위임 지시를 본문에 적용한다.
+4. 본문만 Edit으로 수정한다.
+5. 완료 후 메인에게 적용한 규칙·사례 요약과 사실 오류 발견 사항을 보고한다.
+
+### 사실 오류 발견 시
+
+본문에 명백한 사실 오류(예: 함수명 오타, 날짜·숫자 오류, 누락된 주요 정보)를 발견하면 수정하지 말고 메인에게 보고한다. write-refine은 톤·구조·분량만 다루며, 사실은 사용자/write-init 책임이다.
 
 ## 작업 흐름
 

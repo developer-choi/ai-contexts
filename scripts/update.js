@@ -3,8 +3,11 @@ const path = require('path');
 
 const {
   CATEGORIES,
+  buildCodexAgentsContent,
+  claudeSettingsSource,
   comparePaths,
   copyPath,
+  codexHooksSource,
   defaultCodexDir,
   defaultClaudeDir,
   deployCodexGlobals,
@@ -16,11 +19,12 @@ const {
   registerWtAddAlias,
   resolveUserPath,
   sourceDir,
+  trustCodexHooks,
   uninstallTarget,
   verifySettings,
 } = require('./deploy-lib');
 
-function main() {
+async function main() {
   ensureDeploySource();
 
   const targetArg = process.argv[2];
@@ -88,21 +92,27 @@ function main() {
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
+    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json') continue;
 
     const src = path.join(sourceDir, entry.name);
     const target = path.join(targetDir, entry.name);
     if (!pathExists(target)) {
       fail(failures, `${entry.name} 존재하지 않음`);
-    } else if (entry.name === 'settings.json') {
-      if (verifySettings(src, target)) {
-        console.log(`  PASS  ${entry.name} (merged)`);
-      } else {
-        fail(failures, `${entry.name} 머지 결과 키 불일치`);
-      }
     } else if (comparePaths(src, target)) {
       console.log(`  PASS  ${entry.name}`);
     } else {
       fail(failures, `${entry.name} 내용 불일치`);
+    }
+  }
+
+  const targetSettings = path.join(targetDir, 'settings.json');
+  if (pathExists(claudeSettingsSource)) {
+    if (!pathExists(targetSettings)) {
+      fail(failures, 'settings.json 존재하지 않음');
+    } else if (verifySettings(claudeSettingsSource, targetSettings)) {
+      console.log('  PASS  settings.json (merged)');
+    } else {
+      fail(failures, 'settings.json 머지 결과 키 불일치');
     }
   }
 
@@ -125,6 +135,7 @@ function main() {
     console.log(`Codex 전역 자산 배포 중: ${codexTargetDir}`);
     const codexCopied = deployCodexGlobals(codexTargetDir, console.log);
     console.log(`Codex 배포 완료: ${codexCopied}개`);
+    await trustCodexHooks(codexTargetDir, console.log);
     verifyCodexGlobals(codexTargetDir);
   }
 }
@@ -159,6 +170,38 @@ function verifyCodexGlobals(targetDir) {
     }
   }
 
+  const srcHooks = path.join(sourceDir, 'hooks');
+  const targetHooks = path.join(targetDir, 'hooks');
+  if (existsDir(srcHooks)) {
+    if (!existsDir(targetHooks)) {
+      fail(failures, 'codex hooks/ 존재하지 않음');
+    } else if (comparePaths(srcHooks, targetHooks)) {
+      console.log('  PASS  codex hooks/');
+    } else {
+      fail(failures, 'codex hooks/ 내용 불일치');
+    }
+  }
+
+  const targetHooksConfig = path.join(targetDir, 'hooks.json');
+  if (pathExists(codexHooksSource)) {
+    if (!pathExists(targetHooksConfig)) {
+      fail(failures, 'codex hooks.json 존재하지 않음');
+    } else if (comparePaths(codexHooksSource, targetHooksConfig)) {
+      console.log('  PASS  codex hooks.json');
+    } else {
+      fail(failures, 'codex hooks.json 내용 불일치');
+    }
+  }
+
+  const targetAgents = path.join(targetDir, 'AGENTS.md');
+  if (!pathExists(targetAgents)) {
+    fail(failures, 'codex AGENTS.md 존재하지 않음');
+  } else if (require('fs').readFileSync(targetAgents, 'utf8') === buildCodexAgentsContent()) {
+    console.log('  PASS  codex AGENTS.md');
+  } else {
+    fail(failures, 'codex AGENTS.md 내용 불일치');
+  }
+
   if (failures.length > 0) {
     console.error(`Codex 검증 실패: ${failures.length}개 항목 확인 필요`);
     process.exit(1);
@@ -180,4 +223,7 @@ function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
