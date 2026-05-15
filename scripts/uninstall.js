@@ -2,18 +2,34 @@
 const path = require('path');
 const readline = require('readline');
 
-const { defaultClaudeDir, ensureDeploySource, resolveUserPath, uninstallTarget } = require('./deploy-lib');
+const {
+  defaultCodexDir,
+  defaultClaudeDir,
+  ensureDeploySource,
+  resolveUserPath,
+  uninstallCodexGlobals,
+  uninstallTarget,
+} = require('./deploy-lib');
 
 async function main() {
   ensureDeploySource();
 
-  const targetArg = process.argv[2] || (await askTarget());
+  const explicitTarget = process.argv[2];
+  const targetArg = explicitTarget || (await askTarget());
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
 
   console.log(`타겟: ${targetDir}`);
   console.log('---');
 
-  const removed = uninstallTarget(targetDir);
+  let removed = uninstallTarget(targetDir);
+
+  if (!explicitTarget && targetDir === defaultClaudeDir()) {
+    const codexTargetDir = defaultCodexDir();
+    console.log('');
+    console.log(`Codex 타겟: ${codexTargetDir}`);
+    console.log('---');
+    removed += uninstallCodexGlobals(codexTargetDir);
+  }
 
   console.log('---');
   console.log(`완료: ${removed}개 제거`);

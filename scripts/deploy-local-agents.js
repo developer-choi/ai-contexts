@@ -43,15 +43,27 @@ function main() {
 
 function deployRepo(repo) {
   const claudeSkills = path.join(repo, '.claude', 'skills');
-  if (!existsDir(claudeSkills)) {
-    return { repo, status: 'skipped', detail: 'no .claude/skills' };
+  const claudeAgents = resolveClaudeAgents(repo);
+  const hasSkills = existsDir(claudeSkills);
+  const hasAgents = claudeAgents !== null;
+
+  if (!hasSkills && !hasAgents) {
+    return { repo, status: 'skipped', detail: 'no .claude/skills or CLAUDE.md' };
   }
 
   try {
+    const deployed = [];
     const agentsDir = path.join(repo, '.agents');
-    ensureDir(agentsDir);
-    copyPath(claudeSkills, path.join(agentsDir, 'skills'));
-    return { repo, status: 'deployed', detail: '.claude/skills -> .agents/skills' };
+    if (hasSkills) {
+      ensureDir(agentsDir);
+      copyPath(claudeSkills, path.join(agentsDir, 'skills'));
+      deployed.push('.claude/skills -> .agents/skills');
+    }
+    if (hasAgents) {
+      copyPath(claudeAgents, path.join(repo, 'AGENTS.md'));
+      deployed.push(`${shortSource(repo, claudeAgents)} -> AGENTS.md`);
+    }
+    return { repo, status: 'deployed', detail: deployed.join(', ') };
   } catch (error) {
     return { repo, status: 'failed', detail: error.message };
   }
@@ -82,6 +94,15 @@ function isGitWorktree(repo) {
 
 function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
+}
+
+function resolveClaudeAgents(repo) {
+  const candidate = path.join(repo, 'CLAUDE.md');
+  return fs.existsSync(candidate) && fs.statSync(candidate).isFile() ? candidate : null;
+}
+
+function shortSource(repo, file) {
+  return path.relative(repo, file).replaceAll(path.sep, '/');
 }
 
 main();

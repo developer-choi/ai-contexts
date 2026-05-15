@@ -5,6 +5,7 @@ const path = require('path');
 
 const CATEGORIES = ['rules', 'contexts', 'agents', 'hooks'];
 const SKILLS_PRESERVE = new Set([
+  '.system',
   'vercel-composition-patterns',
   'vercel-react-best-practices',
   'web-design-guidelines',
@@ -15,6 +16,10 @@ const sourceDir = path.join(repoDir, 'deploy');
 
 function defaultClaudeDir() {
   return path.join(os.homedir(), '.claude');
+}
+
+function defaultCodexDir() {
+  return path.join(os.homedir(), '.codex');
 }
 
 function resolveUserPath(input) {
@@ -138,6 +143,64 @@ function deployRootFiles(targetDir, log) {
   return copied;
 }
 
+function deploySkills(targetDir, log) {
+  const srcSkills = path.join(sourceDir, 'skills');
+  if (!fs.existsSync(srcSkills) || !fs.statSync(srcSkills).isDirectory()) return 0;
+
+  const targetSkills = path.join(targetDir, 'skills');
+  ensureDir(targetSkills);
+
+  let copied = 0;
+  for (const entry of listEntries(srcSkills)) {
+    const src = path.join(srcSkills, entry.name);
+    copyPath(src, path.join(targetSkills, entry.name));
+    log(`  COPY  skills/${entry.name}`);
+    copied += 1;
+  }
+  return copied;
+}
+
+function uninstallSkills(targetDir, log) {
+  const skillsDir = path.join(targetDir, 'skills');
+  let removed = 0;
+  for (const entry of listEntries(skillsDir)) {
+    if (SKILLS_PRESERVE.has(entry.name)) continue;
+
+    removePath(path.join(skillsDir, entry.name));
+    log(`  DEL   skills/${entry.name}`);
+    removed += 1;
+  }
+  return removed;
+}
+
+function deployCodexGlobals(targetDir, log = console.log) {
+  ensureDir(targetDir);
+  uninstallCodexGlobals(targetDir, log);
+
+  let copied = 0;
+  const srcContexts = path.join(sourceDir, 'contexts');
+  if (fs.existsSync(srcContexts) && fs.statSync(srcContexts).isDirectory()) {
+    copyPath(srcContexts, path.join(targetDir, 'contexts'));
+    log('  COPY  contexts/');
+    copied += 1;
+  }
+
+  copied += deploySkills(targetDir, log);
+  return copied;
+}
+
+function uninstallCodexGlobals(targetDir, log = console.log) {
+  let removed = 0;
+  const contextsDir = path.join(targetDir, 'contexts');
+  if (fs.existsSync(contextsDir) && fs.statSync(contextsDir).isDirectory()) {
+    removePath(contextsDir);
+    log('  DEL   contexts/');
+    removed += 1;
+  }
+  removed += uninstallSkills(targetDir, log);
+  return removed;
+}
+
 function uninstallTarget(targetDir, options = {}) {
   const log = options.log ?? console.log;
   const removeAlias = options.removeAlias ?? true;
@@ -152,14 +215,7 @@ function uninstallTarget(targetDir, options = {}) {
     }
   }
 
-  const skillsDir = path.join(targetDir, 'skills');
-  for (const entry of listEntries(skillsDir)) {
-    if (SKILLS_PRESERVE.has(entry.name)) continue;
-
-    removePath(path.join(skillsDir, entry.name));
-    log(`  DEL   skills/${entry.name}`);
-    removed += 1;
-  }
+  removed += uninstallSkills(targetDir, log);
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
@@ -204,8 +260,11 @@ module.exports = {
   CATEGORIES,
   comparePaths,
   copyPath,
+  defaultCodexDir,
   defaultClaudeDir,
+  deployCodexGlobals,
   deployRootFiles,
+  deploySkills,
   ensureDeploySource,
   ensureDir,
   listEntries,
@@ -213,6 +272,7 @@ module.exports = {
   repoDir,
   resolveUserPath,
   sourceDir,
+  uninstallCodexGlobals,
   uninstallTarget,
   verifySettings,
 };

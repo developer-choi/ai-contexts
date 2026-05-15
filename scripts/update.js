@@ -5,8 +5,11 @@ const {
   CATEGORIES,
   comparePaths,
   copyPath,
+  defaultCodexDir,
   defaultClaudeDir,
+  deployCodexGlobals,
   deployRootFiles,
+  deploySkills,
   ensureDeploySource,
   ensureDir,
   listEntries,
@@ -20,7 +23,8 @@ const {
 function main() {
   ensureDeploySource();
 
-  const targetDir = resolveUserPath(process.argv[2] || defaultClaudeDir());
+  const targetArg = process.argv[2];
+  const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
   console.log(`소스: ${sourceDir}`);
   console.log(`타겟: ${targetDir}`);
   console.log('---');
@@ -42,18 +46,7 @@ function main() {
     copied += 1;
   }
 
-  const srcSkills = path.join(sourceDir, 'skills');
-  if (existsDir(srcSkills)) {
-    const targetSkills = path.join(targetDir, 'skills');
-    ensureDir(targetSkills);
-
-    for (const entry of listEntries(srcSkills)) {
-      const src = path.join(srcSkills, entry.name);
-      copyPath(src, path.join(targetSkills, entry.name));
-      console.log(`  COPY  skills/${entry.name}`);
-      copied += 1;
-    }
-  }
+  copied += deploySkills(targetDir, console.log);
 
   console.log('---');
   console.log(`복사 완료: ${copied}개`);
@@ -78,6 +71,7 @@ function main() {
     }
   }
 
+  const srcSkills = path.join(sourceDir, 'skills');
   if (existsDir(srcSkills)) {
     for (const entry of listEntries(srcSkills)) {
       const src = path.join(srcSkills, entry.name);
@@ -123,6 +117,53 @@ function main() {
   console.log('---');
   console.log('git wt-add alias 등록 중...');
   registerWtAddAlias(console.log);
+
+  if (!targetArg) {
+    console.log('');
+    console.log('---');
+    const codexTargetDir = defaultCodexDir();
+    console.log(`Codex 전역 자산 배포 중: ${codexTargetDir}`);
+    const codexCopied = deployCodexGlobals(codexTargetDir, console.log);
+    console.log(`Codex 배포 완료: ${codexCopied}개`);
+    verifyCodexGlobals(codexTargetDir);
+  }
+}
+
+function verifyCodexGlobals(targetDir) {
+  console.log('');
+  console.log('Codex 검증 중...');
+  const failures = [];
+
+  const srcContexts = path.join(sourceDir, 'contexts');
+  const targetContexts = path.join(targetDir, 'contexts');
+  if (!existsDir(targetContexts)) {
+    fail(failures, 'codex contexts/ 존재하지 않음');
+  } else if (comparePaths(srcContexts, targetContexts)) {
+    console.log('  PASS  codex contexts/');
+  } else {
+    fail(failures, 'codex contexts/ 내용 불일치');
+  }
+
+  const srcSkills = path.join(sourceDir, 'skills');
+  if (existsDir(srcSkills)) {
+    for (const entry of listEntries(srcSkills)) {
+      const src = path.join(srcSkills, entry.name);
+      const target = path.join(targetDir, 'skills', entry.name);
+      if (!pathExists(target)) {
+        fail(failures, `codex skills/${entry.name} 존재하지 않음`);
+      } else if (comparePaths(src, target)) {
+        console.log(`  PASS  codex skills/${entry.name}`);
+      } else {
+        fail(failures, `codex skills/${entry.name} 내용 불일치`);
+      }
+    }
+  }
+
+  if (failures.length > 0) {
+    console.error(`Codex 검증 실패: ${failures.length}개 항목 확인 필요`);
+    process.exit(1);
+  }
+  console.log('Codex 검증 완료: 모두 정상');
 }
 
 function fail(failures, message) {

@@ -57,7 +57,12 @@ npm run uninstall
 npm run deploy-local-skills
 ```
 
-기본으로 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포를 순회합니다. 각 레포에 `.claude/skills`가 있으면 이를 Codex용 `.agents/skills`로 생성/갱신합니다.
+기본으로 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포를 순회합니다.
+
+각 레포에서 아래 로컬 Codex 산출물을 생성/갱신합니다.
+
+- `.claude/skills`가 있으면 `.agents/skills`로 복사
+- 레포 루트 `CLAUDE.md`가 있으면 레포 루트 `AGENTS.md`로 복사
 
 특정 루트만 지정하려면:
 
