@@ -8,3 +8,5 @@ interview-prep.md
 .agents/
 AGENTS.md
 nul
+__pycache__/
+*.pyc
