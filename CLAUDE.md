@@ -98,6 +98,14 @@
 - **검증용 임시 산출물(파일·커밋·팀·디버그 로그·임시 브랜치)은 같은 세션에서 즉시 정리한다.** 사용자에게 보고하기 전에 cleanup 완료.
 - **메인 워크트리에서 검증 작업을 수행하지 않는다.** fix 워크트리 또는 별도 임시 디렉토리에서 진행한다. 부득이한 경우(예: PostToolUse Write의 워크트리별 cwd 분기 검증) 즉시 삭제하고 사용자에게 사전 고지한다.
 
+## settings.json hook 작성 위치
+
+`~/.claude/settings.json`(또는 프로젝트 settings.json)의 PreToolUse / PostToolUse hook은 인라인 명령으로 작성하지 않는다. 항상 별도 `.js` 파일로 분리하고 settings.json에는 `node -e "require('...')"` 형태로 require만 등록한다.
+
+- 인라인은 디버그 로깅·점진 수정·라인 번호 추적이 어렵고, 패치 시 편집 단위가 settings.json 전체가 되어 hook 코드만 독립 검증할 수 없다.
+- 분리된 `.js`는 Read / Edit / 검증을 hook 단위로 처리할 수 있다.
+- AC `deploy/hooks/`에 원본을 두고 `npm run update`로 `~/.claude/hooks/`에 배포하는 패턴을 따른다.
+
 ## 임시 호환 파일 (삭제 예정)
 
 GitHub 외부 링크(이력서 등)의 404 방지를 위해 옛 경로에 README를 복제해둔 파일. 외부 링크가 새 경로로 전환되면 삭제한다.
