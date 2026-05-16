@@ -80,7 +80,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 스킬이 **설계대로 동작하는가**를 검증한다. 출력 품질이 아니라 오케스트레이션(분기, 순서, 에이전트 구성)이 대상이다.
 
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조.
-- description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. skill-creator 플러그인의 `run_loop.py`가 윈도우에서 동작 안 해 자체 도구(`scripts/bench-trigger.py`)를 둠.
+- description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. [CRITICAL] 작업 시작 전 specialized 파일의 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. skill-creator 표준 도구(`run_eval.py`·`run_loop.py`)는 architectural broken 상태(2026-05-16 기준 미해결, [anthropics/skills#556](https://github.com/anthropics/skills/issues/556))이므로 자체 도구 `scripts/bench-trigger.py` 사용. 6시간 함정 사례 specialized 참조.
 
 ## Eval
 
