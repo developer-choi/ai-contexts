@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Windows-compatible trigger eval for skill descriptions.
 
-Runs `claude -p` for each query with an override description, detects whether
-the skill was triggered by scanning the full stream-json output for the unique
-command name. Uses ThreadPoolExecutor (works on Windows unlike select-based pipes).
+Runs `claude -p` for each query and detects whether the target skill was
+triggered (Skill tool_use with matching name). Uses a background reader thread
++ Queue so stream-json output can be consumed line-by-line on Windows
+(`select.select` doesn't accept pipe fds there), and kills the subprocess as
+soon as a trigger signal is observed — so trigger-positive queries return in
+~10s instead of waiting for the full skill body to finish executing.
 """
 
 import argparse
@@ -12,9 +15,12 @@ import os
 import re
 import subprocess
 import sys
+import threading
+import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from queue import Queue, Empty
 
 
 def find_project_root() -> Path:
@@ -38,6 +44,19 @@ def parse_skill_md(skill_path: Path) -> tuple[str, str, str]:
     return name, description, body
 
 
+def _reader(pipe, q):
+    try:
+        for line in iter(pipe.readline, b""):
+            if not line:
+                break
+            q.put(line)
+    finally:
+        try:
+            pipe.close()
+        except Exception:
+            pass
+
+
 def run_query(
     query: str,
     skill_name: str,
@@ -48,16 +67,19 @@ def run_query(
 ) -> dict:
     """Returns {triggered: bool, error: str|None, stdout_len: int}.
 
-    Detection: whether Claude invoked the Skill tool with skill=<skill_name>.
-    The description passed in is not re-injected here — the caller is expected
-    to have already arranged the deployed skill to reflect the description
-    being tested (e.g., by swapping the SKILL.md contents).
+    Stream-based: reads stream-json line-by-line via a background reader thread
+    (Windows-compatible — select.select doesn't work on Windows pipes). Kills
+    the subprocess as soon as the Skill tool_use event identifying <skill_name>
+    is observed, so trigger-positive queries don't have to wait for the skill
+    body to finish executing.
     """
-    try:
-        env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
-        env["PYTHONUTF8"] = "1"
+    env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+    env["PYTHONUTF8"] = "1"
 
-        result = subprocess.run(
+    process = None
+    collected = []
+    try:
+        process = subprocess.Popen(
             [
                 "claude",
                 "-p", query,
@@ -68,25 +90,54 @@ def run_query(
             ],
             cwd=str(project_root),
             env=env,
-            capture_output=True,
-            timeout=timeout,
-            text=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
         )
 
-        stdout = result.stdout.decode("utf-8", errors="replace")
-
-        dump_dir = os.environ.get("BENCH_DUMP_DIR")
-        if dump_dir:
-            Path(dump_dir).mkdir(parents=True, exist_ok=True)
-            dump_name = f"{skill_name}_{hash(query) & 0xffffff:06x}_{uuid.uuid4().hex[:6]}.jsonl"
-            Path(dump_dir, dump_name).write_text(stdout, encoding="utf-8")
+        q: Queue = Queue()
+        reader = threading.Thread(target=_reader, args=(process.stdout, q), daemon=True)
+        reader.start()
 
         pending_skill = False
         accumulated_json = ""
         skill_target_re = re.compile(r'"skill"\s*:\s*"([^"]+)"')
 
-        for line in stdout.splitlines():
-            line = line.strip()
+        def _finalize(triggered: bool, error: str | None) -> dict:
+            if process and process.poll() is None:
+                try:
+                    process.kill()
+                    process.wait(timeout=3)
+                except Exception:
+                    pass
+            # drain remaining queued lines for dump fidelity
+            while True:
+                try:
+                    collected.append(q.get_nowait())
+                except Empty:
+                    break
+            stdout = b"".join(collected).decode("utf-8", errors="replace")
+            dump_dir = os.environ.get("BENCH_DUMP_DIR")
+            if dump_dir:
+                Path(dump_dir).mkdir(parents=True, exist_ok=True)
+                dump_name = f"{skill_name}_{hash(query) & 0xffffff:06x}_{uuid.uuid4().hex[:6]}.jsonl"
+                Path(dump_dir, dump_name).write_text(stdout, encoding="utf-8")
+            return {"triggered": triggered, "error": error, "stdout_len": len(stdout)}
+
+        start = time.time()
+        while True:
+            remaining = timeout - (time.time() - start)
+            if remaining <= 0:
+                return _finalize(False, "timeout")
+
+            try:
+                raw_line = q.get(timeout=min(0.5, remaining))
+            except Empty:
+                if process.poll() is not None and q.empty():
+                    return _finalize(False, None)
+                continue
+
+            collected.append(raw_line)
+            line = raw_line.decode("utf-8", errors="replace").strip()
             if not line:
                 continue
             try:
@@ -106,8 +157,6 @@ def run_query(
                     if tool_name == "Skill":
                         pending_skill = True
                         accumulated_json = ""
-                    else:
-                        return {"triggered": False, "error": None, "stdout_len": len(stdout)}
             elif se_type == "content_block_delta" and pending_skill:
                 delta = se.get("delta", {})
                 if delta.get("type") == "input_json_delta":
@@ -115,18 +164,20 @@ def run_query(
                     m = skill_target_re.search(accumulated_json)
                     if m:
                         if m.group(1) == skill_name:
-                            return {"triggered": True, "error": None, "stdout_len": len(stdout)}
-                        else:
-                            return {"triggered": False, "error": None, "stdout_len": len(stdout)}
+                            return _finalize(True, None)
+                        # different skill — stop tracking this block but keep listening
+                        pending_skill = False
+                        accumulated_json = ""
             elif se_type == "content_block_stop":
                 pending_skill = False
                 accumulated_json = ""
 
-        return {"triggered": False, "error": None, "stdout_len": len(stdout)}
-
-    except subprocess.TimeoutExpired:
-        return {"triggered": False, "error": "timeout", "stdout_len": 0}
     except Exception as e:
+        if process and process.poll() is None:
+            try:
+                process.kill()
+            except Exception:
+                pass
         return {"triggered": False, "error": str(e), "stdout_len": 0}
 
 
