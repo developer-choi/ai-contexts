@@ -6,13 +6,19 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 # Skill Backlog
 
-스킬 관련 필기를 수집·분류·정리하여 백로그로 쌓아두는 스킬. 뒤죽박죽 메모를 스킬 단위로 분류하고, 기존 백로그와 병합하고, 기존 스킬과의 관계를 식별한다. 개별 스킬의 설계·구현은 skill-creator가 담당한다.
+필기를 수집·분류·정리하여 백로그·사고 흔적으로 쌓아두는 스킬. 뒤죽박죽 메모를 영역 단위(AC 스킬·타 프로젝트·코드 주제)로 분류하고, 기존 백로그와 병합하고, 기존 스킬·프로젝트와의 관계를 식별한다. 개별 스킬의 설계·구현은 skill-creator가 담당한다.
 
 `/backlog` 슬래시 명시 호출 시에만 동작한다. 자동 트리거 매핑은 두지 않는다 — 자연어로 들어온 메모·기록 의도는 메인 LLM이 [메모·기록 도구 분리](../../../rules/global.md#메모기록-도구-분리)에 따라 처리한다.
 
 ## 범위
 
-모든 프로젝트의 백로그를 AC에서 중앙 관리한다. 타 프로젝트(MP, DC 등) 전용 항목도 AC의 `plan/backlog/`에 기록한다.
+모든 백로그·사고 흔적을 AC에서 중앙 관리한다. 영역별 위치:
+
+- `plan/this/` — AC 자체 백로그 (스킬·룰·컨텍스트 등 AC 본체 작업)
+- `plan/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 백로그
+- `plan/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
+
+세 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
 
 ## 워크트리
 
@@ -30,7 +36,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 ### 기존 백로그 파악
 
-`plan/backlog/` 하위(tier-1~4/, index.md)를 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
+`plan/` 하위의 백로그 영역(`this/`, `projects/`, `topics/`)을 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
 
 ### 기존 스킬 파악
 
@@ -47,20 +53,34 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 ## 정리
 
-### 1. 스킬 단위 분류
+### 1. 영역 분류
 
-입력된 필기를 스킬 단위로 묶는다. 하나의 필기가 여러 스킬에 걸치면 각각에 배분한다.
+입력된 필기를 아래 영역 중 하나로 분류한다. 하나의 필기가 여러 영역에 걸치면 각각에 배분한다.
 
-### 2. 기존 스킬 연결
+| 영역 | 대상 | 항목 단위 |
+|------|------|-----------|
+| `plan/this/` | AC 자체(스킬·룰·컨텍스트 등) | 스킬·역할 단위 |
+| `plan/projects/{project}/` | 타 프로젝트(MP, DC 등) 전용 작업 | 항목 단위 |
+| `plan/topics/{topic}/` | 코드 주제에 대한 사고·고민 (react, error, zod 등) | subtopic 단위 |
 
-각 항목을 아래 중 하나로 분류한다:
+`plan/this/`, `plan/projects/`는 **할 일 트래커**(tier·Ready 게이트 적용). `plan/topics/`는 **사고 흔적**(tier·Ready 게이트 미적용).
 
-- **기존 스킬 개선**: `deploy/skills/`에 이미 있는 스킬의 개선. frontmatter `target`에 경로를 명시한다.
-- **신규 스킬**: 기존에 없는 새로운 스킬.
+### 2. 기존 스킬·프로젝트 연결
+
+`plan/this/`, `plan/projects/` 항목은 아래 중 하나로 분류한다:
+
+- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. frontmatter `target`에 경로를 명시한다.
+- **신규**: 기존에 없는 새로운 스킬·작업.
 
 ### 3. 기존 백로그와 병합
 
-`plan/backlog/tier-1/` ~ `tier-4/` 하위의 모든 `.md` 파일을 읽어서 기존 섹션과 대조한다:
+해당 영역의 기존 `.md` 파일을 읽어 대조한다:
+
+- `plan/this/tier-{n}/`
+- `plan/projects/{project}/tier-{n}/`
+- `plan/topics/{topic}/`
+
+대조 규칙:
 
 - **중복**: 같은 내용이면 제거
 - **추가**: 기존 파일에 관련 섹션이 있으면 해당 섹션에 병합
@@ -76,12 +96,11 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 #### 파일명 규칙
 
-파일명은 아래 중 하나로 한다:
+영역별로 파일명을 정한다:
 
-- `deploy/skills/` 하위 스킬명 (예: `workflow.md`, `scw.md`)
-- `deploy/contexts/` 하위 폴더명 (예: `coding-standards.md`)
-- 프로젝트명 (예: `monorepo-playground.md`, `dsa-playground.md`)
-- 그 외 역할 단위 (예: `rules.md`, `agent.md`, `gotchas.md`)
+- `plan/this/tier-{n}/` — `deploy/skills/` 스킬명 (예: `workflow.md`, `scw.md`), `deploy/contexts/` 폴더명 (예: `coding-standards.md`), 그 외 역할 단위 (예: `rules.md`, `agent.md`, `gotchas.md`)
+- `plan/projects/{project}/tier-{n}/` — 항목 단위. 디렉토리에 이미 프로젝트가 박혀 있으므로 파일명에 프로젝트 접두사를 넣지 않는다 (예: `commitlint-한글강제-보완.md`)
+- `plan/topics/{topic}/` — subtopic 단위 (예: `topics/error/도메인-에러클래스.md`)
 
 #### tier 배치
 
@@ -99,7 +118,17 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 ## 산출물 형식
 
-### 개별 파일: `plan/backlog/tier-{n}/{skill-name}.md`
+### 개별 파일
+
+영역별 경로:
+
+- AC: `plan/this/tier-{n}/{skill-name}.md`
+- 타 프로젝트: `plan/projects/{project}/tier-{n}/{item}.md`
+- 주제 사고 흔적: `plan/topics/{topic}/{subtopic}.md`
+
+아래 양식은 `plan/this/`, `plan/projects/` 두 영역에 적용된다. `plan/topics/`의 차이는 [topics 영역](#topics-영역)에서 정의한다.
+
+`plan/this/tier-{n}/{skill-name}.md` 예:
 
 ```markdown
 ---
@@ -190,9 +219,12 @@ scope: global (deploy/ 전체 스캔)
 
 의존성 관계가 있는 항목은 제목에 번호를 붙여 실행 순서를 명시한다. 하위 항목(`###`)도 동일하게 번호를 붙인다.
 
-### 티어별 인덱스: `plan/backlog/tier-{n}/index.md`
+### 티어별 인덱스
 
 각 tier 폴더에 `index.md`를 상시 유지한다. 해당 tier에 속한 항목들의 현황을 한눈에 볼 수 있는 파일이다.
+
+- `plan/this/tier-{n}/index.md`
+- `plan/projects/{project}/tier-{n}/index.md`
 
 ```markdown
 # Tier-{n}
@@ -205,7 +237,7 @@ scope: global (deploy/ 전체 스캔)
 
 별도 파일이 추가·변경될 때마다 해당 tier의 index.md도 함께 갱신한다.
 
-### 미분류 인덱스: `plan/backlog/index.md`
+### 미분류 인덱스: `plan/this/index.md`
 
 ```markdown
 # 미분류
@@ -217,13 +249,25 @@ scope: global (deploy/ 전체 스캔)
 - 한두 줄 메모
 ```
 
+### topics 영역
+
+`plan/topics/{topic}/{subtopic}.md` — 코드 주제(react, error, zod 등)에 대한 사고·고민을 누적한다. 결론에 도달해 액션 아이템이 되면 `plan/this/` 또는 `plan/projects/`로 graduate한다.
+
+`plan/this/`, `plan/projects/`와의 차이:
+
+- **tier 없음** — 사고 흔적은 우선순위를 매길 대상이 아니다
+- **Ready 게이트 미적용** — 사고 흔적 자체가 목적이므로 자족성 검증을 강제하지 않는다
+- **상태 라벨 선택적** — `[ideation]` 등을 붙일 수 있으나 필수 아니다
+
+`plan/topics/{topic}/index.md`는 해당 주제 내 누적 subtopic 인덱스로 둔다.
+
 ---
 
 ## 리뷰 모드
 
 기존 백로그를 순회하며 Ready 게이트로 검증하고 라벨을 갱신하는 모드. 사용자가 백로그 본문을 매번 검수하지 않을 수 있다는 전제에서, critic 서브에이전트가 사용자 대신 객관적 게이트 역할을 한다.
 
-1. `plan/backlog/` 하위 파일을 tier-1부터 순서대로 순회한다
+1. `plan/this/`, `plan/projects/` 하위 파일을 tier-1부터 순서대로 순회한다. `plan/topics/`는 Ready 게이트 미적용이라 리뷰 모드 대상이 아니다.
 2. 각 항목에 대해 critic 서브에이전트(sonnet)를 spawn하여 「Ready 게이트」의 자가검증 문항을 적용한다
    - critic 입력: 백로그 항목 본문 + 「Ready 게이트」 섹션 정의
    - critic 출력: 각 문항에 대해 통과/미통과를 판정하고, 미통과면 어느 정보가 비어 있는지 보고
@@ -244,7 +288,7 @@ scope: global (deploy/ 전체 스캔)
 
 `[ready]` 항목을 tier-1부터 순서대로 실행하는 모드.
 
-1. backlog 브랜치에서 `plan/backlog/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다
+1. backlog 브랜치에서 `plan/this/`, `plan/projects/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다
 2. `[ready]` 섹션을 찾으면 master 브랜치로 전환한다
 3. 해당 섹션의 내용을 그대로 실행하여 구현한다
 4. 구현이 끝나면 커밋한다 (푸시하지 않는다)
@@ -272,7 +316,7 @@ scope: global (deploy/ 전체 스캔)
 
 backlog 브랜치 = master HEAD + plan/ 커밋. master의 모든 파일이 있고, 그 위에 `plan/` 폴더가 추가된 형태다.
 
-- `plan/backlog/` = 백로그 항목
+- `plan/this/`, `plan/projects/`, `plan/topics/` = 백로그·사고 흔적
 - `plan/wip/` = 인수인계 진행중 파일
 - `plan/` 변경은 backlog 브랜치에서만 커밋한다
 - `plan/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다

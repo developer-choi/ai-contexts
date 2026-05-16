@@ -40,7 +40,7 @@
 - 공개 인터페이스(스킬 description, argument-hint, 외부 참조) 변경
 - 같은 스킬 내 여러 섹션을 동시에 손봐야 하는 큰 변경
 
-백로그 적재는 AC `plan/backlog/` 워크트리 절차를 따른다.
+백로그 적재는 AC `plan/` 워크트리 절차를 따른다 (`plan/this/`, `plan/projects/`, `plan/topics/` 중 적합한 영역).
 
 ## 역제안 형식
 

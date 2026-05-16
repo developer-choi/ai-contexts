@@ -65,7 +65,7 @@
 
 ### 5. 백로그 이관
 
-스코프 외 이슈는 `~/WebstormProjects/main/ai-contexts-backlog/plan/backlog/tier-{N}/{target}.md`에 추가. 인수인계 가능한 분량으로 작성한다 (짧게 요약하지 않는다).
+스코프 외 이슈는 AC 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)의 적합한 영역에 추가한다. AC 자체면 `plan/this/tier-{N}/{target}.md`, 타 프로젝트면 `plan/projects/{project}/tier-{N}/{item}.md`. 인수인계 가능한 분량으로 작성한다 (짧게 요약하지 않는다).
 
 필수 항목:
 - 발견 맥락 (어느 세션 어느 단계)
