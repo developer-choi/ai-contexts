@@ -86,6 +86,18 @@
 
 `scripts/update.js` 또는 `scripts/uninstall.js`의 동작이 바뀌면 `meta/INSTALLATION_GUIDE.md`도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
 
+## deploy/hooks 검증 원칙
+
+`deploy/hooks/`(또는 배포된 `~/.claude/hooks/`)의 정책 hook을 수정·검증할 때:
+
+- **실제 명령으로 검증한다.** `echo '...' | node ~/.claude/hooks/<hook>.js`로 hook을 직접 호출하면 hook 내부 코드 경로만 확인되고 PreToolUse/PostToolUse 발동 여부와는 무관하다. Claude Code의 Bash·Write·SendMessage 도구로 실제 명령을 실행해 hook이 차단·통과하는지 확인한다.
+- **위험 케이스도 안전한 시나리오를 설계해서 실제 명령으로 검증한다.**
+  - force push deny: 임시 커밋 만들고 실제 `git push --force-with-lease` 시도 → hook deny 확인 → `git reset --soft HEAD~1` + unstage + 파일 삭제로 정리
+  - SendMessage `shutdown_request` deny: TeamCreate + Agent spawn 후 실제 `SendMessage` 호출 → hook deny 확인
+- **"검증 안 됨", "안전한 시뮬 어려움" 같은 회피 결론을 보고에 쓰지 않는다.** 회피 보고를 내기 전에 안전한 실제 명령 시나리오를 한 번 더 고민한다.
+- **검증용 임시 산출물(파일·커밋·팀·디버그 로그·임시 브랜치)은 같은 세션에서 즉시 정리한다.** 사용자에게 보고하기 전에 cleanup 완료.
+- **메인 워크트리에서 검증 작업을 수행하지 않는다.** fix 워크트리 또는 별도 임시 디렉토리에서 진행한다. 부득이한 경우(예: PostToolUse Write의 워크트리별 cwd 분기 검증) 즉시 삭제하고 사용자에게 사전 고지한다.
+
 ## 임시 호환 파일 (삭제 예정)
 
 GitHub 외부 링크(이력서 등)의 404 방지를 위해 옛 경로에 README를 복제해둔 파일. 외부 링크가 새 경로로 전환되면 삭제한다.
