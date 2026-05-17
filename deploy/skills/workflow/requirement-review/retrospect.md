@@ -29,4 +29,4 @@
 
 ## 4. 기록
 
-위 1~3단계의 결과를 `/plan/background/REQUIREMENT_REVIEW_RESULT.md`의 "회고" 섹션을 만들어 기록한다.
+위 1~3단계의 결과를 `/plan/background/consumable/REQUIREMENT_REVIEW_RESULT.md`의 "회고" 섹션을 만들어 기록한다.

@@ -22,7 +22,7 @@
 
 #### 산출물 생성
 
-[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/global.md`에, page.md 템플릿을 `/plan/pr1/page.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
+[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/consumable/global.md`에, page.md 템플릿을 `/plan/pr1/consumable/page.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
 
 ### 입력 자료
 
@@ -36,15 +36,15 @@
 
 ### 산출물
 
-- `/plan/background/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트, TODO 목록
-- `/plan/pr{N}/page.md` — **생성**. 페이지별 분석 결과 (N은 사용자 플로우 순서; PR 번호와 다를 수 있음 — Step 2에서 경계 확정 후 재정비)
-- `/plan/background/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
+- `/plan/background/consumable/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트, TODO 목록
+- `/plan/pr{N}/consumable/page.md` — **생성**. 페이지별 분석 결과 (N은 사용자 플로우 순서; PR 번호와 다를 수 있음 — Step 2에서 경계 확정 후 재정비)
+- `/plan/background/consumable/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
 
 ### 분석 과정
 
 #### 자료 받기
 
-[output-template.md](./output-template.md)의 page.md 템플릿으로 `/plan/pr{N}/page.md`를 생성합니다. 사용자에게 페이지 자료를 요청합니다.
+[output-template.md](./output-template.md)의 page.md 템플릿으로 `/plan/pr{N}/consumable/page.md`를 생성합니다. 사용자에게 페이지 자료를 요청합니다.
 
 사용자가 자료를 제출하면, 이미지인 경우 `/plan/pr{N}/` 하위로 이동합니다. 1장이면 `page.png`, 여러 장이면 식별 가능한 이름을 붙입니다 (예: `page-list.png`, `page-detail.png`).
 
@@ -53,7 +53,7 @@
 
 #### 같이 분석
 
-AI가 자료와 체크리스트를 기반으로 `pr{N}/page.md` 초안을 작성합니다:
+AI가 자료와 체크리스트를 기반으로 `pr{N}/consumable/page.md` 초안을 작성합니다:
 
 1. 페이지 유형을 식별하고, 해당하는 `../page-type/` 체크리스트를 추가 적용합니다.
 2. `checklist/`와 `../page-type/` 하위 체크리스트를 적용합니다.
@@ -61,7 +61,7 @@ AI가 자료와 체크리스트를 기반으로 `pr{N}/page.md` 초안을 작성
 4. 기획서에서 모호하거나 빠진 정의를 짚습니다.
 5. 엣지케이스를 선제시합니다.
 6. UX 개선 제안 (해당 시에만): 더 나은 대안이 있을 때 선택지를 제시합니다. 단정하지 않고 장단점을 함께 설명합니다.
-7. 위 결과를 `pr{N}/page.md`에 저장합니다.
+7. 위 결과를 `pr{N}/consumable/page.md`에 저장합니다.
 8. 채팅에서 발견한 모호점·`[?]` 항목·엣지케이스를 구체적으로 나열합니다. **여기서 멈춥니다. 사용자 응답을 기다립니다.**
 
 > **Figma 데이터 기록 범위**: CSS·레이아웃 수준 값(높이, 색상 토큰, 타이포그래피, 정렬)은 Background 단계 산출물에 기록하지 않는다. Step 4 구현 방침 단계까지 보류한다.
@@ -72,7 +72,7 @@ SKILL.md 3단계를 따릅니다. `/discussion`으로 미결 항목의 결론을
 
 #### 확정
 
-SKILL.md 4단계를 따릅니다. 논의 결과를 `pr{N}/page.md`에 반영한 뒤, 사용자에게 확인을 요청합니다. 수정이 없으면 다음 페이지로 넘어갑니다.
+SKILL.md 4단계를 따릅니다. 논의 결과를 `pr{N}/consumable/page.md`에 반영한 뒤, 사용자에게 확인을 요청합니다. 수정이 없으면 다음 페이지로 넘어갑니다.
 
 #### 공통화 검토
 

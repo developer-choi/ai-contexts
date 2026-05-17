@@ -1,6 +1,6 @@
 ---
 name: workflow-bug-investigation
-description: 버그·성능 문제의 증상과 Root Cause를 분석하고 /plan/background/bug-analysis.md를 작성합니다.
+description: 버그·성능 문제의 증상과 Root Cause를 분석하고 /plan/background/consumable/bug-analysis.md를 작성합니다.
 argument-hint: (인자 없음 — workflow step-3에서 호출)
 ---
 
@@ -30,7 +30,7 @@ argument-hint: (인자 없음 — workflow step-3에서 호출)
 
 ---
 
-## 산출물: `/plan/background/bug-analysis.md`
+## 산출물: `/plan/background/consumable/bug-analysis.md`
 
 ### 예시
 

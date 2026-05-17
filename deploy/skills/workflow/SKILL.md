@@ -12,8 +12,8 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 
 | 세션 | 담당 | 컨텍스트 |
 |------|------|----------|
-| **BACKGROUND_SESSION** (1개) | Step 1~2 | 기획서, 요구사항 → `/plan/background/`, `/plan/project.md` |
-| **PLANNING_SESSION** (PR당 1개) | Step 3~4 | `/plan/project.md` + `/plan/background/` → `/plan/pr{N}/` |
+| **BACKGROUND_SESSION** (1개) | Step 1~2 | 기획서, 요구사항 → `/plan/background/` |
+| **PLANNING_SESSION** (PR당 1개) | Step 3~4 | `/plan/background/consumable/project.md` + `/plan/background/` → `/plan/pr{N}/` |
 | **IMPLEMENTATION_SESSION** (PR당 1개) | Step 5~6 | `/plan/pr{N}/` 산출물 + 컨벤션. 이 PR 하나에만 집중 |
 | **WRITING_SESSION** (PR당 1개) | Step 7 | `/plan/pr{N}/` 잔여 산출물 + 커밋 로그. 구현 맥락 없이 파일 기반으로 PR 본문 작성 |
 
@@ -43,21 +43,54 @@ argument-hint: (인자 없음 — 세션 시작 시 호출)
 ```
 /plan/
   background/
-    read-only/          ← 삭제 금지 자료 (사용자 제공 원본 + 누적 캐시)
-    (AI 산출물)         ← 소비 후 삭제
+    retained/           ← 사용자 제공 원본 + 누적 캐시. BG 컨텍스트(= 프로젝트 전체) 유효한 동안 보존
+      interview-prep.md ← 채용과제 면접 대비 메모 (조건부, 채용과제만)
+    consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
+      project.md        ← step-2 산출물. PR별 섹션을 각 PR의 step-3에서 overview로 이관 (절 단위 큐), 모든 절 비면 파일 폐기
   pr{N}/
-    overview.md         ← step-3 산출물 (컨벤션·컨텍스트 통합)
-    decisions.md        ← step-3 산출물
-    markup.md           ← step-4 잔존 narrative (조건부)
-    logic.md            ← step-4 잔존 narrative (조건부)
-    implementation.md   ← step-4 잔존 narrative (대부분)
+    persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료
+      decisions.md      ← step-3 산출물 + step-6.6 갱신. 회사·프로젝트 컨텍스트 의존 결정의 흐름 보존
+      reference.md      ← step-3·4 누적. 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스
+    retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
+      implementation.md ← step-4 산출물. step-5(구현 순서·it.todo)·step-5.4(회귀 체크리스트)·step-6.1(Gap 분석)·step-6.5(커밋 정리)까지 살아있음
+      markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표 + IMPL 시점 Figma 확인 체크리스트. step-5 Implementer/Reviewer가 링크로 figma 직접 fetch (Reviewer 자기증명 루프 회피). 마지막 소비자는 step-6.3 사용자 코드 리뷰
+      page*.png         ← 채용과제 페이지 이미지 (조건부, 채용과제만). step-4 stub.tsx·markup.md 작성 시 시각 참조
+    consumable/         ← 소비 시 즉시 폐기 (큐 모델 — 절 단위 소비 시 절 삭제, 비면 파일 삭제)
+      overview.md       ← step-3 산출물
+      page.md           ← step-1 requirement-review 페이지별 분석 결과. step-3 「잔여 산출물 소비」에서 분배
+      review.md         ← step-6 리뷰 결과. step-6 자체 소비
+      user-test-cases.md ← step-6.4 동작 테스트. step-7 PR 본문 Test plan으로 재활용
+      pr-body.md        ← step-7 산출물. PR 본문으로 복사 후 폐기
 ```
+
+라이프사이클 폴더 규칙:
+
+- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움. 회사 컨텍스트 의존 결정·컨벤션 인덱스 등 미래 비교 자료.
+- **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
+- **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
+
+`persistent/`·`retained/` 하위는 step-7 「산출물 정리」의 무조건 삭제 대상이 아니다.
+
+#### consumable/ 산출물 자가 정리 안내문
+
+`consumable/` 하위 산출물은 상단에 다음 양식의 자가 정리 안내문을 박는다. 메인이 본문 룰을 따로 떠올리지 않아도 산출물 자체가 자기 정리 책임을 알린다.
+
+```markdown
+> 이 파일은 큐 모델로 운영됩니다.
+> 각 절을 **소비**한 step은 그 절을 즉시 삭제합니다.
+> 모든 절이 비면 파일째 삭제합니다.
+>
+> **소비** = 그 절의 내용을 다른 산출물(overview·stub·PR 본문·코드 등)로 이관·녹임
+> **단순 읽기·참조 조회는 소비 아님** — 사용자 질문 응답을 위해 잠시 본 케이스 등은 삭제 금지
+```
+
+산출물별 소비 step 목록은 산출물 헤더(step-3·step-4 등)에 명시되어 있으므로, 자가 안내문에는 일반 큐 룰만 박는다.
 
 step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
 
 ### 피그마 URL 캐싱
 
-사용자가 피그마 URL을 제공하면, 그 URL이 어느 페이지·프레임·컴포넌트를 가리키는지 확인한 뒤(함께 말하지 않았으면 묻는다) `plan/background/read-only/figma-url.md`에 누적 기록한다.
+사용자가 피그마 URL을 제공하면, 그 URL이 어느 페이지·프레임·컴포넌트를 가리키는지 확인한 뒤(함께 말하지 않았으면 묻는다) `plan/background/retained/figma-url.md`에 누적 기록한다.
 
 - 기록 형식: 대상 이름 + URL
 - 파일이 없으면 새로 만든다
@@ -113,6 +146,19 @@ PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3
 ### 단계별 승인 대기
 - 각 단계 완료 후 **반드시 사용자 승인** 후 다음 단계
 
+### 검증 기준 = 진실 원천
+
+리뷰·검증 단계의 기준은 항상 진실 원천(figma 원본 URL, 컨벤션 1차 소스, 사용자 발화 등)이다. **AI 산출물(matching 표, 산출물 md 등)을 검증 기준으로 쓰지 않는다.**
+
+이유: AI 산출물은 작성 시점에 누락·오류가 있을 수 있다. 같은 AI 또는 같은 추출 패턴의 Reviewer가 그 산출물을 기준으로 코드를 검증하면, Implementer가 추출 시 놓친 항목을 Reviewer도 못 잡는다. 자기증명 루프.
+
+AI 산출물의 역할은 **Implementer 캐시·인덱스**로만 한정한다 — figma 호출 비용 절약, 컨벤션 경로 빠른 조회 등. Reviewer 절차에는 진실 원천 직접 fetch·참조를 명시한다.
+
+적용 사례:
+- Figma Reviewer는 `markup.md` 「Figma 원본 링크 인덱스」 절의 URL로 figma 원본을 직접 fetch (markup.md의 토큰 매핑표·매칭표는 캐시 보조)
+- Coding-Standards Reviewer는 컨벤션 1차 소스 파일을 직접 읽음 (`reference.md`는 경로 인덱스 역할)
+- code-review 스킬은 coding-standards 문서를 직접 참조
+
 ### 자가 검토 필수
 
 각 세션 경계에서 산출물을 2단으로 검증한다. 세션 이름·개수에 의존하지 않는다.
@@ -148,10 +194,10 @@ PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3
 - 이전 step을 거치지 않고 진입해도 자연스럽게 대응 (step 스킵 허용)
 
 ### `.gitignore` 대상 plan 파일
-- `/plan/project.md`, `/plan/interview-prep.md`는 `.gitignore`에 포함되어 커밋되지 않음
+- `/plan/background/consumable/project.md`, `/plan/background/retained/interview-prep.md`는 `.gitignore`에 포함되어 커밋되지 않음
 
 ### 면접 대비 메모 (채용과제만)
-- 논의 중 "넘어가자", "안 하기로" 같은 판단이 나오면 `/plan/interview-prep.md`에 기록할지 사용자에게 확인
+- 논의 중 "넘어가자", "안 하기로" 같은 판단이 나오면 `/plan/background/retained/interview-prep.md`에 기록할지 사용자에게 확인
 
 ### AI 패턴
 - 먼저 생각 제시 → 사용자 의견 구하기 (멈추고 대기)

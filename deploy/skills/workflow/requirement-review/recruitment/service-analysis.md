@@ -1,6 +1,6 @@
 # 서비스 분석 가이드
 
-채용과제의 대상 서비스를 분석하여 `/plan/background/service-analysis.md`로 산출한다.
+채용과제의 대상 서비스를 분석하여 `/plan/background/consumable/service-analysis.md`로 산출한다.
 
 ## 필수 분석 항목
 

@@ -6,11 +6,11 @@
 
 ### 준비 방식
 
-AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고, `/plan/interview-prep.md`를 생성한다(준비 단계의 중간 산출물 — 최종 산출물이 아니라 분석 과정에서 참조용으로 사용). 원본 사이트 URL이 있으면 같이 요청한다.
+AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고, `/plan/background/retained/interview-prep.md`를 생성한다(준비 단계의 중간 산출물 — 최종 산출물이 아니라 분석 과정에서 참조용으로 사용). 원본 사이트 URL이 있으면 같이 요청한다.
 
 ### 입력 자료
 
-사용자가 `/plan/background/`에 작성한 원본 자료:
+사용자가 `/plan/background/retained/`에 작성한 원본 자료:
 
 - `공고.md` — 채용공고 원본 (공고가 닫히면 접근 불가하므로 보관 필수)
 - `메일.md` — 채용 담당자가 보낸 메일 본문
@@ -20,7 +20,7 @@ AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고,
 
 ### 입력 자료 저장 시 제외 항목
 
-원본 자료를 `/plan/background/`에 저장할 때, 아래 정보는 모두 제외한다:
+원본 자료를 `/plan/background/retained/`에 저장할 때, 아래 정보는 모두 제외한다:
 
 - 제출 기한, 마감일, 잔여 시간
 - "X일까지", "X시간 내", "X일 이내 제출" 등 시간 압박 표현
@@ -35,8 +35,8 @@ AI가 사용자에게 공고, 메일, 과제요구사항 자료를 요청하고,
 
 ### 산출물
 
-- `/plan/background/cross-analysis.md` — 분석 결과
-- `/plan/background/service-analysis.md` — 대상 서비스 분석 ([가이드](service-analysis.md))
+- `/plan/background/consumable/cross-analysis.md` — 분석 결과
+- `/plan/background/consumable/service-analysis.md` — 대상 서비스 분석 ([가이드](service-analysis.md))
 
 ### 분석 과정
 
@@ -69,13 +69,13 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 정독과 병렬 분석이 모두 끝나면 발견 사항을 공유한다.
 
-정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/project.md`가 이미 존재하면 거기에 쌓고, 없으면 cross-analysis.md의 TODO 섹션에 임시로 기록한다 (stage-2에서 project.md 생성 시 이관). 최소한 아래 관점은 점검한다:
+정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`가 이미 존재하면 거기에 쌓고, 없으면 cross-analysis.md의 TODO 섹션에 임시로 기록한다 (stage-2에서 project.md 생성 시 이관). 최소한 아래 관점은 점검한다:
 - 완성도 (404 페이지, 파비콘, page.title, OG 태그, 실제 이미지·텍스트, 로딩/에러 상태)
 - UI/UX (뒤로가기, 취소 버튼, 푸터 링크, 빈 상태, 호버/포커스, 토스트 피드백)
 - 공고에서 강조하는 역량에 연결되는 어필 포인트
 - 페이지별 기술적·비기술적 강점 어필 포인트
 
-공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 `/plan/background/`에 참조 링크를 걸어둔다. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
+공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 `/plan/background/consumable/`에 참조 링크를 걸어둔다. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
 
 #### 2. 평가 기준 추론
 

@@ -27,7 +27,7 @@ Step 5에서 Markup Implementer spawn 전에 Lead가 수행한다.
 
 1. 사용자에게 **디자인시스템 원본 레포 경로** 요청 (예: `~/workspace/langdy/langdy-design-system`)
 2. 원본 소스코드(TSX props interface + SCSS/CSS module)를 읽어서 매칭표 생성
-3. 매칭표를 `/plan/background/figma-component-mapping.md`에 저장 ([템플릿](../template/figma-component-mapping.md) 참조)
+3. 매칭표를 `/plan/background/consumable/figma-component-mapping.md`에 저장 ([템플릿](../template/figma-component-mapping.md) 참조)
 4. 마크업 시 피그마 CSS 토큰을 매칭표와 대조하여 props 결정
 5. 새 컴포넌트 발견 시 매칭표에 추가
 
