@@ -32,14 +32,21 @@
 - 로컬 스킬을 수정해야 하면 `.agents/`를 직접 수정하지 않고 `.claude/` 원본을 수정한 뒤 배포한다.
 - 전역 스킬은 `deploy/`에서 Claude와 Codex 타겟으로 함께 배포되므로 이 제약과 구분한다.
 
+## 폴더 규칙
+
+### 대주제 (이 콘텐츠가 AC에 속하는가)
+
+콘텐츠 추가 전 [`deploy/contexts/placement.md`](deploy/contexts/placement.md)(글로벌 분업 정책)를 본다. AC로 갈지, KA(학습 노트)·MP(예제 코드)로 갈지 먼저 판단한다.
+
+### 소주제 (AC 안에서 어디로)
+
+- `deploy/contexts/` 하위 → 각 디렉토리의 `map.md` 역할 섹션 (「contexts 하위 디렉토리 관리」 참고)
+- `deploy/skills/` (전역 배포) / `.claude/skills/` (AC 로컬) — 「로컬 스킬 원본 기준」 참고
+
 ## contexts 하위 디렉토리 관리
 
 - `deploy/contexts/` 하위에 `map.md`가 있는 디렉토리는, 파일을 추가·삭제·이동할 때 `map.md`를 함께 갱신한다
 - 내용을 추가·수정·삭제할 때 `map.md` 상단의 "역할" 섹션을 확인하고 적합한 위치에 배치한다
-
-### coding-standards 배치 기준
-
-콘텐츠를 AC `deploy/contexts/coding-standards/`에 둘지, KA·MP 등 인접 프로젝트로 보낼지는 MP `docs/meta/placement.md`의 분업 표를 따른다.
 
 ## 백로그 관리
 
