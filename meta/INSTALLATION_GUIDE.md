@@ -41,6 +41,7 @@ npm run update
    - Codex hook 설정은 AC가 전체 소유하므로 기존 `~/.codex/hooks.json`은 보존하지 않고 통째 덮어씁니다.
    - Codex 전역 지시문은 AC가 전체 소유하므로 기존 `~/.codex/AGENTS.md`는 보존하지 않고 통째 덮어씁니다.
    - Codex non-managed hook은 trusted 상태가 아니면 실행되지 않으므로, 배포 후 가능하면 app-server `hooks/list`의 `currentHash`를 읽어 `~/.codex/config.toml`의 `[hooks.state] trusted_hash`를 함께 갱신합니다.
+   - hook 신뢰 갱신에는 실행 가능한 Codex CLI가 필요합니다. 스크립트는 `CODEX_CLI`, PATH, Codex Desktop의 버전별 로컬 bin 경로 순서로 찾고, 최소 실행 검증에 실패하는 WindowsApps 패키지 내부 경로는 사용하지 않습니다.
    - Windows Desktop 설치에 따라 외부 `codex app-server` 실행이 막히면 이 단계는 경고만 출력하고 계속 진행합니다. 이 경우에도 `~/.codex` 자산 배포 자체는 성공합니다.
 
 `npm run update`는 Node 스크립트(`scripts/update.js`)로 실행됩니다. Windows/PowerShell 환경에서 bash 실행 정책이나 `.sh` 줄바꿈에 의존하지 않습니다.

@@ -280,7 +280,7 @@ async function trustCodexHooks(targetDir, log = console.log, cwd = repoDir) {
 
 function resolveCodexCli() {
   const explicit = process.env.CODEX_CLI;
-  if (explicit && isExecutableFile(explicit)) return explicit;
+  if (explicit && isRunnableCodexCli(explicit)) return explicit;
 
   const pathHit = findOnPath(process.platform === 'win32' ? ['codex.exe', 'codex.cmd', 'codex.bat', 'codex'] : ['codex']);
   if (pathHit) return pathHit;
@@ -289,9 +289,10 @@ function resolveCodexCli() {
     const candidates = [
       path.join(os.homedir(), 'AppData', 'Local', 'OpenAI', 'Codex', 'bin', 'codex.exe'),
       path.join(process.env.LOCALAPPDATA || '', 'OpenAI', 'Codex', 'bin', 'codex.exe'),
+      ...findLocalAppCodexBins(),
       ...findWindowsAppCodexBins(),
     ];
-    return candidates.find(isExecutableFile) || null;
+    return candidates.find(isRunnableCodexCli) || null;
   }
 
   return null;
@@ -303,10 +304,41 @@ function findOnPath(names) {
   for (const dir of dirs) {
     for (const name of names) {
       const candidate = path.join(dir, name);
-      if (isExecutableFile(candidate)) return candidate;
+      if (isRunnableCodexCli(candidate)) return candidate;
     }
   }
   return null;
+}
+
+function findLocalAppCodexBins() {
+  const roots = [
+    path.join(os.homedir(), 'AppData', 'Local', 'OpenAI', 'Codex', 'bin'),
+    path.join(process.env.LOCALAPPDATA || '', 'OpenAI', 'Codex', 'bin'),
+  ];
+  const candidates = [];
+
+  for (const root of [...new Set(roots)]) {
+    if (!root || !fs.existsSync(root) || !fs.statSync(root).isDirectory()) continue;
+
+    for (const entry of fs.readdirSync(root)) {
+      const entryPath = path.join(root, entry);
+      try {
+        if (fs.statSync(entryPath).isDirectory()) {
+          candidates.push(path.join(entryPath, 'codex.exe'));
+        }
+      } catch {
+        // Ignore stale package directories while scanning Desktop-managed bins.
+      }
+    }
+  }
+
+  return candidates.sort((left, right) => {
+    try {
+      return fs.statSync(right).mtimeMs - fs.statSync(left).mtimeMs;
+    } catch {
+      return 0;
+    }
+  });
 }
 
 function findWindowsAppCodexBins() {
@@ -332,6 +364,18 @@ function isExecutableFile(file) {
   } catch {
     return false;
   }
+}
+
+function isRunnableCodexCli(file) {
+  if (!isExecutableFile(file)) return false;
+
+  const result = childProcess.spawnSync(file, ['--version'], {
+    stdio: 'ignore',
+    timeout: 5000,
+    windowsHide: true,
+  });
+
+  return !result.error && result.status === 0;
 }
 
 function runCodexAppServer(requests, options = {}) {
