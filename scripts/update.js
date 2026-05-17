@@ -135,9 +135,27 @@ async function main() {
     console.log(`Codex 전역 자산 배포 중: ${codexTargetDir}`);
     const codexCopied = deployCodexGlobals(codexTargetDir, console.log);
     console.log(`Codex 배포 완료: ${codexCopied}개`);
-    await trustCodexHooks(codexTargetDir, console.log);
+    try {
+      await trustCodexHooks(codexTargetDir, console.log);
+    } catch (error) {
+      if (!isRecoverableCodexTrustError(error)) throw error;
+      console.warn(`  WARN  Codex hook trust 건너뜀: ${error.message}`);
+      console.warn('  WARN  Codex Desktop이 CLI를 외부에서 실행할 수 없는 환경입니다. 배포 자산은 정상 복사되었고, hook trust는 Desktop에서 다시 확인하면 됩니다.');
+    }
     verifyCodexGlobals(codexTargetDir);
   }
+}
+
+function isRecoverableCodexTrustError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return [
+    'Codex CLI not found',
+    'Access is denied',
+    'spawn EPERM',
+    'spawn UNKNOWN',
+    'spawn EACCES',
+    'spawn ENOENT',
+  ].some((pattern) => message.includes(pattern));
 }
 
 function verifyCodexGlobals(targetDir) {
