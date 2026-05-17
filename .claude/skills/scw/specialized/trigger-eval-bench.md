@@ -6,7 +6,7 @@
 
 ## 현재 상태 (2026-05-16 기준)
 
-**skill-creator 플러그인의 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**. Anthropic 공식 fix 없음. 모든 관련 이슈·PR OPEN 상태.
+**skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**. Anthropic 공식 fix 없음. 모든 관련 이슈·PR OPEN 상태.
 
 알려진 3가지 별개 문제:
 
