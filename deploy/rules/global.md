@@ -110,9 +110,11 @@
 - 중간 과정이 아니라 결과만 필요한 작업은 서브에이전트에 위임하여 메인 에이전트의 컨텍스트를 보호한다.
 - 예: 외부 프로젝트 탐색/수정, 대량 파일 읽기 + 명령 실행(lint, 테스트), 웹 리서치 후 정리, 코드 분석 후 보고서 작성 등
 - 서브에이전트 모델은 sonnet 기본, 코드 리뷰·/workflow 산출물 분석은 opus.
+- 단, 현재 런타임의 도구 정책이 서브에이전트 사용 조건을 제한하면 그 조건을 우선한다.
 
 ### Agent Teams 우선 사용
-- "팀 에이전트", "Agent Teams", `TeamCreate` 언급 시 반드시 `team_name`을 지정한 Agent Teams로 구성한다. 일반 서브에이전트로 대체하지 않으며, 구성 불가 사유가 있으면 사전에 보고한다.
+- "팀 에이전트", "Agent Teams", `TeamCreate` 언급 시 `deploy/contexts/team-agent.md` 기준으로 현재 런타임에 맞는 팀/서브에이전트 구조를 선택한다.
+- Claude Code에서 Agent Teams를 사용할 수 있으면 반드시 `team_name`을 지정한다. Codex처럼 `TeamCreate`가 없는 환경에서는 제공된 subagent 도구로 대체하고, 대체도 불가능하면 사전에 보고한다.
 
 
 ## 프로젝트 설정

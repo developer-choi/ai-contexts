@@ -30,7 +30,9 @@ skill-creator의 Capture Intent / Interview 단계에서, 사용자에게 바로
 
 ### 인프라
 
-설계 토론 팀은 Agent tool의 서브에이전트가 아니라 **TeamCreate로 팀을 구성**한다. 서브에이전트는 1회 응답 후 종료되지만, 팀 에이전트는 계속 살아있어 다라운드 토론이 가능하다.
+[CRITICAL] [team-agent](../../../deploy/contexts/team-agent.md)의 규칙을 따른다.
+
+설계 토론 팀은 현재 런타임의 team-agent 경로로 구성한다. Claude Code에서 Agent Teams를 사용할 수 있으면 `team_name`을 지정한다. Codex에서는 허용된 subagent 도구를 사용하되, 같은 역할 작업자를 재사용해 다라운드 맥락을 유지한다. 팀/서브에이전트 구성이 불가능하면 메인이 역할을 직접 수행하고, 그 이유를 사용자 제안에 포함한다.
 
 ### 절차
 
@@ -125,7 +127,7 @@ SKILL.md·specialized·guide 등 프롬프트 텍스트를 작성·수정한 직
 
 ## 서브에이전트 위임 구조 테스트
 
-스킬 내부에서 Agent tool로 서브에이전트를 띄우는 패턴은 skill-creator 표준 방식(서브에이전트에서 스킬 실행)으로 테스트할 수 없다. 이 경우 메인 에이전트가 직접 오케스트레이터 역할을 수행한다. 상세는 [eval-delegation.md](eval-delegation.md) 참조.
+스킬 내부에서 추가 에이전트를 띄우는 패턴은 skill-creator 표준 방식(서브에이전트에서 스킬 실행)으로 테스트할 수 없다. 이 경우 메인 에이전트가 직접 오케스트레이터 역할을 수행한다. 상세는 [eval-delegation.md](eval-delegation.md) 참조.
 
 ## 벤치 정리
 
