@@ -1,6 +1,8 @@
 # 스킬 생성/개선 시 따르는 규칙
 
-skill-creator 플러그인을 사용하되, 이 프로젝트에서는 추가로 아래를 따른다.
+skill-creator를 사용하되, 이 프로젝트에서는 추가로 아래를 따른다. Claude Code에서는 플러그인/스킬로, Codex에서는 시스템 스킬로 제공될 수 있다.
+
+Codex 시스템 skill-creator는 지침 로드와 `init_skill.py` 기반 초기화에는 사용할 수 있다. 검증 스크립트는 PyYAML이 필요하므로, 실행 전 같은 Python에서 `import yaml` 가능 여부를 확인한다. 없으면 전역 Python을 변경하지 말고 `%TEMP%` 하위 target에 `python -m pip install --target <target> PyYAML`로 설치한 뒤, 해당 명령 세션에서 `PYTHONPATH=<target>`를 지정해 `quick_validate.py`와 `generate_openai_yaml.py`를 실행한다. `init_skill.py`가 만든 기본 `description: [TODO: ...]`는 YAML 리스트로 해석되어 validator가 실패하므로, 실제 문자열 description으로 채운 뒤 검증한다.
 
 ## 사전 학습
 
