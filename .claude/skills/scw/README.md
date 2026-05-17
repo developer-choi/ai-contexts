@@ -1,6 +1,6 @@
 # SCW (Skill Creator Wrapper)
 
-Claude Code의 skill-creator를 감싸서 자체 원칙과 품질 검증을 추가한 스킬입니다.
+현재 런타임에서 제공되는 skill-creator에 자체 원칙과 품질 검증을 추가한 스킬입니다.
 
 ## 왜 감쌌나요?
 
