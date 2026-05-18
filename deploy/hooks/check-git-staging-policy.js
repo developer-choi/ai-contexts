@@ -8,7 +8,7 @@ for (const segment of cmd.split(/(?:&&|\|\||;)/)) {
   const trimmed = segment.trim();
 
   if (/^git\s+add\s+(-A|\.)(?=\s|$)/.test(trimmed)) {
-    deny("git add . / git add -A is not allowed. Specify files explicitly.");
+    deny("git add . / git add -A 금지. 파일을 개별 지정하세요.");
   }
 
   // commit -a 단독, short option bundle(-am, -vam 등 a 포함), --all을 모두 차단.
@@ -17,7 +17,7 @@ for (const segment of cmd.split(/(?:&&|\|\||;)/)) {
   if (commitMatch) {
     const beforeMessage = commitMatch[1].split(/\s(?:-m|--message)\b/)[0];
     if (/\s-[a-zA-Z]*a[a-zA-Z]*(?=\s|$)/.test(beforeMessage) || /\s--all\b/.test(beforeMessage)) {
-      deny("git commit with auto-stage option is not allowed. Specify files explicitly.");
+      deny("git commit -a (auto-stage 옵션) 금지. 파일을 개별 지정하세요.");
     }
   }
 }

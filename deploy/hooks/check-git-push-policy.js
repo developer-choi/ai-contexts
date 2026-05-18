@@ -17,7 +17,7 @@ const protectedBranches = /^(master|main|develop|release)$/;
 
 for (const inv of pushInvocations) {
   if (inv.args.includes("--no-verify")) {
-    deny("--no-verify is not allowed. Do not bypass pre-push hooks.");
+    deny("--no-verify 금지. pre-push hook을 우회하지 마세요.");
   }
 
   // git -C <path>가 우선. 없으면 cd 추출 cwd로 fallback.
@@ -28,7 +28,7 @@ for (const inv of pushInvocations) {
   const explicitTarget = extractPushTargetBranch(inv.args);
 
   if (explicitTarget && protectedBranches.test(explicitTarget)) {
-    deny(`Pushing to protected branch ${explicitTarget} is not allowed.`);
+    deny(`${explicitTarget} 브랜치에 push 금지.`);
   }
 
   let branch;
@@ -36,18 +36,18 @@ for (const inv of pushInvocations) {
     branch = execSync("git rev-parse --abbrev-ref HEAD", gitOpts).trim();
   } catch (e) {
     // execSync throw 시 process가 비정상 종료되어 deny()가 호출되지 못한다 → 보호 브랜치 검증 우회.
-    deny(`Hook could not determine branch (cwd=${invCwd ?? "<inherit>"}): ${e.message}`);
+    deny(`Hook이 브랜치를 확인할 수 없습니다 (cwd=${invCwd ?? "<inherit>"}): ${e.message}`);
   }
   const targetBranch = explicitTarget || branch;
 
   if (protectedBranches.test(targetBranch)) {
-    deny(`Pushing to protected branch ${targetBranch} is not allowed.`);
+    deny(`${targetBranch} 브랜치에 push 금지.`);
   }
 
   try {
     const prState = execSync(`gh pr view ${targetBranch} --json state -q .state`, gitOptsQuiet).toString().trim();
     if (prState === "OPEN") {
-      deny(`${targetBranch} has an open PR. Ask the user to push directly.`);
+      deny(`${targetBranch} 브랜치에 열린 PR이 있습니다. AI는 푸시하지 않습니다 — 사용자가 직접 푸시하세요.`);
     }
   } catch {
     // No PR, gh unavailable, or no GitHub remote. Continue with local checks.
@@ -63,7 +63,7 @@ for (const inv of pushInvocations) {
     try {
       execSync(`git diff origin/${branch} HEAD --quiet`, gitOptsQuiet);
     } catch {
-      deny(`Force push blocked: origin/${branch} differs from HEAD. Only history-only rewrites are allowed.`);
+      deny(`force push 차단: origin/${branch}과 코드가 다릅니다. 히스토리 정리(squash, reword)만 허용됩니다.`);
     }
   }
 }

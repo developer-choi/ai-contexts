@@ -15,7 +15,7 @@ try {
       JSON.stringify({
         hookSpecificOutput: {
           hookEventName: "PostToolUse",
-          additionalContext: `New file auto-staged: ${filePath}`,
+          additionalContext: `새 파일 자동 staged: ${filePath}`,
         },
       }),
     );
