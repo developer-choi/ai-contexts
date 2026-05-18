@@ -142,19 +142,19 @@ git diff origin/backlog HEAD -- plan/
 
 레포 동기화가 끝나면 `ai-contexts` 레포에서 아래 명령을 순서대로 실행한다.
 
-먼저 글로벌 자산을 Claude 홈에 배포한다.
+먼저 시스템 자산을 Claude/Codex 홈에 동기화한다.
 
 ```
-npm run update
+npm run sync:system
 ```
 
-그 다음 로컬 Claude 스킬을 Codex 스킬 위치로 배포한다.
+그 다음 로컬 Claude 스킬을 Codex 스킬 위치로 동기화한다.
 
 ```
-npm run deploy-local-skills
+npm run sync:local-skills
 ```
 
-- `npm run update`는 `deploy/`의 글로벌 자산을 `~/.claude`에 배포하고 `git wt-add` alias를 갱신한다.
+- `npm run sync:system`은 `deploy/`의 시스템 자산을 `~/.claude`와 `~/.codex`에 동기화하고 `git wt-add` alias를 갱신한다.
 - 순회 범위는 repo-sync와 동일하게 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다.
 - 각 레포의 `.claude/skills`를 원본으로 보고 `.agents/skills`를 생성/갱신한다.
 - 로컬 스킬 수정이 필요하면 `.agents/`를 직접 수정하지 말고 해당 레포의 `.claude/`를 수정한 뒤 다시 배포한다.

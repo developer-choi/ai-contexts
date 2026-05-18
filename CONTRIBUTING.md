@@ -11,10 +11,10 @@
 ```bash
 git clone https://github.com/developer-choi/ai-contexts.git
 cd ai-contexts
-npm run update   # deploy/ → ~/.claude/ 배포
+npm run sync:system   # deploy/ → ~/.claude/ 및 ~/.codex/ 동기화
 ```
 
-수정 후 `npm run update`를 다시 실행하면 변경 사항이 반영됩니다.
+수정 후 `npm run sync:system`을 다시 실행하면 변경 사항이 반영됩니다.
 
 ---
 

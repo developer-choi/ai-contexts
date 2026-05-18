@@ -152,7 +152,7 @@
 ### ~/.claude 하위 파일 직접 수정 금지
 - `~/.claude/` 하위의 md 파일(rules, contexts 등)을 직접 수정하지 않는다.
 - 수정이 필요하면 AC(`~/WebstormProjects/main/ai-contexts/`)에서 원본을 수정한다.
-- `~/.claude/`로의 동기화는 AC 프로젝트의 `npm run update` 스크립트로 수행한다.
+- `~/.claude/`로의 동기화는 AC 프로젝트의 `npm run sync:system` 스크립트로 수행한다.
 
 ## 메모·기록 도구 분리
 

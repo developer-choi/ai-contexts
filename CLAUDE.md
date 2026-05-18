@@ -22,8 +22,9 @@
 
 ## 배포 스크립트 변경 원칙
 
-- `npm run update`가 새 경로·파일·설정을 배포하도록 바꿀 때는, `npm run uninstall`이 같은 대상을 제거할 수 있도록 함께 수정한다.
-- 배포와 제거는 같은 기준으로 검증한다. update만 성공하고 uninstall 후 잔여 파일이 남는 구조를 만들지 않는다.
+- `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
+- 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
+- `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
 
 ## 로컬 스킬 원본 기준
 
@@ -91,7 +92,7 @@
 
 ## 배포 스크립트 관리
 
-`scripts/update.js` 또는 `scripts/uninstall.js`의 동작이 바뀌면 `meta/INSTALLATION_GUIDE.md`도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
+`scripts/sync-*.js` 또는 `scripts/unsync-*.js`의 동작이 바뀌면 `meta/guides/` 하위의 관련 가이드도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
 
 ## deploy/hooks 검증 원칙
 
@@ -111,7 +112,7 @@
 
 - 인라인은 디버그 로깅·점진 수정·라인 번호 추적이 어렵고, 패치 시 편집 단위가 settings.json 전체가 되어 hook 코드만 독립 검증할 수 없다.
 - 분리된 `.js`는 Read / Edit / 검증을 hook 단위로 처리할 수 있다.
-- AC `deploy/hooks/`에 원본을 두고 `npm run update`로 `~/.claude/hooks/`에 배포하는 패턴을 따른다.
+- AC `deploy/hooks/`에 원본을 두고 `npm run sync:system`으로 `~/.claude/hooks/`에 배포하는 패턴을 따른다.
 
 ## 임시 호환 파일 (삭제 예정)
 
