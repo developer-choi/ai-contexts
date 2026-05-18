@@ -14,6 +14,7 @@ npm run sync:system -- <target>
 
 ## 수행 작업
 
+- AC git hook 준비 상태를 먼저 확인합니다. 새 worktree에서 Husky shim이 빠진 상태면 가능한 경우 `npm run prepare`로 복구하고, 의존성이 없으면 실패합니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다.
@@ -35,6 +36,16 @@ npm run unsync:system -- <target>
 ```
 
 제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 `wt-add` alias를 제거합니다. 기본 Claude 타겟을 제거할 때는 Codex 전역 자산도 함께 제거합니다.
+
+## Hook 준비 상태
+
+커밋 전에는 다음 명령으로 AC hook 상태를 직접 확인할 수 있습니다.
+
+```bash
+npm run verify:hooks
+```
+
+새 AC worktree는 `git wt-add`로 만들고, raw `git worktree add`를 사용했다면 `npm ci`와 `npm run prepare`를 실행한 뒤 커밋합니다.
 
 ## Windows 참고
 

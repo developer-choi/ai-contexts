@@ -25,6 +25,7 @@
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
 - 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
 - `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
+- `sync:system`과 `sync:local-skills`는 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git wt-add`로 만들고, raw `git worktree add`를 썼다면 커밋 전에 `npm ci`와 `npm run prepare`를 실행한다.
 
 ## 로컬 스킬 원본 기준
 
@@ -93,6 +94,12 @@
 ## 배포 스크립트 관리
 
 `scripts/sync-*.js` 또는 `scripts/unsync-*.js`의 동작이 바뀌면 `meta/guides/` 하위의 관련 가이드도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
+
+## AC worktree hook 준비
+
+- AC 작업용 worktree는 raw `git worktree add` 대신 `git wt-add` alias를 사용한다. 이 alias는 worktree 생성 후 의존성·Husky hook shim 준비까지 수행하는 진입점이다.
+- raw worktree를 이미 만들었거나 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. 이 명령은 `core.hooksPath`, `.husky/_/commit-msg`, `commitlint` 실행 파일을 확인하고 가능한 경우 `npm run prepare`로 복구한다.
+- `verify:hooks`가 실패한 worktree에서는 커밋하지 않는다. 먼저 `npm ci` 후 `npm run prepare`를 실행하고 다시 확인한다.
 
 ## deploy/hooks 검증 원칙
 

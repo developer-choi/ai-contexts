@@ -14,6 +14,7 @@ npm run sync:local-skills -- ~/WebstormProjects/main
 
 ## 수행 작업
 
+- AC git hook 준비 상태를 먼저 확인합니다. 이 검증은 AC worktree의 commitlint 누락을 조기에 잡기 위한 것이며, 동기화 대상 프로젝트의 hook을 수정하지 않습니다.
 - `.claude/skills`가 있으면 `.agents/skills`로 복사합니다.
 - 레포 루트 `CLAUDE.md`가 있으면 `AGENTS.md`로 복사합니다.
 - 로컬 스킬 원본은 `.claude/`이며, `.agents/`는 배포 산출물로 봅니다.

@@ -10,6 +10,7 @@
     "unsync:system": "node scripts/unsync-system.js",
     "sync:local-skills": "node scripts/sync-local-skills.js",
     "unsync:local-skills": "node scripts/unsync-local-skills.js",
+    "verify:hooks": "node scripts/verify-hooks.js",
     "prepare": "husky"
   },
   "devDependencies": {

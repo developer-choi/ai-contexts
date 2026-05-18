@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
+const { ensureHooksReady } = require('./hook-guard');
 
 const {
   CATEGORIES,
@@ -25,6 +26,7 @@ const {
 } = require('./deploy-lib');
 
 async function main() {
+  ensureHooksReady();
   ensureDeploySource();
 
   const targetArg = process.argv[2];
@@ -242,6 +244,6 @@ function existsDir(target) {
 }
 
 main().catch((error) => {
-  console.error(error);
+  console.error(error.message || error);
   process.exit(1);
 });

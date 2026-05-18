@@ -3,6 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
+const { ensureHooksReady } = require('./hook-guard');
 const { copyPath, ensureDir, resolveUserPath } = require('./deploy-lib');
 
 const defaultRoots = [
@@ -11,6 +12,8 @@ const defaultRoots = [
 ];
 
 function main() {
+  ensureHooksReady();
+
   const roots = process.argv.slice(2).map((root) => resolveUserPath(root));
   const scanRoots = roots.length > 0 ? roots : defaultRoots;
 
@@ -105,4 +108,9 @@ function shortSource(repo, file) {
   return path.relative(repo, file).replaceAll(path.sep, '/');
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  console.error(error.message || error);
+  process.exit(1);
+}
