@@ -11,3 +11,14 @@
 - `sync:*`: AC가 관리하는 원하는 상태로 맞춥니다. 반복 실행해도 같은 상태로 수렴해야 합니다.
 - `unsync:*`: 대응하는 `sync:*`가 만든 AC 관리 산출물만 제거합니다.
 - `verify:hooks`: AC worktree의 Husky/commitlint 준비 상태를 확인합니다. 새 worktree에서 커밋하기 전에 실행합니다.
+
+## 새 대상 추가 기준
+
+새 설치·동기화 대상을 추가할 때는 같은 변경 안에서 다음 항목을 함께 맞춥니다.
+
+- `package.json`에 `sync:<target>`과 `unsync:<target>`을 함께 등록합니다.
+- `scripts/sync-<target>.js`와 `scripts/unsync-<target>.js`를 함께 추가합니다.
+- `meta/guides/<target>.md`에 수행 작업, 제거 기준, 반복 실행 기준을 적습니다.
+- 이 인덱스와 `meta/INSTALLATION_GUIDE.md`에 새 대상이 필요한 사용자 흐름을 반영합니다.
+- `sync:<target>`은 2회 이상 실행해도 중복 산출물을 만들지 않아야 합니다.
+- `unsync:<target>`은 marker block, 상태 파일, 동일성 비교 중 하나로 AC가 만든 산출물만 제거해야 합니다.

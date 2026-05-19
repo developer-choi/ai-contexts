@@ -25,3 +25,14 @@ npm run unsync:environment
 ## 반복 실행 기준
 
 `sync:environment`는 여러 번 실행해도 PowerShell profile block이나 global gitignore pattern을 중복 추가하지 않아야 합니다. 기존 `ai-contexts` 또는 `test-playground` marker는 새 AC marker로 이관합니다.
+
+## 새 머신 기준
+
+새 머신에서는 의존성 설치 후 가장 먼저 실행합니다.
+
+```bash
+npm ci
+npm run sync:environment
+```
+
+이 명령은 사용자 환경을 바꾸므로 `unsync:environment`가 되돌릴 수 있는 대상과 되돌리지 않을 대상을 가이드에 함께 기록해야 합니다.

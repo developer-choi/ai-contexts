@@ -26,6 +26,9 @@
 - 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
 - `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
 - `sync:system`과 `sync:local-skills`는 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git wt-add`로 만들고, raw `git worktree add`를 썼다면 커밋 전에 `npm ci`와 `npm run prepare`를 실행한다.
+- 새 설치·동기화 대상을 추가하면 같은 커밋에서 `sync:<target>`, `unsync:<target>`, `package.json`, `meta/guides/<target>.md`, `meta/guides/index.md`, `meta/INSTALLATION_GUIDE.md`의 안내를 함께 맞춘다.
+- `unsync:*`는 AC가 만든 산출물만 제거해야 한다. 사용자 파일을 지울 가능성이 있으면 marker block, 상태 파일, 동일성 비교 중 하나로 AC 관리 여부를 확인한 뒤 제거한다.
+- 새 `sync:*` 구현은 같은 명령을 2회 이상 실행하는 검증과, 대응 `unsync:*` 후 잔여 AC 산출물이 없는지 확인하는 검증을 포함한다.
 
 ## 로컬 스킬 원본 기준
 

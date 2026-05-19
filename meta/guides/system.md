@@ -37,6 +37,10 @@ npm run unsync:system -- <target>
 
 제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 `wt-add` alias를 제거합니다. 기본 Claude 타겟을 제거할 때는 Codex 전역 자산도 함께 제거합니다.
 
+## 반복 실행 기준
+
+`sync:system`은 기존 AC 관리 파일을 먼저 제거한 뒤 다시 복사해 고아 파일을 남기지 않아야 합니다. 사용자 동적 설정은 `settings.json` 병합 규칙을 통해 보존하고, 외부 스킬과 공존해야 하는 `skills`는 항목 단위로 관리합니다.
+
 ## Hook 준비 상태
 
 커밋 전에는 다음 명령으로 AC hook 상태를 직접 확인할 수 있습니다.

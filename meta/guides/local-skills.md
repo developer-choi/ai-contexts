@@ -26,3 +26,7 @@ npm run unsync:local-skills
 ```
 
 제거 명령은 `.agents/skills`가 `.claude/skills`와 동일할 때만 삭제합니다. `AGENTS.md`도 `CLAUDE.md`와 동일할 때만 삭제합니다. 내용이 다르면 사용자 수정 가능성이 있으므로 건드리지 않고 `skipped`로 보고합니다.
+
+## 반복 실행 기준
+
+`sync:local-skills`는 같은 프로젝트에 여러 번 실행해도 `.claude/skills`와 `CLAUDE.md`의 현재 내용을 기준으로 `.agents/skills`와 `AGENTS.md`를 같은 상태로 맞춰야 합니다. 제거는 동일성 비교가 통과한 산출물에만 적용합니다.

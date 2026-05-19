@@ -11,10 +11,13 @@
 ```bash
 git clone https://github.com/developer-choi/ai-contexts.git
 cd ai-contexts
-npm run sync:system   # deploy/ → ~/.claude/ 및 ~/.codex/ 동기화
+npm ci
+npm run sync:environment
+npm run sync:system
+npm run sync:local-skills
 ```
 
-수정 후 `npm run sync:system`을 다시 실행하면 변경 사항이 반영됩니다.
+수정 후 전역 에이전트 자산만 반영하려면 `npm run sync:system`을 다시 실행합니다. 전체 설치 흐름은 [Installation Guide](meta/INSTALLATION_GUIDE.md)를 따릅니다.
 
 ---
 
