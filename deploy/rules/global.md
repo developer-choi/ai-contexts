@@ -21,9 +21,6 @@
 - 판단 후 제안하는 방식을 선호한다. 매번 물어보기보다 알아서 판단하고 제안한다.
 - 대량 분류/이관보다 점진적 탐색+제안 방식을 선호한다. 1개씩 보고 제안받으며 방향을 잡아간다.
 
-### /workflow 습관화
-- 대화 중 코드 구현(컴포넌트·로직·스타일 등)으로 이어질 가능성이 보이면, 착수 전에 확인한다: "이 작업 /workflow 안 쓰고 진행하려고요?"
-
 ### 대규모 변경 시 계획 모드
 - 100줄 이상의 코드를 생성하거나 수정할 것으로 예상되면, 반드시 `plan mode`에 진입하여 계획을 수립하고 사용자 확인을 받은 뒤 실제 수정을 시작한다.
 - 공개 API(export, props, 타입)가 변경되는 경우에도 반드시 사용자 확인을 받은 뒤 수정한다. 줄 수와 무관하다.
@@ -163,10 +160,16 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - 순서 보장이 필요한 절차가 아니면 번호를 붙이지 않는다 (헤딩, 리스트, 테이블 등 모든 양식)
 - 중간에 항목이 추가/삭제되면 기존·이후 번호를 전부 밀어야 한다
 
-### ~/.claude 하위 파일 직접 수정 금지
-- `~/.claude/` 하위의 md 파일(rules, contexts 등)을 직접 수정하지 않는다.
-- 수정이 필요하면 AC(`~/WebstormProjects/main/ai-contexts/`)에서 원본을 수정한다.
-- `~/.claude/`로의 동기화는 AC 프로젝트의 `npm run sync:system` 스크립트로 수행한다.
+### AI 설정 산출물 직접 수정 금지
+
+배포된 산출물(`~/.claude`, `~/.codex`, `.agents`, `.codex` 등)을 직접 수정하지 않는다. 수정은 원본 위치에서 하고, 대응 동기화 명령으로 산출물을 갱신한다.
+
+| 구분 | 원본 수정 위치 | 직접 수정 금지 | 반영 명령 |
+|---|---|---|---|
+| 글로벌 규칙·컨텍스트·hooks | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/claude-settings.json` | `~/.claude/`, `~/.codex/` | AC에서 `npm run sync:system` |
+| 글로벌 스킬 | AC `deploy/skills/` | `~/.claude/skills/`, `~/.codex/skills/` | AC에서 `npm run sync:system` |
+| 로컬 규칙 | 각 프로젝트의 `CLAUDE.md` | 각 프로젝트의 `AGENTS.md`, `.agents/`, `.codex/` | AC에서 `npm run sync:local-skills` |
+| 로컬 스킬 | 각 프로젝트의 `.claude/skills/` | 각 프로젝트의 `.agents/skills/`, `.codex/skills/` | AC에서 `npm run sync:local-skills` |
 
 ## 메모·기록 도구 분리
 
