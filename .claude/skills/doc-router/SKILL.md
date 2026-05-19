@@ -26,8 +26,8 @@ argument-hint: "[입력 폴더 또는 PDF/MD 파일 경로]"
 
 base64 이미지 임베드 등으로 MD가 token 한도를 초과해 Read가 거부하면, base64 라인을 제외하고 본문 텍스트 + URL을 추출한다.
 
-- `Bash`로 `awk 'length($0) < 500'` 같은 라인 길이 필터로 본문만 출력. 출력 결과를 통합 MD에 직접 옮겨 적는다.
-- 임시 산출물을 입력 폴더에 두지 않는다. 파이프로 즉시 소비하거나 `$env:TEMP` 같은 시스템 임시 위치에 두고 작업 후 삭제한다.
+- `Bash`로 `awk 'length($0) < 500'` 같은 라인 길이 필터로 본문만 출력. 출력 결과를 통합 MD에 직접 옮겨 적는다. PowerShell로 옮기지 않는다 — Claude Code의 PS 도구는 `-NoProfile`로 호출되어 `$PROFILE`의 UTF-8 셋팅(`sync:environment` 블록 포함)이 안 통하고, PS 5.1 기본 인코딩(CP949 읽기, UTF-16 LE BOM 쓰기)으로 mojibake·BOM 오염이 난다. 부득이 PS를 써야 하면 `Get-Content`·`Out-File` 등에 `-Encoding utf8`을 명시.
+- 임시 산출물을 입력 폴더에 두지 않는다. Bash 파이프로 즉시 소비. 임시 파일이 필요하면 `mktemp`로 생성하고 작업 후 삭제한다.
 - 헤딩 grep(`^#{1,6}\s`)은 본문 구조 미리보기 보조용이다. 본문 합치기를 그것만으로 끝내지 않는다.
 
 ## 통합 MD 작성
