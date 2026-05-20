@@ -75,7 +75,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - 내가 수정한 파일만 `git add <path>`로 명시 staging. 내가 건드리지 않은 변경이 보이면 사용자에게 알리고 별도 처리한다.
 
 ### AC 백로그 브랜치 규칙
-- AC에서 `plan/` 변경은 backlog 브랜치에, 그 외는 master/feature 브랜치에서 커밋한다. 두 종류를 같은 커밋에 섞지 않는다.
+- AC에서 `backlog/` 변경은 backlog 브랜치에, 그 외는 master/feature 브랜치에서 커밋한다. 두 종류를 같은 커밋에 섞지 않는다.
 - AC backlog 브랜치에 커밋을 쌓았으면 작업 종료 전에 반드시 `origin/backlog`로 푸시한다. backlog 워크트리는 사용자가 다른 머신·세션에서 이어 작업할 수 있으므로 로컬에만 두지 않는다.
 
 ## 조사 산출물 출처 포함

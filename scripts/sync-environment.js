@@ -84,8 +84,8 @@ function syncGlobalGitignore(state) {
   upsertManagedBlock(globalGitignore, {
     start: '# >>> ai-contexts global gitignore >>>',
     end: '# <<< ai-contexts global gitignore <<<',
-    body: 'plan/',
-    legacyLinePatterns: [/^plan\/$/],
+    body: 'backlog/',
+    legacyLinePatterns: [/^plan\/$/, /^backlog\/$/],
   });
 }
 

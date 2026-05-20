@@ -10,7 +10,7 @@ npm run sync:environment
 
 - Windows에서 PowerShell 7 존재 여부를 확인하고, 없으면 `winget`으로 `Microsoft.PowerShell`을 설치합니다.
 - Windows PowerShell과 PowerShell 7의 실제 `$PROFILE` 경로를 확인해 UTF-8 설정 block을 삽입 또는 갱신합니다.
-- `~/.gitignore_global`에 AC 관리 block으로 `plan/` 패턴을 추가합니다.
+- `~/.gitignore_global`에 AC 관리 block으로 `backlog/` 패턴을 추가합니다.
 - `core.excludesFile`이 비어 있으면 `~/.gitignore_global`을 등록합니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 

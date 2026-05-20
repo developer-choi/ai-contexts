@@ -120,7 +120,7 @@ SKILL.md·specialized·guide 등 프롬프트 텍스트를 작성·수정한 직
 - 드래프트 상태면 `STATUS.md`를 함께 생성하여 진행 상황과 남은 작업 기록
 - 실사용 후 안정되면 `STATUS.md` 삭제
 - commitlint scope에 스킬명 추가
-- 완료된 백로그는 `plan/this/` 또는 `plan/projects/{project}/`에서 삭제
+- 완료된 백로그는 `backlog/this/` 또는 `backlog/projects/{project}/`에서 삭제
 
 ## gotchas 축적
 

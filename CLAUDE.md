@@ -55,7 +55,7 @@
 
 ## 백로그 관리
 
-- `plan/` 하위의 백로그 파일은 상시 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)에서 관리한다
+- `backlog/` 하위의 백로그 파일은 상시 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)에서 관리한다
 - AC 본체에서 backlog 브랜치로 전환하지 않는다
 - 워크트리가 없으면 `git worktree add`로 자동 생성한다
 
@@ -85,13 +85,13 @@
 
 세 영역으로 분리한다.
 
-- `plan/this/` — AC 자체 백로그
+- `backlog/this/` — AC 자체 백로그
   - `index.md` — 미분류 아이디어
   - `tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
   - `tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
-- `plan/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 백로그
+- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 백로그
   - `tier-{N}/index.md`, `tier-{N}/{item}.md` (파일명에 프로젝트 접두사 없이)
-- `plan/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
+- `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
 
 ## 배포 스크립트 관리
