@@ -110,7 +110,7 @@ step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점
 
 | 단계 | 내용 |
 |------|------|
-| [step-3.md](steps/step-3.md) | 과제 정의 (신규 작업 / QA 대응) |
+| [step-3.md](steps/step-3.md) | 과제 정의 |
 | [step-4.md](steps/step-4.md) | 구현 방침 상세화 |
 
 ### IMPLEMENTATION_SESSION (PR당 1개)
@@ -125,10 +125,6 @@ step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점
 | 단계 | 내용 |
 |------|------|
 | [step-7.md](steps/step-7.md) | PR 본문 작성 |
-
-### QA/리뷰 대응 (PR 올린 후)
-
-PR을 올린 뒤 리뷰 피드백을 받으면, **새 세션 1개**에서 Step 3(QA 대응 모드) → Step 4~6을 통합 수행한다. QA 대응 세션은 PLANNING/IMPLEMENTATION 경계 없이 계획부터 구현까지 하나의 세션에서 처리한다. Step 3이 진입 경로를 감지하여 자동으로 QA 대응 모드로 전환한다.
 
 ### 채용과제 마무리 (마지막 PR 완료 후, 채용과제만)
 
