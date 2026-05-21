@@ -8,7 +8,7 @@ BACKGROUND_SESSION에서 작성하는 산출물(`/plan/background/consumable/cro
 |---|---|---|
 | `cross-analysis.md` | 추론한 평가 기준 / 원본 교차 분석 / **라이브러리 선택** / **아키텍처 패턴** / 가정 | 구현 task 단위 (middleware 추가, 컴포넌트 신설 등), 정확한 validation 규칙·메시지·글자수·문자 종류 |
 | `pr{N}/consumable/overview.md` (PLAN) | 구현 단위 / validation 규칙 | (구현 코드 자체. 함수·컴포넌트 명세, props·타입은 step-4 stub 코드로 직접 옮긴다.) |
-| `pr{N}/retained/implementation.md` (IMPL) | 실제 구현 메모 / 주의사항 | — |
+| `pr{N}/persistent/implementation.md` (IMPL) | 실제 구현 메모 / 주의사항 | — |
 
 ## 작성 전 자가 체크
 
