@@ -101,6 +101,16 @@
             "statusMessage": "Auto-staging new file..."
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.claude','hooks','post-worktree-install.js'))\"",
+            "statusMessage": "Installing worktree dependencies..."
+          }
+        ]
       }
     ],
     "PreToolUse": [
