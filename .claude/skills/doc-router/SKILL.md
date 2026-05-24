@@ -69,8 +69,11 @@ KA / MP patterns 행선지 판단 기준은 [`deploy/contexts/placement.md`](../
 | MP | `~/WebstormProjects/main/monorepo-playground/docs/patterns/<주제>.md` | 코드 직결 가이드 (예시 코드 동반) |
 | MP | `~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md` | patterns 인덱스 갱신 |
 | AC | `~/WebstormProjects/main/ai-contexts/backlog/topics/<topic>/` | TODO·References 메타 (`/backlog` 위임) |
+| AC | `~/WebstormProjects/main/ai-contexts-backlog/backlog/history/` | 종결된 회의자료·옛 메모 등 참조 전용 아카이브 |
 
 KA 4번째 역할 `explained/`는 `/explain` 스킬 런타임 캐시라 doc-router 라우팅 대상이 아니다.
+
+`backlog/history/` 판단 기준: 본인이 더 발전시킬 의도 없이 종결한 자료. 옛 회의자료 PDF, 결정 끝난 고민 흔적 등. TODO·미해결 질문이 있으면 history가 아니라 `backlog/topics/`로 라우팅한다 (사고 흔적은 발전 가능). 판단 모호하면 `[BORDERLINE]` 라벨로 잔여에 남기고 사용자가 결정한다.
 
 ## 분류 단위
 

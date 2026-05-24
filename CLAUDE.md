@@ -83,7 +83,7 @@
 
 ### 파일 구조
 
-세 영역으로 분리한다.
+네 영역으로 분리한다.
 
 - `backlog/this/` — AC 자체 백로그
   - `index.md` — 미분류 아이디어
@@ -93,6 +93,9 @@
   - `tier-{N}/index.md`, `tier-{N}/{item}.md` (파일명에 프로젝트 접두사 없이)
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
+- `backlog/history/` — 종결된 자료 아카이브 (옛 회의자료 PDF, 결정 끝난 고민 흔적 등)
+  - 자유 파일·서브폴더. 참조 전용 — 발전·갱신 없음
+  - `/backlog` 스킬 대상 아님. doc-router 라우팅 또는 사용자가 직접 적재
 
 ## 배포 스크립트 관리
 
