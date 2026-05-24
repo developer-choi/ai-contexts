@@ -26,6 +26,15 @@
 
 ---
 
+## Step 6.1.5. 금지 주석 잔존 점검 (안전망)
+
+별도 sonnet 리뷰어를 spawn해 PR diff에 금지 주석이 잔존하는지 재점검한다. step-5 종료 게이트에서 0건이 보장됐어야 하나, 누락 시 본 단계가 안전망.
+
+- 리뷰어 입력: PR diff + [conventions/artifact/comments.md](../conventions/artifact/comments.md)
+- 발견 시: step-5 Implementer 흐름으로 처리 → 다시 Step 6.1.5
+
+---
+
 ## Step 6.2. 리뷰 파이프라인
 
 Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 coding-standards를 선별하고, `/code-review`를 advanced 모드로 호출한다.
