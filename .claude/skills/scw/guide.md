@@ -129,7 +129,7 @@ SKILL.md·specialized·guide 등 프롬프트 텍스트를 작성·수정한 직
 
 ## 서브에이전트 위임 구조 테스트
 
-스킬 내부에서 추가 에이전트를 띄우는 패턴은 skill-creator 표준 방식(서브에이전트에서 스킬 실행)으로 테스트할 수 없다. 이 경우 메인 에이전트가 직접 오케스트레이터 역할을 수행한다. 상세는 [eval-delegation.md](eval-delegation.md) 참조.
+스킬 내부에서 추가 에이전트를 띄우는 패턴은 skill-creator 표준 방식(서브에이전트에서 스킬 실행)으로 테스트할 수 없다. 메인 에이전트가 직접 오케스트레이션한다. 상세는 [eval-delegation.md](eval-delegation.md) 참조.
 
 ## 벤치 정리
 
