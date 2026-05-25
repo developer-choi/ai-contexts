@@ -19,5 +19,7 @@
 | 날짜 | dayjs | |
 | 토스트 | sonner | |
 | 스타일 | sass | |
+| 커밋 컨벤션 | @commitlint/cli, @commitlint/config-conventional | husky commit-msg hook과 함께 |
+| 훅 관리 | husky, lint-staged | commit-msg(commitlint) + pre-commit(lint-staged) 둘 다 표준 |
 
 셋팅 방법은 MP `docs/best-practices-map.md`를 참조한다.
