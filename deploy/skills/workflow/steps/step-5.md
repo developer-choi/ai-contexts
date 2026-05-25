@@ -140,6 +140,16 @@ stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
 
 ---
 
+## Step 5 종료 — 분기점
+
+step-5는 PR_{N}_IMPL 세션의 마지막 step + 후속 세션 spawn 분기점 (SKILL.md 「세션」 표 (4) 컬럼).
+
+step-5.4 「Lead가 사용자에게 결과 보고」 출력 직후, SKILL.md 「세션 spawn 안내 메커니즘」 절차를 발동하여 후속 spawn 안내(**PR_{N}_WRITING**) 출력.
+
+본 절차의 후속 = **동일 PR의 다음 세션 PR_{N}_WRITING**. step-5.4 보고 안의 「다음 PR 진입 가능 안내」(PR_{N+1}_PLAN — PR 도미노)와 혼동하지 않는다. 후자는 PR 분할 도미노 안내이지 본 세션의 후속 spawn이 아니다. 두 안내는 별개로 출력한다.
+
+---
+
 ## Step 5.4. 마무리
 
 - [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
