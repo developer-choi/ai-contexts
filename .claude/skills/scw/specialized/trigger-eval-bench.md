@@ -18,7 +18,7 @@
 
 **근거**: hysteric-lab의 분석 (2026-05-10, 285 trials, 공식 docs https://code.claude.com/docs/en/headless 인용): "User-invoked skills like `/commit` and built-in commands are only available in interactive mode. In `-p` mode, describe the task you want to accomplish instead." `run_eval.py:53-54`가 test artifact를 `.claude/commands/`에 쓰는데 `claude -p`는 commands 안 봄 → 구조적 broken.
 
-즉 윈도우 patch만으로 해결 안 됨. 표준 도구 자체가 구조적으로 동작 안 함.
+윈도우 patch만으로 해결 안 됨. 표준 도구 자체가 구조적으로 동작 안 함.
 
 ## 측정 도구: bench-trigger.py
 
@@ -29,7 +29,7 @@
 - `subprocess.Popen` + reader thread + `queue.Queue` 패턴으로 stream-json을 line-by-line 소비. `select.select`이 윈도우 파이프 fd를 못 받는 문제 우회
 - `Skill` tool_use 감지 즉시 `process.kill()` — early termination. trigger-positive 쿼리도 ~10s 안에 종료. 본문 작업까지 대기하면 130s+
 
-즉 hysteric-lab이 제안한 fix(`commands/` → `skills/`)와 같은 방향을 자체 구현한 것. 우연이 아니라 broken 표준의 자연스러운 우회.
+hysteric-lab이 제안한 fix(`commands/` → `skills/`)와 같은 방향을 자체 구현한 것. 우연이 아니라 broken 표준의 자연스러운 우회.
 
 ## 입력 eval set
 

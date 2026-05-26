@@ -25,6 +25,18 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 있다면 내용을 요약하여 적절한 파일명으로 `/plan/background/consumable/`에 저장합니다. (예: `background/consumable/team-conventions.md`, `background/consumable/designer-notes.md`)
 
+### Step 1.1 종료 — 분기점
+
+step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 시점 (+ 시안이 있으면 `retained/figma/`에 저장 완료). 그 이상은 모두 step-1.2 영역이다.
+
+특히 다음은 **step-1.2** 영역이지 step-1.1이 아니다 — recruitment guide(`requirement-review/recruitment/guide.md`)·planning guide·design guide의 「분석 과정」 절차 일체가 여기 해당:
+- 자료 정독·공동 탐색
+- 시안 분석·페이지 자료 수집·디자인 시스템 설계
+- cross-analysis·service-analysis 등 분석 산출물 작성
+- 평가 기준 추론, 프로젝트 결정 사항, 모호한 부분 정리
+
+step-1.1은 후속 세션 spawn 가능 분기점이다 (SKILL.md 「세션」 표 (4) 컬럼). 자료 저장 직후, **위 step-1.2 절차에 진입하기 전에 반드시** SKILL.md 「세션 spawn 안내 메커니즘」 절차를 발동하여 후속 spawn 안내 출력. 사용자가 후속 세션 spawn 판단 가능한 상태가 된 다음에 step-1.2 진입.
+
 ---
 
 ## Step 1.2 requirement-review 본체
@@ -43,7 +55,9 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### 중복 조기 발견
 
-requirement-review 단계에서 디자인·컴포넌트 중복이 있으면 선제적으로 짚는다. 나중에 통합 얘기를 꺼내면 중복 QA가 발생하므로, 초기에 발견하는 것이 비용이 적다.
+requirement-review 단계에서 디자인·컴포넌트 중복이 있으면 **사용자에게 명시 통보**한다. cross-analysis·평가 기준 추론 같은 분석 산출물에 묻어서 흡수만 시키지 않는다 — 산출물에 묻히면 사용자가 통합 결정을 늦게 가져오고 PLAN·IMPL에서 중복 QA가 발생한다.
+
+선제 통보 형식: "시안 카드 N종에서 공통 골격(타이틀·설명·상태 아이콘 등) 발견 → 컴포넌트 추출 대상. 지금 통합 결정 vs 나중에 PLAN으로 미루기 중 선택" 같이 사용자가 결정해야 할 항목 형태로 통보.
 
 ### 작업 익숙도 판별
 

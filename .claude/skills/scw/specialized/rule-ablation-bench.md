@@ -44,7 +44,7 @@ ZERO subagent가 원본 규칙의 특징 어휘·구절을 응답(본문·도구
 ### 상속 경로 (구체 메커니즘)
 
 - subagent는 메인 cwd 안의 `CLAUDE.md`와 `~/.claude/rules/global.md`를 자동 로드한다
-- 워크트리 cwd가 측정 대상 규칙 본문을 그대로 갖고 있으면 ZERO 격리는 사실상 불가능
+- 워크트리 cwd가 측정 대상 규칙 본문을 그대로 갖고 있으면 ZERO 격리 불가능
 - 회피:
   - 측정 워크트리 ≠ 메인 cwd로 분리 (메인은 `master` clean, 측정은 별도 워크트리)
   - 외부 환경(`ANTHROPIC_API_KEY` 직접 호출, 다른 계정·프로젝트 cwd)에서 재실행

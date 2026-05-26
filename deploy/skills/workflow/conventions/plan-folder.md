@@ -1,0 +1,76 @@
+# /plan/ 폴더 구조
+
+워크플로우 산출물 폴더 구조 + 라이프사이클 규칙 + consumable 자가 정리 양식 + 피그마 캐싱 룰 단일 출처.
+
+## 폴더 트리
+
+```
+/plan/
+  background/
+    persistent/         ← PR·프로젝트 종료 후에도 보존. 회고·재참조 가치
+      공고.md           ← 채용 원본 (채용만) — BG.step-1.1 산출
+      메일.md           ← 채용 메일 (채용만)
+      과제요구사항.md   ← 과제 요구사항 (채용만)
+      requirement-review-retrospect.md ← requirement-review/retrospect.md 산출물. 체크리스트 개선 회고
+    retained/           ← 사용자 제공 원본 + 누적 캐시. BG 컨텍스트(= 프로젝트 전체) 유효한 동안 보존
+      folder-structure.md ← FOUNDATION 단계 1 산출 (채용만). 디렉토리 구조 명세 (PR2~N 참조)
+      tech-constraints.md ← BG.step-1 기술 제약 스캔 결과
+      figma-url.md      ← MARKUP 산출. 대상 이름 + URL 누적
+      figma/            ← MARKUP 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
+    consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
+      project.md        ← step-2 산출물 (BG.step-2). PR별 섹션을 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PR1 섹션에 자연어 지시 추가 (채용 한정)
+      global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. 본문 양식은 [requirement-review/planning/output-template.md] 참조
+      layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
+      figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [figma-component-mapping/guide.md] 참조
+      design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PR3 입력 재료, 사용 후 폐기
+  pr{N}/
+    persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료
+      decisions.md      ← step-3 산출물 + step-6.6 갱신. 회사·프로젝트 컨텍스트 의존 결정의 흐름 보존
+      reference.md      ← step-3·4 누적. 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스
+      implementation.md ← step-4 산출물. 소비 = step-5·step-5.4·step-6.1·step-6.5·step-7 (PR body 작성 시 참조). PR·프로젝트 종료 후에도 보존 (사용자 명시 폐기까지). 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
+    retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
+      markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표 + IMPL 시점 Figma 확인 체크리스트. step-5 Implementer/Reviewer가 링크로 figma 직접 fetch (Reviewer 자기증명 루프 회피). 마지막 소비자는 step-6.3 사용자 코드 리뷰
+    consumable/         ← 소비 시 즉시 폐기 (큐 모델 — 절 단위 소비 시 절 삭제, 비면 파일 삭제)
+      overview.md       ← step-3 산출물
+      page.md           ← step-1 requirement-review 페이지별 분석 결과. step-3 「잔여 산출물 소비」에서 분배
+      review.md         ← step-6 리뷰 결과. step-6 자체 소비
+      user-test-cases.md ← step-6.4 동작 테스트. step-7 PR 본문 Test plan으로 재활용
+      pr-body.md        ← step-7 산출물. PR 본문으로 복사 후 폐기
+```
+
+step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
+
+## 라이프사이클 규칙
+
+- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움. 회사 컨텍스트 의존 결정·컨벤션 인덱스 등 미래 비교 자료. **또는 보존 기간이 PR 라이프타임을 넘어야 하는 구현 인수인계 산출물(`implementation.md`). 이 구현 인수인계 산출물에 한해 사용자 명시 폐기 허용** (PR 라이프타임 후 더 이상 필요 없다고 판단되면 정리 발화 시 폐기). decisions.md·reference.md는 본래 영구성 정신 유지 — 사용자 명시 폐기 예외 적용 X.
+- **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
+- **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
+
+`persistent/`·`retained/` 하위는 step-7 「산출물 정리」의 무조건 삭제 대상이 아니다.
+
+## consumable/ 산출물 자가 정리 안내문
+
+`consumable/` 하위 산출물은 상단에 다음 양식의 자가 정리 안내문을 박는다. 메인이 본문 룰을 따로 떠올리지 않아도 산출물 자체가 자기 정리 책임을 알린다.
+
+```markdown
+> 이 파일은 큐 모델로 운영됩니다.
+> 각 절을 **소비**한 step은 그 절을 즉시 삭제합니다.
+> 모든 절이 비면 파일째 삭제합니다.
+>
+> **소비** = 그 절의 내용을 다른 산출물(overview·stub·PR 본문·코드 등)로 이관·녹임
+> **단순 읽기·참조 조회는 소비 아님** — 사용자 질문 응답을 위해 잠시 본 케이스 등은 삭제 금지
+```
+
+산출물별 소비 step 목록은 산출물 헤더(step-3·step-4 등)에 명시되어 있으므로, 자가 안내문에는 일반 큐 룰만 박는다.
+
+## 피그마 URL·캡처 캐싱
+
+사용자가 피그마 URL을 제공하면, 그 URL이 어느 페이지·프레임·컴포넌트를 가리키는지 확인한 뒤(함께 말하지 않았으면 묻는다) `plan/background/retained/figma-url.md`에 누적 기록한다.
+
+- 기록 형식: 대상 이름 + URL
+- 파일이 없으면 새로 만든다
+- 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
+
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (MARKUP 세션에서 누적). 페이지·섹션·위젯·컴포넌트 어느 단위 캡처든 같은 폴더에.
+
+step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

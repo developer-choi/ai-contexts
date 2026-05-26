@@ -1,6 +1,6 @@
 # BG 산출물 깊이 가이드
 
-BACKGROUND_SESSION에서 작성하는 산출물(`/plan/background/consumable/cross-analysis.md` 등)의 깊이를 잡는 기준. PLAN/IMPL 세션에 미루어야 할 것을 BG에서 적으면, 다음 세션이 같은 정보를 다시 다루게 되어 중복·혼선이 생긴다.
+BG 세션에서 작성하는 산출물(`/plan/background/consumable/cross-analysis.md` 등)의 깊이를 잡는 기준. PLAN/IMPL 세션에 미루어야 할 것을 BG에서 적으면, 다음 세션이 같은 정보를 다시 다루게 되어 중복·혼선이 생긴다.
 
 ## 산출물별 깊이
 

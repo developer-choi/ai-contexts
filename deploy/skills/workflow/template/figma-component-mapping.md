@@ -3,12 +3,7 @@
 > 피그마 CSS 토큰 → 디자인시스템 컴포넌트 props 매핑.
 > 디자인시스템 원본 소스(TSX props interface + SCSS/CSS module)를 읽어서 작성한다.
 
-## 작성 방법
-
-1. 디자인시스템 원본 레포에서 컴포넌트 소스 읽기
-2. props interface에서 variant 속성(styleType, size 등) 추출
-3. SCSS/CSS module에서 각 variant가 적용하는 CSS 토큰 확인
-4. 아래 형식으로 매핑 작성
+작성 절차는 [figma-component-mapping/guide.md](../figma-component-mapping/guide.md) 참조. 본 파일은 양식만 정의한다.
 
 ---
 

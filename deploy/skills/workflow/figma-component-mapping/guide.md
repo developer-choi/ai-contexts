@@ -23,7 +23,7 @@
 
 ## 생성 절차
 
-Step 5에서 Markup Implementer spawn 전에 Lead가 수행한다.
+Markup Implementer spawn 직전에 Lead가 수행한다.
 
 1. 사용자에게 **디자인시스템 원본 레포 경로** 요청 (예: `~/workspace/langdy/langdy-design-system`)
 2. 원본 소스코드(TSX props interface + SCSS/CSS module)를 읽어서 매칭표 생성
