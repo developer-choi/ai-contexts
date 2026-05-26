@@ -95,7 +95,7 @@ md 파일 수정 직후:
 
 ### 파일 구조
 
-네 영역으로 분리한다.
+아래 영역으로 분리한다.
 
 - `backlog/this/` — AC 자체 백로그
   - `index.md` — 미분류 아이디어
@@ -105,6 +105,12 @@ md 파일 수정 직후:
   - `tier-{N}/index.md`, `tier-{N}/{item}.md` (파일명에 프로젝트 접두사 없이)
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
+- `backlog/roadmaps/` — 주제별 **학습 로드맵**. 사용자가 앞으로 학습할 분량이 많은 주제를 순서대로 쌓아두는 곳 (예: monorepo 단계별 학습 코스)
+  - `{topic}.md` — 학습 순서·전체 개요 (필수)
+  - `{topic}/step{N}-*.md` — 단계가 여러 개로 쪼개진 경우의 step 본문 (선택)
+  - tier·상태 체계 미적용, index.md 없음
+  - **사용자가 명시적으로 추가하는 영역**. `/backlog` 스킬·자동 분류 대상 아님. AI는 사용자가 어떤 주제·원본을 옮길지 지시할 때만 파일을 만들거나 수정한다. 외부 레포(KA·DC 등)에서 로드맵을 발견해도 사용자의 명시 지시 없이 선제적으로 복사하지 않는다
+  - 학습할 항목이 아닌 작업 백로그는 `this/`·`projects/`로, 사고 흔적은 `topics/`로, 종결 자료는 `history/`로 보낸다
 - `backlog/history/` — 종결된 자료 아카이브 (옛 회의자료 PDF, 결정 끝난 고민 흔적 등)
   - 자유 파일·서브폴더. 참조 전용 — 발전·갱신 없음
   - `/backlog` 스킬 대상 아님. doc-router 라우팅 또는 사용자가 직접 적재
