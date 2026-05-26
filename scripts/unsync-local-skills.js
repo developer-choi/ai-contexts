@@ -64,6 +64,16 @@ function unsyncRepo(repo) {
       }
     }
 
+    const geminiFile = path.join(repo, 'GEMINI.md');
+    if (isFile(geminiFile)) {
+      if (isFile(claudeAgents) && sameFile(claudeAgents, geminiFile)) {
+        fs.rmSync(geminiFile, { force: true });
+        removed.push('GEMINI.md');
+      } else {
+        return { repo, status: 'skipped', detail: 'GEMINI.md differs from CLAUDE.md' };
+      }
+    }
+
     if (existsDir(agentsDir) && fs.readdirSync(agentsDir).length === 0) {
       fs.rmSync(agentsDir, { recursive: true, force: true });
       removed.push('.agents/');

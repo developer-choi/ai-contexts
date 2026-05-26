@@ -1,6 +1,6 @@
 # Installation Guide
 
-이 문서는 AC를 새 머신이나 새 작업 환경에 맞출 때의 진입점입니다. 상세 동작은 `meta/guides/` 하위에서 대상별로 관리합니다.
+이 문서는 AC를 새 머신이나 새 작업 환경(Claude/Codex/Gemini 런타임)에 맞출 때의 진입점입니다. 상세 동작은 `meta/guides/` 하위에서 대상별로 관리합니다.
 
 ## 새 머신 초기화
 

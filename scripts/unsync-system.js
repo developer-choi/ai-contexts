@@ -5,9 +5,11 @@ const readline = require('readline');
 const {
   defaultCodexDir,
   defaultClaudeDir,
+  defaultGeminiDir,
   ensureDeploySource,
   resolveUserPath,
   uninstallCodexGlobals,
+  uninstallGeminiGlobals,
   uninstallTarget,
 } = require('./deploy-lib');
 
@@ -29,6 +31,12 @@ async function main() {
     console.log(`Codex 타겟: ${codexTargetDir}`);
     console.log('---');
     removed += uninstallCodexGlobals(codexTargetDir);
+
+    const geminiTargetDir = defaultGeminiDir();
+    console.log('');
+    console.log(`Gemini 타겟: ${geminiTargetDir}`);
+    console.log('---');
+    removed += uninstallGeminiGlobals(geminiTargetDir);
   }
 
   console.log('---');

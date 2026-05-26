@@ -11,7 +11,9 @@ const {
   codexHooksSource,
   defaultCodexDir,
   defaultClaudeDir,
+  defaultGeminiDir,
   deployCodexGlobals,
+  deployGeminiGlobals,
   deployRootFiles,
   deploySkills,
   ensureDeploySource,
@@ -94,7 +96,7 @@ async function main() {
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json') continue;
+    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json' || entry.name === 'gemini-settings.json') continue;
 
     const src = path.join(sourceDir, entry.name);
     const target = path.join(targetDir, entry.name);
@@ -145,6 +147,14 @@ async function main() {
       console.warn('  WARN  Codex Desktop이 CLI를 외부에서 실행할 수 없는 환경입니다. 배포 자산은 정상 복사되었고, hook trust는 Desktop에서 다시 확인하면 됩니다.');
     }
     verifyCodexGlobals(codexTargetDir);
+
+    console.log('');
+    console.log('---');
+    const geminiTargetDir = defaultGeminiDir();
+    console.log(`Gemini 전역 자산 배포 중: ${geminiTargetDir}`);
+    const geminiCopied = deployGeminiGlobals(geminiTargetDir, console.log);
+    console.log(`Gemini 배포 완료: ${geminiCopied}개`);
+    verifyGeminiGlobals(geminiTargetDir);
   }
 }
 
@@ -227,6 +237,82 @@ function verifyCodexGlobals(targetDir) {
     process.exit(1);
   }
   console.log('Codex 검증 완료: 모두 정상');
+}
+
+function verifyGeminiGlobals(targetDir) {
+  const {
+    buildGeminiAgentsContent,
+    geminiSettingsSource,
+    comparePaths,
+    verifySettings,
+  } = require('./deploy-lib');
+
+  console.log('');
+  console.log('Gemini 검증 중...');
+  const failures = [];
+
+  const srcContexts = path.join(sourceDir, 'contexts');
+  const targetContexts = path.join(targetDir, 'contexts');
+  if (!existsDir(targetContexts)) {
+    fail(failures, 'gemini contexts/ 존재하지 않음');
+  } else if (comparePaths(srcContexts, targetContexts)) {
+    console.log('  PASS  gemini contexts/');
+  } else {
+    fail(failures, 'gemini contexts/ 내용 불일치');
+  }
+
+  const srcSkills = path.join(sourceDir, 'skills');
+  if (existsDir(srcSkills)) {
+    for (const entry of listEntries(srcSkills)) {
+      const src = path.join(srcSkills, entry.name);
+      const target = path.join(targetDir, 'skills', entry.name);
+      if (!pathExists(target)) {
+        fail(failures, `gemini skills/${entry.name} 존재하지 않음`);
+      } else if (comparePaths(src, target)) {
+        console.log(`  PASS  gemini skills/${entry.name}`);
+      } else {
+        fail(failures, `gemini skills/${entry.name} 내용 불일치`);
+      }
+    }
+  }
+
+  const srcHooks = path.join(sourceDir, 'hooks');
+  const targetHooks = path.join(targetDir, 'hooks');
+  if (existsDir(srcHooks)) {
+    if (!existsDir(targetHooks)) {
+      fail(failures, 'gemini hooks/ 존재하지 않음');
+    } else if (comparePaths(srcHooks, targetHooks)) {
+      console.log('  PASS  gemini hooks/');
+    } else {
+      fail(failures, 'gemini hooks/ 내용 불일치');
+    }
+  }
+
+  const targetSettings = path.join(targetDir, 'settings.json');
+  if (pathExists(geminiSettingsSource)) {
+    if (!pathExists(targetSettings)) {
+      fail(failures, 'gemini settings.json 존재하지 않음');
+    } else if (verifySettings(geminiSettingsSource, targetSettings)) {
+      console.log('  PASS  gemini settings.json (merged)');
+    } else {
+      fail(failures, 'gemini settings.json 머지 결과 키 불일치');
+    }
+  }
+
+  const targetAgents = path.join(targetDir, 'GEMINI.md');
+  if (!pathExists(targetAgents)) {
+    fail(failures, 'gemini GEMINI.md 존재하지 않음');
+  } else if (require('fs').readFileSync(targetAgents, 'utf8') === buildGeminiAgentsContent()) {
+    console.log('  PASS  gemini GEMINI.md');
+  } else {
+    fail(failures, 'gemini GEMINI.md 내용 불일치');
+  }
+
+  if (failures.length > 0) {
+    console.error(`Gemini 검증 실패: ${failures.length}개 항목 확인 필요`);
+    process.exit(1);
+  }
+  console.log('Gemini 검증 완료: 모두 정상');
 }
 
 function fail(failures, message) {

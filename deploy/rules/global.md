@@ -184,10 +184,14 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 | 구분 | 원본 수정 위치 | 직접 수정 금지 | 반영 명령 |
 |---|---|---|---|
-| 글로벌 규칙·컨텍스트·hooks | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/claude-settings.json` | `~/.claude/`, `~/.codex/` | AC에서 `npm run sync:system` |
-| 글로벌 스킬 | AC `deploy/skills/` | `~/.claude/skills/`, `~/.codex/skills/` | AC에서 `npm run sync:system` |
-| 로컬 규칙 | 각 프로젝트의 `CLAUDE.md` | 각 프로젝트의 `AGENTS.md`, `.agents/`, `.codex/` | AC에서 `npm run sync:local-skills` |
-| 로컬 스킬 | 각 프로젝트의 `.claude/skills/` | 각 프로젝트의 `.agents/skills/`, `.codex/skills/` | AC에서 `npm run sync:local-skills` |
+| 글로벌 규칙·컨텍스트·hooks | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/claude-settings.json`, `deploy/gemini-settings.json` | `~/.claude/`, `~/.codex/`, `~/.gemini/` | AC에서 `npm run sync:system` |
+| 글로벌 스킬 | AC `deploy/skills/` | `~/.claude/skills/`, `~/.codex/skills/`, `~/.gemini/skills/` | AC에서 `npm run sync:system` |
+| 로컬 규칙 | 각 프로젝트의 `CLAUDE.md` | 각 프로젝트의 `AGENTS.md`, `GEMINI.md` | AC에서 `npm run sync:local-skills` |
+| 로컬 스킬 | 각 프로젝트의 `.claude/skills/` | 각 프로젝트의 `.agents/skills/` | AC에서 `npm run sync:local-skills` |
+
+## 글로벌 스킬 작성 규칙
+
+- **컨텍스트 파일 상대 경로 참조**: 전역 스킬(`SKILL.md`) 내에서 공통 컨텍스트 자산을 지시하거나 참조할 때는 절대 경로(예: `~/.gemini/contexts/`) 대신 배포 위치 기준의 상대 경로(`../../contexts/`)를 사용한다. 이는 기기나 사용자 환경에 따른 홈 디렉터리 경로 편차로 인한 실행 실패를 방지하기 위함이다.
 
 ## 메모·기록 도구 분리
 

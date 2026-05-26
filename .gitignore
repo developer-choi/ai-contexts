@@ -6,6 +6,8 @@ node_modules
 coverage
 .agents/
 AGENTS.md
+GEMINI.md
+.antigravitycli/
 nul
 __pycache__/
 *.pyc

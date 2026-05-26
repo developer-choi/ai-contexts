@@ -1,0 +1,154 @@
+{
+  "model": "opus[1m]",
+  "autoMemoryEnabled": false,
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
+  "permissions": {
+    "allow": [
+      "Agent",
+      "AskUserQuestion",
+      "Bash(awk *)",
+      "Bash(bash *)",
+      "Bash(cat *)",
+      "Bash(cd *)",
+      "Bash(chmod *)",
+      "Bash(chcp *)",
+      "Bash(claude *)",
+      "Bash(cp *)",
+      "Bash(cygpath *)",
+      "Bash(del *)",
+      "Bash(diff *)",
+      "Bash(dir *)",
+      "Bash(do *)",
+      "Bash(done)",
+      "Bash(du *)",
+      "Bash(echo *)",
+      "Bash(export *)",
+      "Bash(find *)",
+      "Bash(findstr *)",
+      "Bash(for *)",
+      "Bash(gh *)",
+      "Bash(git *)",
+      "Bash(grep *)",
+      "Bash(head *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(mv *)",
+      "Bash(node *)",
+      "Bash(npm *)",
+      "Bash(perl *)",
+      "Bash(pip *)",
+      "Bash(pnpm *)",
+      "Bash(powershell *)",
+      "Bash(powershell.exe *)",
+      "Bash(py *)",
+      "Bash(python *)",
+      "Bash(python3 *)",
+      "Bash(PYTHONUTF8=1 *)",
+      "Bash(PYTHONIOENCODING=utf-8 *)",
+      "Bash(rm *)",
+      "Bash(rmdir *)",
+      "Bash(sed *)",
+      "Bash(sort *)",
+      "Bash(start *)",
+      "Bash(stow *)",
+      "Bash(tail *)",
+      "Bash(tar *)",
+      "Bash(taskkill *)",
+      "Bash(tasklist *)",
+      "Bash(test *)",
+      "Bash(tr *)",
+      "Bash(wc *)",
+      "Bash(where *)",
+      "Bash(where.exe *)",
+      "Bash(which *)",
+      "Bash(winget *)",
+      "Bash(xargs *)",
+      "Bash(xxd *)",
+      "Bash(yarn *)",
+      "Edit",
+      "EnterPlanMode",
+      "EnterWorktree",
+      "ExitPlanMode",
+      "ExitWorktree",
+      "Glob",
+      "Grep",
+      "PowerShell(*)",
+      "Read",
+      "Search",
+      "Skill",
+      "TaskCreate",
+      "TaskGet",
+      "TaskList",
+      "TaskOutput",
+      "TaskStop",
+      "TaskUpdate",
+      "ToolSearch",
+      "WebFetch",
+      "WebSearch",
+      "Write"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','auto-stage-new-file.js'))\"",
+            "statusMessage": "Auto-staging new file..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','post-worktree-install.js'))\"",
+            "statusMessage": "Installing worktree dependencies..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','check-shell-policy.js'))\"",
+            "statusMessage": "Checking shell policy..."
+          },
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','check-git-staging-policy.js'))\"",
+            "statusMessage": "Checking git staging policy..."
+          },
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','check-git-commit-policy.js'))\"",
+            "statusMessage": "Checking git commit policy..."
+          },
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','check-git-push-policy.js'))\"",
+            "statusMessage": "Checking git push policy..."
+          }
+        ]
+      },
+      {
+        "matcher": "SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"require(require('path').join(require('os').homedir(),'.gemini','hooks','check-team-message-policy.js'))\"",
+            "statusMessage": "Checking team message policy..."
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -64,7 +64,8 @@ function syncRepo(repo) {
     }
     if (hasAgents) {
       copyPath(claudeAgents, path.join(repo, 'AGENTS.md'));
-      synced.push(`${shortSource(repo, claudeAgents)} -> AGENTS.md`);
+      copyPath(claudeAgents, path.join(repo, 'GEMINI.md'));
+      synced.push(`${shortSource(repo, claudeAgents)} -> AGENTS.md, GEMINI.md`);
     }
     return { repo, status: 'synced', detail: synced.join(', ') };
   } catch (error) {
