@@ -26,17 +26,11 @@ npm run sync:local-skills
 | 디렉터리 | 역할 | 배포 여부 |
 |-----------|------|-----------|
 | `deploy/rules/` | 전역 AI 행동 규칙 | 배포됨 |
-| `deploy/skills/` | 스킬 정의 (audit, workflow 등) | 배포됨 |
+| `deploy/skills/` | 스킬 정의 (workflow, code-review 등) | 배포됨 |
 | `deploy/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | 배포됨 |
 | `meta/` | 프로젝트 관리 문서 (설치 가이드, 아키텍처 결정) | 배포 안 됨 |
 | `archives/` | 퇴역한 프롬프트 | 배포 안 됨 |
 | `scripts/` | 배포/제거 스크립트 | 배포 안 됨 |
-
----
-
-## 문서 분류 체계
-
-모든 md 파일은 명령문 / 가이드 / 템플릿 중 하나로 분류됩니다. 정의와 판별 기준은 [audit SKILL.md](deploy/skills/audit/SKILL.md)의 "문서 종류" 섹션을 참고하세요.
 
 ---
 
@@ -87,6 +81,5 @@ coding-standards/
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
 - [writing-guide/tone.md](deploy/contexts/writing-guide/tone.md) — 문서 톤 (습니다체, 문장 역할)
-- [writing-guide/pr-body-recruitment-narrative.md](deploy/contexts/writing-guide/pr-body-recruitment-narrative.md) — 채용과제 PR 본문 (서사형)
-- [writing-guide/pr-body-recruitment-evidence.md](deploy/contexts/writing-guide/pr-body-recruitment-evidence.md) — 채용과제 PR 본문 (증거형)
-- [audit/checklist/style.md](deploy/skills/audit/checklist/style.md) — 서식 (이모지 규칙, 헤더 텍스트 규칙)
+- [writing-guide/templates/pr-body/recruitment-narrative.md](deploy/contexts/writing-guide/templates/pr-body/recruitment-narrative.md) — 채용과제 PR 본문 (서사형)
+- [writing-guide/templates/pr-body/recruitment-evidence.md](deploy/contexts/writing-guide/templates/pr-body/recruitment-evidence.md) — 채용과제 PR 본문 (증거형)

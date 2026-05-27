@@ -10,5 +10,12 @@
 
 - **내 코드 점검**: workflow step-6에서 호출. multi-agent 리뷰 (Coding-Standards ×N + Advanced)
 - **남의 PR 리뷰**: 독립 호출. 단일 리뷰 후 사용자가 pr-comment-write로 연결 여부 결정
+- **컨벤션 마이그레이션**: only-standards 모드로 호출. 자유 리뷰·Advanced 미실행, coding-standards 이슈만 반환하여 신규 작성 전에 기존 코드를 새 스탠다드에 정렬
+
+세 가지 모드를 인자로 선택합니다.
+
+```
+/code-review <리뷰 대상> [--coding-standards <경로들>] [--mode default|advanced|only-standards]
+```
 
 > 자세한 내용은 [SKILL.md](SKILL.md)를 참고하세요.
