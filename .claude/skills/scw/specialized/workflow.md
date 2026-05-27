@@ -8,7 +8,7 @@
 
 workflow의 새 절차·룰·sub-section을 박을 때 세션 이름(`PLANNING_SESSION` 등)이나 산출물 파일명(`overview`, `logic` 등)을 본문에 직접 명시하면, 그 룰이 명시한 이름에 묶인다. 세션은 학습 세션 같은 새 종류가 추가되면 룰의 적용 범위에서 누락되고, 산출물 파일명은 step 정비 과정에서 자주 바뀐다. 룰 본문이 그 이름을 가리키고 있으면 변경 때마다 다시 손봐야 하고, 손보지 않으면 룰이 깨진 채 남는다.
 
-SKILL.md 「자가 검토 필수」가 첫 줄에 "세션 이름·개수에 의존하지 않는다"를 박은 것도 같은 이유다. 이미 선언된 원칙이므로 새로 박는 룰도 같은 형태를 따라야 SKILL.md 안에서 일관성이 깨지지 않는다.
+workflow SKILL.md 「자가 검토 필수」가 첫 줄에 "세션 이름·개수에 의존하지 않는다"를 박은 것도 같은 이유다. 이미 선언된 원칙이므로 새로 박는 룰도 같은 형태를 따라야 workflow SKILL.md 안에서 일관성이 깨지지 않는다.
 
 ### 어떻게
 
@@ -297,7 +297,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 사례
 
-step-5에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 SKILL.md 「피그마 URL·캡처 캐싱」, MARKUP 절, step-3, step-4 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
+step-5에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, step-3, step-4 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
 
 ### 점검
 

@@ -71,7 +71,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 정독과 병렬 분석이 모두 끝나면 발견 사항을 공유한다.
 
-정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`가 이미 존재하면 거기에 쌓고, 없으면 cross-analysis.md의 TODO 섹션에 임시로 기록한다 (stage-2에서 project.md 생성 시 이관). 최소한 아래 관점은 점검한다:
+정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`가 이미 존재하면 거기에 쌓고, 없으면 cross-analysis.md의 TODO 섹션에 임시로 기록한다 (step-2에서 project.md 생성 시 이관). 최소한 아래 관점은 점검한다:
 - 완성도 (404 페이지, 파비콘, page.title, OG 태그, 실제 이미지·텍스트, 로딩/에러 상태)
 - UI/UX (뒤로가기, 취소 버튼, 푸터 링크, 빈 상태, 호버/포커스, 토스트 피드백)
 - 공고에서 강조하는 역량에 연결되는 어필 포인트

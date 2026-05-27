@@ -155,7 +155,7 @@ npm run sync:local-skills
 ```
 
 - `npm run sync:system`은 `deploy/`의 시스템 자산을 `~/.claude`, `~/.codex`, `~/.gemini`에 동기화하고 `git wt-add` alias를 갱신한다.
-- 순회 범위는 repo-sync와 동일하게 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다.
+- 순회 범위는 본 스킬의 「순회 범위」와 동일한 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다.
 - 각 레포의 `.claude/skills`와 `CLAUDE.md`를 원본으로 보고, `.agents/skills`와 `AGENTS.md`/`GEMINI.md`를 생성/갱신한다.
 - 로컬 스킬 수정이 필요하면 `.agents/`나 배포된 지시문 파일을 직접 수정하지 말고 해당 레포의 `.claude/` 및 `CLAUDE.md`를 수정한 뒤 다시 배포한다.
 
