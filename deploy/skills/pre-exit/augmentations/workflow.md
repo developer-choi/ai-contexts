@@ -7,7 +7,7 @@
 다음 중 하나라도 해당하면 본 보강을 실행한다:
 
 - `/pre-exit workflow` 명시 호출
-- 무인자 `/pre-exit`에서 자동 감지: `git diff --name-only` 또는 `git log --since` 결과에 `plan/pr{N}/**` 경로 존재
+- 무인자 `/pre-exit`에서 자동 감지: `git status --short` 또는 `git log --since="14 days ago" --name-only --pretty=format:` 결과에 `plan/pr{N}/**` 경로 존재
 - 사용자가 본 세션에서 `/workflow` 호출 사실을 회상 가능
 
 자동 감지 시, 보강 실행 전 "workflow 산출물 변경이 감지됐습니다. 보강 회고를 진행할까요?"로 사용자 확인을 받는다.
@@ -46,7 +46,7 @@
 
 절차:
 1. 보고한 변경 항목 회상 (파일 경로 + 위치 + 변경 내용)
-2. `git log --since=<session-start> -p -- <path>` 또는 `git diff HEAD~N` 실행
+2. `git log --since="14 days ago" -p -- <path>` 또는 `git diff HEAD~N` 실행
 3. 보고와 실제가 일치하는지 항목별 확인
 4. 환각 보고(보고했지만 실제 안 변경) → Step 1 문제 목록에 추가
 
