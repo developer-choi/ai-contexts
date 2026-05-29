@@ -14,10 +14,12 @@
 | **0** | PR1 브랜치·워크트리 생성 | 메인 워크트리 |
 | **1** | 폴더 마이그레이션 + 커밋 1 + `background/retained/folder-structure.md` 작성 (디렉토리 골격 + 폴더 마이그레이션 항목) | PR1 워크트리 |
 | **2** | 코딩 스탠다드 마이그레이션 + 커밋 2 — `/code-review --mode only-standards` 호출 → coding-standards 이슈만 받아 기존 코드 수정 | PR1 워크트리 |
-| **3** | markup 워크트리 분기 + 최소 셋팅 (vite/next + scss/tailwind 마크업 가능 최소만, PR 안 감) | 메인 워크트리 → markup 워크트리 |
+| **3** | markup 워크트리 분기 + 최소 셋팅 (vite/next + scss/tailwind 마크업 가능 최소만, PR 안 감) + 루트 layout 폰트 셋업 | 메인 워크트리 → markup 워크트리 |
 | **4** | `background/consumable/project.md` PR1 섹션 갱신 (파일 없으면 빈 파일 생성 후 박기) + FOUNDATION 종료 | 메인 워크트리 |
 
 **folder-structure.md 결정 기준**: 폴더 구조는 사용자 확인 전에 임의로 정해 스캐폴딩하지 않는다 — 항상 사용자에게 확인받는다. BG.step-1.1 자료(요구사항·우대사항)로 추천은 곁들이되(채용공고 우대사항의 FSD 등은 지원자에게 바라는 역량이지 이 과제를 그 구조로 구현하라는 지시가 아니다), FSD든 DDD든 사용자 확정 없이 진행하지 않는다. 사용자가 이미 구조를 지정했으면 재질문하지 않는다. DDD로 지정되면 트리 작성 전 MP `monorepo-playground/docs/patterns/folder-structure/FolderStructure.md`를 읽고 그 패턴(디렉토리 골격·네이밍·배럴 유무)을 따른다.
+
+**루트 layout 폰트 셋업 기준** (채용 한정): 폰트는 루트 layout에 박는 셋업 사항이므로 폴더·코딩스탠다드 셋팅과 같은 결로 FOUNDATION이 확정한다. 시안에 지정 폰트가 있으면 그 폰트로, 없으면 `Noto Sans KR`을 기본값으로 둔다 — folder-structure와 같이 사용자 확인 후 확정한다. 시안 정독을 기다리지 않는다: 폰트가 든 루트 layout은 페이지 마크업이 아니라 프로젝트 베이스이고, markup 워크트리 코드는 PR 단위로 늦게 흡수되므로 결정을 뒤로 미루면 베이스 셋업이 붕 뜬다.
 
 **코딩 스탠다드 마이그레이션 근거**: 기존 코드(보일러플레이트) 위에 새 코드 얹는 시나리오. AI는 기존 커밋 메시지·기존 코드를 보고 새 코드를 작성하므로, 기존 코드가 새 코딩 스탠다드와 불일치하면 새 코드도 일관성 깨짐.
 
