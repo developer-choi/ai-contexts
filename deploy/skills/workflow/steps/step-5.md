@@ -51,7 +51,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 ### Step 5.1.2. 매칭표 생성 (실무 프로젝트만)
 
-실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer spawn 전에 [figma-component-mapping/guide.md](../figma-component-mapping/guide.md)에 따라 매칭표를 생성하고 컨텍스트에 포함한다.
+실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer spawn 전에 [conventions/figma-component-mapping-guide.md](../conventions/figma-component-mapping-guide.md)에 따라 매칭표를 생성하고 컨텍스트에 포함한다.
 
 ### Step 5.1.3. Markup Implementer 필수 지침
 

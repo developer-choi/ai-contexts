@@ -24,7 +24,7 @@
       cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 원본 교차 분석·평가 기준 추론·기술 결정·모호한 부분
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조)
       bug-analysis.md   ← step-3 bug-investigation 산출물 (버그·성능 PR 한정). 증상과 Root Cause
-      figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [figma-component-mapping/guide.md] 참조
+      figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
       design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PR3 입력 재료, 사용 후 폐기
   pr{N}/
     persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료

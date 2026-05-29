@@ -3,7 +3,7 @@
 > 피그마 CSS 토큰 → 디자인시스템 컴포넌트 props 매핑.
 > 디자인시스템 원본 소스(TSX props interface + SCSS/CSS module)를 읽어서 작성한다.
 
-작성 절차는 [figma-component-mapping/guide.md](../figma-component-mapping/guide.md) 참조. 본 파일은 양식만 정의한다.
+작성 절차는 [conventions/figma-component-mapping-guide.md](../conventions/figma-component-mapping-guide.md) 참조. 본 파일은 양식만 정의한다.
 
 ---
 
