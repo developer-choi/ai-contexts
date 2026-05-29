@@ -59,6 +59,7 @@ Markup Implementer spawn 시 컨텍스트와 함께 반드시 전달:
 
 1. **"피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"** — 스크린샷 보고 감으로 작성 금지
 2. **구현 후 피그마 자동 대조** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
+3. **피그마 MCP 연결인 경우** — 아이콘·이미지 색은 [conventions/figma-color-tokens-guide.md](../conventions/figma-color-tokens-guide.md)에 따라 노드 id로 `get_variable_defs`를 호출해 확정한다 (인라인 응답·styles 카탈로그 추론 금지)
 
 ### Step 5.1.4. Coding-Standards Reviewer 분할
 
