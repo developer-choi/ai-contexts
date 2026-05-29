@@ -86,6 +86,13 @@ IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventi
 - **디자인시스템 컴포넌트 PR이면** [../conventions/commit-strategy-design-system.md](../conventions/commit-strategy-design-system.md) 의 분할 순서를 따른다.
 - 새 파일/모듈을 만들기 전에 프로젝트에 같은 역할의 코드가 이미 있는지 확인한다. 기존 API, 타입, 컴포넌트를 재사용할 수 있으면 새로 만들지 않는다.
 
+### Step 5.2.3. IMPL 중 디자인·기획 변경 감지
+
+IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(figma URL·stub·it.todo)을 그대로 두고 진행하지 않는다. 변경분을 명시 처리하지 않으면 이후 Figma Reviewer·GAP Analysis 라운드에서도 잡히지 않는다.
+
+- **디자인 변경** — 변경된 단위(페이지·섹션·위젯·컴포넌트)의 URL을 [conventions/plan-folder.md](../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 절차로 재수령하고, 그 PR의 `markup.md` 「Figma 원본 링크 인덱스」를 갱신한다(Figma Reviewer가 이 인덱스로 원본을 직접 fetch하므로). 이후 작업·재검수는 새 원본 기준.
+- **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다(이 step 서두의 "계획에 문제가 있으면 보고" 원칙). AI 단독으로 stub·it.todo를 뒤집지 않는다 — SKILL.md 「입력 산출물 비판적 검토」의 결정 위임 형태. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
+
 ---
 
 ## Step 5.3. 리뷰 파이프라인
