@@ -17,7 +17,7 @@
 | **3** | markup 워크트리 분기 + 최소 셋팅 (vite/next + scss/tailwind 마크업 가능 최소만, PR 안 감) | 메인 워크트리 → markup 워크트리 |
 | **4** | `background/consumable/project.md` PR1 섹션 갱신 (파일 없으면 빈 파일 생성 후 박기) + FOUNDATION 종료 | 메인 워크트리 |
 
-**folder-structure.md 결정 기준**: BG.step-1.1 자료 (채용 요구사항 — 특히 폴더 경로 관련 언급) + MP의 디렉토리 가이드(DDD 등). 항상 DDD 아님.
+**folder-structure.md 결정 기준**: 폴더 구조는 사용자 확인 전에 임의로 정해 스캐폴딩하지 않는다 — 항상 사용자에게 확인받는다. BG.step-1.1 자료(요구사항·우대사항)로 추천은 곁들이되(채용공고 우대사항의 FSD 등은 지원자에게 바라는 역량이지 이 과제를 그 구조로 구현하라는 지시가 아니다), FSD든 DDD든 사용자 확정 없이 진행하지 않는다. 사용자가 이미 구조를 지정했으면 재질문하지 않는다. DDD로 지정되면 트리 작성 전 MP `monorepo-playground/docs/patterns/folder-structure/FolderStructure.md`를 읽고 그 패턴(디렉토리 골격·네이밍·배럴 유무)을 따른다.
 
 **코딩 스탠다드 마이그레이션 근거**: 기존 코드(보일러플레이트) 위에 새 코드 얹는 시나리오. AI는 기존 커밋 메시지·기존 코드를 보고 새 코드를 작성하므로, 기존 코드가 새 코딩 스탠다드와 불일치하면 새 코드도 일관성 깨짐.
 
