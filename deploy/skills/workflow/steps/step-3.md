@@ -12,8 +12,7 @@
 
 | 순서 | 조건 | 스킬 | 실행 | 설명 |
 |:---:|------|------|------|------|
-| 1 | 버그/성능 문제 포함 | [bug-investigation](../bug-investigation/SKILL.md) | 서브에이전트 | 증상과 Root Cause 분석. 산출물: `/plan/background/consumable/bug-analysis.md` |
-| 2 | 채용과제 | [prefer-packages](../requirement-review/recruitment/prefer-packages.md) | — | 선호 패키지 참조 |
+| 1 | 채용과제 | [prefer-packages](../requirement-review/recruitment/prefer-packages.md) | — | 선호 패키지 참조 |
 
 ### 컨벤션 사전 참조
 

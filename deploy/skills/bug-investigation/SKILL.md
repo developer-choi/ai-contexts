@@ -1,7 +1,6 @@
 ---
-name: workflow-bug-investigation
-description: 버그·성능 문제의 증상과 Root Cause를 분석하고 /plan/background/consumable/bug-analysis.md를 작성합니다.
-argument-hint: (인자 없음 — workflow step-3에서 호출)
+name: bug-investigation
+description: 버그·성능 문제의 증상과 근본 원인(Root Cause)을 구분해 분석하고, 발견 경로·비즈니스 임팩트까지 정리한다. 버그 원인 분석, 근본 원인 추적, 성능 저하·응답 지연의 원인 파악, 재현·발견 경로 정리, '왜 이게 안 되지'·'왜 느리지'·'이 버그 원인 찾아줘' 같은 원인 규명 요청 시 반드시 이 스킬을 사용한다. 증상만 알고 원인을 모르거나, 원인 규명 없이 곧장 수정에 들어가려는 맥락에서도 — 명시적으로 '조사'라 말하지 않아도 — 사용한다.
 ---
 
 # Bug Investigation
@@ -30,7 +29,9 @@ argument-hint: (인자 없음 — workflow step-3에서 호출)
 
 ---
 
-## 산출물: `/plan/background/consumable/bug-analysis.md`
+## 산출물
+
+증상·근본 원인 분석을 정리한 bug-analysis 문서. 출력 위치는 사용자가 지정하며, 지정이 없으면 분석 결과를 직접 보고한다.
 
 ### 예시
 
