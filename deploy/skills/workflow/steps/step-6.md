@@ -45,7 +45,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 - code-review에 전달하는 입력: PR diff, coding-standards 목록, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
 - code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
-- 수정은 step-5의 Markup/Feature Implementer가 수행한다
+- 수정은 step-5의 Implementer 흐름이 수행한다 (마크업 수정이면 figma 원본 대조 기준)
 
 ---
 
