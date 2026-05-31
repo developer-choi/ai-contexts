@@ -28,7 +28,7 @@ Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**한다. 소비된 원본은 삭제한다 (`read-only/` 하위는 삭제하지 않는다).
 
-채용과제 페이지 이미지(`/plan/background/retained/figma/` 하위)는 해당 PR의 **stub `.tsx` 작성 시 + `markup.md` 작성 시** 시각적 참조로 사용한다. MARKUP 세션이 페이지·섹션·위젯·컴포넌트 단위 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 새 구조에서 생성되지 않는다.
+컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 figma 0건으로 완성하므로 **step-4의 stub 대상이 아니다.** step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·페이지 조립 구조 참조에만 쓴다. MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
 
 ---
 
@@ -85,8 +85,8 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
-| stub 파일들 — `.tsx`, `.module.scss`, hook, `*.test.tsx`, fixture, types 등 (PR이 만들 **외부 공개 모듈은 필수**. 내부 헬퍼는 권장) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
-| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표, **「IMPL 시점 Figma 확인 체크리스트」 절** | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-5 Implementer·Reviewer가 본 링크로 figma 원본을 직접 fetch (SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함 |
+| stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (PR이 만들 **외부 공개 모듈은 필수**. 내부 헬퍼는 권장). 컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인값)은 MARKUP 완성본을 가져오므로 stub 대상 아님 | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
+| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당, SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함 |
 | `implementation.md` | `pr{N}/persistent/` | 구현 순서·방침·`@deprecated` 흐름·it.todo 매핑·회귀 체크리스트 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
@@ -99,7 +99,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 #### markup.md 양식
 
-「Figma 원본 링크 인덱스」 절·「IMPL 시점 Figma 확인 체크리스트」 절 양식·검증 기준은 [conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md) 참조.
+「Figma 원본 링크 인덱스」 절 양식·검증 기준은 [conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md) 참조.
 
 ### implementation.md 양식
 

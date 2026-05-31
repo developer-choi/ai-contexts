@@ -31,7 +31,7 @@
       reference.md      ← step-3·4 누적. 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스
       implementation.md ← step-4 산출물. 소비 = step-5·step-5.4·step-6.1·step-6.5·step-7 (PR body 작성 시 참조). PR·프로젝트 종료 후에도 보존 (사용자 명시 폐기까지). 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
     retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
-      markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표 + IMPL 시점 Figma 확인 체크리스트. step-5 Implementer/Reviewer가 링크로 figma 직접 fetch (Reviewer 자기증명 루프 회피). 마지막 소비자는 step-6.3 사용자 코드 리뷰
+      markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당). 마지막 소비자는 step-6.4.1
     consumable/         ← 소비 시 즉시 폐기 (큐 모델 — 절 단위 소비 시 절 삭제, 비면 파일 삭제)
       overview.md       ← step-3 산출물
       page.md           ← step-1 requirement-review 페이지별 분석 결과. step-3 「잔여 산출물 소비」에서 분배
