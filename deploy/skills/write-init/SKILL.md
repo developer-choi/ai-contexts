@@ -38,7 +38,7 @@ subtype 누락·오타 시 메인이 한 번 묻고 진행한다.
 
 **예외 — pr-comment**: 템플릿 없음. PR 코멘트는 자유 형식이라 섹션 템플릿이 부적합. subtype(reviewer/author)에 따라 메인이 의도 중심 구조(질문/제안/해명/감사 등)를 동적으로 결정한다.
 
-**예외 — readme**: `templates/readme.md` 없음. `../../contexts/writing-guide/readme-guide.md`의 구조·원칙(금지/필수 섹션)을 따라 메인이 섹션 구조를 동적으로 결정한다.
+**예외 — readme**: `templates/readme.md` 없음. `../../contexts/writing-guide/readme-guide.md`의 구조·원칙(금지/필수 섹션)을 따라 메인이 섹션 구조를 동적으로 결정한다. README의 1차 소스는 작업 컨텍스트(git log·diff)가 아니라 대상의 SKILL.md(또는 핵심 문서)다. SKILL.md에 있는 내용은 사용자에게 되묻지 말고 번역하고, 사용자 확인이 필요한 빈칸을 최소화한다.
 
 **예외 — blog-post**: 템플릿 없음. 출처 문서마다 양식이 천차만별이라 고정 템플릿 부적합. 프로젝트 CLAUDE.md의 블로그 운영방침과 frontmatter 스키마(title/description/category/date/picked)에 따라 메인이 섹션 구조를 동적으로 결정한다. 출처 원본의 구조를 골격으로 삼되, 채용담당자(비개발자) 독자에 맞게 풀어쓴다. 시리즈면 출처의 cross-link 구조를 보존하며 N개 skeleton 동시 생성한다.
 
