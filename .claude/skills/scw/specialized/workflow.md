@@ -249,10 +249,11 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 팀 에이전트 소통 구조
 
-- Figma Reviewer ↔ Implementer, Advanced Reviewer ↔ Implementer가 Lead 개입 없이 직접 루프하는지
-- Coding-Standards Reviewer ×N 결과만 Lead가 종합하는지 (sonnet 오탐 필터링)
-- Markup 파이프라인이 3단계(Figma → Coding-Standards → Advanced)인지
-- Feature 파이프라인이 2단계(Coding-Standards → Advanced)인지
+- 구현·리뷰 루프가 `impl-review-loop` 엔진 호출로 일원화됐는지 — step 본문에 루프 기계(구현↔리뷰 0건 수렴)가 인라인 복제되지 않았는지
+- 호출하는 step이 구현자별로 (구현자·재료·진실검사 A·규칙검사 B·증분 단위)를 주입하는지
+- 진실검사 A가 non-null로 강제되는지 (어떤 호출도 진실원천 대조 없이 종료 못 하는지)
+- 규칙검사 B가 진실원천 충실도를 직접 판정하지 않고 A로 라우팅하는지
+- 리뷰어 직접 루프(Reviewer ↔ Implementer, Lead 개입 없이)와 Lead 종합(sonnet 오탐 필터링)이 엔진 절차에 반영됐는지
 - 리뷰어는 code-review SKILL.md의 절차를 따르는지
 - 계획과 달라지는 경우 사용자에게 보고하는지
 
