@@ -25,9 +25,9 @@ BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대
 |---|---|---|---|---|---|
 | **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md / `background/consumable/`: project.md / `pr{N}/consumable/`: page.md (페이지별 분석) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무), 동일 `<모드>` 인자 / step-2 후 → PR_1_PLAN, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 |
 | **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 | BG `background/persistent/` (채용 원본) | `background/retained/folder-structure.md` (단계 1 산출) / PR1 워크트리에 **베이스 두 커밋만** (폴더 마이그레이션·코딩 스탠다드 마이그레이션) — **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 정상 도미노로 수행** / `background/consumable/project.md` PR1 섹션 갱신 (자연어 지시 박음) / markup 워크트리 최소 셋팅 | 단계 4 종료 후 → MARKUP (`/workflow MARKUP 채용`) + PR_1_PLAN (`/workflow PR_1_PLAN 채용`) | 단계별 cwd 분기 (메인 / PR1 / markup 워크트리) |
-| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | 사용자 figma·시안 자료 (페이지·섹션·위젯·컴포넌트 단위) | `background/retained/figma-url.md` (URL 누적) + `background/retained/figma/[meaningful-name].[이미지확장자]` (캡처 이미지) | 없음 (PR_{N}_IMPL이 페이지 단위 코드 가져감) | 마크업 워크트리. **포트 3000 점유** |
+| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | 사용자 figma·시안 자료 (페이지·섹션·위젯·컴포넌트 단위) | **markup 워크트리의 figma 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + `background/retained/figma-url.md`·`figma/` (작성 입력) | 없음 (PR_{N}_IMPL이 페이지 단위 코드 가져감) | 마크업 워크트리. **포트 3000 점유** |
 | **PR_{N}_PLAN** | (N=1, 채용) FOUNDATION 종료 + BG.step-2 / (N=1, 실무) BG.step-2 / (N≥2) BG.step-2 + (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1} 머지) | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md** / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만) / `pr{N}/consumable/`: overview.md | step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 안 만든 경우 → PR_{N}_IMPL만 spawn | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 |
-| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (stub 위에 본체 채움) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-5 끝 후 → PR_{N}_WRITING | PR_{N} 워크트리. 본 PR 하나에 집중 |
+| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-5 끝 후 → PR_{N}_WRITING | PR_{N} 워크트리. 본 PR 하나에 집중 |
 | **PR_{N}_WRITING** | PR_{N}_IMPL.step-5 종료 | implementation.md + 커밋 로그 + decisions.md + reference.md + `pr{N}/consumable/` 잔여 산출물 | `pr{N}/consumable/pr-body.md` (작성 후 PR 본문 복사 → 폐기) / overview.md 폐기 / `pr{N}/persistent/`는 제외 (영구 보존) | step-7 끝 후 → PR_{N} 머지 안내 (추상 명령 — 사용자가 write-refine 후 게시·머지). 머지 후 PR_{N+1}_PLAN spawn 안내 (PR_{N}이 stub 안 만든 경우) | 구현 맥락 없이 파일 기반으로 PR 본문 작성 |
 
 ### 의존성 그래프
@@ -74,7 +74,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 - 각 step은 조건에 해당하는 **하위 스킬을 모두 로드**하는 오케스트레이터이거나, 그 자체가 실행 로직
 - 해당 스킬이 여러 개이면 **순서대로 하나씩** 실행한다 (동시 로드 불가)
 - 각 step의 **산출물이 다음 step의 입력** — step마다 "참고 자료"로 입력 산출물이 명시되어 있음
-- 하위 스킬은 워크플로우 step 내에서만 호출된다 (독립 호출 없음)
+- 하위 스킬은 워크플로우 세션의 절차(step 또는 step 없는 세션 본문) 안에서만 호출된다 (독립 호출 없음). 예: MARKUP은 step 없이 본문(markup.md)에서 impl-review-loop를 호출
 - FOUNDATION·MARKUP은 step 번호가 없는 세션 — 본문은 [conventions/session/foundation.md](conventions/session/foundation.md) / [conventions/session/markup.md](conventions/session/markup.md) 단일 출처
 
 ## 시작 전 준비
@@ -142,7 +142,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 AI 산출물의 역할은 **Implementer 캐시·인덱스**로만 한정한다 — figma 호출 비용 절약, 컨벤션 경로 빠른 조회 등. Reviewer 절차에는 진실 원천 직접 fetch·참조를 명시한다.
 
 적용 사례:
-- Figma Reviewer는 `markup.md` 「Figma 원본 링크 인덱스」 절의 URL로 figma 원본을 직접 fetch (markup.md의 토큰 매핑표·매칭표는 캐시 보조)
+- MARKUP의 Figma Reviewer는 `figma-url.md`의 URL로 figma 원본을 직접 fetch해 마크업과 대조 (매칭표는 캐시 보조)
 - Coding-Standards Reviewer는 컨벤션 1차 소스 파일을 직접 읽음 (`reference.md`는 경로 인덱스 역할)
 - code-review 스킬은 coding-standards 문서를 직접 참조
 
