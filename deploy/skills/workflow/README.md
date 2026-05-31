@@ -22,18 +22,16 @@
 
 전체 흐름을 관리합니다. 사용자와 소통하고, 각 단계에서 어떤 스킬을 호출할지 판단하고, 에이전트들에게 필요한 정보를 전달합니다.
 
-### Agent Teams (PR_{N}_IMPL)
+### Agent Teams — 구현·리뷰 엔진 (MARKUP · PR_{N}_IMPL)
 
-구현과 리뷰 세션에서는 Claude Code의 [Agent Teams](https://code.claude.com/docs/en/agent-teams) 기능으로 역할별 AI 팀을 구성합니다.
+마크업을 만드는 MARKUP 세션과 로직을 구현하는 PR_{N}_IMPL 세션은 같은 **"구현 → 검사 → 0건 수렴" 엔진**을 호출합니다. Claude Code의 [Agent Teams](https://code.claude.com/docs/en/agent-teams)로 역할별 AI 팀을 구성하되, 무엇을 구현하고 무엇을 기준으로 검사할지만 다르게 주입합니다.
 
-- **Lead** — 사용자 소통 + 리뷰 종합
-- **Markup Implementer** — 마크업 전용
-- **Feature Implementer** — 로직 + 테스트
-- **Figma Reviewer** — 디자인 시안과 코드 비교
-- **Coding-Standards Reviewer** — 코딩 규칙 검증
-- **Advanced Reviewer** — 코드 품질 심층 리뷰
+- **MARKUP** — Markup Implementer가 마크업을 만들고, Figma Reviewer가 figma 원본과 직접 대조해 0건까지 수렴시킵니다. 검증된 마크업은 각 PR이 그대로 가져갑니다.
+- **PR_{N}_IMPL** — Feature Implementer가 로직을 구현하고 테스트 실행으로 동작을 검증합니다. 마크업은 MARKUP의 검증본을 그대로 쓰므로 이 세션은 로직만 다룹니다.
 
-Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을 리뷰합니다. 이슈가 있으면 Reviewer가 Implementer에게 직접 전달하고, 이슈가 0건이 될 때까지 반복합니다. 컨벤션 검증만 여러 리뷰어가 동시에 수행하고, 나머지 단계는 순서대로 진행됩니다.
+두 세션 공통으로 **Lead**(사용자 소통 + 리뷰 종합), **Coding-Standards Reviewer**(코딩 규칙 검증), **Advanced Reviewer**(코드 품질 심층 리뷰)가 붙습니다.
+
+검사는 두 축입니다. **진실 원천 충실도**(마크업은 figma 직접 fetch, 로직은 테스트 실행)는 어떤 호출도 생략할 수 없고, **코딩 스탠다드**는 양쪽 공통입니다. Implementer가 커밋하면 Reviewer가 리뷰하고, 이슈가 있으면 Implementer에게 직접 전달해 0건이 될 때까지 반복합니다. 컨벤션 검증만 여러 리뷰어가 동시에 수행하고, 나머지는 순서대로 진행됩니다.
 
 > "Agent teams let you coordinate multiple Claude Code instances working together. One session acts as the team lead, coordinating work, assigning tasks, and synthesizing results. Teammates work independently, each in its own context window, and communicate directly with each other."
 > — [Claude Code Docs: Agent Teams](https://code.claude.com/docs/en/agent-teams)
@@ -67,6 +65,10 @@ Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을
 
 리뷰에서 발견한 이슈를 수정한 뒤 다시 확인하면, 여전히 문제가 남아 있는 경우가 있습니다. 한 번 리뷰로는 충분하지 않기 때문에, 이슈가 0건이 나올 때까지 리뷰-수정 사이클을 반복합니다.
 
+### 왜 마크업과 로직이 같은 엔진을 쓰나요?
+
+마크업이든 로직이든 "만들고 → 진실 원천과 대조하고 → 0건까지 고친다"는 골격은 같습니다. 다른 것은 진실 원천뿐입니다 — 마크업은 figma, 로직은 동작(테스트)입니다. 그래서 이 루프를 하나의 엔진으로 빼고, 각 세션이 진실 원천과 검사 기준만 주입해 재사용합니다. 마크업은 시간이 오래 걸려 MARKUP 세션으로 분리해 일찍 만들지만, 같은 검증 엔진을 거치므로 리뷰 없이 제출되는 일이 구조적으로 막힙니다.
+
 ## 호출
 
 `/workflow <세션> <모드>` 형태로 호출합니다. 세션은 `BG` / `FOUNDATION` / `MARKUP` / `PR_{N}_PLAN` / `PR_{N}_IMPL` / `PR_{N}_WRITING` 중 하나, 모드는 `채용` 또는 `실무`입니다. BG로 시작한 뒤 후속 세션은 직전 세션이 spawn 안내를 출력합니다.
@@ -79,9 +81,9 @@ Implementer가 코드를 작성하고 커밋하면, Reviewer가 해당 커밋을
 
 - **BG** — 배경 파악과 PR 분할. 기획서·피그마·채용 원본을 읽고 무엇을 왜 해야 하는지 정리한 뒤, 작업을 PR 단위로 쪼갭니다.
 - **FOUNDATION** (채용 전용) — 폴더 구조·코딩 스탠다드 마이그레이션 등 PR1 베이스 셋업. 본격 작업은 PR_1_PLAN 도미노가 받아갑니다.
-- **MARKUP** — 피그마 시안을 페이지·섹션·위젯·컴포넌트 단위로 잘라 마크업 워크트리에서 작업합니다. 포트 3000을 점유합니다.
+- **MARKUP** — 피그마 시안을 페이지·섹션·위젯·컴포넌트 단위로 잘라 마크업 워크트리에서 만들고, figma 원본과 0건까지 대조해 검증합니다. 검증된 마크업을 각 PR이 그대로 가져갑니다. 포트 3000을 점유합니다.
 - **PR_{N}_PLAN** — 과제 정의(step-3)와 구현 방침(step-4). step-4 끝에서 후속 PR의 stub 시그니처를 만들면 PR_{N+1}_PLAN과 PR_{N}_IMPL이 병렬로 spawn됩니다.
-- **PR_{N}_IMPL** — Agent Teams로 구현·리뷰. stub 위에 본체를 채우고, 커밋마다 컨벤션·고급 리뷰가 0건이 될 때까지 반복합니다.
+- **PR_{N}_IMPL** — Agent Teams로 로직 구현·리뷰. 로직 stub 위에 본체를 채우고(마크업은 MARKUP 검증본을 가져옴), 커밋마다 검사가 0건이 될 때까지 반복합니다.
 - **PR_{N}_WRITING** — 구현 맥락 없이 산출물 파일만 보고 PR 본문을 작성합니다.
 
 리뷰 코멘트를 받으면 [pr-comment-respond](pr-comment-respond/README.md)가 분류·대응 전략을 세운 뒤 PR_{N}_PLAN부터 다시 돕니다. 채용 과제의 마지막 PR이 끝나면 [recruitment](recruitment/SKILL.md)로 제출 절차를 마무리합니다.
