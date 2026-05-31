@@ -99,13 +99,11 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 - 기존 코드베이스에 설치·사용 중인 스택을 "결정된 사실"로 흡수하지 않는다. "기존이 X를 쓴다" ≠ "X로 결정됐다" (create-next-app 디폴트·이전 작업자 선택일 수 있음). prefer-packages.md 선호와 다르면 안건으로 올려 확정한다.
 - **공고 우대 스택은 결정 근거가 아니다.** 결정 근거 = ① 과제요구사항 강제 명시(오버라이드) → ② prefer-packages.md 사용자 선호. 공고 우대사항은 평가 디테일 추론(#2)에만 쓰고 스택 결정 근거로 leak시키지 않는다.
 
-#### 4. 페이지 자료 수집 + 디자인 시스템 설계
+#### 4. 페이지별 자료 정리 + 디자인 시스템 설계
 
 섹션 3에서 디자인 시스템 라이브러리가 결정된 후 진행한다.
 
-**페이지별 자료 요청**: 사용자에게 페이지별 자료를 요청한다. 형식은 자유 — 페이지 캡처 이미지 묶음, 파일별 링크, 피그마 링크 등. 사용자가 주는 대로 받는다.
-
-**자료 정리**: 받은 자료를 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책에 따라 정리한다 — URL은 `background/retained/figma-url.md`에 누적, 캡처 이미지는 `background/retained/figma/[meaningful-name].[이미지확장자]`에 저장.
+**페이지별 정리**: step-1.1이 수집해 `background/retained/figma-url.md`·`background/retained/figma/`에 저장한 figma 자료를 페이지별로 정리한다. **처음부터 다시 요청하지 않는다** — 빠진 페이지가 있으면 그것만 콕 집어 요청하고, 받으면 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책대로 같은 위치에 추가한다.
 
 **디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다. step-3 PR3 정의와 step-4 PR3 구현 방침의 입력 재료로 쓰이고, 사용 후 삭제되는 중간 산출물이다. PR4+ 구현 시에는 페이지 이미지 파일을 `markup.md` 참조 자료로 사용한다.
 

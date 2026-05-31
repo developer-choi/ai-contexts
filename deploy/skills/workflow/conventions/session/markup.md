@@ -4,7 +4,7 @@
 
 ## [CRITICAL] 메인 작업
 
-**메인 작업은 markup 워크트리에서 마크업 코드(`.tsx`, `.module.scss`)를 작성하고 figma 원본과 0건까지 수렴 검증**하는 것이다. figma 자료 누적은 그 입력 단계일 뿐 — 자료 누적이 끝났다고 세션이 끝난 게 아니다.
+**메인 작업은 markup 워크트리에서 마크업 코드(`.tsx`, `.module.scss`)를 작성하고 figma 원본과 0건까지 수렴 검증**하는 것이다. figma 자료는 step-1.1이 수집한 것을 참조한다 — 자료가 갖춰졌다고 세션이 끝난 게 아니다.
 
 세션 종료 조건: **`background/consumable/project.md`의 모든 페이지·도메인 컴포넌트가 markup 워크트리에 마크업으로 존재하고, 컴포넌트별로 figma 원본 대조 0건 수렴**. 검증은 아래 「마크업 구현·검사」의 엔진이 담당하며, project.md의 PR별 컴포넌트 목록은 "전 컴포넌트를 다뤘는지"를 보는 커버리지 인덱스다 (파일 존재만이 아니라 figma 충실도까지 본다).
 
@@ -13,17 +13,11 @@
 - (채용) FOUNDATION 단계 4 종료 후
 - (실무) BG.step-1.1 후
 
-## 자료 누적 (spawn 직후 첫 메시지)
+## 자료 참조 (수집은 step-1.1)
 
-사용자에게 다음을 안내한다 — 페이지·섹션·위젯·컴포넌트 어느 단위든 피그마 자료 (URL·캡처 이미지)를 **최대한 많이** 따서 누적. 컴포넌트는 추상화 레벨 다양 (atoms·molecules·widget 등).
+MARKUP은 **step-1.1/BG가 수집해** `background/retained/figma-url.md`·`background/retained/figma/`에 저장한 figma 자료를 참조한다. **figma 자료를 다시 요청하지 않는다** — 빠진 컴포넌트가 있으면 그것만 콕 집어 요청한다. 만들 컴포넌트 종류·이름은 `background/consumable/project.md`의 PR별 컴포넌트 목록을 참조한다 — MARKUP 종료조건의 커버리지 인덱스와 **동일원**이라 모드 무관(채용·실무)하고 이름·커버리지가 단일화된다. (figma는 그 컴포넌트들의 디자인 디테일 원천.)
 
-사용자가 전달할 때마다 LLM은 **"이 컴포넌트 이름이 뭐예요?"** 묻기 (매번 인터랙션).
-
-누적 산출물:
-- `background/retained/figma-url.md` — `[이름] - [URL]` 쌍 누적
-- `background/retained/figma/[meaningful-name].[이미지확장자]` — 캡처 이미지
-
-자료 누적이 끝나면 markup 워크트리로 이동하여 「마크업 구현·검사」로 진입한다.
+참조 자료가 갖춰지면 markup 워크트리로 이동하여 「마크업 구현·검사」로 진입한다.
 
 ## 마크업 구현·검사
 

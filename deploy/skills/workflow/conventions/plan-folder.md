@@ -15,8 +15,8 @@
     retained/           ← 사용자 제공 원본 + 누적 캐시. BG 컨텍스트(= 프로젝트 전체) 유효한 동안 보존
       folder-structure.md ← FOUNDATION 단계 1 산출 (채용만). 디렉토리 구조 명세 (PR2~N 참조)
       tech-constraints.md ← BG.step-1 기술 제약 스캔 결과
-      figma-url.md      ← MARKUP 산출. 대상 이름 + URL 누적
-      figma/            ← MARKUP 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
+      figma-url.md      ← step-1.1 수집. 대상 이름 + URL 누적
+      figma/            ← step-1.1 수집 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
       project.md        ← step-2 산출물 (BG.step-2). PR별 섹션을 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PR1 섹션에 자연어 지시 추가 (채용 한정)
       global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. 본문 양식은 [requirement-review/planning/output-template.md] 참조
@@ -73,6 +73,6 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 - 파일이 없으면 새로 만든다
 - 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
 
-캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (MARKUP 세션에서 누적). 페이지·섹션·위젯·컴포넌트 어느 단위 캡처든 같은 폴더에.
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (step-1.1에서 수집). 페이지·섹션·위젯·컴포넌트 어느 단위 캡처든 같은 폴더에.
 
 step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

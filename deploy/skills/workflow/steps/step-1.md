@@ -17,6 +17,8 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 (requirement-review/recruitment/guide.md 「입력 자료」 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 
+**step-1.1은 자료의 단일 수집 지점이다.** 공고·기획·요구사항과 함께 **사용 가능한 figma/시안 자료를 여기서 전부** 받아 저장한다 (figma URL·캡처 → `retained/figma-url.md`·`retained/figma/`). 다운스트림(requirement-review·MARKUP)은 이 수집분을 *참조*하며 자료를 재요청하지 않는다 — 빠진 것이 있으면 그 갭만 콕 집어 보충한다. (UI는 생김새만이 아니라 상태·인터랙션까지 담아 부분적으로 명세 역할을 하므로, design·기획 자료를 분산 수집할 이유가 없다.)
+
 ### 추가 맥락 수집
 
 스킬 실행 전후로, 사용자에게 추가 맥락이 있는지 확인합니다:
@@ -27,11 +29,11 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### Step 1.1 종료 — 분기점
 
-step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 시점 (+ 시안이 있으면 `retained/figma/`에 저장 완료). 그 이상은 모두 step-1.2 영역이다.
+step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 사용 가능한 figma/시안 전체를 `retained/figma-url.md`·`retained/figma/`에 저장 완료. 그 이상(분석)은 모두 step-1.2 영역이다.
 
 특히 다음은 **step-1.2** 영역이지 step-1.1이 아니다 — recruitment guide(`requirement-review/recruitment/guide.md`)·planning guide·design guide의 「분석 과정」 절차 일체가 여기 해당:
 - 자료 정독·공동 탐색
-- 시안 분석·페이지 자료 수집·디자인 시스템 설계
+- 시안 분석·페이지별 자료 정리·디자인 시스템 설계 (raw 자료 *수집*은 1.1, 1.2는 그 수집분의 정리·분석)
 - cross-analysis·service-analysis 등 분석 산출물 작성
 - 평가 기준 추론, 프로젝트 결정 사항, 모호한 부분 정리
 

@@ -42,11 +42,9 @@
 
 ### 분석 과정
 
-#### 자료 받기
+#### 자료 참조 (수집은 step-1.1)
 
-[output-template.md](./output-template.md)의 page.md 템플릿으로 `/plan/pr{N}/consumable/page.md`를 생성합니다. 사용자에게 페이지 자료를 요청합니다.
-
-사용자가 자료를 제출하면, [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책에 따라 정리합니다 — 이미지는 `background/retained/figma/[meaningful-name].[이미지확장자]`, URL은 `background/retained/figma-url.md`에 누적.
+[output-template.md](./output-template.md)의 page.md 템플릿으로 `/plan/pr{N}/consumable/page.md`를 생성합니다. 페이지 자료는 step-1.1이 수집해 `background/retained/figma/`·`background/retained/figma-url.md`에 저장한 것을 참조합니다 — **처음부터 다시 요청하지 않습니다**. 빠진 페이지가 있으면 그것만 콕 집어 요청하고, 받으면 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책대로 같은 위치에 추가합니다.
 
 - 이미지가 5개 이상이면 사용자에게 리뷰 대상이 아닌 것은 제거하라고 안내합니다.
 - 현재 리뷰 대상과 관련 없어 보이는 자료가 있으면 사용자에게 알립니다.
