@@ -1,6 +1,6 @@
 # MARKUP
 
-전 페이지 markup 생성·검증. PR에 안 들어감 (PR_{N}_IMPL이 페이지 단위로 코드 가져감).
+전 페이지 markup 생성·검증. PR에 안 들어감 (PR_{N}_IMPL이 페이지 단위로 검증된 코드를 그대로 가져감).
 
 ## [CRITICAL] 메인 작업
 
