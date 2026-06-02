@@ -22,23 +22,21 @@ git clone --depth 1 <repo-url> simplified-<라이브러리명>
 
 ## Step 2. git 재초기화 + 개인 계정 로컬 config
 
-shallow clone은 히스토리가 불완전하므로 git을 재초기화한다.
+shallow clone은 히스토리가 불완전하므로 git을 재초기화한다. **로컬 git 정체성은 첫 커밋 전에 설정한다** — 그래야 initial commit부터 개인 계정으로 author된다.
+
+글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등), 이 레포의 **로컬** config를 개인 계정으로 설정한다. 학습용 레포가 회사 계정으로 커밋되는 것을 막기 위함이다. (글로벌이 이미 개인 계정이면 config 단계 생략.)
 
 ```bash
 rm -rf .git
 git init
+
+# 개인 계정 로컬 config — 반드시 첫 커밋 전에 설정
+git config user.name "Yu Jin Choe"
+git config user.email "forworkchoe@gmail.com"
+
 git add -A
 git commit -m "initial commit"
 git branch -M main
-```
-
-### 개인 계정으로 로컬 git 정체성 설정
-
-글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등), 이 레포의 **로컬** config를 개인 계정으로 설정한다. 학습용 레포가 회사 계정으로 커밋되는 것을 막기 위함이다.
-
-```bash
-git config user.name "Yu Jin Choe"
-git config user.email "forworkchoe@gmail.com"
 ```
 
 ### (선택) 개인 GitHub 계정으로 push
@@ -94,7 +92,9 @@ git push -u origin main
 
 ---
 
-## Step 5. .gitignore 생성
+## Step 5. .gitignore 작성
+
+원본에 `.gitignore`가 있어도 아래 내용으로 **교체**한다 (실행 안 하므로 빌드 산출물 무시 규칙 불필요).
 
 ```
 .idea
