@@ -155,11 +155,11 @@ simplified-[라이브러리명]/
 
 해당 라이브러리 특화 삭제 패턴입니다. 작업하면서 축적합니다.
 
-**⚠️ 중요 - 이 문서의 목적**:
+**이 문서의 목적**:
 - **여러 파일/컴포넌트에서 반복적으로 나타나는 패턴**을 기록
 - **특정 파일 하나의 작업 기록이 아님**
-- 예: "Slot 시스템 제거" → Dialog, Modal, Menu **모든 컴포넌트**에서 반복
-- 예: ❌ "Dialog.tsx의 backdrop 제거" → 이건 특정 파일 작업 기록
+- 예(O): "Slot 시스템 제거" → Dialog, Modal, Menu **모든 컴포넌트**에서 반복
+- 예(X): "Dialog.tsx의 backdrop 제거" → 이건 특정 파일 작업 기록
 
 **작성 가이드**:
 - **스캐폴딩**: SIMPLIFY_SOURCE `[타입]/format/simplification-patterns.md` 양식을 기반으로 생성
