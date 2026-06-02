@@ -8,6 +8,15 @@ const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
 const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
+const cmdAutorunFile = path.join(home, 'autorun.cmd');
+const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
+
+const cmdAutorunBody = `@echo off
+echo %CMDCMDLINE% | findstr /i " /c " >nul
+if errorlevel 1 (
+    if /i "%CD%"=="%USERPROFILE%" cd /d %USERPROFILE%\\WebstormProjects\\main
+)
+`;
 
 const powershellProfileBlock = `
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
@@ -29,6 +38,9 @@ function main() {
 
   console.log('--- Global gitignore ---');
   syncGlobalGitignore(state);
+
+  console.log('--- cmd autorun ---');
+  syncCmdAutorun(state);
 
   writeState(state);
   console.log('Environment sync complete.');
@@ -87,6 +99,64 @@ function syncGlobalGitignore(state) {
     body: 'plan/',
     legacyLinePatterns: [/^plan\/$/, /^backlog\/$/],
   });
+}
+
+function syncCmdAutorun(state) {
+  if (process.platform !== 'win32') {
+    console.log('Skipping cmd autorun setup because this is not Windows.');
+    return;
+  }
+
+  writeWholeFile(cmdAutorunFile, cmdAutorunBody);
+
+  const desired = `@${cmdAutorunFile}`;
+  const current = queryAutoRun();
+
+  if (current === desired) {
+    state.cmdAutorunRegSetByAiContexts = true;
+    console.log(`AutoRun already registered as ${desired}`);
+  } else if (!current) {
+    childProcess.execFileSync(
+      'reg',
+      ['add', cmdProcessorKey, '/v', 'AutoRun', '/t', 'REG_SZ', '/d', desired, '/f'],
+      { stdio: 'ignore' }
+    );
+    state.cmdAutorunRegSetByAiContexts = true;
+    console.log(`Registered AutoRun = ${desired}`);
+  } else {
+    console.warn(`AutoRun is already set to: ${current}`);
+    console.warn(`Skipping registration of ${desired}`);
+  }
+}
+
+function writeWholeFile(file, body) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+
+  if (fs.existsSync(file)) {
+    if (fs.readFileSync(file, 'utf8') === body) {
+      console.log(`Already up to date: ${file}`);
+      return;
+    }
+    fs.copyFileSync(file, `${file}.bak-${timestamp()}`);
+    fs.writeFileSync(file, body, 'utf8');
+    console.log(`Updated ${file}`);
+    return;
+  }
+
+  fs.writeFileSync(file, body, 'utf8');
+  console.log(`Created ${file}`);
+}
+
+function queryAutoRun() {
+  try {
+    const out = childProcess.execFileSync('reg', ['query', cmdProcessorKey, '/v', 'AutoRun'], {
+      encoding: 'utf8',
+    });
+    const match = out.match(/AutoRun\s+REG_\w+\s+(.+)/);
+    return match ? match[1].trim() : '';
+  } catch {
+    return '';
+  }
 }
 
 function findPowerShell7Command() {

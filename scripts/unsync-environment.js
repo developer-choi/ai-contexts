@@ -8,6 +8,15 @@ const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
 const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
+const cmdAutorunFile = path.join(home, 'autorun.cmd');
+const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
+
+const cmdAutorunBody = `@echo off
+echo %CMDCMDLINE% | findstr /i " /c " >nul
+if errorlevel 1 (
+    if /i "%CD%"=="%USERPROFILE%" cd /d %USERPROFILE%\\WebstormProjects\\main
+)
+`;
 
 function main() {
   const state = readState();
@@ -17,6 +26,9 @@ function main() {
 
   console.log('--- Global gitignore ---');
   unsyncGlobalGitignore(state);
+
+  console.log('--- cmd autorun ---');
+  unsyncCmdAutorun(state);
 
   if (state.powerShell7InstalledByAiContexts) {
     uninstallPowerShell7(state);
@@ -57,6 +69,52 @@ function unsyncGlobalGitignore(state) {
     console.log('Removed global core.excludesFile registration');
   }
   delete state.gitCoreExcludesFileSetByAiContexts;
+}
+
+function unsyncCmdAutorun(state) {
+  if (process.platform !== 'win32') {
+    console.log('Skipping cmd autorun removal because this is not Windows.');
+    return;
+  }
+
+  if (state.cmdAutorunRegSetByAiContexts) {
+    const current = queryAutoRun();
+    if (current === `@${cmdAutorunFile}`) {
+      childProcess.execFileSync('reg', ['delete', cmdProcessorKey, '/v', 'AutoRun', '/f'], {
+        stdio: 'ignore',
+      });
+      console.log('Removed AutoRun registration');
+    } else {
+      console.log(`AutoRun changed since sync (${current || 'absent'}); leaving as is`);
+    }
+    delete state.cmdAutorunRegSetByAiContexts;
+  }
+
+  if (!fs.existsSync(cmdAutorunFile)) {
+    console.log(`Already absent: ${cmdAutorunFile}`);
+    return;
+  }
+
+  if (fs.readFileSync(cmdAutorunFile, 'utf8') !== cmdAutorunBody) {
+    console.log(`Modified outside ai-contexts; leaving ${cmdAutorunFile}`);
+    return;
+  }
+
+  fs.copyFileSync(cmdAutorunFile, `${cmdAutorunFile}.bak-${timestamp()}`);
+  fs.rmSync(cmdAutorunFile, { force: true });
+  console.log(`Removed ${cmdAutorunFile}`);
+}
+
+function queryAutoRun() {
+  try {
+    const out = childProcess.execFileSync('reg', ['query', cmdProcessorKey, '/v', 'AutoRun'], {
+      encoding: 'utf8',
+    });
+    const match = out.match(/AutoRun\s+REG_\w+\s+(.+)/);
+    return match ? match[1].trim() : '';
+  } catch {
+    return '';
+  }
 }
 
 function uninstallPowerShell7(state) {
