@@ -45,8 +45,11 @@ git branch -M main
 
 푸시가 필요하면 `gh auth status`로 인증이 **개인 계정**인지 먼저 확인한 뒤 진행한다.
 
+**비공개(`--private`)로 만든다.** 이 프로젝트는 원본 OSS를 정리한 포크이고(init Step 3에서 LICENSE 삭제),
+학습용 산출물이므로 공개 재배포 대신 개인 비공개 레포로 둔다.
+
 ```bash
-gh repo create <개인 GitHub 핸들>/simplified-<라이브러리명> --public
+gh repo create <개인 GitHub 핸들>/simplified-<라이브러리명> --private
 git remote add origin https://github.com/<개인 GitHub 핸들>/simplified-<라이브러리명>.git
 git push -u origin main
 ```
