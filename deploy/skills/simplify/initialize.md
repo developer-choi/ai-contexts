@@ -16,15 +16,16 @@
 git clone --depth 1 <repo-url> simplified-<라이브러리명>
 ```
 
-- package.json의 `name`도 `simplified-<라이브러리명>`으로 변경한다 (예: `simplified-material-ui`).
+- 클론한 **원본은 이 시점에 손대지 않는다.** package.json `name` 교정·파일 삭제 등 모든 정리는 첫 커밋(원본) 이후 Step 3~5에서 한다.
 
 ---
 
-## Step 2. git 재초기화 + 개인 계정 로컬 config
+## Step 2. git 재초기화 + 원본 1커밋 (개인 계정)
 
-shallow clone은 히스토리가 불완전하므로 git을 재초기화한다. **로컬 git 정체성은 첫 커밋 전에 설정한다** — 그래야 initial commit부터 개인 계정으로 author된다.
+shallow clone은 히스토리가 불완전하므로 git을 재초기화하고, **정리하기 전 원본 전체를 그대로 1커밋**으로 담는다.
 
-글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등), 이 레포의 **로컬** config를 개인 계정으로 설정한다. 학습용 레포가 회사 계정으로 커밋되는 것을 막기 위함이다. (글로벌이 이미 개인 계정이면 config 단계 생략.)
+- ⚠️ **이 첫 커밋은 정리 전 원본이다.** Step 3~5의 삭제·수정을 이 커밋 *전에* 하지 않는다. 원본을 history에 남겨야 이후 "무엇이 제거됐는지"를 과거 버전과 diff할 수 있다 — 이게 이 스킬의 핵심 가치다.
+- **로컬 git 정체성은 이 커밋 전에 설정한다** — 그래야 initial commit부터 개인 계정으로 author된다. 글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등) 로컬 config를 개인 계정으로 설정한다. (글로벌이 이미 개인 계정이면 생략.)
 
 ```bash
 rm -rf .git
@@ -34,6 +35,7 @@ git init
 git config user.name "Yu Jin Choe"
 git config user.email "forworkchoe@gmail.com"
 
+# 원본 전체를 그대로 1커밋 (정리 X — 정리는 Step 5 끝 두 번째 커밋)
 git add -A
 git commit -m "initial commit"
 git branch -M main
@@ -55,6 +57,8 @@ git push -u origin main
 ---
 
 ## Step 3. README.md 및 package.json 정리
+
+> Step 3~5(README·package.json·파일 삭제·.gitignore)는 **두 번째 커밋 = "불필요한 것 삭제"** 하나를 구성한다. Step 5 끝에서 한 커밋으로 묶는다 — 원본 커밋과 분리해야 제거 내역이 diff로 드러난다.
 
 ### README.md
 
@@ -105,6 +109,15 @@ git push -u origin main
 ```
 .idea
 .claude
+```
+
+### 두 번째 커밋 — 정리 내역
+
+Step 3~5의 수정·삭제를 원본 커밋과 분리해 **한 커밋**으로 묶는다. "원본 → 무엇이 제거됐는지"가 diff 한 번으로 보인다.
+
+```bash
+git add -A
+git commit -m "chore: 불필요한 파일·설정 삭제"
 ```
 
 ---
