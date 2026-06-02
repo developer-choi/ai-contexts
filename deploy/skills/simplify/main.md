@@ -28,6 +28,7 @@ Plan Mode로 계획서를 작성한다.
 - `EnterPlanMode` 도구로 plan mode 진입
 - 코드베이스 탐색 및 체계적으로 계획 작성
 - `ExitPlanMode`로 사용자 승인 요청
+- `EnterPlanMode`/`ExitPlanMode`가 없는 환경이면 일반 텍스트로 계획서를 작성해 사용자 승인을 받는다
 
 **계획 작성 절차** (적용 원칙: SKILL.md `[CRITICAL] 지킬 원칙`)
 1. **기능·서브시스템 전수 나열** — 이 대상의 기능/하위 컴포넌트/서브시스템/prop 그룹을 빠짐없이 적는다(제거 후보 목록). 구조적/기계적 패턴(Scope, forwardRef, 합성 헬퍼 등)도 별도로 적는다.

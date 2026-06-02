@@ -72,6 +72,9 @@ git push -u origin main
 
 남길 필드: `name`, `version`, `description`, `private: true`
 
+- 원본에 `version`이 없으면 `0.0.0`. monorepo 루트처럼 `name`이 `root` 등 라이브러리명과 무관하면 `simplified-<라이브러리명>`으로 교정.
+- 목록의 파일이 원본에 없으면(`CHANGELOG.md` 부재 등) 그 항목은 건너뛴다.
+
 ---
 
 ## Step 4. 불필요한 파일 정리
@@ -84,7 +87,9 @@ git push -u origin main
 - **배포 설정**: `.npmrc`, `.npmignore`, `publish.sh` 등
 - **기여 가이드**: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` 등
 - **설정 파일 중 불필요한 것**: `.editorconfig`, `.prettierrc`, `renovate.json` 등
-- **예제/데모**: `examples/`, `demo/` 등
+- **린트/포맷**: `eslint.config.*`, `.eslintrc*`, `prettier.config.*`, `knip.json` 등
+- **모노레포·빌드 오케스트레이션**: `pnpm-workspace.yaml`, `lerna.json`, `nx.json`/`.nx/`, `turbo.json`, 루트 `tsconfig.json`, 루트 `scripts/` 등
+- **예제/데모/통합샘플**: `examples/`, `demo/`, `integrations/` 등
 
 **주의**: 다음은 삭제하지 마세요:
 - 소스 코드 (`src/`, `packages/` 등)
@@ -104,6 +109,8 @@ git push -u origin main
 ---
 
 ## Step 6. 프로젝트 구조 세팅
+
+원본 라이브러리가 자체 `docs/`를 두고 있으면 삭제하지 말고 유지한다(코드 이해 참고용). 새 분석 문서(`codebase-structure.md`·`analysis-queue.md`·`[카테고리]/`)는 같은 `docs/` 아래에 함께 둔다 — 원본 문서와 공존시킨다.
 
 SIMPLIFY_TARGET의 기본 폴더 구조를 만듭니다:
 
