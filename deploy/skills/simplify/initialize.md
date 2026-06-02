@@ -4,12 +4,7 @@
 
 ---
 
-## 핵심 원칙
-
-**⚠️ 이 프로젝트는 코드 읽기 전용입니다**:
-- **테스트/빌드 실행 금지**: `yarn test`, `tsc`, `npm run build` 등 실행하지 마세요
-- **의존성 설치 불필요**: `yarn install`, `npm install` 실행하지 마세요
-- **목적**: 소스 코드만 읽고 이해하는 것
+이 프로젝트는 **코드 읽기 전용**이다 (SKILL.md `작업 공통 규칙`). 아래 셋업은 그 전제에서 실행/빌드/배포 관련 설정을 걷어내는 작업이다.
 
 ---
 
@@ -61,27 +56,21 @@ git push -u origin main
 
 ### package.json
 
-**⚠️ 중요**: 이 프로젝트는 코드만 읽으므로 실행/빌드/테스트 관련 설정을 모두 제거합니다.
+실행/빌드/테스트 관련 설정을 모두 제거한다:
 
-학습용 프로젝트이므로 실행에 필요한 설정을 제거합니다:
+- `scripts` — 빌드/테스트/린트 등 모든 스크립트
+- `devDependencies` — 전부
+- `dependencies` — 전부
+- 배포 관련 필드 — `publishConfig`, `repository`, `bugs`, `homepage`, `funding`, `engines` 등
+- 빌드 관련 필드 — `main`, `module`, `exports`, `types`, `files`, `sideEffects` 등
 
-- `scripts` — 빌드/테스트/린트 등 모든 스크립트 제거 (실행하지 않으므로)
-- `devDependencies` — 전부 제거
-- `dependencies` — 전부 제거 (코드만 읽으므로 설치 불필요)
-- 배포 관련 필드 — `publishConfig`, `repository`, `bugs`, `homepage`, `funding`, `engines` 등 제거
-- 빌드 관련 필드 — `main`, `module`, `exports`, `types`, `files`, `sideEffects` 등 제거
-
-남겨야 할 필드: `name`, `version`, `description`, `private: true`
-
-**이유**: `yarn install`, `yarn test`, `tsc` 등을 실행할 일이 없으므로 관련 설정 제거
+남길 필드: `name`, `version`, `description`, `private: true`
 
 ---
 
 ## Step 4. 불필요한 파일 정리
 
-학습에 불필요한 내용을 모두 간소화하는 것이 목적이므로, 관련 없는 파일을 모두 삭제합니다.
-
-이 프로젝트는 실행할 필요 없이 코드만 읽기 때문에 lock file이나 node_modules도 불필요합니다.
+학습에 무관한 파일을 삭제한다. lock file·node_modules도 불필요하다.
 
 ### 삭제할 파일 예시
 
@@ -182,32 +171,7 @@ simplified-[라이브러리명]/
 
 ## Step 9. 첫 간소화로 방향 잡기
 
-**가장 작고 단순한 대상 하나를 먼저 간소화하면서, 이 프로젝트의 간소화 방향을 잡으세요.**
+**가장 작고 단순한 대상**(의존성 적고, 코드 짧고, 독립적인 것) 하나를 골라 `main.md` 프로세스대로 처음부터 끝까지 수행한다. 큐 읽기·그룹 추가·문서/목록 갱신 절차는 `main.md`를 따른다.
 
-### 작업 전
-
-1. `docs/analysis-queue.md` 읽기
-2. 라이브러리에서 **가장 작고 단순한 대상** 하나 선택
-   - 의존성이 적고, 코드가 짧고, 독립적인 것
-3. **해당 대상과 관련된 전체 그룹**을 "다음 분석 목록"에 추가
-   - 예: `Box` 선택 → Box 관련 파일들 전부 그룹으로 추가
-   - 이유: 관련된 것들을 연속으로 분석하면 효율적, 매번 찾지 않아도 됨
-
-### 작업 진행
-
-4. `main.md` 프로세스대로 처음부터 끝까지 수행
-5. 이 과정에서 자연스럽게 파악되는 것들:
-   - 이 라이브러리에서 반복적으로 제거할 패턴이 뭔지
-   - 어떤 것들은 유지해야 하는지
-   - 적절한 커밋 단위가 어느 정도인지
-
-### 작업 후
-
-6. 파악한 내용을 SIMPLIFY_TARGET `instructions/keep-patterns.md`, `simplification-patterns.md`에 반영
-   - `simplification-patterns.md`는 **다른 대상에도 적용될 반복 패턴**만 기록
-   - 이 대상에만 특화된 내용은 기록하지 않음
-7. **`docs/analysis-queue.md` 업데이트**:
-   - 완료한 대상 체크 → "완료" 섹션으로 이동
-   - 다음 그룹 추가 (필요시)
-8. 이후 대상들은 이 방향을 기반으로 진행
+이 첫 작업은 **방향 잡기**가 목적이다 — 이 라이브러리에서 반복 제거할 패턴, 유지할 대상, 적절한 커밋 단위를 파악한다. 파악한 내용은 `main.md` Step 6 절차대로 패턴 문서에 반영하고, 이후 대상은 그 방향을 기반으로 진행한다.
 
