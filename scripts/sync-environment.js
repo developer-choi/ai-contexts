@@ -3,6 +3,13 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const {
+  upsertManagedBlock,
+  writeWholeFile,
+  queryRegValue,
+  setRegValue,
+  runs,
+} = require('./environment-lib');
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -107,55 +114,22 @@ function syncCmdAutorun(state) {
     return;
   }
 
-  writeWholeFile(cmdAutorunFile, cmdAutorunBody);
+  const status = writeWholeFile(cmdAutorunFile, cmdAutorunBody);
+  console.log({ created: `Created ${cmdAutorunFile}`, updated: `Updated ${cmdAutorunFile}`, unchanged: `Already up to date: ${cmdAutorunFile}` }[status]);
 
   const desired = `@${cmdAutorunFile}`;
-  const current = queryAutoRun();
+  const current = queryRegValue(cmdProcessorKey, 'AutoRun');
 
   if (current === desired) {
     state.cmdAutorunRegSetByAiContexts = true;
     console.log(`AutoRun already registered as ${desired}`);
   } else if (!current) {
-    childProcess.execFileSync(
-      'reg',
-      ['add', cmdProcessorKey, '/v', 'AutoRun', '/t', 'REG_SZ', '/d', desired, '/f'],
-      { stdio: 'ignore' }
-    );
+    setRegValue(cmdProcessorKey, 'AutoRun', desired);
     state.cmdAutorunRegSetByAiContexts = true;
     console.log(`Registered AutoRun = ${desired}`);
   } else {
     console.warn(`AutoRun is already set to: ${current}`);
     console.warn(`Skipping registration of ${desired}`);
-  }
-}
-
-function writeWholeFile(file, body) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-
-  if (fs.existsSync(file)) {
-    if (fs.readFileSync(file, 'utf8') === body) {
-      console.log(`Already up to date: ${file}`);
-      return;
-    }
-    fs.copyFileSync(file, `${file}.bak-${timestamp()}`);
-    fs.writeFileSync(file, body, 'utf8');
-    console.log(`Updated ${file}`);
-    return;
-  }
-
-  fs.writeFileSync(file, body, 'utf8');
-  console.log(`Created ${file}`);
-}
-
-function queryAutoRun() {
-  try {
-    const out = childProcess.execFileSync('reg', ['query', cmdProcessorKey, '/v', 'AutoRun'], {
-      encoding: 'utf8',
-    });
-    const match = out.match(/AutoRun\s+REG_\w+\s+(.+)/);
-    return match ? match[1].trim() : '';
-  } catch {
-    return '';
   }
 }
 
@@ -213,46 +187,6 @@ function getPowerShellProfile(command, fallback) {
   }
 }
 
-function upsertManagedBlock(file, options) {
-  const managed = `${options.start}\n${options.body.trim()}\n${options.end}\n`;
-  const markerPattern = new RegExp(`${escapeRegExp(options.start)}[\\s\\S]*?${escapeRegExp(options.end)}\\r?\\n?`);
-
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-
-  if (!fs.existsSync(file)) {
-    fs.writeFileSync(file, managed, 'utf8');
-    console.log(`Created ${file}`);
-    return;
-  }
-
-  let existing = fs.readFileSync(file, 'utf8');
-  const original = existing;
-  const patterns = [markerPattern, ...(options.legacyPatterns || [])];
-  const matchingPattern = patterns.find((pattern) => pattern.test(existing));
-
-  if (matchingPattern) {
-    existing = existing.replace(matchingPattern, managed);
-  } else {
-    for (const linePattern of options.legacyLinePatterns || []) {
-      existing = existing
-        .split(/\r?\n/)
-        .filter((line) => !linePattern.test(line.trim()))
-        .join('\n');
-      if (existing && !existing.endsWith('\n')) existing += '\n';
-    }
-    existing = `${existing}${existing.endsWith('\n') || existing.length === 0 ? '' : '\n'}${managed}`;
-  }
-
-  if (existing === original) {
-    console.log(`Already up to date: ${file}`);
-    return;
-  }
-
-  fs.copyFileSync(file, `${file}.bak-${timestamp()}`);
-  fs.writeFileSync(file, existing, 'utf8');
-  console.log(`Updated ${file}`);
-}
-
 function getGlobalGitExcludesFile() {
   try {
     return childProcess.execFileSync('git', ['config', '--global', '--get', 'core.excludesFile'], {
@@ -260,15 +194,6 @@ function getGlobalGitExcludesFile() {
     }).trim();
   } catch {
     return '';
-  }
-}
-
-function runs(command, args) {
-  try {
-    childProcess.execFileSync(command, args, { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
   }
 }
 
@@ -289,24 +214,6 @@ function writeState(state) {
 
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(stateFile, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
-}
-
-function timestamp() {
-  const now = new Date();
-  const pad = (value) => String(value).padStart(2, '0');
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    '-',
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join('');
-}
-
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 main();

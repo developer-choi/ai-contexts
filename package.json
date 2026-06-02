@@ -6,6 +6,7 @@
   "scripts": {
     "sync:environment": "node scripts/sync-environment.js",
     "unsync:environment": "node scripts/unsync-environment.js",
+    "verify:environment": "node scripts/verify-environment.js",
     "sync:system": "node scripts/sync-system.js",
     "unsync:system": "node scripts/unsync-system.js",
     "sync:local-skills": "node scripts/sync-local-skills.js",

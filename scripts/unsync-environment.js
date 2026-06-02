@@ -3,6 +3,13 @@ const childProcess = require('child_process');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const {
+  removeManagedBlocks,
+  removeIfIdentical,
+  queryRegValue,
+  deleteRegValue,
+  runs,
+} = require('./environment-lib');
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -78,11 +85,9 @@ function unsyncCmdAutorun(state) {
   }
 
   if (state.cmdAutorunRegSetByAiContexts) {
-    const current = queryAutoRun();
+    const current = queryRegValue(cmdProcessorKey, 'AutoRun');
     if (current === `@${cmdAutorunFile}`) {
-      childProcess.execFileSync('reg', ['delete', cmdProcessorKey, '/v', 'AutoRun', '/f'], {
-        stdio: 'ignore',
-      });
+      deleteRegValue(cmdProcessorKey, 'AutoRun');
       console.log('Removed AutoRun registration');
     } else {
       console.log(`AutoRun changed since sync (${current || 'absent'}); leaving as is`);
@@ -90,31 +95,12 @@ function unsyncCmdAutorun(state) {
     delete state.cmdAutorunRegSetByAiContexts;
   }
 
-  if (!fs.existsSync(cmdAutorunFile)) {
-    console.log(`Already absent: ${cmdAutorunFile}`);
-    return;
-  }
-
-  if (fs.readFileSync(cmdAutorunFile, 'utf8') !== cmdAutorunBody) {
-    console.log(`Modified outside ai-contexts; leaving ${cmdAutorunFile}`);
-    return;
-  }
-
-  fs.copyFileSync(cmdAutorunFile, `${cmdAutorunFile}.bak-${timestamp()}`);
-  fs.rmSync(cmdAutorunFile, { force: true });
-  console.log(`Removed ${cmdAutorunFile}`);
-}
-
-function queryAutoRun() {
-  try {
-    const out = childProcess.execFileSync('reg', ['query', cmdProcessorKey, '/v', 'AutoRun'], {
-      encoding: 'utf8',
-    });
-    const match = out.match(/AutoRun\s+REG_\w+\s+(.+)/);
-    return match ? match[1].trim() : '';
-  } catch {
-    return '';
-  }
+  const status = removeIfIdentical(cmdAutorunFile, cmdAutorunBody);
+  console.log({
+    removed: `Removed ${cmdAutorunFile}`,
+    modified: `Modified outside ai-contexts; leaving ${cmdAutorunFile}`,
+    absent: `Already absent: ${cmdAutorunFile}`,
+  }[status]);
 }
 
 function uninstallPowerShell7(state) {
@@ -140,30 +126,6 @@ function uninstallPowerShell7(state) {
     delete state.powerShell7InstalledByAiContexts;
   } catch (error) {
     console.warn(`PowerShell 7 uninstall skipped or failed: ${error.message}`);
-  }
-}
-
-function removeManagedBlocks(file, patterns) {
-  if (!fs.existsSync(file)) {
-    console.log(`Already absent: ${file}`);
-    return;
-  }
-
-  const existing = fs.readFileSync(file, 'utf8');
-  const next = patterns.reduce((content, pattern) => content.replace(pattern, ''), existing);
-
-  if (next === existing) {
-    console.log(`No ai-contexts block found: ${file}`);
-    return;
-  }
-
-  fs.copyFileSync(file, `${file}.bak-${timestamp()}`);
-  if (next.trim().length === 0) {
-    fs.rmSync(file, { force: true });
-    console.log(`Removed empty file: ${file}`);
-  } else {
-    fs.writeFileSync(file, next, 'utf8');
-    console.log(`Updated ${file}`);
   }
 }
 
@@ -206,15 +168,6 @@ function getGlobalGitExcludesFile() {
   }
 }
 
-function runs(command, args) {
-  try {
-    childProcess.execFileSync(command, args, { stdio: 'ignore' });
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function readState() {
   if (!fs.existsSync(stateFile)) return {};
   try {
@@ -233,20 +186,6 @@ function writeState(state) {
 
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(stateFile, `${JSON.stringify(state, null, 2)}\n`, 'utf8');
-}
-
-function timestamp() {
-  const now = new Date();
-  const pad = (value) => String(value).padStart(2, '0');
-  return [
-    now.getFullYear(),
-    pad(now.getMonth() + 1),
-    pad(now.getDate()),
-    '-',
-    pad(now.getHours()),
-    pad(now.getMinutes()),
-    pad(now.getSeconds()),
-  ].join('');
 }
 
 main();
