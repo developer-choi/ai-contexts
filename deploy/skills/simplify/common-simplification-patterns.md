@@ -2,6 +2,20 @@
 
 > 라이브러리 종류와 무관하게 반복적으로 제거하는 범용 패턴 모음
 
+## 패턴 목록
+
+- 주변 기능/서브시스템 통째 제거 — 기능(capability) 단위 제거 + 부분 해부
+- Disable/Enable Props 제거
+- 복잡한 Ref 처리 제거
+- 브라우저 호환성 코드 제거
+- Interval/Polling 로직 제거
+- 특수 케이스 처리 제거
+- 복잡한 알고리즘 단순화
+- 유틸리티 함수 제거
+- Deprecated Props 제거
+- 메타데이터 제거 (PropTypes·displayName·defaultProps)
+- SSR 마운트 안전성 패턴 제거
+
 ---
 
 ## 주변 기능/서브시스템 통째 제거
