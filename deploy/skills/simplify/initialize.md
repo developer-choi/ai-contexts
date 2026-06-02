@@ -8,43 +8,51 @@
 
 ---
 
-## Step 1. 사용자에게 초기 라이브러리 세팅 요청
+## Step 1. 대상 라이브러리 shallow clone
 
-1. 라이브러리 선정
-2. shallow clone (`git clone --depth 1`)
-3. 프로젝트명과 package.json의 name을 `simplified-[기존이름]`으로 변경 (예: `simplified-material-ui`)
+사용자와 대상 라이브러리를 정한 뒤, 작업 폴더(예: `~/WebstormProjects/simplify/`) 하위에 `simplified-<라이브러리명>`으로 shallow clone한다.
+
+```bash
+git clone --depth 1 <repo-url> simplified-<라이브러리명>
+```
+
+- package.json의 `name`도 `simplified-<라이브러리명>`으로 변경한다 (예: `simplified-material-ui`).
 
 ---
 
-## Step 2. 개인 레포 생성 및 Push
+## Step 2. git 재초기화 + 개인 계정 로컬 config
 
-shallow clone된 레포는 git 히스토리가 불완전하여 push가 실패합니다.
-git을 초기화한 뒤 개인 레포에 push합니다.
-
-### 절차
+shallow clone은 히스토리가 불완전하므로 git을 재초기화한다.
 
 ```bash
-# 1. 기존 git 히스토리 삭제
 rm -rf .git
-
-# 2. git 초기화 및 커밋
 git init
 git add -A
 git commit -m "initial commit"
 git branch -M main
+```
 
-# 3. 개인 레포 생성 (gh CLI)
-gh repo create [사용자명]/simplified-[라이브러리명] --public
+### 개인 계정으로 로컬 git 정체성 설정
 
-# 4. remote 연결 및 push
-git remote add origin https://github.com/[사용자명]/simplified-[라이브러리명].git
+글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등), 이 레포의 **로컬** config를 개인 계정으로 설정한다. 학습용 레포가 회사 계정으로 커밋되는 것을 막기 위함이다.
+
+```bash
+git config user.name "Yu Jin Choe"
+git config user.email "forworkchoe@gmail.com"
+```
+
+### (선택) 개인 GitHub 계정으로 push
+
+푸시가 필요하면 `gh auth status`로 인증이 **개인 계정**인지 먼저 확인한 뒤 진행한다.
+
+```bash
+gh repo create <개인 GitHub 핸들>/simplified-<라이브러리명> --public
+git remote add origin https://github.com/<개인 GitHub 핸들>/simplified-<라이브러리명>.git
 git push -u origin main
 ```
 
-### 주의사항
-
-- `git fetch --unshallow`로 전체 히스토리를 복구하는 방법도 있지만, 학습용 프로젝트이므로 히스토리 초기화가 더 깔끔합니다.
-- `gh` CLI가 설치되어 있지 않으면 `winget install GitHub.cli`로 설치 후 `gh auth login`으로 인증합니다.
+- 토큰을 remote URL에 박지 않는다 — credential helper(`git config --global credential.helper manager`)를 사용한다.
+- `gh` CLI 미설치 시 `winget install GitHub.cli` 후 `gh auth login`으로 인증.
 
 ---
 
