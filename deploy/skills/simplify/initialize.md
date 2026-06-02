@@ -90,6 +90,7 @@ git push -u origin main
 - **린트/포맷**: `eslint.config.*`, `.eslintrc*`, `prettier.config.*`, `knip.json` 등
 - **모노레포·빌드 오케스트레이션**: `pnpm-workspace.yaml`, `lerna.json`, `nx.json`/`.nx/`, `turbo.json`, 루트 `tsconfig.json`, 루트 `scripts/` 등
 - **예제/데모/통합샘플**: `examples/`, `demo/`, `integrations/` 등
+- **라이브러리 자체 문서**: `docs/`(API 레퍼런스·가이드·introduction 등), `website/`, `site/` 등 — 소스가 아닌 문서 cruft이므로 README와 같은 범주로 삭제. 분석 문서는 Step 6에서 빈 `docs/`에 새로 만든다.
 
 **주의**: 다음은 삭제하지 마세요:
 - 소스 코드 (`src/`, `packages/` 등)
@@ -110,7 +111,7 @@ git push -u origin main
 
 ## Step 6. 프로젝트 구조 세팅
 
-원본 라이브러리가 자체 `docs/`를 두고 있으면 삭제하지 말고 유지한다(코드 이해 참고용). 새 분석 문서(`codebase-structure.md`·`analysis-queue.md`·`[카테고리]/`)는 같은 `docs/` 아래에 함께 둔다 — 원본 문서와 공존시킨다.
+원본 라이브러리의 `docs/`는 Step 4에서 삭제했으므로, `docs/`는 **분석 문서 전용**이다. 분석 문서(`codebase-structure.md`·`analysis-queue.md`·`[카테고리]/`)를 새로 만든다.
 
 SIMPLIFY_TARGET의 기본 폴더 구조를 만듭니다:
 
