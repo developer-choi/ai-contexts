@@ -122,6 +122,8 @@ cd ../<AC>-scw-bench
 | 라운드 무한 반복 | "0건 수렴까지" 룰 글자대로 따라 5+ 라운드 → LLM 비결정성에 묻힘, 시간 낭비 | 3~4 라운드에서 정체면 description 외 요인(scw 본문 구조, eval set 품질) 재검토 |
 | eval set 작성 시 노골적 인용 | description에 eval 쿼리 표현 그대로 박아넣음 (overfitting) → 측정 과정에선 통과해도 실제 사용성 X | 의도 표현으로 일반화. eval 쿼리는 표본일 뿐 |
 | Anthropic 표준 가정 무비판 신뢰 | "skill-creator 플러그인이 표준이라 동작할 것" → 6시간 후 broken 확인 | GitHub 이슈/PR 먼저 검색. 표준 도구도 broken 가능 |
+| non-trigger run이 cwd 오염 | 트리거 안 되는 액션형 쿼리는 `claude -p`가 본문 작업까지 수행 → repo 루트에 파일 생성·`git add`까지 함(early-kill은 트리거 시에만 발동). 측정 후 stray 산출물 잔존 | 글로벌 스킬 측정은 빈 scratch 디렉토리에서 실행(`find_project_root`가 cwd로 fallback). 로컬 스킬은 in-repo 불가피하니 측정 직후 `git status`로 stray 파일·staging 점검·정리 필수 |
+| disclaimer만으로 자동 트리거 차단 시도 | description에 "자동 트리거하지 않는다"를 붙여도 도메인 의미 매칭(bait)이 남으면 강매칭 쿼리에서 누설(실측 0.30) | 명시 호출 전용 스킬은 도메인 키워드를 description에서 제거하고 제약만 남긴다(bait 제거). 실측 0.30→0.00 수렴 |
 
 ## Limitations
 
