@@ -119,19 +119,19 @@ KA 기반 변환이므로 Phase 3의 KA Maintain 완료 후 실행한다. KQ는 
 
 3. **dry-run 보고**: 후보 리스트를 사용자에게 그룹화하여 제출.
    - **NEW** (KQ에 없음 — 첫 변환 대상)
-   - **CHANGED** (`lastCommitDate`가 직전 회차 `state.json.KQ.refreshedAt` 이후)
+   - **CHANGED** (`lastCommitDate`가 직전 회차 `state.json.KQ.refreshedAt` 이후). `lastCommitDate`는 날짜 단위라 refreshedAt와 같은 날이면 intra-day 변경(같은 날 더 늦은 시각 커밋)을 놓친다. 같은 날인 후보는 커밋 시각·`diff`로 OA·질문 실변경을 확인해 판정한다
    - **UNCHANGED** (변경 없음, 재변환 불필요)
    - **SKIPPED** (선정 기준 미달 — `skipped.reason`별로 분리)
    - 출처별 추가 분리: `official` / `google-doc` / `unverified` / 미상
 
-4. **사용자 confirm**: 사용자가 변환할 항목 결정. confirm된 셋을 candidates JSON에서 필터링하여 KQ용 dispatch에 박는다.
+4. **사용자 confirm**: 사용자에게 dry-run 그룹을 보고하고 회차 진행 승인을 받는다. **변환은 항상 전체 candidates JSON으로 실행한다 — 일부만 필터링해 넘기지 않는다.** `parse-knowledge.mts`가 passing 전체를 재생성하고 `topics.json`을 전면 재작성하며 candidates 슬러그에 없는 `generated/*.json`을 orphan으로 자동 삭제하므로, 필터링하면 confirm에서 빠진 기존 퀴즈가 삭제된다. NEW/CHANGED/UNCHANGED 분류는 사용자 보고 전용이고 변환 입력을 가르지 않는다.
 
 5. **dispatch 발행**: md를 작성한다.
    - `backlog/full-refresh/dispatch/kq-update-quiz.md` — `KA_DEPLOY_SHA` + candidates 경로 명시
 
    dispatch md에는 다음을 박는다:
    - 잠금 SHA (`KA_DEPLOY_SHA`)
-   - 필터링된 candidates JSON 경로 (절대 경로)
+   - 전체 candidates JSON 경로 (절대 경로)
    - 실행 명령 예시 (`npm run parse -- --candidates <path>`)
    - 결과 md 작성 경로 (`<dispatch>-result.md`)
 
@@ -145,7 +145,7 @@ Deploy 스킬·스크립트(`scripts/list-candidates.mts`, `scripts/parse-knowle
 
 ### state.json 업데이트
 
-Phase 3~5까지 완료된 프로젝트의 `hash`와 `refreshedAt`을 최신 커밋으로 갱신하고, AC 백로그 브랜치에 커밋한다. 이전 회차 커밋들과 squash로 합친다. Maintain 스킬이 없는 프로젝트는 매 실행마다 자동으로 최신 커밋 갱신.
+Phase 3~5까지 완료된 프로젝트의 `hash`와 `refreshedAt`을 **그 회차가 실제 처리한 SHA**로 갱신하고, AC 백로그 브랜치에 커밋한다. 이전 회차 커밋들과 squash로 합친다. 처리 SHA란 Maintain 검증을 돌린 시점, Deploy는 `KA_DEPLOY_SHA`(잠금 SHA)다. **세션 중 잠금 이후 새 커밋이 쌓였으면 최신 HEAD가 아니라 처리 SHA를 기록한다** — 그 추가분이 다음 회차 범위(`<hash>..HEAD`)에 남아 처리되도록. Maintain 스킬이 없어 잠금이 없는 프로젝트(MP 등)는 최신 커밋으로 자동 전진한다.
 
 ## 커밋 단위
 
