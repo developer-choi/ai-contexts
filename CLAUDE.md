@@ -107,6 +107,7 @@ md 파일 수정 직후:
   - `tier-{N}/index.md`, `tier-{N}/{item}.md` (파일명에 프로젝트 접두사 없이)
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
+  - 나중에 읽을(read-later) 참고 링크는 `{topic}/index.md`의 `## References` 섹션에 적재한다 (사고 흔적 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별 topic을 만들어 모은다
 - `backlog/roadmaps/` — 주제별 **학습 로드맵**. 사용자가 앞으로 학습할 분량이 많은 주제를 순서대로 쌓아두는 곳 (예: monorepo 단계별 학습 코스)
   - `{topic}.md` — 학습 순서·전체 개요 (필수)
   - `{topic}/step{N}-*.md` — 단계가 여러 개로 쪼개진 경우의 step 본문 (선택)

@@ -278,6 +278,10 @@ scope: global (deploy/ 전체 스캔)
 
 `backlog/topics/{topic}/index.md`는 해당 주제 내 누적 subtopic 인덱스로 둔다.
 
+#### read-later 참고 링크
+
+나중에 읽을 글·문서 링크는 `{topic}/index.md`의 `## References` 섹션에 적재한다. 아직 안 읽은 링크는 사고 흔적이 아니므로 subtopic 본문과 섞지 않고 References로 분리한다. 코드 주제가 아닌 글(AI·LLM 트렌드 등)도 주제별 topic을 만들어 모은다. `[제목](URL) — 한 줄 요약` 형식으로 적고, 결이 다르면 References 하위 소제목으로 분류한다.
+
 ---
 
 ## 리뷰 모드
