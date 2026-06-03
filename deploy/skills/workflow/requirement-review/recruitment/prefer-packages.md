@@ -12,7 +12,7 @@
 
 | 관심사 | 패키지 | 비고 |
 |--------|--------|------|
-| UI | @radix-ui/themes, @radix-ui/react-icons | |
+| UI | radix-ui (primitives), @radix-ui/react-icons | |
 | 데이터 페칭 | @tanstack/react-query | devDep: @tanstack/eslint-plugin-query |
 | 오버레이 | overlay-kit | |
 | 폼 | react-hook-form | |
