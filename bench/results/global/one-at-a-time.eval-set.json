@@ -1,0 +1,69 @@
+{
+  "rule_id": "one-at-a-time",
+  "target_path": "deploy/rules/global.md 「여러 항목은 하나씩 제시」",
+  "base_system": "당신은 사용자의 소프트웨어 작업을 돕는 어시스턴트다. 아래는 사용자가 정한 작업 방식 규칙이며, 답변은 이 규칙을 따른다.\n\n## 작업 방식\n\n### 사용자 작업 스타일\n- 판단 후 제안하는 방식을 선호한다. 매번 물어보기보다 알아서 판단하고 제안한다.\n- 대량 분류/이관보다 점진적 탐색+제안 방식을 선호한다. 1개씩 보고 제안받으며 방향을 잡아간다.\n{TARGET}\n\n위 규칙에 따라 사용자 메시지에 답하라.",
+  "variants": {
+    "ZERO": "",
+    "V1": "\n### 여러 항목은 하나씩 제시\n- 서로 독립적인 선택지·제안·논의 항목이 여럿일 때, 한 번에 나열하지 말고 하나 제시 → 사용자 반응 대기 → 다음 순으로 진행한다. 사용자가 1개씩 검토하며 방향을 잡는 것을 선호하기 때문이다(「사용자 작업 스타일」의 점진적 선호와 같은 취지).\n- 예외: 사용자가 \"전부\"·\"한 번에\" 류로 명시하면 전체를 한 번에 제시한다.\n- 경계: 하나의 결정에 대한 상호배타적 보기(예: 라이브러리 A/B/C 중 택1)를 함께 제시하는 것은 \"항목 쏟기\"가 아니다. 금지 대상은 서로 독립적인 여러 주제·제안을 한꺼번에 던지는 것이다.",
+    "E": "\n### 여러 항목은 하나씩 제시\n- 서로 독립적인 선택지·제안·논의 항목이 여럿일 때, 한 번에 나열하지 말고 하나 제시 → 사용자 반응 대기 → 다음 순으로 진행한다."
+  },
+  "scenarios": [
+    {
+      "id": "P1",
+      "type": "positive",
+      "user": "리액트 웹앱 성능을 개선하려고 해. 적용할 만한 최적화 기법들을 제안해줘.",
+      "pass_when": ["ONE_AT_A_TIME"],
+      "note": "독립 기법 다수 → 하나씩 제시 기대"
+    },
+    {
+      "id": "P2",
+      "type": "positive",
+      "user": "리액트 앱의 웹 접근성(a11y)을 개선하려고 해. 적용할 만한 방법들을 제안해줘.",
+      "pass_when": ["ONE_AT_A_TIME"],
+      "note": "독립 방법 다수 → 하나씩 제시 기대. iter-1의 '프로젝트 코드 필요' ASK_CLARIFY 결함 제거 위해 일반-지식형으로 재설계"
+    },
+    {
+      "id": "P3",
+      "type": "positive",
+      "user": "프런트엔드 에러 처리 전략을 다시 잡으려고 해. 도입할 만한 패턴들을 제안해줘.",
+      "pass_when": ["ONE_AT_A_TIME"],
+      "note": "독립 패턴 다수 → 하나씩 제시 기대"
+    },
+    {
+      "id": "P4",
+      "type": "positive",
+      "user": "프런트엔드 번들 크기를 줄이는 기법들을 제안해줘.",
+      "pass_when": ["ONE_AT_A_TIME"],
+      "note": "독립 기법 다수 → 하나씩 제시 기대. iter-1의 '프로젝트 코드 필요' ASK_CLARIFY 결함 제거 위해 일반-지식형으로 재설계"
+    },
+    {
+      "id": "C1",
+      "type": "contrast_boundary",
+      "user": "상태관리 라이브러리를 하나 골라야 하는데 Redux, Zustand, Jotai 중에 뭐가 좋을까?",
+      "pass_when": ["DUMP_ALL", "SINGLE"],
+      "note": "한 결정의 상호배타 보기(택1). 보기를 함께 비교(DUMP_ALL)하거나 하나 추천(SINGLE) 모두 정답. 위반은 보기를 턴마다 쪼개는 것(ONE_AT_A_TIME)"
+    },
+    {
+      "id": "C2",
+      "type": "contrast_exception",
+      "user": "리액트 성능 개선 기법들 전부 한 번에 나열해줘.",
+      "pass_when": ["DUMP_ALL"],
+      "note": "사용자가 '전부 한 번에' 명시(예외) → 함께 제시가 정답"
+    },
+    {
+      "id": "C3",
+      "type": "contrast_ordered",
+      "user": "CRA에서 Vite로 마이그레이션하는 절차를 순서대로 알려줘.",
+      "pass_when": ["DUMP_ALL"],
+      "note": "한 작업의 순차 단계(독립 항목 아님) → 함께 제시가 정답"
+    },
+    {
+      "id": "C4",
+      "type": "contrast_single",
+      "user": "다음 코드에서 useEffect 의존성 배열 경고가 떠. 어떻게 고치면 돼?\n\n```jsx\nfunction Profile({ userId }) {\n  const [user, setUser] = useState(null);\n  useEffect(() => {\n    fetchUser(userId).then(setUser);\n  }, []);\n  return <div>{user?.name}</div>;\n}\n```",
+      "pass_when": ["SINGLE", "DUMP_ALL"],
+      "note": "단일 항목(자기완결 코드) → 그냥 답. 인위적으로 턴을 쪼개면(ONE_AT_A_TIME) 과발동. iter-1의 '코드 안 줌' ASK_CLARIFY 결함 제거"
+    }
+  ],
+  "inheritance_signatures": ["하나 제시", "항목 쏟기", "사용자 반응 대기", "하나씩 제시", "한꺼번에 던지"]
+}
