@@ -109,7 +109,7 @@ md 파일 수정 직후:
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
   - 나중에 읽을(read-later) 참고 링크는 `{topic}/index.md`의 `## References` 섹션에 적재한다 (사고 흔적 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별 topic을 만들어 모은다
 - `backlog/articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (tier·Ready 게이트·리뷰/실행 모드 미적용 — topics/와 같은 비-트래커)
-  - `{slug}.md`, 재료가 커지면 `{slug}/` 디렉토리로 승격. 기획 목록은 `articles/index.md`(선택)
+  - `{slug}.md`, 재료가 커지면 `{slug}/` 디렉토리로 승격. 인덱스 파일은 두지 않는다(비-트래커 + 발행 시 삭제 → 순배럴)
   - topics/(내부 사고 흔적)와 구분: 발행 의도가 있는 외부 공개용 재료다. 발행되면 파일을 삭제한다 (발행 이력 미보존)
 - `backlog/roadmaps/` — 주제별 **학습 로드맵**. 사용자가 앞으로 학습할 분량이 많은 주제를 순서대로 쌓아두는 곳 (예: monorepo 단계별 학습 코스)
   - `{topic}.md` — 학습 순서·전체 개요 (필수)
