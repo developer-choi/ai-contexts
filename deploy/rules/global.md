@@ -191,6 +191,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - DP = dsa-playground
 - KA = knowledge-archive
 - MP = monorepo-playground
+- PFM = plan-for-myself
 - DC = developer-choi (`~/WebstormProjects/my-else/developer-choi`)
 - PP = private-playground (`~/WebstormProjects/my-else/private-playground`)
 - TP = test-playground
