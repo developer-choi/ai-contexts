@@ -5,7 +5,10 @@ function readPayload() {
 }
 
 function getCommand(payload) {
-  return payload.tool_input && typeof payload.tool_input.command === "string" ? payload.tool_input.command : "";
+  if (!payload.tool_input) return "";
+  if (typeof payload.tool_input.command === "string") return payload.tool_input.command;
+  if (typeof payload.tool_input.CommandLine === "string") return payload.tool_input.CommandLine;
+  return "";
 }
 
 function getCwd(payload) {
