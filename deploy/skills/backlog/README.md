@@ -12,17 +12,18 @@
 
 ## 영역 분리
 
-백로그는 세 영역으로 나뉩니다.
+백로그는 네 영역으로 나뉩니다.
 
 - `backlog/this/` — AC 자체 작업 (스킬·룰·컨텍스트). tier·Ready 게이트 적용.
-- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 작업. tier·Ready 게이트 적용.
+- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 작업. tier 없음, Ready 게이트 미적용.
 - `backlog/topics/{topic}/` — 코드 주제(react, error, zod 등) 사고 흔적. tier 없음, Ready 게이트 미적용.
+- `backlog/articles/{slug}/` — 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
 
-`this`와 `projects`는 할 일 트래커이고, `topics`는 사고 흔적입니다.
+`this`는 할 일 트래커이고, `projects`·`topics`·`articles`는 비-트래커입니다. `topics`는 내부 사고 흔적, `articles`는 외부 발행용 재료입니다.
 
 ## Ready 게이트와 critic
 
-`this`·`projects`의 항목은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 `[ready]` 라벨이 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동)을 사용자 대신 검증해 라벨을 갱신합니다.
+`this`의 항목은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 `[ready]` 라벨이 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동)을 사용자 대신 검증해 라벨을 갱신합니다.
 
 ## 항목 양식
 

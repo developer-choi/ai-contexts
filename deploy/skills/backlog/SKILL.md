@@ -17,8 +17,9 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 - `backlog/this/` — AC 자체 백로그 (스킬·룰·컨텍스트 등 AC 본체 작업)
 - `backlog/projects/{project}/{topic}/` — 타 프로젝트(MP, DC 등) 전용 작업 메모, 주제별
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
+- `backlog/articles/{slug}/` — 기술블로그에 발행할 포스트 재료, 포스트 단위
 
-세 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
+네 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
 
 ## 워크트리
 
@@ -36,7 +37,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 ### 기존 백로그 파악
 
-`backlog/` 하위의 백로그 영역(`this/`, `projects/`, `topics/`)을 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
+`backlog/` 하위의 백로그 영역(`this/`, `projects/`, `topics/`, `articles/`)을 읽어 이미 정리된 백로그를 파악한다. 없으면 첫 정리로 간주한다.
 
 ### 기존 스킬 파악
 
@@ -62,8 +63,11 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 | `backlog/this/` | AC 자체(스킬·룰·컨텍스트 등) | 스킬·역할 단위 |
 | `backlog/projects/{project}/{topic}/` | 타 프로젝트(MP, DC 등) 전용 작업 메모 | 주제 단위 |
 | `backlog/topics/{topic}/` | 코드 주제에 대한 사고·고민 (react, error, zod 등) | subtopic 단위 |
+| `backlog/articles/{slug}/` | 기술블로그에 발행할 포스트 재료 | 포스트 단위 |
 
-`backlog/this/`는 **할 일 트래커**(tier·Ready 게이트·리뷰/실행 모드 적용). `backlog/projects/`·`backlog/topics/`는 **비-트래커**(tier·Ready 게이트·리뷰/실행 모드 미적용) — projects/는 외부 레포 작업 메모(주제별), topics/는 코드 주제 사고 흔적.
+`backlog/this/`는 **할 일 트래커**(tier·Ready 게이트·리뷰/실행 모드 적용). `backlog/projects/`·`backlog/topics/`·`backlog/articles/`는 **비-트래커**(tier·Ready 게이트·리뷰/실행 모드 미적용) — projects/는 외부 레포 작업 메모(주제별), topics/는 코드 주제 사고 흔적, articles/는 발행될 포스트 단위 재료 모음.
+
+`backlog/topics/`와 `backlog/articles/`의 구분: topics/는 **사고 흔적**(내부, 고민의 축)이고, articles/는 **발행 재료**(외부 공개, 나올 포스트 1편의 축)다. 같은 코드 주제라도 "이걸 어떻게 풀지 고민"이면 topics/, "이걸 글로 써서 올릴 재료"면 articles/로 분류한다.
 
 ### 2. 기존 스킬·프로젝트 연결
 
@@ -79,6 +83,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 - `backlog/this/tier-{n}/`
 - `backlog/projects/{project}/{topic}/`
 - `backlog/topics/{topic}/`
+- `backlog/articles/`
 
 대조 규칙:
 
@@ -101,6 +106,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 - `backlog/this/tier-{n}/` — `deploy/skills/` 스킬명 (예: `workflow.md`, `scw.md`), `deploy/contexts/` 폴더명 (예: `coding-standards.md`), 그 외 역할 단위 (예: `rules.md`, `agent.md`, `gotchas.md`)
 - `backlog/projects/{project}/{topic}/` — 주제 디렉토리 단위. 디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사를 넣지 않는다 (예: `design-system/components-map.md`)
 - `backlog/topics/{topic}/` — subtopic 단위 (예: `topics/error/도메인-에러클래스.md`)
+- `backlog/articles/` — 포스트 단위 slug (예: `articles/react-error-boundary.md`). 재료가 커지면 `articles/{slug}/` 디렉토리로 승격한다
 
 #### tier 배치 (`this/` 전용)
 
@@ -125,8 +131,9 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 - AC: `backlog/this/tier-{n}/{skill-name}.md`
 - 타 프로젝트: `backlog/projects/{project}/{topic}/{item}.md`
 - 주제 사고 흔적: `backlog/topics/{topic}/{subtopic}.md`
+- 발행 재료: `backlog/articles/{slug}.md`
 
-아래 양식은 `backlog/this/`에 적용된다 (tier·Ready 게이트 트래커). `backlog/projects/`·`backlog/topics/`는 경량 양식 — [topics 영역](#topics-영역)에서 정의한다.
+아래 양식은 `backlog/this/`에 적용된다 (tier·Ready 게이트 트래커). `backlog/projects/`·`backlog/topics/`는 경량 양식 — [topics 영역](#topics-영역)에서 정의한다. `backlog/articles/`는 [articles 영역](#articles-영역)에서 정의한다.
 
 `backlog/this/tier-{n}/{skill-name}.md` 예:
 
@@ -281,13 +288,51 @@ scope: global (deploy/ 전체 스캔)
 
 나중에 읽을 글·문서 링크는 `{topic}/index.md`의 `## References` 섹션에 적재한다. 아직 안 읽은 링크는 사고 흔적이 아니므로 subtopic 본문과 섞지 않고 References로 분리한다. 코드 주제가 아닌 글(AI·LLM 트렌드 등)도 주제별 topic을 만들어 모은다. `[제목](URL) — 한 줄 요약` 형식으로 적고, 결이 다르면 References 하위 소제목으로 분류한다.
 
+### articles 영역
+
+`backlog/articles/{slug}.md` — 기술블로그에 발행할 포스트 1편의 재료(단편 메모·코드 조각·인용·링크)를 누적한다. 발행 의도가 있는 외부 공개용 모음이라는 점에서 내부 사고 흔적인 `backlog/topics/`와 구분된다 ([영역 분류](#1-영역-분류) 참고).
+
+`backlog/this/`와의 차이:
+
+- **tier 없음** — 발행 재료는 우선순위를 매길 대상이 아니다
+- **Ready 게이트 미적용** — 자족성 검증을 강제하지 않는다
+- **상태 라벨 선택적** — `[ideation]` 등을 붙일 수 있으나 필수 아니다
+
+경량 양식:
+
+```markdown
+# {가제}
+
+## 컨셉 (1줄)
+
+이 글로 무엇을 말하려는지
+
+## 재료
+
+- 단편 메모 / 코드 조각 / 인용 / 링크
+
+## 구상 (선택)
+
+- 목차·흐름 아이디어
+```
+
+재료가 커지면 `backlog/articles/{slug}/`(디렉토리)로 승격하고, 묶음별로 파일을 쪼갠다.
+
+#### 발행 후 삭제
+
+해당 포스트가 기술블로그에 실제로 발행되면 재료 파일(또는 디렉토리)을 삭제한다. 백로그는 "남은 재료"만 유지하고 발행 이력은 남기지 않는다.
+
+#### 기획 인덱스
+
+`backlog/articles/index.md`에 기획 중인 포스트 목록을 유지한다(선택). `[제목](slug.md) — 한 줄 컨셉` 형식.
+
 ---
 
 ## 리뷰 모드
 
 기존 백로그를 순회하며 Ready 게이트로 검증하고 라벨을 갱신하는 모드. 사용자가 백로그 본문을 매번 검수하지 않을 수 있다는 전제에서, critic 서브에이전트가 사용자 대신 객관적 게이트 역할을 한다.
 
-1. `backlog/this/` 하위 파일을 tier-1부터 순서대로 순회한다. `backlog/projects/`·`backlog/topics/`는 tier·Ready 게이트 미적용이라 리뷰 모드 대상이 아니다.
+1. `backlog/this/` 하위 파일을 tier-1부터 순서대로 순회한다. `backlog/projects/`·`backlog/topics/`·`backlog/articles/`는 tier·Ready 게이트 미적용이라 리뷰 모드 대상이 아니다.
 2. 각 항목에 대해 critic 서브에이전트(sonnet)를 spawn하여 「Ready 게이트」의 자가검증 문항을 적용한다
    - critic 입력: 백로그 항목 본문 + 「Ready 게이트」 섹션 정의
    - critic 출력: 각 문항에 대해 통과/미통과를 판정하고, 미통과면 어느 정보가 비어 있는지 보고
@@ -357,7 +402,7 @@ scope: global (deploy/ 전체 스캔)
 
 backlog 브랜치 = master HEAD + backlog/ 커밋. master의 모든 파일이 있고, 그 위에 `backlog/` 폴더가 추가된 형태다.
 
-- `backlog/this/`, `backlog/projects/`, `backlog/topics/` = 백로그·사고 흔적
+- `backlog/this/`, `backlog/projects/`, `backlog/topics/`, `backlog/articles/` = 백로그·사고 흔적·발행 재료
 - `backlog/wip/` = 인수인계 진행중 파일
 - `backlog/` 변경은 backlog 브랜치에서만 커밋한다
 - `backlog/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
