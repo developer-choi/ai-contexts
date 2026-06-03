@@ -15,7 +15,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 모든 백로그·사고 흔적을 AC에서 중앙 관리한다. 영역별 위치:
 
 - `backlog/this/` — AC 자체 백로그 (스킬·룰·컨텍스트 등 AC 본체 작업)
-- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 백로그
+- `backlog/projects/{project}/{topic}/` — 타 프로젝트(MP, DC 등) 전용 작업 메모, 주제별
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
 
 세 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
@@ -60,10 +60,10 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 | 영역 | 대상 | 항목 단위 |
 |------|------|-----------|
 | `backlog/this/` | AC 자체(스킬·룰·컨텍스트 등) | 스킬·역할 단위 |
-| `backlog/projects/{project}/` | 타 프로젝트(MP, DC 등) 전용 작업 | 항목 단위 |
+| `backlog/projects/{project}/{topic}/` | 타 프로젝트(MP, DC 등) 전용 작업 메모 | 주제 단위 |
 | `backlog/topics/{topic}/` | 코드 주제에 대한 사고·고민 (react, error, zod 등) | subtopic 단위 |
 
-`backlog/this/`, `backlog/projects/`는 **할 일 트래커**(tier·Ready 게이트 적용). `backlog/topics/`는 **사고 흔적**(tier·Ready 게이트 미적용).
+`backlog/this/`는 **할 일 트래커**(tier·Ready 게이트·리뷰/실행 모드 적용). `backlog/projects/`·`backlog/topics/`는 **비-트래커**(tier·Ready 게이트·리뷰/실행 모드 미적용) — projects/는 외부 레포 작업 메모(주제별), topics/는 코드 주제 사고 흔적.
 
 ### 2. 기존 스킬·프로젝트 연결
 
@@ -77,7 +77,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 해당 영역의 기존 `.md` 파일을 읽어 대조한다:
 
 - `backlog/this/tier-{n}/`
-- `backlog/projects/{project}/tier-{n}/`
+- `backlog/projects/{project}/{topic}/`
 - `backlog/topics/{topic}/`
 
 대조 규칙:
@@ -90,7 +90,7 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 
 #### 기존 파일 우선
 
-- 해당 항목이 속하는 파일이 tier-1~4에 이미 있으면 **그 파일에 섹션 추가**
+- 해당 항목이 속하는 파일이 이미 있으면 **그 파일에 섹션 추가**
 - 기존 파일이 없을 때만 새 파일을 생성하거나 `index.md`에 추가
 - 모호한 항목(한두 줄 메모)이라도 기존 파일이 있으면 거기에 넣는다
 
@@ -99,10 +99,10 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 영역별로 파일명을 정한다:
 
 - `backlog/this/tier-{n}/` — `deploy/skills/` 스킬명 (예: `workflow.md`, `scw.md`), `deploy/contexts/` 폴더명 (예: `coding-standards.md`), 그 외 역할 단위 (예: `rules.md`, `agent.md`, `gotchas.md`)
-- `backlog/projects/{project}/tier-{n}/` — 항목 단위. 디렉토리에 이미 프로젝트가 박혀 있으므로 파일명에 프로젝트 접두사를 넣지 않는다 (예: `commitlint-한글강제-보완.md`)
+- `backlog/projects/{project}/{topic}/` — 주제 디렉토리 단위. 디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사를 넣지 않는다 (예: `design-system/components-map.md`)
 - `backlog/topics/{topic}/` — subtopic 단위 (예: `topics/error/도메인-에러클래스.md`)
 
-#### tier 배치
+#### tier 배치 (`this/` 전용)
 
 - **tier-1**: 스킬 만드는 데 직접 영향
 - **tier-2**: 스킬 만드는 데 간접 영향 (재료가 되는 스킬) / 공부에 직접 영향
@@ -123,10 +123,10 @@ argument-hint: "[구두 필기 또는 메모 파일 경로]"
 영역별 경로:
 
 - AC: `backlog/this/tier-{n}/{skill-name}.md`
-- 타 프로젝트: `backlog/projects/{project}/tier-{n}/{item}.md`
+- 타 프로젝트: `backlog/projects/{project}/{topic}/{item}.md`
 - 주제 사고 흔적: `backlog/topics/{topic}/{subtopic}.md`
 
-아래 양식은 `backlog/this/`, `backlog/projects/` 두 영역에 적용된다. `backlog/topics/`의 차이는 [topics 영역](#topics-영역)에서 정의한다.
+아래 양식은 `backlog/this/`에 적용된다 (tier·Ready 게이트 트래커). `backlog/projects/`·`backlog/topics/`는 경량 양식 — [topics 영역](#topics-영역)에서 정의한다.
 
 `backlog/this/tier-{n}/{skill-name}.md` 예:
 
@@ -241,7 +241,6 @@ scope: global (deploy/ 전체 스캔)
 각 tier 폴더에 `index.md`를 상시 유지한다. 해당 tier에 속한 항목들의 현황을 한눈에 볼 수 있는 파일이다.
 
 - `backlog/this/tier-{n}/index.md`
-- `backlog/projects/{project}/tier-{n}/index.md`
 
 ```markdown
 # Tier-{n}
@@ -270,7 +269,7 @@ scope: global (deploy/ 전체 스캔)
 
 `backlog/topics/{topic}/{subtopic}.md` — 코드 주제(react, error, zod 등)에 대한 사고·고민을 누적한다. 결론에 도달해 액션 아이템이 되면 `backlog/this/` 또는 `backlog/projects/`로 graduate한다.
 
-`backlog/this/`, `backlog/projects/`와의 차이:
+`backlog/this/`와의 차이:
 
 - **tier 없음** — 사고 흔적은 우선순위를 매길 대상이 아니다
 - **Ready 게이트 미적용** — 사고 흔적 자체가 목적이므로 자족성 검증을 강제하지 않는다
@@ -288,7 +287,7 @@ scope: global (deploy/ 전체 스캔)
 
 기존 백로그를 순회하며 Ready 게이트로 검증하고 라벨을 갱신하는 모드. 사용자가 백로그 본문을 매번 검수하지 않을 수 있다는 전제에서, critic 서브에이전트가 사용자 대신 객관적 게이트 역할을 한다.
 
-1. `backlog/this/`, `backlog/projects/` 하위 파일을 tier-1부터 순서대로 순회한다. `backlog/topics/`는 Ready 게이트 미적용이라 리뷰 모드 대상이 아니다.
+1. `backlog/this/` 하위 파일을 tier-1부터 순서대로 순회한다. `backlog/projects/`·`backlog/topics/`는 tier·Ready 게이트 미적용이라 리뷰 모드 대상이 아니다.
 2. 각 항목에 대해 critic 서브에이전트(sonnet)를 spawn하여 「Ready 게이트」의 자가검증 문항을 적용한다
    - critic 입력: 백로그 항목 본문 + 「Ready 게이트」 섹션 정의
    - critic 출력: 각 문항에 대해 통과/미통과를 판정하고, 미통과면 어느 정보가 비어 있는지 보고
@@ -309,7 +308,7 @@ scope: global (deploy/ 전체 스캔)
 
 `[ready]` 항목을 tier-1부터 순서대로 실행하는 모드.
 
-1. backlog 워크트리에서 `backlog/this/`, `backlog/projects/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다
+1. backlog 워크트리에서 `backlog/this/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다
 2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. AC worktree는 `git wt-add`를 쓴다 (master에서 임시 브랜치를 따고 의존성·hook 준비까지 수행):
    ```
    git wt-add backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-exec

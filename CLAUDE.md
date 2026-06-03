@@ -78,7 +78,7 @@ md 파일 수정 직후:
 - README 수정은 일반 작업에서 직접 수행하지 않는다.
 - README 변경이 필요하면 `full-refresh` 스킬 절차를 통해서만 갱신한다.
 
-### 티어 기준
+### 티어 기준 (`backlog/this/` 전용)
 
 | Tier | 기준 |
 |------|------|
@@ -103,8 +103,8 @@ md 파일 수정 직후:
   - `index.md` — 미분류 아이디어
   - `tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
   - `tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
-- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 백로그
-  - `tier-{N}/index.md`, `tier-{N}/{item}.md` (파일명에 프로젝트 접두사 없이)
+- `backlog/projects/{project}/{topic}/` — 타 프로젝트(MP, DC 등) 전용 작업 메모. 주제별 디렉토리 (tier·Ready 게이트·리뷰/실행 모드 미적용 — topics/와 같은 비-트래커)
+  - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이). 외부 레포 작업이라 AC 실행 모드 대상 아님
 - `backlog/topics/{topic}/` — 코드 주제(예: react, error, zod)에 대한 사고 흔적
   - `index.md`, `{subtopic}.md` (tier 없음, Ready 게이트 미적용)
   - 나중에 읽을(read-later) 참고 링크는 `{topic}/index.md`의 `## References` 섹션에 적재한다 (사고 흔적 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별 topic을 만들어 모은다
