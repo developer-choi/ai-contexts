@@ -147,6 +147,14 @@ Deploy 스킬·스크립트(`scripts/list-candidates.mts`, `scripts/parse-knowle
 
 Phase 3~5까지 완료된 프로젝트의 `hash`와 `refreshedAt`을 최신 커밋으로 갱신하고, AC 백로그 브랜치에 커밋한다. 이전 회차 커밋들과 squash로 합친다. Maintain 스킬이 없는 프로젝트는 매 실행마다 자동으로 최신 커밋 갱신.
 
+## 커밋 단위
+
+회차 history가 잘게 쪼개지지 않게, 각 프로젝트·Phase 산출 커밋을 종류별로 한 커밋으로 묶는다.
+
+- Phase 3 Maintain: 한 프로젝트의 검증·수정 전체를 그 프로젝트에서 한 커밋으로 합친다 (예: KA validate 전체 = KA 1커밋, AC scw-refresh 전체 = AC 1커밋). 작업 중 여러 번 커밋했으면 마지막에 squash로 합친다. 단 종류가 명확히 다르면 그 종류끼리만 분리한다.
+- Phase 4 Readme: 갱신한 README가 여러 건이면 한 커밋으로 묶는다.
+- 종류가 다른 작업(Maintain 수정 vs README vs Deploy 산출물·state.json)은 같은 커밋에 섞지 않는다.
+
 ## 대규모 작업 위임
 
 팀/서브에이전트로 위임된 작업자는 다시 새 작업자를 만들 수 없거나 런타임별 제약으로 병렬화가 막힐 수 있다. 대량 파일 변환·생성 작업은 현재 세션의 하위 작업자에게 몰아넣지 말고, 아래 dispatch 플로우로 새 메인 세션에 넘긴다.
