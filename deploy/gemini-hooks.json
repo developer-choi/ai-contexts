@@ -1,0 +1,42 @@
+{
+  "safety-gate": {
+    "enabled": true,
+    "PreToolUse": [
+      {
+        "matcher": "run_command|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node __USER_HOME__/.gemini/hooks/check-shell-policy.js",
+            "statusMessage": "Checking shell policy..."
+          },
+          {
+            "type": "command",
+            "command": "node __USER_HOME__/.gemini/hooks/check-git-staging-policy.js",
+            "statusMessage": "Checking git staging policy..."
+          },
+          {
+            "type": "command",
+            "command": "node __USER_HOME__/.gemini/hooks/check-git-commit-policy.js",
+            "statusMessage": "Checking git commit policy..."
+          },
+          {
+            "type": "command",
+            "command": "node __USER_HOME__/.gemini/hooks/check-git-push-policy.js",
+            "statusMessage": "Checking git push policy..."
+          }
+        ]
+      },
+      {
+        "matcher": "send_message",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node __USER_HOME__/.gemini/hooks/check-team-message-policy.js",
+            "statusMessage": "Checking team message policy..."
+          }
+        ]
+      }
+    ]
+  }
+}

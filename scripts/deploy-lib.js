@@ -17,7 +17,8 @@ const sourceDir = path.join(repoDir, 'deploy');
 const claudeSettingsSource = path.join(sourceDir, 'claude-settings.json');
 const codexHooksSource = path.join(sourceDir, 'codex-hooks.json');
 const geminiSettingsSource = path.join(sourceDir, 'gemini-settings.json');
-const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json', 'codex-hooks.json', 'gemini-settings.json']);
+const geminiHooksSource = path.join(sourceDir, 'gemini-hooks.json');
+const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json', 'codex-hooks.json', 'gemini-settings.json', 'gemini-hooks.json']);
 
 function defaultClaudeDir() {
   return path.join(os.homedir(), '.claude');
@@ -292,6 +293,23 @@ function deployGeminiGlobals(targetDir, log = console.log) {
     copied += 1;
   }
 
+  if (fs.existsSync(geminiHooksSource) && fs.statSync(geminiHooksSource).isFile()) {
+    const rawHooks = fs.readFileSync(geminiHooksSource, 'utf8');
+    const processedHooks = rawHooks.replace(/__USER_HOME__/g, os.homedir().replace(/\\/g, '/'));
+
+    const configDir = path.join(targetDir, 'config');
+    ensureDir(configDir);
+    fs.writeFileSync(path.join(configDir, 'hooks.json'), processedHooks, 'utf8');
+    log('  WRITE config/hooks.json');
+
+    const appDir = path.join(targetDir, 'antigravity-cli');
+    ensureDir(appDir);
+    fs.writeFileSync(path.join(appDir, 'hooks.json'), processedHooks, 'utf8');
+    log('  WRITE antigravity-cli/hooks.json');
+
+    copied += 2;
+  }
+
   return copied;
 }
 
@@ -322,6 +340,21 @@ function uninstallGeminiGlobals(targetDir, log = console.log) {
       removed += 1;
     }
   }
+
+  const configHooks = path.join(targetDir, 'config', 'hooks.json');
+  if (fs.existsSync(configHooks) && fs.statSync(configHooks).isFile()) {
+    removePath(configHooks);
+    log('  DEL   config/hooks.json');
+    removed += 1;
+  }
+
+  const appHooks = path.join(targetDir, 'antigravity-cli', 'hooks.json');
+  if (fs.existsSync(appHooks) && fs.statSync(appHooks).isFile()) {
+    removePath(appHooks);
+    log('  DEL   antigravity-cli/hooks.json');
+    removed += 1;
+  }
+
   removed += uninstallSkills(targetDir, log);
   return removed;
 }
