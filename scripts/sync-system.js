@@ -4,11 +4,12 @@ const { ensureHooksReady } = require('./hook-guard');
 
 const {
   CATEGORIES,
+  SOURCE_ONLY_ROOT_FILES,
   buildCodexAgentsContent,
-  claudeSettingsSource,
+  claudeSettingsObject,
+  codexHooksObject,
   comparePaths,
   copyPath,
-  codexHooksSource,
   defaultCodexDir,
   defaultClaudeDir,
   defaultGeminiDir,
@@ -24,12 +25,15 @@ const {
   sourceDir,
   trustCodexHooks,
   uninstallTarget,
+  verifyJsonExact,
   verifySettings,
 } = require('./deploy-lib');
 
 async function main() {
   ensureHooksReady();
   ensureDeploySource();
+  // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
+  require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'verify-settings-projection.js')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
@@ -96,7 +100,7 @@ async function main() {
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json' || entry.name === 'gemini-settings.json') continue;
+    if (SOURCE_ONLY_ROOT_FILES.has(entry.name)) continue;
 
     const src = path.join(sourceDir, entry.name);
     const target = path.join(targetDir, entry.name);
@@ -110,14 +114,12 @@ async function main() {
   }
 
   const targetSettings = path.join(targetDir, 'settings.json');
-  if (pathExists(claudeSettingsSource)) {
-    if (!pathExists(targetSettings)) {
-      fail(failures, 'settings.json 존재하지 않음');
-    } else if (verifySettings(claudeSettingsSource, targetSettings)) {
-      console.log('  PASS  settings.json (merged)');
-    } else {
-      fail(failures, 'settings.json 머지 결과 키 불일치');
-    }
+  if (!pathExists(targetSettings)) {
+    fail(failures, 'settings.json 존재하지 않음');
+  } else if (verifySettings(claudeSettingsObject(), targetSettings)) {
+    console.log('  PASS  settings.json (merged)');
+  } else {
+    fail(failures, 'settings.json 머지 결과 키 불일치');
   }
 
   console.log('---');
@@ -213,14 +215,12 @@ function verifyCodexGlobals(targetDir) {
   }
 
   const targetHooksConfig = path.join(targetDir, 'hooks.json');
-  if (pathExists(codexHooksSource)) {
-    if (!pathExists(targetHooksConfig)) {
-      fail(failures, 'codex hooks.json 존재하지 않음');
-    } else if (comparePaths(codexHooksSource, targetHooksConfig)) {
-      console.log('  PASS  codex hooks.json');
-    } else {
-      fail(failures, 'codex hooks.json 내용 불일치');
-    }
+  if (!pathExists(targetHooksConfig)) {
+    fail(failures, 'codex hooks.json 존재하지 않음');
+  } else if (verifyJsonExact(codexHooksObject(), targetHooksConfig)) {
+    console.log('  PASS  codex hooks.json');
+  } else {
+    fail(failures, 'codex hooks.json 내용 불일치');
   }
 
   const targetAgents = path.join(targetDir, 'AGENTS.md');
@@ -242,7 +242,7 @@ function verifyCodexGlobals(targetDir) {
 function verifyGeminiGlobals(targetDir) {
   const {
     buildGeminiAgentsContent,
-    geminiSettingsSource,
+    geminiSettingsObject,
     comparePaths,
     verifySettings,
   } = require('./deploy-lib');
@@ -277,14 +277,12 @@ function verifyGeminiGlobals(targetDir) {
   }
 
   const targetSettings = path.join(targetDir, 'settings.json');
-  if (pathExists(geminiSettingsSource)) {
-    if (!pathExists(targetSettings)) {
-      fail(failures, 'gemini settings.json 존재하지 않음');
-    } else if (verifySettings(geminiSettingsSource, targetSettings)) {
-      console.log('  PASS  gemini settings.json (merged)');
-    } else {
-      fail(failures, 'gemini settings.json 머지 결과 키 불일치');
-    }
+  if (!pathExists(targetSettings)) {
+    fail(failures, 'gemini settings.json 존재하지 않음');
+  } else if (verifySettings(geminiSettingsObject(), targetSettings)) {
+    console.log('  PASS  gemini settings.json (merged)');
+  } else {
+    fail(failures, 'gemini settings.json 머지 결과 키 불일치');
   }
 
   const targetAgents = path.join(targetDir, 'GEMINI.md');

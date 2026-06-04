@@ -11,6 +11,7 @@
 - `sync:*`: AC가 관리하는 원하는 상태로 맞춥니다. 반복 실행해도 같은 상태로 수렴해야 합니다.
 - `unsync:*`: 대응하는 `sync:*`가 만든 AC 관리 산출물만 제거합니다.
 - `verify:hooks`: AC worktree의 Husky/commitlint 준비 상태를 확인합니다. 새 worktree에서 커밋하기 전에 실행합니다.
+- `verify:settings`: `deploy/base-settings.json`에서 타겟별 설정을 생성하는 계약을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
 
 ## 새 대상 추가 기준
 

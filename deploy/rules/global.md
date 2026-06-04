@@ -222,7 +222,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 | 구분 | 원본 수정 위치 | 직접 수정 금지 | 반영 명령 |
 |---|---|---|---|
-| 글로벌 규칙·컨텍스트·hooks | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/claude-settings.json`, `deploy/gemini-settings.json` | `~/.claude/`, `~/.codex/`, `~/.gemini/` | AC에서 `npm run sync:system` |
+| 글로벌 규칙·컨텍스트·hooks·설정 | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/base-settings.json`(공통), `deploy/*-settings.json`(타겟 override) | `~/.claude/`, `~/.codex/`, `~/.gemini/` | AC에서 `npm run sync:system` |
 | 글로벌 스킬 | AC `deploy/skills/` | `~/.claude/skills/`, `~/.codex/skills/`, `~/.gemini/skills/` | AC에서 `npm run sync:system` |
 | 로컬 규칙 | 각 프로젝트의 `CLAUDE.md` | 각 프로젝트의 `AGENTS.md`, `GEMINI.md` | AC에서 `npm run sync:local-skills` |
 | 로컬 스킬 | 각 프로젝트의 `.claude/skills/` | 각 프로젝트의 `.agents/skills/` | AC에서 `npm run sync:local-skills` |

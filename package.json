@@ -12,6 +12,7 @@
     "sync:local-skills": "node scripts/sync-local-skills.js",
     "unsync:local-skills": "node scripts/unsync-local-skills.js",
     "verify:hooks": "node scripts/verify-hooks.js",
+    "verify:settings": "node scripts/verify-settings-projection.js",
     "prepare": "husky"
   },
   "devDependencies": {

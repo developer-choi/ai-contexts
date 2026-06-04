@@ -1,0 +1,52 @@
+{
+  "hooks": [
+    {
+      "file": "auto-stage-new-file.js",
+      "event": "PostToolUse",
+      "on": "write",
+      "msg": "Auto-staging new file..."
+    },
+    {
+      "file": "post-worktree-install.js",
+      "event": "PostToolUse",
+      "on": "bash",
+      "msg": "Installing worktree dependencies..."
+    },
+    {
+      "file": "surface-backlog.js",
+      "event": "UserPromptSubmit",
+      "on": "prompt",
+      "msg": "Surfacing related backlog..."
+    },
+    {
+      "file": "check-shell-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking shell policy..."
+    },
+    {
+      "file": "check-git-staging-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking git staging policy..."
+    },
+    {
+      "file": "check-git-commit-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking git commit policy..."
+    },
+    {
+      "file": "check-git-push-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking git push policy..."
+    },
+    {
+      "file": "check-team-message-policy.js",
+      "event": "PreToolUse",
+      "on": "message",
+      "msg": "Checking team message policy..."
+    }
+  ]
+}

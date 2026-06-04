@@ -12,12 +12,41 @@ const SKILLS_PRESERVE = new Set([
   'web-design-guidelines',
 ]);
 
+const { buildHooks } = require('./settings-projection');
+
 const repoDir = path.resolve(__dirname, '..');
 const sourceDir = path.join(repoDir, 'deploy');
-const claudeSettingsSource = path.join(sourceDir, 'claude-settings.json');
-const codexHooksSource = path.join(sourceDir, 'codex-hooks.json');
-const geminiSettingsSource = path.join(sourceDir, 'gemini-settings.json');
-const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json', 'codex-hooks.json', 'gemini-settings.json']);
+const baseSettingsSource = path.join(sourceDir, 'base-settings.json');
+// 직접 복사하지 않고 settings 생성의 재료로만 쓰는 root 파일들.
+// base-settings.json(공통 hook)과 타겟별 override(claude/gemini-settings.json).
+const SOURCE_ONLY_ROOT_FILES = new Set(['base-settings.json', 'claude-settings.json', 'gemini-settings.json']);
+
+// 각 타겟 설정 = base에서 만든 것(hook) + 타겟 override 파일. override가 우선(키 충돌 시 덮어씀).
+function loadBaseSettings() {
+  if (!fs.existsSync(baseSettingsSource) || !fs.statSync(baseSettingsSource).isFile()) {
+    throw new Error(`base-settings.json을 찾을 수 없습니다: ${baseSettingsSource}`);
+  }
+  return readJson(baseSettingsSource);
+}
+
+// 타겟 override 파일(없으면 {}). base 재료를 덮어쓰는 타겟 전용 설정.
+function loadOverride(name) {
+  const overridePath = path.join(sourceDir, name);
+  return fs.existsSync(overridePath) && fs.statSync(overridePath).isFile() ? readJson(overridePath) : {};
+}
+
+function claudeSettingsObject() {
+  return { hooks: buildHooks(loadBaseSettings().hooks, 'claude'), ...loadOverride('claude-settings.json') };
+}
+
+function geminiSettingsObject() {
+  // gemini는 hook 런타임이 없어 base hook을 받지 않는다. override 파일만(현재 없음 → {}).
+  return { ...loadOverride('gemini-settings.json') };
+}
+
+function codexHooksObject() {
+  return { hooks: buildHooks(loadBaseSettings().hooks, 'codex') };
+}
 
 function defaultClaudeDir() {
   return path.join(os.homedir(), '.claude');
@@ -131,8 +160,7 @@ function readManagedKeys(targetPath) {
   }
 }
 
-function mergeSettings(deployPath, targetPath) {
-  const deploy = readJson(deployPath);
+function mergeSettings(deploy, targetPath) {
   const deployKeys = Object.keys(deploy);
   const existing = fs.existsSync(targetPath) ? readJson(targetPath) : {};
 
@@ -145,14 +173,13 @@ function mergeSettings(deployPath, targetPath) {
   fs.writeFileSync(settingsManifestPath(targetPath), `${JSON.stringify(deployKeys)}\n`, 'utf8');
 }
 
-function splitSettings(deployPath, targetPath) {
+function splitSettings(deploy, targetPath) {
   if (!fs.existsSync(targetPath)) {
     const manifestPath = settingsManifestPath(targetPath);
     if (fs.existsSync(manifestPath)) removePath(manifestPath);
     return false;
   }
 
-  const deploy = readJson(deployPath);
   const existing = readJson(targetPath);
   // 현재 소스 키 + 지난 AC 관리 키(고아)를 모두 제거한다.
   const keysToRemove = new Set([...Object.keys(deploy), ...readManagedKeys(targetPath)]);
@@ -171,12 +198,17 @@ function splitSettings(deployPath, targetPath) {
   return true;
 }
 
-function verifySettings(deployPath, targetPath) {
+function verifySettings(deploy, targetPath) {
   if (!fs.existsSync(targetPath)) return false;
 
-  const deploy = readJson(deployPath);
   const target = readJson(targetPath);
   return Object.keys(deploy).every((key) => stableJson(deploy[key]) === stableJson(target[key]));
+}
+
+// whole-file 타겟(codex hooks.json)용: 부분키 비교가 아니라 전체 일치를 본다.
+function verifyJsonExact(expected, targetPath) {
+  if (!fs.existsSync(targetPath)) return false;
+  return stableJson(readJson(targetPath)) === stableJson(expected);
 }
 
 function stableJson(value) {
@@ -225,11 +257,9 @@ function deployRootFiles(targetDir, log) {
     copied += 1;
   }
 
-  if (fs.existsSync(claudeSettingsSource) && fs.statSync(claudeSettingsSource).isFile()) {
-    mergeSettings(claudeSettingsSource, path.join(targetDir, 'settings.json'));
-    log('  MERGE settings.json');
-    copied += 1;
-  }
+  mergeSettings(claudeSettingsObject(), path.join(targetDir, 'settings.json'));
+  log('  MERGE settings.json');
+  copied += 1;
   return copied;
 }
 
@@ -282,11 +312,9 @@ function deployCodexGlobals(targetDir, log = console.log) {
     copied += 1;
   }
 
-  if (fs.existsSync(codexHooksSource) && fs.statSync(codexHooksSource).isFile()) {
-    copyPath(codexHooksSource, path.join(targetDir, 'hooks.json'));
-    log('  COPY  hooks.json');
-    copied += 1;
-  }
+  writeJson(path.join(targetDir, 'hooks.json'), codexHooksObject());
+  log('  WRITE hooks.json');
+  copied += 1;
 
   fs.writeFileSync(path.join(targetDir, 'AGENTS.md'), buildCodexAgentsContent(), 'utf8');
   log('  WRITE AGENTS.md');
@@ -317,11 +345,9 @@ function deployGeminiGlobals(targetDir, log = console.log) {
 
   copied += deploySkills(targetDir, log);
 
-  if (fs.existsSync(geminiSettingsSource) && fs.statSync(geminiSettingsSource).isFile()) {
-    mergeSettings(geminiSettingsSource, path.join(targetDir, 'settings.json'));
-    log('  MERGE settings.json');
-    copied += 1;
-  }
+  mergeSettings(geminiSettingsObject(), path.join(targetDir, 'settings.json'));
+  log('  MERGE settings.json');
+  copied += 1;
 
   return copied;
 }
@@ -346,9 +372,9 @@ function uninstallGeminiGlobals(targetDir, log = console.log) {
     log('  DEL   GEMINI.md');
     removed += 1;
   }
-  if (fs.existsSync(geminiSettingsSource) && fs.statSync(geminiSettingsSource).isFile()) {
+  {
     const target = path.join(targetDir, 'settings.json');
-    if (splitSettings(geminiSettingsSource, target)) {
+    if (splitSettings(geminiSettingsObject(), target)) {
       log('  SPLIT settings.json');
       removed += 1;
     }
@@ -651,10 +677,10 @@ function uninstallTarget(targetDir, options = {}) {
     }
   }
 
-  const settingsSource = targetDir === defaultGeminiDir() ? geminiSettingsSource : claudeSettingsSource;
-  if (fs.existsSync(settingsSource) && fs.statSync(settingsSource).isFile()) {
+  {
+    const settings = targetDir === defaultGeminiDir() ? geminiSettingsObject() : claudeSettingsObject();
     const target = path.join(targetDir, 'settings.json');
-    if (splitSettings(settingsSource, target)) {
+    if (splitSettings(settings, target)) {
       log('  SPLIT settings.json');
       removed += 1;
     }
@@ -685,13 +711,15 @@ function unsetWtAddAlias(log = console.log) {
 
 module.exports = {
   CATEGORIES,
+  SOURCE_ONLY_ROOT_FILES,
+  baseSettingsSource,
   buildCodexAgentsContent,
   buildGeminiAgentsContent,
-  claudeSettingsSource,
-  geminiSettingsSource,
+  claudeSettingsObject,
+  codexHooksObject,
+  geminiSettingsObject,
   comparePaths,
   copyPath,
-  codexHooksSource,
   defaultCodexDir,
   defaultClaudeDir,
   defaultGeminiDir,
@@ -713,5 +741,6 @@ module.exports = {
   uninstallCodexGlobals,
   uninstallGeminiGlobals,
   uninstallTarget,
+  verifyJsonExact,
   verifySettings,
 };

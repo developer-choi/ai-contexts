@@ -2,6 +2,16 @@
 
 AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, settings.json hook, AC worktree)을 수정·추가할 때 따르는 규칙.
 
+## settings는 base(공통) + 타겟 override로 생성한다
+
+각 타겟 설정은 **공통 재료 `deploy/base-settings.json` + 타겟 override 파일(`deploy/claude-settings.json` 등)을 합쳐 생성**한다(`scripts/settings-projection.js` + `deploy-lib.js`). override가 우선(키 충돌 시 base를 덮음).
+
+- **base에는 진짜 공통인 것만 둔다.** 현재는 정책 hook의 논리 목록(`file/event/on`)뿐 — claude·codex가 같은 hook을 쓰므로 한 번만 적고 어댑터가 타겟별로 변환한다.
+- **타겟 전용 설정은 그 타겟 override 파일에 둔다.** 예: model·env·permissions는 Claude 전용이라 `deploy/claude-settings.json`에. codex는 override 없이 hook만, gemini는 hook 없음(override 파일 없으면 `{}`).
+- 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.js`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
+- override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
+- `sync:system`은 시작 시 `verify:settings`(생성 계약)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
+
 ## 배포 스크립트 변경 원칙
 
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
