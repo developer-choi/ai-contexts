@@ -113,20 +113,55 @@ function buildGeminiAgentsContent() {
   return buildAgentsContent('GEMINI.md');
 }
 
+// 머지된 settings.json 옆에 AC가 넣은 top-level 키 목록을 기록하는 사이드카.
+// 다음 sync에서 "지난번엔 AC가 넣었지만 이번 소스엔 없는 키"(고아)를 식별해 제거하는 데 쓴다.
+// mergeSettings는 소스 키를 추가만 하므로, 이 매니페스트 없이는 소스에서 사라진 키가 영영 잔존한다.
+function settingsManifestPath(targetPath) {
+  return path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.ac-keys`);
+}
+
+function readManagedKeys(targetPath) {
+  const manifestPath = settingsManifestPath(targetPath);
+  if (!fs.existsSync(manifestPath)) return [];
+  try {
+    const parsed = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function mergeSettings(deployPath, targetPath) {
   const deploy = readJson(deployPath);
+  const deployKeys = Object.keys(deploy);
   const existing = fs.existsSync(targetPath) ? readJson(targetPath) : {};
+
+  // 지난 sync에서 AC가 넣었지만 이번 소스엔 없는 top-level 키(고아)를 제거한다.
+  for (const key of readManagedKeys(targetPath)) {
+    if (!deployKeys.includes(key)) delete existing[key];
+  }
+
   writeJson(targetPath, { ...existing, ...deploy });
+  fs.writeFileSync(settingsManifestPath(targetPath), `${JSON.stringify(deployKeys)}\n`, 'utf8');
 }
 
 function splitSettings(deployPath, targetPath) {
-  if (!fs.existsSync(targetPath)) return false;
+  if (!fs.existsSync(targetPath)) {
+    const manifestPath = settingsManifestPath(targetPath);
+    if (fs.existsSync(manifestPath)) removePath(manifestPath);
+    return false;
+  }
 
   const deploy = readJson(deployPath);
   const existing = readJson(targetPath);
-  for (const key of Object.keys(deploy)) {
+  // 현재 소스 키 + 지난 AC 관리 키(고아)를 모두 제거한다.
+  const keysToRemove = new Set([...Object.keys(deploy), ...readManagedKeys(targetPath)]);
+  for (const key of keysToRemove) {
     delete existing[key];
   }
+
+  const manifestPath = settingsManifestPath(targetPath);
+  if (fs.existsSync(manifestPath)) removePath(manifestPath);
 
   if (Object.keys(existing).length === 0) {
     removePath(targetPath);
@@ -667,10 +702,13 @@ module.exports = {
   ensureDeploySource,
   ensureDir,
   listEntries,
+  mergeSettings,
   registerWtAddAlias,
   repoDir,
   resolveUserPath,
+  settingsManifestPath,
   sourceDir,
+  splitSettings,
   trustCodexHooks,
   uninstallCodexGlobals,
   uninstallGeminiGlobals,
