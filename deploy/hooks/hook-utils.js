@@ -5,10 +5,7 @@ function readPayload() {
 }
 
 function getCommand(payload) {
-  if (!payload.tool_input) return "";
-  if (typeof payload.tool_input.command === "string") return payload.tool_input.command;
-  if (typeof payload.tool_input.CommandLine === "string") return payload.tool_input.CommandLine;
-  return "";
+  return payload.tool_input && typeof payload.tool_input.command === "string" ? payload.tool_input.command : "";
 }
 
 function getCwd(payload) {

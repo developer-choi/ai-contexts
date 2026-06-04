@@ -96,7 +96,7 @@ async function main() {
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json' || entry.name === 'gemini-settings.json' || entry.name === 'gemini-hooks.json') continue;
+    if (entry.name === 'claude-settings.json' || entry.name === 'codex-hooks.json' || entry.name === 'gemini-settings.json') continue;
 
     const src = path.join(sourceDir, entry.name);
     const target = path.join(targetDir, entry.name);
@@ -276,18 +276,6 @@ function verifyGeminiGlobals(targetDir) {
     }
   }
 
-  const srcHooks = path.join(sourceDir, 'hooks');
-  const targetHooks = path.join(targetDir, 'hooks');
-  if (existsDir(srcHooks)) {
-    if (!existsDir(targetHooks)) {
-      fail(failures, 'gemini hooks/ 존재하지 않음');
-    } else if (comparePaths(srcHooks, targetHooks)) {
-      console.log('  PASS  gemini hooks/');
-    } else {
-      fail(failures, 'gemini hooks/ 내용 불일치');
-    }
-  }
-
   const targetSettings = path.join(targetDir, 'settings.json');
   if (pathExists(geminiSettingsSource)) {
     if (!pathExists(targetSettings)) {
@@ -296,30 +284,6 @@ function verifyGeminiGlobals(targetDir) {
       console.log('  PASS  gemini settings.json (merged)');
     } else {
       fail(failures, 'gemini settings.json 머지 결과 키 불일치');
-    }
-  }
-
-  const geminiHooksSource = path.join(sourceDir, 'gemini-hooks.json');
-  if (pathExists(geminiHooksSource)) {
-    const targetConfigHooks = path.join(targetDir, 'config', 'hooks.json');
-    const targetAppHooks = path.join(targetDir, 'antigravity-cli', 'hooks.json');
-    const expectedHooks = require('fs').readFileSync(geminiHooksSource, 'utf8')
-      .replace(/__USER_HOME__/g, require('os').homedir().replace(/\\/g, '/'));
-
-    if (!pathExists(targetConfigHooks)) {
-      fail(failures, 'gemini config/hooks.json 존재하지 않음');
-    } else if (require('fs').readFileSync(targetConfigHooks, 'utf8') === expectedHooks) {
-      console.log('  PASS  gemini config/hooks.json');
-    } else {
-      fail(failures, 'gemini config/hooks.json 내용 불일치');
-    }
-
-    if (!pathExists(targetAppHooks)) {
-      fail(failures, 'gemini antigravity-cli/hooks.json 존재하지 않음');
-    } else if (require('fs').readFileSync(targetAppHooks, 'utf8') === expectedHooks) {
-      console.log('  PASS  gemini antigravity-cli/hooks.json');
-    } else {
-      fail(failures, 'gemini antigravity-cli/hooks.json 내용 불일치');
     }
   }
 
