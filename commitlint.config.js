@@ -19,7 +19,6 @@ module.exports = {
         'contexts',
         'rules',
         'settings',
-        'bench',
         'wip',
         'archives',
       ],
