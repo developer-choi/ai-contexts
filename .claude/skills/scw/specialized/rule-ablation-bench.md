@@ -39,7 +39,7 @@ ablation 벤치는 반드시 ZERO(규칙 제거) variant를 포함한다. skill-
 ZERO subagent가 원본 규칙의 특징 어휘·구절을 응답(본문·도구 호출 요약 양쪽)에서 재사용하면 환경 상속 의심 신호다.
 
 - 예: 원본 규칙에 "순서 보장이 필요한 절차가 아니면"이라는 문구. ZERO 응답 요약에 동일 표현 등장 → subagent가 어떤 경로로든 규칙 내용을 흘려받았을 가능성
-- 의심 발견 시 해당 벤치 판정 **보류**. `bench/results/<target>/pending-revalidation.md`에 기록
+- 의심 발견 시 해당 벤치 판정 **보류**. 결과 보고에 사유 기록
 
 ### 상속 경로 (구체 메커니즘)
 
@@ -112,8 +112,7 @@ E·B 압축본은 원본보다 트리거 어휘가 짧아져 매칭 범위가 **
 ## workspace / 커밋 규칙
 
 - 벤치 workspace: `bench/workspace/<target>/<rule-id>/runs/`. 완료 후 `rm -rf`
-- 결과 md: `bench/results/<target>/<rule-id>.md` 축적
-- 판정 보류: `bench/results/<target>/pending-revalidation.md`에 사유·다음 단계 기록
-- 커밋 순서: 결과 md → 규칙 파일 수정 → roadmap. 세 커밋 분리 (한 커밋에 섞지 않음)
+- 판정 보류 사유·다음 단계는 결과 보고에 기록
+- 커밋 순서: 규칙 파일 수정 → roadmap. 두 커밋 분리 (한 커밋에 섞지 않음)
 
 자세한 bench 운영 규칙은 해당 target의 roadmap에 둔다. 이 문서는 ablation 방법론만 다룬다.
