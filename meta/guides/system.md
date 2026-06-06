@@ -21,7 +21,7 @@ npm run sync:system -- <target>
 - 각 타겟 설정은 공통 `deploy/base-settings.json`(정책 hook)과 타겟 override(`deploy/claude-settings.json` 등)를 합쳐 생성합니다(`scripts/settings-projection.js`, override 우선). claude·gemini는 결과를 각자의 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존하고, codex는 hook만 `~/.codex/hooks.json`으로 통째 씁니다. hook 등록 구조(matcher·이벤트)는 타겟별 어댑터가 변환합니다.
 - 기본 타겟으로 실행하면 Codex 전역 자산도 `~/.codex`에, Gemini 전역 자산도 `~/.gemini`에 함께 동기화합니다.
 - Codex hook trust 갱신을 시도하고, Desktop 환경 제약으로 실패하면 경고 후 자산 검증은 계속합니다.
-- 글로벌 git alias `wt-add`를 등록합니다.
+- 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
 
 ## 제거
 
@@ -35,7 +35,7 @@ npm run unsync:system
 npm run unsync:system -- <target>
 ```
 
-제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 `wt-add` alias를 제거합니다. 기본 Claude 타겟을 제거할 때는 Codex 및 Gemini 전역 자산도 함께 제거합니다.
+제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 구버전 `wt-add` alias를 제거합니다. 기본 Claude 타겟을 제거할 때는 Codex 및 Gemini 전역 자산도 함께 제거합니다.
 
 ## 반복 실행 기준
 
@@ -49,7 +49,7 @@ npm run unsync:system -- <target>
 npm run verify:hooks
 ```
 
-새 AC worktree는 `git wt-add`로 만들고, raw `git worktree add`를 사용했다면 `npm ci`와 `npm run prepare`를 실행한 뒤 커밋합니다.
+새 AC worktree는 `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성·Husky hook shim을 자동 복구합니다. 하네스 밖(맨 터미널)에서 직접 만든 워크트리는 자동 복구되지 않으므로 그 워크트리에서 `npm ci`(또는 `npm run prepare`)를 실행한 뒤 커밋합니다.
 
 ## Windows 참고
 

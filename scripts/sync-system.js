@@ -20,7 +20,7 @@ const {
   ensureDeploySource,
   ensureDir,
   listEntries,
-  registerWtAddAlias,
+  unsetWtAddAlias,
   resolveUserPath,
   sourceDir,
   trustCodexHooks,
@@ -131,8 +131,8 @@ async function main() {
 
   console.log('');
   console.log('---');
-  console.log('git wt-add alias 등록 중...');
-  registerWtAddAlias(console.log);
+  console.log('구버전 git wt-add alias 정리 중 (워크트리 복구는 self-heal hook이 전담)...');
+  unsetWtAddAlias(console.log);
 
   if (!targetArg) {
     console.log('');

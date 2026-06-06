@@ -17,7 +17,7 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
 - 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
 - `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
-- `sync:system`과 `sync:local-skills`는 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git wt-add`로 만들고, raw `git worktree add`를 썼다면 커밋 전에 `npm ci`와 `npm run prepare`를 실행한다.
+- `sync:system`과 `sync:local-skills`는 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git worktree add`·`EnterWorktree` 어느 쪽으로 만들어도 self-heal hook이 의존성·hook을 복구한다. 하네스 밖에서 직접 만든 워크트리는 커밋 전에 `npm ci`(또는 `npm run prepare`)를 실행한다.
 - 새 설치·동기화 대상을 추가하면 같은 커밋에서 `sync:<target>`, `unsync:<target>`, `package.json`, `meta/guides/<target>.md`, `meta/guides/index.md`, `meta/INSTALLATION_GUIDE.md`의 안내를 함께 맞춘다.
 - `unsync:*`는 AC가 만든 산출물만 제거해야 한다. 사용자 파일을 지울 가능성이 있으면 marker block, 상태 파일, 동일성 비교 중 하나로 AC 관리 여부를 확인한 뒤 제거한다.
 - 새 `sync:*` 구현은 같은 명령을 2회 이상 실행하는 검증과, 대응 `unsync:*` 후 잔여 AC 산출물이 없는지 확인하는 검증을 포함한다.
@@ -39,9 +39,9 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 
 ## AC worktree hook 준비
 
-- AC 작업용 worktree는 raw `git worktree add` 대신 `git wt-add` alias를 사용한다. 이 alias는 worktree 생성 후 의존성·Husky hook shim 준비까지 수행하는 진입점이다.
-- raw worktree를 이미 만들었거나 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. 이 명령은 `core.hooksPath`, `.husky/_/commit-msg`, `commitlint` 실행 파일을 확인하고 가능한 경우 `npm run prepare`로 복구한다.
-- `verify:hooks`가 실패한 worktree에서는 커밋하지 않는다. 먼저 `npm ci` 후 `npm run prepare`를 실행하고 다시 확인한다.
+- AC 작업용 worktree는 `git worktree add`(Bash)나 `EnterWorktree`(툴) 어느 쪽으로 만들어도, 직후 PostToolUse self-heal hook(`post-worktree-install` / `post-enterworktree-install`)이 새 워크트리에 의존성을 설치한다. `npm ci`가 husky `prepare`를 실행해 `.husky/_` shim과 `core.hooksPath`를 복구하므로 commitlint 우회가 막힌다.
+- self-heal은 하네스를 거친 워크트리 생성에만 발동한다. 하네스 밖(맨 터미널)에서 `git worktree add`를 직접 했다면 그 워크트리에서 `npm ci`(또는 `npm run prepare`)를 직접 실행한다.
+- 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. `core.hooksPath`, `.husky/_/commit-msg`, `commitlint` 실행 파일을 확인하고 가능하면 `npm run prepare`로 복구한다. 실패한 worktree에서는 `npm ci` 후 다시 확인하고 커밋한다.
 
 ## deploy/hooks 검증 원칙
 

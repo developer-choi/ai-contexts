@@ -693,12 +693,9 @@ function uninstallTarget(targetDir, options = {}) {
   return removed;
 }
 
-function registerWtAddAlias(log = console.log) {
-  const aliasValue = '!f() { branch="$1"; path="$2"; base="${3:-$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | sed s,^origin/,,)}"; base="${base:-master}"; git worktree add -b "$branch" "$path" "$base" || return $?; if [ -f "$path/package.json" ]; then ( cd "$path" && npm ci ); fi; }; f';
-  childProcess.execFileSync('git', ['config', '--global', 'alias.wt-add', aliasValue], { stdio: 'ignore' });
-  log('  OK   git wt-add 등록 완료 (사용법: git wt-add <branch> <path> [base])');
-}
-
+// 구버전에서 등록하던 글로벌 git wt-add alias를 제거한다. 워크트리 의존성 복구는
+// 이제 PostToolUse self-heal hook(post-worktree-install / post-enterworktree-install)이
+// 전담하므로 alias는 폐기한다. sync/unsync 모두에서 호출해 잔여 alias를 정리한다.
 function unsetWtAddAlias(log = console.log) {
   const result = childProcess.spawnSync('git', ['config', '--global', '--unset', 'alias.wt-add'], {
     stdio: 'ignore',
@@ -731,7 +728,7 @@ module.exports = {
   ensureDir,
   listEntries,
   mergeSettings,
-  registerWtAddAlias,
+  unsetWtAddAlias,
   repoDir,
   resolveUserPath,
   settingsManifestPath,

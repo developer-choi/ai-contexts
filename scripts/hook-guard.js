@@ -21,7 +21,7 @@ function ensureHooksReady() {
     'AC git hook 준비 상태가 올바르지 않습니다.',
     ...state.issues.map((issue) => `- ${issue}`),
     '',
-    '새 worktree에서는 git wt-add를 사용하세요. raw git worktree add를 사용했다면 npm ci 후 npm run prepare를 실행하세요.',
+    '하네스로 만든 worktree는 self-heal hook이 의존성을 자동 설치합니다. 자동 복구가 안 됐다면 이 worktree에서 npm ci 후 npm run prepare를 실행하세요.',
   ];
   throw new Error(lines.join('\n'));
 }
