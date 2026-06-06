@@ -395,9 +395,9 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 `[ready]` 항목을 tier-1부터 순서대로 실행하는 모드.
 
 1. backlog 워크트리에서 `backlog/this/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다. 호출 인자에 대상(파일명·섹션 식별자)이 있으면 매칭되는 항목으로 좁혀 그것부터 실행한다
-2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. AC worktree는 `git wt-add`를 쓴다 (master에서 임시 브랜치를 따고 의존성·hook 준비까지 수행):
+2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성·Husky hook을 자동 복구한다:
    ```
-   git wt-add backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-exec
+   git worktree add -b backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-exec origin/master
    ```
 3. **반영 여부 선확인**: 임시 워크트리에서 frontmatter `target` 경로(없으면 섹션이 지목하는 파일)를 읽고, 이 섹션이 요구하는 변경이 이미 반영돼 있는지 대조한다
    - **이미 반영됨**: 구현하지 않는다. 사용자에게 "이미 반영돼 건너뜀"을 보고하고 7번(정리)으로 건너뛴다. 8번에서 섹션 삭제는 동일하게 수행한다
