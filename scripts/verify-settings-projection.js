@@ -62,10 +62,15 @@ function main() {
   const codexPre = codex.filter((h) => h.event === 'PreToolUse');
   check(codexPre.length > 0 && codexPre.every((h) => h.matcher === '*'), 'codex: PreToolUse 전부 단일 * 매처');
   check(JSON.stringify(buildHooks(base.hooks, 'codex')).includes("'.codex','hooks'"), 'codex: command dir 토큰 .codex');
-  // codex는 prompt 이벤트 hook(surface-backlog)만 빠지고 나머지는 전부 등록
-  const promptFiles = base.hooks.filter((h) => h.event === 'UserPromptSubmit').map((h) => h.file);
-  check(baseFiles.filter((f) => !promptFiles.includes(f)).every((f) => codex.some((h) => h.file === f)),
-    'codex: UserPromptSubmit 외 모든 hook 등록됨');
+  // codex는 UserPromptSubmit 이벤트 hook(surface-backlog)과 EnterWorktree 전용 hook
+  // (codex엔 그 tool이 없음)만 빠지고 나머지는 전부 등록
+  const codexExcluded = base.hooks
+    .filter((h) => h.event === 'UserPromptSubmit' || h.on === 'enterworktree')
+    .map((h) => h.file);
+  check(baseFiles.filter((f) => !codexExcluded.includes(f)).every((f) => codex.some((h) => h.file === f)),
+    'codex: UserPromptSubmit·EnterWorktree 외 모든 hook 등록됨');
+  check(!codex.some((h) => h.file === 'post-enterworktree-install.js'),
+    'codex: EnterWorktree 전용 hook 미등록');
 
   if (failures.length) {
     console.error(`settings 생성 계약 검증 실패: ${failures.length}건`);

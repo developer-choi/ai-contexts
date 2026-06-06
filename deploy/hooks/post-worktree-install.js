@@ -1,13 +1,13 @@
-const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 const { readPayload, getCommand } = require("./hook-utils");
+const { installWorktreeDeps } = require("./worktree-install-core");
 
 const payload = readPayload();
 const command = getCommand(payload);
 if (!command) process.exit(0);
 
-const m = command.match(/\bgit\s+(?:worktree\s+add|wt-add)\b(.*)/);
+const m = command.match(/\bgit\s+worktree\s+add\b(.*)/);
 if (!m) process.exit(0);
 
 const argStr = m[1];
@@ -46,7 +46,6 @@ for (let i = 0; i < tokens.length; i++) {
   const t = tokens[i];
   if (t.startsWith("-")) {
     if (valueFlags.has(t)) i++;
-    if (t.startsWith("--reason=") || t.startsWith("--lock=")) {}
     continue;
   }
   wtPath = t;
@@ -67,61 +66,15 @@ if (cdMatch) {
 
 const absWtPath = path.isAbsolute(wtPath) ? wtPath : path.resolve(cwd, wtPath);
 
-if (!fs.existsSync(absWtPath)) process.exit(0);
-
-const pkgJsonPath = path.join(absWtPath, "package.json");
-if (!fs.existsSync(pkgJsonPath)) process.exit(0);
-
-if (fs.existsSync(path.join(absWtPath, "node_modules"))) process.exit(0);
-
-let pm = null;
-let installCmd = null;
-if (fs.existsSync(path.join(absWtPath, "pnpm-lock.yaml"))) {
-  pm = "pnpm";
-  installCmd = "pnpm install --frozen-lockfile";
-} else if (fs.existsSync(path.join(absWtPath, "yarn.lock"))) {
-  pm = "yarn";
-  installCmd = "yarn install --frozen-lockfile";
-} else if (fs.existsSync(path.join(absWtPath, "package-lock.json"))) {
-  pm = "npm";
-  installCmd = "npm ci";
-} else {
-  try {
-    const pkg = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
-    if (pkg.packageManager) {
-      const name = String(pkg.packageManager).split("@")[0];
-      if (name === "pnpm") {
-        pm = "pnpm";
-        installCmd = "pnpm install";
-      } else if (name === "yarn") {
-        pm = "yarn";
-        installCmd = "yarn install";
-      } else if (name === "npm") {
-        pm = "npm";
-        installCmd = "npm install";
-      }
-    }
-  } catch {}
-}
-if (!pm) process.exit(0);
-
-let result = "";
-let ok = false;
-try {
-  execSync(installCmd, { cwd: absWtPath, stdio: "pipe", timeout: 10 * 60 * 1000 });
-  ok = true;
-  result = `워크트리 의존성 설치 완료 (${pm}): ${absWtPath}`;
-} catch (e) {
-  const stderr = (e.stderr && e.stderr.toString()) || (e.stdout && e.stdout.toString()) || e.message || "";
-  result = `워크트리 의존성 설치 실패 (${pm} @ ${absWtPath}): ${stderr.slice(-400)}`;
-}
+const result = installWorktreeDeps(absWtPath);
+if (!result.ran) process.exit(0);
 
 process.stdout.write(
   JSON.stringify({
     hookSpecificOutput: {
       hookEventName: "PostToolUse",
-      additionalContext: result,
+      additionalContext: result.message,
     },
   }),
 );
-process.exit(ok ? 0 : 0);
+process.exit(0);
