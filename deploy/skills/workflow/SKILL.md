@@ -23,14 +23,16 @@ BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대
 
 워크플로우 6종 세션. 각 세션은 컨텍스트 격리.
 
-| 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 |
-|---|---|---|---|---|---|
-| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md / `background/consumable/`: project.md / `pr{N}/consumable/`: page.md (페이지별 분석) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무), 동일 `<모드>` 인자 / step-2 후 → PR_1_PLAN, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 |
-| **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 | BG `background/persistent/` (채용 원본) | `background/retained/folder-structure.md` (단계 1 산출) / PR1 워크트리에 **베이스 두 커밋만** (폴더 마이그레이션·코딩 스탠다드 마이그레이션) — **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 정상 도미노로 수행** / `background/consumable/project.md` PR1 섹션 갱신 (자연어 지시 박음) / markup 워크트리 최소 셋팅 | 단계 4 종료 후 → MARKUP (`/workflow MARKUP 채용`) + PR_1_PLAN (`/workflow PR_1_PLAN 채용`) | 단계별 cwd 분기 (메인 / PR1 / markup 워크트리) |
-| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | step-1.1 수집 figma·시안 자료 참조 (페이지·섹션·위젯·컴포넌트 단위) | **markup 워크트리의 figma 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + `background/retained/figma-url.md`·`figma/` (작성 입력) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** |
-| **PR_{N}_PLAN** | (N=1, 채용) FOUNDATION 종료 + BG.step-2 / (N=1, 실무) BG.step-2 / (N≥2) BG.step-2 + (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1} 머지) | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md** / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만) / `pr{N}/consumable/`: overview.md | step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 안 만든 경우 → PR_{N}_IMPL만 spawn | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 |
-| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-5 끝 후 → PR_{N}_WRITING | PR_{N} 워크트리. 본 PR 하나에 집중 |
-| **PR_{N}_WRITING** | PR_{N}_IMPL.step-5 종료 | implementation.md + 커밋 로그 + decisions.md + reference.md + `pr{N}/consumable/` 잔여 산출물 | `pr{N}/consumable/pr-body.md` (작성 후 PR 본문 복사 → 폐기) / overview.md 폐기 / `pr{N}/persistent/`는 제외 (영구 보존) | step-7 끝 후 → PR_{N} 머지 안내 (추상 명령 — 사용자가 write-refine 후 게시·머지). 머지 후 PR_{N+1}_PLAN spawn 안내 (PR_{N}이 stub 안 만든 경우) | 구현 맥락 없이 파일 기반으로 PR 본문 작성 |
+| 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 | (6) 권장 모델 |
+|---|---|---|---|---|---|---|
+| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md / `background/consumable/`: project.md / `pr{N}/consumable/`: page.md (페이지별 분석) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무), 동일 `<모드>` 인자 / step-2 후 → PR_1_PLAN, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 분할이 전 세션의 루트 결정, 오판이 도미노로 전파 |
+| **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 | BG `background/persistent/` (채용 원본) | `background/retained/folder-structure.md` (단계 1 산출) / PR1 워크트리에 **베이스 두 커밋만** (폴더 마이그레이션·코딩 스탠다드 마이그레이션) — **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 정상 도미노로 수행** / `background/consumable/project.md` PR1 섹션 갱신 (자연어 지시 박음) / markup 워크트리 최소 셋팅 | 단계 4 종료 후 → MARKUP (`/workflow MARKUP 채용`) + PR_1_PLAN (`/workflow PR_1_PLAN 채용`) | 단계별 cwd 분기 (메인 / PR1 / markup 워크트리) | **Sonnet** — 컨벤션 이식 정형 작업, 검수 쉬움 |
+| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | step-1.1 수집 figma·시안 자료 참조 (페이지·섹션·위젯·컴포넌트 단위) | **markup 워크트리의 figma 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + `background/retained/figma-url.md`·`figma/` (작성 입력) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only) — URL은 노드값이 정답이라 결정론적 번역, 캡처는 픽셀에서 레이아웃·간격·토큰 역추론 + reviewer도 캡처라 자기증명 루프 위험 |
+| **PR_{N}_PLAN** | (N=1, 채용) FOUNDATION 종료 + BG.step-2 / (N=1, 실무) BG.step-2 / (N≥2) BG.step-2 + (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1} 머지) | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md** / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만) / `pr{N}/consumable/`: overview.md | step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 안 만든 경우 → PR_{N}_IMPL만 spawn | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 다음 PR의 공개 계약, 오판 시 도미노 오염 |
+| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-5 끝 후 → PR_{N}_WRITING | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** (PLAN이 방침 확정 시) — PLAN이 알고리즘 판단을 미뤘으면 Opus |
+| **PR_{N}_WRITING** | PR_{N}_IMPL.step-5 종료 | implementation.md + 커밋 로그 + decisions.md + reference.md + `pr{N}/consumable/` 잔여 산출물 | `pr{N}/consumable/pr-body.md` (작성 후 PR 본문 복사 → 폐기) / overview.md 폐기 / `pr{N}/persistent/`는 제외 (영구 보존) | step-7 끝 후 → PR_{N} 머지 안내 (추상 명령 — 사용자가 write-refine 후 게시·머지). 머지 후 PR_{N+1}_PLAN spawn 안내 (PR_{N}이 stub 안 만든 경우) | 구현 맥락 없이 파일 기반으로 PR 본문 작성 | **Opus** — 구현 맥락 없이 파일만 보고 사용자 의도를 추론해 PR 본문에 녹여야 함, 의도 오독 비용 큼 |
+
+(6) 권장 모델은 **세션 구동 모델**(사용자가 `/workflow`로 띄우는 본 세션)이다. MARKUP·IMPL이 내부에서 spawn하는 reviewer 서브에이전트는 impl-review-loop의 자체 모델 분할(기계적 대조=Sonnet/Haiku, 깊은 품질 판단=Opus)을 따른다 — 본 칸과 별개.
 
 ### 의존성 그래프
 
@@ -68,7 +70,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 종료 시 LLM 절차:
 1. 표에서 자기 후속 명단 추출
 2. 각 후속의 선행 분해 — 자기 선행·방금 끝낸 step은 ✓ (자기 spawn 사실로 충족 추론), 병렬 세션 종료 항목은 미충족 가능 단서로 표시
-3. 후속별 spawn 가능 조건 안내 출력 (`/workflow <세션> <모드>` 인자 포함). 사용자가 단서 보고 spawn 판단
+3. 후속별 spawn 가능 조건 안내 출력 (`/workflow <세션> <모드>` 인자 포함). 표 (6) 권장 모델도 함께 출력 (예: "Opus 권장"). MARKUP은 입력 모달리티(figma URL이면 Sonnet / 캡처-only면 Opus)에 따라 분기 안내. 사용자가 단서 보고 spawn 판단
 4. 후속 spawn 안내 출력 직후, "이 세션은 종료되었습니다. 회고가 필요한 시점에 `/pre-exit` 호출하세요." 한 줄 안내. 보강·augmentation 디테일은 적지 않는다 (/pre-exit 내부 처리)
 
 ## 구조
