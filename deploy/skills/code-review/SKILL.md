@@ -46,7 +46,11 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
    | 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
    | UI 마크업, 접근성, UX | `web-design-guidelines` |
 
-   외부 스킬을 적용하는 리뷰는 **opus 모델**로 실행한다 (sonnet은 룰 적용·우리 컨벤션과의 충돌 판단에서 누락이 잦다).
+   외부 스킬을 적용하는 리뷰는 **sonnet 리뷰어**가 담당한다 (외부 스킬마다 sonnet 리뷰어 1명씩 — default는 단일 리뷰어가 함께 참조, advanced는 3단계 참고).
+
+   외부 스킬이 로컬에 설치돼 있지 않으면(`~/.claude/skills/<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다.
+
+   `--extra-standards`(사내 컨벤션)는 외부 스킬 로드를 트리거하지 않는다 — 외부 스킬 선별은 위 표의 리뷰 대상 도메인으로만 한다.
 
 5. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
 
@@ -62,16 +66,17 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 
 #### default 모드
 
-단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행한다.
+단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행하며, 1단계 4번에서 선별된 외부 스킬이 있으면 그 관점도 함께 적용한다.
 
 #### advanced 모드
 
 [CRITICAL] [team-agent](../../contexts/team-agent.md)의 규칙에 따라 팀을 구성한다.
 
-Coding-Standards Reviewer ×N (sonnet)과 Advanced Reviewer (opus)를 **병렬 실행**한다.
+Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
 - **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
-- **Advanced Reviewer**: diff만 전달, coding-standards 문서 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
+- **External-Skill Reviewer ×M**: 1단계 4번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 해당 스킬 `~/.claude/skills/<name>/SKILL.md`만 컨텍스트로 받아 그 관점으로 diff를 리뷰한다.
+- **Advanced Reviewer**: diff만 전달, coding-standards 문서·외부 스킬 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
 Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
 
