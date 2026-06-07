@@ -195,6 +195,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - DC = developer-choi (`~/WebstormProjects/my-else/developer-choi`)
 - PP = private-playground (`~/WebstormProjects/my-else/private-playground`)
 - TP = test-playground
+- AP = assignment-playground (`~/WebstormProjects/recruitment/assignment-playground`)
 
 ### 피드백 저장
 - Claude 내장 auto memory를 사용하지 않는다 (설정으로 비활성화됨).
