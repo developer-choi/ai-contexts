@@ -6,6 +6,10 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 # Skill Creator & Prompt Auditor
 
+## 목적
+
+스킬을 만들고 개선(통합·분리·재구조화·마이그레이션 포함)하며, 프롬프트 문서가 잘 쓰였는지 검증한다.
+
 [CRITICAL] [skill-creator](skill-creator)를 로드한다. Claude Code에서는 플러그인/스킬로, Codex에서는 시스템 스킬로 제공될 수 있다. 실패하면 즉시 중단하고 사용자에게 skill-creator 설치 또는 활성화가 필요하다고 안내한다.
 
 ## 스킬 생성/개선

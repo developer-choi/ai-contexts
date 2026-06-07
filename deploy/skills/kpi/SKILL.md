@@ -6,7 +6,10 @@ argument-hint: "[project] (생략 시 프로젝트 목록부터 시작)"
 
 # kpi
 
-세션 로그에서 사용자의 active time KPI를 추출하는 대화형 데이터 추출 도구다.
+## 목적
+
+Claude Code 세션 로그에서 사용자의 active time KPI를 추출한다.
+
 사용자와 대화하며 프로젝트와 세션을 탐색하고, 선택한 세션의 데이터를 정제해서 보여준다.
 
 ## 스크립트

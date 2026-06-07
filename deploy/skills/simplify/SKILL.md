@@ -6,6 +6,10 @@ argument-hint: "[init | 작업 단계]"
 
 # AI 행동 가이드
 
+## 목적
+
+라이브러리를 학습에 필요한 구현만 남겨 단순화한다.
+
 > **용어 정의**
 > - **SIMPLIFY_SOURCE**: 이 스킬 폴더 (`deploy/skills/simplify/`). 워크플로우, 패턴 참조, 문서 양식 등 규칙 파일이 있는 곳.
 > - **SIMPLIFY_TARGET**: 간소화 대상 프로젝트 (`simplified-[라이브러리명]`). 실제 코드를 읽고 단순화하는 작업 프로젝트.

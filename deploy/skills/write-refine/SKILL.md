@@ -6,7 +6,11 @@ argument-hint: <package-file-path>
 
 # write-refine — 다듬기 세션용
 
-write-init이 만든 패키지를 받아 톤·구조·분량을 다듬는다. 작업 히스토리는 없고, 패키지의 frontmatter가 유일한 컨텍스트 소스다.
+## 목적
+
+write-init이 만든 패키지의 톤·구조·분량을 다듬는다.
+
+작업 히스토리는 없고, 패키지의 frontmatter가 유일한 컨텍스트 소스다.
 
 ## 입력
 

@@ -5,6 +5,10 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 
 # Repo Sync
 
+## 목적
+
+내가 자주 쓰는 프로젝트들을 origin과 동기화한다.
+
 `~/WebstormProjects/main/*`, `~/WebstormProjects/my-else/*`, `~/WebstormProjects/simplify/*`의 1뎁스 디렉토리를 순회하며 각 레포의 현재 브랜치를 origin과 양방향 동기화한다. 컴퓨터 2대 이상에서 작업을 이어갈 때 미푸시 작업 유실을 막는 게 목적이다.
 
 ## 용어

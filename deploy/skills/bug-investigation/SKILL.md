@@ -5,6 +5,10 @@ description: 버그·성능 문제의 증상과 근본 원인(Root Cause)을 구
 
 # Bug Investigation
 
+## 목적
+
+버그·성능 문제의 증상과 근본 원인(Root Cause)을 구분해 분석하고 정리한다.
+
 버그·성능 문제의 **증상**과 **Root Cause**를 분석하여 정리합니다.
 
 ---
