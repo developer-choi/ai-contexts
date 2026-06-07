@@ -19,6 +19,7 @@ argument-hint: "[보강 키워드 (예: workflow) | 무인자 시 자동 감지]
 | 인자 / 감지 조건 | 보강 파일 |
 |---|---|
 | `workflow` 인자, 또는 `git diff --name-only` / `git log` 결과에 `plan/pr{N}/**` 변경 존재 | [augmentations/workflow.md](augmentations/workflow.md) |
+| `digest` 인자, 또는 본 세션 `/digest` 호출, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다. 신규 보강 파일을 추가할 때 본 표에 한 줄을 추가하면 분기에 합류한다.
 
