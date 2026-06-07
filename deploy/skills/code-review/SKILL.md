@@ -38,7 +38,7 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 1. 사용자에게 **리뷰 대상**을 확인받는다
 2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 탐색 절차를 따라 관련 rules·principles 파일을 선별·로드한다
 3. [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)를 읽고, 리뷰 대상과 관련된 구현 패턴이 있는지 확인한다. 관련 패턴이 있으면 해당 섹션도 로드한다
-4. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool, 서브에이전트는 `~/.claude/skills/<name>/SKILL.md`를 Read). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
+4. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool로 호출. 서브에이전트에 넘길 때는 메인이 형제 스킬 `../<name>/SKILL.md`를 읽어 그 내용을 전달한다). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
 
    | 리뷰 대상 | 외부 스킬 |
    |---|---|
@@ -48,7 +48,7 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 
    외부 스킬을 적용하는 리뷰는 **sonnet 리뷰어**가 담당한다 (외부 스킬마다 sonnet 리뷰어 1명씩 — default는 단일 리뷰어가 함께 참조, advanced는 3단계 참고).
 
-   외부 스킬이 로컬에 설치돼 있지 않으면(`~/.claude/skills/<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다.
+   외부 스킬이 설치돼 있지 않으면(Skill tool 목록에 없거나 형제 경로 `../<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다.
 
    `--extra-standards`(사내 컨벤션)는 외부 스킬 로드를 트리거하지 않는다 — 외부 스킬 선별은 위 표의 리뷰 대상 도메인으로만 한다.
 
@@ -75,7 +75,7 @@ coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
 Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
 - **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
-- **External-Skill Reviewer ×M**: 1단계 4번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 해당 스킬 `~/.claude/skills/<name>/SKILL.md`만 컨텍스트로 받아 그 관점으로 diff를 리뷰한다.
+- **External-Skill Reviewer ×M**: 1단계 4번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 메인이 전달한 해당 외부 스킬(`../<name>/SKILL.md`) 내용만 컨텍스트로 받아 그 관점으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff만 전달, coding-standards 문서·외부 스킬 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
 Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
