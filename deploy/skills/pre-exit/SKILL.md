@@ -20,6 +20,7 @@ argument-hint: "[보강 키워드 (예: workflow) | 무인자 시 자동 감지]
 |---|---|
 | `workflow` 인자, 또는 `git diff --name-only` / `git log` 결과에 `plan/pr{N}/**` 변경 존재 | [augmentations/workflow.md](augmentations/workflow.md) |
 | `digest` 인자, 또는 본 세션 `/digest` 호출, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
+| `write-refine` 인자, 또는 본 세션 `/write-refine` 호출 | [augmentations/write-refine.md](augmentations/write-refine.md) |
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
 
@@ -49,12 +50,6 @@ argument-hint: "[보강 키워드 (예: workflow) | 무인자 시 자동 감지]
 team-agent 규칙으로 띄운 활성 팀/서브에이전트가 있으면, 현재 런타임의 후속 지시 경로로 각 에이전트에게 세션 회고를 요청한다. 에이전트가 발견한 문제는 Step 1에 함께 포함한다. 수집 완료 후 현재 런타임에서 제공하는 종료/정리 수단으로 에이전트를 종료한다.
 
 활성 팀 에이전트가 없으면 이 하위 단계를 건너뛴다.
-
-### 0b. write-refine 사례 회수
-
-세션에서 `write-refine` 스킬이 호출됐으면, 메인이 누적한 (원본, 수정, 사유) 사례 목록을 사용자에게 보여준다. 이 사례는 Step 2에서 writing-guide에 규칙+before/after로 심는다.
-
-호출 이력이 없으면 이 하위 단계를 건너뛴다.
 
 ## Step 1. 문제 리스트업
 
