@@ -72,6 +72,11 @@ worker brief 첫줄에 명시 — 위반 사고(워커가 master에 직접 commi
 - 규칙 파일 수정 / roadmap 갱신은 **각 별도 commit**. 한 commit에 섞지 않음
 - 영역(global.md / coding-standards / writing-guide 등) 다르면 영역별 분리 commit
 
+## 벤치 산출물 정리
+
+- 벤치 산출물(`bench/` 하위 iteration·transcript·raw 출력)은 개발용 측정 흔적이다. **벤치 종료 후 삭제**한다 — 절대 커밋하지 않는다.
+- `bench/`는 .gitignore로 추적 차단돼 있다. 출력 경로를 바꿀 때 ignore 범위를 벗어나지 않는지 확인한다.
+
 ## 보류 항목 운영
 
 환경 상속·시나리오 부족·모델 업데이트 등으로 판정 보류된 항목은 결과 보고에 누적:
