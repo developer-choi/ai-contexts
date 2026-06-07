@@ -33,7 +33,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 ### 1. 컨텍스트 준비
 
-coding-standards 목록이 주입된 경우 이 단계를 건너뛴다.
+coding-standards 목록이 주입된 경우, **외부 스킬 선별(4번)을 제외한 나머지를 건너뛴다** (호출자가 이미 스탠다드를 정했으므로 재선별 불필요). 4번은 리뷰 대상 도메인(Next.js 등) 기준이라 coding-standards 주입 여부와 무관하게 항상 실행한다 — only-standards 모드는 어차피 3단계에서 자유 리뷰·외부 스킬 리뷰어를 실행하지 않으므로 좁은 스코프가 유지된다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
 2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 탐색 절차를 따라 관련 rules·principles 파일을 선별·로드한다
