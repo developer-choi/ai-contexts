@@ -11,4 +11,4 @@ GEMINI.md
 nul
 __pycache__/
 *.pyc
-bench/workspace/
+bench/
