@@ -1,6 +1,10 @@
-.claude/settings.json
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+# sync:local-system 산출물 (소스는 local/, 트래킹하지 않음)
+.claude/settings.json
+.claude/.settings.json.ac-keys
+.claude/hooks/
+.codex/
 .idea
 node_modules
 coverage

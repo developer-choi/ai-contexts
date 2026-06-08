@@ -127,4 +127,8 @@ function sameFile(left, right) {
   return fs.readFileSync(left).equals(fs.readFileSync(right));
 }
 
-main();
+module.exports = { unsyncLocalSkills: main };
+
+if (require.main === module) {
+  main();
+}

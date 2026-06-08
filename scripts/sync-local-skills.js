@@ -11,8 +11,8 @@ const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'my-else'),
 ];
 
-function main() {
-  ensureHooksReady();
+function main(opts = {}) {
+  if (opts.ensureHooks !== false) ensureHooksReady();
 
   const roots = process.argv.slice(2).map((root) => resolveUserPath(root));
   const scanRoots = roots.length > 0 ? roots : defaultRoots;
@@ -109,9 +109,13 @@ function shortSource(repo, file) {
   return path.relative(repo, file).replaceAll(path.sep, '/');
 }
 
-try {
-  main();
-} catch (error) {
-  console.error(error.message || error);
-  process.exit(1);
+module.exports = { syncLocalSkills: main };
+
+if (require.main === module) {
+  try {
+    main();
+  } catch (error) {
+    console.error(error.message || error);
+    process.exit(1);
+  }
 }

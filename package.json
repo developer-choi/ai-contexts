@@ -9,10 +9,11 @@
     "verify:environment": "node scripts/verify-environment.js",
     "sync:system": "node scripts/sync-system.js",
     "unsync:system": "node scripts/unsync-system.js",
-    "sync:local-skills": "node scripts/sync-local-skills.js",
-    "unsync:local-skills": "node scripts/unsync-local-skills.js",
+    "sync:local-system": "node scripts/sync-local-system.js",
+    "unsync:local-system": "node scripts/unsync-local-system.js",
     "verify:hooks": "node scripts/verify-hooks.js",
     "verify:settings": "node scripts/verify-settings-projection.js",
+    "verify:local-system": "node scripts/verify-local-system.js",
     "prepare": "husky"
   },
   "devDependencies": {
