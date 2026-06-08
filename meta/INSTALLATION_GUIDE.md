@@ -8,7 +8,7 @@
 npm ci
 npm run sync:environment
 npm run sync:system
-npm run sync:local-skills
+npm run sync:local-system
 ```
 
 ## 평소 갱신
@@ -19,10 +19,10 @@ npm run sync:local-skills
 npm run sync:system
 ```
 
-프로젝트 로컬 스킬 산출물까지 맞출 때는 로컬 스킬 동기화를 함께 실행합니다.
+프로젝트 로컬 산출물(로컬 스킬 + AC settings/hooks)까지 맞출 때는 로컬 시스템 동기화를 함께 실행합니다.
 
 ```bash
-npm run sync:local-skills
+npm run sync:local-system
 ```
 
 ## 제거
@@ -32,7 +32,7 @@ npm run sync:local-skills
 ```bash
 npm run unsync:environment
 npm run unsync:system
-npm run unsync:local-skills
+npm run unsync:local-system
 ```
 
 ## 상세 가이드
@@ -40,4 +40,4 @@ npm run unsync:local-skills
 - [가이드 인덱스](guides/index.md)
 - [환경 동기화](guides/environment.md)
 - [시스템 자산 동기화](guides/system.md)
-- [로컬 스킬 동기화](guides/local-skills.md)
+- [로컬 시스템 동기화](guides/local-system.md)

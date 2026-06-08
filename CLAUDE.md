@@ -40,7 +40,8 @@ md 파일 수정 직후:
 다음을 수정·추가할 때 [meta/deploy-conventions.md](meta/deploy-conventions.md)를 먼저 본다.
 
 - `scripts/sync-*.js`·`unsync-*.js` 또는 sync/unsync 타겟
-- `deploy/hooks/`의 정책 hook
+- `deploy/hooks/`(전역)·`local/hooks/`(AC 로컬)의 정책 hook
+- `deploy/base-settings.json`·`local/base-settings.json` 등 settings 생성 소스
 - settings.json의 PreToolUse/PostToolUse hook
 - AC 작업용 worktree 생성
 

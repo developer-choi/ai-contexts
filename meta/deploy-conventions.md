@@ -12,12 +12,22 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
 - `sync:system`은 시작 시 `verify:settings`(생성 계약)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
 
+## 로컬 settings projection (`local/` → repo-local)
+
+AC 전용 settings/hooks는 위 전역 메커니즘을 **그대로 미러링한 로컬판**으로 배포한다. 소스는 `local/`(전역 `deploy/`의 로컬판), 타겟은 repo-local `.claude/settings.json`·`.codex/hooks.json`이며, `sync:local-system`이 (로컬 스킬과 함께) 배포한다. 산출물은 gitignore한다.
+
+- **재사용**: `mergeSettings`(부분키 머지+`.ac-keys`)·`splitSettings`·`verifySettings`·`verifyJsonExact`는 `targetPath` 제네릭이라 그대로 쓴다(`scripts/local-deploy-lib.js`). `settings.json`은 통째 덮어쓰지 않고 부분키만 관리해 사용자 동적 필드를 보존한다.
+- **분기점은 어댑터뿐**: `settings-projection.js`의 `LOCAL_ADAPTERS`+`localHookCommand`. 전역과 달리 command가 repo-relative(`node .claude/hooks/<file>`)이고, codex 매처는 사용자가 codex로 검증한 `run_command`+`Bash`다(전역의 `*`는 프로젝트-로컬 발화 미검증). `buildHooks`는 `opts.adapters`/`opts.makeCommand`로 주입받고 매처 배열을 fan-out한다 — 전역 호출은 인자 없이 그대로 동작한다.
+- **생성 계약**: `verify:local-system`이 `sync:local-system` 시작 시 fail-fast한다. 배포 후 `verifySettings`(claude 부분키)+`verifyJsonExact`(codex whole-file)로 대조한다.
+- **codex trust**: 프로젝트-로컬 훅은 trusted여야 발화한다. best-effort로 `trustCodexHooks`를 시도하고, 실패 시 `/hooks` 수동 신뢰를 안내한다.
+- 새 로컬 hook은 `local/base-settings.json`에 논리 항목을 추가하고 `local/hooks/`에 `.js`를 둔다(인라인 금지, 전역과 동일). `unsync`·가이드(`meta/guides/local-system.md`)·같은 커밋 문서 정합은 전역과 같은 규칙을 따른다.
+
 ## 배포 스크립트 변경 원칙
 
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
 - 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
 - `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
-- `sync:system`과 `sync:local-skills`는 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git worktree add`·`EnterWorktree` 어느 쪽으로 만들어도 self-heal hook이 의존성·hook을 복구한다. 하네스 밖에서 직접 만든 워크트리는 커밋 전에 `npm ci`(또는 `npm run prepare`)를 실행한다.
+- `sync:system`과 `sync:local-system`은 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git worktree add`·`EnterWorktree` 어느 쪽으로 만들어도 self-heal hook이 의존성·hook을 복구한다. 하네스 밖에서 직접 만든 워크트리는 커밋 전에 `npm ci`(또는 `npm run prepare`)를 실행한다.
 - 새 설치·동기화 대상을 추가하면 같은 커밋에서 `sync:<target>`, `unsync:<target>`, `package.json`, `meta/guides/<target>.md`, `meta/guides/index.md`, `meta/INSTALLATION_GUIDE.md`의 안내를 함께 맞춘다.
 - `unsync:*`는 AC가 만든 산출물만 제거해야 한다. 사용자 파일을 지울 가능성이 있으면 marker block, 상태 파일, 동일성 비교 중 하나로 AC 관리 여부를 확인한 뒤 제거한다.
 - 새 `sync:*` 구현은 같은 명령을 2회 이상 실행하는 검증과, 대응 `unsync:*` 후 잔여 AC 산출물이 없는지 확인하는 검증을 포함한다.

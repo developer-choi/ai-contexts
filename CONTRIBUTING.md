@@ -14,7 +14,7 @@ cd ai-contexts
 npm ci
 npm run sync:environment
 npm run sync:system
-npm run sync:local-skills
+npm run sync:local-system
 ```
 
 수정 후 전역 에이전트 자산만 반영하려면 `npm run sync:system`을 다시 실행합니다. 전체 설치 흐름은 [Installation Guide](meta/INSTALLATION_GUIDE.md)를 따릅니다.

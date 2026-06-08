@@ -4,7 +4,7 @@
 
 - [환경 동기화](environment.md): 현재 사용자 환경을 AC 기준으로 맞춥니다.
 - [시스템 자산 동기화](system.md): Claude/Codex/Gemini 등 에이전트 시스템 자산을 AC 기준으로 맞춥니다.
-- [로컬 스킬 동기화](local-skills.md): 각 프로젝트의 로컬 스킬 산출물을 맞춥니다.
+- [로컬 시스템 동기화](local-system.md): 로컬 스킬(cross-repo)과 AC settings/hooks를 한 명령으로 맞춥니다.
 
 ## 명령 이름 기준
 
@@ -12,6 +12,7 @@
 - `unsync:*`: 대응하는 `sync:*`가 만든 AC 관리 산출물만 제거합니다.
 - `verify:hooks`: AC worktree의 Husky/commitlint 준비 상태를 확인합니다. 새 worktree에서 커밋하기 전에 실행합니다.
 - `verify:settings`: `deploy/base-settings.json`에서 타겟별 설정을 생성하는 계약을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
+- `verify:local-system`: `local/base-settings.json`에서 repo-local 설정을 생성하는 계약을 확인합니다. `sync:local-system`이 시작 시 자동 실행합니다.
 
 ## 새 대상 추가 기준
 
