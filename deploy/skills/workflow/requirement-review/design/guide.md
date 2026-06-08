@@ -2,6 +2,8 @@
 
 기획서 리뷰(planning)의 산출물(page.md, global.md)이 이미 있으면 보완하고, 없으면 디자인 시안을 기반으로 신규 생성한다.
 
+**개인 모드**는 디자인 시안이 없다 — 시안을 분석하는 대신 사용자와 **함께 디자인을 정의**한다 (AI 제안 + 사용자 공동 승인). 디자인↔기획서 불일치 대조 대신, 정의한 내용을 page.md/global.md에 반영하고 사용자 확인을 받는다. 시각 충실도는 MARKUP의 사용자 시각 확인이 담당하므로([conventions/session/markup/personal.md](../../conventions/session/markup/personal.md)) 본 단계는 의도·구조 정의에 집중한다.
+
 ## 슬롯
 
 ### 준비 방식

@@ -1,7 +1,7 @@
 ---
 name: workflow
 description: 기획서, 피그마, 피그마 디자인토큰, 채용과제를 PR로 변환하는 워크플로우. 배경 파악 → PR 분할 → 구현 → 코드리뷰 → PR 작성까지 단계별 진행. 커밋, PR 작성, 코드리뷰 요청 시 반드시 이 스킬을 사용한다.
-argument-hint: <세션 이름> <채용|실무>
+argument-hint: <세션 이름> <채용|실무|개인>
 ---
 
 # 워크플로우
@@ -16,10 +16,10 @@ argument-hint: <세션 이름> <채용|실무>
 
 `/workflow <세션 이름> <모드>`
 
-- 세션 이름 디폴트 `BG`. 모드 디폴트 없음 (사용자가 명시 전달 — 채용/실무 분기 영향이 크므로 디폴트 추론 위험).
+- 세션 이름 디폴트 `BG`. 모드 디폴트 없음 (사용자가 명시 전달 — 채용/실무/개인 분기 영향이 크므로 디폴트 추론 위험).
 - 세션 이름: `BG` / `FOUNDATION` / `MARKUP` / `PR_{N}_PLAN` / `PR_{N}_IMPL` / `PR_{N}_WRITING`
-- 모드: `채용` / `실무`
-- 호출 예: `/workflow BG 채용`, `/workflow MARKUP 실무`, `/workflow PR_2_PLAN 채용`
+- 모드: `채용` / `실무` / `개인`
+- 호출 예: `/workflow BG 채용`, `/workflow MARKUP 실무`, `/workflow PR_2_PLAN 개인`
 
 BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대로 포함한다 (다음 세션 시작 시 사용자가 같은 모드 인자로 spawn). 모드 자동 감지(폴더 검사 등) 사용 X.
 
@@ -29,10 +29,10 @@ BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대
 
 | 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 | (6) 권장 모델 |
 |---|---|---|---|---|---|---|
-| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md / `background/consumable/`: project.md / `pr{N}/consumable/`: page.md (페이지별 분석) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무), 동일 `<모드>` 인자 / step-2 후 → PR_1_PLAN, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 분할이 전 세션의 루트 결정, 오판이 도미노로 전파 |
+| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md / `background/consumable/`: project.md / `pr{N}/consumable/`: page.md (페이지별 분석) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무·개인), 동일 `<모드>` 인자 / step-2 후 → PR_1_PLAN, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 분할이 전 세션의 루트 결정, 오판이 도미노로 전파 |
 | **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 | BG `background/persistent/` (채용 원본) | `background/retained/folder-structure.md` (단계 1 산출) / PR1 워크트리에 **베이스 두 커밋만** (폴더 마이그레이션·코딩 스탠다드 마이그레이션) — **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 정상 도미노로 수행** / `background/consumable/project.md` PR1 섹션 갱신 (자연어 지시 박음) / markup 워크트리 최소 셋팅 | 단계 4 종료 후 → MARKUP (`/workflow MARKUP 채용`) + PR_1_PLAN (`/workflow PR_1_PLAN 채용`) | 단계별 cwd 분기 (메인 / PR1 / markup 워크트리) | **Sonnet** — 컨벤션 이식 정형 작업, 검수 쉬움 |
-| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | step-1.1 수집 figma·시안 자료 참조 (페이지·섹션·위젯·컴포넌트 단위) | **markup 워크트리의 figma 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + `background/retained/figma-url.md`·`figma/` (작성 입력) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only) — URL은 노드값이 정답이라 결정론적 번역, 캡처는 픽셀에서 레이아웃·간격·토큰 역추론 + reviewer도 캡처라 자기증명 루프 위험 |
-| **PR_{N}_PLAN** | (N=1, 채용) FOUNDATION 종료 + BG.step-2 / (N=1, 실무) BG.step-2 / (N≥2) BG.step-2 + (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1} 머지) | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md** / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만) / `pr{N}/consumable/`: overview.md | step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 안 만든 경우 → PR_{N}_IMPL만 spawn | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 다음 PR의 공개 계약, 오판 시 도미노 오염 |
+| **MARKUP** | (채용) FOUNDATION 단계 4 종료 / (실무·개인) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | (채용·실무) step-1.1 수집 figma·시안 자료 / (개인) 공동 정의 기획 md — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) 공동 정의 기획 md | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) — URL은 노드값이 정답이라 결정론적 번역, 캡처·개인은 디자인을 픽셀/의도에서 역추론 + 자기증명 루프 위험 |
+| **PR_{N}_PLAN** | (N=1, 채용) FOUNDATION 종료 + BG.step-2 / (N=1, 실무·개인) BG.step-2 / (N≥2) BG.step-2 + (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1} 머지) | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md** / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / `pr{N}/consumable/`: overview.md | step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 안 만든 경우 → PR_{N}_IMPL만 spawn | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 다음 PR의 공개 계약, 오판 시 도미노 오염 |
 | **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-5 끝 후 → PR_{N}_WRITING | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** (PLAN이 방침 확정 시) — PLAN이 알고리즘 판단을 미뤘으면 Opus |
 | **PR_{N}_WRITING** | PR_{N}_IMPL.step-5 종료 | implementation.md + 커밋 로그 + decisions.md + reference.md + `pr{N}/consumable/` 잔여 산출물 | `pr{N}/consumable/pr-body.md` (작성 후 PR 본문 복사 → 폐기) / overview.md 폐기 / `pr{N}/persistent/`는 제외 (영구 보존) | step-7 끝 후 → PR_{N} 머지 안내 (추상 명령 — 사용자가 write-refine 후 게시·머지). 머지 후 PR_{N+1}_PLAN spawn 안내 (PR_{N}이 stub 안 만든 경우) | 구현 맥락 없이 파일 기반으로 PR 본문 작성 | **Opus** — 구현 맥락 없이 파일만 보고 사용자 의도를 추론해 PR 본문에 녹여야 함, 의도 오독 비용 큼 |
 
@@ -54,7 +54,7 @@ PR_{N}_PLAN.step-4 stub 안 만든 경우 ──→ PR_{N}_IMPL ──→ PR_{N}
 PR_{N}_IMPL은 MARKUP 워크트리의 검증된 페이지 마크업 코드를 그대로 가져옴 (재작성 X).
 ```
 
-**실무:**
+**실무·개인:**
 
 ```
 BG.step-1.1 ──→ MARKUP
@@ -62,6 +62,8 @@ BG.step-2 ────→ PR_1_PLAN
 
 PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일.
 ```
+
+개인은 그래프가 실무와 동일하다. 차이는 MARKUP의 디자인 검사뿐 — figma 대조 대신 사용자 시각 확인([conventions/session/markup/personal.md](conventions/session/markup/personal.md)).
 
 ### 세션 spawn 안내 메커니즘
 
@@ -82,13 +84,14 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 - 각 step은 조건에 해당하는 **하위 스킬을 모두 로드**하는 오케스트레이터이거나, 그 자체가 실행 로직
 - 해당 스킬이 여러 개이면 **순서대로 하나씩** 실행한다 (동시 로드 불가)
 - 각 step의 **산출물이 다음 step의 입력** — step마다 "참고 자료"로 입력 산출물이 명시되어 있음
-- 하위 스킬은 워크플로우 세션의 절차(step 또는 step 없는 세션 본문) 안에서만 호출된다 (독립 호출 없음). 예: MARKUP은 step 없이 본문(markup.md)에서 impl-review-loop를 호출
-- FOUNDATION·MARKUP은 step 번호가 없는 세션 — 본문은 [conventions/session/foundation.md](conventions/session/foundation.md) / [conventions/session/markup.md](conventions/session/markup.md) 단일 출처
+- 하위 스킬은 워크플로우 세션의 절차(step 또는 step 없는 세션 본문) 안에서만 호출된다 (독립 호출 없음). 예: MARKUP은 step 없이 본문(markup/)에서 impl-review-loop를 호출
+- FOUNDATION·MARKUP은 step 번호가 없는 세션 — 본문은 [conventions/session/foundation.md](conventions/session/foundation.md) / [conventions/session/markup/index.md](conventions/session/markup/index.md)(모드 공통) + 모드 파일([figma.md](conventions/session/markup/figma.md)·[personal.md](conventions/session/markup/personal.md)) 단일 출처
 
 ## 시작 전 준비
 
 - `template/context-setup.md` 양식으로 레포지토리 Context 수집
   - **실무 프로젝트**: 필수
+  - **개인 프로젝트**: 선택 (권장 — 기존 레포면 제약 정리에 도움)
   - **채용 과제 등**: 생략 가능
 
 ## /plan/ 폴더 구조
@@ -97,7 +100,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 
 ## 작업 진행 순서
 
-각 세션의 step 매핑. FOUNDATION·MARKUP은 [conventions/session/foundation.md](conventions/session/foundation.md) / [conventions/session/markup.md](conventions/session/markup.md) 참조.
+각 세션의 step 매핑. FOUNDATION·MARKUP은 [conventions/session/foundation.md](conventions/session/foundation.md) / [conventions/session/markup/index.md](conventions/session/markup/index.md) 참조.
 
 ### BG (Step 1~2)
 

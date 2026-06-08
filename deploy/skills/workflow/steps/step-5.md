@@ -24,7 +24,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 [CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
-step-5는 로직 구현자와 리뷰어로 팀을 구성한다 — 마크업은 MARKUP 세션에서 figma 0건으로 검증 완료된 코드를 가져오므로 본 step은 로직 전용이다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
+step-5는 로직 구현자와 리뷰어로 팀을 구성한다 — 마크업은 MARKUP 세션에서 디자인 진실 원천 0건으로 검증 완료된 코드(채용·실무 figma 대조 / 개인 사용자 시각 확인)를 가져오므로 본 step은 로직 전용이다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합
@@ -75,7 +75,7 @@ IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventi
 
 IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(stub·it.todo, 마크업의 figma 자료)을 그대로 두고 진행하지 않는다. 변경분을 명시 처리하지 않으면 이후 GAP Analysis·검증 라운드에서도 잡히지 않는다.
 
-- **디자인 변경** — 마크업의 진실 원천(figma)이 바뀐 것이다. 변경된 단위의 figma 자료를 [conventions/plan-folder.md](../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 절차로 재수령하고, 마크업은 MARKUP 세션이 figma 원본 기준으로 담당하므로 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. 본 PR의 `markup.md`(사용자 시각 대조용)도 새 URL로 갱신한다.
+- **디자인 변경** — 마크업의 진실 원천이 바뀐 것이다. (채용·실무) 변경된 단위의 figma 자료를 [conventions/plan-folder.md](../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 절차로 재수령하고, 마크업은 MARKUP 세션이 figma 원본 기준으로 담당하므로 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. 본 PR의 `markup.md`(사용자 시각 대조용)도 새 URL로 갱신한다. (**개인 모드**) figma가 없으니 사용자와 디자인을 다시 정의하고, MARKUP에서 사용자 시각 확인으로 재검증한 뒤 가져온다 — markup.md 갱신 단계는 없다.
 - **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다(이 step 서두의 "계획에 문제가 있으면 보고" 원칙). AI 단독으로 stub·it.todo를 뒤집지 않는다 — SKILL.md 「입력 산출물 비판적 검토」의 결정 위임 형태. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
 
 ---

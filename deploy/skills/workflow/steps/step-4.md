@@ -28,7 +28,7 @@ Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**한다. 소비된 원본은 삭제한다 (`read-only/` 하위는 삭제하지 않는다).
 
-컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 figma 0건으로 완성하므로 **step-4의 stub 대상이 아니다.** 완성 마크업은 MARKUP 워크트리의 **검증된 페이지 파일을 그대로 PR 워크트리로 가져온다**(재작성 금지 — figma 검증본이 PR마다 어긋나지 않게. 배치 경로만 판단). PR 로직은 가져온 마크업 파일을 **수정하지 않고 별도 파일**(hook·컨테이너 등)에서 import·합성해 얹는다 — 디자인 변경으로 마크업을 다시 가져와도 로직이 덮이지 않도록(재수령은 Step 5.2.3). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다. MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
+컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 디자인 진실 원천 0건으로 완성하므로(채용·실무 figma 대조 / 개인 사용자 시각 확인) **step-4의 stub 대상이 아니다.** 완성 마크업은 MARKUP 워크트리의 **검증된 페이지 파일을 그대로 PR 워크트리로 가져온다**(재작성 금지 — 검증본이 PR마다 어긋나지 않게. 배치 경로만 판단). PR 로직은 가져온 마크업 파일을 **수정하지 않고 별도 파일**(hook·컨테이너 등)에서 import·합성해 얹는다 — 디자인 변경으로 마크업을 다시 가져와도 로직이 덮이지 않도록(재수령은 Step 5.2.3). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 (**개인 모드는 figma·markup.md 없음 — 로직·조립 구조 참조만**). MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
 
 ---
 
@@ -86,7 +86,7 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (PR이 만들 **외부 공개 모듈은 필수**. 내부 헬퍼는 권장). 컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인값)은 MARKUP 완성본을 가져오므로 stub 대상 아님 | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
-| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당, SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함 |
+| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당, SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함. **개인 모드는 figma가 없어 생성 안 함** ([conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md)) |
 | `implementation.md` | `pr{N}/persistent/` | 구현 순서·방침·`@deprecated` 흐름·it.todo 매핑·회귀 체크리스트 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.

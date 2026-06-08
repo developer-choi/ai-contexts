@@ -46,6 +46,8 @@
 
 [output-template.md](./output-template.md)의 page.md 템플릿으로 `/plan/pr{N}/consumable/page.md`를 생성합니다. 페이지 자료는 step-1.1이 수집해 `background/retained/figma/`·`background/retained/figma-url.md`에 저장한 것을 참조합니다 — **처음부터 다시 요청하지 않습니다**. 빠진 페이지가 있으면 그것만 콕 집어 요청하고, 받으면 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책대로 같은 위치에 추가합니다.
 
+**개인 모드**는 외부 제공 자료가 없습니다 — 받아서 분석하는 대신 사용자와 **함께 스펙을 정의**합니다 (AI가 page.md 초안 작성 + 사용자 공동 승인). 이후 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 자료"가 아니라 "사용자와 합의한 정의"입니다.
+
 - 이미지가 5개 이상이면 사용자에게 리뷰 대상이 아닌 것은 제거하라고 안내합니다.
 - 현재 리뷰 대상과 관련 없어 보이는 자료가 있으면 사용자에게 알립니다.
 
