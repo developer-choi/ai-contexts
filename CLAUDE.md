@@ -106,7 +106,7 @@ md 파일 수정 직후:
   - `tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
 - `backlog/projects/{project}/{topic}/` — 외부 레포(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리 (tier·Ready 게이트·리뷰/실행 모드 미적용 비-트래커). destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
   - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이). 외부 레포 작업이라 AC 실행 모드 대상 아님
-  - `{topic}/index.md` — 주제 내 item 목록 + read-later References. 나중에 읽을 참고 링크는 `## References`에 적재한다 (item 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별로 모은다
+  - `{topic}/index.md` — read-later References 전용. item 목차(파일 목록·요약 표)는 두지 않는다. 나중에 읽을 참고 링크를 `## References`에 적재한다 (item 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별로 모은다. References가 없으면 index.md를 두지 않는다
 - `backlog/articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (tier·Ready 게이트·리뷰/실행 모드 미적용 — projects/와 같은 비-트래커)
   - `{slug}.md`, 재료가 커지면 `{slug}/` 디렉토리로 승격. 인덱스 파일은 두지 않는다(비-트래커 + 발행 시 삭제 → 순배럴)
   - projects/(내부 작업·지식)와 구분: 발행 의도가 있는 외부 공개용 재료다. 발행되면 파일을 삭제한다 (발행 이력 미보존)

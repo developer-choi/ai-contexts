@@ -183,7 +183,7 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — Phase 1
 
 ### 마무리
 
-- 파일 구성이 바뀐 주제는 `backlog/projects/{project}/{topic}/index.md`를 갱신한다.
+- `this/tier-{n}/index.md` 현황표는 항목이 변동된 tier만 갱신한다. `projects/{topic}/index.md`는 References 전용이라 파일 구성이 바뀌어도 갱신하지 않는다 (item 목차 아님).
 - 백로그 워크트리에서 수행하고 backlog 브랜치에 커밋한다 (`/backlog`의 「브랜치 관리」).
 - 정비 후 `/backlog`의 「보고」 형식으로 분리·통합·이동·삭제 내역을 사용자에게 보고한다.
 

@@ -305,7 +305,7 @@ scope: global (deploy/ 전체 스캔)
 - **Ready 게이트 미적용** — 자족성 검증을 강제하지 않는다
 - **상태 라벨 선택적** — `[ideation]` 등을 붙일 수 있으나 필수 아니다
 
-`backlog/projects/{project}/{topic}/index.md`는 해당 주제 내 누적 item 인덱스 + read-later References로 둔다.
+`backlog/projects/{project}/{topic}/index.md`는 read-later References 전용이다. item 목차(파일 목록·요약 표)는 만들지 않는다 — 항목은 각 `{item}.md`에 살고, 조망이 필요하면 `ls`/`grep`으로 즉석 생성한다. References가 없으면 index.md를 두지 않는다.
 
 #### read-later 참고 링크
 
