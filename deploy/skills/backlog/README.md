@@ -1,6 +1,6 @@
 # Backlog
 
-스킬·프로젝트 작업 아이디어와 코드 주제 사고 흔적을 수집·분류·정리하는 스킬입니다. `/backlog` 슬래시로 명시 호출할 때만 동작합니다.
+AC 작업 아이디어와 외부 레포(KA·MP 등) 작업·지식·참고를 수집·분류·정리하는 스킬입니다. `/backlog` 슬래시로 명시 호출할 때만 동작합니다.
 
 ## 왜 만들었나요?
 
@@ -12,14 +12,13 @@
 
 ## 영역 분리
 
-백로그는 네 영역으로 나뉩니다.
+백로그는 세 영역으로 나뉩니다.
 
 - `backlog/this/` — AC 자체 작업 (스킬·룰·컨텍스트). tier·Ready 게이트 적용.
-- `backlog/projects/{project}/` — 타 프로젝트(MP, DC 등) 전용 작업. tier 없음, Ready 게이트 미적용.
-- `backlog/topics/{topic}/` — 코드 주제(react, error, zod 등) 사고 흔적. tier 없음, Ready 게이트 미적용.
+- `backlog/projects/{project}/` — 외부 레포(KA·MP·DC 등) 작업·지식·참고. tier 없음, Ready 게이트 미적용.
 - `backlog/articles/{slug}/` — 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
 
-`this`는 할 일 트래커이고, `projects`·`topics`·`articles`는 비-트래커입니다. `topics`는 내부 사고 흔적, `articles`는 외부 발행용 재료입니다.
+`this`는 할 일 트래커이고, `projects`·`articles`는 비-트래커입니다. `projects`는 외부 레포 작업·지식, `articles`는 외부 발행용 재료입니다.
 
 ## Ready 게이트와 critic
 
