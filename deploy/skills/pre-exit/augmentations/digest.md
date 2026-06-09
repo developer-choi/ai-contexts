@@ -39,7 +39,7 @@
 
 발견한 번복은 두 갈래로 처리한다:
 
-- **digest 고유 — 학습가치 기준 정교화**: keep/skip 유형 교정을 `knowledge-archive/.claude/skills/digest/SKILL.md` §4 「스킵 판단」에 반영한다. 반영 전 아래 **일반화 우선 원칙**을 적용한다.
+- **digest 고유 — 학습가치 기준 정교화**: keep/skip 유형 교정을 `knowledge-archive/local/skills/digest/SKILL.md` §4 「스킵 판단」에 반영한다. 반영 전 아래 **일반화 우선 원칙**을 적용한다.
 - **일반화되는 선호**: keep/skip이 아니라 "제안 형식·범위·위계" 같은 일반 선호 신호면, pre-exit 본 절차 Step 1 「제안 거부 신호 수집」으로 보내 일반 경로로 처리한다 (digest 고유가 아님).
 
 ### 일반화 우선 원칙

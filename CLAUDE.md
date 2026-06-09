@@ -48,8 +48,8 @@ md 파일 수정 직후:
 ## 로컬 스킬 원본 기준
 
 - 프로젝트 로컬 스킬의 원본은 `local/skills/`이다.
-- `.agents/` 하위 로컬 스킬은 `local/skills/`에서 배포된 산출물로 간주한다.
-- 로컬 스킬을 수정해야 하면 `.agents/`를 직접 수정하지 않고 `local/skills/` 원본을 수정한 뒤 배포한다.
+- `.claude/skills/`(Claude가 읽음)와 `.agents/skills/`(Codex가 읽음)는 `local/skills/`에서 배포된 산출물로 간주한다 (gitignore).
+- 로컬 스킬을 수정해야 하면 산출물(`.claude/skills/`·`.agents/skills/`)을 직접 수정하지 않고 `local/skills/` 원본을 수정한 뒤 배포한다.
 - 전역 스킬은 `deploy/`에서 Claude와 Codex 타겟으로 함께 배포되므로 이 제약과 구분한다.
 
 ## 폴더 규칙

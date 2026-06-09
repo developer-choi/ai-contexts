@@ -37,19 +37,37 @@ function main() {
   printResults(results);
 }
 
+// sync-local-skills.js와 동일 규칙: local/ 하위에서 claude·codex 공통 배포 디렉토리(hooks 제외).
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
+
+function localDeployDirs(repo) {
+  const localDir = path.join(repo, 'local');
+  if (!existsDir(localDir)) return [];
+  return fs
+    .readdirSync(localDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !LOCAL_DEPLOY_EXCLUDE.has(entry.name))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
 function unsyncRepo(repo) {
   try {
     const removed = [];
-    const localSkills = path.join(repo, 'local', 'skills');
-    const agentsSkills = path.join(repo, '.agents', 'skills');
+    const deployDirs = localDeployDirs(repo);
+    const claudeDir = path.join(repo, '.claude');
     const agentsDir = path.join(repo, '.agents');
 
-    if (existsDir(agentsSkills)) {
-      if (existsDir(localSkills) && comparePaths(localSkills, agentsSkills)) {
-        fs.rmSync(agentsSkills, { recursive: true, force: true });
-        removed.push('.agents/skills');
-      } else {
-        return { repo, status: 'skipped', detail: '.agents/skills differs from local/skills' };
+    for (const name of deployDirs) {
+      const source = path.join(repo, 'local', name);
+      for (const [label, base] of [['.claude', claudeDir], ['.agents', agentsDir]]) {
+        const target = path.join(base, name);
+        if (!existsDir(target)) continue;
+        if (existsDir(source) && comparePaths(source, target)) {
+          fs.rmSync(target, { recursive: true, force: true });
+          removed.push(`${label}/${name}`);
+        } else {
+          return { repo, status: 'skipped', detail: `${label}/${name} differs from local/${name}` };
+        }
       }
     }
 
@@ -80,7 +98,7 @@ function unsyncRepo(repo) {
     }
 
     if (removed.length === 0) {
-      return { repo, status: 'skipped', detail: 'no generated local skills' };
+      return { repo, status: 'skipped', detail: 'no generated local artifacts' };
     }
 
     return { repo, status: 'removed', detail: removed.join(', ') };

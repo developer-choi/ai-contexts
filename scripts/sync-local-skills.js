@@ -44,23 +44,40 @@ function main(opts = {}) {
   }
 }
 
+// local/ 하위에서 claude·codex 공통으로 배포하는 디렉토리. hooks는 settings projection이
+// .claude/hooks·.codex/hooks로 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
+
+function localDeployDirs(repo) {
+  const localDir = path.join(repo, 'local');
+  if (!existsDir(localDir)) return [];
+  return fs
+    .readdirSync(localDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !LOCAL_DEPLOY_EXCLUDE.has(entry.name))
+    .map((entry) => entry.name)
+    .sort((a, b) => a.localeCompare(b));
+}
+
 function syncRepo(repo) {
-  const localSkills = path.join(repo, 'local', 'skills');
+  const deployDirs = localDeployDirs(repo);
   const claudeAgents = resolveClaudeAgents(repo);
-  const hasSkills = existsDir(localSkills);
   const hasAgents = claudeAgents !== null;
 
-  if (!hasSkills && !hasAgents) {
-    return { repo, status: 'skipped', detail: 'no local/skills or CLAUDE.md' };
+  if (deployDirs.length === 0 && !hasAgents) {
+    return { repo, status: 'skipped', detail: 'no local/ deploy dirs or CLAUDE.md' };
   }
 
   try {
     const synced = [];
+    const claudeDir = path.join(repo, '.claude');
     const agentsDir = path.join(repo, '.agents');
-    if (hasSkills) {
+    for (const name of deployDirs) {
+      const source = path.join(repo, 'local', name);
+      ensureDir(claudeDir);
       ensureDir(agentsDir);
-      copyPath(localSkills, path.join(agentsDir, 'skills'));
-      synced.push('local/skills -> .agents/skills');
+      copyPath(source, path.join(claudeDir, name));
+      copyPath(source, path.join(agentsDir, name));
+      synced.push(`local/${name} -> .claude/${name}, .agents/${name}`);
     }
     if (hasAgents) {
       copyPath(claudeAgents, path.join(repo, 'AGENTS.md'));

@@ -4,6 +4,7 @@
 .claude/settings.json
 .claude/.settings.json.ac-keys
 .claude/hooks/
+.claude/skills/
 .codex/
 .idea
 node_modules

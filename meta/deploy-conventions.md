@@ -22,6 +22,15 @@ AC 전용 settings/hooks는 위 전역 메커니즘을 **그대로 미러링한 
 - **codex trust**: 프로젝트-로컬 훅은 trusted여야 발화한다. best-effort로 `trustCodexHooks`를 시도하고, 실패 시 `/hooks` 수동 신뢰를 안내한다.
 - 새 로컬 hook은 `local/base-settings.json`에 논리 항목을 추가하고 `local/hooks/`에 `.js`를 둔다(인라인 금지, 전역과 동일). `unsync`·가이드(`meta/guides/local-system.md`)·같은 커밋 문서 정합은 전역과 같은 규칙을 따른다.
 
+## 로컬 자산 배포 (`local/<X>` → `.claude/<X>`·`.agents/<X>`)
+
+settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 같은 내용을 쓰므로 타겟별 투영 없이 **동일 복사**한다. `sync:local-system`이 `local/` 하위 디렉토리(`hooks` 제외 — settings projection이 따로 투영)를 `.claude/<X>`와 `.agents/<X>` 양쪽으로 배포한다(`scripts/sync-local-skills.js`).
+
+- **원본은 `local/<X>`**, `.claude/<X>`·`.agents/<X>`는 gitignore 산출물. 산출물 직접 수정 금지.
+- 새 자산 종류를 추가하려면 `local/`에 디렉토리만 두면 된다 — sync가 일반 순회하므로 스크립트 수정 불필요. settings/hooks처럼 타겟별로 갈리는 자산만 projection 어댑터가 필요하다.
+- `unsync`는 원본과 동일성 비교(`comparePaths`)가 통과한 산출물만 제거한다(사용자 수정분 보존).
+- 새 자산 종류를 `local/`에 추가하면 그 레포 `.gitignore`에 `.claude/<X>/` 항목을 더한다(`.agents/`는 통째 ignore되어 추가 불필요).
+
 ## 배포 스크립트 변경 원칙
 
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.

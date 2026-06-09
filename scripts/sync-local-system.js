@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // AC 로컬 배포(전역 sync:system의 로컬판). 한 명령으로 로컬 산출물 전부를 배포한다:
-//   1) 로컬 스킬: 각 레포 .claude/skills → .agents/skills, CLAUDE.md → AGENTS.md·GEMINI.md
+//   1) 로컬 자산(스킬 등): 각 레포 local/<X> → .claude/<X>·.agents/<X> (claude·codex 공통),
+//      CLAUDE.md → AGENTS.md·GEMINI.md. hooks는 2)가 따로 투영하므로 제외.
 //   2) AC settings/hooks: local/ 소스 → repo-local .claude/settings.json·.codex/hooks.json
 //
 // settings/hooks는 전역 sync:system과 동일한 메커니즘(부분키 머지·생성 계약 fail-fast·배포
