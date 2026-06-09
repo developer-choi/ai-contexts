@@ -219,10 +219,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - 구체적인 절차는 `/pre-exit` 스킬이 안내한다.
 
 ### worktree 감지
-- 아래 조건 중 하나라도 해당하면 브랜치 직접 전환 대신 worktree를 사용한다:
-  1. uncommitted changes 존재
-  2. 현재 브랜치가 master/main이 아님
-  3. 현재 브랜치에 푸시하지 않은 커밋 존재
+- 브랜치 전환 시 worktree를 사용한다.
 
 ### 페이지 경로 보고 시 클릭 가능한 URL
 - 페이지 경로를 사용자에게 알려줄 때 `/some/path`만 쓰지 않는다.
