@@ -68,7 +68,7 @@
 자가 개선 적용 대상 스킬의 SKILL.md 끝에 아래 한 줄을 둔다. 스킬 위치에 따라 경로가 다르다.
 
 - `deploy/skills/<skill>/SKILL.md` (글로벌 배포용): `../../contexts/skill-self-improvement.md`
-- `.claude/skills/<skill>/SKILL.md` (AC 본인용): `../../../deploy/contexts/skill-self-improvement.md`
+- `local/skills/<skill>/SKILL.md` (AC 본인용): `../../../deploy/contexts/skill-self-improvement.md`
 
 ```markdown
 ## 자가 개선

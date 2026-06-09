@@ -57,7 +57,7 @@ $env:PYTHONUTF8 = "1"
   --verbose
 ```
 
-- `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `.claude/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
+- `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
 - `--runs-per-query 3`: LLM 비결정성 보정. 3 권장.
 - `--num-workers 3`: 윈도우에선 동시 `claude -p` 부하 고려. 5+로 늘리면 socket·메모리 한계.
 - 모델: sonnet (SCW 「Eval」 룰).
@@ -91,13 +91,13 @@ git -C <AC> worktree add ../<AC>-scw-bench -b chore/scw-<topic> <base-commit>
 
 # 그 워크트리 안의 SKILL.md만 수정·측정
 cd ../<AC>-scw-bench
-# Edit .claude/skills/<name>/SKILL.md line 3 description
-# bench-trigger.py --skill-path ./.claude/skills/<name>
+# Edit local/skills/<name>/SKILL.md line 3 description
+# bench-trigger.py --skill-path ./local/skills/<name>
 ```
 
 이렇게 하면 메인 워크트리의 실제 사용 환경은 영향 없음.
 
-[CRITICAL] **측정 시작 직전 워크트리 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- .claude/skills/<name>/SKILL.md`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 워크트리 재생성.
+[CRITICAL] **측정 시작 직전 워크트리 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- local/skills/<name>/SKILL.md`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 워크트리 재생성.
 
 ## 자동화: run_loop의 대체
 
