@@ -45,13 +45,13 @@ function main(opts = {}) {
 }
 
 function syncRepo(repo) {
-  const claudeSkills = path.join(repo, '.claude', 'skills');
+  const localSkills = path.join(repo, 'local', 'skills');
   const claudeAgents = resolveClaudeAgents(repo);
-  const hasSkills = existsDir(claudeSkills);
+  const hasSkills = existsDir(localSkills);
   const hasAgents = claudeAgents !== null;
 
   if (!hasSkills && !hasAgents) {
-    return { repo, status: 'skipped', detail: 'no .claude/skills or CLAUDE.md' };
+    return { repo, status: 'skipped', detail: 'no local/skills or CLAUDE.md' };
   }
 
   try {
@@ -59,8 +59,8 @@ function syncRepo(repo) {
     const agentsDir = path.join(repo, '.agents');
     if (hasSkills) {
       ensureDir(agentsDir);
-      copyPath(claudeSkills, path.join(agentsDir, 'skills'));
-      synced.push('.claude/skills -> .agents/skills');
+      copyPath(localSkills, path.join(agentsDir, 'skills'));
+      synced.push('local/skills -> .agents/skills');
     }
     if (hasAgents) {
       copyPath(claudeAgents, path.join(repo, 'AGENTS.md'));

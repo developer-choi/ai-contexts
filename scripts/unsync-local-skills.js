@@ -40,16 +40,16 @@ function main() {
 function unsyncRepo(repo) {
   try {
     const removed = [];
-    const claudeSkills = path.join(repo, '.claude', 'skills');
+    const localSkills = path.join(repo, 'local', 'skills');
     const agentsSkills = path.join(repo, '.agents', 'skills');
     const agentsDir = path.join(repo, '.agents');
 
     if (existsDir(agentsSkills)) {
-      if (existsDir(claudeSkills) && comparePaths(claudeSkills, agentsSkills)) {
+      if (existsDir(localSkills) && comparePaths(localSkills, agentsSkills)) {
         fs.rmSync(agentsSkills, { recursive: true, force: true });
         removed.push('.agents/skills');
       } else {
-        return { repo, status: 'skipped', detail: '.agents/skills differs from .claude/skills' };
+        return { repo, status: 'skipped', detail: '.agents/skills differs from local/skills' };
       }
     }
 
