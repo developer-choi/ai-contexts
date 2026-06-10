@@ -99,7 +99,7 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 
 `backlog/this/`, `backlog/projects/` 항목은 아래 중 하나로 분류한다:
 
-- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. frontmatter `target`에 경로를 명시한다.
+- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치 표기는 [frontmatter 규칙](#frontmatter-규칙)을 따른다.
 - **신규**: 기존에 없는 새로운 스킬·작업.
 
 ### 3. 기존 백로그와 병합
@@ -157,6 +157,27 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 ---
 
 ## 산출물 형식
+
+### frontmatter 규칙
+
+상태(`[ideation]`/`[draft]`/`[ready]`)는 frontmatter가 아니라 섹션 제목 인라인 라벨이고, tier는 폴더(`tier-{n}`)로 표현한다 — 둘 다 frontmatter에 넣지 않는다.
+
+| 영역 | frontmatter |
+|------|-------------|
+| `this/` item | `target` 필수. 폴더면 폴더경로, 파일이면 전체경로. 여러 곳이면 경로들의 YAML 리스트 |
+| `this/` index | 없음 (목록 파일) |
+| `projects/` | `target` 선택. 쓸 때는 폴더보다 정밀하게 — 레포 내부 경로(`{repo}/path/file.md`) 또는 교차레포 다중 target. 단순 레포명은 폴더와 중복이라 생략 |
+| `articles/`·`roadmaps/`·`history/` | 정책 없음 |
+
+`target`이 여러 곳이면 공통 부모로 뭉뚱그리지 않고 나열한다 (부분집합은 과대포함되고, 레포가 갈리면 공통 부모가 무의미하다):
+
+```yaml
+target:
+  - deploy/skills/workflow/
+  - deploy/skills/scw/
+```
+
+여러 파일로 쪼갠 항목은 진입점 파일에만 frontmatter를 둔다. 곧 삭제할 임시 인수인계처럼 반영 즉시 폐기되는 항목은 `target`을 생략할 수 있다.
 
 ### 개별 파일
 
@@ -314,6 +335,7 @@ scope: global (deploy/ 전체 스캔)
 - **tier 없음** — 외부 레포 메모는 AC tier 우선순위 대상이 아니다
 - **Ready 게이트 미적용** — 자족성 검증을 강제하지 않는다
 - **상태 라벨 선택적** — `[ideation]` 등을 붙일 수 있으나 필수 아니다
+- **frontmatter `target` 선택** — 폴더(`projects/{project}/`)가 destination 레포다. 더 정밀한 graduate 경로나 교차레포 target일 때만 적고, 단순 레포명은 생략 ([frontmatter 규칙](#frontmatter-규칙))
 
 `backlog/projects/{project}/{topic}/index.md`는 read-later References 전용이다. item 목차(파일 목록·요약 표)는 만들지 않는다 — 항목은 각 `{item}.md`에 살고, 조망이 필요하면 `ls`/`grep`으로 즉석 생성한다. References가 없으면 index.md를 두지 않는다.
 
