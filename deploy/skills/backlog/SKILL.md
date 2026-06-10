@@ -132,16 +132,6 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 - `backlog/projects/{project}/{topic}/` — 주제 디렉토리 단위. 디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사를 넣지 않는다 (예: `knowledge-archive/network/throughput-번역.md`). read-later 참고 링크는 `{topic}/index.md`의 `## References`에 모은다
 - `backlog/articles/` — 포스트 단위 slug (예: `articles/react-error-boundary.md`). 재료가 커지면 `articles/{slug}/` 디렉토리로 승격한다
 
-#### cwd 기반 기본 태그 자동 주입 (`projects/` 영역)
-
-`projects/` 영역으로 라우팅할 때, 호출 시점 cwd가 아래 매핑에 해당하면 생성·수정하는 백로그 파일 frontmatter에 해당 태그를 **자동으로 넣는다**(목적지가 `projects/knowledge-archive`든 `projects/<그 프로젝트>`든 무관). 사용자가 매번 태그를 지정하지 않아도 출처 맥락이 태그로 보존되게 하기 위함이다. 이미 그 태그가 있으면 중복 추가하지 않는다.
-
-| cwd 프로젝트 | 자동 주입 태그 |
-|---|---|
-| `private-playground` (PP) | `recruitment` |
-
-매핑에 없는 프로젝트는 자동 주입하지 않는다(기존대로 사용자/intent가 태그를 정한다). 새 프로젝트에 기본 태그가 필요해지면 이 표에 행만 추가한다.
-
 #### tier 배치 (`this/` 전용)
 
 - **tier-1**: 스킬 만드는 데 직접 영향
