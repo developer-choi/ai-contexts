@@ -1,10 +1,5 @@
-.claude/settings.local.json
-.claude/scheduled_tasks.lock
-# sync:local-system 산출물 (소스는 local/, 트래킹하지 않음)
-.claude/settings.json
-.claude/.settings.json.ac-keys
-.claude/hooks/
-.claude/skills/
+# Claude/Codex 배포 산출물·로컬 설정·워크트리 (소스는 local/·deploy/, 트래킹 안 함)
+.claude/
 .codex/
 .idea
 node_modules
