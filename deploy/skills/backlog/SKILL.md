@@ -440,9 +440,9 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 `[ready]` 항목을 tier-1부터 순서대로 실행하는 모드.
 
 1. backlog 워크트리에서 `backlog/this/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다. 호출 인자에 대상(파일명·섹션 식별자)이 있으면 매칭되는 항목으로 좁혀 그것부터 실행한다
-2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성·Husky hook을 자동 복구한다:
+2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. `<식별>`은 실행하는 백로그 항목(파일명·섹션)에서 딴 고유 이름으로 짓는다 — 워크트리 디렉터리와 브랜치에 같은 `<식별>`을 써서, 여러 exec를 병렬로 돌려도 디렉터리·브랜치가 겹치지 않게 한다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성·Husky hook을 자동 복구한다:
    ```
-   git worktree add -b backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-exec origin/master
+   git worktree add -b backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-<식별> origin/master
    ```
 3. **반영 여부 선확인**: 임시 워크트리에서 frontmatter `target` 경로(없으면 섹션이 지목하는 파일)를 읽고, 이 섹션이 요구하는 변경이 이미 반영돼 있는지 대조한다
    - **이미 반영됨**: 구현하지 않는다. 사용자에게 "이미 반영돼 건너뜀"을 보고하고 7번(정리)으로 건너뛴다. 8번에서 섹션 삭제는 동일하게 수행한다
@@ -462,7 +462,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
    - 병렬 세션이 그사이 master를 옮겨 ff가 실패하면, `git rebase master`부터 다시 한다 (먼저 통합한 세션이 이기고, 진 세션이 재배치로 따라붙는다)
 7. **임시 워크트리·브랜치 정리**: 워크트리를 제거하고 임시 브랜치를 삭제한다 (구현을 건너뛴 경우 브랜치에 커밋이 없으므로 병합 없이 바로 정리)
    ```
-   git worktree remove ~/WebstormProjects/main/ai-contexts-exec
+   git worktree remove ~/WebstormProjects/main/ai-contexts-<식별>
    git branch -d backlog-exec-<식별>
    ```
 8. backlog 워크트리에서, 방금 실행 완료한(또는 이미 반영돼 건너뛴) 섹션을 파일에서 삭제한다 (파일 자체는 삭제하지 않는다)
