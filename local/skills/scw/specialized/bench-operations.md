@@ -89,10 +89,17 @@ worker brief 첫줄에 명시 — 위반 사고(워커가 master에 직접 commi
 - 규칙 파일 수정 / roadmap 갱신은 **각 별도 commit**. 한 commit에 섞지 않음
 - 영역(global.md / coding-standards / writing-guide 등) 다르면 영역별 분리 commit
 
-## 벤치 산출물 정리
+## 벤치 산출물 정리 — 종결 시 자동 teardown
 
-- 벤치 산출물(`bench/` 하위 iteration·transcript·raw 출력)은 개발용 측정 흔적이다. **벤치 종료 후 삭제**한다 — 절대 커밋하지 않는다.
-- `bench/`는 .gitignore로 추적 차단돼 있다. 출력 경로를 바꿀 때 ignore 범위를 벗어나지 않는지 확인한다.
+벤치의 **마지막 단계는 산출물 자동 삭제**다. 측정 결과를 사용자에게 보고한 직후, 별도 확인 없이 아래를 전부 제거한다 (보고가 곧 종결 신호 — "남겨둘까요" 묻지 않는다). 산출물은 개발용 측정 흔적이라 사용자가 다시 보지 않으며, 남기면 워크트리·디스크만 점유한다.
+
+자동 삭제 대상 (벤치가 만든 것 전부):
+
+- **워크스페이스**: `bench/` 하위 iteration·transcript·raw 출력. `bench/`는 .gitignore로 추적 차단돼 있어 커밋되지 않는다 — 출력 경로를 바꿀 때 ignore 범위를 벗어나지 않는지 확인한다.
+- **임시 워크트리**: 측정용으로 만든 clean 체크아웃(예: `<project>-bench`, tracked-only 체크아웃). `git -C <project> worktree remove --force <path>`로 제거한다.
+- **임시 브랜치**: 벤치용으로 만든 backup·measurement 브랜치.
+
+보류 항목 재측정이 예정돼 셋업을 살려야 하면, 그 사실을 결과 보고에 한 줄 남기고 해당 워크트리만 예외로 둔다 — 기본은 삭제다.
 
 ## 보류 항목 운영
 
@@ -106,4 +113,4 @@ worker brief 첫줄에 명시 — 위반 사고(워커가 master에 직접 commi
 
 - 커밋 훅 우회 표현: 메시지 본문에 `git add -A` 같은 문자열 포함 시 false positive 차단 — 표현 우회
 - team-agent 규칙으로 띄운 작업자는 현재 런타임의 종료 수단으로 정리한다. 종료 수단이 없으면 사용자 `/exit` 시 정리
-- 워크트리·backup 브랜치는 작업 종료 후 정리 (보류 재측정 시 새로 셋업)
+- 워크트리·backup 브랜치 teardown은 「벤치 산출물 정리」가 단일 출처다 (종결 시 자동 삭제)
