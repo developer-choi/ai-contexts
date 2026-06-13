@@ -19,9 +19,10 @@
 overview.md 작성 전에 아래를 읽고 기술 전략에 반영한다:
 
 - [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 현재 작업과 관련된 규칙 확인
-- 사용자에게 프로젝트별 컨벤션(회사 컨벤션 등)이 있는지 확인하고, 있으면 함께 참조
+- `/plan/background/retained/conventions-index.md`(자료 수집 단계 산출물)에서 이번 PR 관련 항목을 **선별**한다. 프로젝트 컨벤션을 여기서 재수집하거나 사용자에게 재질문하지 않는다 — 인덱스에 없는 갭이 의심될 때만 그 갭을 콕 집어 질문한다
+- 인덱스가 없으면(이전 단계 스킵 등) fallback으로 사용자에게 프로젝트별 컨벤션(회사 컨벤션 등)이 있는지 확인하고, 있으면 함께 참조
 
-여기서 파악한 컨벤션은 `/plan/pr{N}/persistent/reference.md`에 초기 작성한다. 책임·포함 항목·소비처는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
+여기서 선별한 컨벤션은 `/plan/pr{N}/persistent/reference.md`에 초기 작성한다. 책임·포함 항목·소비처는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
 
 ### overview.md 생성 + 기술 전략 수립
 

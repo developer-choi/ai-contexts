@@ -66,6 +66,9 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 - `docs/ARCHITECTURE.md` — 레이어 의존성, 폴더 구조, Public API 원칙
 - `docs/conventions/*` — 네이밍·레이어·nuqs·patterns 등
 - `_fsd/.../*` — 기존 슬라이스의 평행 사례
+- **작업 대상 디렉터리의 조상 체인 `CLAUDE.md`** — 내용이 다른 문서를 가리키는 포인터면 끝까지 따라가 실제 배치·네이밍 규칙 본문을 확인한다. 한 줄 포인터에서 멈추지 않는다 (하위 CLAUDE.md는 Read 전까지 자동 로드되지 않는다)
+
+`/plan/background/retained/conventions-index.md`가 있으면 거기 등재된 경로를 grep 출발점으로 우선한다.
 
 특히 다음 결정 전에 grep 의무:
 - features/widgets/entities `ui/` 폴더 sub-folder 허용 여부 (예: `grep "ui/" docs/ARCHITECTURE.md docs/conventions/02-layers.md`)

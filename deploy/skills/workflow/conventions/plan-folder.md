@@ -15,6 +15,7 @@
     retained/           ← 사용자 제공 원본 + 누적 캐시. BG 컨텍스트(= 프로젝트 전체) 유효한 동안 보존
       folder-structure.md ← FOUNDATION 단계 1 산출 (채용만). 디렉토리 구조 명세 (PR2~N 참조)
       tech-constraints.md ← BG.step-1 기술 제약 스캔 결과
+      conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성). 프로젝트 컨벤션 소스 "경로 + 한 줄 트리거" 인덱스. 양식·작성 절차는 step-1 「컨벤션 소스 수집」 참조
       figma-url.md      ← step-1.1 수집. 대상 이름 + URL 누적
       figma/            ← step-1.1 수집 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
