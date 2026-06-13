@@ -34,7 +34,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### Step 1.1 종료 — 분기점
 
-step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 사용 가능한 figma/시안 전체를 `retained/figma-url.md`·`retained/figma/`에 저장 완료. 그 이상(분석)은 모두 step-1.2 영역이다.
+step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 사용 가능한 figma/시안 전체를 `retained/figma-url.md`·`retained/figma/`에 저장 완료 + 컨벤션 인덱스 산출(아래 종료 게이트). 그 이상(분석)은 모두 step-1.2 영역이다.
 
 특히 다음은 **step-1.2** 영역이지 step-1.1이 아니다 — recruitment guide(`requirement-review/recruitment/guide.md`)·planning guide·design guide의 「분석 과정」 절차 일체가 여기 해당:
 - 자료 정독·공동 탐색
@@ -42,7 +42,7 @@ step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 
 - cross-analysis·service-analysis 등 분석 산출물 작성
 - 평가 기준 추론, 프로젝트 결정 사항, 모호한 부분 정리
 
-step-1.1은 후속 세션 spawn 가능 분기점이다 (SKILL.md 「세션」 표 (4) 컬럼). 자료 저장 직후, **위 step-1.2 절차에 진입하기 전에 반드시** SKILL.md 「세션 spawn 안내 메커니즘」 절차를 발동하여 후속 spawn 안내 출력. 사용자가 후속 세션 spawn 판단 가능한 상태가 된 다음에 step-1.2 진입.
+step-1.1은 후속 세션 spawn 가능 분기점이다 (SKILL.md 「세션」 표 (4) 컬럼). 자료 저장 직후, **분석(step-1.2)이나 구현 설계로 진입하기 전에 두 산출을 먼저 낸다** — ① 위 「컨벤션 소스 수집」 절(이름 스캔 선제안·채택, 사용자 보충, `retained/conventions-index.md` 작성), ② SKILL.md 「세션 spawn 안내 메커니즘」 발동. 이 둘은 다음 행동의 전제다 — 둘 중 하나라도 내지 않은 채 분석·구현 절차를 시작하지 않는다. ①을 건너뛰고 다운스트림(PR별 과제 정의·MARKUP)으로 가면 컨벤션 1차 소스를 거기서 재수집하게 되고, 같은 추출 패턴의 Reviewer가 그 누락을 못 잡는 자기증명 루프가 생긴다(SKILL.md 「검증 기준 = 진실 원천」). 컨벤션 파일을 선제안·채택 없이 혼자 읽고 진행하는 것도 ① 위반이다. 작업 레포가 아직 없어 ①의 인덱스 작성을 미루는 경우(절 4항)는 연기 사실을 한 줄로 남긴다. 두 산출이 끝나 사용자가 후속 세션 spawn을 판단할 수 있게 된 다음에 step-1.2로 진입한다.
 
 ---
 
