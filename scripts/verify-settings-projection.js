@@ -57,6 +57,11 @@ function main() {
   check(claudePre.some((h) => h.matcher === 'Bash') && claudePre.some((h) => h.matcher === 'SendMessage'),
     'claude: PreToolUse가 Bash/SendMessage로 분리됨');
 
+  // search(on) 항목은 배열 매처 fan-out으로 Glob·Grep 양쪽에 등록된다
+  check(claudePre.some((h) => h.matcher === 'Glob' && h.file === 'surface-claude-md.js')
+    && claudePre.some((h) => h.matcher === 'Grep' && h.file === 'surface-claude-md.js'),
+    'claude: surface-claude-md가 Glob·Grep 매처로 fan-out 등록됨');
+
   // codex: UserPromptSubmit 없음, PreToolUse 전부 단일 '*'
   check(!codex.some((h) => h.event === 'UserPromptSubmit'), 'codex: UserPromptSubmit 없음');
   const codexPre = codex.filter((h) => h.event === 'PreToolUse');

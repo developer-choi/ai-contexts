@@ -25,6 +25,12 @@
       "msg": "Surfacing related backlog..."
     },
     {
+      "file": "surface-claude-md.js",
+      "event": "PreToolUse",
+      "on": "search",
+      "msg": "Surfacing folder CLAUDE.md..."
+    },
+    {
       "file": "check-shell-policy.js",
       "event": "PreToolUse",
       "on": "bash",
