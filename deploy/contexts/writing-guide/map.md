@@ -27,7 +27,10 @@
 
 | 태그 | 의미 | 사용 시점 |
 |------|------|-----------|
-| `always` | 항상 로드 | 모든 문서 작업 |
+| `always` | 항상 로드 | 모든 문서 작업 (룰 SSOT + 말투 변별 사례) |
+| `structure` | 문단·구조·순서 사례 | 구조·순서·중복 이슈가 보일 때 |
+| `accuracy` | 요약·축소 정확성 사례 | 요약·범위 축소를 다룰 때 |
+| `process` | 작업·절차 서술 사례 | 절차·과정 서술을 점검할 때 |
 | `pr` | PR 본문 관련 | PR 작성/리뷰 시 |
 | `readme` | README 관련 | README 작성 시 |
 | `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
@@ -39,9 +42,9 @@
 
 tone.md [always]
 examples/tone.md [always]
-examples/structure.md [always]
-examples/accuracy.md [always]
-examples/process.md [always]
+examples/structure.md [structure]
+examples/accuracy.md [accuracy]
+examples/process.md [process]
 readme-guide.md [readme]
 resume-guide.md [resume]
 examples/resume.md [resume]
