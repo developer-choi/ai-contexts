@@ -1,7 +1,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { readPayload, getCwd, addContext } = require("./hook-utils");
+const { readPayload, getCwd, getSessionId, addContext } = require("./hook-utils");
 
 // 백로그는 master가 아니라 ai-contexts-backlog 워크트리(backlog 브랜치)에 있다.
 // 워크트리가 없는 기기에서는 조용히 no-op 한다.
@@ -12,6 +12,9 @@ const BACKLOG_ROOT = path.join(
   "ai-contexts-backlog",
   "backlog",
 );
+
+// 세션당 폴더당 "전체 블록"은 1회만 주입하기 위한 상태 저장 위치.
+const STATE_DIR = path.join(os.tmpdir(), "claude-backlog-surfaced");
 
 // cwd: .../WebstormProjects/<group>/<project>/... → <project>
 function projectFromCwd(cwd) {
@@ -38,6 +41,32 @@ function hasMarkdown(dir) {
   return false;
 }
 
+function seenFile(sessionId) {
+  return path.join(STATE_DIR, `${sessionId}.json`);
+}
+
+function alreadySurfaced(sessionId, key) {
+  try {
+    const seen = JSON.parse(fs.readFileSync(seenFile(sessionId), "utf8"));
+    return Array.isArray(seen) && seen.includes(key);
+  } catch (_e) {
+    return false;
+  }
+}
+
+function markSurfaced(sessionId, key) {
+  let seen = [];
+  try {
+    const prev = JSON.parse(fs.readFileSync(seenFile(sessionId), "utf8"));
+    if (Array.isArray(prev)) seen = prev;
+  } catch (_e) {
+    /* 첫 안내 */
+  }
+  if (!seen.includes(key)) seen.push(key);
+  fs.mkdirSync(STATE_DIR, { recursive: true });
+  fs.writeFileSync(seenFile(sessionId), JSON.stringify(seen));
+}
+
 try {
   const payload = readPayload();
   const project = projectFromCwd(getCwd(payload));
@@ -48,9 +77,17 @@ try {
   const folder = path.join(BACKLOG_ROOT, rel);
   if (!fs.existsSync(folder) || !hasMarkdown(folder)) process.exit(0);
 
-  // 매 턴 주입한다. 세션당 1회로 묶으면 첫 프롬프트가 무관할 때 단 한 번의 리마인드를
-  // 거기 태워버려, 이후 관련 작업이 와도 영구 누락된다 — 누락 0이 노이즈보다 중요하다.
-  // 매 턴 주입해도 글랜스(Glob)는 아래 문구로 세션당 1회로 묶어 비용을 제한한다.
+  // 전체 블록은 세션당 폴더당 1회만 주입한다. 폴더는 cwd에서 파생되어 세션 내내 고정이므로
+  // 첫 주입이 "무관한 프롬프트에 낭비"되는 일은 없다. 이미 안내한 폴더는 이후 턴에 아무것도
+  // 주입하지 않고 빠져, 전체 블록을 매 턴 주입할 때 생기던 과잉 priming(관련 없는
+  // "저장할까요?" 제안 반복)을 완전히 제거한다. session_id가 없으면(폴백) 매 턴 전체 블록.
+  const sessionId = getSessionId(payload);
+  const relPosix = rel.split(path.sep).join("/");
+  if (sessionId) {
+    if (alreadySurfaced(sessionId, relPosix)) process.exit(0);
+    markSurfaced(sessionId, relPosix);
+  }
+
   addContext(
     `[백로그 표면화] 현재 작업 디렉터리(${project})에 연결된 백로그 폴더가 있다:\n` +
       `  ${folder}\n` +
