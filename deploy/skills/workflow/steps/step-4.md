@@ -116,11 +116,15 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 stub 커밋은 step-4의 산출물이다. 절차:
 
-1. **LLM이 PR 작업 분석** → step-3 산출물·`/plan/background/consumable/project.md` PR 정의·MARKUP 산출물을 기반으로 "이 PR에 stub 만들 외부 시그니처(props·타입·함수 시그니처 등)가 있나?" 판단
-2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?"
+1. **LLM이 PR 작업 분석** — 아래 두 조건으로 "코드/stub로 갈 것"을 가른다 (둘 중 하나라도 해당하면 코드로):
+   - **조건 1 (외부 공개 시그니처)**: PR이 만들 props·타입·함수 시그니처 등 외부 공개 모듈.
+   - **조건 2 (코드로 표현 가능한 모든 계획)**: 시그니처가 없어도 **파일로 표현 가능한 계획은 전부 코드/stub로** 만든다 — 의존성(`package.json` 추가 + 설치), 설정(`vite.config`·`tsconfig`·`eslint` 등), 테스트 의도(`*.test.tsx`의 `it.todo`). 이들을 `implementation.md`에 *산문으로 나열하지 않는다*.
+
+   `implementation.md`에는 **코드로 표현 못 하는 narrative만** 남긴다 (구현 순서·커밋 분할·회귀 체크리스트·gotcha·"왜"). impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
+2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
 3. **사용자 동의·수정 후 진행** — stub 만들거나 빈 step-4 (stub 없이 step-5 진입)
 
-PR 번호별 분기·조건문 없음. PR1·2 (인프라성: 빌드·린트·포맷·패키지)는 통상 stub 불필요로 LLM 분석 결과가 나옴. PR3+ 는 외부 공개 시그니처가 있어 stub 필요한 경우가 많음. step-2 「PR 분할 원칙」의 stub 시점 병렬·spawn 분기와 정합.
+PR 번호별 분기·조건문 없음. **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 *코드로 표현 가능*하므로 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다**(it.todo·deps가 코드 stub 대신 `implementation.md` 산문으로 새는 사고의 원인). step-2 「PR 분할 원칙」의 stub 시점 병렬·spawn 분기와 정합.
 
 ### stub 커밋 작성
 
@@ -171,6 +175,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - stub 파일이 lint·tsc·prettier를 통과하는지 확인 (코드라서 가능)
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
 - **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
+- **코드-narrative 오배치 검출** — `implementation.md` 등 md 산출물에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2). 특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.
 
 **설계 타당성 역추적**
 - `decisions.md`의 기술 결정과 `overview.md`의 의도(목표·범위)를 기준으로, 파생 산출물(stub 코드 + 잔존 md)이 해당 결정·의도를 충실히 반영하는지 검증한다
