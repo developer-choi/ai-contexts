@@ -13,6 +13,7 @@ persistent에 두는 사유: 회사·프로젝트 컨벤션 경로는 코드 리
 - 외부 자료 링크 (기획서, 디자인 시안 URL 등 — `background/retained/figma-url.md`에 누적되는 figma URL은 중복 회피)
 - 회사·프로젝트 컨벤션 경로 + 라인 범위 (본 PR 작업 관련 규칙)
 - AC 코딩 스탠다드 + MP 베스트프랙티스 맵 중 본 PR 매칭 패턴 경로
+- 개인·실무 모드: `conventions-index.md`에 등재된 외부 레퍼런스 레포(simplified) 중 본 PR 테스트·컴포넌트와 매칭되는 것 (등재는 step-1 「컨벤션 소스 수집」 단일 출처)
 
 ## 누적 원칙
 
