@@ -245,6 +245,8 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 배포된 산출물(`~/.claude`, `~/.codex`, `.agents`, `.codex` 등)을 직접 수정하지 않는다. 수정은 AC 원본 위치에서 진행한다.
 
+단, 사용자가 명시적으로 허용한 경우에는 테스트 목적으로 산출물 경로를 직접 수정할 수 있다. 테스트 후에는 결과를 AC 원본에 반영하고 배포까지 완료한다.
+
 | 구분 | 원본 수정 위치 | 직접 수정 금지 | 반영 명령 |
 |---|---|---|---|
 | 글로벌 규칙·컨텍스트·hooks·설정 | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/base-settings.json`(공통), `deploy/*-settings.json`(타겟 override) | `~/.claude/`, `~/.codex/`, `~/.gemini/` | AC에서 `npm run sync:system` |
