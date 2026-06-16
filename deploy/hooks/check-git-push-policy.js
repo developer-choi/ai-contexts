@@ -9,6 +9,18 @@ if (typeof cmd !== "string") process.exit(0);
 const pushInvocations = findGitInvocations(cmd, "push");
 if (pushInvocations.length === 0) process.exit(0);
 
+// chained 우회 차단: 같은 명령에 history rewrite와 force push가 함께 들어오면, PreToolUse 훅은
+// rewrite 실행 전 상태로 1회만 검사하므로 push 시점의 실제 diff를 못 본다 (reset && push --force 패턴).
+// 둘이 한 명령에 공존하면 deny하고 분리 실행을 안내한다 — 분리하면 두 번째 push가 정상 검증된다.
+const forcePushPresent = pushInvocations.some((inv) =>
+  inv.args.some((t) => /^(--force|--force-with-lease|-f)$|^--force-with-lease=/.test(t)),
+);
+if (forcePushPresent && findHistoryRewrites(cmd).length > 0) {
+  deny(
+    "history rewrite(reset --soft/--mixed/--hard, rebase, cherry-pick, commit --amend)와 force push를 한 명령으로 chain하면 훅이 push 시점 상태를 검증하지 못합니다. 두 명령을 분리해 각각 실행하세요 (rewrite 먼저 → 그다음 force push).",
+  );
+}
+
 const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
 let cdCwd = cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]);
 cdCwd = normalizeCwd(cdCwd);
@@ -83,6 +95,28 @@ function findGitInvocations(command, subcommand) {
     }
   }
   return out;
+}
+
+function findHistoryRewrites(command) {
+  const out = [];
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    for (let i = 0; i < tokens.length; i += 1) {
+      if (tokens[i] !== "git") continue;
+      const parsed = parseGitInvocation(tokens, i + 1);
+      if (parsed && isHistoryRewrite(parsed)) out.push(parsed);
+      break;
+    }
+  }
+  return out;
+}
+
+function isHistoryRewrite(parsed) {
+  const { subcommand, args } = parsed;
+  if (subcommand === "rebase" || subcommand === "cherry-pick") return true;
+  if (subcommand === "reset") return args.some((t) => /^--(soft|mixed|hard|keep|merge)$/.test(t));
+  if (subcommand === "commit") return args.some((t) => t === "--amend");
+  return false;
 }
 
 function parseGitInvocation(tokens, startIdx) {
