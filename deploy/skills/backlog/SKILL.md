@@ -1,6 +1,5 @@
 ---
 name: backlog
-description: 스킬 관련 필기를 수집·분류·정리하여 백로그로 쌓아두는 스킬. `/backlog` 슬래시 명시 호출 시에만 동작한다.
 argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파일경로]"
 ---
 
