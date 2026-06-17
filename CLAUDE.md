@@ -100,9 +100,7 @@ md 파일 수정 직후:
 
 아래 영역으로 분리한다.
 
-- `backlog/this/` — AC 자체 백로그
-  - `index.md` — 미분류 아이디어
-  - `tier-{N}/index.md` — 해당 tier 파일 목록과 상태 요약
+- `backlog/this/` — AC 자체 백로그. 목차·인덱스 파일을 두지 않는다 (상태 라벨이 각 파일 섹션 제목에 인라인, 조망은 `grep '^## \[' tier-*/*.md`)
   - `tier-{N}/{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다
 - `backlog/projects/{project}/{topic}/` — 외부 레포(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리 (tier·Ready 게이트·리뷰/실행 모드 미적용 비-트래커). destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
   - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이). 외부 레포 작업이라 AC 실행 모드 대상 아님

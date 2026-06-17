@@ -120,7 +120,7 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 #### 기존 파일 우선
 
 - 해당 항목이 속하는 파일이 이미 있으면 **그 파일에 섹션 추가**
-- 기존 파일이 없을 때만 새 파일을 생성하거나 `index.md`에 추가
+- 기존 파일이 없을 때만 새 파일을 생성한다
 - 모호한 항목(한두 줄 메모)이라도 기존 파일이 있으면 거기에 넣는다
 
 #### 파일명 규칙
@@ -137,11 +137,6 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 - **tier-2**: 스킬 만드는 데 간접 영향 (재료가 되는 스킬) / 공부에 직접 영향
 - **tier-3**: 사용 빈도 극높음
 - **tier-4**: 나머지
-
-#### index.md
-
-- 어느 파일에도 속하지 않고 파일을 새로 만들 만큼 구체적이지도 않은 항목만 `index.md`에 추가
-- 기존에 `index.md`에 있던 것이 구체화되면 별도 파일로 승격하고 `index.md`에서 제거
 
 ### 5. 등록 상태 — 기본 [ready] (`this/` 전용)
 
@@ -299,7 +294,7 @@ scope: global (deploy/ 전체 스캔)
 - 동기 1줄 (왜 적었는가)
 - 핵심 아이디어 또는 발견 1줄
 
-이 둘을 채우지 않은 항목은 `index.md`(미분류)에서만 살릴 수 있고, tier 파일에 등재하지 않는다.
+이 둘을 채우지 못하는 항목은 등재하지 않는다 — 캡처 시점에 사용자에게 물어 채우거나, 못 채우면 보류한다.
 
 ### 사고 회고는 발견 즉시 Ready
 
@@ -313,34 +308,9 @@ scope: global (deploy/ 전체 스캔)
 
 **같은 파일 내 섹션 간** 의존성 관계가 있는 항목은 제목에 번호를 붙여 실행 순서를 명시한다. 하위 항목(`###`)도 동일하게 번호를 붙인다. (파일을 가로지르는 선행은 frontmatter `dependencies`로 — 「frontmatter 규칙」 참조.)
 
-### 티어별 인덱스
+### 조망 — 인덱스 파일 없음
 
-각 tier 폴더에 `index.md`를 상시 유지한다. 해당 tier에 속한 항목들의 현황을 한눈에 볼 수 있는 파일이다.
-
-- `backlog/this/tier-{n}/index.md`
-
-```markdown
-# Tier-{n}
-
-| 파일 | 상태 요약 |
-|------|-----------|
-| workflow-convention-preload.md | 기능1 `ready`, 기능2 `draft` |
-| workflow-figma-mapping.md | 전체 `ready` |
-```
-
-별도 파일이 추가·변경될 때마다 해당 tier의 index.md도 함께 갱신한다.
-
-### 미분류 인덱스: `backlog/this/index.md`
-
-```markdown
-# 미분류
-
-## {항목 제목}
-- 한두 줄 메모
-
-## {항목 제목}
-- 한두 줄 메모
-```
+`this/`에는 목차·인덱스 파일(tier별 `index.md`·미분류 `index.md`)을 두지 않는다. 상태 라벨(`[ready]`/`[draft]`/`[ideation]`)이 각 파일 섹션 제목에 인라인으로 박혀 있어, tier 현황은 `grep '^## \[' tier-*/*.md`로 즉석 생성한다. 별도 요약 파일은 본문 중복이고 stale만 유발한다.
 
 ### projects 영역
 
@@ -503,7 +473,6 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 - 신규 파일 생성 목록
 - 기존 파일 업데이트 목록 (무엇이 추가/변경됐는지)
 - 기존 스킬 개선으로 연결된 항목
-- index.md에서 별도 파일로 승격된 항목 (있으면)
 
 ---
 
