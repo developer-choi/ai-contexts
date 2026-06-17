@@ -12,3 +12,4 @@ nul
 __pycache__/
 *.pyc
 bench/
+cache/
