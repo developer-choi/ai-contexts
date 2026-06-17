@@ -1,7 +1,7 @@
 ---
 name: simplify
 description: 수동 호출 전용 스킬. 사용자가 `/simplify` 슬래시 명령을 직접 입력한 경우에만 동작한다. 자동 트리거 대상이 아니므로 다른 어떤 요청에도 이 스킬을 선택하지 말 것.
-argument-hint: "[init | 작업 단계]"
+argument-hint: "[init | renew | 작업 단계]"
 ---
 
 # AI 행동 가이드
@@ -67,6 +67,10 @@ Scope 제거·forwardRef 제거 같은 구조적/기계적 변환은 **최소선
 ## 새 프로젝트 시작
 
 1. **초기 세팅**: `initialize.md` 읽기
+
+## 기존 프로젝트 현행화 (`renew`)
+
+옛 스킬로 init된 `simplified-*` 프로젝트의 인프라만 현행 표준으로 갱신할 때(소스 재간소화 없이): `renew.md` 읽기
 
 ## 단순화 작업 진행
 
