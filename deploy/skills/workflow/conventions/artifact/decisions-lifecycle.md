@@ -25,9 +25,27 @@
 ### 제외
 
 - **출처값 그대로 채택**: 1차 소스(공식 문서·MP 베스트프랙티스 등)의 기본값·권장값을 비교 없이 채택 → reference.md 출처 경로로 충분
-- **자명한 절차 결과**: 안 할 이유가 없어 결과가 정해진 것 (예: 인프라 PR이라 stub 없음) → implementation.md 계획에 자연 반영, 별도 기재 불요
+- **자명한 절차 결과**: 안 할 이유가 없어 결과가 정해진 것 (예: 단일 후보뿐인 라이브러리 채택) → implementation.md 계획에 자연 반영, 별도 기재 불요. 단 **stub 유무는 "자명한 절차 결과"가 아니다** — step-4 §5 판정 소관이고, "외부 시그니처 없음=stub 없음"은 잘못된 디폴트다([stub.md](stub.md) §11: PR이 만들 모든 파일 stub 필수, `*.test.tsx`의 it.todo도 코드 stub). step-3 decisions·계획에서 stub 없음으로 단정하지 않는다.
+- **non-issue 확인 (걱정거리 해소)**: "우려했으나 확인해보니 문제 없음"으로 닫힌 항목은 결정이 아니다 (채택한 대안도 기각한 대안도 없음) → 적지 않는다. 필요하면 implementation.md 메모로.
 - **PR 분할·범위 변경**: project.md가 PR 분할·이연 인덱스이므로 거기 적는다
 - **단순 합의**: 트레이드오프 없이 사용자가 그냥 동의 (선택지가 사실상 하나)
+
+**non-issue 확인 사례** —
+
+**before** (걱정거리 해소를 결정으로 박음):
+
+```markdown
+## 결정 N: 오버레이(Dialog·Alert·Confirm) controlled 방식 테스트
+채택: open/onClose props 직접 지정 + 콜백 vi.fn() spy. overlay-kit 미사용.
+```
+
+→ 사용자가 "뭘 결정했다는 거야"를 반복 질문. 실질은 "overlay-kit 필요할까 걱정했으나 controlled 구조라 불필요"라는 non-issue 확인 — 채택/기각 대안이 없어 결정이 아니다.
+
+**after** (decisions에 안 적고 implementation.md 메모로):
+
+```markdown
+(implementation.md) 오버레이는 overlay-kit 불필요 — open prop + 콜백 spy로 충분.
+```
 
 ### 경계 사례 — AI 단독 판단 금지
 
