@@ -333,6 +333,16 @@ scope: global (deploy/ 전체 스캔)
 
 `backlog/projects/{project}/{topic}/{item}.md` — 외부 레포(KA·MP·DC 등)의 작업·지식·참고를 주제별로 누적한다. 지식 이해가 코드화로 결정되면 해당 레포 항목으로 graduate한다 ([§1 영역 분류](#1-영역-분류)의 intent 분기 참고).
 
+#### active / inactive / domains 격리
+
+외부 레포 백로그는 진행 상태에 따라 `active/`·`inactive/`로 격리한다. topic 디렉토리를 둘 중 하나의 하위에 둔다 — 표준 경로는 `projects/{project}/active/{topic}/`.
+
+- **`active/`**: 진행 중이거나 가까운 시일 내 다룰 활성 백로그. [백로그 표면화](#백로그-표면화) hook은 `projects/{project}/active/` 하위만 탐색해 제안을 띄운다.
+- **`inactive/`**: 보관용·아이디어·당장 진행 계획 없는 비활성 백로그. 표면화 대상에서 배제되어 불필요한 제안 노이즈를 막는다.
+- **`inactive/domains/`**: 도메인별(장바구니·채팅 등) 지식·코드 스케치·기획을 수집·숙성하는 staging. 표면화 대상이 아니라 리마인드 노이즈가 없다. 기획이 구체화돼 착수할 때 해당 topic을 `active/domains/`로 수동 이동(promote)해 노출시키고, 구현이 끝나면 실행 코드는 그 레포로·정제된 지식은 KA로 graduate해 완료 처리한다.
+
+active↔inactive 이동은 수동이다. 새 topic은 진행 의도에 맞춰 기본 `active/`에 두고, 묵힐 것만 `inactive/`로 내린다.
+
 `backlog/this/`와의 차이:
 
 - **tier 없음** — 외부 레포 메모는 AC tier 우선순위 대상이 아니다
@@ -401,9 +411,9 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 | cwd 프로젝트 | 가리킬 폴더 |
 |---|---|
 | `ai-contexts` (AC 본체) | `backlog/this/` |
-| 그 외 (`monorepo-playground`, `private-playground` 등) | `backlog/projects/<project>/` |
+| 그 외 (`monorepo-playground`, `private-playground` 등) | `backlog/projects/<project>/active/` |
 
-해당 폴더가 존재하고 그 아래 `.md`가 하나라도 있을 때만 띄운다. 그래서 새 프로젝트의 `projects/<name>/` 폴더를 만들면 **자동으로** 표면화 대상이 된다 — 매핑을 손볼 필요가 없다. 백로그 파일을 추가·수정·삭제해도 hook은 폴더만 가리키고 내용은 그 순간 LLM이 라이브로 훑으므로 항상 최신이다(파일 단위 매니페스트·frontmatter 태그가 없다).
+외부 레포는 `active/` 하위만 가리킨다 — `inactive/`는 경로에서 빠져 표면화되지 않는다([projects 영역](#projects-영역)의 격리 규칙). 해당 폴더가 존재하고 그 아래 `.md`가 하나라도 있을 때만 띄운다. 그래서 새 프로젝트의 `projects/<name>/active/`에 `.md`를 두면 **자동으로** 표면화 대상이 된다 — 매핑을 손볼 필요가 없다. 백로그 파일을 추가·수정·삭제해도 hook은 폴더만 가리키고 내용은 그 순간 LLM이 라이브로 훑으므로 항상 최신이다(파일 단위 매니페스트·frontmatter 태그가 없다).
 
 ### 노이즈 제어 — 세션당 폴더당 1회
 
