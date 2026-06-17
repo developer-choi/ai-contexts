@@ -161,7 +161,7 @@ argument-hint: "[review|exec [대상] | projects|articles [메모] | 메모·파
 
 | 영역 | frontmatter |
 |------|-------------|
-| `this/` item | `target` 필수. 폴더면 폴더경로, 파일이면 전체경로. 여러 곳이면 경로들의 YAML 리스트 |
+| `this/` item | `target` 필수. 폴더면 폴더경로, 파일이면 전체경로. 여러 곳이면 경로들의 YAML 리스트. `dependencies` 선택 (파일 간 선행 — 아래 정의) |
 | `this/` index | 없음 (목록 파일) |
 | `projects/` | `target` 선택. 쓸 때는 폴더보다 정밀하게 — 레포 내부 경로(`{repo}/path/file.md`) 또는 교차레포 다중 target. 단순 레포명은 폴더와 중복이라 생략 |
 | `articles/`·`roadmaps/`·`history/` | 정책 없음 |
@@ -182,6 +182,17 @@ target:
 priority: 1
 ```
 
+**`dependencies`** — `this/` 전용 선택 필드. 다른 백로그 **파일**이 먼저 끝나야 이 파일을 착수할 수 있을 때 선행 파일을 명시한다. 같은 파일 내 섹션 간 순서는 「의존성 번호」로, 파일을 가로지르는 선행은 이 필드로 가른다 (frontmatter는 파일당 1개라 섹션 단위는 못 담는다).
+
+- **경로 기준**: `backlog/this/` 상대 경로. 예: `dependencies: [tier-1/another.md]`
+- **부재 = 해결**: 백로그엔 미완료만 남으므로, 선행 경로의 파일이 **없거나 / 있어도 ready·draft·ideation 섹션이 0개(frontmatter+제목만 남은 빈 파일)**면 "선행 완료"로 간주한다 — dangling이 아니라 정상 종결 신호다.
+- **`projects/` 제외**: 비-트래커·exec 미적용이라 `dependencies`를 쓰지 않는다.
+
+```yaml
+dependencies:
+  - tier-1/another.md
+```
+
 ### 개별 파일
 
 영역별 경로:
@@ -197,6 +208,7 @@ priority: 1
 ```markdown
 ---
 target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
+# dependencies: [tier-1/another.md]  # (선택) 이 파일보다 먼저 끝나야 하는 백로그 파일
 ---
 
 # {스킬명}
@@ -270,6 +282,7 @@ scope: global (deploy/ 전체 스캔)
 
 - 가설을 적었다면 → 가설별 (a) 지지하는 사실 인용 + (b) 작성 시점 평가, 또는 (c) **검증 액션** (재현 조건을 어떻게 잡을지) 동봉. 미평가·미검증 가설을 그냥 나열하면 사유 명시 필요
 - 수정이 산문·코드 변경을 동반한다면 추가할 텍스트 자체를 포함. 단순 위치 명시(파일·섹션 추가/삭제)면 면제
+- `dependencies`를 적었다면 → 각 경로가 오타 없이 실존 파일을 가리키는지 점검. 부재 자체는 「부재=해결」로 정상이므로, 경로 오타만 잡는 경량 점검이다
 
 ### 외부 컨텍스트 Robust 룰
 
@@ -298,7 +311,7 @@ scope: global (deploy/ 전체 스캔)
 
 ### 의존성 번호
 
-의존성 관계가 있는 항목은 제목에 번호를 붙여 실행 순서를 명시한다. 하위 항목(`###`)도 동일하게 번호를 붙인다.
+**같은 파일 내 섹션 간** 의존성 관계가 있는 항목은 제목에 번호를 붙여 실행 순서를 명시한다. 하위 항목(`###`)도 동일하게 번호를 붙인다. (파일을 가로지르는 선행은 frontmatter `dependencies`로 — 「frontmatter 규칙」 참조.)
 
 ### 티어별 인덱스
 
@@ -451,6 +464,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 `[ready]` 항목을 tier-1부터 순서대로 실행하는 모드.
 
 1. backlog 워크트리에서 `backlog/this/` 하위를 tier-1부터 순회하며 `[ready]` 섹션을 찾는다. 호출 인자에 대상(파일명·섹션 식별자)이 있으면 매칭되는 항목으로 좁혀 그것부터 실행한다
+   - **선행 검증**: 그 섹션이 속한 파일에 frontmatter `dependencies`가 있으면, 각 선행 경로가 해결됐는지(「frontmatter 규칙」의 「부재=해결」 기준) 확인한다. 미해결 선행이 있으면 이 섹션을 **건너뛰고 사용자에게 경고**한다(차단이 아니라 안내). 모두 해결됐으면 정상 진행한다
 2. `[ready]` 섹션을 찾으면 master 기반 임시 워크트리를 만든다. `<식별>`은 실행하는 백로그 항목(파일명·섹션)에서 딴 고유 이름으로 짓는다 — 워크트리 디렉터리와 브랜치에 같은 `<식별>`을 써서, 여러 exec를 병렬로 돌려도 디렉터리·브랜치가 겹치지 않게 한다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성·Husky hook을 자동 복구한다:
    ```
    git worktree add -b backlog-exec-<식별> ~/WebstormProjects/main/ai-contexts-<식별> origin/master
