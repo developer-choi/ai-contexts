@@ -41,12 +41,12 @@ npm run sync:local-system -- ~/WebstormProjects/main
 npm run unsync:local-system
 ```
 
-- **로컬 자산**: `.claude/<X>`·`.agents/<X>`·`AGENTS.md`·`GEMINI.md`는 원본(`local/<X>`·`CLAUDE.md`)과 동일할 때만 삭제합니다. 다르면 사용자 수정 가능성이 있으므로 `skipped`로 보고합니다.
+- **로컬 자산**: `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 스킬도 함께 청소). `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`가 있는 레포에서만 삭제합니다. 원본은 `local/<X>`·`CLAUDE.md`에 남아 있어 re-sync로 복구됩니다.
 - **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.codex/hooks.json`·`.codex/hooks`·`.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
 
 ## 반복 실행 기준
 
-여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다. 로컬 자산은 `local/<X>`·`CLAUDE.md` 기준으로, settings/hooks는 `local/` 기준으로 재생성(기존 AC 산출물 먼저 제거 → 고아 방지)합니다. 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 동일성 비교가 통과한 산출물에만 적용합니다.
+여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다. 로컬 자산은 `local/<X>`·`CLAUDE.md` 기준으로, settings/hooks는 `local/` 기준으로 재생성(기존 AC 산출물 먼저 제거 → 고아 방지)합니다. 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 `.claude/<X>`·`.agents/<X>` 카테고리 통째(gitignore 산출물)에 적용합니다.
 
 ## 생성 계약 검증
 

@@ -3,7 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { comparePaths, resolveUserPath } = require('./deploy-lib');
+const { resolveUserPath } = require('./deploy-lib');
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),
@@ -57,38 +57,28 @@ function unsyncRepo(repo) {
     const claudeDir = path.join(repo, '.claude');
     const agentsDir = path.join(repo, '.agents');
 
+    // .claude/<X>·.agents/<X>는 local/<X>에서 배포된 gitignore 산출물이다. 동일성 비교 없이
+    // 카테고리 단위로 통째 제거한다 — 원본에서 사라진 스킬(orphan)도 함께 청소된다. 원본은
+    // local/에 남아 re-sync로 복구되므로 사용자 데이터 손실 위험이 없다. (경로 자체가 AC 관리
+    // 산출물임을 보장하므로 deploy-conventions의 "AC 관리 여부 확인"을 경로로 충족한다.)
     for (const name of deployDirs) {
-      const source = path.join(repo, 'local', name);
       for (const [label, base] of [['.claude', claudeDir], ['.agents', agentsDir]]) {
         const target = path.join(base, name);
         if (!existsDir(target)) continue;
-        if (existsDir(source) && comparePaths(source, target)) {
-          fs.rmSync(target, { recursive: true, force: true });
-          removed.push(`${label}/${name}`);
-        } else {
-          return { repo, status: 'skipped', detail: `${label}/${name} differs from local/${name}` };
-        }
+        fs.rmSync(target, { recursive: true, force: true });
+        removed.push(`${label}/${name}`);
       }
     }
 
+    // AGENTS.md·GEMINI.md는 CLAUDE.md의 투영이다. CLAUDE.md가 있는(=AC 투영 대상) 레포에서만
+    // 제거한다 — CLAUDE.md 없는 비-AC 레포의 사용자 AGENTS.md는 건드리지 않는다.
     const claudeAgents = path.join(repo, 'CLAUDE.md');
-    const agentsFile = path.join(repo, 'AGENTS.md');
-    if (isFile(agentsFile)) {
-      if (isFile(claudeAgents) && sameFile(claudeAgents, agentsFile)) {
-        fs.rmSync(agentsFile, { force: true });
-        removed.push('AGENTS.md');
-      } else {
-        return { repo, status: 'skipped', detail: 'AGENTS.md differs from CLAUDE.md' };
-      }
-    }
-
-    const geminiFile = path.join(repo, 'GEMINI.md');
-    if (isFile(geminiFile)) {
-      if (isFile(claudeAgents) && sameFile(claudeAgents, geminiFile)) {
-        fs.rmSync(geminiFile, { force: true });
-        removed.push('GEMINI.md');
-      } else {
-        return { repo, status: 'skipped', detail: 'GEMINI.md differs from CLAUDE.md' };
+    if (isFile(claudeAgents)) {
+      for (const projected of ['AGENTS.md', 'GEMINI.md']) {
+        const file = path.join(repo, projected);
+        if (!isFile(file)) continue;
+        fs.rmSync(file, { force: true });
+        removed.push(projected);
       }
     }
 
@@ -139,10 +129,6 @@ function existsDir(target) {
 
 function isFile(target) {
   return fs.existsSync(target) && fs.statSync(target).isFile();
-}
-
-function sameFile(left, right) {
-  return fs.readFileSync(left).equals(fs.readFileSync(right));
 }
 
 module.exports = { unsyncLocalSkills: main };
