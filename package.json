@@ -14,6 +14,7 @@
     "verify:hooks": "node scripts/verify-hooks.js",
     "verify:settings": "node scripts/verify-settings-projection.js",
     "verify:local-system": "node scripts/verify-local-system.js",
+    "backlog:squash": "node scripts/backlog-squash.js",
     "prepare": "husky"
   },
   "devDependencies": {
