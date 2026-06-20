@@ -78,6 +78,14 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 
 사유: 컨벤션 위반은 reviewer가 잡아내기 전 PLAN 단계에서 막아야 한다. PR3에서 features `ui/cards/` 서브폴더를 grep 없이 채택했다가 `docs/ARCHITECTURE.md:189,221` + `docs/conventions/02-layers.md:498`의 "서브폴더 금지" 명시 발견 후 일괄 평탄화한 사례 — 본 절차로 사전 차단.
 
+### prop 설계 타당성 — HTML 표준 속성 우선
+
+stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성과 중복되는 비표준 래퍼 prop을 만들기 전에 표준 속성을 직접 쓸 수 있는지 검토한다.** 기존 패턴을 그대로 따라 래퍼를 만들지 말고, 표준 경로가 있으면 그쪽을 채택한다.
+
+- 판단 기준: 도입하려는 prop이 사실상 표준 DOM 속성의 별칭인가? (예: `label: string` ≈ `aria-label`, `disabled`·`type`·`name` 등 네이티브 속성)
+- 표준 속성 래퍼면 `ComponentProps<'element'>`를 extend해 해당 속성을 직접 노출(필요 시 필수 override)하는 쪽이 더 표준적이다.
+- 위반 사례: `IconButton`의 `label: string`이 `aria-label` 래퍼인데, `ComponentProps<'button'>` extend + `'aria-label': string` 필수 override로 표준화 가능했음.
+
 ### 기존 린트/coding-standards 오류 확인 (채용과제)
 
 채용과제에서는 린트 설정 PR이 앞단에 위치하는 경우가 많다. 이때 린트 설정 PR은 다른 PR 범위의 파일에서 발생하는 오류를 파일 단위로 린트 제외 처리하고 넘어간다 (해당 파일을 수정하는 것은 그 PR의 범위가 아니므로). 따라서 overview.md 또는 PR 분할에서 파악된 파일 목록을 기준으로, 해당 파일에 기존 린트/coding-standards 오류가 남아있는지 점검한다. 오류가 있으면 `implementation.md`에 포함하여, 해당 파일의 기능 변경 커밋보다 앞에 린트 정리 커밋을 별도로 배치하도록 계획한다.
