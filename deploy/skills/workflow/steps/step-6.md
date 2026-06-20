@@ -28,6 +28,8 @@
 
 ## Step 6.1.5. 금지 주석 잔존 점검 (안전망)
 
+> [CRITICAL] **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. sonnet 리뷰어 spawn → 금지 주석 0건 확인 후에만 step-6.2로 진입한다. 생략 불가 — "step-5 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
+
 별도 sonnet 리뷰어를 spawn해 PR diff에 금지 주석이 잔존하는지 재점검한다. step-5 종료 게이트에서 0건이 보장됐어야 하나, 누락 시 본 단계가 안전망.
 
 - 리뷰어 입력: PR diff + [conventions/artifact/comments.md](../conventions/artifact/comments.md)
