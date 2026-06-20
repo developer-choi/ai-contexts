@@ -480,52 +480,10 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 
 ### 구조
 
-backlog 브랜치 = master HEAD + backlog/ 커밋. master의 모든 파일이 있고, 그 위에 `backlog/` 폴더가 추가된 형태다.
+backlog 브랜치 = master HEAD + backlog/ 커밋. master의 모든 파일이 있고, 그 위에 `backlog/` 등 폴더가 1개의 커밋으로 올라간 형태다.
 
 - `backlog/this/`, `backlog/projects/`, `backlog/articles/` = 백로그·발행 재료
 - `backlog/wip/` = 인수인계 진행중 파일
 - `backlog/` 변경은 backlog 브랜치에서만 커밋한다
 - `backlog/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
 - master와 backlog는 서로 병합하지 않는다
-
-### 평소
-
-백로그를 추가·수정할 때마다 자유롭게 커밋을 쌓는다. 스쿼시하지 않는다. 커밋이 나뉘어 있어야 사용자가 `git diff`로 새로 추가된 항목을 확인할 수 있다.
-
-### 새 백로그 추가 전 origin/backlog로 reset
-
-백로그 항목을 새로 추가하기 전에, 항상 로컬 `backlog` 브랜치를 `origin/backlog`로 reset한다. **pull이 아니라 reset이다.**
-
-```
-git fetch origin backlog && git reset --hard origin/backlog
-```
-
-- 여러 기기에서 backlog 브랜치를 공유하므로, 다른 기기에서 이미 정리·스쿼시한 히스토리가 origin에 있을 수 있다
-- pull(merge/rebase)하면 로컬에 남아 있던 미푸시 커밋이 그대로 재적용되거나 충돌이 발생한다. 대부분은 origin에 이미 반영·스쿼시된 중복이다
-- reset --hard로 origin/backlog와 정확히 맞추고, 그 위에 새 백로그 커밋을 쌓는다
-- 로컬에 정말 살려야 할 미푸시 커밋이 있다면 reset 전에 사용자에게 확인한다
-
-### master 동기화
-
-backlog 브랜치가 master보다 뒤처지면 master를 rebase한다:
-
-```
-git checkout backlog && git rebase master
-```
-
-### 잘못 추가된 백로그 커밋 되돌리기
-
-사용자가 백로그 커밋을 되돌리라고 하면, `git revert`가 아니라 `git reset`으로 커밋을 drop한다.
-
-- revert는 되돌림 커밋이 히스토리에 남아 불필요한 노이즈가 된다
-- backlog 브랜치는 정기적으로 스쿼시하므로 reset으로 깔끔하게 제거하는 것이 맞다
-
-### 스쿼시 (정리 시점)
-
-사용자가 백로그 검토·정리를 완료한 뒤 "백로그 정리", "브랜치 정리", "커밋 정리" 등을 요청하면 실행한다.
-
-1. master를 rebase하여 최신 상태로 맞춘다
-2. master 이후의 backlog/ 커밋들을 1개로 스쿼시한다
-3. `origin/backlog`에 force-push한다
-
-결과: backlog = master HEAD + backlog/ 스쿼시 커밋 1개.

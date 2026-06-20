@@ -70,7 +70,7 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 - ahead > 0 AND behind > 0
 - 미커밋 변경 없음 (3-3에는 적용하지 않는다 — 미커밋이 있으면 `reset --keep`이 abort되어 무의미)
 
-**판단 근거**: backlog 브랜치는 master 위에 `backlog/`만 변경되고, 정기적으로 squash + force push가 일어난다 (`/backlog` 스킬의 「스쿼시 (정리 시점)」). 양쪽에 커밋이 쌓여 있어도 backlog/ 최종 내용이 동일하거나 origin에만 추가 변경이 있는 경우는 결국 origin이 정답이다. 로컬에만 있는 변경이 있을 때만 squash 누락·미푸시 가능성이 있어 사용자 판단이 필요하다.
+**판단 근거**: backlog 브랜치는 master 위에 `backlog/`만 변경되고, 사용자가 `npm run backlog:squash`로 정기적으로 squash + force push를 한다. 양쪽에 커밋이 쌓여 있어도 backlog/ 최종 내용이 동일하거나 origin에만 추가 변경이 있는 경우는 결국 origin이 정답이다. 로컬에만 있는 변경이 있을 때만 squash 누락·미푸시 가능성이 있어 사용자 판단이 필요하다.
 
 **판정 알고리즘**:
 
