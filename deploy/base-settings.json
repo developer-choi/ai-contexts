@@ -37,6 +37,18 @@
       "msg": "Checking shell policy..."
     },
     {
+      "file": "check-rm-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking rm policy..."
+    },
+    {
+      "file": "check-rm-policy.js",
+      "event": "PreToolUse",
+      "on": "powershell",
+      "msg": "Checking rm policy..."
+    },
+    {
       "file": "check-git-staging-policy.js",
       "event": "PreToolUse",
       "on": "bash",

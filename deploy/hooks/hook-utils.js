@@ -16,17 +16,26 @@ function getSessionId(payload) {
   return typeof payload.session_id === "string" ? payload.session_id : "";
 }
 
-function deny(reason) {
+function decide(permissionDecision, reason) {
   process.stdout.write(
     JSON.stringify({
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
-        permissionDecision: "deny",
+        permissionDecision,
         permissionDecisionReason: reason,
       },
     }),
   );
   process.exit(0);
+}
+
+function deny(reason) {
+  decide("deny", reason);
+}
+
+// allowlist에 Bash/PowerShell이 있어도 사용자에게 권한 프롬프트를 띄운다(ask가 allow를 덮음).
+function ask(reason) {
+  decide("ask", reason);
 }
 
 function addContext(context, hookEventName = "UserPromptSubmit") {
@@ -43,6 +52,7 @@ function addContext(context, hookEventName = "UserPromptSubmit") {
 
 module.exports = {
   deny,
+  ask,
   addContext,
   getCommand,
   getCwd,

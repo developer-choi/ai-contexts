@@ -62,6 +62,11 @@ function main() {
     && claudePre.some((h) => h.matcher === 'Grep' && h.file === 'surface-claude-md.js'),
     'claude: surface-claude-md가 Glob·Grep 매처로 fan-out 등록됨');
 
+  // rm 정책은 Bash·PowerShell 양쪽 매처에 등록된다(PowerShell tool은 Bash와 별개)
+  check(claudePre.some((h) => h.matcher === 'Bash' && h.file === 'check-rm-policy.js')
+    && claudePre.some((h) => h.matcher === 'PowerShell' && h.file === 'check-rm-policy.js'),
+    'claude: check-rm-policy가 Bash·PowerShell 매처로 등록됨');
+
   // codex: UserPromptSubmit 없음, PreToolUse 전부 단일 '*'
   check(!codex.some((h) => h.event === 'UserPromptSubmit'), 'codex: UserPromptSubmit 없음');
   const codexPre = codex.filter((h) => h.event === 'PreToolUse');
@@ -76,6 +81,10 @@ function main() {
     'codex: UserPromptSubmit·EnterWorktree 외 모든 hook 등록됨');
   check(!codex.some((h) => h.file === 'post-enterworktree-install.js'),
     'codex: EnterWorktree 전용 hook 미등록');
+  // codex엔 PowerShell tool이 없다. powershell 항목은 '*'로 통합되는 bash 항목과 중복되지
+  // 않도록 제외되어, check-rm-policy는 정확히 1번만 등록된다.
+  check(codex.filter((h) => h.file === 'check-rm-policy.js').length === 1,
+    'codex: check-rm-policy 중복 없이 1회 등록됨');
 
   if (failures.length) {
     console.error(`settings 생성 계약 검증 실패: ${failures.length}건`);
