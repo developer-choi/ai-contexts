@@ -67,6 +67,18 @@
       "msg": "Checking git push policy..."
     },
     {
+      "file": "check-git-reset-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking git reset policy..."
+    },
+    {
+      "file": "check-git-reset-policy.js",
+      "event": "PreToolUse",
+      "on": "powershell",
+      "msg": "Checking git reset policy..."
+    },
+    {
       "file": "check-team-message-policy.js",
       "event": "PreToolUse",
       "on": "message",
