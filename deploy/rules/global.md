@@ -207,7 +207,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 ### Agent Teams 우선 사용
 - "팀 에이전트", "Agent Teams", `TeamCreate` 언급 시 `deploy/contexts/team-agent.md` 기준으로 현재 런타임에 맞는 팀/서브에이전트 구조를 선택한다.
-- Claude Code에서 Agent Teams를 사용할 수 있으면 반드시 `team_name`을 지정한다. Codex처럼 `TeamCreate`가 없는 환경에서는 제공된 subagent 도구로 대체하고, 대체도 불가능하면 사전에 보고한다.
+- 구체적 도구·파라미터(이름 지정 방식, `SendMessage` 활성화 조건 등)는 team-agent.md에 따른다. 팀/서브에이전트 구성이 불가능한 환경이면 메인이 직접 수행하고 사전에 보고한다.
 
 
 ## 프로젝트 설정

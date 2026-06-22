@@ -1,16 +1,18 @@
 # 팀/서브에이전트 운용 규칙
 
-역할별 작업자를 오래 유지하거나 다라운드 리뷰를 돌려야 할 때, 현재 런타임에서 제공되는 에이전트 기능을 기준으로 선택한다. Claude Code와 Codex는 도구 이름과 수명주기가 다르므로 `TeamCreate`를 모든 환경의 기본값으로 가정하지 않는다.
+역할별 작업자를 오래 유지하거나 다라운드 리뷰를 돌려야 할 때, 현재 런타임에서 제공되는 에이전트 기능을 기준으로 선택한다. Claude Code와 Codex는 도구 이름과 수명주기가 다르므로 한쪽의 운용 절차를 다른 환경의 기본값으로 가정하지 않는다.
 
 ## Claude Code
 
-Agent Teams를 사용할 수 있으면 다음 절차를 따른다.
+Agent Teams는 experimental 기능이라 환경변수 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`이 켜져 있어야 한다 (AC는 `claude-settings.json`의 `env`에 설정해 배포한다). 켜져 있으면 `SendMessage` 도구가 활성화된다.
 
-1. **TeamCreate**로 팀 생성 (이미 있으면 생략)
-2. **Agent** 호출 시 `team_name` 파라미터 포함
-3. 에이전트 간 후속 지시는 **SendMessage**로 전달
+팀 생성은 **암묵적**이다. 별도 셋업 도구 없이 첫 팀원을 띄우는 순간 세션 단위 팀이 자동 생성되고, 세션 종료 시 자동 정리된다.
 
-`team_name` 없이 호출하면 일회성 서브에이전트가 되어 다라운드 SendMessage 소통이 불가능하다.
+- **Agent** 호출 시 `name`을 지정하면 이름으로 호명 가능한 팀원이 된다 (`name` 없으면 일회성 서브에이전트).
+- 팀원 간 후속 지시·다라운드 토론은 **SendMessage**로 전달한다 (`to`에 팀원 이름, 메인 대화는 `"main"`).
+- 백그라운드(`run_in_background`)로 띄운 팀원은 완료·메시지 시 메인이 자동으로 통지받는다.
+
+> 과거(v2.1.178 이전)에는 `TeamCreate`/`TeamDelete`로 팀을 명시 생성·삭제하고 `team_name` 파라미터로 지정했다. 두 도구는 제거됐고 `team_name`은 받아도 무시된다(deprecated). 옛 절차를 따르지 않는다.
 
 ## Codex
 
