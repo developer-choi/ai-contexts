@@ -135,11 +135,12 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 ### AC 백로그 브랜치 규칙
 - AC에서 `backlog/` 변경은 backlog 브랜치에, 그 외는 master/feature 브랜치에서 커밋한다. 두 종류를 같은 커밋에 섞지 않는다.
 
-### 작업 반영 흐름 — master 머지까지 AI, 푸시·배포는 사용자
+### 작업 반영 흐름 — 워크트리 커밋·rebase까지 AI, master 머지·푸시·배포는 사용자
 
-원본 레포 수정은 워크트리를 만들어 거기서 커밋을 쌓고, 정리해 master로 머지하는 것까지 AI가 한다 (워크트리 사용은 「worktree 감지」). 단계마다 "해도 되나 / 해야 하나"를 묻지 않는다.
+원본 레포 수정은 워크트리를 만들어 거기서 커밋을 쌓고, 현재 master 위로 rebase해 머지 직전 상태까지 만드는 것까지 AI가 한다 (워크트리 사용은 「worktree 감지」). 단계마다 "해도 되나 / 해야 하나"를 묻지 않는다.
 
-- 머지 충돌은 사용자와 함께 해결한다. 멈추고 "이렇게 충돌났다 + 해결 제안"을 제시한 뒤 진행하며, 임의로 한쪽을 채택해 덮어쓰지 않는다.
+- **master 포인터 이동(머지)은 AI가 하지 않는다.** rebase까지 끝낸 뒤 사용자에게 실행할 명령을 안내하고(`git merge --ff-only <branch>` 등) 대기한다. 보호 브랜치(master/main/develop/release) 머지는 사용자 결정이며 `check-git-merge-policy.js` hook이 AI 실행을 차단한다.
+- 머지 충돌(rebase 중)은 사용자와 함께 해결한다. 멈추고 "이렇게 충돌났다 + 해결 제안"을 제시한 뒤 진행하며, 임의로 한쪽을 채택해 덮어쓰지 않는다.
 - 원격 `git push`와 배포(`npm run sync:*`)는 사용자가 한다 — 실행도, 할지 묻지도 않는다. backlog `origin/backlog` 푸시, deploy/ 산출물 sync도 마찬가지.
 
 ## 조사 산출물 출처 포함
