@@ -10,7 +10,7 @@ argument-hint: (인자 없음 — workflow 마지막 PR_{N}_WRITING 세션에서
 
 채용 과제 제출을 마무리한다 — 커밋 정리, PR 작성, README, 배포 안내까지.
 
-`/plan/`에서 과제 요구사항과 각 PR의 pr-body를 찾아 참조합니다.
+`/plan/`에서 과제 요구사항과 각 PR의 pr-body를 찾아 참조한다.
 
 ## 1. 커밋 정리 — 사용자에게 안내
 

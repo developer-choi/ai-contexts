@@ -32,7 +32,7 @@ skill-creator의 Capture Intent / Interview 단계에서, 사용자에게 바로
 
 ### 인프라
 
-[CRITICAL] [team-agent](../../../deploy/contexts/team-agent.md)의 규칙을 따른다.
+[CRITICAL] [team-agent](../../contexts/team-agent.md)의 규칙을 따른다.
 
 설계 토론 팀은 현재 런타임의 team-agent 경로로 구성한다. Codex에서는 허용된 subagent 도구를 사용하되, 같은 역할 작업자를 재사용해 다라운드 맥락을 유지한다. 팀/서브에이전트 구성이 불가능하면 메인이 역할을 직접 수행하고, 그 이유를 사용자 제안에 포함한다.
 

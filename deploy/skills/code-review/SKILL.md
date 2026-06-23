@@ -80,7 +80,7 @@ Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Ad
 
 - **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
 - **External-Skill Reviewer ×M**: 1단계 4번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 메인이 전달한 해당 외부 스킬(`../<name>/SKILL.md`) 내용만 컨텍스트로 받아 그 관점으로 diff를 리뷰한다.
-- **Advanced Reviewer**: diff만 전달, coding-standards 문서·외부 스킬 미전달. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
+- **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
 Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
 
