@@ -206,8 +206,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 - 단, 현재 런타임의 도구 정책이 서브에이전트 사용 조건을 제한하면 그 조건을 우선한다.
 
 ### Agent Teams 우선 사용
-- "팀 에이전트", "Agent Teams", `TeamCreate` 언급 시 `deploy/contexts/team-agent.md` 기준으로 현재 런타임에 맞는 팀/서브에이전트 구조를 선택한다.
-- 구체적 도구·파라미터(이름 지정 방식, `SendMessage` 활성화 조건 등)는 team-agent.md에 따른다. 팀/서브에이전트 구성이 불가능한 환경이면 메인이 직접 수행하고 사전에 보고한다.
+- "팀 에이전트", "Agent Teams", 역할 고정·다라운드 소통 요청 시 `deploy/contexts/team-agent.md`를 따른다.
 
 
 ## 프로젝트 설정
