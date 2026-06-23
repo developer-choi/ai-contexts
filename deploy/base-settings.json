@@ -79,6 +79,18 @@
       "msg": "Checking git reset policy..."
     },
     {
+      "file": "check-git-merge-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking git merge policy..."
+    },
+    {
+      "file": "check-git-merge-policy.js",
+      "event": "PreToolUse",
+      "on": "powershell",
+      "msg": "Checking git merge policy..."
+    },
+    {
       "file": "check-team-message-policy.js",
       "event": "PreToolUse",
       "on": "message",
