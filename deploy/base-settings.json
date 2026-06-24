@@ -31,6 +31,12 @@
       "msg": "Surfacing folder CLAUDE.md..."
     },
     {
+      "file": "check-artifact-write-policy.js",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking artifact write policy..."
+    },
+    {
       "file": "check-shell-policy.js",
       "event": "PreToolUse",
       "on": "bash",
