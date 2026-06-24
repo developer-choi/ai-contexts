@@ -1,0 +1,72 @@
+{
+  "groups": [
+    {
+      "name": "settings hook 등록·투영",
+      "files": [
+        "deploy/base-settings.json",
+        "scripts/settings-projection.js",
+        "scripts/verify-settings-projection.js"
+      ],
+      "note": "훅을 추가/변경하면 셋이 같이 움직인다 (논리 등록 ↔ 매처 어댑터 ↔ 생성 계약). 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조가 바뀌면 verify의 단언을 함께 고친다."
+    },
+    {
+      "name": "sync:system 동기화·제거·가이드",
+      "files": [
+        "scripts/sync-system.js",
+        "scripts/unsync-system.js",
+        "meta/guides/system.md"
+      ],
+      "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드(에이전트가 코드 안 읽고 따르는 절차)도 함께 갱신한다."
+    },
+    {
+      "name": "sync:local-system 동기화·제거·가이드",
+      "files": [
+        "scripts/sync-local-system.js",
+        "scripts/unsync-local-system.js",
+        "meta/guides/local-system.md"
+      ],
+      "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
+    },
+    {
+      "name": "sync:local-skills 동기화·제거 쌍",
+      "files": [
+        "scripts/sync-local-skills.js",
+        "scripts/unsync-local-skills.js"
+      ],
+      "note": "로컬 자산 배포가 새 카테고리/경로를 다루면 제거도 같은 기준으로 맞춘다 (sync만 되고 unsync 후 잔여물 남는 구조 금지)."
+    },
+    {
+      "name": "sync:environment 동기화·제거·가이드",
+      "files": [
+        "scripts/sync-environment.js",
+        "scripts/unsync-environment.js",
+        "meta/guides/environment.md"
+      ],
+      "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
+    },
+    {
+      "name": "environment 메커니즘 계약",
+      "files": [
+        "scripts/environment-lib.js",
+        "scripts/verify-environment.js"
+      ],
+      "note": "environment-lib에 새 멱등성·안전제거 함수를 추가하면 verify-environment에 그 계약 케이스를 추가한다 (로직 drift 방지)."
+    },
+    {
+      "name": "coding-standards map.md",
+      "files": [
+        "deploy/contexts/coding-standards/map.md",
+        "deploy/contexts/coding-standards/**"
+      ],
+      "note": "이 디렉토리에서 파일을 추가·삭제·이동하면 map.md(역할 섹션·파일 목록·태그)를 함께 갱신한다. map.md는 모델이 무엇을 읽을지 결정하는 인덱스라 어긋나면 규칙 누락·오라우팅이 난다."
+    },
+    {
+      "name": "writing-guide map.md",
+      "files": [
+        "deploy/contexts/writing-guide/map.md",
+        "deploy/contexts/writing-guide/**"
+      ],
+      "note": "이 디렉토리에서 파일을 추가·삭제·이동하면 map.md를 함께 갱신한다."
+    }
+  ]
+}

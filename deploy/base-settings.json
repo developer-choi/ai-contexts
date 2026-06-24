@@ -31,6 +31,12 @@
       "msg": "Surfacing folder CLAUDE.md..."
     },
     {
+      "file": "surface-coupling.js",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Surfacing coupled files..."
+    },
+    {
       "file": "check-artifact-write-policy.js",
       "event": "PreToolUse",
       "on": "edit",

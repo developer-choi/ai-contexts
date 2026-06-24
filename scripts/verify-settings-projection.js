@@ -62,6 +62,11 @@ function main() {
     && claudePre.some((h) => h.matcher === 'Grep' && h.file === 'surface-claude-md.js'),
     'claude: surface-claude-md가 Glob·Grep 매처로 fan-out 등록됨');
 
+  // edit(on) 항목은 배열 매처 fan-out으로 Edit·Write 양쪽에 등록된다
+  check(claudePre.some((h) => h.matcher === 'Edit' && h.file === 'surface-coupling.js')
+    && claudePre.some((h) => h.matcher === 'Write' && h.file === 'surface-coupling.js'),
+    'claude: surface-coupling가 Edit·Write 매처로 fan-out 등록됨');
+
   // rm 정책은 Bash·PowerShell 양쪽 매처에 등록된다(PowerShell tool은 Bash와 별개)
   check(claudePre.some((h) => h.matcher === 'Bash' && h.file === 'check-rm-policy.js')
     && claudePre.some((h) => h.matcher === 'PowerShell' && h.file === 'check-rm-policy.js'),
