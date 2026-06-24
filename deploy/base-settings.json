@@ -61,6 +61,12 @@
       "msg": "Checking git staging policy..."
     },
     {
+      "file": "check-backlog-commit-policy.js",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking backlog commit policy..."
+    },
+    {
       "file": "check-git-commit-policy.js",
       "event": "PreToolUse",
       "on": "bash",
