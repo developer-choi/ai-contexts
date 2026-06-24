@@ -46,6 +46,28 @@ function main() {
   const codex = flatten(buildHooks(base.hooks, 'codex'));
   const baseFiles = base.hooks.map((h) => h.file);
 
+  // 파일 존재 정합 (deploy/hooks/ ↔ base-settings.json 등록)
+  // base 안에서의 투영만 검사하면 파일시스템과 어긋나도 못 잡는다:
+  //   - deploy/hooks/에 hook 본체를 추가하고 등록을 빠뜨림 → 죽은 채 배포
+  //   - base에 등록된 file을 deploy/hooks/에서 개명·삭제 → 없는 파일 가리키는 command 생성
+  // hook 본체 = 폴더 내 다른 .js가 require하지 않는 .js. require되는 것(hook-utils 등)은 라이브러리라 제외.
+  // (allowlist를 두지 않는다 — 그 자체가 손-관리 짝꿍이 되어 강등 취지에 어긋난다.)
+  const hooksDir = path.join(__dirname, '..', 'deploy', 'hooks');
+  const jsFiles = fs.readdirSync(hooksDir).filter((f) => f.endsWith('.js'));
+  const imported = new Set();
+  for (const f of jsFiles) {
+    const src = fs.readFileSync(path.join(hooksDir, f), 'utf8');
+    for (const m of src.matchAll(/require\(['"]\.\/([^'"]+)['"]\)/g)) {
+      imported.add(m[1].endsWith('.js') ? m[1] : `${m[1]}.js`);
+    }
+  }
+  const hookBodies = jsFiles.filter((f) => !imported.has(f));
+  const registered = new Set(baseFiles);
+  const orphans = hookBodies.filter((f) => !registered.has(f));
+  const dangling = baseFiles.filter((f) => !jsFiles.includes(f));
+  check(orphans.length === 0, `존재 정합: 모든 hook 본체가 base에 등록됨 (미등록: ${orphans.join(', ') || '없음'})`);
+  check(dangling.length === 0, `존재 정합: base의 모든 등록이 deploy/hooks/에 실존 (없는 파일: ${dangling.join(', ') || '없음'})`);
+
   // claude: 모든 논리 hook 등록, command 토큰 .claude
   check(baseFiles.every((f) => claude.some((h) => h.file === f)), 'claude: base의 모든 hook 등록됨');
   check(buildHooks(base.hooks, 'claude').PostToolUse !== undefined

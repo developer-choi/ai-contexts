@@ -7,7 +7,7 @@
         "scripts/settings-projection.js",
         "scripts/verify-settings-projection.js"
       ],
-      "note": "훅을 추가/변경하면 셋이 같이 움직인다 (논리 등록 ↔ 매처 어댑터 ↔ 생성 계약). 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조가 바뀌면 verify의 단언을 함께 고친다."
+      "note": "존재 정합(hook 본체 ↔ base 등록)은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: hook을 추가하면 base의 event/on/msg를 정하고, 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조(매처 fan-out 등)를 바꾸면 verify의 단언을 함께 고친다."
     },
     {
       "name": "sync:system 동기화·제거·가이드",
