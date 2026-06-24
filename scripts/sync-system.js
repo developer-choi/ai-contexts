@@ -34,6 +34,8 @@ async function main() {
   ensureDeploySource();
   // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
   require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'verify-settings-projection.js')], { stdio: 'inherit' });
+  // contexts map.md ↔ 파일 목록 정합이 깨지면 배포 전에 중단(fail-fast).
+  require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'verify-context-maps.js')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());

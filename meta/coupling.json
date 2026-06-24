@@ -58,7 +58,7 @@
         "deploy/contexts/coding-standards/map.md",
         "deploy/contexts/coding-standards/**"
       ],
-      "note": "이 디렉토리에서 파일을 추가·삭제·이동하면 map.md(역할 섹션·파일 목록·태그)를 함께 갱신한다. map.md는 모델이 무엇을 읽을지 결정하는 인덱스라 어긋나면 규칙 누락·오라우팅이 난다."
+      "note": "파일 존재·등록 정합(목록 ↔ 실제 파일)은 verify:context-maps가 자동으로 잡으니 여기선 판단 면만 챙긴다: 파일을 추가·이동하면 map.md에서 그 파일의 역할 섹션 배치·태그 부여를 정한다. 잘못 배치되면 규칙 오라우팅이 난다."
     },
     {
       "name": "writing-guide map.md",
@@ -66,7 +66,7 @@
         "deploy/contexts/writing-guide/map.md",
         "deploy/contexts/writing-guide/**"
       ],
-      "note": "이 디렉토리에서 파일을 추가·삭제·이동하면 map.md를 함께 갱신한다."
+      "note": "파일 존재·등록 정합은 verify:context-maps가 자동으로 잡으니 여기선 판단 면만 챙긴다: 파일을 추가·이동하면 map.md에서 그 파일의 태그(예: always·structure)를 정한다."
     }
   ]
 }
