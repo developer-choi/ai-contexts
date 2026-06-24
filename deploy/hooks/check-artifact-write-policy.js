@@ -5,7 +5,8 @@
 // 차단 대상:
 //   - 홈 배포 루트 하위: ~/.claude, ~/.codex, ~/.gemini
 //   - 레포 배포 산출물 세그먼트: .agents, .codex, .claude/skills, .claude/hooks,
-//     .claude/settings.json
+//     .claude/contexts, .claude/settings.json
+//   - 투영 산출물 파일명: AGENTS.md, GEMINI.md (CLAUDE.md가 원본, 이 둘은 항상 산출물)
 //
 // ask(deny 아님)인 이유: "사용자가 명시 허용하면 테스트 목적 직접 수정 가능"이라는 예외가
 // 규칙에 있어, 그 순간 사용자가 승인할 수 있어야 한다.
@@ -41,12 +42,16 @@ function isArtifact(file) {
     if (abs === root || abs.startsWith(root + path.sep)) return true;
   }
   const segs = abs.split(path.sep);
+  // 투영 산출물 파일명(norm으로 소문자화됨). CLAUDE.md가 원본이고 이 둘은 항상 산출물이라
+  // 위치 불문 차단한다. 손수 쓴 AGENTS.md가 필요하면 ask라 사용자가 승인하면 통과한다.
+  const base = segs[segs.length - 1];
+  if (base === "agents.md" || base === "gemini.md") return true;
   for (let i = 0; i < segs.length; i++) {
     const seg = segs[i];
     if (seg === ".agents" || seg === ".codex") return true;
     if (seg === ".claude") {
       const next = segs[i + 1];
-      if (next === "skills" || next === "hooks" || next === "settings.json") return true;
+      if (next === "skills" || next === "hooks" || next === "contexts" || next === "settings.json") return true;
     }
   }
   return false;
