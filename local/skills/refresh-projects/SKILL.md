@@ -189,9 +189,9 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — Phase 1
 
 ### 대상
 
-`backlog/projects/`만 대상으로 한다 — 누적되며 게이트가 없는 비-트래커 영역이다.
+`backlog/projects/`(단, AC 자기수정 트래커 `projects/ai-contexts/`는 제외)를 대상으로 한다 — 누적되며 게이트가 없는 비-트래커 영역이다.
 
-- `backlog/this/` 제외: Ready 게이트·상태 라벨이 달린 트래커라, 구조를 AI가 임의로 바꾸면 우선순위·실행 순서가 깨진다.
+- `backlog/projects/ai-contexts/` 제외: Ready 게이트·상태 라벨이 달린 AC 자기수정 트래커라, 구조를 AI가 임의로 바꾸면 우선순위·실행 순서가 깨진다.
 - `backlog/articles/` 제외: 발행 단위(slug)로 사용자가 큐레이션하는 재료라, 임의 분리가 글 구성을 흩뜨린다.
 
 ### 현황파악
@@ -209,7 +209,7 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — Phase 1
 
 ### 마무리
 
-- `this/`에는 인덱스 파일을 두지 않는다 — tier 현황은 갱신할 목차가 없다. `projects/{topic}/index.md`는 References 전용이라 파일 구성이 바뀌어도 갱신하지 않는다 (item 목차 아님).
+- AC 트래커(`projects/ai-contexts/active/`)에는 인덱스 파일을 두지 않는다 — tier 현황은 갱신할 목차가 없다. `projects/{topic}/index.md`는 References 전용이라 파일 구성이 바뀌어도 갱신하지 않는다 (item 목차 아님).
 - 백로그 워크트리에서 수행하고 backlog 브랜치에 커밋한다 (`/backlog`의 「브랜치 관리」).
 - 정비 후 `/backlog`의 「보고」 형식으로 분리·통합·이동·삭제 내역을 사용자에게 보고한다.
 

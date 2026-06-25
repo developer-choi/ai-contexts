@@ -21,12 +21,12 @@
 사용자가 표면화 제안을 명시적으로 거절하면, 그 항목을 7일간 다시 제안하지 않도록 기록한다. (hook이 이 기록을 읽어 "재제안 금지" 목록으로 주입하고, 만료된 기록은 자동 삭제한다.)
 
 - **위치**: 주입 메시지의 「거절 기록 위치」가 알려주는 디렉터리 (= `<ai-contexts>/cache/backlog/surface-backlog/`). `cache/`는 gitignore된다.
-- **파일명**: 거절된 백로그 항목의 `backlog/` 상대경로에서 `/`를 `-`로 치환 + `.md`. 예: `this/foo.md` → `this-foo.md`. (같은 항목을 다시 거절하면 같은 파일을 덮어써 갱신.)
+- **파일명**: 거절된 백로그 항목의 `backlog/` 상대경로에서 `/`를 `-`로 치환 + `.md`. 예: `projects/monorepo-playground/active/foo.md` → `projects-monorepo-playground-active-foo.md`. (같은 항목을 다시 거절하면 같은 파일을 덮어써 갱신.)
 - **내용**: frontmatter 2줄.
 
   ```yaml
   ---
-  item: this/foo.md      # 거절된 항목의 backlog/ 상대경로 (원문 — hook이 제외에 쓴다)
+  item: projects/monorepo-playground/active/foo.md  # 거절된 항목의 backlog/ 상대경로 (원문 — hook이 제외에 쓴다)
   invalidated-date: 2026-06-24  # 거절일 + 7일. 오늘 날짜는 컨텍스트의 currentDate 사용
   ---
   ```

@@ -88,10 +88,10 @@ md 파일 수정 직후:
 
 아래 영역으로 분리한다.
 
-- `backlog/this/` — AC 자체 백로그. 목차·인덱스 파일을 두지 않는다 (상태 라벨이 각 파일 섹션 제목에 인라인, 조망은 `grep '^## \[' *.md`)
-  - `{target}.md` — target별 백로그 항목. 내용 없는 빈 파일은 만들지 않는다. 우선순위는 frontmatter `priority`(`1`/`2`)로 표기
-- `backlog/projects/{project}/{topic}/` — 외부 레포(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리 (Ready 게이트·리뷰/실행 모드 미적용 비-트래커). destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
-  - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이). 외부 레포 작업이라 AC 실행 모드 대상 아님
+- `backlog/projects/{project}/{topic}/` — 레포별(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리. destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
+  - **AC 자체 작업은 `projects/ai-contexts/active/`** — AC는 백로그를 호스팅하며 exec로 자기 자신을 수정하는 자기수정 트래커다. 이 서브트리만 Ready 게이트·기본 `[ready]` 등록·리뷰/실행 모드의 주 무대이고, 목차·인덱스 파일을 두지 않는다 (상태 라벨이 각 파일 섹션 제목에 인라인, 조망은 `grep '^## \[' *.md`). `{target}.md` 단위, 우선순위는 frontmatter `priority`(`1`/`2`)로 표기
+  - 그 외 레포는 기본 무상태 비-트래커 — `[ready]`를 opt-in하면 Ready 게이트가 적용된다(영역무관). exec는 레포 무관이라 projects 항목도 실행 대상이 될 수 있다
+  - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이)
   - `{topic}/index.md` — read-later References 전용. item 목차(파일 목록·요약 표)는 두지 않는다. 나중에 읽을 참고 링크를 `## References`에 적재한다 (item 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별로 모은다. References가 없으면 index.md를 두지 않는다
 - `backlog/articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (Ready 게이트·리뷰/실행 모드 미적용 — projects/와 같은 비-트래커)
   - `{slug}.md`, 재료가 커지면 `{slug}/` 디렉토리로 승격. 인덱스 파일은 두지 않는다(비-트래커 + 발행 시 삭제 → 순배럴)
@@ -101,7 +101,7 @@ md 파일 수정 직후:
   - `{topic}/step{N}-*.md` — 단계가 여러 개로 쪼개진 경우의 step 본문 (선택)
   - 상태 체계 미적용, index.md 없음
   - **사용자가 명시적으로 추가하는 영역**. `/backlog` 스킬·자동 분류 대상 아님. AI는 사용자가 어떤 주제·원본을 옮길지 지시할 때만 파일을 만들거나 수정한다. 외부 레포(KA·DC 등)에서 로드맵을 발견해도 사용자의 명시 지시 없이 선제적으로 복사하지 않는다
-  - 학습할 항목이 아닌 작업·지식 백로그는 `this/`·`projects/`로, 종결 자료는 `history/`로 보낸다
+  - 학습할 항목이 아닌 작업·지식 백로그는 `projects/`로, 종결 자료는 `history/`로 보낸다
 - `backlog/history/` — 종결된 자료 아카이브 (옛 회의자료 PDF, 결정 끝난 고민 흔적 등)
   - 자유 파일·서브폴더. 참조 전용 — 발전·갱신 없음
   - `/backlog` 스킬 대상 아님. doc-router 라우팅 또는 사용자가 직접 적재

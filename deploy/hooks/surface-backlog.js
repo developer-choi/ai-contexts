@@ -123,12 +123,9 @@ try {
   const project = projectFromCwd(getCwd(payload));
   if (!project) process.exit(0);
 
-  // cwd 프로젝트 → 백로그 폴더. AC 본체는 this/, 그 외는 projects/<project>/active/.
-  // 외부 레포는 active/ 하위만 표면화한다(inactive/는 배제). 규칙은 SKILL.md 「projects 영역」.
-  const rel =
-    project === "ai-contexts"
-      ? "this"
-      : path.join("projects", project, "active");
+  // cwd 프로젝트 → 백로그 폴더. 모든 프로젝트(ai-contexts 포함)가 projects/<project>/active/.
+  // active/ 하위만 표면화한다(inactive/는 배제). 규칙은 SKILL.md 「projects 영역」.
+  const rel = path.join("projects", project, "active");
   const folder = path.join(BACKLOG_ROOT, rel);
   if (!fs.existsSync(folder) || !hasMarkdown(folder)) process.exit(0);
 
