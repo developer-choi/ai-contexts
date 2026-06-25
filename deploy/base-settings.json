@@ -113,6 +113,18 @@
       "event": "PreToolUse",
       "on": "message",
       "msg": "Checking team message policy..."
+    },
+    {
+      "file": "snapshot-precompact-transcript.js",
+      "event": "PreCompact",
+      "on": "manual",
+      "msg": "Snapshotting transcript before compaction..."
+    },
+    {
+      "file": "snapshot-precompact-transcript.js",
+      "event": "PreCompact",
+      "on": "auto",
+      "msg": "Snapshotting transcript before compaction..."
     }
   ]
 }
