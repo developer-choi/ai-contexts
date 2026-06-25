@@ -124,8 +124,6 @@ git diff origin/backlog HEAD -- backlog/
   - 성공 = fast-forward 완료 → `<branch> ff +N` 기록 (N은 갱신 전후 커밋 차이).
   - 실패 = fast-forward 불가 → `<branch> ff 불가` 기록. 보고만, 자동 처리 안 함.
 
-이 트릭은 fast-forward만 허용하고 working tree·HEAD·현재 브랜치를 건드리지 않으므로 안전하다.
-
 ### 5. 실패 처리
 
 - 어느 단계에서 git 명령이 실패해도 다음 레포로 계속 진행.
@@ -160,9 +158,8 @@ npm run sync:local-system
 ```
 
 - `npm run sync:system`은 `deploy/`의 시스템 자산을 `~/.claude`, `~/.codex`, `~/.gemini`에 동기화한다.
-- `sync:local-system`의 스킬 배포 대상은 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다. git 동기화 「순회 범위」와 달리 `simplify/`는 제외한다 — 해당 프로젝트엔 배포할 로컬 스킬(`local/skills`)이 없다. settings/hooks 배포는 AC 전용이다(`local/` → AC `.claude/settings.json`·`.codex/hooks.json`).
+- `sync:local-system`의 스킬 배포 대상은 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다. git 동기화 「순회 범위」와 달리 `simplify/`는 제외한다. settings/hooks 배포는 AC 전용이다(`local/` → AC `.claude/settings.json`·`.codex/hooks.json`).
 - 각 레포의 `local/skills`와 `CLAUDE.md`를 원본으로 보고, `.claude/skills`·`.agents/skills`와 `AGENTS.md`/`GEMINI.md`를 생성/갱신한다.
-- 로컬 스킬 수정이 필요하면 산출물(`.claude/skills`·`.agents/`)이나 배포된 지시문 파일을 직접 수정하지 말고 해당 레포의 `local/skills/` 및 `CLAUDE.md`를 수정한 뒤 다시 배포한다.
 
 ## 안전 가드
 
