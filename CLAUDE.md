@@ -74,7 +74,7 @@ md 파일 수정 직후:
 ## README 관리
 
 - README 수정은 일반 작업에서 직접 수행하지 않는다.
-- README 변경이 필요하면 `full-refresh` 스킬 절차를 통해서만 갱신한다.
+- README 변경이 필요하면 `refresh-projects` 스킬 절차를 통해서만 갱신한다.
 
 ### 상태
 

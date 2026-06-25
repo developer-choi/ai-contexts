@@ -131,7 +131,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL → PR_{N}_WRITING)는 채용과 동일
 
 ### 채용과제 마무리 (마지막 PR 완료 후, 채용과제만)
 
-사용자가 `/full-refresh` 등으로 README 갱신 + GitHub PR 작성 완료 직후, [recruitment](recruitment/SKILL.md)의 「4-1. 산출물 문서 채용담당자 시점 리뷰」 트리거 (사용자 발화 트리거 — 메인 에이전트 자동 호출 아님).
+사용자가 `/refresh-projects` 등으로 README 갱신 + GitHub PR 작성 완료 직후, [recruitment](recruitment/SKILL.md)의 「4-1. 산출물 문서 채용담당자 시점 리뷰」 트리거 (사용자 발화 트리거 — 메인 에이전트 자동 호출 아님).
 
 **마지막 PR 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 현재 작업 중인 PR이면 마지막.
 
