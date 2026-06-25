@@ -49,8 +49,6 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 Lead가 AC [coding-standards/map.md](../../../contexts/coding-standards/map.md) + MP `docs/best-practices-map.md` + 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
 
-- 분할 단위는 Lead 재량
-
 ---
 
 ## Step 5.2. 구현 중 공통 룰

@@ -19,15 +19,6 @@ skill-creator는 "realistic 하라"까지 말한다. ablation은 한 단계 더 
 - 추출한 맥락을 positive 시나리오 시드로 사용한다
 - 일반 예시로 대체 금지. 규칙이 방어하려는 구체 상황이 아닌 프롬프트로 측정하면 결과는 "일반 문체·행동 경향"만 보여주고 **규칙의 효과는 측정하지 않는다**
 
-### 사례
-
-- "마크다운 순번 금지"의 rationale: "중간 추가/삭제 시 번호가 밀린다"
-  - 적합: 자주 변경되는 지침·규칙 md 작성
-  - 부적합: 단발성 블로그 포스트, 라이브러리 비교 섹션
-- "worktree 감지"의 rationale: "dirty 브랜치에서 직접 checkout은 작업 손실 위험"
-  - 적합: uncommitted 있는 상태에서 다른 브랜치 전환 요구
-  - 부적합: clean master에서 새 브랜치 생성
-
 ## ZERO negative control + 환경 상속 탐지
 
 ablation 벤치는 반드시 ZERO(규칙 제거) variant를 포함한다. skill-creator의 without_skill baseline과 역할이 다르다:
