@@ -1,6 +1,6 @@
 ---
 name: discussion
-description: 사용자와 기술적 주제에 대해 토론한다. 기술 토론, 기술 면접, 기술 검증 요청 시 사용.
+description: 사용자와 기술적 주제에 대해 토론한다. 기술 토론, 기술 면접 요청 시 사용.
 argument-hint: "[토론 주제]"
 ---
 

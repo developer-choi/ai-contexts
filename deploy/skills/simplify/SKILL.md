@@ -76,10 +76,10 @@ Scope 제거·forwardRef 제거 같은 구조적/기계적 변환은 **최소선
 
 1. **작업 프로세스**: `main.md` 읽기
 2. **유지/삭제 패턴 참고**:
-   - SIMPLIFY_SOURCE `common-keep-patterns.md` — 공통 유지 패턴
-   - SIMPLIFY_SOURCE `common-simplification-patterns.md` — 공통 삭제 패턴
-   - SIMPLIFY_TARGET `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴
-   - SIMPLIFY_TARGET `instructions/simplification-patterns.md` — 라이브러리 특화 삭제 패턴
+   - SIMPLIFY_SOURCE `common-keep-patterns.md`
+   - SIMPLIFY_SOURCE `common-simplification-patterns.md`
+   - SIMPLIFY_TARGET `instructions/keep-patterns.md`
+   - SIMPLIFY_TARGET `instructions/simplification-patterns.md`
 3. **문서 양식 참고** (필요 시): `[타입]/format/` 하위 파일 읽기
    - `[타입]`: 컴포넌트 라이브러리 → `component`
    - 비컴포넌트(상태관리·hooks·유틸 등)도 `component` 양식을 쓰되, 컴포넌트 전용 필드(렌더링 구조·Props)는 대상에 맞게 적응한다(모듈/클래스 공개 API·호출 구조 등). 별도 타입 폴더는 만들지 않는다.

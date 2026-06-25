@@ -13,7 +13,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### 자료 수집 점검
 
-아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../template/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내, 이미 받았는데 텍스트 흐림이 의심되면 영역을 짚어 다시 요청한다.
+아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../template/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 (requirement-review/recruitment/guide.md 「입력 자료」 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 

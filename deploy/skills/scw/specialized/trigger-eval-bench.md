@@ -63,8 +63,6 @@ $env:PYTHONUTF8 = "1"
 - 모델: sonnet (SCW 「Eval」 룰).
 - `--timeout 240`: 90·120으로는 부족. trigger되는 쿼리는 본문 작업 130s+ 걸리는데 early-kill 신호 못 잡으면 통째 timeout. 240 권장.
 
-**시간 추정**: early-kill 덕에 trigger되는 쿼리는 ~10~15s, non-trigger는 응답 완료까지 ~20~30s. `22 × 3 / 3 workers × 평균 20s ≈ 7~10분` per round.
-
 ## 결과 해석
 
 JSON 핵심 필드:
@@ -105,7 +103,6 @@ cd ../<AC>-scw-bench
 
 자동 루프 옵션:
 - **수동 라운드**: description 한 줄 수정 → bench-trigger.py 측정 → 잔류 FAIL 패턴 분석 → 또 수정 → 반복. 라운드당 7~10분. **최대 3~4 라운드까지만 시도** (그 이상은 LLM 비결정성에 묻힘).
-- **`improve_description.py` 직접 호출 + bench-trigger.py 측정 자체 wrapping**: 미구현. 만들 가치 있으나 함정(commands 안 거치고 description override가 호출자 환경에 어떻게 전달되는지) 검증 필요.
 - **hysteric-lab의 manual workaround**: 50줄 bash + 사람 눈 verdict. 가장 신뢰 가능. 자동화 X.
 
 ## 함정 — 피해야 할 6시간 사례
@@ -130,7 +127,6 @@ cd ../<AC>-scw-bench
 - 트리거 결정은 모델별로 다름. 측정 모델과 사용자 환경 모델 다르면 결과 해석 주의.
 - timeout 짧으면 false negative.
 - 트리거 감지는 stream-json의 `Skill` tool_use에서 `"skill":"<name>"` 매칭. 다른 tool 형태는 미감지.
-- bench-trigger.py는 표준 도구가 fix되면 폐기 대상. PR #794 + hysteric-lab의 `commands → skills` fix가 merge되면 표준 도구로 전환.
 
 ## 워크스페이스 컨벤션
 
