@@ -48,4 +48,4 @@ function useProductList() { /* ... */ }
 function useProductFilter() { /* ... */ }
 ```
 
-Hook을 다른 곳에서 재사용하지 않는다면, 같은 파일에 두는 것이 탐색 비용을 줄인다.
+Hook을 다른 곳에서 재사용하지 않는다면, 같은 파일에 둔다.
