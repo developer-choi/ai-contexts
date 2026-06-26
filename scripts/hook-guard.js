@@ -45,6 +45,15 @@ function checkHooks() {
     repairable = hasHuskyBin();
   }
 
+  if (!isFile(path.join(repoRoot, '.husky', 'pre-commit'))) {
+    issues.push('.husky/pre-commit 파일이 없음');
+  }
+
+  if (!isFile(path.join(repoRoot, '.husky', '_', 'pre-commit'))) {
+    issues.push('.husky/_/pre-commit shim이 없음');
+    repairable = hasHuskyBin();
+  }
+
   if (!isFile(commitlintBin())) {
     issues.push('commitlint 실행 파일이 없음: npm ci 필요');
   }
