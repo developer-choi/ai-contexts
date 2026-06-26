@@ -16,15 +16,14 @@
 
 백로그는 세 영역으로 나뉩니다.
 
-- `backlog/this/`: 이 저장소 자체 작업 (스킬·룰·컨텍스트). tier·Ready 게이트 적용.
-- `backlog/projects/{project}/`: 외부 저장소(knowledge-archive·monorepo-playground 등) 작업·지식·참고. tier 없음, Ready 게이트 미적용.
+- `backlog/projects/{project}/`: 저장소별(knowledge-archive·monorepo-playground 등) 작업·지식·참고. 기본 무상태(tier 없음, Ready 게이트 미적용)입니다. 단 `backlog/projects/ai-contexts/active/`는 AC 자기수정 트래커로 tier·Ready 게이트가 적용되고, 다른 projects도 `[ready]`를 opt-in하면 게이트가 적용됩니다(영역 무관).
 - `backlog/articles/{slug}/`: 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
 
-`this`는 할 일 트래커이고, `projects`·`articles`는 비-트래커입니다. `projects`는 외부 저장소 작업·지식, `articles`는 외부 발행용 재료입니다.
+`backlog/projects/ai-contexts/active`가 할 일 트래커이고, 그 외 `projects`·`articles`는 비-트래커입니다. `projects`는 저장소별 작업·지식, `articles`는 외부 발행용 재료입니다.
 
 ## Ready 게이트와 critic
 
-`this`의 항목은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 `[ready]` 라벨이 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동)을 사용자 대신 검증해 라벨을 갱신합니다.
+`backlog/projects/ai-contexts/active`의 항목(또는 `[ready]`를 opt-in한 projects 항목)은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 `[ready]` 라벨이 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동)을 사용자 대신 검증해 라벨을 갱신합니다.
 
 ## 항목 양식
 
