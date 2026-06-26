@@ -9,6 +9,8 @@ const { deny, getCommand, readPayload } = require("./hook-utils");
 //   1. 정적 매칭 — 보호 브랜치명이 인자에 직접 노출: branch -f/--force, checkout -B, switch -C.
 //   2. HEAD 기반 — 타깃이 현재 체크아웃 브랜치라 인자에 안 나옴: merge/pull/rebase/cherry-pick.
 //      이 경우만 `git rev-parse --abbrev-ref HEAD`로 현재 브랜치를 읽어 보호 여부를 판정한다.
+//      예외: `merge --ff-only`로 현재 보호 브랜치를 자기 upstream에 따라잡는 동기화(origin/main→main)는 허용한다(isUpstreamCatchUp).
+//      결정이 끝난 원격 커밋을 로컬에 맞추는 ff라 사용자 결정이 아니다. feature→master 같은 통합 ff는 그대로 차단.
 // push(refspec→보호 브랜치)는 check-git-push-policy.js가 이미 담당하므로 여기서 중복 처리하지 않는다
 // (한 명령에 deny가 두 번 뜨는 것을 막는다). reset 포인터 이동은 check-git-reset-policy.js 담당.
 const cmd = getCommand(readPayload());
@@ -55,7 +57,10 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
       // 의도적으로 반대 — merge/rebase의 흔한 정상 상태(detached)를 오차단하지 않기 위함. 정적 매칭은 그대로 보호.
       continue;
     }
-    if (PROTECTED.test(branch)) deny(MERGE_MSG);
+    if (!PROTECTED.test(branch)) continue;
+    // 예외: 현재 보호 브랜치를 자기 upstream으로 따라잡는 `merge --ff-only`만 허용(동기화이지 결정이 아님).
+    if (sub === "merge" && isUpstreamCatchUp(inv, gitOpts)) continue;
+    deny(MERGE_MSG);
   }
 }
 
@@ -64,6 +69,24 @@ process.exit(0);
 // --- helpers ---
 function stripRef(value) {
   return value.replace(/^refs\/heads\//, "");
+}
+
+// `merge --ff-only`가 '현재 브랜치를 자기 upstream(예: origin/main)으로 따라잡기'인지 판정한다.
+// --ff-only가 없거나, upstream 미설정이거나, 머지 대상이 upstream이 아니면 false(=차단 유지) —
+// feature→master 같은 통합 ff를 따라잡기로 오인하지 않게 한다. ff 불가 시엔 git이 거부하므로 데이터 위험도 없다.
+function isUpstreamCatchUp(inv, gitOpts) {
+  if (!inv.args.includes("--ff-only")) return false;
+  let upstream;
+  try {
+    upstream = execSync("git rev-parse --abbrev-ref --symbolic-full-name @{u}", gitOpts).toString().trim();
+  } catch {
+    return false;
+  }
+  const positionals = inv.args.filter((t) => !t.startsWith("-"));
+  if (positionals.length === 0) return true; // 인자 없는 `merge --ff-only` = @{u} 머지 = 따라잡기
+  if (positionals.length > 1) return false;
+  const ref = stripRef(positionals[0]);
+  return ref === upstream || ref === "@{u}" || ref === "@{upstream}";
 }
 
 function flagValues(args, ...flags) {
