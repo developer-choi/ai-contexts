@@ -8,7 +8,7 @@
 // (GIT_REFLOG_ACTION은 이 hook에 전달되지 않아 rebase 디렉토리 존재로 판별한다 — 실측 확인.)
 const { execFileSync } = require("child_process");
 const fs = require("fs");
-const { parseNameStatusZ, findViolations, formatViolations } = require("./backlog-path-policy");
+const { parseNameStatusZ, findViolations, formatViolations, rebaseInProgress } = require("./backlog-path-policy");
 
 if (process.argv[2] !== "prepared") process.exit(0);
 if (rebaseInProgress()) process.exit(0);
@@ -42,15 +42,3 @@ for (const line of stdin.split("\n")) {
   }
 }
 process.exit(0);
-
-function rebaseInProgress() {
-  for (const name of ["rebase-merge", "rebase-apply"]) {
-    try {
-      const dir = execFileSync("git", ["rev-parse", "--git-path", name], { encoding: "utf8" }).trim();
-      if (dir && fs.existsSync(dir)) return true;
-    } catch {
-      /* ignore */
-    }
-  }
-  return false;
-}

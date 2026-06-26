@@ -3,7 +3,11 @@
 // cherry-pick·merge·amend는 pre-commit이 안 도므로 reference-transaction(check-backlog-ref.js)이
 // 백스톱으로 같은 정책을 강제한다. 판정 로직은 backlog-path-policy.js 한 곳을 공유한다.
 const { execFileSync } = require("child_process");
-const { parseNameStatusZ, findViolations, formatViolations } = require("./backlog-path-policy");
+const { parseNameStatusZ, findViolations, formatViolations, rebaseInProgress } = require("./backlog-path-policy");
+
+// rebase 재생 커밋은 신규 변경이 아니므로 skip — backlog를 master 위로 rebase할 때
+// 과거 인프라 커밋 재생이 Rule B에 걸려 정상 흐름이 깨지는 것을 막는다.
+if (rebaseInProgress()) process.exit(0);
 
 let branch = "";
 try {

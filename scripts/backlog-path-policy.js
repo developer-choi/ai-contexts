@@ -6,6 +6,8 @@
 //   Rule A (경로 스코프):  backlog/projects/<project>/ 직속은 active/ · inactive/ 만(신규 배치 한정).
 // rules-as-code: 파일 구조·금지 경로는 LLM 판단 0인 강제 칸.
 
+const { execFileSync } = require("child_process");
+
 const ALLOWED_TOP = /^(backlog|archives)\//;
 const PROJECTS = "backlog/projects/";
 const ALLOWED_CHILD = new Set(["active", "inactive"]);
@@ -70,4 +72,19 @@ function formatViolations(violations) {
   return lines.join("\n");
 }
 
-module.exports = { parseNameStatusZ, findViolations, formatViolations };
+// rebase 진행 중인가. rebase는 이미 리뷰된 커밋을 재생할 뿐(신규 변경 도입 아님)이고,
+// backlog를 master 위로 rebase하면 master·과거 인프라 커밋이 재생돼 정책에 걸릴 수 있으므로
+// pre-commit·reference-transaction 둘 다 rebase 중엔 skip한다. (실측: rebase는 pre-commit을 재생마다 실행.)
+function rebaseInProgress() {
+  for (const name of ["rebase-merge", "rebase-apply"]) {
+    try {
+      const dir = execFileSync("git", ["rev-parse", "--git-path", name], { encoding: "utf8" }).trim();
+      if (dir && require("fs").existsSync(dir)) return true;
+    } catch {
+      /* ignore */
+    }
+  }
+  return false;
+}
+
+module.exports = { parseNameStatusZ, findViolations, formatViolations, rebaseInProgress };
