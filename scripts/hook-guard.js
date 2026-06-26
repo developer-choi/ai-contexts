@@ -54,6 +54,16 @@ function checkHooks() {
     repairable = hasHuskyBin();
   }
 
+  if (!isFile(path.join(repoRoot, '.husky', 'reference-transaction'))) {
+    issues.push('.husky/reference-transaction 파일이 없음');
+  }
+
+  if (!isFile(path.join(repoRoot, '.husky', '_', 'reference-transaction'))) {
+    // husky가 안 만드는 추가 shim. prepare 체인(install-husky-extra)이 복구한다.
+    issues.push('.husky/_/reference-transaction shim이 없음');
+    repairable = hasHuskyBin();
+  }
+
   if (!isFile(commitlintBin())) {
     issues.push('commitlint 실행 파일이 없음: npm ci 필요');
   }

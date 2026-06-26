@@ -16,7 +16,7 @@
     "verify:context-maps": "node scripts/verify-context-maps.js",
     "verify:local-system": "node scripts/verify-local-system.js",
     "backlog:squash": "node scripts/backlog-squash.js",
-    "prepare": "husky"
+    "prepare": "husky && node scripts/install-husky-extra.js"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

@@ -1,1 +1,1 @@
-node scripts/check-backlog-structure.js
+node scripts/check-backlog-precommit.js
