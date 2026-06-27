@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const { ensureHooksReady } = require('./hook-guard');
+const { ensureHooksReady } = require('../lib/hook-guard');
 
 try {
   ensureHooksReady();

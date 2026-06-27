@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const contextsDir = path.join(__dirname, '..', 'deploy', 'contexts');
+const contextsDir = path.join(__dirname, '..', '..', 'deploy', 'contexts');
 
 // "상대경로.md" 또는 "상대경로.md [태그]" 한 줄 (헤딩·표·링크·산문 줄은 안 걸림)
 const LISTED_RE = /^([\w][\w./-]*\.md)(\s+\[[\w-]+\])?\s*$/;

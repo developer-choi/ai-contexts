@@ -14,7 +14,7 @@ Claude Code 세션 로그에서 사용자의 active time KPI를 추출한다.
 
 ## 스크립트
 
-경로: `~/WebstormProjects/main/ai-contexts/scripts/kpi.js`
+경로: `~/WebstormProjects/main/ai-contexts/scripts/tools/kpi.js`
 
 | 명령어 | 설명 |
 |--------|------|

@@ -12,9 +12,9 @@ const SKILLS_PRESERVE = new Set([
   'web-design-guidelines',
 ]);
 
-const { buildHooks } = require('./settings-projection');
+const { buildHooks } = require('../settings/settings-projection');
 
-const repoDir = path.resolve(__dirname, '..');
+const repoDir = path.resolve(__dirname, '..', '..');
 const sourceDir = path.join(repoDir, 'deploy');
 const baseSettingsSource = path.join(sourceDir, 'base-settings.json');
 // 직접 복사하지 않고 settings 생성의 재료로만 쓰는 root 파일들.

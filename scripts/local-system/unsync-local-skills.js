@@ -3,7 +3,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { resolveUserPath } = require('./deploy-lib');
+const { resolveUserPath } = require('../lib/deploy-lib');
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),

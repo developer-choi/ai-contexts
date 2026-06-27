@@ -10,7 +10,7 @@ const path = require('path');
 
 const { buildHooks } = require('./settings-projection');
 
-const baseSettingsSource = path.join(__dirname, '..', 'deploy', 'base-settings.json');
+const baseSettingsSource = path.join(__dirname, '..', '..', 'deploy', 'base-settings.json');
 
 function flatten(hooksObj) {
   // event별 그룹 → [{event, matcher, file}] 평탄화 (file은 command에서 추출)
@@ -52,7 +52,7 @@ function main() {
   //   - base에 등록된 file을 deploy/hooks/에서 개명·삭제 → 없는 파일 가리키는 command 생성
   // hook 본체 = 폴더 내 다른 .js가 require하지 않는 .js. require되는 것(hook-utils 등)은 라이브러리라 제외.
   // (allowlist를 두지 않는다 — 그 자체가 손-관리 짝꿍이 되어 강등 취지에 어긋난다.)
-  const hooksDir = path.join(__dirname, '..', 'deploy', 'hooks');
+  const hooksDir = path.join(__dirname, '..', '..', 'deploy', 'hooks');
   const jsFiles = fs.readdirSync(hooksDir).filter((f) => f.endsWith('.js'));
   const imported = new Set();
   for (const f of jsFiles) {

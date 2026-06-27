@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 로컬 settings/hooks 생성 계약 검증 (전역 verify-settings-projection.js의 로컬판).
 // sync:local-system 시작 시 fail-fast로 호출된다.
-const { buildHooks, LOCAL_ADAPTERS, localHookCommand } = require('./settings-projection');
+const { buildHooks, LOCAL_ADAPTERS, localHookCommand } = require('../settings/settings-projection');
 const { loadLocalBaseSettings } = require('./local-deploy-lib');
 
 const buildOpts = { adapters: LOCAL_ADAPTERS, makeCommand: localHookCommand };

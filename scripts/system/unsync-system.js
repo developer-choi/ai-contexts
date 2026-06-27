@@ -11,7 +11,7 @@ const {
   uninstallCodexGlobals,
   uninstallGeminiGlobals,
   uninstallTarget,
-} = require('./deploy-lib');
+} = require('../lib/deploy-lib');
 
 async function main() {
   ensureDeploySource();

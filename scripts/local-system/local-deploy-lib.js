@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const { buildHooks, LOCAL_ADAPTERS, localHookCommand } = require('./settings-projection');
+const { buildHooks, LOCAL_ADAPTERS, localHookCommand } = require('../settings/settings-projection');
 const {
   copyPath,
   ensureDir,
@@ -19,7 +19,7 @@ const {
   settingsManifestPath,
   splitSettings,
   writeJson,
-} = require('./deploy-lib');
+} = require('../lib/deploy-lib');
 
 const localSourceDir = path.join(repoDir, 'local');
 const localBaseSettingsSource = path.join(localSourceDir, 'base-settings.json');

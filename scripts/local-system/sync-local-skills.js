@@ -3,8 +3,8 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 
-const { ensureHooksReady } = require('./hook-guard');
-const { copyPath, ensureDir, resolveUserPath } = require('./deploy-lib');
+const { ensureHooksReady } = require('../lib/hook-guard');
+const { copyPath, ensureDir, resolveUserPath } = require('../lib/deploy-lib');
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),

@@ -12,14 +12,14 @@
  * force-push는 Claude 정책 hook에서 막혀 있고 origin 푸시는 사용자 몫이므로,
  * 스쿼시까지만 하고 마지막 `git push --force` 명령은 출력만 한다.
  *
- *   node scripts/backlog-squash.js            실행
- *   node scripts/backlog-squash.js --dry-run  판정·계획만 출력 (변경 없음)
+ *   node scripts/tools/backlog-squash.js            실행
+ *   node scripts/tools/backlog-squash.js --dry-run  판정·계획만 출력 (변경 없음)
  */
 
 const path = require('path');
 const childProcess = require('child_process');
 
-const REPO = path.resolve(__dirname, '..');
+const REPO = path.resolve(__dirname, '..', '..');
 const WT = path.resolve(REPO, '..', 'ai-contexts-backlog');
 const BRANCH = 'backlog';
 const REMOTE = 'origin';

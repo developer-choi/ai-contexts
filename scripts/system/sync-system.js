@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 const path = require('path');
-const { ensureHooksReady } = require('./hook-guard');
+const { ensureHooksReady } = require('../lib/hook-guard');
 
 const {
   CATEGORIES,
@@ -27,15 +27,15 @@ const {
   uninstallTarget,
   verifyJsonExact,
   verifySettings,
-} = require('./deploy-lib');
+} = require('../lib/deploy-lib');
 
 async function main() {
   ensureHooksReady();
   ensureDeploySource();
   // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
-  require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'verify-settings-projection.js')], { stdio: 'inherit' });
+  require('child_process').execFileSync(process.execPath, [path.join(__dirname, '..', 'settings', 'verify-settings-projection.js')], { stdio: 'inherit' });
   // contexts map.md ↔ 파일 목록 정합이 깨지면 배포 전에 중단(fail-fast).
-  require('child_process').execFileSync(process.execPath, [path.join(__dirname, 'verify-context-maps.js')], { stdio: 'inherit' });
+  require('child_process').execFileSync(process.execPath, [path.join(__dirname, '..', 'verify', 'verify-context-maps.js')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
@@ -247,7 +247,7 @@ function verifyGeminiGlobals(targetDir) {
     geminiSettingsObject,
     comparePaths,
     verifySettings,
-  } = require('./deploy-lib');
+  } = require('../lib/deploy-lib');
 
   console.log('');
   console.log('Gemini 검증 중...');

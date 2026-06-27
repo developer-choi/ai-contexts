@@ -10,8 +10,8 @@
 const path = require('path');
 const childProcess = require('child_process');
 
-const { ensureHooksReady } = require('./hook-guard');
-const { ensureDir, trustCodexHooks, verifyJsonExact, verifySettings, repoDir } = require('./deploy-lib');
+const { ensureHooksReady } = require('../lib/hook-guard');
+const { ensureDir, trustCodexHooks, verifyJsonExact, verifySettings, repoDir } = require('../lib/deploy-lib');
 const { syncLocalSkills } = require('./sync-local-skills');
 const {
   copyLocalHooks,
