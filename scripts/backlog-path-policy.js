@@ -4,11 +4,14 @@
 // 규칙 SSOT: deploy/skills/backlog/SKILL.md 「active / inactive / domains 격리」 + 브랜치 운영방침.
 //   Rule B (브랜치 스코프): backlog 브랜치에선 backlog/ · archives/ 하위만 수정·생성·삭제 가능.
 //   Rule A (경로 스코프):  backlog/projects/<project>/ 직속은 active/ · inactive/ 만(신규 배치 한정).
+//   Rule C (archives 전용): archives/ 는 backlog 브랜치 전용 1급 폴더 — 비-backlog 브랜치(master 등)에선
+//     추가·수정 금지(삭제만 허용해 master→backlog 전용 전환을 가능케 한다). Rule B의 역방향 가드.
 // rules-as-code: 파일 구조·금지 경로는 LLM 판단 0인 강제 칸.
 
 const { execFileSync } = require("child_process");
 
 const ALLOWED_TOP = /^(backlog|archives)\//;
+const ARCHIVES_PREFIX = "archives/";
 const PROJECTS = "backlog/projects/";
 const ALLOWED_CHILD = new Set(["active", "inactive"]);
 
@@ -43,6 +46,13 @@ function findViolations(changes, branch) {
       continue; // Rule B 위반이면 Rule A는 볼 필요 없음
     }
 
+    // Rule C — archives/ 는 backlog 브랜치 전용. 비-backlog 브랜치에선 추가·수정·복사·이동(A/M/C/R)
+    // 금지(master 재유입 차단). 삭제(D)는 master→backlog 전용 전환을 위해 허용한다.
+    if (branch !== "backlog" && p.startsWith(ARCHIVES_PREFIX) && status !== "D") {
+      out.push({ path: p, rule: "C", msg: "archives/ 는 backlog 브랜치 전용 — 비-backlog 브랜치에선 추가·수정 불가(삭제만 허용)" });
+      continue;
+    }
+
     // Rule A — projects/<project>/ 직속 신규 배치(A/C/R)는 active/ · inactive/ 만.
     // 기존 폴더 안 파일의 수정(M)·삭제(D)는 정리를 위해 허용한다.
     if ((status === "A" || status === "C" || status === "R") && p.startsWith(PROJECTS)) {
@@ -57,12 +67,17 @@ function findViolations(changes, branch) {
 
 function formatViolations(violations) {
   const lines = ["✘ backlog 경로 정책 위반:"];
-  const byRule = { B: [], A: [] };
+  const byRule = { B: [], A: [], C: [] };
   for (const v of violations) byRule[v.rule].push(v.path);
   if (byRule.B.length) {
     lines.push("", "[backlog 브랜치 허용 범위 초과] backlog/ · archives/ 하위만 수정·생성·삭제 가능합니다:");
     byRule.B.forEach((p) => lines.push(`  - ${p}`));
     lines.push("  → 인프라(스킬·룰·스크립트 등)는 master에서 작업하고, backlog는 master 위 rebase로 받습니다.");
+  }
+  if (byRule.C.length) {
+    lines.push("", "[archives 전용] archives/ 는 backlog 브랜치 전용 1급 폴더라 비-backlog 브랜치에선 추가·수정할 수 없습니다(삭제만 허용):");
+    byRule.C.forEach((p) => lines.push(`  - ${p}`));
+    lines.push("  → archives/ 변경은 backlog 브랜치(ai-contexts-backlog 워크트리)에서 커밋하세요.");
   }
   if (byRule.A.length) {
     lines.push("", "[구조 위반] projects/<project>/ 바로 아래 허용 폴더는 active/ · inactive/ 뿐입니다:");

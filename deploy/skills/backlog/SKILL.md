@@ -498,9 +498,10 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 
 ### 구조
 
-backlog 브랜치 = master HEAD + backlog/ 커밋. master의 모든 파일이 있고, 그 위에 `backlog/` 등 폴더가 1개의 커밋으로 올라간 형태다.
+backlog 브랜치 = master HEAD + `backlog/`·`archives/` 커밋. master의 모든 파일이 있고, 그 위에 `backlog/`(백로그·발행 재료)와 `archives/`(종결·퇴역 자료)가 backlog 브랜치 전용 최상위 폴더로 올라간 형태다. 두 폴더는 master엔 없고 backlog 브랜치에만 있으며, backlog가 master 위로 rebase될 때 그 커밋이 replay되어 보존된다.
 
 - `backlog/projects/`, `backlog/articles/` = 백로그·발행 재료
-- `backlog/` 변경은 backlog 브랜치에서만 커밋한다
-- `backlog/` 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
+- `archives/` = 종결·퇴역 자료(옛 프롬프트·`history/` 등). `backlog/`와 동급의 backlog 브랜치 전용 폴더지만 커밋 종류가 다르므로 같은 커밋에 섞지 않는다
+- `backlog/`·`archives/` 변경은 backlog 브랜치에서만 커밋한다 (git-level `backlog-path-policy.js` Rule B/C가 강제 — 비-backlog 브랜치에 archives/ 재유입도 차단)
+- 그 둘 외 파일은 backlog 브랜치에서 절대 수정하지 않는다
 - master와 backlog는 서로 병합하지 않는다
