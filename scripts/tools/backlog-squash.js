@@ -9,8 +9,8 @@
  *   local 앞섬               → push
  *   동일                     → origin/master 위로 1커밋 스쿼시 (force-push는 사용자가 직접)
  *
- * force-push는 Claude 정책 hook에서 막혀 있고 origin 푸시는 사용자 몫이므로,
- * 스쿼시까지만 하고 마지막 `git push --force` 명령은 출력만 한다.
+ * force-push는 Claude 정책 hook에서 deny되므로, 스쿼시까지만 하고
+ * 마지막 `git push --force` 명령은 출력만 한다.
  *
  *   node scripts/tools/backlog-squash.js            실행
  *   node scripts/tools/backlog-squash.js --dry-run  판정·계획만 출력 (변경 없음)
