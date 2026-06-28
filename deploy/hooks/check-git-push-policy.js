@@ -1,7 +1,7 @@
 const { execSync } = require("child_process");
 const os = require("os");
 const path = require("path");
-const { deny, getCommand, readPayload } = require("./hook-utils");
+const { ask, deny, getCommand, readPayload } = require("./hook-utils");
 
 const cmd = getCommand(readPayload());
 if (typeof cmd !== "string") process.exit(0);
@@ -40,7 +40,7 @@ for (const inv of pushInvocations) {
   const explicitTarget = extractPushTargetBranch(inv.args);
 
   if (explicitTarget && protectedBranches.test(explicitTarget)) {
-    deny(`${explicitTarget} 브랜치에 push 금지.`);
+    ask(`${explicitTarget} 보호 브랜치에 push합니다. 승인하면 진행합니다.`);
   }
 
   let branch;
@@ -53,13 +53,13 @@ for (const inv of pushInvocations) {
   const targetBranch = explicitTarget || branch;
 
   if (protectedBranches.test(targetBranch)) {
-    deny(`${targetBranch} 브랜치에 push 금지.`);
+    ask(`${targetBranch} 보호 브랜치에 push합니다. 승인하면 진행합니다.`);
   }
 
   try {
     const prState = execSync(`gh pr view ${targetBranch} --json state -q .state`, gitOptsQuiet).toString().trim();
     if (prState === "OPEN") {
-      deny(`${targetBranch} 브랜치에 열린 PR이 있습니다. AI는 푸시하지 않습니다 — 사용자가 직접 푸시하세요.`);
+      deny(`${targetBranch} 브랜치에 열린 PR이 있어 AI 푸시를 막습니다 — 사용자가 직접 푸시하세요.`);
     }
   } catch {
     // No PR, gh unavailable, or no GitHub remote. Continue with local checks.
