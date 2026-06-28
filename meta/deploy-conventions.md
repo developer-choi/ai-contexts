@@ -2,6 +2,18 @@
 
 AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, settings.json hook, AC worktree)을 수정·추가할 때 따르는 규칙.
 
+## 목적: 어느 에이전트가 와도 동일하게 동작
+
+이 배포 시스템의 목적은 **Claude·Codex·Gemini 중 어느 에이전트로 작업해도 같은 규칙·스킬·hook이 동일하게 동작하게** 만드는 것이다. 아래의 모든 계약은 이 목적을 위한 수단이다.
+
+- **원본은 한 벌만 둔다.** 전역 공통 자산은 `deploy/`에, 레포 로컬 자산은 그 레포의 `local/`에 둔다. 같은 로직(hook js·정책 목록·스킬)을 에이전트마다 따로 쓰지 않는다 — 한 벌이 SSOT다.
+- **타겟별 형식은 어댑터가 투영한다.** `sync:*`가 원본 한 벌을 각 에이전트의 등록 형식으로 변환해 배포한다. Claude는 `~/.claude`(레포 로컬은 `.claude/`), Codex는 `~/.codex`·`.codex/`, Gemini는 `~/.gemini`. 등록 구조(matcher·이벤트)의 에이전트별 차이는 어댑터가 흡수하므로, 같은 hook 하나가 세 에이전트에서 동일하게 발동한다.
+- **배포 산출물은 직접 손대지 않는다.** `~/.claude/*`·`.claude/*`·`.codex/*`·`.gemini/*`·`.agents/*`와 투영 파일(`AGENTS.md`·`GEMINI.md`)은 전부 원본에서 생성된 산출물이다. 직접 고치면 다음 sync에 덮여 사라지고, 한 에이전트에만 반영돼 동일 동작이 깨진다. 그래서 산출물을 두 장치로 보호한다 — 둘은 막는 대상이 달라 서로 대체하지 못한다:
+  - **편집 차단(hook)** — 전역 `check-artifact-write-policy.js`가 AI의 Edit/Write를 가로채 산출물 직접 수정 시 `ask`를 띄운다. hook 하나가 모든 레포의 `~/.claude`·`.claude/*` 등을 커버한다. 단 AI의 편집만 막지 git 커밋은 못 막는다.
+  - **커밋 차단(gitignore)** — 각 레포 `.gitignore`가 산출물을 git에서 제외한다. 산출물은 원본에서 다시 만들어지므로 커밋할 이유가 없다. 이건 레포마다 적어야 하고 hook이 대신할 수 없다.
+
+수정은 항상 원본(`deploy/`·`local/`)에서 하고 `sync:*`로 배포한다 — 글로벌 원본은 `deploy/`, 레포 로컬 원본은 `local/`.
+
 ## settings는 base(공통) + 타겟 override로 생성한다
 
 각 타겟 설정은 **공통 재료 `deploy/base-settings.json` + 타겟 override 파일(`deploy/claude-settings.json` 등)을 합쳐 생성**한다(`scripts/settings/settings-projection.js` + `deploy-lib.js`). override가 우선(키 충돌 시 base를 덮음).
