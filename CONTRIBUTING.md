@@ -29,7 +29,6 @@ npm run sync:local-system
 | `deploy/skills/` | 스킬 정의 (workflow, code-review 등) | 배포됨 |
 | `deploy/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | 배포됨 |
 | `meta/` | 프로젝트 관리 문서 (설치 가이드, 아키텍처 결정) | 배포 안 됨 |
-| `archives/` | 퇴역한 프롬프트 | 배포 안 됨 |
 | `scripts/` | 배포/제거 스크립트 | 배포 안 됨 |
 
 ---
