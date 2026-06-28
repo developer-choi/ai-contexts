@@ -40,11 +40,11 @@ KA·MP 행선지 판단 기준은 [`deploy/contexts/placement.md`](../../../depl
 | AC | `~/WebstormProjects/main/ai-contexts-backlog/backlog/projects/<project>/active/<topic>/` | TODO·References 메타 — destination은 캡처 intent로 결정, References는 `index.md` (`/backlog` 위임) |
 | AC | `~/WebstormProjects/main/ai-contexts-backlog/backlog/projects/knowledge-archive/active/<topic>/<파일>.md` | KA 성격이나 한국어로 쓰인 미검증 정리 — KA staging (`/backlog projects` 위임, 「KA 언어 게이트」 참조) |
 | AC | `~/WebstormProjects/main/ai-contexts-backlog/backlog/projects/monorepo-playground/active/<topic>/<파일>.md` | MP 성격 항목 전부 — MP staging (`/backlog projects` 위임, 「MP staging」 참조) |
-| AC | `~/WebstormProjects/main/ai-contexts-backlog/backlog/history/` | 종결된 회의자료·옛 메모 등 참조 전용 아카이브 |
+| AC | `~/WebstormProjects/main/ai-contexts-backlog/archives/history/` | 종결된 회의자료·옛 메모 등 참조 전용 아카이브 (backlog 브랜치 전용 `archives/` 하위) |
 
 KA 4번째 역할 `explained/`는 `/explain` 스킬 런타임 캐시라 doc-router 라우팅 대상이 아니다.
 
-`backlog/history/` 판단 기준: 본인이 더 발전시킬 의도 없이 종결한 자료. 옛 회의자료 PDF, 결정 끝난 고민 흔적 등. TODO·미해결 질문이 있으면 history가 아니라 해당 레포 `backlog/projects/<project>/active/`로 라우팅한다 (사고 흔적은 발전 가능). 판단 모호하면 `.unrouted.md` 잔여에 남기고 사용자가 결정한다.
+`archives/history/` 판단 기준: 본인이 더 발전시킬 의도 없이 종결한 자료. 옛 회의자료 PDF, 결정 끝난 고민 흔적 등. TODO·미해결 질문이 있으면 history가 아니라 해당 레포 `backlog/projects/<project>/active/`로 라우팅한다 (사고 흔적은 발전 가능). 판단 모호하면 `.unrouted.md` 잔여에 남기고 사용자가 결정한다. (history는 backlog 영역이 아니라 backlog 브랜치 전용 `archives/` 하위 종결 자료다.)
 
 ## 분류 단위
 
@@ -157,7 +157,7 @@ KA destination 레포에 산출물을 쓰기 전에, master/main 워크트리에
 - 산출물 쓰기는 이 워크트리 경로에서만 수행한다. 「행선지 인덱스」 경로는 레포 루트 기준이므로 실제 쓰기 경로의 루트를 워크트리 루트로 치환한다
 - 워크트리·브랜치는 작업 후에도 그대로 둔다. 커밋·push·merge 판단은 사용자가 한다
 
-AC `backlog/projects`·`history` 행선지는 `/backlog`가 자체 워크트리(`ai-contexts-backlog`)로 처리하므로 여기서 따로 만들지 않는다.
+AC `backlog/projects`·`archives/history` 행선지는 `/backlog`가 자체 워크트리(`ai-contexts-backlog`)로 처리하므로 여기서 따로 만들지 않는다.
 
 ## 양식 변환
 
