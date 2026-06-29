@@ -93,7 +93,18 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 
 ## 출력
 
-입력 파일을 직접 Edit. 별도 파일 생성 X. 같은 경로 안내. (시안 다양화는 예외 — 위 type 분기 참조.)
+다듬기 단계는 입력 패키지(frontmatter + 본문)를 **제자리 Edit**한다. 별도 파일 생성 X. 같은 경로 안내. (시안 다양화는 예외 — 위 type 분기 참조.) 발행처로 내보내는 것은 사용자 리뷰가 끝난 뒤 「종결 — 발행처 이관」에서 한다.
+
+## 종결 — 발행처 이관 (frontmatter 제거)
+
+사용자 리뷰까지 끝나 본문이 확정되면 실행한다. frontmatter는 write-refine **재실행 컨텍스트**라(「write-init과의 관계」 — frontmatter만으로 출발) staging 패키지엔 보존하고, **발행 문서(레포에 들어가는 본체)엔 0줄**이어야 한다. 같은 파일을 제자리 Edit하면 둘이 충돌하므로 **발행처를 패키지와 분리**하는 게 전제다.
+
+- **발행처 확인**: 확정 본문이 실제로 들어갈 위치(레포 파일·문서 서식·외부 입력 폼 등)를 사용자에게 묻는다. 모르면 채우지 말고 받는다.
+- **본문만 이관**: 발행처에는 `---`~`---` frontmatter를 떼고 **본문만** 쓴다. `rendering_env: plain-text`면 마크다운 문법도 함께 벗긴다(「1. 파악」의 `rendering_env` 규칙).
+- **패키지 보존**: staging 패키지 파일은 frontmatter를 그대로 둔다 — 다음 세션 write-refine 재실행이 frontmatter만으로 출발하기 때문이다.
+- **확인**: 발행 문서에 frontmatter가 0줄인지 점검한다(`type`·`audience`·`purpose`·`refs` 등 staging 메타가 남으면 안 됨).
+
+발행처가 staging 패키지와 같은 파일 하나뿐이면(별도 발행 위치 없음) frontmatter를 남길지 뗄지 사용자에게 확인한다 — 재실행 가능성과 발행 청결 중 무엇을 우선할지는 사용자 판단이다.
 
 ## write-init과의 관계
 
