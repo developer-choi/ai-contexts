@@ -1,0 +1,1 @@
+node scripts/sync-on-push.js
