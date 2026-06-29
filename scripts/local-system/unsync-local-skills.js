@@ -37,7 +37,10 @@ function main() {
   printResults(results);
 }
 
-// sync-local-skills.js와 동일 규칙: local/ 하위에서 claude·codex 공통 배포 디렉토리(hooks 제외).
+// 배포 디렉토리 판정은 sync-local-skills.js와 같되 제외 집합은 의도적으로 다르다: sync는 'contexts'도
+// 배포 제외하지만, 여기선 'hooks'만 제외한다 — 과거 배포된 .claude/contexts·.agents/contexts 고아를
+// unsync가 청소해야 하기 때문이다(여기서 'contexts'를 제외하면 잔재가 영영 안 지워진다). hooks는 settings
+// projection이 .claude/hooks·.codex/hooks로 따로 처리하므로 제외.
 const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
 
 function localDeployDirs(repo) {

@@ -46,7 +46,9 @@ function main(opts = {}) {
 
 // local/ 하위에서 claude·codex 공통으로 배포하는 디렉토리. hooks는 settings projection이
 // .claude/hooks·.codex/hooks로 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
+// contexts는 스킬 supporting file의 단일 정본(local/contexts/, git 추적·비배포)이라 제외한다 — 배포하면
+// .claude/contexts·.agents/contexts로 복제돼 한 파일이 3벌이 되므로, 스킬은 repo-상대 local/contexts/...로 참조한다.
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'contexts']);
 
 function localDeployDirs(repo) {
   const localDir = path.join(repo, 'local');
