@@ -35,6 +35,7 @@
 | `readme` | README 관련 | README 작성 시 |
 | `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
 | `decision` | 기술적 의사결정 문서 관련 | 의사결정 문서 작성/다듬기 시 (`write-init` type: `decision` 또는 `write-refine` frontmatter type: `decision`) |
+| `tradeoff` | 트레이드오프(단점·비용·적용 한계) 명시 | 해법·선택을 담는 글 작성/다듬기 시 (`decision`·`resume-*`·블로그) |
 
 ## 파일 리스트
 
@@ -49,6 +50,7 @@ readme-guide.md [readme]
 resume-guide.md [resume]
 examples/resume.md [resume]
 decision-guide.md [decision]
+tradeoff-guide.md [tradeoff]
 requirements.md
 templates/pr-body/recruitment-narrative.md [pr]
 templates/pr-body/recruitment-evidence.md [pr]
