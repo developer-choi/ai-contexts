@@ -26,6 +26,7 @@ write-init 패키지의 **표현**을 다듬는다. frontmatter가 유일한 컨
   - `resume-item`·`resume-intro`: `../../contexts/writing-guide/examples/resume.md` + `../../contexts/writing-guide/resume-guide.md`
   - 요약·축소 정확성 관련: `../../contexts/writing-guide/examples/accuracy.md`
   - `decision`: `../../contexts/writing-guide/decision-guide.md`
+  - 해법·선택을 담는 글(`decision`·`resume-*`), 또는 type과 무관하게 본문에 비교·선택 절이 보이면: `../../contexts/writing-guide/tradeoff-guide.md` (트레이드오프 누락 플래그 — 아래 type 분기)
 
 ## 구조 — 자기검토 단일 에이전트
 
@@ -38,7 +39,7 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 - `rendering_env: plain-text`면 마크다운 문법(백틱·헤딩·코드펜스)을 본문에 쓰지 않는다.
 - `placeholder_policy` 명시 없으면 `keep`.
 - `audience`가 비개발자면 코드 레벨 용어·기술 링크·괄호 부연을 우선 점검.
-- **type 분기**: `type: resume-item`이면 "시안 다양화"(아래), `type: decision`이면 "비교 구조 강제"(아래)를 추가 적용.
+- **type 분기**: `type: resume-item`이면 "시안 다양화"(아래), `type: decision`이면 "비교 구조 강제"(아래)를 추가 적용. `type: resume-*`이면 "트레이드오프 누락 플래그"(아래)를 추가 적용. type과 무관하게 본문에 비교·선택 절이 보이면 그 절에 "트레이드오프 누락 플래그"를 적용.
 
 ### 2. 직접 다듬기 — 상속 가드
 
@@ -83,6 +84,12 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 ### 비교 구조 강제 (decision)
 
 `type: decision`이면 본문이 "방법 2개 이상 / 각 장점·단점 / 결론에 비선택 이유"를 갖췄는지 검토하고, 빠지면 보강한다. 세부는 `decision-guide.md` 참조.
+
+### 트레이드오프 누락 플래그 (resume·비교 절)
+
+`type: resume-*`이면 해법·선택을 제시하는 절에 그 선택의 단점·비용(이득과 맞바꾼 것)이 있는지 점검한다. 빠졌으면 **보강하지 않고 사용자에게 보고**한다 — 트레이드오프 내용은 저자 고유 판단이라 refine이 채우면 날조다(내용은 write-init 책임, 사실 오류 보고 규칙과 동일). 서술 규칙(감수 단점 정당화 금지 등)은 표현 다듬기 대상이므로 발견 시 직접 적용한다. 세부는 `tradeoff-guide.md` 참조.
+
+`type`이 `resume-*`가 아니어도(예: `readme`·`pr-body`) 본문에 "검토한 접근법"·"방법 A vs B" 같은 비교·선택 절이 있으면 그 절에 같은 점검을 건다.
 
 ## 출력
 
