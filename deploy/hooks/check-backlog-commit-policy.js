@@ -1,21 +1,24 @@
 // AC 백로그 커밋 규칙을 hook으로 내린다(부탁→강제).
-//   1) 한 커밋(또는 git add)에 backlog/ 변경과 그 외 변경을 섞으면 deny.
-//   2) backlog/ 변경을 backlog 브랜치가 아닌 곳에서 커밋하면 deny
-//      (AC backlog는 ai-contexts-backlog 워크트리=backlog 브랜치에서만 다룬다).
+//   1) 한 커밋(또는 git add)에 backlog/·archives/·그 외 중 서로 다른 종류를
+//      섞으면 deny. 셋은 서로 다른 커밋 종류다(백로그 vs 종결자료 vs master).
+//   2) backlog/·archives/ 변경을 backlog 브랜치가 아닌 곳에서 커밋하면 deny
+//      (둘 다 ai-contexts-backlog 워크트리=backlog 브랜치 전용 폴더다.
+//       backlog 브랜치 = master HEAD + backlog/ + archives/).
 //
-// AC 레포에서만 적용한다. 다른 레포의 backlog/ 디렉토리는 이 규칙과 무관하므로,
-// git common-dir의 부모가 'ai-contexts'(=AC 워크트리 공유 .git)일 때만 발동한다.
+// AC 레포에서만 적용한다. 다른 레포의 backlog/·archives/ 디렉토리는 이 규칙과
+// 무관하므로, git common-dir의 부모가 'ai-contexts'(=AC 워크트리 공유 .git)일 때만 발동한다.
 //
 // 전제: git add . / -A 금지 + bare git commit 금지(다른 hook)라 경로가 항상 명령에
-// 명시된다 → 인덱스 조회 없이 명령 문자열로 backlog 혼합을 판정한다. backlog/ 경로가
-// 하나도 없으면 git 조회 없이 통과(흔한 경우 비용 0).
+// 명시된다 → 인덱스 조회 없이 명령 문자열로 혼합을 판정한다. 관리 대상(backlog/·
+// archives/) 경로가 하나도 없으면 git 조회 없이 통과(흔한 경우 비용 0).
 const { execFileSync } = require("child_process");
 const path = require("path");
 const { deny, getCommand, getCwd, readPayload } = require("./hook-utils");
 
 const AC_DIR_NAME = "ai-contexts"; // git common-dir의 부모 디렉토리명 = AC 식별자
 const BACKLOG_BRANCH = "backlog";
-const BACKLOG_PREFIX = "backlog/";
+// backlog 브랜치 전용 1급 폴더들 → 카테고리명. 이 외 경로는 "other"(master).
+const MANAGED_PREFIXES = { "backlog/": "backlog", "archives/": "archives" };
 
 const payload = readPayload();
 const cmd = getCommand(payload);
@@ -30,26 +33,25 @@ function check(command, baseCwd) {
     const paths = stagedPaths(segment.trim());
     if (!paths.length) continue;
 
-    let hasBacklog = false;
-    let hasOther = false;
-    for (const p of paths) {
-      if (isBacklog(p)) hasBacklog = true;
-      else hasOther = true;
-    }
-    if (!hasBacklog) continue; // backlog 무관 → 통과(git 조회 안 함)
+    const cats = new Set();
+    for (const p of paths) cats.add(categorize(p));
+
+    const managed = cats.has("backlog") || cats.has("archives");
+    if (!managed) continue; // 관리 대상 무관 → 통과(git 조회 안 함)
 
     const info = gitInfo(baseCwd);
     if (!info || info.acName !== AC_DIR_NAME) continue; // 비-AC 레포 → 무관
 
-    if (hasOther) {
+    if (cats.size > 1) {
       deny(
-        "한 커밋(또는 git add)에 backlog/ 변경과 그 외 변경을 섞을 수 없습니다 " +
-          "(AC 백로그 규칙). 종류별로 분리해 커밋하세요.",
+        "한 커밋(또는 git add)에 backlog/·archives/·그 외 중 서로 다른 종류를 " +
+          "섞을 수 없습니다 (AC 백로그 규칙). 종류별로 분리해 커밋하세요.",
       );
     }
     if (info.branch !== BACKLOG_BRANCH) {
+      const kind = cats.has("backlog") ? "backlog/" : "archives/";
       deny(
-        `backlog/ 변경은 ${BACKLOG_BRANCH} 브랜치(ai-contexts-backlog 워크트리)에서 ` +
+        `${kind} 변경은 ${BACKLOG_BRANCH} 브랜치(ai-contexts-backlog 워크트리)에서 ` +
           `커밋하세요. 현재 브랜치: ${info.branch}.`,
       );
     }
@@ -75,9 +77,14 @@ function stagedPaths(segment) {
   return out;
 }
 
-function isBacklog(arg) {
+// 경로를 backlog / archives / other 중 하나로 분류한다.
+function categorize(arg) {
   const a = stripQuotes(arg).replace(/\\/g, "/").replace(/^\.\//, "");
-  return a === "backlog" || a.startsWith(BACKLOG_PREFIX);
+  for (const [prefix, cat] of Object.entries(MANAGED_PREFIXES)) {
+    const dir = prefix.slice(0, -1); // "backlog/" → "backlog"
+    if (a === dir || a.startsWith(prefix)) return cat;
+  }
+  return "other";
 }
 
 function gitInfo(baseCwd) {
