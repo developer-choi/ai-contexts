@@ -1,1 +1,1 @@
-node scripts/sync-on-push.js
+node scripts/sync-on-push.mjs

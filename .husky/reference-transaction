@@ -1,1 +1,1 @@
-node scripts/check-backlog-ref.js "$@"
+node scripts/check-backlog-ref.mjs "$@"

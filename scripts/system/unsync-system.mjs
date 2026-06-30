@@ -1,0 +1,60 @@
+#!/usr/bin/env node
+import path from 'node:path';
+import readline from 'node:readline';
+
+import {
+  defaultCodexDir,
+  defaultClaudeDir,
+  defaultGeminiDir,
+  ensureDeploySource,
+  resolveUserPath,
+  uninstallCodexGlobals,
+  uninstallGeminiGlobals,
+  uninstallTarget,
+} from '../lib/deploy-lib.mjs';
+
+async function main() {
+  ensureDeploySource();
+
+  const explicitTarget = process.argv[2];
+  const targetArg = explicitTarget || (await askTarget());
+  const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
+
+  console.log(`타겟: ${targetDir}`);
+  console.log('---');
+
+  let removed = uninstallTarget(targetDir);
+
+  if (!explicitTarget && targetDir === defaultClaudeDir()) {
+    const codexTargetDir = defaultCodexDir();
+    console.log('');
+    console.log(`Codex 타겟: ${codexTargetDir}`);
+    console.log('---');
+    removed += uninstallCodexGlobals(codexTargetDir);
+
+    const geminiTargetDir = defaultGeminiDir();
+    console.log('');
+    console.log(`Gemini 타겟: ${geminiTargetDir}`);
+    console.log('---');
+    removed += uninstallGeminiGlobals(geminiTargetDir);
+  }
+
+  console.log('---');
+  console.log(`완료: ${removed}개 제거`);
+}
+
+function askTarget() {
+  const defaultTarget = defaultClaudeDir();
+  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`타겟 경로 [${defaultTarget}]: `, (answer) => {
+      rl.close();
+      resolve(answer.trim() || defaultTarget);
+    });
+  });
+}
+
+main().catch((error) => {
+  console.error(error.message);
+  process.exit(1);
+});

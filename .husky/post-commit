@@ -1,1 +1,1 @@
-node scripts/push-backlog-postcommit.js
+node scripts/push-backlog-postcommit.mjs

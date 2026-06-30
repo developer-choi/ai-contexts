@@ -1,127 +1,127 @@
 {
   "hooks": [
     {
-      "file": "auto-stage-new-file.js",
+      "file": "auto-stage-new-file.mjs",
       "event": "PostToolUse",
       "on": "write",
       "msg": "Auto-staging new file..."
     },
     {
-      "file": "post-worktree-install.js",
+      "file": "post-worktree-install.mjs",
       "event": "PostToolUse",
       "on": "bash",
       "msg": "Installing worktree dependencies..."
     },
     {
-      "file": "post-enterworktree-install.js",
+      "file": "post-enterworktree-install.mjs",
       "event": "PostToolUse",
       "on": "enterworktree",
       "msg": "Installing worktree dependencies..."
     },
     {
-      "file": "surface-backlog.js",
+      "file": "surface-backlog.mjs",
       "event": "UserPromptSubmit",
       "on": "prompt",
       "msg": "Surfacing related backlog..."
     },
     {
-      "file": "surface-claude-md.js",
+      "file": "surface-claude-md.mjs",
       "event": "PreToolUse",
       "on": "search",
       "msg": "Surfacing folder CLAUDE.md..."
     },
     {
-      "file": "surface-coupling.js",
+      "file": "surface-coupling.mjs",
       "event": "PreToolUse",
       "on": "edit",
       "msg": "Surfacing coupled files..."
     },
     {
-      "file": "check-artifact-write-policy.js",
+      "file": "check-artifact-write-policy.mjs",
       "event": "PreToolUse",
       "on": "edit",
       "msg": "Checking artifact write policy..."
     },
     {
-      "file": "check-shell-policy.js",
+      "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking shell policy..."
     },
     {
-      "file": "check-rm-policy.js",
+      "file": "check-rm-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking rm policy..."
     },
     {
-      "file": "check-rm-policy.js",
+      "file": "check-rm-policy.mjs",
       "event": "PreToolUse",
       "on": "powershell",
       "msg": "Checking rm policy..."
     },
     {
-      "file": "check-git-staging-policy.js",
+      "file": "check-git-staging-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking git staging policy..."
     },
     {
-      "file": "check-backlog-commit-policy.js",
+      "file": "check-backlog-commit-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking backlog commit policy..."
     },
     {
-      "file": "check-git-commit-policy.js",
+      "file": "check-git-commit-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking git commit policy..."
     },
     {
-      "file": "check-git-push-policy.js",
+      "file": "check-git-push-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking git push policy..."
     },
     {
-      "file": "check-git-reset-policy.js",
+      "file": "check-git-reset-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking git reset policy..."
     },
     {
-      "file": "check-git-reset-policy.js",
+      "file": "check-git-reset-policy.mjs",
       "event": "PreToolUse",
       "on": "powershell",
       "msg": "Checking git reset policy..."
     },
     {
-      "file": "check-git-merge-policy.js",
+      "file": "check-git-merge-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking git merge policy..."
     },
     {
-      "file": "check-git-merge-policy.js",
+      "file": "check-git-merge-policy.mjs",
       "event": "PreToolUse",
       "on": "powershell",
       "msg": "Checking git merge policy..."
     },
     {
-      "file": "check-team-message-policy.js",
+      "file": "check-team-message-policy.mjs",
       "event": "PreToolUse",
       "on": "message",
       "msg": "Checking team message policy..."
     },
     {
-      "file": "snapshot-precompact-transcript.js",
+      "file": "snapshot-precompact-transcript.mjs",
       "event": "PreCompact",
       "on": "manual",
       "msg": "Snapshotting transcript before compaction..."
     },
     {
-      "file": "snapshot-precompact-transcript.js",
+      "file": "snapshot-precompact-transcript.mjs",
       "event": "PreCompact",
       "on": "auto",
       "msg": "Snapshotting transcript before compaction..."

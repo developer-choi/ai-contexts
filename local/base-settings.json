@@ -1,7 +1,7 @@
 {
   "hooks": [
     {
-      "file": "block-ac-sync.js",
+      "file": "block-ac-sync.mjs",
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking for sync:* commands..."
