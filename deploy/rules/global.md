@@ -124,11 +124,11 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 원본 레포 수정은 워크트리를 만들어 거기서 커밋을 쌓고, 현재 master 위로 rebase해 머지 직전 상태까지 만드는 것까지 AI가 한다 (워크트리 사용은 「worktree 감지」). 단계마다 "해도 되나 / 해야 하나"를 묻지 않는다.
 
-- **master 포인터 이동(머지)은 AI가 하지 않는다.** rebase까지 끝낸 뒤 사용자에게 실행할 명령을 안내하고(`git merge --ff-only <branch>` 등) 대기한다. 보호 브랜치(master/main/develop/release) 머지는 사용자 결정이며 `check-git-merge-policy.js` hook이 AI 실행을 차단한다.
+- **master 포인터 이동(머지)은 AI가 하지 않는다.** rebase까지 끝낸 뒤 사용자에게 실행할 명령을 안내하고(`git merge --ff-only <branch>` 등) 대기한다. 보호 브랜치(master/main/develop/release) 머지는 사용자 결정이며 `check-git-merge-policy.mjs` hook이 AI 실행을 차단한다.
   - **예외 — upstream 따라잡기 ff:** 현재 보호 브랜치를 자기 upstream으로 맞추는 동기화(`git merge --ff-only origin/<현재브랜치>`, 인자 없는 `merge --ff-only` 포함)는 결정이 아니라 동기화라 hook이 허용하며 AI가 직접 해도 된다. feature·worktree 브랜치를 보호 브랜치에 올리는 통합 ff는 인자가 upstream이 아니므로 그대로 차단된다.
 - 머지 충돌(rebase 중)은 사용자와 함께 해결한다. 멈추고 "이렇게 충돌났다 + 해결 제안"을 제시한 뒤 진행하며, 임의로 한쪽을 채택해 덮어쓰지 않는다.
 - 배포(`npm run sync:*`)는 사용자가 한다 — 실행도, 할지 묻지도 않는다. deploy/ 산출물 sync도 마찬가지.
-- 원격 `git push`는 AI가 직접 할 수 있다. `check-git-push-policy.js`가 보호 브랜치(master/main/develop/release) 푸시에 ask로 사용자 승인을 받는다. force push(diverged)·`--no-verify`·history rewrite chain·열린 PR 브랜치는 여전히 deny.
+- 원격 `git push`는 AI가 직접 할 수 있다. `check-git-push-policy.mjs`가 보호 브랜치(master/main/develop/release) 푸시에 ask로 사용자 승인을 받는다. force push(diverged)·`--no-verify`·history rewrite chain·열린 PR 브랜치는 여전히 deny.
 
 ## 조사 산출물 출처 포함
 - 외부 소스를 근거로 제시할 때 URL만 나열하지 않는다. 해당 페이지에서 근거가 되는 원문을 함께 인용한다.

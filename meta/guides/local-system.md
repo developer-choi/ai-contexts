@@ -30,7 +30,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 - `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
 - 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책).
-- `local/hooks/*.js` → `.claude/hooks/`·`.codex/hooks/`로 복사.
+- `local/hooks/*.mjs` → `.claude/hooks/`·`.codex/hooks/`로 복사.
 - codex 프로젝트-로컬 훅은 trusted여야 발화합니다. 배포 시 best-effort로 trust를 시도하고, 실패하면 codex 세션에서 `/hooks`로 `.codex/hooks.json`을 수동 신뢰하세요.
 
 산출물(`.claude/settings.json`·`.claude/hooks/`·`.codex/`)은 **gitignore**되며 트래킹하지 않습니다. 소스(`local/`)만 커밋합니다.

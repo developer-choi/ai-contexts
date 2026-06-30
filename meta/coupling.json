@@ -4,16 +4,16 @@
       "name": "settings hook 등록·투영",
       "files": [
         "deploy/base-settings.json",
-        "scripts/settings/settings-projection.js",
-        "scripts/settings/verify-settings-projection.js"
+        "scripts/settings/settings-projection.mjs",
+        "scripts/settings/verify-settings-projection.mjs"
       ],
       "note": "존재 정합(hook 본체 ↔ base 등록)은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: hook을 추가하면 base의 event/on/msg를 정하고, 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조(매처 fan-out 등)를 바꾸면 verify의 단언을 함께 고친다."
     },
     {
       "name": "sync:system 동기화·제거·가이드",
       "files": [
-        "scripts/system/sync-system.js",
-        "scripts/system/unsync-system.js",
+        "scripts/system/sync-system.mjs",
+        "scripts/system/unsync-system.mjs",
         "meta/guides/system.md"
       ],
       "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드(에이전트가 코드 안 읽고 따르는 절차)도 함께 갱신한다."
@@ -21,8 +21,8 @@
     {
       "name": "sync:local-system 동기화·제거·가이드",
       "files": [
-        "scripts/local-system/sync-local-system.js",
-        "scripts/local-system/unsync-local-system.js",
+        "scripts/local-system/sync-local-system.mjs",
+        "scripts/local-system/unsync-local-system.mjs",
         "meta/guides/local-system.md"
       ],
       "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
@@ -30,16 +30,16 @@
     {
       "name": "sync:local-skills 동기화·제거 쌍",
       "files": [
-        "scripts/local-system/sync-local-skills.js",
-        "scripts/local-system/unsync-local-skills.js"
+        "scripts/local-system/sync-local-skills.mjs",
+        "scripts/local-system/unsync-local-skills.mjs"
       ],
       "note": "로컬 자산 배포가 새 카테고리/경로를 다루면 제거도 같은 기준으로 맞춘다 (sync만 되고 unsync 후 잔여물 남는 구조 금지)."
     },
     {
       "name": "sync:environment 동기화·제거·가이드",
       "files": [
-        "scripts/environment/sync-environment.js",
-        "scripts/environment/unsync-environment.js",
+        "scripts/environment/sync-environment.mjs",
+        "scripts/environment/unsync-environment.mjs",
         "meta/guides/environment.md"
       ],
       "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
@@ -47,8 +47,8 @@
     {
       "name": "environment 메커니즘 계약",
       "files": [
-        "scripts/environment/environment-lib.js",
-        "scripts/environment/verify-environment.js"
+        "scripts/environment/environment-lib.mjs",
+        "scripts/environment/verify-environment.mjs"
       ],
       "note": "environment-lib에 새 멱등성·안전제거 함수를 추가하면 verify-environment에 그 계약 케이스를 추가한다 (로직 drift 방지)."
     },

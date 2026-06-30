@@ -80,7 +80,7 @@ git cat-file -e <hash> && git merge-base --is-ancestor <hash> HEAD
 
 #### 짝꿍 드리프트 점검
 
-변경 있는 프로젝트별로, 그 프로젝트 루트 `meta/coupling.json`을 읽어 **한쪽만 수정된 짝꿍 그룹**을 후보로 잡는다. edit 시점 surfacing 훅(`surface-coupling.js`)은 세션당 1회라 놓치거나 무시될 수 있는데, 이 주기 점검이 회차 단위로 그 누락을 메운다. 대상은 `meta/coupling.json`이 있는 레지스트리 프로젝트뿐이다 (없는 프로젝트는 자동 제외). 이미 계산한 `<hash>..HEAD`의 변경 파일 목록을 재사용한다.
+변경 있는 프로젝트별로, 그 프로젝트 루트 `meta/coupling.json`을 읽어 **한쪽만 수정된 짝꿍 그룹**을 후보로 잡는다. edit 시점 surfacing 훅(`surface-coupling.mjs`)은 세션당 1회라 놓치거나 무시될 수 있는데, 이 주기 점검이 회차 단위로 그 누락을 메운다. 대상은 `meta/coupling.json`이 있는 레지스트리 프로젝트뿐이다 (없는 프로젝트는 자동 제외). 이미 계산한 `<hash>..HEAD`의 변경 파일 목록을 재사용한다.
 
 각 그룹을 그룹 유형에 따라 판정한다.
 

@@ -14,13 +14,13 @@ Claude Code 세션 로그에서 사용자의 active time KPI를 추출한다.
 
 ## 스크립트
 
-경로: `~/WebstormProjects/main/ai-contexts/scripts/tools/kpi.js`
+경로: `~/WebstormProjects/main/ai-contexts/scripts/tools/kpi.mjs`
 
 | 명령어 | 설명 |
 |--------|------|
-| `node kpi.js projects` | 프로젝트 목록 조회 |
-| `node kpi.js sessions <project>` | 세션 목록 조회 |
-| `node kpi.js detail <session-id>` | 세션 상세: 시작/종료 시각, 사용자 입력 목록 |
+| `node kpi.mjs projects` | 프로젝트 목록 조회 |
+| `node kpi.mjs sessions <project>` | 세션 목록 조회 |
+| `node kpi.mjs detail <session-id>` | 세션 상세: 시작/종료 시각, 사용자 입력 목록 |
 
 사용자가 명시적으로 끝낼 때까지 추가 탐색 요청을 받는다.
 
