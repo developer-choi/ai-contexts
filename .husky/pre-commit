@@ -1,1 +1,2 @@
 node scripts/check-backlog-precommit.mjs
+node ./node_modules/eslint/bin/eslint.js .
