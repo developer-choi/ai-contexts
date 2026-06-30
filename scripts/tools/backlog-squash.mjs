@@ -25,6 +25,14 @@ const BRANCH = 'backlog';
 const REMOTE = 'origin';
 const DRY = process.argv.includes('--dry-run');
 
+// 스쿼시는 이미 리뷰된 커밋을 기계적으로 재포장한다. 이 동안 husky hook을 모두 끈다(HUSKY=0).
+//   - post-commit 자동 push: 히스토리 재작성이라 일반 push가 non-fast-forward로 거부됨 → 꺼야 함
+//   - pre-commit eslint: 워크트리엔 node_modules가 없어 backlog가 새 master로 rebase되면 깨짐
+//   - 경로검사·commit-msg: 원본 커밋에서 이미 통과한 내용
+// env 깃발로 hook이 협조하길 기대하면 워크트리에 체크아웃된 옛 hook 스크립트가 무시하므로,
+// 버전 무관하게 동작하도록 git이 hook을 아예 실행하지 않게 한다(자식 git → hook 상속).
+process.env.HUSKY = '0';
+
 function git(args, opts = {}) {
   return childProcess
     .execFileSync('git', ['-C', WT, ...args], { encoding: 'utf8', ...opts })
@@ -69,7 +77,9 @@ function fail(msg) {
 
 function sameTree(a, b) {
   try {
-    git(['diff', '--quiet', a, b]);
+    // `--`로 revision/path 모호성 차단 — 워크트리에 'backlog/' 디렉터리가 있어
+    // 'backlog' ref가 path로도 해석될 수 있다(fatal: ambiguous argument).
+    git(['diff', '--quiet', a, b, '--']);
     return true;
   } catch {
     return false;
@@ -114,9 +124,14 @@ if (local !== remote && remote === base) {
 }
 
 if (local !== remote) {
-  // 갈라짐. 단, 트리가 origin과 동일하면 "이미 스쿼시됨, force-push만 남음" 상태
-  if (sameTree(BRANCH, `${REMOTE}/${BRANCH}`)) {
-    console.log('이미 로컬에서 스쿼시됨 (트리는 origin과 동일). force-push만 남았습니다:\n');
+  // 갈라짐. 단, "이미 로컬에서 스쿼시됨, force-push만 남음" 상태면 그 명령을 안내한다.
+  //   (a) 트리가 origin과 동일             — master가 안 움직인 경우
+  //   (b) backlog가 최신 master 위 1커밋   — master가 전진해 트리는 다르지만 정리는 끝난 경우
+  const squashedBase = git(['merge-base', `${REMOTE}/master`, BRANCH]);
+  const onLatestMaster = squashedBase === git(['rev-parse', `${REMOTE}/master`]);
+  const aheadCount = parseInt(git(['rev-list', '--count', `${squashedBase}..${BRANCH}`]), 10);
+  if (sameTree(BRANCH, `${REMOTE}/${BRANCH}`) || (onLatestMaster && aheadCount === 1)) {
+    console.log('이미 로컬에서 스쿼시됨 (최신 master 위 1커밋). force-push만 남았습니다:\n');
     console.log(`  git -C ${WT} push --force ${REMOTE} ${BRANCH}\n`);
     process.exit(0);
   }
