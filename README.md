@@ -54,7 +54,7 @@ AI가 코드를 만들거나 고칠 때마다, 기존 동작이 깨지지 않았
 
 - [workflow](deploy/skills/workflow/README.md): 기획서나 피그마 같은 자료에서 출발해 단계마다 방향을 정하며 PR을 만드는 프로세스
   - [requirement-review](deploy/skills/workflow/requirement-review/README.md): 기획서, 디자인 시안, 채용 과제를 구현 전에 개발자 관점에서 점검
-  - [bug-investigation](deploy/skills/workflow/bug-investigation/README.md): 버그의 근본 원인 추적 및 수정 방안 제안
+  - [bug-investigation](deploy/skills/bug-investigation/README.md): 버그의 근본 원인 추적 및 수정 방안 제안
   - [pr-comment-respond](deploy/skills/workflow/pr-comment-respond/README.md): 내 PR에 달린 리뷰 피드백에 대응
 
 ### 리뷰
