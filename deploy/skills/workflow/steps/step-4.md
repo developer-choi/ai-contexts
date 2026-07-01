@@ -119,6 +119,9 @@ stub 커밋은 step-4의 산출물이다. 절차:
 1. **LLM이 PR 작업 분석** — 아래 두 조건으로 "코드/stub로 갈 것"을 가른다 (둘 중 하나라도 해당하면 코드로):
    - **조건 1 (외부 공개 시그니처)**: PR이 만들 props·타입·함수 시그니처 등 외부 공개 모듈.
    - **조건 2 (코드로 표현 가능한 모든 계획)**: 시그니처가 없어도 **파일로 표현 가능한 계획은 전부 코드/stub로** 만든다 — 의존성(`package.json` 추가 + 설치), 설정(`vite.config`·`tsconfig`·`eslint` 등), 테스트 의도(`*.test.tsx`의 `it.todo`). 이들을 **어떤 md 산출물에도 산문으로 나열하지 않는다**.
+   - **조건 3 (stub 불가 + 코드표현 가능)**: rename·파일/폴더 이동·설정 한 줄 치환처럼 **코드가 이미 있어 stub 대상이 없지만 편집이 100% 코드로 표현되는** 것. stub이 없어 정확한 편집이 "구현 순서" 산문으로 새기 쉽다. **정확한 before/after 문자열·식별자·줄번호를 어느 md에도 적지 않는다**:
+     - trivial(실행하면 끝 — 순수 rename 등)이면 **문서·세션 핸드오프로 이연하지 말고 그 자리에서 실행·커밋**한다.
+     - 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. **각 매치의 before→after 쌍(식별자·경로·줄번호)을 나열하지 않는다**: 무엇을 찾을지(패턴)만 적고, 개별 치환은 step-5가 파일 보고 수행한다. (예: `ErrorFeedbackLayout→HandleSubmitLayout, ErrorFeedbackPage→...`처럼 쌍을 열거하면 위반 — `grep \`error-feedback|ErrorFeedback\` → 새 라우트명으로 치환` 한 줄로 접는다.)
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·구현 순서·커밋 분할·회귀 체크리스트·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
