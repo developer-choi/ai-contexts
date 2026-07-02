@@ -1,0 +1,454 @@
+@use "sass:map";
+
+$design-tokens: (
+  "primitive": (
+  "color": (
+  "accent": (
+  "primary": (
+  "50": #fef1e8,
+  "100": #fde2d0,
+  "150": #fcd4b9,
+  "200": #fbc5a2,
+  "300": #f9a973,
+  "400": #f78c45,
+  "500": #f56f16,
+  "600": #c45912,
+  "700": #93430d,
+  "800": #622c09,
+  "900": #311604
+)
+),
+  "base": (
+  "red": (
+  "50": #ffebea,
+  "100": #ffd8d6,
+  "150": #ffc4c1,
+  "200": #ffb1ac,
+  "300": #ff8983,
+  "400": #ff6259,
+  "500": #ff3b30,
+  "600": #cd2f26,
+  "700": #9c231d,
+  "800": #6a1813,
+  "900": #390c0a
+),
+  "yellow": (
+  "50": #fffae5,
+  "100": #fff5cc,
+  "150": #fff0b2,
+  "200": #ffeb99,
+  "300": #ffe066,
+  "400": #ffd633,
+  "500": #ffcc00,
+  "600": #cca300,
+  "700": #997a00,
+  "800": #665200,
+  "900": #332900
+),
+  "green": (
+  "50": #ebf9ee,
+  "100": #d6f4de,
+  "150": #c2eecd,
+  "200": #aee9bd,
+  "300": #85dd9b,
+  "400": #5dd27a,
+  "500": #34c759,
+  "600": #2a9f47,
+  "700": #1f7735,
+  "800": #155024,
+  "900": #0a2812
+),
+  "blue": (
+  "50": #e5f2ff,
+  "100": #cce4ff,
+  "150": #b2d7ff,
+  "200": #99caff,
+  "300": #66afff,
+  "400": #3395ff,
+  "500": #007aff,
+  "600": #0062cc,
+  "700": #004999,
+  "800": #003166,
+  "900": #001833
+),
+  "orange": (
+  "50": #fef1e8,
+  "100": #fde2d0,
+  "150": #fcd4b9,
+  "200": #fbc5a2,
+  "300": #f9a973,
+  "400": #f78c45,
+  "500": #f56f16,
+  "600": #c45912,
+  "700": #93430d,
+  "800": #622c09,
+  "900": #311604
+),
+  "mint": (
+  "50": #ebfaf6,
+  "100": #d6f5ed,
+  "150": #c2f0e4,
+  "200": #aeebdb,
+  "300": #85ddc7,
+  "400": #5dcfb3,
+  "500": #34c19f,
+  "600": #2a9a7f,
+  "700": #1f7460,
+  "800": #154e40,
+  "900": #0a2820
+),
+  "teal": (
+  "50": #e5f9fa,
+  "100": #ccf3f5,
+  "150": #b2edf0,
+  "200": #99e7eb,
+  "300": #66dbe1,
+  "400": #33cfd7,
+  "500": #5ac3cd,
+  "600": #489ca4,
+  "700": #36757b,
+  "800": #244e52,
+  "900": #122629
+),
+  "cyan": (
+  "50": #e5f9fa,
+  "100": #ccf3f5,
+  "150": #b2edf0,
+  "200": #99e7eb,
+  "300": #66dbe1,
+  "400": #33cfd7,
+  "500": #32c5cd,
+  "600": #289da4,
+  "700": #1e767b,
+  "800": #144f52,
+  "900": #0a2729
+),
+  "indigo": (
+  "50": #efeef5,
+  "100": #dfddeb,
+  "150": #cfcce1,
+  "200": #bfbbd7,
+  "300": #9f99c4,
+  "400": #7f77b1,
+  "500": #57559e,
+  "600": #46447e,
+  "700": #34335f,
+  "800": #23223f,
+  "900": #11111f
+),
+  "purple": (
+  "50": #f5eef5,
+  "100": #ebddeb,
+  "150": #e1cce1,
+  "200": #d7bbd7,
+  "300": #c499c4,
+  "400": #b177b1,
+  "500": #9f559f,
+  "600": #7f447f,
+  "700": #5f335f,
+  "800": #3f223f,
+  "900": #1f111f
+),
+  "pink": (
+  "50": #feebee,
+  "100": #fdd8dd,
+  "150": #fcc5cc,
+  "200": #fbb2bb,
+  "300": #f999a5,
+  "400": #f7808f,
+  "500": #f56778,
+  "600": #c45260,
+  "700": #933e48,
+  "800": #622a30,
+  "900": #311618
+),
+  "brown": (
+  "50": #f5ebe7,
+  "100": #ebd8cf,
+  "150": #e1c5b7,
+  "200": #d7b29f,
+  "300": #c4937d,
+  "400": #b1745b,
+  "500": #a35539,
+  "600": #82442e,
+  "700": #613323,
+  "800": #402218,
+  "900": #20110c
+)
+),
+  "neutral": (
+  "0": #ffffff,
+  "50": #f2f2f2,
+  "100": #e7e7e7,
+  "150": #d8d8d8,
+  "200": #cbcbcb,
+  "300": #b1b1b1,
+  "400": #979797,
+  "500": #7d7d7d,
+  "600": #646464,
+  "700": #4b4b4b,
+  "800": #323232,
+  "900": #353535,
+  "1000": #000000
+)
+),
+  "spacing": (
+  "0": 0,
+  "1": 2,
+  "2": 4,
+  "3": 6,
+  "4": 8,
+  "5": 10,
+  "6": 12,
+  "7": 14,
+  "8": 16,
+  "9": 18,
+  "10": 20,
+  "11": 22,
+  "12": 24,
+  "13": 26,
+  "14": 28,
+  "15": 30,
+  "16": 32,
+  "17": 34,
+  "18": 36,
+  "19": 38,
+  "20": 40,
+  "21": 42,
+  "22": 44,
+  "23": 46,
+  "24": 48,
+  "25": 50,
+  "26": 52,
+  "27": 54,
+  "28": 56,
+  "29": 58,
+  "30": 60,
+  "31": 62,
+  "32": 64
+),
+  "radius": (
+  "0": 0,
+  "1": 4,
+  "2": 8,
+  "3": 12,
+  "4": 16,
+  "5": 20,
+  "6": 24,
+  "7": 28,
+  "8": 32,
+  "9": 36
+),
+  "border": (
+  "default": 1,
+  "strong": 2,
+  "extraStrong": 3
+),
+  "opacity": (
+  "backdrop": (
+  "weak": 30,
+  "medium": 50,
+  "strong": 70
+)
+),
+  "font": (
+  "size": (
+  "1": 12,
+  "2": 14,
+  "3": 16,
+  "4": 18,
+  "5": 20,
+  "6": 22,
+  "7": 28,
+  "8": 34
+),
+  "lineHeight": (
+  "1": 16,
+  "2": 20,
+  "3": 22,
+  "4": 24,
+  "5": 28,
+  "6": 34,
+  "7": 42
+)
+)
+),
+  "semantic": (
+  "gap": (
+  "xs": 4,
+  "sm": 8,
+  "md": 16,
+  "lg": 24,
+  "xl": 32
+),
+  "padding": (
+  "none": 0,
+  "xs": 4,
+  "sm": 8,
+  "md": 12,
+  "lg": 16,
+  "xl": 20,
+  "2xl": 24,
+  "3xl": 28,
+  "4xl": 32,
+  "5xl": 36,
+  "6xl": 40,
+  "7xl": 44,
+  "8xl": 48,
+  "9xl": 52,
+  "10xl": 56,
+  "11xl": 60,
+  "12xl": 64,
+  "13xl": 72
+),
+  "borderRadius": (
+  "xs": 4,
+  "sm": 8,
+  "md": 16,
+  "lg": 24,
+  "xl": 32
+),
+  "text": (
+  "accent": #f56f16,
+  "primary": #353535,
+  "secondary": #4b4b4b,
+  "hint": #7d7d7d,
+  "disabled": #b1b1b1,
+  "placeholder": #b1b1b1,
+  "on-contrast-surface": #ffffff
+),
+  "icon": (
+  "accent": #f56f16,
+  "primary": #353535,
+  "secondary": #4b4b4b,
+  "hint": #7d7d7d,
+  "disabled": #b1b1b1,
+  "on-contrast-surface": #ffffff
+),
+  "state": (
+  "focus": #f56f16,
+  "error": (
+  "foreground": #ff3b30,
+  "background": #ffc4c1
+),
+  "info": (
+  "foreground": #007aff,
+  "background": #cce4ff
+),
+  "success": (
+  "foreground": #34c759,
+  "background": #d6f4de
+),
+  "warning": (
+  "foreground": #ffcc00,
+  "background": #fff5cc
+),
+  "link": (
+  "default": #007aff,
+  "hover": #0062cc,
+  "active": #004999
+)
+),
+  "surface": (
+  "primary": #ffffff,
+  "subtle": #e7e7e7,
+  "elevated": #f2f2f2
+),
+  "canvas": (
+  "default": #f2f2f2
+),
+  "selection": (
+  "background": (
+  "weak": #ffffff,
+  "default": #f2f2f2,
+  "strong": #e7e7e7
+),
+  "foreground": (
+  "weak": #4b4b4b,
+  "default": #353535,
+  "strong": #f56f16
+)
+),
+  "border": (
+  "default": #f2f2f2,
+  "strong": #e7e7e7
+),
+  "action": (
+  "primary": #f56f16,
+  "destructive": #ff3b30,
+  "field": (
+  "default": #f2f2f2,
+  "weak": #ffffff
+),
+  "on-action": (
+  "primary": #ffffff
+)
+),
+  "typography": (
+  "label": (
+  "fontSize": 12,
+  "lineHeight": 16
+),
+  "callout": (
+  "fontSize": 14,
+  "lineHeight": 20
+),
+  "body": (
+  "fontSize": 16,
+  "lineHeight": 22
+),
+  "headline": (
+  "fontSize": 18,
+  "lineHeight": 24
+),
+  "title3": (
+  "fontSize": 20,
+  "lineHeight": 24
+),
+  "title2": (
+  "fontSize": 22,
+  "lineHeight": 28
+),
+  "title1": (
+  "fontSize": 28,
+  "lineHeight": 34
+),
+  "large-title": (
+  "fontSize": 34,
+  "lineHeight": 42
+)
+)
+),
+  "component": (
+  "layout": (
+  "canvas": (
+  "top": (
+  "default": 44
+),
+  "side": (
+  "mobile": 12,
+  "tablet": 16
+)
+),
+  "contents-area": (
+  "top": (
+  "default": 60
+),
+  "bottom": (
+  "default": 40,
+  "button-fixed": 72
+)
+)
+),
+  "section": (
+  "spacing": (
+  "default": 24,
+  "wide": 32
+)
+)
+),
+  "shadow-tbd": (
+  "color": #000000,
+  "blurRadius": 24
+)
+);
