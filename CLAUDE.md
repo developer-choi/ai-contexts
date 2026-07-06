@@ -89,8 +89,8 @@ md 파일 수정 직후:
 아래 영역으로 분리한다.
 
 - `backlog/projects/{project}/{topic}/` — 레포별(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리. destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
-  - **AC 자체 작업은 `projects/ai-contexts/active/`** — AC는 백로그를 호스팅하며 exec로 자기 자신을 수정하는 자기수정 트래커다. 이 서브트리만 Ready 게이트·기본 `[ready]` 등록·리뷰/실행 모드의 주 무대이고, 목차·인덱스 파일을 두지 않는다 (상태 라벨이 각 파일 섹션 제목에 인라인, 조망은 `grep '^## \[' *.md`). `{target}.md` 단위, 우선순위는 frontmatter `priority`(`1`/`2`)로 표기
-  - 그 외 레포는 기본 무상태 비-트래커 — `[ready]`를 opt-in하면 Ready 게이트가 적용된다(영역무관). exec는 레포 무관이라 projects 항목도 실행 대상이 될 수 있다
+  - **AC 자체 작업은 `projects/ai-contexts/active/`** — AC는 백로그를 호스팅하며 exec로 자기 자신을 수정하는 자기수정 트래커다. 이 서브트리만 Ready 게이트·기본 `status: ready` 등록·리뷰/실행 모드의 주 무대이고, 목차·인덱스 파일을 두지 않는다. 백로그 1건 = 파일 1개이며, 상태는 frontmatter `status` 필드(`ready`/`draft`/`ideation`)로 표기하고 조망은 frontmatter 스캔으로 한다. 항목은 항상 target(스킬)별 하위 디렉토리에 둔다(단일 항목도 — 예: `active/workflow/step4-plan-framing.md`), 우선순위는 frontmatter `priority`(`1`/`2`)로 표기
+  - 그 외 레포는 기본 무상태 비-트래커 — frontmatter `status: ready`를 opt-in하면 Ready 게이트가 적용된다(영역무관). exec는 레포 무관이라 projects 항목도 실행 대상이 될 수 있다
   - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이)
   - `{topic}/index.md` — read-later References 전용. item 목차(파일 목록·요약 표)는 두지 않는다. 나중에 읽을 참고 링크를 `## References`에 적재한다 (item 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별로 모은다. References가 없으면 index.md를 두지 않는다
 - `backlog/articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (Ready 게이트·리뷰/실행 모드 미적용 — projects/와 같은 비-트래커)

@@ -16,18 +16,18 @@
 
 백로그는 두 영역으로 나뉩니다.
 
-- `backlog/projects/{project}/`: 저장소별(knowledge-archive·monorepo-playground 등) 작업·지식·참고. 기본 무상태(tier 없음, Ready 게이트 미적용)입니다. 단 `ai-contexts`(자기수정)·`private-playground`의 `active/`에 캡처하는 fix·룰 트래커 항목(`### 기대상황`을 갖는 양식)은 tier·Ready 게이트가 적용되고, 다른 projects도 `[ready]`를 opt-in하면 게이트가 적용됩니다(영역 무관). 같은 폴더라도 개인 메모·완성형 노트는 트래커가 아니라 해당 없습니다.
+- `backlog/projects/{project}/`: 저장소별(knowledge-archive·monorepo-playground 등) 작업·지식·참고. 기본 무상태(tier 없음, Ready 게이트 미적용)입니다. 단 `ai-contexts`(자기수정)·`private-playground`의 `active/`에 캡처하는 fix·룰 트래커 항목(`## 기대상황`을 갖는 양식)은 tier·Ready 게이트가 적용되고, 다른 projects도 frontmatter `status: ready`를 opt-in하면 게이트가 적용됩니다(영역 무관). 같은 폴더라도 개인 메모·완성형 노트는 트래커가 아니라 해당 없습니다.
 - `backlog/articles/{slug}/`: 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
 
 `ai-contexts`·`private-playground`의 `active`에 캡처하는 fix·룰 트래커 항목이 할 일 트래커이고, 그 외 `projects`·`articles`는 비-트래커입니다. `projects`는 저장소별 작업·지식, `articles`는 외부 발행용 재료입니다.
 
 ## Ready 게이트와 critic
 
-`ai-contexts`·`private-playground`의 `active` 트래커 항목(또는 `[ready]`를 opt-in한 projects 항목)은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 `[ready]` 라벨이 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동, 트래커 항목이면 현재상태·현재 생각중인 방법)을 사용자 대신 검증해 라벨을 갱신합니다.
+`ai-contexts`·`private-playground`의 `active` 트래커 항목(또는 `status`를 opt-in한 projects 항목)은 다른 세션·다른 머신의 자신이 추가 질문 없이 작업을 시작할 수 있는 수준이 되면 frontmatter `status: ready`가 붙습니다. critic 서브에이전트가 게이트 문항(외부 인용 임베드, 시점 표현 0개, 동기 1줄, 종료 조건, 첫 행동, 트래커 항목이면 현재상태·현재 생각중인 방법)을 사용자 대신 검증해 상태를 갱신합니다.
 
 ## 항목 양식
 
-각 항목은 `[상태] 기능명` 헤딩 아래 다음 세 헤딩으로 구성합니다.
+백로그 1건은 파일 1개입니다. 트래커 항목은 frontmatter에 `title`(필수)과 `status`(`ready`/`draft`/`ideation`)를 표기하고, 본문은 다음 헤딩(H2)으로 구성합니다.
 
 - **기대상황** (필수): 도달하고자 하는 최종 상태
 - **현재상태** (트래커 항목 필수): 지금 어떻게 박혀 있어 어긋나는지 — 왜 이 작업이 필요한지의 근거
