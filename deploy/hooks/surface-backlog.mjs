@@ -56,6 +56,32 @@ function hasMarkdown(dir) {
   return false;
 }
 
+// 목록 나열은 판단이 필요 없는 기계적 작업이라 hook이 직접 한다(rules-as-code 강제 사다리).
+// LLM에게 "Glob해서 확인해라"라고 시키면 그 행동 자체를 건너뛸 수 있으므로, 목록을 미리
+// 컨텍스트에 박아 넣어 "볼지 말지"를 판단할 필요를 없앤다. 남는 판단은 관련성 하나뿐이다.
+function listMarkdownFiles(dir) {
+  const results = [];
+  const stack = [dir];
+  while (stack.length) {
+    const d = stack.pop();
+    let entries;
+    try {
+      entries = fs.readdirSync(d, { withFileTypes: true });
+    } catch (_e) {
+      continue;
+    }
+    for (const e of entries) {
+      const full = path.join(d, e.name);
+      if (e.isDirectory()) stack.push(full);
+      else if (e.isFile() && e.name.endsWith(".md")) {
+        results.push(path.relative(dir, full).split(path.sep).join("/"));
+      }
+    }
+  }
+  results.sort();
+  return results;
+}
+
 // 거절 캐시를 읽어 (rel 폴더에 속한) 만료 전 항목 경로를 모은다.
 // 만료(오늘 > invalidated-date)된 파일은 그 자리에서 삭제한다. ISO 날짜라 문자열 비교가 곧 시간순.
 function readExclusions(rel) {
@@ -145,12 +171,18 @@ try {
     ? `[최근 거절 — 재제안 금지] 다음 항목은 사용자가 최근 거절했으니 다시 제안하지 마라: ${excluded.join(", ")}`
     : `[최근 거절] 없음`;
 
+  const files = listMarkdownFiles(folder);
+  const fileListBlock = files.length
+    ? files.map((f) => `  - ${f}`).join("\n")
+    : "  (파일 없음)";
+
   addContext(
-    `[백로그 표면화] 현재 작업 디렉터리(${project})에 연결된 백로그 폴더가 있다:\n` +
-      `  ${folder}\n` +
-      `이 세션에서 아직 안 봤으면 폴더를 Glob해 항목을 확인하고, 현재 작업과 겹치면 "이 백로그도 같이 다룰까요?"로 ` +
-      `먼저 제안한 뒤 허락받고 반영한다. 허락 없이 흡수 금지 — 직접 입력물처럼 보여도 예외 아님. 겹치는 게 없으면 조용히 넘어간다.\n` +
-      `상세 규칙(훑기·제안·거절 기록 방법)은 반드시 이 파일을 읽고 따른다: ${RULES_FILE}\n` +
+    `[백로그 표면화] 현재 작업 디렉터리(${project})에 연결된 백로그 폴더(${folder}) 항목 목록:\n` +
+      `${fileListBlock}\n` +
+      `위 목록 중 현재 작업과 겹치는 항목이 있으면 "이 백로그도 같이 다룰까요?"로 먼저 제안한 뒤 허락받고 반영한다. ` +
+      `허락 없이 흡수 금지 — 직접 입력물처럼 보여도 예외 아님. 파일명만으로 관련성이 불분명하면 Read로 열어 내용으로 판단한다(단정 금지). ` +
+      `겹치는 게 없으면 조용히 넘어간다.\n` +
+      `상세 규칙(제안·거절 기록 방법)은 반드시 이 파일을 읽고 따른다: ${RULES_FILE}\n` +
       `${exclusionLine}\n` +
       `거절 기록 위치(거절 시 여기에 항목별 기록을 쓴다): ${CACHE_ROOT}`,
   );
