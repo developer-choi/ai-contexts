@@ -12,6 +12,8 @@
 //     status: ready 이면 `## 기대상황`·`## 현재상태`·`## 현재 생각중인 방법` H2가 비어있지 않아야 한다.
 //     왜 고치는지(현재상태)·작성 세션 의견(현재 생각중인 방법)이 없으면 실행자가 판단 근거를 잃는다.
 //     `## 기대상황`이 없는 status:ready(개인 메모·완성형 노트)는 트래커가 아니라 면제한다.
+//   [focus 게이트] frontmatter에 `focus:` 키가 있으면 값이 low|high여야 한다(프로젝트 무관, opt-in 필드).
+//     내 집중력 요구량을 표기해 저집중 배치를 선별하는 축. 값 오타(medium 등)를 커밋 시점에 막는다.
 //
 // 정규식은 frontmatter 블록(첫 `---`~다음 `---`)·H2 앵커로 스코프한다 — 본문 코드블록·인용의
 //   `status:`/`title:` 문자열이나 `### 기대상황`(H3)에 오매치하지 않게.
@@ -27,6 +29,9 @@ const PROJECTS_PREFIX = "backlog/projects/";
 // 트래커 shape 판별 앵커(`## 기대상황` H2). 강제 대상 하위 섹션이기도 하다.
 const EXPECTATION = "기대상황";
 const SHAPE_REQUIRED = [EXPECTATION, "현재상태", "현재 생각중인 방법"];
+
+// focus 게이트 허용 값. 내 집중력 요구량 — low=적게, high=많이.
+const FOCUS_VALUES = ["low", "high"];
 
 function normalize(path) {
   return path.replace(/\\/g, "/");
@@ -122,6 +127,14 @@ function findViolations(files) {
       out.push({ path: p, gate: "title", detail: "status 있는 항목은 frontmatter `title:`이 비어있으면 안 됨" });
     }
 
+    // [focus 게이트] focus 키가 있으면 값이 low|high여야 한다(프로젝트 무관, opt-in 필드).
+    if (hasFrontmatterKey(fm.lines, "focus")) {
+      const v = frontmatterScalar(fm.lines, "focus");
+      if (!FOCUS_VALUES.includes(v)) {
+        out.push({ path: p, gate: "focus", detail: `focus 값은 ${FOCUS_VALUES.join("|")}여야 함 (현재: ${v || "(빈 값)"})` });
+      }
+    }
+
     // [shape 게이트] AC/PP active 트래커 + status: ready + `## 기대상황` H2 → triple 비어있지 않아야 한다.
     if (isTrackerPath(p) && frontmatterScalar(fm.lines, "status") === "ready") {
       const sections = splitH2Sections(fm.body);
@@ -142,6 +155,7 @@ function formatViolations(violations) {
   const lines = ["✘ backlog frontmatter 양식 위반:", ""];
   const malformedV = violations.filter((v) => v.gate === "malformed");
   const titleV = violations.filter((v) => v.gate === "title");
+  const focusV = violations.filter((v) => v.gate === "focus");
   const shapeV = violations.filter((v) => v.gate === "shape");
 
   if (malformedV.length) {
@@ -156,6 +170,11 @@ function formatViolations(violations) {
       "  → frontmatter에 `title: <제목>`을 채우세요. 무상태 노트면 `status:`를 빼세요(제목은 `# H1` 유지).",
       "",
     );
+  }
+  if (focusV.length) {
+    lines.push("[focus] `focus:`는 low|high만 허용합니다:");
+    for (const v of focusV) lines.push(`  - ${v.path}\n      ${v.detail}`);
+    lines.push("  → focus 값을 low 또는 high로 고치거나, 안 쓰면 키를 빼세요.", "");
   }
   if (shapeV.length) {
     lines.push(
