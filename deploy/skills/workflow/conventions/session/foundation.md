@@ -39,7 +39,7 @@ project.md PR1 섹션을 소통 창구로 사용. PR_1_PLAN이 시작 시 projec
 ## 워크트리 명명
 
 - **PR 워크트리**: `{메인 디렉토리}-pr{N}` (예: `ai-contexts-pr1`)
-- **그 외 목적**: `{메인 디렉토리}-{purpose}` (예: `ai-contexts-markup`, `ai-contexts-backlog`)
+- **그 외 목적**: `{메인 디렉토리}-{purpose}` (예: `ai-contexts-markup`, `ai-contexts-review`)
 
 AI는 `git worktree list`로 메인 디렉토리 이름을 알아내 패턴 적용.
 

@@ -15,14 +15,14 @@
 1. **바이브 체크**: 실제 PR에서 써보고 어색하거나 부족한 부분 피드백
 2. **gotchas 축적**: 실사용 중 발견되는 실패 패턴을 SKILL.md에 gotchas 섹션으로 추가
 3. **description optimization**: `/scw`의 trigger eval 절차로 현재 런타임에서 가능한 방식의 트리거 테스트 수행. 실행 백엔드가 제한되면 사용한 런타임과 미실행 사유를 STATUS에 기록
-4. **말투 규칙 축적**: 사용하면서 tone-guide 백로그(`backlog/projects/ai-contexts/active/tone-guide.md`)에 규칙 추가
+4. **말투 규칙 축적**: 사용하면서 tone-guide 백로그(`projects/ai-contexts/active/tone-guide.md`)에 규칙 추가
 5. **커밋**: 실사용 피드백 반영 후 최종 커밋
 
 ### 관련 백로그
 
-- `backlog/projects/ai-contexts/active/pr-review.md` — 이 스킬의 원본 백로그. 코멘트 작성 부분은 이 스킬이 담당. 리뷰 플로우(code-review 먼저 돌리기 등)는 별도.
-- `backlog/projects/ai-contexts/active/tone-guide.md` — 말투 규칙이 충분히 쌓이면 별도 contexts 파일로 분리 예정
-- `backlog/projects/ai-contexts/active/pr-comment-receive.md` — 코멘트 수신 대응은 별도 스킬(pr-comment-respond)로 만들 예정
+- `projects/ai-contexts/active/pr-review.md` — 이 스킬의 원본 백로그. 코멘트 작성 부분은 이 스킬이 담당. 리뷰 플로우(code-review 먼저 돌리기 등)는 별도.
+- `projects/ai-contexts/active/tone-guide.md` — 말투 규칙이 충분히 쌓이면 별도 contexts 파일로 분리 예정
+- `projects/ai-contexts/active/pr-comment-receive.md` — 코멘트 수신 대응은 별도 스킬(pr-comment-respond)로 만들 예정
 
 ## 설계 결정
 

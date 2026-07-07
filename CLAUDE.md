@@ -67,9 +67,9 @@ md 파일 수정 직후:
 
 ## 백로그 관리
 
-- `backlog/` 하위의 백로그 파일은 상시 워크트리(`~/WebstormProjects/main/ai-contexts-backlog/`)에서 관리한다
-- AC 본체에서 backlog 브랜치로 전환하지 않는다
-- 워크트리가 없으면 `git worktree add`로 자동 생성한다
+- 백로그 파일은 AC가 아니라 별도 private 레포 `backlog`(`~/WebstormProjects/main/backlog`)에서 관리한다
+- 레포가 없는 기기에서는 `git clone https://github.com/developer-choi/backlog.git ~/WebstormProjects/main/backlog`로 클론한다
+- 커밋은 자유롭게 쌓는다 (squash·rebase 불필요, post-commit이 origin으로 자동 push)
 
 ## README 관리
 
@@ -88,20 +88,20 @@ md 파일 수정 직후:
 
 아래 영역으로 분리한다.
 
-- `backlog/projects/{project}/{topic}/` — 레포별(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리. destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
+- `projects/{project}/{topic}/` — 레포별(KA·MP·DC 등) 작업·지식·참고. 주제별 디렉토리. destination(레포)은 캡처 intent로 가린다 — 지식 이해용이면 `knowledge-archive`, 구현 참고·레포 작업이면 그 레포
   - **AC 자체 작업은 `projects/ai-contexts/active/`** — AC는 백로그를 호스팅하며 exec로 자기 자신을 수정하는 자기수정 트래커다. 이 서브트리만 Ready 게이트·기본 `status: ready` 등록·리뷰/실행 모드의 주 무대이고, 목차·인덱스 파일을 두지 않는다. 백로그 1건 = 파일 1개이며, 상태는 frontmatter `status` 필드(`ready`/`draft`/`ideation`)로 표기하고 조망은 frontmatter 스캔으로 한다. 항목은 항상 target(스킬)별 하위 디렉토리에 둔다(단일 항목도 — 예: `active/workflow/step4-plan-framing.md`), 우선순위는 frontmatter `priority`(`1`/`2`)로 표기
   - 그 외 레포는 기본 무상태 비-트래커 — frontmatter `status: ready`를 opt-in하면 Ready 게이트가 적용된다(영역무관). exec는 레포 무관이라 projects 항목도 실행 대상이 될 수 있다
   - `{topic}/{item}.md` (디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사 없이)
   - `{topic}/index.md` — read-later References 전용. item 목차(파일 목록·요약 표)는 두지 않는다. 나중에 읽을 참고 링크를 `## References`에 적재한다 (item 본문과 섞지 않음). AI·LLM 글 등 코드 주제가 아니어도 주제별로 모은다. References가 없으면 index.md를 두지 않는다
-- `backlog/articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (Ready 게이트·리뷰/실행 모드 미적용 — projects/와 같은 비-트래커)
+- `articles/` — 기술블로그에 발행할 포스트 재료. 포스트(글) 1편 단위 (Ready 게이트·리뷰/실행 모드 미적용 — projects/와 같은 비-트래커)
   - `{slug}.md`, 재료가 커지면 `{slug}/` 디렉토리로 승격. 인덱스 파일은 두지 않는다(비-트래커 + 발행 시 삭제 → 순배럴)
   - projects/(내부 작업·지식)와 구분: 발행 의도가 있는 외부 공개용 재료다. 발행되면 파일을 삭제한다 (발행 이력 미보존)
-- `backlog/roadmaps/` — 주제별 **학습 로드맵**. 사용자가 앞으로 학습할 분량이 많은 주제를 순서대로 쌓아두는 곳 (예: monorepo 단계별 학습 코스)
+- `roadmaps/` — 주제별 **학습 로드맵**. 사용자가 앞으로 학습할 분량이 많은 주제를 순서대로 쌓아두는 곳 (예: monorepo 단계별 학습 코스)
   - `{topic}.md` — 학습 순서·전체 개요 (필수)
   - `{topic}/step{N}-*.md` — 단계가 여러 개로 쪼개진 경우의 step 본문 (선택)
   - 상태 체계 미적용, index.md 없음
   - **사용자가 명시적으로 추가하는 영역**. `/backlog` 스킬·자동 분류 대상 아님. AI는 사용자가 어떤 주제·원본을 옮길지 지시할 때만 파일을 만들거나 수정한다. 외부 레포(KA·DC 등)에서 로드맵을 발견해도 사용자의 명시 지시 없이 선제적으로 복사하지 않는다
   - 학습할 항목이 아닌 작업·지식 백로그는 `projects/`로, 종결 자료는 `archives/history/`로 보낸다
-- `archives/history/` — 종결된 자료 아카이브 (옛 회의자료 PDF, 결정 끝난 고민 흔적 등). `backlog/` 영역이 아니라 backlog 브랜치 전용 `archives/` 하위다
+- `archives/history/` — 종결된 자료 아카이브 (옛 회의자료 PDF, 결정 끝난 고민 흔적 등). 백로그 재료가 아니라 `backlog` 레포의 `archives/` 하위 종결 자료다
   - 자유 파일·서브폴더. 참조 전용 — 발전·갱신 없음
   - `/backlog` 스킬 대상 아님. doc-router 라우팅 또는 사용자가 직접 적재

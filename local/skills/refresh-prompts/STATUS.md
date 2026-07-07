@@ -12,4 +12,4 @@
 
 - 격리는 대상 로드 방식으로 갈림 (scw bench-operations 「대상 로드 방식별 격리」에 반영)
 - 병렬 세션은 고유 워크트리 이름 필요 (scw bench-operations 「병렬 측정」에 반영)
-- 실제 스윕 산출물: `backlog/projects/ai-contexts/active/how-minimization*.md`
+- 실제 스윕 산출물: `projects/ai-contexts/active/how-minimization*.md`

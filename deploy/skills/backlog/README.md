@@ -16,8 +16,8 @@
 
 백로그는 두 영역으로 나뉩니다.
 
-- `backlog/projects/{project}/`: 저장소별(knowledge-archive·monorepo-playground 등) 작업·지식·참고. 기본 무상태(tier 없음, Ready 게이트 미적용)입니다. 단 `ai-contexts`(자기수정)·`private-playground`의 `active/`에 캡처하는 fix·룰 트래커 항목(`## 기대상황`을 갖는 양식)은 tier·Ready 게이트가 적용되고, 다른 projects도 frontmatter `status: ready`를 opt-in하면 게이트가 적용됩니다(영역 무관). 같은 폴더라도 개인 메모·완성형 노트는 트래커가 아니라 해당 없습니다.
-- `backlog/articles/{slug}/`: 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
+- `projects/{project}/`: 저장소별(knowledge-archive·monorepo-playground 등) 작업·지식·참고. 기본 무상태(tier 없음, Ready 게이트 미적용)입니다. 단 `ai-contexts`(자기수정)·`private-playground`의 `active/`에 캡처하는 fix·룰 트래커 항목(`## 기대상황`을 갖는 양식)은 tier·Ready 게이트가 적용되고, 다른 projects도 frontmatter `status: ready`를 opt-in하면 게이트가 적용됩니다(영역 무관). 같은 폴더라도 개인 메모·완성형 노트는 트래커가 아니라 해당 없습니다.
+- `articles/{slug}/`: 기술블로그에 발행할 포스트 재료. tier 없음, Ready 게이트 미적용.
 
 `ai-contexts`·`private-playground`의 `active`에 캡처하는 fix·룰 트래커 항목이 할 일 트래커이고, 그 외 `projects`·`articles`는 비-트래커입니다. `projects`는 저장소별 작업·지식, `articles`는 외부 발행용 재료입니다.
 

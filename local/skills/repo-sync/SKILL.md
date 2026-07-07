@@ -57,35 +57,7 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 | 0 | 0 | `up-to-date` | `up-to-date` |
 | 0 | >0 | ff merge → `pulled +N` | ff merge → `pulled +N` |
 | >0 | 0 | push → `pushed +N` | `blocked: protected branch ahead +N` |
-| >0 | >0 | `blocked: ahead N, behind M (fast-forward 불가)` (단, [3-2-α](#3-2-α-ac-backlog-특화-분기) 적용 대상이면 그 분기로) | `blocked: ahead N, behind M (fast-forward 불가)` |
-
-#### 3-2-α. AC backlog 특화 분기
-
-**트리거 지점**: 3-2 표의 일반 브랜치 `ahead>0 & behind>0` 셀에서, 일반 `blocked` 처리 직전에 평가한다.
-
-**적용 조건** (모두 충족 시):
-
-- 레포 origin url에 `ai-contexts`가 포함됨 (AC 본체 또는 그 워크트리)
-- 현재 브랜치명이 `backlog`
-- ahead > 0 AND behind > 0
-- 미커밋 변경 없음 (3-3에는 적용하지 않는다 — 미커밋이 있으면 `reset --keep`이 abort되어 무의미)
-
-**판단 근거**: backlog 브랜치는 master 위에 `backlog/`만 변경되고, 사용자가 `npm run backlog:squash`로 정기적으로 squash + force push를 한다. 양쪽에 커밋이 쌓여 있어도 backlog/ 최종 내용이 동일하거나 origin에만 추가 변경이 있는 경우는 결국 origin이 정답이다. 로컬에만 있는 변경이 있을 때만 squash 누락·미푸시 가능성이 있어 사용자 판단이 필요하다.
-
-**판정 알고리즘**:
-
-```
-git diff origin/backlog HEAD -- backlog/
-```
-
-출력에서 `+`로 시작하는 라인(`+++` 파일 헤더 제외) 개수를 센다.
-
-| `+` 라인 | 의미 | 처리 |
-|---|---|---|
-| 0 | origin 변경이 squash 또는 다른 머신의 진척만으로 이루어짐 (추가·삭제 무관). 로컬에만 있는 backlog/ 변경은 없음 | 사용자에게 `git diff origin/backlog HEAD -- backlog/ --stat` 요약 제시 후 확인 받고 `git reset --keep origin/backlog`. 결과 표기: `force-resynced (squash/progress)` |
-| >0 | 로컬에만 있는 backlog/ 변경 존재 — 다른 머신 squash 시 누락인지, 이 머신에서 미푸시 작업인지 구분 불가 | reset 하지 않고 보고. 결과 표기: `blocked: local-only backlog changes` |
-
-`--keep`은 워킹트리에 미커밋 변경이 있으면 abort하므로 데이터 손실을 막는다. 위 적용 조건에서 미커밋 변경을 이미 배제했지만, 안전망으로 `--keep`을 유지한다.
+| >0 | >0 | `blocked: ahead N, behind M (fast-forward 불가)` | `blocked: ahead N, behind M (fast-forward 불가)` |
 
 #### 3-3. 분기 — 미커밋 변경 **있는** 경우
 
