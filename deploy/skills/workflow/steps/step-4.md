@@ -28,7 +28,7 @@ Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 
 
 ## 1. 잔여 산출물 소비
 
-`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**한다. 소비된 원본은 삭제한다 (`read-only/` 하위는 삭제하지 않는다).
+`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([conventions/plan-folder.md](../conventions/plan-folder.md) 「라이프사이클 규칙」·「소비→삭제 메커니즘 SSOT」).
 
 컴포넌트 마크업(`.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 디자인 진실 원천 0건으로 완성하므로(채용·실무 figma 대조 / 개인 사용자 시각 확인) **step-4의 stub 대상이 아니다.** 완성 마크업은 MARKUP 워크트리의 **검증된 페이지 파일을 그대로 PR 워크트리로 가져온다**(재작성 금지 — 검증본이 PR마다 어긋나지 않게. 배치 경로만 판단). PR 로직은 가져온 마크업 파일을 **수정하지 않고 별도 파일**(hook·컨테이너 등)에서 import·합성해 얹는다 — 디자인 변경으로 마크업을 다시 가져와도 로직이 덮이지 않도록(재수령은 Step 5.2.3). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 (**개인 모드는 figma·markup.md 없음 — 로직·조립 구조 참조만**). MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
 
