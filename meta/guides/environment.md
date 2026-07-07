@@ -13,6 +13,7 @@ npm run sync:environment
 - `~/.gitignore_global`에 AC 관리 block으로 `backlog/` 패턴을 추가합니다.
 - `core.excludesFile`이 비어 있으면 `~/.gitignore_global`을 등록합니다.
 - Windows에서 `~/autorun.cmd`를 AC 내용으로 생성·갱신하고, `HKCU\Software\Microsoft\Command Processor`의 `AutoRun`을 `@~/autorun.cmd`로 등록합니다. 대화형 cmd 창을 홈 디렉토리에서 열면 `~/WebstormProjects/main`으로 이동시킵니다. `AutoRun`이 다른 값으로 이미 설정돼 있으면 사용자 설정 보호를 위해 건너뜁니다.
+- `~/WebstormProjects/<group>/<repo>` 중 `.githooks`가 추적되는 레포마다 `core.hooksPath`를 `.githooks`로 멱등하게 세팅합니다. 각 레포의 `prepare`(= `git config core.hooksPath .githooks`)가 `npm install` 때 이미 박지만, install을 아직 안 한 클론(git pull만 한 다른 머신 등)의 훅이 조용히 꺼지는 창을 이 스윕이 닫습니다. 이미 `.githooks`면 건드리지 않습니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거
@@ -22,6 +23,8 @@ npm run unsync:environment
 ```
 
 제거 명령은 AC marker block만 제거합니다. PowerShell 7은 `sync:environment`가 직접 설치했다고 상태 파일에 기록된 경우에만 제거를 시도합니다. `~/autorun.cmd`는 내용이 AC가 쓴 것과 동일할 때만 삭제하고, `AutoRun` 레지스트리는 상태 파일에 AC 등록 기록이 있고 현재 값이 `@~/autorun.cmd`일 때만 제거합니다.
+
+`.githooks` hooksPath 스윕은 `unsync:environment`가 **되돌리지 않습니다** — 그 값은 AC가 주입한 환경 오염이 아니라 각 레포가 스스로(각자의 `prepare`로도) 세팅하는 레포 고유 설정이라, 되돌리면 오히려 그 레포의 훅이 꺼집니다.
 
 ## 반복 실행 기준
 

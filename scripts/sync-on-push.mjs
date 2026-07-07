@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// husky pre-push — master(메인 브랜치)를 push할 때 sync:system + sync:local-system을 함께 돌린다.
+// pre-push (.githooks) — master(메인 브랜치)를 push할 때 sync:system + sync:local-system을 함께 돌린다.
 // sync가 하나라도 실패하면 non-zero로 종료해 push 자체를 막는다(gate). 배포가 깨진 채 master가 나가는 것을 방지.
 // master가 아닌 브랜치 push나 master 삭제(local sha all-zero)에는 발화하지 않는다.
 import path from "node:path";

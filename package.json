@@ -16,12 +16,11 @@
     "verify:context-maps": "node scripts/verify/verify-context-maps.mjs",
     "verify:local-system": "node scripts/local-system/verify-local-system.mjs",
     "verify:links": "node scripts/verify/verify-links.mjs",
-    "prepare": "husky"
+    "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "eslint": "^10.6.0",
-    "husky": "^9.1.7"
+    "eslint": "^10.6.0"
   }
 }

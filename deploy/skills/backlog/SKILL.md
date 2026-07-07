@@ -434,7 +434,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 1. backlog 레포에서 **인자로 지정된 프로젝트**의 `projects/<project>/active/` 하위를 priority 순(1→2→없음)으로 순회하며 `status: ready` 파일을 찾는다(전환기엔 구 `## [ready]` 섹션도 동일하게 인정한다)(대상 미지정 시 어느 프로젝트인지 사용자에게 되묻는다 — 기본값 없음). 파일명 식별자가 있으면 매칭되는 파일로 좁혀 그것부터 실행한다
    - **저집중 필터(opt-in)**: 사용자가 저집중 배치를 요청하면 `focus: low`인 파일만 대상으로 좁힌다(무표기·`focus: high` 제외). 요청 없으면 기본은 전체(현행)
    - **선행 검증**: 그 파일에 frontmatter `dependencies`가 있으면, 각 선행 경로가 해결됐는지(「frontmatter 규칙」의 「부재=해결」 기준) 확인한다. 미해결 선행이 있으면 이 파일을 **건너뛰고 사용자에게 경고**한다(차단이 아니라 안내). 모두 해결됐으면 정상 진행한다
-2. `status: ready` 파일을 찾으면 **그 항목의 target 레포** 기반 임시 워크트리를 만든다. 레포·기본브랜치는 항목에서 파생한다 — `<레포경로>`는 target(또는 프로젝트명)에서, `<기본브랜치>`는 `git -C <레포경로> symbolic-ref --short refs/remotes/origin/HEAD`로 구한다(레포마다 master/main 상이). `<식별>`은 실행하는 백로그 항목(파일명)에서 딴 고유 이름으로 짓는다 — 워크트리 디렉터리와 브랜치에 같은 `<식별>`을 써서, 여러 exec를 병렬로 돌려도 디렉터리·브랜치가 겹치지 않게 한다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성·Husky hook을 자동 복구한다:
+2. `status: ready` 파일을 찾으면 **그 항목의 target 레포** 기반 임시 워크트리를 만든다. 레포·기본브랜치는 항목에서 파생한다 — `<레포경로>`는 target(또는 프로젝트명)에서, `<기본브랜치>`는 `git -C <레포경로> symbolic-ref --short refs/remotes/origin/HEAD`로 구한다(레포마다 master/main 상이). `<식별>`은 실행하는 백로그 항목(파일명)에서 딴 고유 이름으로 짓는다 — 워크트리 디렉터리와 브랜치에 같은 `<식별>`을 써서, 여러 exec를 병렬로 돌려도 디렉터리·브랜치가 겹치지 않게 한다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성을 자동 설치한다(훅 발동은 추적되는 `.githooks`가 보장하므로 이 설치는 편의):
    ```
    git -C <레포경로> worktree add -b backlog-exec-<식별> <레포경로>-<식별> <기본브랜치>
    ```

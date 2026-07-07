@@ -14,7 +14,7 @@ npm run sync:system -- <target>
 
 ## 수행 작업
 
-- AC git hook 준비 상태를 먼저 확인합니다. 새 worktree에서 Husky shim이 빠진 상태면 가능한 경우 `npm run prepare`로 복구하고, 의존성이 없으면 실패합니다.
+- AC git hook 준비 상태를 먼저 확인합니다. 추적되는 `.githooks` 훅은 체크아웃에 항상 있으므로, `core.hooksPath`가 `.githooks`가 아니면 `npm run prepare`로 설정하고, `commitlint` 의존성이 없으면 실패합니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다.
@@ -49,7 +49,7 @@ npm run unsync:system -- <target>
 npm run verify:hooks
 ```
 
-새 AC worktree는 `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성·Husky hook shim을 자동 복구합니다. 하네스 밖(맨 터미널)에서 직접 만든 워크트리는 자동 복구되지 않으므로 그 워크트리에서 `npm ci`(또는 `npm run prepare`)를 실행한 뒤 커밋합니다.
+AC는 추적되는 `.githooks` 붙박이 훅을 쓰므로 훅 파일은 새 worktree 체크아웃에 항상 딸려옵니다. `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성만 자동 설치합니다(편의). 하네스 밖(맨 터미널)에서 만든 worktree는 그 안에서 `npm ci`를 실행해 `commitlint` 등 deps를 채운 뒤 커밋합니다.
 
 ## Windows 참고
 

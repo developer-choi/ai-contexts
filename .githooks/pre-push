@@ -1,1 +1,2 @@
+#!/usr/bin/env sh
 node scripts/sync-on-push.mjs

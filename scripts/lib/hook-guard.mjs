@@ -30,36 +30,24 @@ function checkHooks() {
   const issues = [];
   let repairable = false;
 
+  // AC는 추적되는 .githooks 붙박이 훅을 쓴다. 훅 파일은 체크아웃에 항상 딸려오므로 존재만 확인하고,
+  // git이 못 나르는 core.hooksPath(=.githooks) 한 줄은 npm run prepare(= git config core.hooksPath .githooks)로 복구한다.
   const hooksPath = readGitConfig('core.hooksPath');
-  if (normalizeGitPath(hooksPath) !== '.husky/_') {
-    issues.push(`core.hooksPath가 .husky/_가 아님: ${hooksPath || '(unset)'}`);
-    repairable = hasHuskyBin();
+  if (normalizeGitPath(hooksPath) !== '.githooks') {
+    issues.push(`core.hooksPath가 .githooks가 아님: ${hooksPath || '(unset)'}`);
+    repairable = true;
   }
 
-  if (!isFile(path.join(repoRoot, '.husky', 'commit-msg'))) {
-    issues.push('.husky/commit-msg 파일이 없음');
+  if (!isFile(path.join(repoRoot, '.githooks', 'commit-msg'))) {
+    issues.push('.githooks/commit-msg 파일이 없음');
   }
 
-  if (!isFile(path.join(repoRoot, '.husky', '_', 'commit-msg'))) {
-    issues.push('.husky/_/commit-msg shim이 없음');
-    repairable = hasHuskyBin();
-  }
-
-  if (!isFile(path.join(repoRoot, '.husky', 'pre-commit'))) {
-    issues.push('.husky/pre-commit 파일이 없음');
-  }
-
-  if (!isFile(path.join(repoRoot, '.husky', '_', 'pre-commit'))) {
-    issues.push('.husky/_/pre-commit shim이 없음');
-    repairable = hasHuskyBin();
+  if (!isFile(path.join(repoRoot, '.githooks', 'pre-commit'))) {
+    issues.push('.githooks/pre-commit 파일이 없음');
   }
 
   if (!isFile(commitlintBin())) {
     issues.push('commitlint 실행 파일이 없음: npm ci 필요');
-  }
-
-  if (!isFile(huskyBin())) {
-    issues.push('husky 실행 파일이 없음: npm ci 필요');
   }
 
   return { ok: issues.length === 0, issues, repairable };
@@ -101,14 +89,6 @@ function normalizeGitPath(value) {
 
 function commitlintBin() {
   return path.join(repoRoot, 'node_modules', '.bin', process.platform === 'win32' ? 'commitlint.cmd' : 'commitlint');
-}
-
-function huskyBin() {
-  return path.join(repoRoot, 'node_modules', '.bin', process.platform === 'win32' ? 'husky.cmd' : 'husky');
-}
-
-function hasHuskyBin() {
-  return isFile(huskyBin());
 }
 
 function isFile(file) {
