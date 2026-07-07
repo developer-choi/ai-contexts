@@ -101,14 +101,6 @@ stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
 
 ---
 
-## Step 5 종료 — step 6으로 이어짐
-
-step-5는 PR_{N}_IMPL 세션의 **마지막 구현 step**. step 5.4 종료 후 step 6(최종 점검)이 이어진다 — step 5.4 보고 완료 ≠ 세션 종료.
-
-후속 spawn 안내(**PR_{N}_WRITING**)와 「다음 PR 진입 가능 안내」(PR_{N+1}_PLAN — PR 도미노)는 **step-6 종료(IMPL 세션 종료) 시점에** 출력한다 ([step-6.md](step-6.md) 「세션 종료 — 후속 안내」). step-5에서 조기 출력하지 않는다: step-6 사용자 리뷰에서 시그니처가 바뀌면 후속 PR·PR 본문에 영향이 가므로, IMPL이 완전히 끝난 뒤 안내해야 한다. (stub 도미노는 예외 — stub을 만든 경우 PR_{N+1}_PLAN은 step-4 stub 시그니처에서 곧장 시작하며, 이는 조기 진입이 아니라 stub 핸드오프다.)
-
----
-
 ## Step 5.4. 마무리
 
 - [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
@@ -119,7 +111,14 @@ step-5는 PR_{N}_IMPL 세션의 **마지막 구현 step**. step 5.4 종료 후 s
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
   - **`it.todo` 커버리지 (전체 todo 수 / 구현된 it 수)**
   - 수정 사항 (있는 경우)
-  - (다음 PR 진입·WRITING·FINALIZE 안내는 여기서 하지 않는다 — step-6 종료 시 [step-6.md](step-6.md) 「세션 종료 — 후속 안내」에서 출력)
 - 사용자가 step-6에서 코드 리뷰 수행 (커밋 정리 전이라 stub→IMPL diff 추적 가능)
 
 > [CRITICAL] 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 Step 6(최종 점검)에 진입한다.
+
+---
+
+## Step 5 종료 — step 6으로 이어짐
+
+step-5는 PR_{N}_IMPL 세션의 **마지막 구현 step**. step 5.4 종료 후 step 6(최종 점검)이 이어진다 — step 5.4 보고 완료 ≠ 세션 종료.
+
+후속 spawn 안내(**PR_{N}_WRITING**)와 「다음 PR 진입 가능 안내」(PR_{N+1}_PLAN — PR 도미노)는 **step-6 종료(IMPL 세션 종료) 시점에** 출력한다 ([step-6.md](step-6.md) 「세션 종료 — 후속 안내」). step-5에서 조기 출력하지 않는다: step-6 사용자 리뷰에서 시그니처가 바뀌면 후속 PR·PR 본문에 영향이 가므로, IMPL이 완전히 끝난 뒤 안내해야 한다. (stub 도미노는 예외 — stub을 만든 경우 PR_{N+1}_PLAN은 step-4 stub 시그니처에서 곧장 시작하며, 이는 조기 진입이 아니라 stub 핸드오프다.)
