@@ -13,7 +13,7 @@
 ## 구조 규칙
 
 - 어필 포인트(구현 규모, 코드량 자랑 등)는 항목의 마지막 bullet으로 배치한다. 첫 bullet은 "무엇을 했는가/어떤 효과인가"로 시작한다 — 위에서 아래로 읽었을 때 결론·주제 → 디테일 순서가 자연스럽도록.
-- 헤딩 명사형은 `tone.md` "헤딩은 명사형으로", 렌더링은 write-init SKILL.md "패키지 형식"의 `rendering_env` 항목을 따른다 (이력서 입력 필드는 plain-text 기본).
+- 헤딩 명사형은 `resume-guide.md` "헤딩", 렌더링은 write-init SKILL.md "패키지 형식"의 `rendering_env` 항목을 따른다 (이력서 입력 필드는 plain-text 기본).
 
 -->
 
