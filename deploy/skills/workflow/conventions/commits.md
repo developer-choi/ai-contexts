@@ -13,8 +13,8 @@
 | stub 커밋 (PR 골조 생성) | `chore(<scope>): [PR{N}] 초기 골조 stub` |
 | 잔존 md 커밋 (`/plan/pr{N}/` 산출물) | `docs(<scope>): [PR{N}] <산출물 요약>` |
 | IMPL·리뷰 수정 커밋 | `feat(<scope>): [PR{N}] <슬라이스 메시지>` |
-| 1차 정리 (슬라이스별 재정렬) | `[PR{N}]` 접두사 유지, 슬라이스 단위로 묶음 |
-| 2차 정리 (마지막 PR 한정) | `[PR{N}]` 접두사 제거, 슬라이스·도메인 기준 재작성 |
+| 1차 정리 (각 PR step-6.5, 슬라이스별 재정렬) | `[PR{N}]` 접두사 유지, 슬라이스 단위로 묶음 |
+| 2차 정리 (FINALIZE, 스택 전역 1회) | `[PR{N}]` 접두사 제거(strip), 슬라이스·도메인 기준 재작성 |
 
 - `<scope>`는 프로젝트 commitlint scope-enum에 따라 결정
 - PR 번호는 항상 subject 안 대괄호 접두사로 표기 (type/scope 자리 아님)
@@ -35,9 +35,9 @@
 
 - 부여 시점: stub 이후 모든 IMPL·리뷰 수정 커밋
 - 보존 기간: 1차 정리까지
-- 제거 시점: 마지막 PR의 2차 정리
+- 제거 시점: FINALIZE의 2차 정리(strip) — 스택 전체 IMPL 완료 후 1회 ([conventions/session/finalize.md](session/finalize.md))
 
-대괄호로 통일하는 이유: 2차 정리에서 일괄 제거(grep·sed)가 쉽다.
+대괄호로 통일하는 이유: strip에서 일괄 제거(grep·sed)가 쉽다.
 
 ## 슬라이스 분할 정리 예시
 
@@ -65,9 +65,24 @@ fix(examples): 머무름 데모 reset 버그 수정
 feat(examples): 제출 생명주기 데모 + 도착 페이지   ← 네이밍·버그 수정 내장
 ```
 
-## PR 간 시간순 섞임 수용
+## 스택 모델 전제
 
-2차 정리에서 `[PR{N}]` 접두사를 제거하고 나면 PR 단위 식별 가치는 사라진다. rebase로 재배열하지 않는다 — 재배열은 추가 history rewrite 부담.
+큰 작업은 여러 PR로 쪼개고 **각 PR 브랜치는 앞 PR 브랜치 위에 얹는다(스택)** — main에서 각자 뻗지 않는다 (base 결정은 [../steps/step-4.md](../steps/step-4.md) 「사전 준비」). 구현 페이즈는 머지 없이 도미노로 진행하므로, 종료 페이즈(FINALIZE) 진입 시점엔 스택의 어느 PR도 아직 머지되지 않았다. 아래 strip(접두사 일괄 제거)·replace(오배치 재배치)가 성립하는 근거가 이 미머지 스택 전제다.
+
+## PR 간 시간순 섞임 vs 오배치
+
+두 현상을 구분한다 — 처리가 정반대다.
+
+- **시간순 섞임 (소속은 맞음)**: 커밋이 원래 자기 PR에 있는데 시간 순서만 다른 PR 커밋과 뒤섞임. **재배열하지 않는다** — 2차 정리(strip)로 `[PR{N}]` 접두사를 제거하고 나면 PR 단위 식별 가치가 사라지므로, 시간순 재배열은 순이익 없는 추가 history rewrite 부담이다.
+- **오배치 (소속이 틀림)**: "PR4 브랜치에 있지만 실은 PR2 작업인 커밋"처럼 커밋이 잘못된 PR에 얹혀 있음. 원래 PR로 **재배치(replace)** 한다 — 이건 소속을 바로잡는 조작이라 위 "재배열 금지"의 예외가 아니라 별개 사안이다.
+
+### replace 절차 (오배치 재배치)
+
+FINALIZE에서 1회 수행한다 ([conventions/session/finalize.md](session/finalize.md) 「replace」). 스택이라 대상 PR(상류)에 커밋을 옮기면 하류 PR 브랜치들을 연쇄 rebase해야 한다(다중 브랜치 rewrite). 스택이 다 완성돼야 대상 PR이 확정되므로 종료 페이즈 1회 조작이다. 「history rewriting 안전 절차」의 백업 브랜치를 대상·하류 브랜치마다 적용한다.
+
+### strip 대상 경계 — 조기 개별 머지분 제외
+
+strip "전 커밋 일괄 제거"의 대상은 **미머지 스택**이다. 앞 PR에 독립인 PR을 스택 완성 전에 개별 조기 머지하는 것(문서 기본 흐름 밖 1% — 사용자 수동)은 FINALIZE 일괄 strip/replace에서 빠진다. 조기 머지분은 머지 직전 **그 PR만 수동 strip** + (스택 상류 섞임 방지) base retarget 또는 상류 선머지로 처리한다.
 
 ---
 
@@ -92,6 +107,8 @@ git branch backup/<현재브랜치>-<YYYYMMDD-HHmm>
 ```
 git reset --hard backup/<현재브랜치>-<YYYYMMDD-HHmm>
 ```
+
+**스택 전역(FINALIZE) 확장**: replace는 대상 PR + 그 하류 PR 브랜치를 모두 재작성하므로, **재작성 대상 브랜치마다** 백업을 뜬다. 한 브랜치만 백업하고 연쇄 rebase에 들어가지 않는다.
 
 ### force-push 요청 보고 양식
 

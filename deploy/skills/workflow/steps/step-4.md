@@ -11,7 +11,10 @@ Step 3이 "무엇을 구현할지"를 결정했다면, 이 단계는 "어떻게 
 이 단계 시작 시 작업 내용에 맞는 브랜치를 새로 생성하고, 워크트리도 함께 새로 만든다. 이전 세션의 브랜치를 이어서 사용하지 않는다.
 
 - 브랜치명: `feature/{짧은-설명}` (예: `feature/login-form`)
-- base: 프로젝트의 기본 브랜치 (main 또는 master)
+- base 브랜치 (스택 모델 — 각 PR은 앞 PR 위에 얹는다):
+  - **N≥2**: PR_{N-1} 브랜치. 앞 PR의 stub 시그니처를 봐야 하므로 main이 아니라 앞 PR 브랜치에서 뻗는다.
+  - **N=1, 채용**: FOUNDATION이 만든 PR1 워크트리·브랜치(베이스 두 커밋 위) — FOUNDATION 제공 base ([conventions/session/foundation.md](../conventions/session/foundation.md)).
+  - **N=1, 실무·개인**: 프로젝트 기본 브랜치(main 또는 master) — 스택할 앞 PR·FOUNDATION이 없다 (FOUNDATION은 채용 한정, SKILL.md 「세션」 표).
 - 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다
 
 이후 이 단계의 모든 작업(stub 파일 생성·stub 커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/consumable/overview.md`, `/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
