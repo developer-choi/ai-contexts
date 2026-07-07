@@ -18,9 +18,7 @@ export default {
         'skills',
         'contexts',
         'rules',
-        'settings',
-        'archives',
-        'backlog',
+        'settings'
       ],
     ],
     'scope-empty': [2, 'never'],
