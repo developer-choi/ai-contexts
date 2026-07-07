@@ -8,8 +8,8 @@
 
 ## 진입 조건 (fan-in)
 
-- **모든 PR의 IMPL(step-5) 완료**. 특정 PR 하나가 아니라 스택 전체가 선행 (fan-in).
-- 마지막 IMPL 판정: `/plan/` 하위 가장 높은 번호의 `pr{N}` 디렉토리가 방금 IMPL을 끝낸 PR이면 그 IMPL이 마지막 (SKILL.md 「채용과제 마무리」·step-5.4의 project.md 방식과 동일). 마지막 IMPL 세션이 본 세션 진입을 안내한다.
+- **모든 PR의 IMPL(step-6) 완료**. IMPL 세션은 step-5(구현)~step-6(최종 점검)이라 step-6까지 끝나야 IMPL 완료다. 특정 PR 하나가 아니라 스택 전체가 선행 (fan-in).
+- 마지막 IMPL 판정: `/plan/` 하위 가장 높은 번호의 `pr{N}` 디렉토리가 방금 IMPL(step-6)을 끝낸 PR이면 그 IMPL이 마지막 (SKILL.md 「채용과제 마무리」의 project.md 방식과 동일). 마지막 IMPL 세션이 step-6 종료 시 본 세션 진입을 안내한다.
 - WRITING(PR 본문)은 per-PR·유연 타이밍이라 본 세션의 선행이 아니다 — IMPL 직후 쓴 PR도, 아직 안 쓴 PR도 섞여 있을 수 있다. 「WRITING·머지 관계」 참조.
 
 ## cwd
