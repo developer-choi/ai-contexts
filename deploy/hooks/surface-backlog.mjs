@@ -3,13 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import { readPayload, getCwd, getSessionId, addContext } from "./hook-utils.mjs";
 
-// 백로그는 master가 아니라 ai-contexts-backlog 워크트리(backlog 브랜치)에 있다.
-// 워크트리가 없는 기기에서는 조용히 no-op 한다.
+// 백로그는 AC가 아니라 별도 private 레포 `backlog`(main/backlog)에 산다.
+// 레포가 클론돼 있지 않은 기기에서는 조용히 no-op 한다.
+// 주의: 이 경로는 레포 루트다(projects 미포함). 아래 rel이 "projects/<p>/active"로 projects를
+// 이미 붙이므로, 여기에 projects를 더하면 projects/projects 이중경로가 돼 표면화가 무력화된다.
 const BACKLOG_ROOT = path.join(
   os.homedir(),
   "WebstormProjects",
   "main",
-  "ai-contexts-backlog",
   "backlog",
 );
 

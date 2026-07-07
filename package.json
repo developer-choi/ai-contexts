@@ -16,8 +16,7 @@
     "verify:context-maps": "node scripts/verify/verify-context-maps.mjs",
     "verify:local-system": "node scripts/local-system/verify-local-system.mjs",
     "verify:links": "node scripts/verify/verify-links.mjs",
-    "backlog:squash": "node scripts/tools/backlog-squash.mjs",
-    "prepare": "husky && node scripts/install-husky-extra.mjs"
+    "prepare": "husky"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
