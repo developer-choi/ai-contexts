@@ -39,7 +39,7 @@ KA·MP 행선지 판단 기준은 [`deploy/contexts/placement.md`](../../../depl
 | KA | `~/WebstormProjects/main/knowledge-archive/tips/<도메인>/<파일>.md` | 한 포인트 짤막한 단편 (자유 양식) |
 | B | `~/WebstormProjects/main/backlog/projects/<project>/active/<topic>/` | TODO·References 메타 — destination은 캡처 intent로 결정, References는 `index.md` (`/backlog` 위임) |
 | B | `~/WebstormProjects/main/backlog/projects/knowledge-archive/active/<topic>/<파일>.md` | KA 성격이나 한국어로 쓰인 미검증 정리 — KA staging (`/backlog projects` 위임, 「KA 언어 게이트」 참조) |
-| B | `~/WebstormProjects/main/backlog/projects/monorepo-playground/active/<topic>/<파일>.md` | MP 성격 항목 전부 — MP staging (`/backlog projects` 위임, 「MP staging」 참조) |
+| B | `~/WebstormProjects/main/backlog/projects/monorepo-playground/inactive/domains/<도메인>/<파일>.md` | MP 성격 항목 전부 — MP staging (`/backlog projects` 위임, 「MP staging」 참조) |
 | B | `~/WebstormProjects/main/backlog/archives/history/` | 종결된 회의자료·옛 메모 등 참조 전용 아카이브 (`backlog` 레포 `archives/` 하위) |
 
 KA 4번째 역할 `explained/`는 `/explain` 스킬 런타임 캐시라 doc-router 라우팅 대상이 아니다.
@@ -72,7 +72,7 @@ KA 4번째 역할 `explained/`는 `/explain` 스킬 런타임 캐시라 doc-rout
 
 ## MP staging
 
-행선지가 MP로 판단된 항목은 전부 MP 본체(`docs/patterns`·`best-practices-map.md`)로 직접 쓰지 않고 `projects/monorepo-playground/active/<topic>/`(MP staging, 구현 전 임시 보관)로 보낸다. MP는 동작하는 예제 코드 레포라, PDF/MD를 전사한 미검증 코드를 본체에 바로 넣을 수 없기 때문이다. staging에 재료로 쌓고 실제 patterns 구현은 이후 별도 작업으로 한다.
+행선지가 MP로 판단된 항목은 전부 MP 본체(`docs/patterns`·`best-practices-map.md`)로 직접 쓰지 않고 `projects/monorepo-playground/inactive/domains/<도메인>/`(MP staging, 구현 전 숙성 보관)로 보낸다. MP는 동작하는 예제 코드 레포라, PDF/MD를 전사한 미검증 코드를 본체에 바로 넣을 수 없기 때문이다. 도메인별 필기·스케치는 `inactive/domains/`에서 숙성하다 착수 시점에 `active/`로 promote되므로(표면화 노이즈 회피 — `/backlog` 격리 규칙), staging도 이 위치에 쌓는다. 실제 patterns 구현은 이후 별도 작업으로 한다.
 
 - 조건 없이 MP 성격 항목 **전부**가 대상이다 (KA 언어 게이트와 달리 언어·출처와 무관).
 - staging 라우팅은 `/backlog projects`에 위임한다 — 양식·워크트리 모두 `/backlog`가 담당하므로 MP patterns 양식 변환(「양식 변환」)을 적용하지 않는다.
@@ -186,7 +186,7 @@ MP 성격 항목은 본체 patterns 양식으로 변환하지 않는다 — `/ba
 
 - 행선지 적절성: `placement.md` 분업 표 대비 KA/MP/AC 매핑이 맞는가
 - KA 언어 게이트 준수: KA 성격인데 본문이 한국어인 항목이 KA 본체가 아니라 staging(`projects/knowledge-archive/active/`)으로 갔는가
-- MP staging 준수: MP 성격 항목이 MP 본체(`docs/patterns`)가 아니라 staging(`projects/monorepo-playground/active/`)으로 갔는가
+- MP staging 준수: MP 성격 항목이 MP 본체(`docs/patterns`)가 아니라 staging(`projects/monorepo-playground/inactive/domains/`)으로 갔는가
 - 양식 준수: KA 파일이 Q&A 구조·frontmatter·convert 규칙(원문만 변환, OA 신규 생성 금지, 빈 섹션 금지 등)을 따랐는가
 - 분기 합리성: 보류(`.unrouted.md`) vs 폐기(`.discarded.md`) vs 라우팅 분기가 자료 성격에 맞는가 (잘못 버린 것·잘못 살린 것 없는가)
 - 일반화·익명화: 본인 프로젝트 고유명사가 라우팅된 항목에 그대로 남았는가
