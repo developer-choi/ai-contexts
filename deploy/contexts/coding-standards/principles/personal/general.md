@@ -1,3 +1,7 @@
+---
+tags: [file-folder-structure]
+---
+
 # General Coding Principles
 
 ## 도메인 종속 코드 배치

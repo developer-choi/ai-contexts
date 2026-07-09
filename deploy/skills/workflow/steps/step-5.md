@@ -39,7 +39,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, AC coding-standards/map.md + MP best-practices-map.md 중 로직 관련 rules |
+| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴 |
 | Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중), `pr{N}/persistent/reference.md` (회사·프로젝트 고유 컨벤션 — 리뷰어 자체 컨벤션 외 추가 검증 기준) |
 | Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, `pr{N}/persistent/reference.md`, stub `*.test.tsx`의 `it.todo` |
 
@@ -47,7 +47,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 ### Step 5.1.2. Coding-Standards Reviewer 분할
 
-Lead가 AC [coding-standards/map.md](../../../contexts/coding-standards/map.md) + MP `docs/best-practices-map.md` + 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
+Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차 + 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
 
 ---
 

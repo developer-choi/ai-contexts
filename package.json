@@ -13,7 +13,6 @@
     "unsync:local-system": "node scripts/local-system/unsync-local-system.mjs",
     "verify:hooks": "node scripts/verify/verify-hooks.mjs",
     "verify:settings": "node scripts/settings/verify-settings-projection.mjs",
-    "verify:context-maps": "node scripts/verify/verify-context-maps.mjs",
     "verify:local-system": "node scripts/local-system/verify-local-system.mjs",
     "verify:links": "node scripts/verify/verify-links.mjs",
     "prepare": "git config core.hooksPath .githooks"

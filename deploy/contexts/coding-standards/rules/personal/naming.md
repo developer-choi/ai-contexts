@@ -1,3 +1,7 @@
+---
+tags: [file-folder-structure]
+---
+
 # 네이밍 컨벤션
 
 ## 변수명, 함수명, 클래스명 공통

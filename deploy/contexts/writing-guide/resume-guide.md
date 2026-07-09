@@ -1,3 +1,7 @@
+---
+tags: [resume]
+---
+
 # resume-guide
 
 이력서·경력기술서 전용 작성·다듬기 규칙입니다. `write-init`에서 `type: resume-item`으로 입력받은 뒤 `write-refine`이 다듬을 때 함께 로드됩니다.

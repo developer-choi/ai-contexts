@@ -17,7 +17,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 | 입력 | 필수 | 설명 |
 |------|------|------|
 | **리뷰 대상** | O | PR diff, 커밋, 파일 |
-| **coding-standards 목록** | X | 적용할 coding-standards 파일 경로 리스트. 없으면 [map.md](../../contexts/coding-standards/map.md)에서 직접 판단 |
+| **coding-standards 목록** | X | 적용할 coding-standards 파일 경로 리스트. 없으면 [code-map.md](../../contexts/code-map.md)에서 직접 판단 |
 | **추가 컨벤션** | X | coding-standards 외 경로 (사내 컨벤션 등) |
 | **리뷰 모드** | X | default / advanced / only-standards (기본: default) |
 
@@ -33,12 +33,11 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 ### 1. 컨텍스트 준비
 
-coding-standards 목록이 주입된 경우, **외부 스킬 선별(4번)을 제외한 나머지를 건너뛴다** (호출자가 이미 스탠다드를 정했으므로 재선별 불필요). 4번은 리뷰 대상 도메인(Next.js 등) 기준이라 coding-standards 주입 여부와 무관하게 항상 실행한다 — only-standards 모드는 어차피 3단계에서 자유 리뷰·외부 스킬 리뷰어를 실행하지 않으므로 좁은 스코프가 유지된다.
+coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제외한 나머지를 건너뛴다** (호출자가 이미 스탠다드를 정했으므로 재선별 불필요). 3번은 리뷰 대상 도메인(Next.js 등) 기준이라 coding-standards 주입 여부와 무관하게 항상 실행한다 — only-standards 모드는 어차피 3단계(리뷰 수행)에서 자유 리뷰·외부 스킬 리뷰어를 실행하지 않으므로 좁은 스코프가 유지된다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
-2. [coding-standards/map.md](../../contexts/coding-standards/map.md)를 읽고, 탐색 절차를 따라 관련 rules·principles 파일을 선별·로드한다
-3. [best-practices-map.md](~/WebstormProjects/main/monorepo-playground/docs/best-practices-map.md)를 읽고, 리뷰 대상과 관련된 구현 패턴이 있는지 확인한다. 관련 패턴이 있으면 해당 섹션도 로드한다
-4. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool로 호출. 서브에이전트에 넘길 때는 메인이 형제 스킬 `../<name>/SKILL.md`를 읽어 그 내용을 전달한다). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
+2. [code-map.md](../../contexts/code-map.md)의 탐색 절차를 따라 관련 coding-standards rules·principles + MP 구현 패턴을 선별·로드한다
+3. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool로 호출. 서브에이전트에 넘길 때는 메인이 형제 스킬 `../<name>/SKILL.md`를 읽어 그 내용을 전달한다). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
 
    | 리뷰 대상 | 외부 스킬 |
    |---|---|
@@ -52,7 +51,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(4번)을 제
 
    `--extra-standards`(사내 컨벤션)는 외부 스킬 로드를 트리거하지 않는다 — 외부 스킬 선별은 위 표의 리뷰 대상 도메인으로만 한다.
 
-5. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
+4. 사용자에게 추가 컨벤션이 있는지 확인한다 (사내 컨벤션 등)
 
 ### 2. 리뷰 대상 파악
 

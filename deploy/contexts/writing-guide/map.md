@@ -12,18 +12,9 @@
 1. **AI가 사례를 보면 규칙보다 정확하게 이해한다** — 규칙만으로는 해석 여지가 남지만, Bad/Good 쌍이 있으면 기준이 명확해진다.
 2. **사례는 영원하고 규칙은 바뀐다** — 규칙이 리팩토링되어도 사례는 그대로 유효하다. 나중에 규칙 변경 시 기존 사례를 테스트 케이스로 활용할 수 있다.
 
-## 로드 규칙
-
-- `[always]` 태그 파일: 작업 내용과 무관하게 **무조건 전부 Read**한다. 선별하지 않는다.
-- 그 외: 작업 맥락에 맞는 태그의 파일을 선별하여 로드
-
-### [CRITICAL] 탐색 절차
-
-1. 하단 파일 리스트에서 `[always]` 태그 파일을 전부 Read한다. 건너뛰지 않는다.
-2. 현재 작업과 관련된 다른 태그 파일이 있으면 추가로 Read한다
-3. 톤 규칙 + 사례를 하나씩 대조한다
-
 ## 태그
+
+폴더 경로로 표현되지 않는 축(문서 종류·상황)은 각 파일 자신의 frontmatter `tags`에 둔다(map.md에 목록을 두지 않는다 — 파일 내용을 고칠 때 같은 파일에서 태그도 같이 갱신하게 하기 위함).
 
 | 태그 | 의미 | 사용 시점 |
 |------|------|-----------|
@@ -37,20 +28,9 @@
 | `decision` | 기술적 의사결정 문서 관련 | 의사결정 문서 작성/다듬기 시 (`write-init` type: `decision` 또는 `write-refine` frontmatter type: `decision`) |
 | `tradeoff` | 트레이드오프(단점·비용·적용 한계) 명시 | 해법·선택을 담는 글 작성/다듬기 시 (`decision`·`resume-*`·블로그) |
 
-## 파일 리스트
+### [CRITICAL] 탐색 절차
 
-이 디렉토리(`deploy/contexts/writing-guide/`) 기준 상대 경로:
-
-tone.md [always]
-examples/tone.md [always]
-examples/structure.md [structure]
-examples/accuracy.md [accuracy]
-examples/process.md [process]
-readme-guide.md [readme]
-resume-guide.md [resume]
-examples/resume.md [resume]
-decision-guide.md [decision]
-tradeoff-guide.md [tradeoff]
-requirements.md
-templates/pr-body/recruitment-narrative.md [pr]
-templates/pr-body/recruitment-evidence.md [pr]
+1. `deploy/contexts/writing-guide/**/*.md`를 Glob해 전체 파일 목록을 얻는다(map.md 제외).
+2. frontmatter에 `always` 태그가 있는 파일은 작업 내용과 무관하게 전부 Read한다. 건너뛰지 않는다.
+3. 현재 작업과 관련된 다른 태그가 있는 파일을 frontmatter `tags`로 확인해 추가로 Read한다.
+4. 톤 규칙 + 사례를 하나씩 대조한다.

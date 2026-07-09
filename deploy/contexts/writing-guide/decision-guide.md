@@ -1,3 +1,7 @@
+---
+tags: [decision]
+---
+
 # decision-guide
 
 기술적 의사결정 문서(`type: decision`) 전용 작성·검토 규칙입니다. `write-init`에서 `type: decision`으로 입력받아 `write-refine`이 다듬을 때 함께 로드됩니다.

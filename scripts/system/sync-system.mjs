@@ -38,8 +38,6 @@ async function main() {
   ensureDeploySource();
   // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'settings', 'verify-settings-projection.mjs')], { stdio: 'inherit' });
-  // contexts map.md ↔ 파일 목록 정합이 깨지면 배포 전에 중단(fail-fast).
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-context-maps.mjs')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());

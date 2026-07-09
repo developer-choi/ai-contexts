@@ -1,6 +1,6 @@
 # Writing-Guide 특화 체크리스트
 
-`contexts/writing-guide/` 리뷰 시 추가로 점검하는 항목. 파일 목록은 `map.md` 참조.
+`contexts/writing-guide/` 리뷰 시 추가로 점검하는 항목. 탐색 절차는 `map.md` 참조(Glob + 각 파일 frontmatter `tags` 기반, 수기 목록 없음).
 
 ## [CRITICAL] 분류 검증
 

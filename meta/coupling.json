@@ -53,12 +53,12 @@
       "note": "environment-lib에 새 멱등성·안전제거 함수를 추가하면 verify-environment에 그 계약 케이스를 추가한다 (로직 drift 방지)."
     },
     {
-      "name": "coding-standards map.md",
+      "name": "coding-standards 탐색 절차 (code-map.md)",
       "files": [
-        "deploy/contexts/coding-standards/map.md",
+        "deploy/contexts/code-map.md",
         "deploy/contexts/coding-standards/**"
       ],
-      "note": "파일 존재·등록 정합(목록 ↔ 실제 파일)은 verify:context-maps가 자동으로 잡으니 여기선 판단 면만 챙긴다: 파일을 추가·이동하면 map.md에서 그 파일의 역할 섹션 배치·태그 부여를 정한다. 잘못 배치되면 규칙 오라우팅이 난다."
+      "note": "파일 존재는 code-map.md의 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: rules·principles 파일을 추가·수정할 때, code-map.md 「태그」 표에 정의된 축(예: file-folder-structure)에 해당하면 그 파일 자신의 frontmatter `tags`에 추가한다. 새 축이 필요하면 code-map.md 「태그」 표에도 정의를 추가한다."
     },
     {
       "name": "writing-guide map.md",
@@ -66,7 +66,7 @@
         "deploy/contexts/writing-guide/map.md",
         "deploy/contexts/writing-guide/**"
       ],
-      "note": "파일 존재·등록 정합은 verify:context-maps가 자동으로 잡으니 여기선 판단 면만 챙긴다: 파일을 추가·이동하면 map.md에서 그 파일의 태그(예: always·structure)를 정한다."
+      "note": "파일 존재는 map.md 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: 파일을 추가·수정할 때 그 파일 자신의 frontmatter `tags`에 map.md 「태그」 표의 축(예: always·structure)을 부여한다."
     }
   ]
 }

@@ -32,7 +32,7 @@
 | 구현자 | Markup Implementer (sonnet) — 마크업 전용 (CSS·최소 props). 로직·테스트 작성 안 함 |
 | 재료 | 컴포넌트 목록, 디자인시스템 소스, 기존 mixin/레이아웃 패턴 + 모드별 자료 (모드 파일 참조) |
 | 진실검사 A | 모드 파일이 정의 — figma 대조([figma.md](figma.md)) / 사용자 시각 확인([personal.md](personal.md)). 종료 커버리지 = project.md 전 컴포넌트 |
-| 규칙검사 B | 마크업 coding-standards (AC coding-standards/map.md + MP best-practices-map.md 중 마크업 rules) |
+| 규칙검사 B | 마크업 coding-standards (AC [code-map.md](../../../../../contexts/code-map.md) 탐색 절차로 찾은 마크업 관련 rules) |
 | 증분 단위 | 컴포넌트 |
 
 구현자에게 주입하는 모드별 필수 지침은 해당 모드 파일을 따른다.

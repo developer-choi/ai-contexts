@@ -72,7 +72,7 @@ KA 4번째 역할 `explained/`는 `/explain` 스킬 런타임 캐시라 doc-rout
 
 ## MP staging
 
-행선지가 MP로 판단된 항목은 전부 MP 본체(`docs/patterns`·`best-practices-map.md`)로 직접 쓰지 않고 `projects/monorepo-playground/inactive/domains/<도메인>/`(MP staging, 구현 전 숙성 보관)로 보낸다. MP는 동작하는 예제 코드 레포라, PDF/MD를 전사한 미검증 코드를 본체에 바로 넣을 수 없기 때문이다. 도메인별 필기·스케치는 `inactive/domains/`에서 숙성하다 착수 시점에 `active/`로 promote되므로(표면화 노이즈 회피 — `/backlog` 격리 규칙), staging도 이 위치에 쌓는다. 실제 patterns 구현은 이후 별도 작업으로 한다.
+행선지가 MP로 판단된 항목은 전부 MP 본체(`docs/patterns`·`docs/best-practices/`)로 직접 쓰지 않고 `projects/monorepo-playground/inactive/domains/<도메인>/`(MP staging, 구현 전 숙성 보관)로 보낸다. MP는 동작하는 예제 코드 레포라, PDF/MD를 전사한 미검증 코드를 본체에 바로 넣을 수 없기 때문이다. 도메인별 필기·스케치는 `inactive/domains/`에서 숙성하다 착수 시점에 `active/`로 promote되므로(표면화 노이즈 회피 — `/backlog` 격리 규칙), staging도 이 위치에 쌓는다. 실제 patterns 구현은 이후 별도 작업으로 한다.
 
 - 조건 없이 MP 성격 항목 **전부**가 대상이다 (KA 언어 게이트와 달리 언어·출처와 무관).
 - staging 라우팅은 `/backlog projects`에 위임한다 — 양식·워크트리 모두 `/backlog`가 담당하므로 MP patterns 양식 변환(「양식 변환」)을 적용하지 않는다.

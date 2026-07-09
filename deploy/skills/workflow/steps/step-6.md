@@ -39,7 +39,7 @@
 
 ## Step 6.2. 리뷰 파이프라인
 
-Lead가 [coding-standards/map.md](../../../contexts/coding-standards/map.md)에서 관련 coding-standards를 선별하고, `/code-review`를 advanced 모드로 호출한다.
+Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차에서 관련 coding-standards·구현 패턴을 선별하고, `/code-review`를 advanced 모드로 호출한다.
 
 ```
 code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)

@@ -1,3 +1,7 @@
+---
+tags: [file-folder-structure]
+---
+
 # Zod 스키마 컨벤션
 
 ## 스키마 정의

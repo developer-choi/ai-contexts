@@ -22,4 +22,4 @@
 | 커밋 컨벤션 | @commitlint/cli, @commitlint/config-conventional | husky commit-msg hook과 함께 |
 | 훅 관리 | husky, lint-staged | commit-msg(commitlint) + pre-commit(lint-staged) 둘 다 표준 |
 
-셋팅 방법은 MP `docs/best-practices-map.md`를 참조한다.
+셋팅 방법은 MP `docs/best-practices/setup.md`를 참조한다.
