@@ -5,9 +5,10 @@
       "files": [
         "deploy/base-settings.json",
         "scripts/settings/settings-projection.mjs",
-        "scripts/settings/verify-settings-projection.mjs"
+        "scripts/settings/verify-settings-projection.mjs",
+        "scripts/local-system/verify-local-system.mjs"
       ],
-      "note": "존재 정합(hook 본체 ↔ base 등록)은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: hook을 추가하면 base의 event/on/msg를 정하고, 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조(매처 fan-out 등)를 바꾸면 verify의 단언을 함께 고친다."
+      "note": "존재 정합(hook 본체 ↔ base 등록)은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: hook을 추가하면 base의 event/on/msg를 정하고, 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조(매처 fan-out 등)를 바꾸면 verify의 단언을 함께 고친다. settings-projection의 buildHooks·LOCAL_ADAPTERS·localHookCommand는 전역 verify-settings-projection과 로컬 verify-local-system이 함께 소비하므로 투영 export 계약을 바꾸면 두 verify를 같이 맞춘다(생성부 deploy-lib·local-deploy-lib의 buildHooks 오용은 이 verify들이 잡는다)."
     },
     {
       "name": "sync:system 동기화·제거·가이드",
@@ -53,6 +54,14 @@
       "note": "environment-lib에 새 멱등성·안전제거 함수를 추가하면 verify-environment에 그 계약 케이스를 추가한다 (로직 drift 방지)."
     },
     {
+      "name": "check-links 구현·회귀 계약",
+      "files": [
+        "scripts/check-links.mjs",
+        "scripts/verify/verify-links.mjs"
+      ],
+      "note": "verify-links는 check-links의 export(scan·classify·githubSlug·headingSlugs·extractLinks·repoSlug)를 직접 import해 회귀 검증한다. check-links의 export 시그니처·분류(anchor/in-repo/myrepo-url/external) 동작을 바꾸면 verify-links의 픽스처·단언을 함께 고친다."
+    },
+    {
       "name": "coding-standards 탐색 절차 (code-map.md)",
       "files": [
         "deploy/contexts/code-map.md",
@@ -67,6 +76,15 @@
         "deploy/contexts/writing-guide/**"
       ],
       "note": "파일 존재는 map.md 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: 파일을 추가·수정할 때 그 파일 자신의 frontmatter `tags`에 map.md 「태그」 표의 축(예: always·structure)을 부여한다."
+    },
+    {
+      "name": "pre-push sync 게이트 ↔ sync 진입점",
+      "files": [
+        "scripts/sync-on-push.mjs",
+        "scripts/system/sync-system.mjs",
+        "scripts/local-system/sync-local-system.mjs"
+      ],
+      "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-system·sync-local-system의 진입 경로(scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩해 실행·게이트한다. 이 두 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
     }
   ]
 }
