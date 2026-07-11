@@ -35,6 +35,20 @@ description: 버그·성능 문제의 증상과 근본 원인(Root Cause)을 구
 
 ---
 
+## 수정 전 — 재현 테스트 먼저
+
+근본 원인을 찾았으면 곧장 코드 수정으로 가지 않는다. **버그를 재현하는 실패 테스트를 먼저 쓰고**, 실패를 확인한 뒤 코드를 고쳐 초록(통과)으로 바꾼다.
+
+- **이점**: 버그가 오해가 아니라 진짜임을 증명 / 무엇이 망가졌는지 문서화 / 재발 방지(회귀 테스트 — 누가 같은 문제를 되살리면 이 테스트가 잡는다).
+- **AI가 수정할 때 특히**: 코드가 아니라 테스트를 고쳐서 통과시키는 꼼수를 막는다. 반드시 "실패 테스트로 재현 → 코드 수정" 순서를 지킨다.
+- **예외**: 단위 테스트로 재현하기 어려운 유형(인프라·환경 의존, 성능 저하, 시각 회귀 등)은 사유를 밝히고 다른 재현 수단(로그·프로파일·스크린샷)으로 대체한다.
+
+> 출처: https://vitest.dev/guide/learn/testing-in-practice.html
+> "A better approach is to write a failing test first that reproduces the bug, then fix the code and watch the test turn green."
+> "If you use AI agents to fix bugs, configure them to follow the same principle: reproduce the issue with a failing test first, then fix the code. This prevents the agent from 'fixing' a bug by changing the test instead of the code, and gives you confidence that the fix actually works."
+
+---
+
 ## 산출물
 
 증상·근본 원인 분석을 정리한 bug-analysis 문서. 출력 위치는 사용자가 지정하며, 지정이 없으면 분석 결과를 직접 보고한다.
