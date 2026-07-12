@@ -43,6 +43,12 @@
       "msg": "Checking artifact write policy..."
     },
     {
+      "file": "check-artifact-tag-policy.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking for stray tool-artifact tags..."
+    },
+    {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "bash",
