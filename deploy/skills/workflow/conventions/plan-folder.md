@@ -18,12 +18,12 @@
       conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성). 프로젝트 컨벤션 소스 "경로 + 한 줄 트리거" 인덱스. 양식·작성 절차는 step-1 「컨벤션 소스 수집」 참조
       figma-url.md      ← step-1.1 수집. 대상 이름 + URL 누적
       figma/            ← step-1.1 수집 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
+      cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다(프로젝트 라이프타임 내내 구현 우선순위 판단에 참조) — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분은 처음부터 `background/consumable/project.md`에 직접 기록한다(중간 산출물에 임시로 적어두지 않는다)
+      service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조). 개발 내내 컨셉 판단 기준으로 참조되므로 retained
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
-      project.md        ← step-2 산출물 (BG.step-2). PR별 섹션을 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PR1 섹션에 자연어 지시 추가 (채용 한정)
+      project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성), step-2에서 PR별 섹션으로 구조화. PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PR1 섹션에 자연어 지시 추가 (채용 한정)
       global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
-      cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 원본 교차 분석·평가 기준 추론·기술 결정·모호한 부분
-      service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조)
       figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
       design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PR3 입력 재료, 사용 후 폐기
   pr{N}/
