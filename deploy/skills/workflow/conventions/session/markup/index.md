@@ -30,7 +30,7 @@
 | 인자 | 주입값 |
 |---|---|
 | 구현자 | Markup Implementer (sonnet) — 마크업 전용 (CSS·최소 props). 로직·테스트 작성 안 함 |
-| 재료 | 컴포넌트 목록, 디자인시스템 소스, 기존 mixin/레이아웃 패턴 + 모드별 자료 (모드 파일 참조) |
+| 재료 | 컴포넌트 목록, 디자인시스템 소스(MP `packages/design-system` 복사·차감), 기존 mixin/레이아웃 패턴 + 모드별 자료 (모드 파일 참조). **채용은 [figma.md](figma.md) 「스타터 코드·MP 재사용·스타일링 라이브러리」를 따름** — 스타터 코드 미참조, MP 컴포넌트는 복사해 스펙만큼 차감, 시각 토큰은 캡처 기준 |
 | 진실검사 A | 모드 파일이 정의 — figma 대조([figma.md](figma.md)) / 사용자 시각 확인([personal.md](personal.md)). 종료 커버리지 = project.md 전 컴포넌트 |
 | 규칙검사 B | 마크업 coding-standards (AC [code-map.md](../../../../../contexts/code-map.md) 탐색 절차로 찾은 마크업 관련 rules) |
 | 증분 단위 | 컴포넌트 |
