@@ -220,6 +220,49 @@ function listEntries(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
+// SKILL.md frontmatter에 name이 없으면 폴더명을 주입한 내용을 반환한다.
+// Antigravity는 frontmatter name이 있어야 스킬을 인식하므로(Claude는 폴더명으로 잡음),
+// 소스에는 name을 적지 않고 배포 시점에 주입한다. 이미 name이 있으면 그대로 둔다(멱등).
+function withSkillName(content, name) {
+  const frontmatter = content.match(/^---\r?\n([\s\S]*?\r?\n)---(\r?\n|$)/);
+  if (!frontmatter) return `---\nname: ${name}\n---\n\n${content}`;
+  if (/^name\s*:/m.test(frontmatter[1])) return content;
+  return `---\n${frontmatter[1]}name: ${name}\n---${frontmatter[2]}${content.slice(frontmatter[0].length)}`;
+}
+
+// 배포된 스킬 디렉토리의 SKILL.md에 폴더명 name을 주입한다. 산출물만 고치고 소스는 건드리지 않는다.
+function injectSkillName(skillDir) {
+  const skillMd = path.join(skillDir, 'SKILL.md');
+  if (!fs.existsSync(skillMd) || !fs.statSync(skillMd).isFile()) return;
+
+  const raw = fs.readFileSync(skillMd, 'utf8');
+  const updated = withSkillName(raw, path.basename(skillDir));
+  if (updated !== raw) fs.writeFileSync(skillMd, updated, 'utf8');
+}
+
+// 스킬 항목 대조: SKILL.md는 name 주입 결과와, 나머지 파일은 원본과 일치해야 한다.
+function compareSkillPaths(src, target) {
+  if (!fs.existsSync(src) || !fs.existsSync(target)) return false;
+  if (!fs.statSync(src).isDirectory() || !fs.statSync(target).isDirectory()) return comparePaths(src, target);
+
+  const skillName = path.basename(src);
+  const leftEntries = listEntries(src);
+  const rightEntries = listEntries(target);
+  if (leftEntries.length !== rightEntries.length) return false;
+
+  for (let i = 0; i < leftEntries.length; i += 1) {
+    if (leftEntries[i].name !== rightEntries[i].name) return false;
+    const left = path.join(src, leftEntries[i].name);
+    const right = path.join(target, rightEntries[i].name);
+    if (leftEntries[i].name === 'SKILL.md' && leftEntries[i].isFile()) {
+      if (withSkillName(fs.readFileSync(left, 'utf8'), skillName) !== fs.readFileSync(right, 'utf8')) return false;
+    } else if (!comparePaths(left, right)) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function comparePaths(left, right) {
   if (!fs.existsSync(left) || !fs.existsSync(right)) return false;
 
@@ -273,7 +316,9 @@ function deploySkills(targetDir, log) {
   let copied = 0;
   for (const entry of listEntries(srcSkills)) {
     const src = path.join(srcSkills, entry.name);
-    copyPath(src, path.join(targetSkills, entry.name));
+    const dest = path.join(targetSkills, entry.name);
+    copyPath(src, dest);
+    if (entry.isDirectory()) injectSkillName(dest);
     log(`  COPY  skills/${entry.name}`);
     copied += 1;
   }
@@ -716,6 +761,7 @@ export {
   codexHooksObject,
   geminiSettingsObject,
   comparePaths,
+  compareSkillPaths,
   copyPath,
   defaultCodexDir,
   defaultClaudeDir,
@@ -726,6 +772,7 @@ export {
   deploySkills,
   ensureDeploySource,
   ensureDir,
+  injectSkillName,
   listEntries,
   mergeSettings,
   readJson,

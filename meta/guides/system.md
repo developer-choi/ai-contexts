@@ -17,7 +17,7 @@ npm run sync:system -- <target>
 - AC git hook 준비 상태를 먼저 확인합니다. 추적되는 `.githooks` 훅은 체크아웃에 항상 있으므로, `core.hooksPath`가 `.githooks`가 아니면 `npm run prepare`로 설정하고, `commitlint` 의존성이 없으면 실패합니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
-- `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다.
+- `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다. 복사 후 각 스킬 SKILL.md frontmatter에 `name`이 없으면 폴더명을 주입합니다(Antigravity는 `name`이 있어야 스킬을 인식). 검증도 주입 결과를 기준으로 대조합니다.
 - 각 타겟 설정은 공통 `deploy/base-settings.json`(정책 hook)과 타겟 override(`deploy/claude-settings.json` 등)를 합쳐 생성합니다(`scripts/settings/settings-projection.mjs`, override 우선). claude·gemini는 결과를 각자의 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존하고, codex는 hook만 `~/.codex/hooks.json`으로 통째 씁니다. hook 등록 구조(matcher·이벤트)는 타겟별 어댑터가 변환합니다.
 - 기본 타겟으로 실행하면 Codex 전역 자산도 `~/.codex`에, Gemini 전역 자산도 `~/.gemini`에 함께 동기화합니다.
 - Codex hook trust 갱신을 시도하고, Desktop 환경 제약으로 실패하면 경고 후 자산 검증은 계속합니다.

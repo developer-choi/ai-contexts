@@ -5,7 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
-import { copyPath, ensureDir, resolveUserPath } from '../lib/deploy-lib.mjs';
+import { copyPath, ensureDir, injectSkillName, listEntries, resolveUserPath } from '../lib/deploy-lib.mjs';
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),
@@ -78,8 +78,16 @@ function syncRepo(repo) {
       const source = path.join(repo, 'local', name);
       ensureDir(claudeDir);
       ensureDir(agentsDir);
-      copyPath(source, path.join(claudeDir, name));
-      copyPath(source, path.join(agentsDir, name));
+      for (const targetDir of [claudeDir, agentsDir]) {
+        const dest = path.join(targetDir, name);
+        copyPath(source, dest);
+        // 스킬 SKILL.md에는 폴더명 name을 주입한다(Antigravity는 name 필수 — deploy-lib 참고).
+        if (name === 'skills') {
+          for (const skill of listEntries(dest)) {
+            if (skill.isDirectory()) injectSkillName(path.join(dest, skill.name));
+          }
+        }
+      }
       synced.push(`local/${name} -> .claude/${name}, .agents/${name}`);
     }
     if (hasAgents) {

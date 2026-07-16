@@ -12,6 +12,7 @@ import {
   claudeSettingsObject,
   codexHooksObject,
   comparePaths,
+  compareSkillPaths,
   copyPath,
   defaultCodexDir,
   defaultClaudeDir,
@@ -94,7 +95,7 @@ async function main() {
       const target = path.join(targetDir, 'skills', entry.name);
       if (!pathExists(target)) {
         fail(failures, `skills/${entry.name} 존재하지 않음`);
-      } else if (comparePaths(src, target)) {
+      } else if (compareSkillPaths(src, target)) {
         console.log(`  PASS  skills/${entry.name}`);
       } else {
         fail(failures, `skills/${entry.name} 내용 불일치`);
@@ -198,7 +199,7 @@ function verifyCodexGlobals(targetDir) {
       const target = path.join(targetDir, 'skills', entry.name);
       if (!pathExists(target)) {
         fail(failures, `codex skills/${entry.name} 존재하지 않음`);
-      } else if (comparePaths(src, target)) {
+      } else if (compareSkillPaths(src, target)) {
         console.log(`  PASS  codex skills/${entry.name}`);
       } else {
         fail(failures, `codex skills/${entry.name} 내용 불일치`);
@@ -265,7 +266,7 @@ function verifyGeminiGlobals(targetDir) {
       const target = path.join(targetDir, 'skills', entry.name);
       if (!pathExists(target)) {
         fail(failures, `gemini skills/${entry.name} 존재하지 않음`);
-      } else if (comparePaths(src, target)) {
+      } else if (compareSkillPaths(src, target)) {
         console.log(`  PASS  gemini skills/${entry.name}`);
       } else {
         fail(failures, `gemini skills/${entry.name} 내용 불일치`);
