@@ -108,6 +108,16 @@ const result = await someCall();
 
 코드 안 `TODO`는 본 PR 안 모두 해소. IMPL 종료 시 0건.
 
+## file-level(blanket) eslint-disable 라이프사이클
+
+파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 `/plan/background/consumable/project.md`의 **담당 PR 섹션에 "PR{N}에서 disable 제거 + 규칙 준수 수정" TODO로 등록**한다. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
+
+- 격리 마커에 **추적 가능한 고정 문구**를 남긴다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`) — step-6 백스톱이 이 문구로 고아를 탐지한다.
+- 등록된 항목의 집행은 기존 step-3 「project.md 현재 PR 절 소비」가 담당한다 (새 게이트 없음).
+- 생성 시 등록을 빠뜨려 어느 PR에도 안 걸린 고아는 step-6 백스톱(step-6.md 「미배정 blanket eslint-disable 고아 점검」)이 잡는다.
+
+인라인 disable(`// eslint-disable-next-line`)은 본 소절 대상이 아니다 — file-level blanket 블록만.
+
 ## 라이프사이클
 
 ### 생성 (신규 stub 작성 시)
