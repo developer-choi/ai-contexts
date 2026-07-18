@@ -41,9 +41,13 @@ replace·strip 둘 다 history rewriting이므로 시작 전 [commits.md](../com
 
 - 슬라이스 분할·stub drop은 각 PR의 step-6.5(1회차 정리)에서 이미 끝났으므로, 본 세션 strip은 메시지 정리에 집중한다.
 
+### 메시지 톤 최종화
+
+strip으로 메시지를 재작성할 때 **외부 독자(채용담당자·리뷰어·팀원) 친화 톤으로 정리**한다 — 작업 중 섞인 캐주얼·은어·비속어를 정중·명확한 기술 문서 톤으로 통일. 가이드는 [commits.md](../commits.md) 「커밋 메시지 톤 — 외부 독자 친화」. 커밋 메시지와 함께 `project.md` 등 외부 노출 가능 메모도 스캔한다.
+
 ### 순서
 
-replace와 strip은 동일 커밋을 다시 쓰므로 병렬 불가 — **replace 먼저(소속 교정) → strip(접두사 제거)** 순차. replace로 재배치가 끝난 히스토리 위에 strip을 얹는다.
+replace와 strip은 동일 커밋을 다시 쓰므로 병렬 불가 — **replace 먼저(소속 교정) → strip(접두사 제거 + 톤 최종화)** 순차. replace로 재배치가 끝난 히스토리 위에 strip을 얹는다.
 
 ### force-push
 
