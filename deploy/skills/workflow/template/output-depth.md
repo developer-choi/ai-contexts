@@ -14,7 +14,7 @@ BG 세션에서 작성하는 산출물(`/plan/background/consumable/project.md` 
 
 각 항목을 적기 전 스스로 묻는다:
 
-- **"이 항목이 PR PLAN 또는 IMPL 세션에서 결정해도 되는가?"** → YES면 BG에 넣지 않는다. validation 규칙·필드 명세 같은 정확 디테일은 PLAN, 함수 시그니처·구현 코드는 IMPL.
+- **"이 항목이 PR PLAN 또는 IMPL 세션에서 결정해도 되는가?"** → YES면 BG에 넣지 않는다. validation 규칙·필드 명세 같은 정확 디테일, 함수 시그니처·props·타입은 PLAN(step-4 stub), 구현 코드는 IMPL.
 - **"이건 프로젝트 내내 참조할 평가 기준인가, 한 번 쓰이고 옮겨질 발견인가?"** → 전자만 cross-analysis.md, 후자는 project.md에 직접.
 
 ## BG 시안 정독 깊이
@@ -27,8 +27,8 @@ BG 세션에서 작성하는 산출물(`/plan/background/consumable/project.md` 
 | 페이지별 어떤 컬럼/필드가 있는가 (api 매핑 위해) | 다룬다 |
 | 페이지별 핵심 동작 (필터·토글·페이지네이션 유무) | 다룬다 |
 | validation 정확한 메시지·규칙 | 다루지 않는다 — PLAN 세션 |
-| 정확한 props·타입 정의 | 다루지 않는다 — IMPL 세션 |
-| 함수 시그니처 | 다루지 않는다 — IMPL 세션 |
+| 정확한 props·타입 정의 | 다루지 않는다 — PLAN(step-4 stub) |
+| 함수 시그니처 | 다루지 않는다 — PLAN(step-4 stub) |
 
 ## Anti-pattern
 

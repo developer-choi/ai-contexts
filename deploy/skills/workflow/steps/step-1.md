@@ -2,6 +2,8 @@
 
 > **이 단계의 목표: 작업의 문제/목표를 정의한다** (도메인/비즈니스 관점, 코드 분석 아님)
 
+BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디자인. "무한스크롤이 필요하다"까지가 BG다. 그것을 Intersection Observer로 짤지 Scroll Event로 짤지 같은 **개발 방법론(HOW)** 은 PLAN/IMPL 소관이다. 산출물 깊이는 이 축으로 잡는다([output-depth.md](../template/output-depth.md)).
+
 step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입수 단계, 1.2는 requirement-review 본체.
 
 - **Step 1.1 자료 받기**: 사용자에게서 자료를 받아 정리. 자료 입수 완료 시점이 후속 세션(FOUNDATION·MARKUP)의 spawn 가능 조건이다 (SKILL.md 「세션」 표 참조)
