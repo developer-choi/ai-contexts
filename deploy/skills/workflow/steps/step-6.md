@@ -121,7 +121,7 @@ UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 
 
 사용자 리뷰·동작 테스트 통과 후 step-7(PR 본문 작성) 진입 전, stub 커밋을 drop하고 슬라이스별로 커밋을 재정렬한다.
 
-이 정리는 **1회차**로 `[PR{N}]` 접두사를 유지한다. 메시지 양식·접두사 라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 본 PR에서 끝났다고 판단되는 정리도 후속 PR 작업 중 예전 PR의 잘못이 발견되어 다시 손봐야 하는 케이스가 잦으므로, 본 단계는 본 PR 슬라이스 정리에만 집중하고 접두사 제거·오배치 재배치 등 메시지 최종화(2차 정리)는 스택 전체 IMPL 완료 후 FINALIZE로 미룬다 ([conventions/session/finalize.md](../conventions/session/finalize.md)).
+이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 본 PR에서 끝났다고 판단되는 정리도 후속 PR 작업 중 예전 PR의 잘못이 발견되어 다시 손봐야 하는 케이스가 잦으므로, 메시지 최종화·오배치 재배치 등 2차 정리는 스택 전체 IMPL 완료 후 FINALIZE로 미룬다 ([conventions/session/finalize.md](../conventions/session/finalize.md)).
 
 ### Step 6.5.1. 백업 브랜치 [CRITICAL]
 

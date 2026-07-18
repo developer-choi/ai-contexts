@@ -27,4 +27,4 @@ PR 본문 작성이 완료되면, `/plan/pr{N}/consumable/`의 각 산출물 절
 
 ## 스택 전역 최종화·머지는 FINALIZE 담당
 
-`[PR{N}]` 접두사 일괄 제거·오배치 커밋 재배치·머지 안내는 step-7이 아니라 **스택 전체 IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다 ([conventions/session/finalize.md](../conventions/session/finalize.md)). step-7은 본 PR 하나로 스코프가 닫힌 per-PR 세션(PR 본문 + consumable 정리)이라 cross-PR·스택 전역 조작을 담지 않는다. WRITING은 per-PR·유연 타이밍이라 IMPL 직후 써도, 나중에 몰아서 써도 된다.
+메시지 최종화·오배치 커밋 재배치·머지 안내는 step-7이 아니라 **스택 전체 IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다 ([conventions/session/finalize.md](../conventions/session/finalize.md)). step-7은 본 PR 하나로 스코프가 닫힌 per-PR 세션(PR 본문 + consumable 정리)이라 cross-PR·스택 전역 조작을 담지 않는다. WRITING은 per-PR·유연 타이밍이라 IMPL 직후 써도, 나중에 몰아서 써도 된다.
