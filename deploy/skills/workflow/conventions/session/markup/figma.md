@@ -2,6 +2,8 @@
 
 figma 원본이 디자인 진실 원천인 모드. 공통 절차는 [index.md](index.md), 본 파일은 figma 고유 부분만 담는다.
 
+커버리지 원천·공통 컴포넌트 판정([index.md](index.md) 「공통 컴포넌트 확정」)의 직독 대상은 **figma 전 페이지**다 — 누적된 figma URL·캡처를 훑어 반복 컴포넌트를 확정한다. project.md를 되읽지 않는다.
+
 ## 재료
 
 - (채용·실무 공통) 누적한 figma URL·캡처 — step-1.1/BG가 `background/retained/figma-url.md`·`background/retained/figma/`에 수집. **다시 요청하지 않는다** — 빠진 컴포넌트만 콕 집어 요청
