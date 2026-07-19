@@ -74,10 +74,10 @@ force-push 요청 후, 스택 전체 `pr{N}/consumable/`을 훑어 잔존 산출
 
 본 세션 종료 시 SKILL.md 「세션 spawn 안내 메커니즘」으로 후속을 안내한다.
 
-- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·메일·채용담당자 리뷰·제출). 동일 모드 인자(`채용`) 유지.
-- **실무·개인** — 바텀업(1→n) 머지 안내. 머지는 사용자 실행.
+- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·메일·채용담당자 리뷰·제출·자산 회수. 세션 자기 회고는 7-3에서 호출). 동일 모드 인자(`채용`) 유지.
+- **실무·개인** — 바텀업(1→n) 머지 안내 + 아래 「세션 자기 회고 안내」. 머지는 사용자 실행.
 
-## 세션 자기 회고 안내
+## 세션 자기 회고 안내 (실무·개인)
 
 커밋 최종화(replace + 메시지 최종화 + force-push 요청)가 끝난 사후 시점이므로, 후속 안내에 더해 **각 세션이 자기 자신을 회고**하도록 안내한다 — "workflow를 타고 진행한 각 세션에 다시 들어가 `session-retro`로 자기 회고를 돌리세요(타임라인 뽑기 → 시간소비·위임·병렬 3관점)". 순회 개수는 사용자가 감당 가능한 만큼. 절차는 [session-retro/SKILL.md](../../session-retro/SKILL.md).
 
