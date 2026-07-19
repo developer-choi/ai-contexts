@@ -104,7 +104,7 @@ const result = await someCall();
 
 본 PR 외부 의존성(백엔드 합의·디자인 검수·인프라 등):
 
-- ✓ `plan/{prN}/consumable/overview.md` 「열려있는 질문」
+- ✓ `plan/{prN}/persistent/overview.md` 「열려있는 질문」
 
 코드 안 `TODO`는 본 PR 안 모두 해소. IMPL 종료 시 0건.
 
@@ -161,7 +161,7 @@ grep -rn "TODO" _fsd/<slice>/ src/<scope>/
 |---|---|
 | 헬퍼 함수 동작 설명, 컨벤션 출처 인라인 메모, placeholder 의도 | `TODO [USER_REVIEW]` |
 | scss 토큰 매핑, 미구현 컴포넌트·기능, 본 PR 안 끝나는 디자인/백엔드 후속 작업 | `TODO [AI_IMPL]` |
-| 본 PR 외부 의존성 (디자인 검수 별도 일정, 백엔드 합의 지연 등) | `plan/{prN}/consumable/overview.md` 「열려있는 질문」 |
+| 본 PR 외부 의존성 (디자인 검수 별도 일정, 백엔드 합의 지연 등) | `plan/{prN}/persistent/overview.md` 「열려있는 질문」 |
 | 다른 PR로 이연 (PR4에서 X 추가 등) | `/plan/background/consumable/project.md` 해당 PR 섹션 |
 
 판단 기준: 본 PR IMPL 처리 → 코드 안 TODO. 외부 의존성 → overview.md. 다른 PR 이연 → project.md.

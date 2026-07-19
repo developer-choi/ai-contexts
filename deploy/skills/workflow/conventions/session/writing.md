@@ -12,7 +12,7 @@ REFINER가 커밋 로그를 읽을 때 pr{N}→워크트리→브랜치명은 `g
 
 WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장기세션 하나로 유지하며 여러 PR을 이어 처리할 수 있다(컨텍스트가 커지면 `/compact`).
 
-단, **최초 진입은 반드시 `/workflow WRITING_IDEATOR <모드>` / `/workflow WRITING_REFINER <모드>`로 한다.** 이 문서(overview 소비, consumable 정리 등)가 세션에 로드되려면 최초 한 번은 이 문서를 거쳐야 한다. 최초 진입을 `/write-refine <path>` 직접 호출로 하면 이 문서가 그 세션에 전혀 로드되지 않아 정리가 누락된다(write-refine 스킬은 `/plan/`·consumable 구조를 모르는 범용 글쓰기 스킬).
+단, **최초 진입은 반드시 `/workflow WRITING_IDEATOR <모드>` / `/workflow WRITING_REFINER <모드>`로 한다.** 이 문서(consumable 정리 등)가 세션에 로드되려면 최초 한 번은 이 문서를 거쳐야 한다. 최초 진입을 `/write-refine <path>` 직접 호출로 하면 이 문서가 그 세션에 전혀 로드되지 않아 정리가 누락된다(write-refine 스킬은 `/plan/`·consumable 구조를 모르는 범용 글쓰기 스킬).
 
 최초 진입 이후 같은 세션 안에서 개별 PR은 `/write-refine <path>`만 반복 호출해도 된다 — 이미 로드된 이 문서의 지시를 따르면 된다.
 
@@ -22,7 +22,7 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 ### 입력
 
-- `pr{N}/consumable/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다(소비 아님)** — 삭제는 REFINER가 한다.
+- `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다** — persistent라 어느 소비처도 삭제하지 않는다.
 - `pr{N}/persistent/decisions.md` — step-3 초기본. 토론이 없었으면 부재할 수 있다.
 - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
 
@@ -32,7 +32,7 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 `/plan/`에 이전 PR의 pr-body.md가 있으면 읽고 섹션 구조·서술 패턴을 맞춘다. `/write-init pr-body`로 `pr{N}/consumable/pr-body.md` **초안**을 생성한다. overview·decisions·reference를 컨텍스트로 전달하되, 특정 파일명을 하드코딩하지 않고 `/plan/pr{N}/`을 탐색하여 존재하는 산출물을 동적으로 참조한다.
 
-초안 단계이므로 consumable 소비(삭제)는 하지 않는다. overview는 읽기만 하고, pr-body 초안은 **잠정**이다 (REFINER가 실제 커밋·구현 반영으로 확정).
+초안 단계이므로 consumable 소비(삭제)는 하지 않는다. overview는 persistent라 읽기만 하고, pr-body 초안은 **잠정**이다 (REFINER가 실제 커밋·구현 반영으로 확정).
 
 #### 채용 모드 — 완성본 라이브러리 복사 기점
 
@@ -51,19 +51,19 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 - `pr{N}/persistent/implementation.md`
 - 커밋 로그 (브랜치 유도는 위 「cwd」)
 - `decisions.md`의 step-6.6 갱신분
-- `pr{N}/consumable/` 잔여 산출물 (review.md·user-test-cases.md 등)
+- `pr{N}/consumable/` 잔여 산출물
 
 ### fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
 
-IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 REFINER로 바로 올 수 있다. 그 경우 다듬을 pr-body 초안이 없어 빈손이 되므로, **`/write-init pr-body`를 먼저 호출해 초안을 만든 뒤(IDEATOR 역할 흡수) refine한다.** (IDEATOR-skip 경로에서도 overview는 소비 안 된 채 살아 있어 write-init 입력으로 유효하다.)
+IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 REFINER로 바로 올 수 있다. 그 경우 다듬을 pr-body 초안이 없어 빈손이 되므로, **`/write-init pr-body`를 먼저 호출해 초안을 만든 뒤(IDEATOR 역할 흡수) refine한다.** (IDEATOR-skip 경로에서도 overview는 persistent라 그대로 살아 있어 write-init 입력으로 유효하다.)
 
 ### 절차
 
-사용자가 새 세션에서 `/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고, 실제 커밋 목록·변경 요약·Test plan·코드블록을 채워 확정한다. `user-test-cases.md`는 Test plan으로 재활용한다.
+사용자가 새 세션에서 `/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고, 실제 커밋 목록·변경 요약·Test plan·코드블록을 채워 확정한다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 Test plan으로 재활용한다.
 
 ### 산출물 정리
 
-확정된 `pr-body.md`를 PR 본문으로 복사한 뒤 **삭제**한다. 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). overview.md의 **유일 소비자가 REFINER**다 — IDEATOR는 읽기만 했으므로 여기서 소비·삭제한다. 소비 후 정리는 consumable 큐 모델을 따른다 ([../plan-folder.md](../plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
+확정된 `pr-body.md`를 PR 본문으로 복사·게시한 뒤 삭제한다(다른 산출물로 이관·녹이는 「소비」가 아니라 REFINER 자신의 저작물을 게시 후 정리하는 것). 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). **overview.md는 persistent라 소비 대상이 아니다** — REFINER는 pr-body 큐레이션에 읽기만 하고 삭제하지 않는다. consumable 소비 후 정리는 큐 모델을 따른다 ([../plan-folder.md](../plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
 
 - **`/plan/pr{N}/persistent/` 하위는 정리 대상에서 제외** — 영구 보존 자료. 대조도 수행하지 않는다.
 

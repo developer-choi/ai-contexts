@@ -7,7 +7,7 @@ BG 세션에서 작성하는 산출물(`/plan/background/consumable/project.md` 
 | 산출물 | 적는 것 | 적지 않는 것 |
 |---|---|---|
 | `cross-analysis.md` (retained) | 추론한 평가 기준만 (프로젝트 라이프타임 내내 참조) | 그 외 전부 — 원본 교차 분석 발견·라이브러리 선택·아키텍처 패턴 후보·가정은 `project.md`에 직접. 구현 task 단위, 정확한 validation 규칙·메시지·글자수·문자 종류도 적지 않음 |
-| `pr{N}/consumable/overview.md` (PLAN) | 구현 단위 / validation 규칙 | (구현 코드 자체. 함수·컴포넌트 명세, props·타입은 step-4 stub 코드로 직접 옮긴다.) |
+| `pr{N}/persistent/overview.md` (PLAN) | 구현 단위 / validation 규칙 | (구현 코드 자체. 함수·컴포넌트 명세, props·타입은 step-4 stub 코드로 직접 옮긴다.) |
 | `pr{N}/persistent/implementation.md` (IMPL) | 실제 구현 메모 / 주의사항 | — |
 
 ## 작성 전 자가 체크
