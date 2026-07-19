@@ -25,7 +25,7 @@
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조). 개발 내내 컨셉 판단 기준으로 참조되므로 retained
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
       project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성), step-2에서 PR별 섹션으로 구조화. PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PRESET_SETUP 섹션에 자연어 지시 추가 (채용 한정)
-      global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. 본문 양식은 [requirement-review/planning/output-template.md] 참조
+      global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. step-4 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
       design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PRESET_COMPONENTS 입력 재료, 사용 후 폐기
@@ -38,7 +38,7 @@
     retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
       markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당). 마지막 소비자는 step-6.4.1
     consumable/         ← 소비 시 즉시 폐기 (큐 모델 — 절 단위 소비 시 절 삭제, 비면 파일 삭제)
-      page.md           ← step-1 requirement-review 페이지별 분석 결과. step-3 「잔여 산출물 소비」에서 분배
+      page.md           ← step-1 requirement-review 페이지별 분석 결과. step-4 「잔여 산출물 소비」에서 분배·소비
       review.md         ← step-6 리뷰 결과. step-6 자체 소비
       user-test-cases.md ← step-6.4 동작 테스트. WRITING_REFINER가 PR 본문 Test plan으로 재활용
       pr-body.md        ← WRITING_IDEATOR가 초안 저작(잠정) → WRITING_REFINER가 확정·PR 본문 복사·게시. 게시 후 스윕 대상(다른 산출물로 이관·녹이는 소비가 아니라 REFINER 자신의 저작물이므로 「소비」가 아니다). step-4 「잔여 산출물 소비」 스윕은 pr-body를 다루지 않는다(REFINER 전용)
