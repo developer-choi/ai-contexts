@@ -16,8 +16,11 @@
       folder-structure.md ← FOUNDATION 단계 1 산출 (채용만). 디렉토리 구조 명세 (PR2~N 참조)
       tech-constraints.md ← BG.step-1 기술 제약 스캔 결과
       conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성). 프로젝트 컨벤션 소스 "경로 + 한 줄 트리거" 인덱스. 양식·작성 절차는 step-1 「컨벤션 소스 수집」 참조
-      figma-url.md      ← step-1.1 수집. 대상 이름 + URL 누적
-      figma/            ← step-1.1 수집 캡처 이미지. `[meaningful-name].[이미지확장자]` 단위
+      figma-url.md      ← step-1.1 수집 (figma 쓰는 모드). 대상 이름 + URL 누적
+      figma/            ← step-1.1 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
+      mockup/           ← step-1.1 수집 (개인 모드). 사용자가 미리 만든 마크업 시안 = 시각 진실 원천
+      spec.md           ← step-1.1 수집 (개인 모드, 선택). 화면에 안 담기는 동작(API·에러·로딩·엣지값)을 저자가 미리 아는 경우
+      design-root.md    ← step-1.1 산출. 프로젝트별 시각 원본 진입 문서(root) — "원본이 어느 파일에 있고 대조는 어느 절차문서(markup/figma.md·personal.md) 대로". 양식·규칙은 [conventions/artifact/design-root.md] 참조
       cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다(프로젝트 라이프타임 내내 구현 우선순위 판단에 참조) — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분은 처음부터 `background/consumable/project.md`에 직접 기록한다(중간 산출물에 임시로 적어두지 않는다)
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조). 개발 내내 컨셉 판단 기준으로 참조되므로 retained
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)

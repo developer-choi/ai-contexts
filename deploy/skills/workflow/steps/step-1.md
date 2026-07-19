@@ -19,9 +19,9 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 (requirement-review/recruitment/guide.md 「입력 자료」 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 
-**step-1.1은 자료의 단일 수집 지점이다.** 공고·기획·요구사항과 함께 **사용 가능한 figma/시안 자료를 여기서 전부** 받아 저장한다 (figma URL·캡처 → `retained/figma-url.md`·`retained/figma/`). 다운스트림(requirement-review·MARKUP)은 이 수집분을 *참조*하며 자료를 재요청하지 않는다 — 빠진 것이 있으면 그 갭만 콕 집어 보충한다. (UI는 생김새만이 아니라 상태·인터랙션까지 담아 부분적으로 명세 역할을 하므로, design·기획 자료를 분산 수집할 이유가 없다.)
+**step-1.1은 자료의 단일 수집 지점 — 가진 것 중 가장 완성도 높은 원본(SSOT)을 여기서 받아 저장한다.** 원본의 형태는 모드마다 다르지만(채용=figma+과제요구사항, 실무=figma+기획서, 개인=마크업 시안+선택 spec.md), **시각 진실 원천을 step-1.1에 받아 retained에 보존한다**는 점은 모드 무관으로 같다. 사람이 만든 것이라 불완전할 수 있고, 빠진 부분은 step-1.2 리뷰에서 구멍으로 잡는다. figma 쓰는 모드(채용·실무)는 **사용 가능한 figma/시안을 여기서 전부** 받아 저장한다 (figma URL·캡처 → `retained/figma-url.md`·`retained/figma/`). 다운스트림(requirement-review·MARKUP)은 이 수집분을 *참조*하며 자료를 재요청하지 않는다 — 빠진 것이 있으면 그 갭만 콕 집어 보충한다. (UI는 생김새만이 아니라 상태·인터랙션까지 담아 부분적으로 명세 역할을 하므로, design·기획 자료를 분산 수집할 이유가 없다.)
 
-**개인 모드**는 외부에서 받을 자료가 없다 (figma 없음, 기획자·디자이너 없음). "받기" 대신 사용자와 함께 기획·디자인 스펙을 **정의**하는 것이 이 단계의 일이며, 정의는 step-1.2 requirement-review(planning·design)에서 page.md/global.md로 수행한다. step-1.1에서는 사용자가 이미 가진 참고 자료(디자인시스템 소스, 기존 코드 등)만 수집한다.
+**개인 모드**도 step-1.1에서 원본을 받는다 — figma 대신, 사용자가 워크플로우 전에 아이디에이션으로 만든 **마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 시각 진실 원천이다(figma 자리를 대체). figma를 받는 것과 대칭이며 `retained/mockup/`에 저장해 보존한다. 화면에 안 담기는 동작(API 응답 형태·에러·로딩·엣지값 등)을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다 — 특례가 아니라 "자료를 더 받는 것"이다. step-1.2는 이 원본을 리뷰해 page.md/global.md(비시각 스펙)를 채우고 리뷰 중 나온 구멍은 project.md TODO로 남긴다 — "정의"가 아니라 "가져온 원본 리뷰"다. 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 수집한다.
 
 ### 컨벤션 소스 수집 — 이름 스캔 선제안 + conventions-index.md
 
@@ -37,7 +37,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### Step 1.1 종료 — 분기점
 
-step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 사용 가능한 figma/시안 전체를 `retained/figma-url.md`·`retained/figma/`에 저장 완료 + 컨벤션 인덱스 산출(아래 종료 게이트). 그 이상(분석)은 모두 step-1.2 영역이다.
+step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 시각 원본(figma 쓰는 모드는 `retained/figma-url.md`·`retained/figma/`, 개인 모드는 `retained/mockup/`(+선택 `retained/spec.md`)) 저장 완료 + 시각 원본 진입 문서 `retained/design-root.md` 산출(원본 위치 + 대조 절차문서만 적는 한 장 — 양식은 [conventions/artifact/design-root.md](../conventions/artifact/design-root.md)) + 컨벤션 인덱스 산출(아래 종료 게이트). 그 이상(분석)은 모두 step-1.2 영역이다.
 
 특히 다음은 **step-1.2** 영역이지 step-1.1이 아니다 — recruitment guide(`requirement-review/recruitment/guide.md`)·planning guide·design guide의 「분석 과정」 절차 일체가 여기 해당:
 - 자료 정독·공동 탐색
