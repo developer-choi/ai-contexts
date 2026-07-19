@@ -8,6 +8,14 @@
 
 REFINER가 커밋 로그를 읽을 때 pr{N}→워크트리→브랜치명은 `git worktree list` + FOUNDATION 명명규칙으로 유도한다. **실무·개인 모드는 FOUNDATION이 없으므로** `git worktree list`가 워크트리→브랜치를 직접 매핑하는 것으로 조회한다.
 
+## 장기세션 재사용
+
+WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장기세션 하나로 유지하며 여러 PR을 이어 처리할 수 있다(컨텍스트가 커지면 `/compact`).
+
+단, **최초 진입은 반드시 `/workflow WRITING_IDEATOR <모드>` / `/workflow WRITING_REFINER <모드>`로 한다.** 이 문서(overview 소비, consumable 정리 등)가 세션에 로드되려면 최초 한 번은 이 문서를 거쳐야 한다. 최초 진입을 `/write-refine <path>` 직접 호출로 하면 이 문서가 그 세션에 전혀 로드되지 않아 정리가 누락된다(write-refine 스킬은 `/plan/`·consumable 구조를 모르는 범용 글쓰기 스킬).
+
+최초 진입 이후 같은 세션 안에서 개별 PR은 `/write-refine <path>`만 반복 호출해도 된다 — 이미 로드된 이 문서의 지시를 따르면 된다.
+
 ## WRITING_IDEATOR — 초안 (각 PR step-3 종료 후)
 
 계획만으로 쓸 수 있는 PR 본문의 배경·문제·접근·근거를 미리 초안한다. 상세 코드블록·실제 커밋 목록은 REFINER 몫이다.
