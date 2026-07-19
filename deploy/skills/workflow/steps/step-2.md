@@ -15,21 +15,21 @@
 
 ## 채용과제: 기본 PR 구조 (가설)
 
-채용과제는 아래 PR1~3을 **기본 가설**로 잡는다 — 정적으로 못박힌 순서가 아니라 사용자 확정으로 override되는 출발점이다. 구체적 항목은 Step 3에서 PR별로 정의한다.
+채용과제는 아래 PRESET_SETUP/PRESET_INFRA/PRESET_COMPONENTS를 **기본 가설**로 잡는다 — 정적으로 못박힌 순서가 아니라 사용자 확정으로 override되는 출발점이다. 구체적 항목은 Step 3에서 PR별로 정의한다.
 
-| PR | 경계 |
+| 프리셋 | 경계 |
 |----|------|
-| PR1 (프로젝트 세팅) | 빌드·린트·포맷 등 static checking 도구와 설정. 런타임 코드 없음 |
-| PR2 (공통 인프라) | 런타임 의존성 설치 + Provider·API 클라이언트 등 앱 인프라 구성 |
-| PR3 (공통 컴포넌트) | MARKUP이 「공통 컴포넌트 확정」으로 산출한 범용(도메인 안 묻은) 재사용 UI 컴포넌트. 공통성 판정(2군데 이상)은 MARKUP이 하고 step-2는 그 산출을 소비한다(단방향) — step-2가 공통성을 재판정하지 않는다 |
+| PRESET_SETUP (프로젝트 세팅) | 빌드·린트·포맷 등 static checking 도구와 설정. 런타임 코드 없음 |
+| PRESET_INFRA (공통 인프라) | 런타임 의존성 설치 + Provider·API 클라이언트 등 앱 인프라 구성 |
+| PRESET_COMPONENTS (공통 컴포넌트) | MARKUP이 「공통 컴포넌트 확정」으로 산출한 범용(도메인 안 묻은) 재사용 UI 컴포넌트. 공통성 판정(2군데 이상)은 MARKUP이 하고 step-2는 그 산출을 소비한다(단방향) — step-2가 공통성을 재판정하지 않는다 |
 
-**PR1~3은 기본 가설이며 분할 판단의 출발점**이다. 순서·경계가 실제 의존과 맞지 않으면 사용자가 override한다 (아래 「PR 의존 순서 — 판단거리 노출」).
+**PRESET_SETUP/PRESET_INFRA/PRESET_COMPONENTS는 기본 가설이며 분할 판단의 출발점**이다. 순서·경계가 실제 의존과 맞지 않으면 사용자가 override한다 (아래 「PR 의존 순서 — 판단거리 노출」).
 
-### PR1 ≠ FOUNDATION
+### PRESET_SETUP ≠ FOUNDATION
 
-채용 모드에서 PR1을 표기할 때 "담당: FOUNDATION"·"FOUNDATION이 PR1 수행/완료" 같은 단정 표현 금지. FOUNDATION은 PR1 워크트리에 **베이스 두 커밋(폴더 마이그레이션·코딩 스탠다드 마이그레이션)만** 제공하고, PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL이 일반 도미노로 수행한다(PR 본문은 WRITING_IDEATOR/REFINER).
+채용 모드에서 PRESET_SETUP을 표기할 때 "담당: FOUNDATION"·"FOUNDATION이 PRESET_SETUP 수행/완료" 같은 단정 표현 금지. FOUNDATION은 PRESET_SETUP 워크트리에 **베이스 두 커밋(폴더 마이그레이션·코딩 스탠다드 마이그레이션)만** 제공하고, PRESET_SETUP의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL이 일반 도미노로 수행한다(PR 본문은 WRITING_IDEATOR/REFINER).
 
-기존 `project.md` PR1 섹션에 "FOUNDATION ... 완료" 같은 표현이 있으면 그대로 수용하지 말고 본 규칙에 맞춰 정정한다 (글로벌 「입력 산출물 비판적 검토」 발동). FOUNDATION이 "완료"한 것은 베이스 두 커밋이지 PR1이 아니다.
+기존 `project.md` PRESET_SETUP 섹션에 "FOUNDATION ... 완료" 같은 표현이 있으면 그대로 수용하지 말고 본 규칙에 맞춰 정정한다 (글로벌 「입력 산출물 비판적 검토」 발동). FOUNDATION이 "완료"한 것은 베이스 두 커밋이지 PRESET_SETUP이 아니다.
 
 ---
 
@@ -46,7 +46,7 @@
 
 ## PR 의존 순서 — 판단거리 노출
 
-PR 순서를 정적으로 못박지 않는다. "PR1·2는 인프라성이라 순차" 같은 고정 엣지도 실제론 유동적이다(채용이라도 PR1·2를 먼저 진행하는 경우가 있다). PR 순서 정하는 시점(step-2)엔 각 PR 속을 아직 안 짜서 공용물(훅·유틸·API·타입)의 뼈대/실물을 정밀히 알 수 없으므로, AI가 무거운 의존 분석을 스스로 하면 과설계다.
+PR 순서를 정적으로 못박지 않는다. "PRESET_SETUP·PRESET_INFRA는 인프라성이라 순차" 같은 고정 엣지도 실제론 유동적이다(채용이라도 PRESET_SETUP·PRESET_INFRA를 먼저 진행하는 경우가 있다). PR 순서 정하는 시점(step-2)엔 각 PR 속을 아직 안 짜서 공용물(훅·유틸·API·타입)의 뼈대/실물을 정밀히 알 수 없으므로, AI가 무거운 의존 분석을 스스로 하면 과설계다.
 
 AI는 "판단"이 아니라 "**판단거리 노출**"만 한다: 각 PR이 앞 PR에서 당겨 쓰는 것을 **[껍데기 의존 / 실물 의존]**으로 러프 태깅해(값싼 신호만) 사용자가 순차/병렬을 1초에 확정하게 한다. 판단은 사용자 몫.
 

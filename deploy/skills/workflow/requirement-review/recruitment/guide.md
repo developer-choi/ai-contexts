@@ -115,7 +115,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 **페이지별 정리**: step-1.1이 수집해 `background/retained/figma-url.md`·`background/retained/figma/`에 저장한 figma 자료를 페이지별로 정리한다. **처음부터 다시 요청하지 않는다** — 빠진 페이지가 있으면 그것만 콕 집어 요청하고, 받으면 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책대로 같은 위치에 추가한다.
 
-**디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다. step-3 PR3 정의와 step-4 PR3 구현 방침의 입력 재료로 쓰이고, 사용 후 삭제되는 중간 산출물이다. PR4+ 구현 시에는 페이지 이미지 파일을 `markup.md` 참조 자료로 사용한다.
+**디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다. step-3 PRESET_COMPONENTS 정의와 step-4 PRESET_COMPONENTS 구현 방침의 입력 재료로 쓰이고, 사용 후 삭제되는 중간 산출물이다. PR4+ 구현 시에는 페이지 이미지 파일을 `markup.md` 참조 자료로 사용한다.
 
 #### 5. 모호한 부분 및 질문 목록
 

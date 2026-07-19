@@ -4,7 +4,7 @@
 
 프로젝트의 commitlint(`type(scope): subject`, scope-enum, subject 한글 필수 등) 위에 얹는 워크플로우 추가 룰만 본 컨벤션이 정의한다.
 
-**commitlint 도입 책임**: 채용은 PR1 정식 구축 단계에서 도입한다 (foundation.md 「PR1 정식 구축 항목」 참조). 실무·개인은 프로젝트 셋업 초기에 이미 깔려있는 것이 전제 — 신규 프로젝트면 첫 PR에 포함한다.
+**commitlint 도입 책임**: 채용은 PRESET_SETUP 정식 구축 단계에서 도입한다 (foundation.md 「PRESET_SETUP 정식 구축 항목」 참조). 실무·개인은 프로젝트 셋업 초기에 이미 깔려있는 것이 전제 — 신규 프로젝트면 첫 PR에 포함한다.
 
 ## 커밋 메시지 라이프사이클
 

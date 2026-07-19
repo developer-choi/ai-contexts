@@ -21,11 +21,11 @@
       cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다(프로젝트 라이프타임 내내 구현 우선순위 판단에 참조) — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분은 처음부터 `background/consumable/project.md`에 직접 기록한다(중간 산출물에 임시로 적어두지 않는다)
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조). 개발 내내 컨셉 판단 기준으로 참조되므로 retained
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
-      project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성), step-2에서 PR별 섹션으로 구조화. PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PR1 섹션에 자연어 지시 추가 (채용 한정)
+      project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성), step-2에서 PR별 섹션으로 구조화. PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). FOUNDATION이 PRESET_SETUP 섹션에 자연어 지시 추가 (채용 한정)
       global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 피그마 CSS 토큰 → DS 컴포넌트 props 매핑표. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
-      design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PR3 입력 재료, 사용 후 폐기
+      design-system.md  ← recruitment 4단계 산출물 (채용 한정). 필요한 컴포넌트 종류·props 요구사항 설계. step-3·step-4 PRESET_COMPONENTS 입력 재료, 사용 후 폐기
   pr{N}/
     persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료
       decisions.md      ← step-3 산출물 + step-6.6 갱신. 회사·프로젝트 컨텍스트 의존 결정의 흐름 보존
