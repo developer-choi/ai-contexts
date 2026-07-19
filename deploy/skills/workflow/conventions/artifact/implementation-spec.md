@@ -8,7 +8,7 @@
 
 정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(회귀·gotcha·근거)만 남긴다 (step-4 §5 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭하고 **확정 SHA는 박지 않는다** — history rewrite로 무효화돼 정정 부담만 낳고, SHA의 진실 원천은 git이다 (decisions-lifecycle.md 「갱신」과 동일 원칙).
 
-`persistent/` 하위에 둔다. step-5(구현)·step-6.1(Gap Analysis)·step-7(PR body)에서 소비. 사용자 명시 폐기 전까지 보존 (커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존).
+`persistent/` 하위에 둔다. step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 소비. 사용자 명시 폐기 전까지 보존 (커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존).
 
 ## 양식
 

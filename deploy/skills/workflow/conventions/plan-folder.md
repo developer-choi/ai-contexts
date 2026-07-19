@@ -30,15 +30,15 @@
     persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료
       decisions.md      ← step-3 산출물 + step-6.6 갱신. 회사·프로젝트 컨텍스트 의존 결정의 흐름 보존
       reference.md      ← step-3·4 누적. 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스
-      implementation.md ← step-4 산출물. 소비 = step-5·step-5.4·step-6.1·step-6.5·step-7 (PR body 작성 시 참조). PR·프로젝트 종료 후에도 보존 (사용자 명시 폐기까지). 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
+      implementation.md ← step-4 산출물. 소비 = step-5·step-5.4·step-6.1·step-6.5·WRITING_REFINER (PR body 확정 시 참조). PR·프로젝트 종료 후에도 보존 (사용자 명시 폐기까지). 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
     retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
       markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당). 마지막 소비자는 step-6.4.1
     consumable/         ← 소비 시 즉시 폐기 (큐 모델 — 절 단위 소비 시 절 삭제, 비면 파일 삭제)
-      overview.md       ← step-3 산출물
+      overview.md       ← step-3 산출물. **WRITING_IDEATOR는 읽기만(소비 아님), WRITING_REFINER가 유일 소비자로 삭제** — step-4 「잔여 산출물 소비」 스윕도 overview는 소비하지 않는다(REFINER까지 생존)
       page.md           ← step-1 requirement-review 페이지별 분석 결과. step-3 「잔여 산출물 소비」에서 분배
       review.md         ← step-6 리뷰 결과. step-6 자체 소비
-      user-test-cases.md ← step-6.4 동작 테스트. step-7 PR 본문 Test plan으로 재활용
-      pr-body.md        ← step-7 산출물. PR 본문으로 복사 후 폐기
+      user-test-cases.md ← step-6.4 동작 테스트. WRITING_REFINER가 PR 본문 Test plan으로 재활용
+      pr-body.md        ← WRITING_IDEATOR 초안 생성(잠정) → WRITING_REFINER가 확정·PR 본문 복사 후 폐기. step-4 「잔여 산출물 소비」 스윕은 pr-body를 소비하지 않는다(REFINER 전용)
 ```
 
 step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
@@ -49,7 +49,7 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 - **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
 - **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
 
-`persistent/`·`retained/` 하위는 step-7 「산출물 정리」의 정리 대상이 아니다 (step-7은 consumable만 소비·정리).
+`persistent/`·`retained/` 하위는 WRITING_REFINER 「산출물 정리」의 정리 대상이 아니다 (REFINER는 consumable만 소비·정리).
 
 ## consumable/ 산출물 자가 정리 안내문
 

@@ -1,6 +1,6 @@
 # FOUNDATION (채용 한정)
 
-채용 과제 환경 셋업 + PR1 input 준비. MARKUP을 띄울 최소 환경 + PR1 작업의 사전 조건 두 커밋을 만든다. PR1 작업 자체는 PR_1_PLAN/IMPL/WRITING이 정상 처리.
+채용 과제 환경 셋업 + PR1 input 준비. MARKUP을 띄울 최소 환경 + PR1 작업의 사전 조건 두 커밋을 만든다. PR1 작업 자체는 PR_1_PLAN/IMPL이 정상 처리(PR 본문은 WRITING_IDEATOR/REFINER).
 
 ## 진입 조건
 
@@ -26,7 +26,7 @@
 **코딩 스탠다드 마이그레이션 근거**: 기존 코드(보일러플레이트) 위에 새 코드 얹는 시나리오. AI는 기존 커밋 메시지·기존 코드를 보고 새 코드를 작성하므로, 기존 코드가 새 코딩 스탠다드와 불일치하면 새 코드도 일관성 깨짐.
 
 **단계 4 project.md PR1 섹션 내용** (what만, how는 미정의):
-> FOUNDATION이 PR1 워크트리에 베이스 두 커밋(폴더 마이그레이션 + 코딩 스탠다드 마이그레이션)을 작성했다. **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 PR1 워크트리에서 정상 도미노로 수행한다.** PR1 = FOUNDATION이 아니다 — FOUNDATION은 베이스 셋팅만 제공.
+> FOUNDATION이 PR1 워크트리에 베이스 두 커밋(폴더 마이그레이션 + 코딩 스탠다드 마이그레이션)을 작성했다. **PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL이 PR1 워크트리에서 정상 도미노로 수행한다(PR 본문은 WRITING_IDEATOR/REFINER).** PR1 = FOUNDATION이 아니다 — FOUNDATION은 베이스 셋팅만 제공.
 
 **금지 표현**: PR1 섹션·후속 산출물에서 "PR1 = FOUNDATION", "담당: FOUNDATION", "FOUNDATION이 PR1 수행/완료" 같은 단정 표현 금지. FOUNDATION이 끝낸 것은 "베이스 두 커밋"이지 "PR1"이 아니다.
 

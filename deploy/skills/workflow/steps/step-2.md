@@ -27,7 +27,7 @@
 
 ### PR1 ≠ FOUNDATION
 
-채용 모드에서 PR1을 표기할 때 "담당: FOUNDATION"·"FOUNDATION이 PR1 수행/완료" 같은 단정 표현 금지. FOUNDATION은 PR1 워크트리에 **베이스 두 커밋(폴더 마이그레이션·코딩 스탠다드 마이그레이션)만** 제공하고, PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL/WRITING이 일반 도미노로 수행한다.
+채용 모드에서 PR1을 표기할 때 "담당: FOUNDATION"·"FOUNDATION이 PR1 수행/완료" 같은 단정 표현 금지. FOUNDATION은 PR1 워크트리에 **베이스 두 커밋(폴더 마이그레이션·코딩 스탠다드 마이그레이션)만** 제공하고, PR1의 본격 작업(빌드·린트·포맷·tsconfig 등 static checking 도구 설정)은 PR_1_PLAN/IMPL이 일반 도미노로 수행한다(PR 본문은 WRITING_IDEATOR/REFINER).
 
 기존 `project.md` PR1 섹션에 "FOUNDATION ... 완료" 같은 표현이 있으면 그대로 수용하지 말고 본 규칙에 맞춰 정정한다 (글로벌 「입력 산출물 비판적 검토」 발동). FOUNDATION이 "완료"한 것은 베이스 두 커밋이지 PR1이 아니다.
 

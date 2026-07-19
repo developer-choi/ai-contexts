@@ -121,4 +121,4 @@ stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
 
 step-5는 PR_{N}_IMPL 세션의 **마지막 구현 step**. step 5.4 종료 후 step 6(최종 점검)이 이어진다 — step 5.4 보고 완료 ≠ 세션 종료.
 
-후속 spawn 안내(**PR_{N}_WRITING**)와 「다음 PR 진입 가능 안내」(PR_{N+1}_PLAN — PR 도미노)는 **step-6 종료(IMPL 세션 종료) 시점에** 출력한다 ([step-6.md](step-6.md) 「세션 종료 — 후속 안내」). step-5에서 조기 출력하지 않는다: step-6 사용자 리뷰에서 시그니처가 바뀌면 후속 PR·PR 본문에 영향이 가므로, IMPL이 완전히 끝난 뒤 안내해야 한다. (stub 도미노는 예외 — stub을 만든 경우 PR_{N+1}_PLAN은 step-4 stub 시그니처에서 곧장 시작하며, 이는 조기 진입이 아니라 stub 핸드오프다.)
+후속 spawn 안내(**WRITING_REFINER**)와 「다음 PR 진입 가능 안내」(PR_{N+1}_PLAN — PR 도미노)는 **step-6 종료(IMPL 세션 종료) 시점에** 출력한다 ([step-6.md](step-6.md) 「세션 종료 — 후속 안내」). step-5에서 조기 출력하지 않는다: step-6 사용자 리뷰에서 시그니처가 바뀌면 후속 PR·PR 본문에 영향이 가므로, IMPL이 완전히 끝난 뒤 안내해야 한다. (stub 도미노는 예외 — stub을 만든 경우 PR_{N+1}_PLAN은 step-4 stub 시그니처에서 곧장 시작하며, 이는 조기 진입이 아니라 stub 핸드오프다.)
