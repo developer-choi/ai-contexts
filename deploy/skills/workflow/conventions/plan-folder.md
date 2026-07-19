@@ -33,7 +33,7 @@
     persistent/         ← PR 종료 후에도 영구 보존. 미래 다른 프로젝트·후속 PR의 참조 자료
       decisions.md      ← step-3 산출물 + step-6.6 갱신. 회사·프로젝트 컨텍스트 의존 결정의 흐름 보존
       reference.md      ← step-3·4 누적. 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스
-      implementation.md ← step-4 산출물. 소비 = step-5·step-5.4·step-6.1·step-6.5·WRITING_REFINER (PR body 확정 시 참조). 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
+      implementation.md ← step-4 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조. 커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존
       overview.md       ← step-3 산출물. 이 PR 전체(step-4~6·미래 step)에 대한 청중-중립 목표·범위 기록. WRITING_IDEATOR·WRITING_REFINER를 포함한 다독자가 읽으며(read), 어느 소비처도 삭제하지 않는다 — persistent라 소비 후에도 보존
     retained/           ← PR 라이프타임 동안 보존. step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
       markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당). 마지막 소비자는 step-6.4.1
