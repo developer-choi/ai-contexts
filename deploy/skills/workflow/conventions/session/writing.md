@@ -69,6 +69,6 @@ IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 RE
 
 대조 자체는 수행하되, 사용자에게는 소비·유지 파일 목록(유지 시 한 줄 사유)만 보고한다. 내용 매핑을 항목별로 줄줄이 노출하지 않는다.
 
-## 스택 전역 최종화·머지는 FINALIZE 담당
+## 전역 최종화·머지는 FINALIZE 담당
 
-메시지 최종화·오배치 커밋 재배치·머지 안내는 WRITING이 아니라 **스택 전체 IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다 ([finalize.md](finalize.md)). WRITING은 본 PR 하나로 스코프가 닫힌 per-PR 작업(PR 본문 + consumable 정리)이라 cross-PR·스택 전역 조작을 담지 않는다. WRITING은 per-PR·유연 타이밍이라 IMPL 직후 써도, 나중에 몰아서 써도 된다.
+메시지 최종화·오배치 커밋 재배치·머지 안내는 WRITING이 아니라 **전 PR IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다 ([finalize.md](finalize.md)). WRITING은 본 PR 하나로 스코프가 닫힌 per-PR 작업(PR 본문 + consumable 정리)이라 cross-PR·전역 조작을 담지 않는다. WRITING은 per-PR·유연 타이밍이라 IMPL 직후 써도, 나중에 몰아서 써도 된다.
