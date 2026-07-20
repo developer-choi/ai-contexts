@@ -150,7 +150,8 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
   - **예외 — upstream 따라잡기 ff:** 현재 보호 브랜치를 자기 upstream으로 맞추는 동기화(`git merge --ff-only origin/<현재브랜치>`, 인자 없는 `merge --ff-only` 포함)는 결정이 아니라 동기화라 hook이 허용하며 AI가 직접 해도 된다. feature·worktree 브랜치를 보호 브랜치에 올리는 통합 ff는 인자가 upstream이 아니므로 그대로 차단된다.
 - 머지 충돌(rebase 중)은 사용자와 함께 해결한다. 멈추고 "이렇게 충돌났다 + 해결 제안"을 제시한 뒤 진행하며, 임의로 한쪽을 채택해 덮어쓰지 않는다.
 - 배포(`npm run sync:*`)는 사용자가 한다 — 실행도, 할지 묻지도 않는다. deploy/ 산출물 sync도 마찬가지.
-- 원격 `git push`는 AI가 직접 할 수 있다. `check-git-push-policy.mjs`가 보호 브랜치(master/main/develop/release) 푸시에 ask로 사용자 승인을 받는다. force push(diverged)·`--no-verify`·history rewrite chain·열린 PR 브랜치는 여전히 deny.
+- 원격 `git push`는 AI가 직접 할 수 있다. 단 `claude-settings.json`의 `permissions.ask`(`Bash(git push:*)`·`Bash(git -C * push *)`)가 **모든 push**에 사용자 승인 창을 띄운다 — 브랜치를 가리지 않으므로 feature 브랜치도 승인 대상이다. `check-git-push-policy.mjs`는 보호 브랜치일 때 승인 창에 뜰 사유 문구를 만들고, force push(diverged)·`--no-verify`·history rewrite chain·열린 PR 브랜치는 deny로 차단한다.
+  - **훅의 `ask`는 승인 창을 띄우지 못한다.** allow 목록에 `Bash`가 통째로 있으면 훅이 낸 `ask`는 "이미 승인됨"으로 흡수된다(훅의 `deny`는 allow를 이기지만 `ask`는 못 이긴다 — 2026-07-20 실측). 승인 창이 필요한 명령은 훅이 아니라 `permissions.ask` 규칙으로 잡는다.
 
 ## 조사 산출물 출처 포함
 - 외부 소스를 근거로 제시할 때 URL만 나열하지 않는다. 해당 페이지에서 근거가 되는 원문을 함께 인용한다.
