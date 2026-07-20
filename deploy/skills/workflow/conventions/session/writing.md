@@ -1,6 +1,6 @@
 # WRITING 세션 — PR 본문 작성 (WRITING_IDEATOR / WRITING_REFINER)
 
-이 세션은 **step 번호가 없는 상시 세션**이다 (FOUNDATION·MARKUP·FINALIZE와 동일 성격). PR별 세션이 아니라 PR 1~N 본문을 IDEATOR→REFINER 2단계로 연속 작성한다. 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
+이 세션은 **step 번호가 없는 상시 세션**이다 (MARKUP·FINALIZE와 동일 성격). PR별 세션이 아니라 PR 1~N 본문을 IDEATOR→REFINER 2단계로 연속 작성한다. 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
 
 ## cwd — 코드 워크트리 무관
 

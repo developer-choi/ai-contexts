@@ -13,7 +13,7 @@
       과제요구사항.md   ← 과제 요구사항 (채용만)
       requirement-review-retrospect.md ← requirement-review/retrospect.md 산출물. 체크리스트 개선 회고
     retained/           ← 사용자 제공 원본 + 누적 캐시. BG 컨텍스트(= 프로젝트 전체) 유효한 동안 보존
-      folder-structure.md ← FOUNDATION 단계 1 산출 (채용만). 디렉토리 구조 명세 (PR2~N 참조)
+      folder-structure.md ← FOUNDATION 산출 (채용만). 디렉토리 구조 명세 (후속 PR 참조)
       tech-constraints.md ← BG.step-1 기술 제약 스캔 결과
       conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성). 프로젝트 컨벤션 소스 "경로 + 한 줄 트리거" 인덱스. 양식·작성 절차는 step-1 「컨벤션 소스 수집」 참조
       figma-url.md      ← step-1.1 수집 (figma 쓰는 모드). 대상 이름 + URL 누적
