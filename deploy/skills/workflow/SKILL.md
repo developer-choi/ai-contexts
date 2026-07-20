@@ -10,7 +10,7 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 기획서, 피그마, 피그마 디자인토큰, 채용과제를 PR로 변환한다.
 
-이 워크플로우의 목표는 작업을 가능한 한 병렬로 돌려 병목을 없애는 것이다. 다음 PR 설계와 현재 PR 구현을 겹치고(PR 도미노), 화면 마크업을 PR 작업과 병행하며, 리뷰어를 종류별로 나눠 동시에 돌리는 것이 그 장치다.
+이 워크플로우의 목표는 작업을 가능한 한 병렬로 돌려 병목을 없애는 것이다. 어떤 PR의 구현과 그 PR에 의존하는 PR의 설계를 겹치고(stub 핸드오프), 화면 마크업을 PR 작업과 병행하며, 리뷰어를 종류별로 나눠 동시에 돌리는 것이 그 장치다.
 
 ## 호출
 
@@ -30,10 +30,10 @@ BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대
 | 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 | (6) 권장 모델 |
 |---|---|---|---|---|---|---|
 | **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md·conventions-index.md / `background/consumable/`: project.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무·개인), 동일 `<모드>` 인자 / **PR을 확정할 때마다 → 그 PR의 PR_{N}_PLAN**, 동일 `<모드>` 인자 (일괄 분할 없음 — [conventions/pr-split.md](conventions/pr-split.md)) | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 확정이 전 세션의 루트 결정, 오판이 도미노로 전파 |
-| **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 + `project.md`에 이 PR 확정 | BG `background/persistent/` (채용 원본) | **`PRESET_FOUNDATION` PR을 자기 브랜치·워크트리에서 완결** (폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션) — 절차는 전용 단계가 아니라 **표준 step-3~6**(불필요한 절차는 건너뜀) / `background/retained/folder-structure.md` / markup 워크트리 최소 셋팅. **도구 세팅(`PRESET_SETUP`)은 별개 PR**이며 정상 도미노가 처리 | 세션 종료 후 → MARKUP (`/workflow MARKUP 채용`) + 확정된 다음 PR의 PR_{N}_PLAN | 자기 PR 워크트리 (+ markup 워크트리). 다른 PR의 워크트리로 이동하지 않음 | **Sonnet** — 컨벤션 이식 정형 작업, 검수 쉬움 |
-| **MARKUP** | (채용) FOUNDATION 세션 종료 후 / (실무·개인) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | (채용·실무) step-1.1 수집 figma·시안 자료 / (개인) step-1.1 수집 마크업 시안(`retained/mockup/`) — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + **공통 컴포넌트 확정·독립 산출**(전 페이지 직독, 2군데 이상=공통 → PR 확정이 소비하는 단방향 입력) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) `background/retained/mockup/`(+선택 `retained/spec.md`) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) — URL은 노드값이 정답이라 결정론적 번역, 캡처·개인 시안은 명세 완결성이 낮을 수 있어 해석 여지가 큼 |
-| **PR_{N}_PLAN** | **`project.md`에 이 PR 절이 확정됨** (BG의 PR 확정 — 일괄 분할 대기 없음) + 앞 PR에 의존하는 경우에 한해 (PR_{N-1}이 stub 만든 경우 PR_{N-1}.step-4 stub, 안 만든 경우 PR_{N-1}.step-6 IMPL 완료). 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이전 PR `persistent/` (decisions, reference, implementation) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / **가벼운 PR은 step-4에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | step-3 종료 → WRITING_IDEATOR (PR 본문 초안, step-4 진입 전 같은 세션 도중 안내) / step-4 stub 만든 경우 → PR_{N+1}_PLAN + PR_{N}_IMPL 동시 spawn / stub 없이 실행 이연(무거운 non-stub) → PR_{N}_IMPL spawn / stub 없이 그 자리 실행·커밋 완결(가벼운 PR) → IMPL 세션 없이 WRITING_REFINER **(단 step-5·6 수행 후 — step-4 「종료 시퀀스」 가벼운 PR 분기)** (다음 PLAN 선행 = 본 step-4 완료) | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 다음 PR의 공개 계약, 오판 시 도미노 오염 |
-| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (PR_{N-1}이 stub 만든 경우) PR_{N-1} stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-6 끝 후(IMPL 세션 종료) → WRITING_REFINER / stub 안 만든 경우 → PR_{N+1}_PLAN (머지 아님, 본 IMPL(step-6) 완료가 선행) / 마지막 IMPL이면(전 PR IMPL step-6 완료) → FINALIZE (fan-in) | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** (PLAN이 방침 확정 시) — PLAN이 알고리즘 판단을 미뤘으면 Opus |
+| **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 + `project.md`에 이 PR 확정 | BG `background/persistent/` (채용 원본) | **`PRESET_FOUNDATION` PR을 자기 브랜치·워크트리에서 완결** (폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션) — 절차는 전용 단계가 아니라 **표준 step-3~6**(불필요한 절차는 건너뜀) / `background/retained/folder-structure.md` / markup 워크트리 최소 셋팅. **도구 세팅(`PRESET_SETUP`)은 별개 PR**이며 정상 도미노가 처리 | **markup 워크트리 최소 셋팅 완료 시 → MARKUP** (`/workflow MARKUP 채용`) / 세션 종료 후 → 다른 PR의 PLAN을 여기서 띄우지 않는다 (PLAN spawn은 BG 몫). 이 PR에 의존하는 PR이 있으면 자기 진입 조건으로 출발한다 | 자기 PR 워크트리 (+ markup 워크트리). 다른 PR의 워크트리로 이동하지 않음 | **Sonnet** — 컨벤션 이식 정형 작업, 검수 쉬움 |
+| **MARKUP** | (채용) FOUNDATION이 markup 워크트리 최소 셋팅을 마친 뒤 / (실무·개인) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | (채용·실무) step-1.1 수집 figma·시안 자료 / (개인) step-1.1 수집 마크업 시안(`retained/mockup/`) — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + **공통 컴포넌트 확정·독립 산출**(전 페이지 직독, 2군데 이상=공통 → PR 확정이 소비하는 단방향 입력) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) `background/retained/mockup/`(+선택 `retained/spec.md`) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) — URL은 노드값이 정답이라 결정론적 번역, 캡처·개인 시안은 명세 완결성이 낮을 수 있어 해석 여지가 큼 |
+| **PR_{N}_PLAN** | **`project.md`에 이 PR 절이 확정됨** (BG의 PR 확정 — 일괄 분할 대기 없음) + 의존 PR이 있는 경우에 한해 (그 PR이 stub 만든 경우 그 PR.step-4 stub, 안 만든 경우 그 PR.step-6 IMPL 완료 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수 있다. `project.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / **가벼운 PR은 step-4에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | step-3 종료 → WRITING_IDEATOR (PR 본문 초안, step-4 진입 전 같은 세션 도중 안내) / step-4 stub 만든 경우 → PR_{N}_IMPL spawn / stub 없이 실행 이연(무거운 non-stub) → PR_{N}_IMPL spawn / stub 없이 그 자리 실행·커밋 완결(가벼운 PR) → IMPL 세션 없이 WRITING_REFINER **(단 step-5·6 수행 후 — step-4 「종료 시퀀스」 가벼운 PR 분기)** / step-4 stub 확정 시 → **본 PR에 껍데기 의존하는 PR의 출발 게이트 해제 안내** (`project.md`의 의존 항목에서 찾는다. 세션을 새로 띄우라는 spawn 안내가 아니라 게이트가 풀렸다는 안내 — PLAN spawn 자체는 BG의 PR 확정이 유일 트리거) | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 의존 PR의 공개 계약, 오판 시 도미노 오염 |
+| **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (의존 PR이 stub 만든 경우) 그 stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-6 끝 후(IMPL 세션 종료) → WRITING_REFINER / 마지막 IMPL이면(전 PR IMPL step-6 완료) → FINALIZE (fan-in) | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** (PLAN이 방침 확정 시) — PLAN이 알고리즘 판단을 미뤘으면 Opus |
 | **WRITING_IDEATOR** | PR_{N}_PLAN.step-3 종료 (초안 트리거) | `pr{N}/persistent/overview.md` + `pr{N}/persistent/decisions.md` (step-3 초기본, 토론 없으면 부재 가능) + `pr{N}/persistent/reference.md` | `pr{N}/consumable/pr-body.md` **초안**(배경·문제·접근·근거; 상세 코드블록·실제 커밋 목록 제외) — overview는 persistent라 **읽기만**, 어느 소비처도 삭제하지 않음 | 후속 spawn 없음 (REFINER는 IMPL·step-6 후 별도 트리거). per-PR·유연 타이밍 | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조** (`step-4.md:24`). 구현 맥락 없이 계획 산출물 기반 초안 | **Opus** — 계획만 보고 사용자 의도를 PR 본문 배경·근거로 녹여야 함, 의도 오독 비용 큼 |
 | **WRITING_REFINER** | PR_{N}_IMPL.step-6 종료 (가벼운 PR은 PLAN이 step-5·6 수행 후) | WRITING_IDEATOR 입력 + `implementation.md` + 커밋 로그 + `decisions.md` 갱신분(step-6.6) + `pr{N}/consumable/` 잔여(review.md·user-test-cases.md). **pr-body 초안 부재 시 write-init 선행**(IDEATOR 흡수) | `pr{N}/consumable/pr-body.md` **확정** → PR 본문 복사·게시·삭제 / overview.md는 persistent라 읽기만(큐레이션), 삭제 안 함 / 잔여 consumable 소비·정리 / `pr{N}/persistent/`는 제외 (영구 보존) | 후속 spawn 없음 (per-PR·유연 타이밍 — IMPL 직후 또는 나중에 몰아서. 머지·최종화는 FINALIZE 담당) | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조**. 커밋 로그 조회 시 pr{N}→브랜치는 `git worktree list` + FOUNDATION 명명규칙(실무·개인은 worktree list 직접) | **Opus** — 구현 산출물·커밋을 사용자 의도와 정합시켜 확정, 의도 오독 비용 큼 |
 | **FINALIZE** | 전 PR의 IMPL(step-6) 완료 (fan-in) | 전 PR 커밋 히스토리 + WRITING 잔여 산출물 | 재배치·메시지 최종화된 히스토리 + force-push 요청 (폴더 산출물 없음) | 채용 → recruitment 마무리 안내 (동일 `채용` 인자) / 실무·개인 → 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관) | 다중 브랜치, 단계별 cwd ([conventions/session/finalize.md](conventions/session/finalize.md) 「cwd」) | **Opus** — 다중 브랜치 history rewrite에서 오배치 판정·연쇄 rebase 오판 비용 큼 |
@@ -48,18 +48,22 @@ BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대
 
 ```
 BG.step-1.1 ──→ FOUNDATION (= PRESET_FOUNDATION PR, 표준 step-3~6)
-                  └─ 세션 종료 ──→ MARKUP
+                  └─ markup 환경 셋팅 완료 ──→ MARKUP
 
-BG가 PR을 확정할 때마다 ──→ 그 PR_{N}_PLAN (일괄 분할 대기 없음)
-                            앞 PR에 의존하면 그 선행이 풀린 뒤 출발
+BG가 PR을 확정할 때마다 ──→ 그 PR_{N}_PLAN (일괄 분할 대기 없음. PLAN spawn의 유일 트리거)
+                            의존 PR이 있으면 그 선행이 풀린 뒤 출발
+                            (의존 PR = `project.md` 해당 PR 절의 의존 항목. 직전 번호가 아닐 수 있고 여럿일 수 있다)
 
 [구현 페이즈 — 도미노, 머지 없음. base는 사전 준비에서 사용자 확인 —
  앞 PR에 의존하면 그 브랜치 위(스택), 독립이면 기본 브랜치에서]
 PR_{N}_PLAN.step-3 종료 ──→ WRITING_IDEATOR (PR 본문 초안 — step-4 진입 전, 상시 세션)
-PR_{N}_PLAN.step-4 stub 만든 경우 ──┬─→ PR_{N+1}_PLAN (도미노 — stub 시그니처 확정이 선행)
-                                    └─→ PR_{N}_IMPL ──(step-6 끝)──→ WRITING_REFINER (per-PR·유연 타이밍)
-PR_{N}_PLAN.step-4 실행 이연(무거운 non-stub) ──→ PR_{N}_IMPL ──(step-6 완료)──→ PR_{N+1}_PLAN (머지 아님, IMPL step-6 완료가 선행)
-PR_{N}_PLAN.step-4 그 자리 실행·커밋 완결(가벼운 PR) ──→ (step-5·6 수행 후) IMPL 세션 없이 WRITING_REFINER; PR_{N+1}_PLAN 선행 = 본 step-4 완료
+PR_{N}_PLAN.step-4 stub 만든 경우 ──→ PR_{N}_IMPL ──(step-6 끝)──→ WRITING_REFINER (per-PR·유연 타이밍)
+PR_{N}_PLAN.step-4 실행 이연(무거운 non-stub) ──→ PR_{N}_IMPL ──(step-6 끝)──→ WRITING_REFINER
+PR_{N}_PLAN.step-4 그 자리 실행·커밋 완결(가벼운 PR) ──→ (step-5·6 수행 후) IMPL 세션 없이 WRITING_REFINER
+
+PR_{N}에 의존하는 PR은 여기서 띄우지 않는다 (spawn은 BG 몫). 그 PR은 자기 진입 조건으로 출발한다:
+  PR_{N}이 stub 만든 경우 ──→ PR_{N}.step-4 stub 확정 시점
+  PR_{N}이 stub 안 만든 경우 ──→ PR_{N}.step-6 IMPL 완료 시점 (머지 아님)
 
 [종료 페이즈 — 전 PR IMPL 완료 후 1회, fan-in]
 PR_1..n IMPL 전부 완료 ──→ FINALIZE (replace 오배치 재배치 + 메시지 최종화)
@@ -158,7 +162,7 @@ PR별 세션이 아니라 PR 1~N 본문을 연속 작성하는 상시 2세션. I
 
 전 PR IMPL 완료 후 1회 실행하는 종료 페이즈 세션. replace(오배치 재배치)·메시지 최종화·머지 안내는 [conventions/session/finalize.md](conventions/session/finalize.md) 참조.
 
-**마지막 PR(=마지막 IMPL) 판별**: `/plan/` 하위에서 가장 높은 번호의 `pr{N}` 디렉토리가 방금 IMPL을 끝낸 PR이면 마지막. 이 판정으로 마지막 IMPL 세션이 FINALIZE 진입을 안내한다 (「세션 spawn 안내 메커니즘」 fan-in 후속).
+**마지막 PR(=마지막 IMPL) 판별**: `project.md`를 읽어 IMPL이 아직 안 끝난 PR이 남았는지 본다. 남아 있지 않으면 방금 끝낸 IMPL이 마지막이다. `pr{N}` 디렉토리 존재는 보조 신호일 뿐이고, **번호는 확정 순서라 완료 순서가 아니므로 "가장 높은 번호"로 판정하지 않는다** (PR5가 PR3보다 먼저 끝날 수 있다). 이 판정으로 마지막 IMPL 세션이 FINALIZE 진입을 안내한다 (「세션 spawn 안내 메커니즘」 fan-in 후속).
 
 ### 채용과제 마무리 (FINALIZE 종료 후, 채용과제만)
 

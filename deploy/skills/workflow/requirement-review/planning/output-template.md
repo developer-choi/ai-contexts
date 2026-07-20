@@ -2,7 +2,7 @@
 
 AI가 초안을 채우고 사용자가 리뷰하는 명세 분석 양식. 산출물 저장 위치는 [conventions/plan-folder.md](../../conventions/plan-folder.md) 참조.
 
-PR 번호는 사용자 플로우 순서대로 매긴다. 각 page.md 상단에 페이지명을 H1으로 적어 어떤 페이지인지 식별한다.
+PR 번호는 **확정 순서대로** 매긴다 — 확정할 때마다 다음 번호를 준다. 사용자 플로우 순서도, 의존 순서도 아니다 ([../../conventions/pr-split.md](../../conventions/pr-split.md) 「산출물」). 의존은 번호가 아니라 각 PR 절의 의존 항목이 표현한다. 각 page.md 상단에 페이지명을 H1으로 적어 어떤 페이지인지 식별한다.
 
 ---
 
