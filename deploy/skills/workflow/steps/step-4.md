@@ -129,7 +129,7 @@ stub 커밋은 step-4의 산출물이다. 절차:
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
 3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — IMPL 분리 없이 step-4에서 완결)
 
-PR 번호별 분기·조건문 없음. **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 *코드로 표현 가능*하므로 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다**(it.todo·deps가 코드 stub 대신 `implementation.md` 산문으로 새는 사고의 원인). step-2 「PR 분할 원칙」의 stub 시점 병렬·spawn 분기와 정합.
+PR 번호별 분기·조건문 없음. **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 *코드로 표현 가능*하므로 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다**(it.todo·deps가 코드 stub 대신 `implementation.md` 산문으로 새는 사고의 원인). [conventions/pr-split.md](../conventions/pr-split.md) 「PR 분할 원칙」의 stub 시점 병렬·spawn 분기와 정합.
 
 ### stub 커밋 작성
 

@@ -75,7 +75,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 정독과 병렬 분석이 모두 끝나면 발견 사항을 공유한다.
 
-정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`에 직접 기록한다 — 없으면 이 시점에 생성한다(step-2 이전이라 PR 경계가 아직 없으면 미분류 절에 담아두고, step-2에서 PR별 섹션으로 재배치). 최소한 아래 관점은 점검한다:
+정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`에 직접 기록한다 — 없으면 이 시점에 생성한다(그 PR이 아직 확정 전이면 미분류 절에 담아두고, 해당 PR을 확정할 때 그 절로 재배치). 최소한 아래 관점은 점검한다:
 - 완성도 (404 페이지, 파비콘, page.title, OG 태그, 실제 이미지·텍스트, 로딩/에러 상태)
 - UI/UX (뒤로가기, 취소 버튼, 푸터 링크, 빈 상태, 호버/포커스, 토스트 피드백)
 - 공고에서 강조하는 역량에 연결되는 어필 포인트
@@ -115,7 +115,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 **페이지별 정리**: step-1.1이 수집해 `background/retained/figma-url.md`·`background/retained/figma/`에 저장한 figma 자료를 페이지별로 정리한다. **처음부터 다시 요청하지 않는다** — 빠진 페이지가 있으면 그것만 콕 집어 요청하고, 받으면 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 정책대로 같은 위치에 추가한다.
 
-**디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다. step-3 PRESET_COMPONENTS 정의와 step-4 PRESET_COMPONENTS 구현 방침의 입력 재료로 쓰이고, 사용 후 삭제되는 중간 산출물이다. PR4+ 구현 시에는 페이지 이미지 파일을 `markup.md` 참조 자료로 사용한다.
+**디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다. step-3 PRESET_COMPONENTS 정의와 step-4 PRESET_COMPONENTS 구현 방침의 입력 재료로 쓰이고, 사용 후 삭제되는 중간 산출물이다. 페이지 UI를 담는 PR에서는 `background/retained/figma/`의 페이지 자료를 `markup.md` 참조 자료로 사용한다.
 
 #### 5. 모호한 부분 및 질문 목록
 

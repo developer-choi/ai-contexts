@@ -22,7 +22,7 @@
 
 #### 산출물 생성
 
-[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/consumable/global.md`에, page.md 템플릿을 `/plan/pr1/consumable/page.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
+[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/consumable/global.md`에, page.md 템플릿을 `/plan/background/consumable/page-{페이지명}.md`에 생성합니다 (PR 확정 전이라 아직 `pr{N}` 폴더가 없기 때문입니다). 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
 
 ### 입력 자료
 
@@ -37,7 +37,7 @@
 ### 산출물
 
 - `/plan/background/consumable/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트, TODO 목록
-- `/plan/pr{N}/consumable/page.md` — **생성**. 페이지별 분석 결과 (N은 사용자 플로우 순서; PR 번호와 다를 수 있음 — Step 2에서 경계 확정 후 재정비)
+- `page.md` — **생성**. 페이지별 분석 결과. **그 페이지를 담을 PR이 확정되기 전에는 `/plan/background/consumable/page-{페이지명}.md`에 둔다** (어느 PR에 속할지 아직 모르므로). PR이 확정되면 `pr{N}/consumable/page.md`로 옮긴다 — 번호 부여가 확정 시점이라 폴더 번호와 PR 번호가 어긋나지 않는다 ([conventions/pr-split.md](../../conventions/pr-split.md))
 - `/plan/background/consumable/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
 
 ### 분석 과정
