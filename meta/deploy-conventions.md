@@ -26,11 +26,12 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 
 ## 로컬 settings projection (`local/` → repo-local)
 
-AC 전용 settings/hooks는 위 전역 메커니즘을 **그대로 미러링한 로컬판**으로 배포한다. 소스는 `local/`(전역 `deploy/`의 로컬판), 타겟은 repo-local `.claude/settings.json`·`.codex/hooks.json`이며, `sync:local-system`이 (로컬 스킬과 함께) 배포한다. 산출물은 gitignore한다.
+settings/hooks는 위 전역 메커니즘을 **그대로 미러링한 로컬판**으로 배포한다. 소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판), 타겟은 그 레포의 repo-local `.claude/settings.json`·`.codex/hooks.json`이며, `sync:local-system`이 (로컬 스킬과 함께) 배포한다. **`local/base-settings.json`을 가진 모든 레포**가 대상이다(AC + KA 등, per-repo — `projectRepoLocalSettings(repo)`가 `repo` 인자를 생략하면 AC로 흘러 기존 동작이 불변). 산출물은 gitignore한다.
 
 - **재사용**: `mergeSettings`(부분키 머지+`.ac-keys`)·`splitSettings`·`verifySettings`·`verifyJsonExact`는 `targetPath` 제네릭이라 그대로 쓴다(`scripts/local-system/local-deploy-lib.mjs`). `settings.json`은 통째 덮어쓰지 않고 부분키만 관리해 사용자 동적 필드를 보존한다.
 - **분기점은 어댑터뿐**: `settings-projection.mjs`의 `LOCAL_ADAPTERS`+`localHookCommand`. 전역과 달리 command가 repo-relative(`node .claude/hooks/<file>`)이고, codex 매처는 사용자가 codex로 검증한 `run_command`+`Bash`다(전역의 `*`는 프로젝트-로컬 발화 미검증). `buildHooks`는 `opts.adapters`/`opts.makeCommand`로 주입받고 매처 배열을 fan-out한다 — 전역 호출은 인자 없이 그대로 동작한다.
-- **생성 계약**: `verify:local-system`이 `sync:local-system` 시작 시 fail-fast한다. 배포 후 `verifySettings`(claude 부분키)+`verifyJsonExact`(codex whole-file)로 대조한다.
+- **Stop 이벤트는 claude 전용**: codex엔 Stop hook 런타임이 없어 `LOCAL_ADAPTERS.codex.supports`에서 제외한다. codex로 투영되는 hook이 하나도 없는 레포(Stop-only base, 예: KA)는 `.codex/` 산출물을 만들지 않는다(`codexHasHooks`로 gate).
+- **생성 계약**: `verify:local-system`이 `sync:local-system` 시작 시 fail-fast한다. base-settings를 가진 각 레포를 per-repo로 검증하며, 이벤트별 단언(PreToolUse 매처·Stop 매처없음 등)은 해당 이벤트가 있을 때만 적용한다. 배포 후 `verifySettings`(claude 부분키)+`verifyJsonExact`(codex whole-file)로 대조한다.
 - **codex trust**: 프로젝트-로컬 훅은 trusted여야 발화한다. best-effort로 `trustCodexHooks`를 시도하고, 실패 시 `/hooks` 수동 신뢰를 안내한다.
 - 새 로컬 hook은 `local/base-settings.json`에 논리 항목을 추가하고 `local/hooks/`에 `.mjs`를 둔다(인라인 금지, 전역과 동일). `unsync`·가이드(`meta/guides/local-system.md`)·같은 커밋 문서 정합은 전역과 같은 규칙을 따른다.
 

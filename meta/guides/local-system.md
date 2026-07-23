@@ -1,6 +1,6 @@
 # Local System Sync
 
-전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 스킬**(cross-repo)과 **AC settings/hooks**(AC 전용).
+전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 스킬**(cross-repo)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
 
 ```bash
 npm run sync:local-system
@@ -25,13 +25,13 @@ npm run sync:local-system -- ~/WebstormProjects/main
 - 레포 루트 `CLAUDE.md`가 있으면 `AGENTS.md` 및 `GEMINI.md`로 복사합니다.
 - 원본은 `local/`이며, `.claude/<X>`·`.agents/<X>`는 배포 산출물로 봅니다(gitignore).
 
-### 2. AC settings/hooks (AC 전용)
+### 2. settings/hooks (per-repo)
 
-전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다. 소스는 `local/`(전역 `deploy/`의 로컬판).
+전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다. 소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
 
 - `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
-- 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책).
-- `local/hooks/*.mjs` → `.claude/hooks/`·`.codex/hooks/`로 복사.
+- 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책). 단 **Stop 이벤트는 claude 전용**(codex엔 Stop 런타임 없음)이라 codex 투영에서 제외되며, codex hook이 하나도 없는 레포(Stop-only, 예: KA)는 `.codex/` 산출물을 만들지 않습니다.
+- `local/hooks/*.mjs` → `.claude/hooks/`(+codex hook이 있으면 `.codex/hooks/`)로 복사.
 - codex 프로젝트-로컬 훅은 trusted여야 발화합니다. 배포 시 best-effort로 trust를 시도하고, 실패하면 codex 세션에서 `/hooks`로 `.codex/hooks.json`을 수동 신뢰하세요.
 
 산출물(`.claude/settings.json`·`.claude/hooks/`·`.codex/`)은 **gitignore**되며 트래킹하지 않습니다. 소스(`local/`)만 커밋합니다.
@@ -55,4 +55,4 @@ npm run unsync:local-system
 npm run verify:local-system
 ```
 
-`local/base-settings.json`에서 만든 hooks가 claude·codex 양쪽에 등록되는지, command가 repo-relative(`node .claude/hooks/`·`node .codex/hooks/`)인지, codex 매처가 `run_command`+`Bash`인지 검증합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
+base-settings를 가진 각 레포(AC + KA 등)에 대해, hooks가 claude·codex(지원 이벤트)에 등록되는지, command가 repo-relative(`node .claude/hooks/`·`node .codex/hooks/`)인지, codex 매처가 `run_command`+`Bash`인지, Stop이 claude에선 매처 없이·codex에선 미등록인지 검증합니다. 이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
