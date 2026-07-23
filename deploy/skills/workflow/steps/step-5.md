@@ -113,12 +113,4 @@ stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
   - 수정 사항 (있는 경우)
 - 사용자가 step-6에서 코드 리뷰 수행 (커밋 정리 전이라 stub→IMPL diff 추적 가능)
 
-> [CRITICAL] 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 Step 6(최종 점검)에 진입한다.
-
----
-
-## Step 5 종료 — step 6으로 이어짐
-
-step-5는 PR_{N}_IMPL 세션의 **마지막 구현 step**. step 5.4 종료 후 step 6(최종 점검)이 이어진다 — step 5.4 보고 완료 ≠ 세션 종료.
-
-후속 spawn 안내(**WRITING_REFINER**)와 「본 PR에 의존하는 PR의 진입 가능 안내」는 **step-6 종료(IMPL 세션 종료) 시점에** 출력한다 ([step-6.md](step-6.md) 「세션 종료 — 후속 안내」). step-5에서 조기 출력하지 않는다: step-6 사용자 리뷰에서 시그니처가 바뀌면 의존하는 PR·PR 본문에 영향이 가므로, IMPL이 완전히 끝난 뒤 안내해야 한다. (stub은 예외 — stub을 만든 경우 의존 PR은 step-4 stub 시그니처에서 곧장 출발하며, 이는 조기 진입이 아니라 stub 핸드오프다.)
+> [CRITICAL] 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 Step 6(최종 점검)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — step-5는 세션 경계가 아니며 후속 안내는 step-6에서 낸다.)
