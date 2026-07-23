@@ -83,7 +83,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL, PR 본문은 step-3 후 WRITING_IDEATO
 FINALIZE 종료 ──→ 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관. recruitment 마무리는 채용 전용 — 실무·개인은 곧장 머지).
 ```
 
-개인은 그래프가 실무와 동일하다. 차이는 MARKUP의 디자인 진실 원천뿐 — figma 대신 마크업 시안 대조 + 사용자 시각 승인([conventions/session/markup/personal.md](conventions/session/markup/personal.md)).
+개인은 그래프가 실무와 동일하다. 차이는 MARKUP의 디자인 진실 원천·진실검사뿐 — 모드별 축은 [conventions/modes.md](conventions/modes.md) 매트릭스.
 
 ### 세션 spawn 안내 메커니즘
 

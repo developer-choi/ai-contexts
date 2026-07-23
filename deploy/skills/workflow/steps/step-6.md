@@ -62,7 +62,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 - code-review에 전달하는 입력: PR diff, coding-standards 목록, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
 - code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
-- 수정은 step-5의 Implementer 흐름이 수행한다 (마크업 수정이면 figma 원본 대조 기준 / 개인 모드는 마크업 시안 대조 + 사용자 시각 확인)
+- 수정은 step-5의 Implementer 흐름이 수행한다 (마크업 수정이면 그 모드의 진실검사 기준 — [modes.md](../conventions/modes.md) 매트릭스)
 
 ---
 
@@ -113,7 +113,7 @@ UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
 - 반려분은 구현 단계 Implementer 흐름으로 수정 → 다시 6.2부터 진행.
 - 승인 게이트이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
-- **개인 모드**: figma·markup.md가 없다. 시각 진실 원천은 step-1.1에서 받은 마크업 시안(`retained/mockup/`)이다. 사용자가 MARKUP에서 이미 시안 대조·시각 확인을 거쳤으므로 "처음 마주하는 지점"은 아니고, 본 게이트는 *조립된 PR 렌더(로직·실데이터 반영)*를 그 마크업 시안과 사용자 눈으로 재확인하는 승인 게이트로 동작한다. 기준이 figma 원본이 아니라 시안·사용자 시각이라는 점만 다르고, 승인/반려·반려분 수정 흐름은 동일하다.
+- **figma 없는 모드**: figma·markup.md가 없어 시각 진실 원천이 다르다([modes.md](../conventions/modes.md) 매트릭스). 사용자가 MARKUP에서 이미 그 원본 대조·시각 확인을 거쳤으므로 "처음 마주하는 지점"은 아니고, 본 게이트는 *조립된 PR 렌더(로직·실데이터 반영)*를 그 시각 원본과 사용자 눈으로 재확인하는 승인 게이트로 동작한다. 검증 기준이 figma 원본이 아니라는 점만 다르고, 승인/반려·반려분 수정 흐름은 동일하다.
 
 ---
 

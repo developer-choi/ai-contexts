@@ -64,7 +64,7 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 | `overview.md` | **의도만** — 목표·범위·열려있는 질문. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
 | `decisions.md` | **기록 대상 결정의 근거** + 의사결정 흐름 (사용자 발화 단계 + 거부/채택 사유) | 사용자 발화 인용은 그대로. 코드는 시그니처 수준만 |
 | `reference.md` | 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스 | 코드 없음 |
-| `markup.md` | **Figma 원본 링크 인덱스(사용자 입력)** + 토큰 매핑표·매칭표 (개인 모드는 figma 없어 N/A — [markup-spec.md](../conventions/artifact/markup-spec.md)) | 코드 블록 없음 (링크·도표만) |
+| `markup.md` | **Figma 원본 링크 인덱스(사용자 입력)** + 토큰 매핑표·매칭표 (figma 없는 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
 | `implementation.md` | 구현 순서·커밋 분할·회귀 체크리스트 | 신설 시그니처·함수명 OK (rename류 기존 식별자 전사 X — grep 일괄치환 지시로) |
 
 「열려있는 질문」 절의 역할:

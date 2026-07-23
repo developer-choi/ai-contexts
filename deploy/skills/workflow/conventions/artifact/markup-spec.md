@@ -4,9 +4,9 @@
 
 ## 책임·위치
 
-UI 컴포넌트가 있는 PR이면 `pr{N}/retained/` 하위에 필수 생성 (채용·실무 — figma 전제). 그 외 PR은 생성하지 않는다.
+UI 컴포넌트가 있는 PR이면 `pr{N}/retained/` 하위에 필수 생성한다. 그 외 PR은 생성하지 않는다.
 
-**개인 모드는 생성하지 않는다** — figma가 없어 「Figma 원본 링크 인덱스」가 성립하지 않는다. 개인 모드의 시각 원본은 마크업 시안(`background/retained/mockup/`)이고, 그 위치·대조 절차는 프로젝트별 진입 문서 [design-root.md](design-root.md)가 가리킨다. 디자인 검사는 그 시안 대조 + 사용자 시각 확인([../session/markup/personal.md](../session/markup/personal.md))이라 figma URL 인덱스가 불필요하다.
+**모드별 생성 여부·시각 원본·진실검사는 [modes.md](../modes.md) 매트릭스가 단일 출처다.** figma가 없는 모드는 「Figma 원본 링크 인덱스」가 성립하지 않아 생성하지 않는다 — 그 모드의 시각 원본과 검사 절차는 매트릭스를 따른다.
 
 담는 내용: 「Figma 원본 링크 인덱스」 절(사용자 입력) + 토큰 매핑표·매칭표. 코드 블록 없음 (링크·도표만). 마크업 scss 자체는 MARKUP 세션이 figma 0건으로 완성하므로 본 산출물에 "IMPL이 채울 figma 항목" 류 체크리스트를 두지 않는다.
 
