@@ -125,7 +125,7 @@ UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 
 
 ### Step 6.5.1. 백업 브랜치 [CRITICAL]
 
-history rewriting + force-push가 동반되는 작업이다. [conventions/commits.md](../conventions/commits.md) 「백업 브랜치」 적용.
+history rewriting + force-push가 동반되는 작업이다.
 
 ### Step 6.5.2. 케이스 분기
 
@@ -133,7 +133,7 @@ stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식
 
 ### Step 6.5.3. 사용자에게 force-push 요청 안내
 
-재정렬 완료 후 [conventions/commits.md](../conventions/commits.md) 「force-push 요청 보고 양식」 적용.
+재정렬 완료 후 사용자에게 force-push를 요청한다.
 
 ---
 
