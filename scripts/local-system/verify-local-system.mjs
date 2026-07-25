@@ -35,10 +35,11 @@ function verifyBase(base, label, check) {
   // codex는 지원 이벤트(supports)만 투영된다 — Stop-only base면 빈 집합.
   const codexFiles = base.hooks.filter((h) => LOCAL_ADAPTERS.codex.supports(h.event, h.on)).map((h) => h.file);
 
-  // claude: 모든 논리 hook 등록, command가 repo-relative .claude/hooks
+  // claude: 모든 논리 hook 등록, command가 ${CLAUDE_PROJECT_DIR} 기준 .claude/hooks
+  // (상대 경로면 워크트리 cwd에서 깨진다 — settings-projection의 localHookCommand 주석 참고)
   check(baseFiles.every((f) => claude.some((h) => h.file === f)), `${label} claude: base의 모든 hook 등록됨`);
-  check(claude.every((h) => h.command.includes('.claude/hooks/') && h.command.startsWith('node ')),
-    `${label} claude: command가 repo-relative node .claude/hooks/`);
+  check(claude.every((h) => h.command.includes('${CLAUDE_PROJECT_DIR}/.claude/hooks/') && h.command.startsWith('node ')),
+    `${label} claude: command가 \${CLAUDE_PROJECT_DIR} 기준 node .claude/hooks/`);
 
   // codex: codex-지원 subset만 등록, command가 repo-relative .codex/hooks, Stop·UserPromptSubmit 없음
   check(codexFiles.every((f) => codex.some((h) => h.file === f)), `${label} codex: codex-지원 hook 등록됨`);

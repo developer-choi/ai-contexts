@@ -55,4 +55,4 @@ npm run unsync:local-system
 npm run verify:local-system
 ```
 
-base-settings를 가진 각 레포(AC + KA 등)에 대해, hooks가 claude·codex(지원 이벤트)에 등록되는지, command가 repo-relative(`node .claude/hooks/`·`node .codex/hooks/`)인지, codex 매처가 `run_command`+`Bash`인지, Stop이 claude에선 매처 없이·codex에선 미등록인지 검증합니다. 이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
+base-settings를 가진 각 레포(AC + KA 등)에 대해, hooks가 claude·codex(지원 이벤트)에 등록되는지, command가 claude는 `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`·codex는 `node .codex/hooks/`인지, codex 매처가 `run_command`+`Bash`인지, Stop이 claude에선 매처 없이·codex에선 미등록인지 검증합니다. 이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
