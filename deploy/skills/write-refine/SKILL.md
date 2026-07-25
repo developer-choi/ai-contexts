@@ -24,7 +24,7 @@ write-init 패키지의 **표현**을 다듬는다. frontmatter가 유일한 컨
   - 모든 type: `../../contexts/writing-guide/examples/tone.md` (금지어·말투 변별)
   - 문단·구조 이슈 보이면: `../../contexts/writing-guide/examples/structure.md`
   - `resume-item`·`resume-intro`: `../../contexts/writing-guide/examples/resume.md` + `../../contexts/writing-guide/resume-guide.md`
-  - 요약·축소 정확성 관련: `../../contexts/writing-guide/examples/accuracy.md`
+  - 본문에 수치·단정 표현이 있거나 요약·축소 정확성 관련: `../../contexts/writing-guide/examples/accuracy.md` (단정 수위를 낮추는 것까지가 표현 다듬기다. 사실 자체의 검증은 init 책임)
   - `decision`: `../../contexts/writing-guide/decision-guide.md`
   - 해법·선택을 담는 글(`decision`·`resume-*`), 또는 type과 무관하게 본문에 비교·선택 절이 보이면: `../../contexts/writing-guide/tradeoff-guide.md` (트레이드오프 누락 플래그 — 아래 type 분기)
 
