@@ -27,7 +27,7 @@
     {
       "file": "surface-claude-md.mjs",
       "event": "PreToolUse",
-      "on": "search",
+      "on": "search-edit",
       "msg": "Surfacing folder CLAUDE.md..."
     },
     {

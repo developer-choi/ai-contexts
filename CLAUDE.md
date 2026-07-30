@@ -65,12 +65,6 @@ md 파일 수정 직후:
 - `deploy/contexts/` 하위에 `map.md`가 있는 디렉토리는, 파일을 추가·삭제·이동할 때 `map.md`를 함께 갱신한다
 - 내용을 추가·수정·삭제할 때 `map.md` 상단의 "역할" 섹션을 확인하고 적합한 위치에 배치한다
 
-## 백로그 관리
-
-- 백로그 파일은 AC가 아니라 별도 private 레포 `backlog`(`~/WebstormProjects/main/backlog`)에서 관리한다
-- 레포가 없는 기기에서는 `git clone https://github.com/developer-choi/backlog.git ~/WebstormProjects/main/backlog`로 클론한다
-- 백로그를 읽거나 쓸 때는 그 레포의 `CLAUDE.md`를 먼저 Read한다 (폴더 구조·항목 양식·커밋 규칙의 단일 출처)
-
 ## README 관리
 
 - README 수정은 일반 작업에서 직접 수행하지 않는다.

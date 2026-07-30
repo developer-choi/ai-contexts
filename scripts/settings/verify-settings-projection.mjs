@@ -81,10 +81,11 @@ function main() {
   check(claudePre.some((h) => h.matcher === 'Bash') && claudePre.some((h) => h.matcher === 'SendMessage'),
     'claude: PreToolUse가 Bash/SendMessage로 분리됨');
 
-  // search(on) 항목은 배열 매처 fan-out으로 Glob·Grep 양쪽에 등록된다
-  check(claudePre.some((h) => h.matcher === 'Glob' && h.file === 'surface-claude-md.mjs')
-    && claudePre.some((h) => h.matcher === 'Grep' && h.file === 'surface-claude-md.mjs'),
-    'claude: surface-claude-md가 Glob·Grep 매처로 fan-out 등록됨');
+  // search-edit(on) 항목은 배열 매처 fan-out으로 탐색·쓰기 네 도구 전부에 등록된다
+  // (쓰기는 백스톱 — Write/Edit으로는 폴더 CLAUDE.md가 자동 로드되지 않는다)
+  check(['Glob', 'Grep', 'Edit', 'Write'].every((m) =>
+    claudePre.some((h) => h.matcher === m && h.file === 'surface-claude-md.mjs')),
+    'claude: surface-claude-md가 Glob·Grep·Edit·Write 매처로 fan-out 등록됨');
 
   // edit(on) 항목은 배열 매처 fan-out으로 Edit·Write 양쪽에 등록된다
   check(claudePre.some((h) => h.matcher === 'Edit' && h.file === 'surface-coupling.mjs')

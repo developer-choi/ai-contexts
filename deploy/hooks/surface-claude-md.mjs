@@ -8,6 +8,9 @@ import { readPayload, getCwd, getSessionId, addContext } from "./hook-utils.mjs"
 // Glob/Grep·Write·서브에이전트로는 미로드). 배치·네이밍을 결정하는 계획 단계의 주력
 // 도구가 Glob/Grep이라 폴더 규칙이 결정보다 늦게 도착한다 — 탐색 시점에 대상 경로의
 // 미로드 CLAUDE.md "경로만" 주입해(본문 0) 선읽기를 유도한다. 도구는 차단하지 않는다.
+//
+// Write/Edit도 잡는 이유(백스톱): 탐색을 한 번도 거치지 않고 경로를 지어내 바로 쓰면
+// 규격이 아예 도착하지 않는다. 세션·경로당 1회 주입이라 탐색 때 이미 떴으면 조용하다.
 
 const MARKER_PREFIX = "claude-md-surface-";
 const CLEANUP_SENTINEL = path.join(os.tmpdir(), `${MARKER_PREFIX}last-cleanup`);
@@ -27,10 +30,18 @@ function staticPrefix(pattern) {
   return out.join("/");
 }
 
+// Glob/Grep은 경로를 input.path에, Write/Edit은 input.file_path에 담는다.
+function inputPath(input) {
+  for (const key of ["path", "file_path"]) {
+    if (typeof input[key] === "string" && input[key]) return input[key];
+  }
+  return null;
+}
+
 function resolveTarget(payload) {
   const cwd = getCwd(payload);
   const input = payload.tool_input || {};
-  let base = typeof input.path === "string" && input.path ? input.path : cwd;
+  let base = inputPath(input) || cwd;
   if (!path.isAbsolute(base)) base = path.resolve(cwd, base);
   // Grep의 pattern은 내용 정규식이라 경로 결합 대상이 아니다 — Glob만 결합.
   if (payload.tool_name === "Glob" && typeof input.pattern === "string") {
@@ -122,7 +133,7 @@ function cleanupStaleMarkers() {
 try {
   const payload = readPayload();
   // codex는 PreToolUse를 '*'로 통합 등록하므로 대상 도구가 아니면 self-skip.
-  if (payload.tool_name !== "Glob" && payload.tool_name !== "Grep") process.exit(0);
+  if (!["Glob", "Grep", "Write", "Edit"].includes(payload.tool_name)) process.exit(0);
   const cwd = getCwd(payload);
   if (!cwd) process.exit(0);
 
@@ -133,13 +144,14 @@ try {
   cleanupStaleMarkers();
 
   addContext(
-    `[폴더 규칙] 탐색 대상 경로에 적용되는 CLAUDE.md가 있다 (하위 디렉터리 CLAUDE.md는 Read 전까지 자동 로드되지 않는다):\n` +
+    `[폴더 규칙] 대상 경로에 적용되는 CLAUDE.md가 있다 (하위 디렉터리·다른 레포의 CLAUDE.md는 Read 전까지 자동 로드되지 않는다):\n` +
       fresh.map((p) => `  ${p}`).join("\n") +
       `\n이 폴더 하위에 파일을 만들거나 배치·네이밍·구조를 결정하기 전에 위 파일을 Read로 읽는다. ` +
-      `내용이 다른 문서를 가리키는 포인터면 그 문서를 끝까지 따라가 본문 규칙을 확인한다 — 한 줄 포인터에서 멈추지 않는다.`,
+      `내용이 다른 문서를 가리키는 포인터면 그 문서를 끝까지 따라가 본문 규칙을 확인한다 — 한 줄 포인터에서 멈추지 않는다. ` +
+      `쓰기 도구에서 이 안내를 받았다면 이미 정한 경로·파일명·양식이 그 규칙에 맞는지 다시 확인한 뒤 쓴다.`,
     "PreToolUse",
   );
 } catch (_e) {
-  // 표면화 실패가 탐색을 막아서는 안 된다.
+  // 표면화 실패가 도구 호출을 막아서는 안 된다.
   process.exit(0);
 }

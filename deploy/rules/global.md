@@ -138,10 +138,6 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 ### 내 작업 외 변경은 커밋하지 않는다
 - 내가 수정한 파일만 `git add <path>`로 명시 staging. 내가 건드리지 않은 변경이 보이면 사용자에게 알리고 별도 처리한다.
 
-### 백로그 레포 규칙
-- 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`)는 AC가 아니라 별도 private 레포 `backlog`(`~/WebstormProjects/main/backlog`)에서 관리한다. AC(master/feature)와 같은 커밋에 섞지 않는다.
-- 그 레포 안에서의 커밋 단위·구조 규칙은 `backlog/CLAUDE.md`에 있다.
-
 ### 작업 반영 흐름 — 워크트리 커밋·rebase까지 AI, master 머지·배포는 사용자
 
 원본 레포 수정은 워크트리를 만들어 거기서 커밋을 쌓고, 현재 master 위로 rebase해 머지 직전 상태까지 만드는 것까지 AI가 한다 (워크트리 사용은 「worktree 감지」). 단계마다 "해도 되나 / 해야 하나"를 묻지 않는다.

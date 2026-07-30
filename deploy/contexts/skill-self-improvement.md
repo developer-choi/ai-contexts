@@ -52,7 +52,7 @@
 - 공개 인터페이스(스킬 description, argument-hint, 외부 참조) 변경
 - 같은 스킬 내 여러 섹션을 동시에 손봐야 하는 큰 변경
 
-백로그 적재는 `backlog` 레포 `CLAUDE.md`를 Read해서 그 규격을 따른다.
+백로그 적재는 `backlog` 레포(`~/WebstormProjects/main/backlog/`)에 한다.
 
 ## 역제안 형식
 
