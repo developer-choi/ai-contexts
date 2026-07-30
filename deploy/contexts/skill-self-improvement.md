@@ -52,7 +52,7 @@
 - 공개 인터페이스(스킬 description, argument-hint, 외부 참조) 변경
 - 같은 스킬 내 여러 섹션을 동시에 손봐야 하는 큰 변경
 
-백로그 적재는 `backlog` 레포 절차를 따른다 (`projects/` 중 적합한 영역 — AC 자체는 `ai-contexts/active/`).
+백로그 적재는 `backlog` 레포 `CLAUDE.md`를 Read해서 그 규격을 따른다.
 
 ## 역제안 형식
 

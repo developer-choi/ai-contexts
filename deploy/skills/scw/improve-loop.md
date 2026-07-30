@@ -54,7 +54,7 @@
 
 ### 5. 백로그 이관
 
-스코프 외 이슈는 `backlog` 레포(`~/WebstormProjects/main/backlog/`)의 적합한 영역에 추가한다. AC 자체면 `projects/ai-contexts/active/{target}.md`, 타 프로젝트면 `projects/{project}/{topic}/{item}.md` (주제별). 인수인계 가능한 분량으로 작성한다 (짧게 요약하지 않는다).
+스코프 외 이슈는 `backlog` 레포(`~/WebstormProjects/main/backlog/`)에 항목으로 추가한다 — 영역·경로·파일명·양식은 그 레포 `CLAUDE.md`를 Read해서 따른다. 인수인계 가능한 분량으로 작성한다 (짧게 요약하지 않는다).
 
 필수 항목:
 - 발견 맥락 (어느 세션 어느 단계)
@@ -77,4 +77,4 @@
 - 100줄 이상 변경이 예상되면 plan mode 진입 (CLAUDE.md 전역 규칙)
 - workspace 폴더는 작업 종료 전 반드시 삭제 (guide.md 「벤치 정리」)
 - 워크트리 자동 삭제 금지 — 사용자 지시 받기
-- 백로그 이관 시 항목을 짧게 요약하면 인수인계 불가. {target}.md 형식의 다른 기존 항목을 참고해 분량을 맞춘다
+- 백로그 이관 시 항목을 짧게 요약하면 인수인계 불가. 같은 영역의 다른 기존 항목을 참고해 분량을 맞춘다

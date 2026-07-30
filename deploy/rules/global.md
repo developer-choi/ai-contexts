@@ -140,7 +140,7 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 ### 백로그 레포 규칙
 - 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`)는 AC가 아니라 별도 private 레포 `backlog`(`~/WebstormProjects/main/backlog`)에서 관리한다. AC(master/feature)와 같은 커밋에 섞지 않는다.
-- `backlog` 레포 안에서도 백로그 재료(`projects/`·`articles/`·`roadmaps/`)와 `archives/`(종결 자료)는 커밋 종류가 다르므로 같은 커밋에 섞지 않는다.
+- 그 레포 안에서의 커밋 단위·구조 규칙은 `backlog/CLAUDE.md`에 있다.
 
 ### 작업 반영 흐름 — 워크트리 커밋·rebase까지 AI, master 머지·배포는 사용자
 

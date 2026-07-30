@@ -30,16 +30,11 @@ argument-hint: "[review|exec [대상] | orchestrate-exec | projects|articles [�
 
 ## 범위
 
-모든 백로그를 별도 `backlog` 레포에서 중앙 관리한다. 영역별 위치:
-
-- `projects/{project}/{topic}/` — 레포별(KA·MP·DC 등) 작업·지식·참고, 주제별. AC 자체 작업은 `projects/ai-contexts/active/`에 둔다 — 백로그 레포는 exec로 AC를 수정하는 자기수정 트래커도 호스팅한다. `ai-contexts`·`private-playground`(PP)의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 다른 projects와 달리 기본 `status: ready` 등록 대상이다(아래 트래커 비대칭 참고). 같은 폴더의 개인 메모·완성형 노트는 트래커 항목이 아니라 해당 없다
-- `articles/{slug}/` — 기술블로그에 발행할 포스트 재료, 포스트 단위
-
-두 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
+모든 백로그를 별도 `backlog` 레포에서 중앙 관리한다. 영역은 `projects/`(레포별 작업·지식·참고)와 `articles/`(발행 재료)이며, 두 영역의 차이는 [영역 분류](#1-영역-분류)에서 정의한다.
 
 ## 레포
 
-백로그는 AC(public)와 분리된 **별도 private 레포 `backlog`**(약어 B)에 산다. 개인 메모라 public 노출을 막고, 커밋을 자유롭게 쌓는다(squash·rebase 불필요). 백로그 데이터는 이 레포의 기본 브랜치(`main`)에 그대로 있으므로 브랜치 전환·상시 워크트리가 없다.
+백로그는 AC(public)와 분리된 **별도 private 레포 `backlog`**(약어 B)에 산다. 개인 메모라 public 노출을 막기 때문이다.
 
 - **경로**: `~/WebstormProjects/main/backlog/`
 - **원격**: `https://github.com/developer-choi/backlog` (private)
@@ -47,6 +42,8 @@ argument-hint: "[review|exec [대상] | orchestrate-exec | projects|articles [�
   ```
   git clone https://github.com/developer-choi/backlog.git ~/WebstormProjects/main/backlog
   ```
+
+[CRITICAL] 백로그를 읽거나 쓰기 전에 `~/WebstormProjects/main/backlog/CLAUDE.md`를 Read한다. 영역별 경로·파일명, frontmatter 어휘, 항목 양식, Ready 게이트 문항, 커밋 규칙의 단일 출처다. 본 스킬은 그 규격을 중복 정의하지 않으므로, 읽지 않으면 산출물의 위치·양식을 정할 수 없다.
 
 ---
 
@@ -80,7 +77,7 @@ argument-hint: "[review|exec [대상] | orchestrate-exec | projects|articles [�
 | `projects/{project}/{topic}/` | 레포별 작업·지식·참고 (AC 자체 포함 → `projects/ai-contexts/`) | 주제·역할 단위 |
 | `articles/{slug}/` | 기술블로그에 발행할 포스트 재료 | 포스트 단위 |
 
-`ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 **할 일 트래커** — 기본 `status: ready` 등록 대상이고 리뷰/실행 모드의 주 무대다. 같은 폴더라도 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니라 `status: ready` 강제 대상이 아니다. 다른 `projects/`는 기본 무상태이되 `status: ready`를 opt-in하면 Ready 게이트가 적용된다(게이트는 영역무관 — 「Ready 게이트 — 자가검증」 참고). `articles/`는 비-트래커(발행 재료)로 `status`를 쓰지 않는다.
+`ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 **할 일 트래커** — 기본 `status: ready` 등록 대상이고 리뷰/실행 모드의 주 무대다. 같은 폴더라도 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니라 `status: ready` 강제 대상이 아니다. 다른 `projects/`는 기본 무상태이되 `status: ready`를 opt-in하면 Ready 게이트가 적용된다(게이트는 영역무관 — 백로그 레포 CLAUDE.md 「Ready 게이트 — 자가검증」). `articles/`는 비-트래커(발행 재료)로 `status`를 쓰지 않는다.
 
 #### projects의 destination은 intent로 가린다
 
@@ -98,7 +95,7 @@ argument-hint: "[review|exec [대상] | orchestrate-exec | projects|articles [�
 
 `projects/` 항목(AC 자체 포함)은 아래 중 하나로 분류한다:
 
-- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치 표기는 [frontmatter 규칙](#frontmatter-규칙)을 따른다.
+- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치는 frontmatter `target`에 적는다 (표기 규격은 백로그 레포 CLAUDE.md 「frontmatter 규칙」).
 - **신규**: 기존에 없는 새로운 스킬·작업.
 
 ### 3. 기존 백로그와 병합
@@ -114,277 +111,27 @@ argument-hint: "[review|exec [대상] | orchestrate-exec | projects|articles [�
 - **추가**: 무상태 지식노트·발행 재료는 기존 파일에 관련 섹션이 있으면 그 섹션에 병합한다. 트래커 항목은 파일=백로그이므로 섹션으로 덧붙이지 않고 대상 target 디렉토리에 새 항목 파일을 만든다
 - **신규**: 해당 주제·항목이 없으면 새로 만든다 — 지식노트는 새 섹션, 트래커는 새 파일
 
-### 4. 배치 판단
+### 4. 배치·파일명
 
-#### 기존 파일·디렉토리 우선
-
-- **트래커 항목**(파일=백로그): 같은 target(스킬) 디렉토리가 이미 있으면 **그 디렉토리에 새 항목 파일**을 만든다. 없으면 디렉토리째 새로 만든다. 기존 항목 파일에 섹션으로 덧붙이지 않는다
-- **무상태 지식노트·발행 재료**: 해당 주제 파일이 이미 있으면 그 파일에 섹션을 추가한다. 없을 때만 새 파일을 만든다
-- 모호한 항목(한두 줄 메모)도 위 기준으로 기존 위치에 넣는다
-
-#### 파일명 규칙
-
-영역별로 파일명을 정한다:
-
-- `projects/ai-contexts/active/` — 백로그 1건 = 파일 1개. 항상 target(스킬·역할)별 하위 디렉토리에 둔다: `active/{스킬명}/{항목-slug}.md` (단일 항목도 디렉토리 형태 — 2번째 항목이 생겨도 승격·이동이 없어 deps 경로가 안 바뀐다). 스킬명은 `deploy/skills/` 스킬명(예: `workflow`, `scw`), `deploy/contexts/` 폴더명(예: `coding-standards`), 그 외 역할 단위(예: `rules`, `agent`, `gotchas`)
-- `projects/{project}/{topic}/` — 주제 디렉토리 단위. 디렉토리에 프로젝트·주제가 박혀 있으므로 파일명에 접두사를 넣지 않는다 (예: `knowledge-archive/network/throughput-번역.md`). read-later 참고 링크는 `{topic}/index.md`의 `## References`에 모은다
-- `articles/` — 포스트 단위 slug (예: `articles/react-error-boundary.md`). 재료가 커지면 `articles/{slug}/` 디렉토리로 승격한다
-
-#### 우선순위
-
-우선 처리할 항목은 frontmatter `priority`(`1`/`2`)로 표기한다 ([frontmatter 규칙](#frontmatter-규칙)의 `priority` 참고). 안 달면 우선순위 없음(기본).
+경로·파일명 규격은 백로그 레포 CLAUDE.md의 「영역별 경로·파일명」에 있다. 기존 디렉토리·파일이 있으면 거기에 넣는 것이 원칙이므로, 새로 만들기 전에 대상 위치를 먼저 훑는다.
 
 ### 5. 등록 상태 — 기본 ready (`ai-contexts`·`private-playground` 트래커 항목)
 
 `ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 사용자가 명시적으로 낮은 상태를 요청하지 않는 한("일단 적어만 둬", "아이디어만" 등) **frontmatter `status: ready`로 등록한다**. 작성 세션이 정보가 가장 풍부한 시점이고, 미뤄둔 보강은 잘 일어나지 않는다. 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니므로 이 기본-ready 대상이 아니다 — `status` 없이 둔다. 다른 projects 항목은 기본 무상태이고, `status: ready`는 opt-in이다(달면 아래 게이트가 적용된다).
 
-- 캡처하면서 「Ready 게이트」 필수 항목(동기 1줄·종료 조건·첫 행동·외부 인용 임베드·절대 시점, 그리고 트래커 항목이면 현재상태·현재 생각중인 방법)을 빈칸 없이 채운다. 채울 정보가 부족하면 등록 전에 사용자에게 그 자리에서 묻는다.
+- 캡처하면서 「Ready 게이트」 필수 문항을 빈칸 없이 채운다. 채울 정보가 부족하면 등록 전에 사용자에게 그 자리에서 묻는다 — 미뤄두면 안 채워진다.
 - critic 서브에이전트(sonnet)로 게이트 문항을 검증하고, 미통과 보강 → 재검증을 0건까지 반복한 뒤 `status: ready`를 단다 (리뷰 모드의 critic 단계를 등록 시점으로 앞당긴 것).
-- `ideation`/`draft`는 사용자가 명시적으로 요청한 경우에만 쓴다. 이때도 「Draft·Ideation 최소검증」은 채운다.
+- `ideation`/`draft`는 사용자가 명시적으로 요청한 경우에만 쓴다. 이때도 「Draft · Ideation 최소검증」은 채운다.
 
 ---
 
 ## 산출물 형식
 
-### frontmatter 규칙
-
-백로그 **1건 = 파일 1개**다. 상태는 섹션 제목 인라인 라벨이 아니라 **frontmatter `status` 필드**로 표기한다.
-
-```yaml
----
-title: PLAN을 "문서·핸드오프"로 프레이밍해 실행을 IMPL로 미루게 함  # status 있는 항목 필수. 무상태 지식노트는 title 없이 # H1 유지
-status: ready          # ready|draft|ideation — 트래커/opt-in 항목만. 무상태 항목은 생략
-priority: 1            # 선택 (1/2)
-focus: low             # 선택 low|high — 내 집중력 요구량(high=많이). 저집중 배치 선별용. 무표기=저집중 후보 아님
-tags: [bench]          # 선택 discussion|bench — 항목 성격(discussion=토론 재료, bench=스킬편집 아닌 문제·벤치 재료). 무표기=일반 트래커
-target: deploy/skills/workflow/
-scope: global (steps/step-4.md, SKILL.md, steps/step-3.md)   # 선택. 값에 global 토큰 포함(전수 스캔 묶음용)
-dependencies: [workflow/consumable-ssot.md]         # 선택. active/ 루트 상대경로. "부재=해결"
----
-```
-
-| 영역 | frontmatter |
-|------|-------------|
-| `projects/ai-contexts/` (AC 트래커) | `title`·`status` 필수. `target` 필수 — 폴더면 폴더경로, 파일이면 전체경로. 여러 곳이면 경로들의 YAML 리스트. `scope`·`dependencies`·`priority`·`focus`·`tags` 선택 |
-| 그 외 `projects/` | `status`를 opt-in하면 `title` 필수. `target` 선택 — 쓸 때는 폴더보다 정밀하게, 레포 내부 경로(`{repo}/path/file.md`) 또는 교차레포 다중 target. 단순 레포명은 폴더와 중복이라 생략. `scope`·`dependencies`·`priority`·`focus`·`tags` 선택 |
-| `articles/`·`roadmaps/`, `archives/`(`history/` 포함) | 정책 없음 |
-
-`target`이 여러 곳이면 공통 부모로 뭉뚱그리지 않고 나열한다 (부분집합은 과대포함되고, 레포가 갈리면 공통 부모가 무의미하다):
-
-```yaml
-target:
-  - deploy/skills/workflow/
-  - deploy/skills/scw/
-```
-
-여러 파일로 쪼갠 항목은 진입점 파일에만 frontmatter를 둔다.
-
-**`title`** — `status` 있는 항목의 필수 필드. 본문 `# H1`을 대체한다(중복 제거, 본문은 `## 동기`부터 시작). 무상태 지식노트는 `# H1`을 유지하고 `title`을 두지 않는다.
-
-**`status`** — `ready`·`draft`·`ideation` 중 하나. 트래커·opt-in 항목만 표기하고, 무상태 항목은 생략한다. 각 값의 의미는 [개별 파일](#개별-파일)의 상태 정의를 따른다.
-
-**`priority`** — 영역 무관 선택 필드. 우선 처리할 항목에 단다. `1`(높음)·`2`(중간) 2단계로 운영하고, 안 달면 우선순위 없음(기본). 백로그를 표면화·처리할 때 `priority: 1`을 먼저, 그다음 `2`, 없는 항목을 마지막으로 다룬다.
-
-```yaml
-priority: 1
-```
-
-**`focus`** — `low`·`high` 중 하나(영역 무관 선택 필드). 그 항목이 **내 집중력을 얼마나 요구하는지**를 표기한다(`high`=많이 필요). `status`(명세 완결성)와 직교하는 별개 축이라, 잘 명세된 `high`도 있다. 저집중 배치를 선별하는 용도이며, 안 달면 저집중 후보가 아니다(opt-in). 값은 `scripts/backlog-ready-shape.mjs`가 `low|high`로 검증한다.
-
-```yaml
-focus: low
-```
-
-**`tags`** — `discussion`·`bench`의 인라인 리스트(영역 무관 opt-in 필드). 항목의 **성격**을 표시한다. 대다수 트래커는 target 스킬을 편집하므로 태그를 안 단다 — 아래 성격일 때만 opt-in한다. 값은 `scripts/backlog-ready-shape.mjs`가 `discussion|bench`로 검증한다(어휘 밖 값·빈 리스트는 커밋 거부).
-
-- **`bench`** — 벤치 재료(위반 사례·before/after 케이스)를 많이 확보해둬서 **벤치를 돌려 그 결과로 target 스킬·룰을 바꾸는 것**이 목적인 ready급 항목. 재료 확보나 발생한 문제 자체는 목적이 아니라 그 수단·맥락이다. (「Ready 게이트」의 "행동 룰 항목이면 벤치 재료"가 **모든** 행동 룰 항목에 요구하는 최소 재료와는 별개 축 — 그건 변경 근거용 최소 재료이고, 이 태그는 *벤치 실행이 변경을 이끄는* 항목을 구분한다)
-- **`discussion`** — 누군가와 **토론해봐야 결론 나는** 항목. 토론 재료를 본문에 모아둔 상태.
-
-```yaml
-tags: [bench]
-```
-
-**`scope`** — 선택 필드. 여러 파일·디렉토리를 전수 스캔해야 하는 항목에 스캔 범위를 적는다. 값에 `global` 토큰을 포함해 오케스트레이션 실행 모드가 같은 스캔 범위끼리 항목을 묶을 수 있게 한다. 단일 파일 수정 등 범위가 좁은 작업에는 붙이지 않는다.
-
-```yaml
-scope: global (deploy/ 전체 스캔)
-```
-
-**`dependencies`** — 선택 필드(트래커 항목). 다른 백로그 **파일**이 먼저 끝나야 이 파일을 착수할 수 있을 때 선행 파일을 명시한다.
-
-- **경로 기준**: 같은 프로젝트 `active/` **루트** 상대 경로(하위 디렉토리 포함). 예: `dependencies: [another.md]`, 하위 디렉토리면 `dependencies: [workflow/consumable-ssot.md]`
-- **부재 = 해결**: 백로그엔 미완료만 남으므로, 선행 경로의 파일이 **없으면** "선행 완료"로 간주한다 — dangling이 아니라 정상 종결 신호다. 완료된 백로그 파일은 삭제되므로(「개별 파일」), 완료된 선행은 경로 부재로 나타난다.
-- **무상태 항목 제외**: `status`를 쓰지 않는 무상태 항목엔 `dependencies`가 무의미하다.
-- **한계**: 이 경로는 같은 프로젝트 `active/` 기준의 프로젝트-로컬 표기라, 크로스레포 선행이나 `inactive/`에 있는 선행은 표현할 수 없다. 그런 선후 관계는 [오케스트레이션 실행 모드](#오케스트레이션-실행-모드)의 단위 분할로 우회한다.
-
-```yaml
-dependencies:
-  - another.md
-```
-
-### 개별 파일
-
-영역별 경로 — **백로그 1건 = 파일 1개**다. 같은 target(스킬) 아래 여러 항목이 있으면 target별 하위 디렉토리로 나눈다:
-
-- AC: `projects/ai-contexts/active/{skill-name}/{item-slug}.md` (단일 항목도 항상 디렉토리 형태 — 승격·이동을 없애 deps 경로가 안 바뀌게)
-- 외부 레포: `projects/{project}/{topic}/{item}.md`
-- 발행 재료: `articles/{slug}.md`
-
-아래 양식은 트래커 항목(AC 자기수정 = `projects/ai-contexts/active/`, 또는 `status`를 opt-in한 projects 항목)에 적용된다. 무상태 `projects/`는 경량 양식 — [projects 영역](#projects-영역)에서 정의한다. `articles/`는 [articles 영역](#articles-영역)에서 정의한다.
-
-`projects/ai-contexts/active/{skill-name}/{item-slug}.md` 예:
-
-```markdown
----
-title: {기능 1 제목}
-status: ready
-target: deploy/skills/pre-exit/  # 결과물이 반영될 위치
-# dependencies: [another.md]  # (선택) 이 파일보다 먼저 끝나야 하는 백로그 파일
----
-
-## 동기
-
-(왜 필요한지)
-
-## 기대상황
-
-- 도달하고자 하는 최종 상태. 어떤 구조/동작이 되면 끝인지
-
-## 현재상태
-
-- 지금 어떻게 박혀 있어서 기대상황과 어긋나는지 — 왜 이 작업이 필요한지의 근거. 위반 사례·발생 사고가 있으면 인용. 기존 문제가 없는 신규 생성 항목이면 "기존 X가 없어서 필요"처럼 공백 자체를 적는다
-
-## 현재 생각중인 방법
-
-- 기대상황으로 가는 후보 방안 — **작성 세션의 의견**이다. 미확정이어도 적되, 나중에 실행하는 사람은 이를 정답으로 맹목 적용하지 말고 기대상황을 기준으로 재판단한다 (작성 시점 사고 흔적)
-```
-
-트래커 항목은 **기대상황·현재상태·현재 생각중인 방법** 셋 다 필수다 — 왜 고치는지(현재상태)와 작성 세션 의견(현재 생각중인 방법)이 없으면 나중에 실행하는 사람이 "왜 이렇게 고치라는지" 판단 근거를 잃는다. 구현이 끝나면 파일을 삭제한다 — 빈 껍데기를 남기지 않는다 (완료된 선행은 「frontmatter 규칙」의 「부재=해결」로 경로 부재가 곧 해결 신호다).
-
-**행동 룰 항목**(프롬프트·룰 본문에 텍스트를 넣어 모델 행동을 바꾸려는 항목)은 「현재상태」에 아래를 *재현 가능할 만큼* 구체적으로 적는다. 규칙 효과를 벤치할 때 그대로 재료가 되므로, 등록 시점에 풍부하게 박아두면 나중에 추가 복기 없이 바로 돌릴 수 있다:
-
-- 어떤 상황(작업 지시·입력)에서 규칙 없이 어떤 행동·출력이 나왔는지 — *위반 사례*
-- 규칙이 작동했다면 나왔어야 할 모습 — *채점 기준* (위반의 반대가 자동으로 정답이 되진 않으므로 따로 적는다)
-
-파일 변환·코드 생성처럼 산출물 정확성이 곧 검증인 항목은 해당 없다.
-
-상태는 frontmatter `status` 필드로 표기한다:
-
-- **`ideation`**: 아이디어 단계, 브레인스토밍 중. 윤곽이 잡히지 않음. 「Draft·Ideation 최소검증」 적용
-- **`draft`**: 윤곽은 잡혔으나 「Ready 게이트」 자가검증 중 일부 문항 미통과 (사용자가 명시 요청한 경우만 — 「등록 상태 — 기본 ready」 참고)
-- **`ready`**: 「Ready 게이트」 전체 통과. 리뷰 모드의 critic 검증을 거친 상태. 다른 세션·머신의 AI가 추가 질문 없이 작업 시작 가능
-
-### Ready 게이트 — 자가검증
-
-`status: ready`를 달려면 아래 문항을 모두 통과한다. 통과 못 한 문항이 있으면 `draft`에 머무른다. **영역 무관** — AC 트래커든 `status`를 opt-in한 projects 항목이든, `ready`를 달려는 모든 항목에 적용된다(기본 ready 등록만 `ai-contexts`·`private-playground` 트래커 항목 한정 — 「등록 상태」 참고).
-
-작성 세션이 사라지고 다른 세션·다른 머신·며칠 뒤의 자신이 읽어도 추가 질문 없이 작업을 시작할 수 있는지를 검증한다. 사용자가 백로그 본문을 매번 검수하지 않을 수 있다는 전제에서, 항목 자체가 자족적으로 살아 있어야 한다.
-
-- **외부 인용 임베드**: 외부 파일·SHA·라인번호를 인용한다면, 인용된 본문 핵심이 백로그 안에 같이 박혀 있는가? (외부 파일이 수정되거나 SHA가 사라져도 백로그가 자족적으로 살아 있어야 한다)
-- **시점 표현 0개**: `어제`, `방금`, `아까`, `지난번` 등 상대 시점이 없는가? 시점은 절대 표기로 (`2026-05-09`) 또는 트리거 표기로 (`PR2 머지 전까지`)
-- **동기 1줄**: 왜 이게 필요한가, 왜 적었는가가 1줄로 박혀 있는가
-- **종료 조건**: 어떤 상태가 되면 이 백로그를 삭제해도 되는지 명시
-- **첫 행동**: 다음에 이어 작업하는 사람이 가장 처음 무엇을 해야 하는지 (명령·파일 열기·재현 절차 등)
-- **트래커 항목이면 문제·의견 동봉**: `## 기대상황`을 갖는 fix·룰 항목은 「현재상태」(왜 고치는지 — 발생한 문제·위반·공백)와 「현재 생각중인 방법」(작성 세션 의견)이 비어있지 않게 채워져 있는가? 둘 다 없으면 ready로 올리지 않는다. 이는 실행자가 변경의 근거를 알고, 의견을 맹목 추종이 아니라 후보로 다루게 하기 위함이며 without/with 벤치 재료도 된다. (기대상황이 없는 비-트래커 항목 — 개인 메모·완성형 노트 — 은 애초에 트래커 ready 대상이 아니므로 해당 없음. git-level `backlog-ready-shape.mjs`가 `ai-contexts`·`private-playground`의 `active/`에서 이 존재를 강제한다)
-- **행동 룰 항목이면 벤치 재료**: 「현재상태」에 위반 사례와 채점 기준이 *재현 가능할 만큼* 박혀 있는가 — 규칙 효과를 벤치할 재료다. 없으면 ready로 올리지 않는다. (파일 변환·코드 생성 등 산출물 정확성이 곧 검증인 항목은 해당 없음)
-
-#### 추가 권장 (소프트 게이트, 사유 명시 시 면제)
-
-- 가설을 적었다면 → 가설별 (a) 지지하는 사실 인용 + (b) 작성 시점 평가, 또는 (c) **검증 액션** (재현 조건을 어떻게 잡을지) 동봉. 미평가·미검증 가설을 그냥 나열하면 사유 명시 필요
-- 수정이 산문·코드 변경을 동반한다면 추가할 텍스트 자체를 포함. 단순 위치 명시(파일·섹션 추가/삭제)면 면제
-- `dependencies`를 적었다면 → 각 경로가 오타 없이 실존 파일을 가리키는지 점검. 부재 자체는 「부재=해결」로 정상이므로, 경로 오타만 잡는 경량 점검이다
-
-### 외부 컨텍스트 Robust 룰
-
-백로그가 시간이 지나도 살아 있게 하기 위한 인용·식별 규칙. Ready 게이트의 「외부 인용 임베드」를 구체화한다.
-
-- **외부 파일·라인번호 인용**: 라인번호만 박지 않고 인용본 핵심도 같이 박는다. `step-4.md:30-36`만 쓰면 그 파일이 수정되는 순간 의미가 깨진다
-- **SHA 인용**: SHA만 적지 않고 인지적 라벨을 쌍으로 (`KA ed1c240 (= list-candidates 신규 커밋)`). 시간 지나면 SHA 자체는 의미가 약해도 라벨이 사용자 기억을 살린다
-- **경로 표기**: 사용자 본인 백로그면 `~/...` 가능. 다른 사람·다른 머신이 이어 받을 가능성을 고려하면 프로젝트 약어를 함께 (예: `AC = ~/WebstormProjects/main/ai-contexts/`)
-
-### Draft · Ideation 최소검증
-
-`draft` 또는 `ideation` 항목도 며칠 뒤 사용자가 봤을 때 무엇이었는지 떠올릴 수 있어야 한다. ready로 가지 않더라도 다음은 적는다:
-
-- 동기 1줄 (왜 적었는가)
-- 핵심 아이디어 또는 발견 1줄
-
-이 둘을 채우지 못하는 항목은 등재하지 않는다 — 캡처 시점에 사용자에게 물어 채우거나, 못 채우면 보류한다.
+frontmatter 어휘(`title`·`status`·`priority`·`focus`·`tags`·`target`·`scope`·`dependencies`), 항목 본문 양식, 「Ready 게이트」 문항은 백로그 레포 CLAUDE.md에 있다. 이 스킬은 그 규격을 중복 정의하지 않는다 — 작성·검증 전에 그 파일을 읽는다 ([레포](#레포)).
 
 ### 사고 회고는 발견 즉시 Ready
 
 사고가 발생한 PR·세션 안에서 발견 즉시 `status: ready`까지 끌어올린다. 발견 시점의 정보(PR 회차, 커밋 SHA, IMPL 산출물, 수치)는 그 시점에만 풍부하고 며칠 뒤엔 휘발된다. "나중에 보강하자"가 사고 회고 백로그에는 작동하지 않는다.
-
-### 암묵적 맥락 금지
-
-"아까 그 이슈", "방금 논의한 것" 등 작성 세션 안에서만 통하는 표현은 금지. 파일 경로, 섹션 이름, 구체적 텍스트로 지시한다.
-
-### 조망 — 인덱스 파일 없음
-
-AC 트래커 폴더(`projects/ai-contexts/active/`)에는 목차·인덱스 파일(`index.md`)을 두지 않는다. 상태는 각 파일 frontmatter의 `status` 필드에 있으므로, 현황은 각 파일 첫 `---`~`---` 블록만 읽어 `status:` 값을 스캔하는 것으로 즉석 생성한다(본문은 로드하지 않는다). 별도 요약 파일은 본문 중복이고 stale만 유발한다.
-
-### projects 영역
-
-`projects/{project}/{topic}/{item}.md` — 외부 레포(KA·MP·DC 등)의 작업·지식·참고를 주제별로 누적한다. 지식 이해가 코드화로 결정되면 해당 레포 항목으로 graduate한다 ([§1 영역 분류](#1-영역-분류)의 intent 분기 참고).
-
-#### active / inactive / domains 격리
-
-외부 레포 백로그는 진행 상태에 따라 `active/`·`inactive/`로 격리한다. topic 디렉토리를 둘 중 하나의 하위에 둔다 — 표준 경로는 `projects/{project}/active/{topic}/`.
-
-- **`active/`**: 진행 중이거나 가까운 시일 내 다룰 활성 백로그. [백로그 표면화](#백로그-표면화) hook은 `projects/{project}/active/` 하위만 탐색해 제안을 띄운다.
-- **`inactive/`**: 보관용·아이디어·당장 진행 계획 없는 비활성 백로그. 표면화 대상에서 배제되어 불필요한 제안 노이즈를 막는다.
-- **`inactive/domains/`**: 도메인별(장바구니·채팅 등) 지식·코드 스케치·기획을 수집·숙성하는 staging. 표면화 대상이 아니라 리마인드 노이즈가 없다. 기획이 구체화돼 착수할 때 해당 topic을 `active/domains/`로 수동 이동(promote)해 노출시키고, 구현이 끝나면 실행 코드는 그 레포로·정제된 지식은 KA로 graduate해 완료 처리한다.
-
-active↔inactive 이동은 수동이다. 새 topic은 진행 의도에 맞춰 기본 `active/`에 두고, 묵힐 것만 `inactive/`로 내린다.
-
-AC 트래커(`projects/ai-contexts/active/`)와의 차이:
-
-- **Ready 게이트는 `status: ready` opt-in 시 적용**(영역무관) — 기본 무상태라 보통 해당 없지만, `status: ready`를 달면 자족성 게이트를 통과해야 한다
-- **상태 필드 선택적** — frontmatter `status`(`ideation` 등)를 붙일 수 있으나 필수 아니다
-- **frontmatter `target` 선택** — 폴더(`projects/{project}/`)가 destination 레포다. 더 정밀한 graduate 경로나 교차레포 target일 때만 적고, 단순 레포명은 생략 ([frontmatter 규칙](#frontmatter-규칙))
-
-`projects/{project}/{topic}/index.md`는 read-later References 전용이다. item 목차(파일 목록·요약 표)는 만들지 않는다 — 항목은 각 `{item}.md`에 살고, 조망이 필요하면 `ls`/`grep`으로 즉석 생성한다. References가 없으면 index.md를 두지 않는다.
-
-#### read-later 참고 링크
-
-나중에 읽을 글·문서 링크는 `{project}/{topic}/index.md`의 `## References` 섹션에 적재한다. destination(레포)은 intent로 가린다 — 지식 이해용이면 `projects/knowledge-archive/`, 구현 참고용이면 그 레포. 아직 안 읽은 링크는 item 본문과 섞지 않고 References로 분리한다. 코드 주제가 아닌 글(AI·LLM 트렌드 등)도 주제별로 모은다. `[제목](URL) — 한 줄 요약` 형식으로 적고, 결이 다르면 References 하위 소제목으로 분류한다.
-
-### articles 영역
-
-`articles/{slug}.md` — 기술블로그에 발행할 포스트 1편의 재료(단편 메모·코드 조각·인용·링크)를 누적한다. 발행 의도가 있는 외부 공개용 모음이라는 점에서 내부 작업·지식인 `projects/`와 구분된다 ([영역 분류](#1-영역-분류) 참고).
-
-트래커와의 차이:
-
-- **Ready 게이트 미적용** — 발행 재료라 `status`를 쓰지 않는다(비-트래커)
-- **상태 표기 없음** — 비-트래커라 frontmatter를 두지 않는다. 이번 개편(status·title frontmatter)은 `articles/`·`roadmaps/`를 대상에서 제외한다
-
-경량 양식:
-
-```markdown
-# {가제}
-
-## 컨셉 (1줄)
-
-이 글로 무엇을 말하려는지
-
-## 재료
-
-- 단편 메모 / 코드 조각 / 인용 / 링크
-
-## 구상 (선택)
-
-- 목차·흐름 아이디어
-```
-
-재료가 커지면 `articles/{slug}/`(디렉토리)로 승격하고, 묶음별로 파일을 쪼갠다.
-
-#### 발행 후 삭제
-
-해당 포스트가 기술블로그에 실제로 발행되면 재료 파일(또는 디렉토리)을 삭제한다. 백로그는 "남은 재료"만 유지하고 발행 이력은 남기지 않는다.
-
-#### 인덱스 없음
-
-`articles/`에는 인덱스 파일을 두지 않는다. 발행 재료는 비-트래커라 띄울 상태가 없고, 각 파일이 첫머리에 `# 가제` + `## 컨셉`을 담아 `ls`만으로 조망되며, 발행 시 파일이 삭제되므로 인덱스는 stale만 유발하는 순배럴이다. 전체 조망이 필요하면 `grep`으로 즉석 생성한다.
 
 ---
 
@@ -404,7 +151,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 |---|---|
 | 모든 프로젝트 (`ai-contexts`·`monorepo-playground`·`private-playground` 등) | `projects/<project>/active/` |
 
-외부 레포는 `active/` 하위만 가리킨다 — `inactive/`는 경로에서 빠져 표면화되지 않는다([projects 영역](#projects-영역)의 격리 규칙). 해당 폴더가 존재하고 그 아래 `.md`가 하나라도 있을 때만 띄운다. 그래서 새 프로젝트의 `projects/<name>/active/`에 `.md`를 두면 **자동으로** 표면화 대상이 된다 — 매핑을 손볼 필요가 없다. 백로그 파일을 추가·수정·삭제해도 hook은 폴더만 가리키고 내용은 그 순간 LLM이 라이브로 훑으므로 항상 최신이다(파일 단위 매니페스트·frontmatter 태그가 없다).
+외부 레포는 `active/` 하위만 가리킨다 — `inactive/`는 경로에서 빠져 표면화되지 않는다(백로그 레포 CLAUDE.md 「active / inactive / domains 격리」). 해당 폴더가 존재하고 그 아래 `.md`가 하나라도 있을 때만 띄운다. 그래서 새 프로젝트의 `projects/<name>/active/`에 `.md`를 두면 **자동으로** 표면화 대상이 된다 — 매핑을 손볼 필요가 없다. 백로그 파일을 추가·수정·삭제해도 hook은 폴더만 가리키고 내용은 그 순간 LLM이 라이브로 훑으므로 항상 최신이다(파일 단위 매니페스트·frontmatter 태그가 없다).
 
 ### 노이즈 제어 — 세션당 폴더당 1회
 
@@ -422,7 +169,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 
 1. 인자로 지정된 프로젝트의 `projects/<project>/active/` 하위 파일을 priority 순(1→2→없음)으로 순회한다(대상 미지정 시 어느 프로젝트인지 사용자에게 되묻는다 — 기본값 없음). 호출 인자에 파일명 식별자가 있으면 매칭 항목으로 좁힌다. Ready 게이트는 영역무관이므로 `status: ready`를 단(또는 달려는) 항목이면 AC·외부 레포 가리지 않고 리뷰 대상이다(전환기엔 구 `## [ready]` 헤딩 항목도 동일하게 인정한다). `articles/`는 비-트래커라 제외.
 2. 각 항목에 대해 critic 서브에이전트(sonnet)를 spawn하여 「Ready 게이트」의 자가검증 문항을 적용한다
-   - critic 입력: 백로그 항목 본문 + 「Ready 게이트」 섹션 정의
+   - critic 입력: 백로그 항목 본문 + 백로그 레포 CLAUDE.md 「Ready 게이트 — 자가검증」 절 본문
    - critic 출력: 각 문항에 대해 통과/미통과를 판정하고, 미통과면 어느 정보가 비어 있는지 보고
 3. critic 결과를 사용자에게 요약 보고한다
    - 전체 통과: `status: ready` 표기 가능
@@ -443,7 +190,7 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 
 1. backlog 레포에서 **인자로 지정된 프로젝트**의 `projects/<project>/active/` 하위를 priority 순(1→2→없음)으로 순회하며 `status: ready` 파일을 찾는다(전환기엔 구 `## [ready]` 섹션도 동일하게 인정한다)(대상 미지정 시 어느 프로젝트인지 사용자에게 되묻는다 — 기본값 없음). 파일명 식별자가 있으면 매칭되는 파일로 좁혀 그것부터 실행한다
    - **저집중 필터(opt-in)**: 사용자가 저집중 배치를 요청하면 `focus: low`인 파일만 대상으로 좁힌다(무표기·`focus: high` 제외). 요청 없으면 기본은 전체(현행)
-   - **선행 검증**: 그 파일에 frontmatter `dependencies`가 있으면, 각 선행 경로가 해결됐는지(「frontmatter 규칙」의 「부재=해결」 기준) 확인한다. 미해결 선행이 있으면 이 파일을 **건너뛰고 사용자에게 경고**한다(차단이 아니라 안내). 모두 해결됐으면 정상 진행한다
+   - **선행 검증**: 그 파일에 frontmatter `dependencies`가 있으면, 각 선행 경로가 해결됐는지(백로그 레포 CLAUDE.md 「부재=해결」 기준) 확인한다. 미해결 선행이 있으면 이 파일을 **건너뛰고 사용자에게 경고**한다(차단이 아니라 안내). 모두 해결됐으면 정상 진행한다
 2. `status: ready` 파일을 찾으면 **그 항목의 target 레포** 기반 임시 워크트리를 만든다. 레포·기본브랜치는 항목에서 파생한다 — `<레포경로>`는 target(또는 프로젝트명)에서, `<기본브랜치>`는 `git -C <레포경로> symbolic-ref --short refs/remotes/origin/HEAD`로 구한다(레포마다 master/main 상이). `<식별>`은 실행하는 백로그 항목(파일명)에서 딴 고유 이름으로 짓는다 — 워크트리 디렉터리와 브랜치에 같은 `<식별>`을 써서, 여러 exec를 병렬로 돌려도 디렉터리·브랜치가 겹치지 않게 한다. `git worktree add`로 만들면 생성 직후 self-heal hook이 의존성을 자동 설치한다(훅 발동은 추적되는 `.githooks`가 보장하므로 이 설치는 편의):
    ```
    git -C <레포경로> worktree add -b backlog-exec-<식별> <레포경로>-<식별> <기본브랜치>
@@ -511,15 +258,3 @@ hook이 cwd의 `WebstormProjects/<group>/<project>` 세그먼트에서 프로젝
 - 기존 파일 업데이트 목록 (무엇이 추가/변경됐는지)
 - 기존 스킬 개선으로 연결된 항목
 
----
-
-## 레포 구조
-
-백로그 레포(`backlog`, `~/WebstormProjects/main/backlog`)는 AC와 분리된 단독 private 레포다. 기본 브랜치(`main`) 루트에 아래 최상위 폴더가 있다:
-
-- `projects/`, `articles/`, `roadmaps/` = 백로그·발행 재료·학습 로드맵
-- `refresh-projects/` = refresh-projects 스킬의 상태·dispatch 산출물
-- `archives/` = 종결·퇴역 자료(옛 프롬프트·`history/` 등). 백로그 재료와 커밋 종류가 다르므로 같은 커밋에 섞지 않는다
-
-- **커밋 자유**: AC master에 얹혀 있지 않으므로 squash·rebase-onto-master가 필요 없다. post-commit hook이 커밋마다 origin(private)으로 자동 push한다.
-- **구조 강제**: `projects/<project>/` 직속은 `active/`·`inactive/`만 허용한다 (git-level `backlog-path-policy.mjs` Rule A). ready 양식은 `backlog-ready-shape.mjs`가 강제한다.
