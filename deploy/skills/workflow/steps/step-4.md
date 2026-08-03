@@ -52,7 +52,7 @@ Step 3의 "컨벤션 사전 참조"에서 파악한 컨벤션을 기반으로, �
 1. coding-standards `rules/`·`principles/`를 Glob → 프로젝트 유형 판별(회사: `universal/`만, 개인: `universal/` + `personal/`) → 해당하는 파일 중 현재 구현에 관련된 것을 선별 (`file-folder-structure` 태그 포함, frontmatter로 확인)
 2. MP `docs/best-practices/*.md`에서 현재 구현에 매칭되는 패턴을 탐색한다 — 매칭되는 엔트리가 있으면 해당 산출물에 참조 패턴으로 기록한다
    - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
-5. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 「누적 원칙」 참조.
+3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 「누적 원칙」 참조.
 
 ### [CRITICAL] 컨벤션 1차 소스 직접 grep 의무
 
