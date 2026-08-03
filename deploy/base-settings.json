@@ -9,7 +9,7 @@
     {
       "file": "post-worktree-install.mjs",
       "event": "PostToolUse",
-      "on": "bash",
+      "on": "shell",
       "msg": "Installing worktree dependencies..."
     },
     {
@@ -51,61 +51,43 @@
     {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
+      "on": "shell",
       "msg": "Checking shell policy..."
     },
     {
       "file": "check-rm-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
-      "msg": "Checking rm policy..."
-    },
-    {
-      "file": "check-rm-policy.mjs",
-      "event": "PreToolUse",
-      "on": "powershell",
+      "on": "shell",
       "msg": "Checking rm policy..."
     },
     {
       "file": "check-git-staging-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
+      "on": "shell",
       "msg": "Checking git staging policy..."
     },
     {
       "file": "check-git-commit-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
+      "on": "shell",
       "msg": "Checking git commit policy..."
     },
     {
       "file": "check-git-push-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
+      "on": "shell",
       "msg": "Checking git push policy..."
     },
     {
       "file": "check-git-reset-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
-      "msg": "Checking git reset policy..."
-    },
-    {
-      "file": "check-git-reset-policy.mjs",
-      "event": "PreToolUse",
-      "on": "powershell",
+      "on": "shell",
       "msg": "Checking git reset policy..."
     },
     {
       "file": "check-git-merge-policy.mjs",
       "event": "PreToolUse",
-      "on": "bash",
-      "msg": "Checking git merge policy..."
-    },
-    {
-      "file": "check-git-merge-policy.mjs",
-      "event": "PreToolUse",
-      "on": "powershell",
+      "on": "shell",
       "msg": "Checking git merge policy..."
     },
     {

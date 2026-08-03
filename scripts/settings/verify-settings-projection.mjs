@@ -92,10 +92,14 @@ function main() {
     && claudePre.some((h) => h.matcher === 'Write' && h.file === 'surface-coupling.mjs'),
     'claude: surface-coupling가 Edit·Write 매처로 fan-out 등록됨');
 
-  // rm 정책은 Bash·PowerShell 양쪽 매처에 등록된다(PowerShell tool은 Bash와 별개)
-  check(claudePre.some((h) => h.matcher === 'Bash' && h.file === 'check-rm-policy.mjs')
-    && claudePre.some((h) => h.matcher === 'PowerShell' && h.file === 'check-rm-policy.mjs'),
-    'claude: check-rm-policy가 Bash·PowerShell 매처로 등록됨');
+  // shell(on) 항목은 셸 명령을 실행하는 tool 전부로 fan-out된다. 하나라도 빠지면 그 tool로
+  // 우회한 명령이 정책 검사를 통과하므로, 대표 훅으로 세 매처 등록을 모두 확인한다.
+  check(['Bash', 'PowerShell', 'Monitor'].every((m) =>
+    claudePre.some((h) => h.matcher === m && h.file === 'check-git-push-policy.mjs')),
+    'claude: check-git-push-policy가 Bash·PowerShell·Monitor 매처로 fan-out 등록됨');
+  check(['Bash', 'PowerShell', 'Monitor'].every((m) =>
+    claudePre.some((h) => h.matcher === m && h.file === 'check-rm-policy.mjs')),
+    'claude: check-rm-policy가 Bash·PowerShell·Monitor 매처로 fan-out 등록됨');
 
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
@@ -120,8 +124,8 @@ function main() {
     'codex: EnterWorktree 전용 hook 미등록');
   check(!codex.some((h) => h.event === 'PreCompact'),
     'codex: PreCompact hook 미등록');
-  // codex엔 PowerShell tool이 없다. powershell 항목은 '*'로 통합되는 bash 항목과 중복되지
-  // 않도록 제외되어, check-rm-policy는 정확히 1번만 등록된다.
+  // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이
+  // codex에선 '*' 한 그룹으로 접혀야 하므로, check-rm-policy는 정확히 1번만 등록된다.
   check(codex.filter((h) => h.file === 'check-rm-policy.mjs').length === 1,
     'codex: check-rm-policy 중복 없이 1회 등록됨');
 

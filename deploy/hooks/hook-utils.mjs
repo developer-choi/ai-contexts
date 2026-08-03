@@ -8,6 +8,10 @@ export function getCommand(payload) {
   return payload.tool_input && typeof payload.tool_input.command === "string" ? payload.tool_input.command : "";
 }
 
+export function getToolName(payload) {
+  return typeof payload.tool_name === "string" ? payload.tool_name : "";
+}
+
 export function getCwd(payload) {
   return typeof payload.cwd === "string" ? payload.cwd : "";
 }

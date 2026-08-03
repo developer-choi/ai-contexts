@@ -1,6 +1,8 @@
-import { deny, getCommand, readPayload } from "./hook-utils.mjs";
+import { deny, getCommand, getToolName, readPayload } from "./hook-utils.mjs";
 
-const cmd = getCommand(readPayload());
+const payload = readPayload();
+const cmd = getCommand(payload);
+const tool = getToolName(payload);
 
 if (/(?:^|&&|\|\||[;|]|\$\(|`)\s*npx\b/.test(cmd)) {
   deny("npx is not allowed. 가장 가까운 package.json의 scripts 섹션을 읽고 적절한 npm run <script>를 사용하세요.");
@@ -16,6 +18,7 @@ if (hasCdSub && hasGitSub) {
 
 // PowerShell here-string(@'...'@ / @"..."@)을 Bash 툴에 쓰면 @가 리터럴로 남아
 // 커밋 메시지 등에 눌러붙는다. bash 여러 줄 문자열은 -m 여러 번 또는 heredoc을 쓴다.
-if (/(?:^|\s)@['"]/.test(cmd)) {
+// PowerShell tool에서는 here-string이 정상 문법이므로 이 룰만 건너뛴다(위 두 룰은 공통).
+if (tool !== "PowerShell" && /(?:^|\s)@['"]/.test(cmd)) {
   deny("PowerShell here-string(@'...'@) 문법을 Bash 툴에 썼습니다. bash에선 @가 리터럴로 남아 메시지 앞뒤에 붙습니다. 여러 줄이면 -m 'subject' -m 'body'로 나누거나 heredoc(<<'MSG' ... MSG)을 쓰세요.");
 }
