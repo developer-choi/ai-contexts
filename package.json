@@ -12,6 +12,7 @@
     "sync:local-system": "node scripts/local-system/sync-local-system.mjs",
     "unsync:local-system": "node scripts/local-system/unsync-local-system.mjs",
     "verify:hooks": "node scripts/verify/verify-hooks.mjs",
+    "verify:hook-policies": "node scripts/verify/verify-hook-policies.mjs",
     "verify:settings": "node scripts/settings/verify-settings-projection.mjs",
     "verify:local-system": "node scripts/local-system/verify-local-system.mjs",
     "verify:links": "node scripts/verify/verify-links.mjs",

@@ -39,6 +39,8 @@ async function main() {
   ensureDeploySource();
   // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'settings', 'verify-settings-projection.mjs')], { stdio: 'inherit' });
+  // 정책 hook은 구멍이 나도 조용하다(등록·실행은 정상, 특정 명령 형태만 통과). 배포 전에 판정을 고정한다.
+  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-hook-policies.mjs')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());

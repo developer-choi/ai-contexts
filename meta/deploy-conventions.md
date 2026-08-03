@@ -22,7 +22,8 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 - **타겟 전용 설정은 그 타겟 override 파일에 둔다.** 예: model·env·permissions는 Claude 전용이라 `deploy/claude-settings.json`에. codex는 override 없이 hook만, gemini는 hook 없음(override 파일 없으면 `{}`).
 - 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.mjs`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
-- `sync:system`은 시작 시 `verify:settings`(생성 계약)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
+- `sync:system`은 시작 시 `verify:settings`(생성 계약)·`verify:hook-policies`(정책 hook 판정)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
+- 정책 hook은 **명령 문자열이 아니라 파싱된 git 호출**을 본다. 인접 정규식으로 검사하면 `git -C <path>`·chain 형태가 조용히 빠져나간다. 새 git 정책 hook은 `deploy/hooks/git-command-parser.mjs`의 `findGitInvocations`·`partitionArgs`를 쓰고, 대표 케이스를 `verify-hook-policies.mjs`에 등록한다.
 
 ## 로컬 settings projection (`local/` → repo-local)
 

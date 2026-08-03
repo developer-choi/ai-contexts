@@ -15,6 +15,7 @@ npm run sync:system -- <target>
 ## 수행 작업
 
 - AC git hook 준비 상태를 먼저 확인합니다. 추적되는 `.githooks` 훅은 체크아웃에 항상 있으므로, `core.hooksPath`가 `.githooks`가 아니면 `npm run prepare`로 설정하고, `commitlint` 의존성이 없으면 실패합니다.
+- 이어서 두 생성·판정 계약을 fail-fast로 확인합니다: settings 생성 계약(`verify:settings`)과 git 정책 hook의 판정(`verify:hook-policies`). 둘 다 깨져도 조용하기 때문에 배포 전에 막습니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다. 복사 후 각 스킬 SKILL.md frontmatter에 `name`이 없으면 폴더명을 주입합니다(Antigravity는 `name`이 있어야 스킬을 인식). 검증도 주입 결과를 기준으로 대조합니다.

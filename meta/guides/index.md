@@ -12,6 +12,7 @@
 - `unsync:*`: 대응하는 `sync:*`가 만든 AC 관리 산출물만 제거합니다.
 - `verify:hooks`: AC worktree의 `.githooks` hooksPath·commitlint 준비 상태를 확인합니다. 새 worktree에서 커밋하기 전에 실행합니다.
 - `verify:settings`: `deploy/base-settings.json`에서 타겟별 설정을 생성하는 계약을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
+- `verify:hook-policies`: git 정책 hook에 대표 명령을 흘려 차단·통과 판정을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
 - `verify:local-system`: `local/base-settings.json`에서 repo-local 설정을 생성하는 계약을 확인합니다. `sync:local-system`이 시작 시 자동 실행합니다.
 
 ## 새 대상 추가 기준
