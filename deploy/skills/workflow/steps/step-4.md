@@ -92,7 +92,7 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (PR이 만들 **외부 공개 모듈은 필수**. 내부 헬퍼는 권장). 페이지 마크업(`.tsx` JSX·`.module.scss` 디자인값)은 MARKUP 완성본을 가져오므로 stub 대상 아님(공통 지정 컴포넌트 껍데기는 예외 — stub.md) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
 | `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당, SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함. figma 없는 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
-| `implementation.md` | `pr{N}/persistent/` | 커밋 분할·방침·행동 결정 커버리지 표·gotcha·근거 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조) | 대부분 작성됨 |
+| `implementation.md` | `pr{N}/persistent/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
 
