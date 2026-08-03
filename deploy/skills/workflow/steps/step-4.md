@@ -177,7 +177,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - stub 파일이 lint·tsc·prettier를 통과하는지 확인 (코드라서 가능)
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
 - **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
-- **코드-narrative 오배치 검출** — **모든 md 산출물**에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2). 특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.
+- **코드-narrative 오배치 검출** — **모든 md 산출물**에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2). **단 `implementation.md` 「행동 결정 커버리지」 표의 `it.todo`는 예외** — 상위 결정과의 대조표라 코드에 대응물이 없다 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조). 특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.
 
 **설계 타당성 역추적**
 - `decisions.md`의 기술 결정과 `overview.md`의 의도(목표·범위)를 기준으로, 파생 산출물(stub 코드 + 잔존 md)이 해당 결정·의도를 충실히 반영하는지 검증한다
