@@ -1,13 +1,68 @@
-import { execSync } from "node:child_process";
+import { execSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
-// 새 워크트리(absWtPath)가 의존성 미설치 상태의 JS 프로젝트면 패키지 매니저로 설치한다.
+// 훅 표준은 husky다. husky의 훅 실행 주체(.husky/_)는 git 추적 대상이 아니라 새 워크트리에
+// 안 딸려오고, 없으면 git이 훅을 조용히 스킵한다. npm ci 가 prepare 를 돌려 그 shim 을
+// 복구하므로, 워크트리 의존성 설치는 편의가 아니라 훅이 도느냐를 가르는 안전 장치다.
 //
-// 훅 발동 자체는 이 설치에 의존하지 않는다 — 개인 레포는 추적되는 .githooks 붙박이 훅으로
-// 전환돼, 훅 파일이 체크아웃에 항상 딸려오고 core.hooksPath(.git/config 공용)를 상속한다.
-// deps가 없어도 훅은 fail-loud로 커밋을 막으므로(예: commitlint 미설치 시 npx --no exit 1),
-// 이 설치는 "안전"이 아니라 "편의(DX)"다 — AI가 새 워크트리에서 바로 커밋할 수 있게 deps를 채운다.
+// 대상 워크트리를 명령 문자열에서 파싱하지 않는다 — 훅은 셸이 실행하기 전의 텍스트를 보므로
+// -C 옵션·셸 변수·명령치환이 끼면 경로를 알 수 없다(2026-07-10·2026-08-03 사고). 대신
+// git 에게 워크트리 목록을 물어 의존성이 빠진 곳을 채운다. 명령이 어떤 형태든 결과가 같다.
+function installMissingWorktreeDeps() {
+  const messages = [];
+
+  for (const worktree of listCandidateWorktrees()) {
+    const result = installWorktreeDeps(worktree);
+    if (result.ran) messages.push(result.message);
+  }
+
+  return messages;
+}
+
+// ~/WebstormProjects/<group>/<repo> 의 링크 워크트리를 모은다. primary 는 이미 셋업돼 있으므로 제외.
+function listCandidateWorktrees() {
+  const projectsRoot = path.join(os.homedir(), "WebstormProjects");
+  const found = [];
+
+  for (const group of readDirsSafe(projectsRoot)) {
+    for (const repo of readDirsSafe(path.join(projectsRoot, group))) {
+      const repoPath = path.join(projectsRoot, group, repo);
+      if (!isDirectory(path.join(repoPath, ".git"))) continue; // primary 워크트리만 조회 시작점으로 쓴다
+
+      const result = spawnSync("git", ["-C", repoPath, "worktree", "list", "--porcelain"], { encoding: "utf8" });
+      if (result.status !== 0) continue;
+
+      for (const line of result.stdout.split("\n")) {
+        if (!line.startsWith("worktree ")) continue;
+        const wtPath = line.slice("worktree ".length).trim();
+        if (path.resolve(wtPath) === path.resolve(repoPath)) continue;
+        found.push(wtPath);
+      }
+    }
+  }
+
+  return found;
+}
+
+function readDirsSafe(dir) {
+  try {
+    return fs.readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+  } catch {
+    return [];
+  }
+}
+
+function isDirectory(target) {
+  try {
+    return fs.statSync(target).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+// 워크트리 하나에 의존성이 없으면 패키지 매니저로 설치한다.
 // 반환: { ran, ok, message }
 function installWorktreeDeps(absWtPath) {
   if (!absWtPath || !fs.existsSync(absWtPath)) return { ran: false, ok: true, message: "" };
@@ -47,4 +102,4 @@ function detectPm(absWtPath, pkgJsonPath) {
   return { pm: null, installCmd: null };
 }
 
-export { installWorktreeDeps };
+export { installMissingWorktreeDeps };
