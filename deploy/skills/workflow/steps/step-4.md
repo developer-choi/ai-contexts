@@ -92,7 +92,7 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (PR이 만들 **외부 공개 모듈은 필수**. 내부 헬퍼는 권장). 페이지 마크업(`.tsx` JSX·`.module.scss` 디자인값)은 MARKUP 완성본을 가져오므로 stub 대상 아님(공통 지정 컴포넌트 껍데기는 예외 — stub.md) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
 | `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준 (figma 충실도 검증 자체는 MARKUP 담당, SKILL.md 「검증 기준 = 진실 원천」). 그 외 PR은 생성 안 함. figma 없는 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
-| `implementation.md` | `pr{N}/persistent/` | 구현 순서·방침·`@deprecated` 흐름·it.todo 매핑·회귀 체크리스트 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조) | 대부분 작성됨 |
+| `implementation.md` | `pr{N}/persistent/` | 커밋 분할·방침·행동 결정 커버리지 표·gotcha·근거 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
 
@@ -108,7 +108,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 ### implementation.md 양식
 
-양식·회귀 체크리스트 절은 [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조.
+양식은 [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조.
 
 ---
 
@@ -121,11 +121,11 @@ stub 커밋은 step-4의 산출물이다. 절차:
 1. **LLM이 PR 작업 분석** — 아래 두 조건으로 "코드/stub로 갈 것"을 가른다 (둘 중 하나라도 해당하면 코드로):
    - **조건 1 (외부 공개 시그니처)**: PR이 만들 props·타입·함수 시그니처 등 외부 공개 모듈.
    - **조건 2 (코드로 표현 가능한 모든 계획)**: 시그니처가 없어도 **파일로 표현 가능한 계획은 전부 코드/stub로** 만든다 — 의존성(`package.json` 추가 + 설치), 설정(`vite.config`·`tsconfig`·`eslint` 등), 테스트 의도(`*.test.tsx`의 `it.todo`). 이들을 **어떤 md 산출물에도 산문으로 나열하지 않는다**.
-   - **조건 3 (stub 불가 + 코드표현 가능)**: rename·파일/폴더 이동·설정 한 줄 치환처럼 **코드가 이미 있어 stub 대상이 없지만 편집이 100% 코드로 표현되는** 것. stub이 없어 정확한 편집이 "구현 순서" 산문으로 새기 쉽다. **정확한 before/after 문자열·식별자·줄번호를 어느 md에도 적지 않는다**:
+   - **조건 3 (stub 불가 + 코드표현 가능)**: rename·파일/폴더 이동·설정 한 줄 치환처럼 **코드가 이미 있어 stub 대상이 없지만 편집이 100% 코드로 표현되는** 것. stub이 없어 정확한 편집이 순서 서술 산문으로 새기 쉽다. **정확한 before/after 문자열·식별자·줄번호를 어느 md에도 적지 않는다**:
      - trivial(실행하면 끝 — 순수 rename 등)이면 **문서·세션 핸드오프로 이연하지 말고 그 자리에서 실행·커밋**한다.
      - 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. **각 매치의 before→after 쌍(식별자·경로·줄번호)을 나열하지 않는다**: 무엇을 찾을지(패턴)만 적고, 개별 치환은 step-5가 파일 보고 수행한다. (예: `ErrorFeedbackLayout→HandleSubmitLayout, ErrorFeedbackPage→...`처럼 쌍을 열거하면 위반 — `grep \`error-feedback|ErrorFeedback\` → 새 라우트명으로 치환` 한 줄로 접는다.)
 
-   **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·구현 순서·커밋 분할·회귀 체크리스트·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
+   **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
 3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — IMPL 분리 없이 step-4에서 완결)
 
@@ -187,7 +187,6 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - stub `.tsx`의 props 타입을 `.module.scss`/hook stub이 일관되게 소비하는지 대조한다
 - hook stub의 API 응답 placeholder가 호출자 타입과 일치하는지 확인한다
 - `it.todo` 자연어가 logic stub의 에러/엣지 시나리오를 커버하는지 확인한다
-- **모든 `it.todo`가 implementation.md의 어느 커밋에서 다뤄지는지** 대조한다. 누락 시 추가하거나 의도적 제외 사유를 명시한다
 - implementation.md의 각 컴포넌트/모듈 커밋에 해당 테스트가 포함되어 있는지 확인한다. 테스트를 별도 커밋으로 분리하지 않고 구현 커밋에 함께 포함시킨다
 
 **채용과제 관점 (채용과제인 경우에만)**
@@ -202,7 +201,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 ### 2. 종료 게이트 (`it.todo` 매칭)
 
-산출물 리뷰와 별개로 직접 수행한다 (리뷰 결과와 무관, 매번 수행). [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트」의 PLAN 시점 매칭 두 갈래를 모두 적용 — **작성 시점(decisions 행동 결정 → `it.todo`, implementation.md 「행동 결정 커버리지」 표 산출)** 과 **종료 시점(`it.todo` → 커밋 계획)**. 앞 갈래는 표를 **필수 산출물**로 강제하므로, 표 미산출·미완(면제 없는 빈 행)이면 종료 불가 — 상류 대조를 산문 점검으로 두면 여러 종료 임무 속에 묻혀 스킵되기 쉬운 것을 표로 가시화하고, IMPL·step-6이 재검증할 계약으로 남긴다. 게이트 결과(커버리지 표 + `it.todo`↔커밋 매칭/누락/면제 분류)는 보고에 포함.
+산출물 리뷰와 별개로 직접 수행한다 (리뷰 결과와 무관, 매번 수행). [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트」의 **PLAN 시점 매칭**(decisions 행동 결정 → `it.todo`, implementation.md 「행동 결정 커버리지」 표 산출)을 적용한다. 이 매칭은 표를 **필수 산출물**로 강제하므로, 표 미산출·미완(면제 없는 빈 행)이면 종료 불가 — 상류 대조를 산문 점검으로 두면 여러 종료 임무 속에 묻혀 스킵되기 쉬운 것을 표로 가시화하고, IMPL·step-6이 재검증할 계약으로 남긴다. 게이트 결과(커버리지 표)는 보고에 포함.
 
 stub 없는 PR이라도 decisions에 **행동 결정이 있으면** 그 결정은 대응 `it.todo`(→stub)를 요구한다 — "외부 시그니처 없음"을 "행동 결정 없음"으로 확장하지 않는다(§5 정신과 정합). 행동 결정이 실제 0건인 순수 인프라 PR만 `it.todo` 0건 → 면제로 분류하고 면제 사유를 명시한다.
 
@@ -218,5 +217,5 @@ SKILL.md 「자가 검토 필수」의 「세션 종료 시 셀프 리뷰」 적
 
 - 파생된 산출물 핵심 요약
 - 산출물 리뷰 결과 (1단계)
-- 종료 게이트 결과 (2단계 — 행동 결정 커버리지 표 + `it.todo`↔커밋 매칭/누락/면제 분류)
+- 종료 게이트 결과 (2단계 — 행동 결정 커버리지 표)
 - 자가 검토 결과 (3·4단계 통과/이슈 발견 여부)

@@ -6,7 +6,7 @@
 
 ## Step 6.1. Gap Analysis (계획 ↔ 실제 차이 검사)
 
-`pr{N}/persistent/implementation.md` 「구현 순서·커밋 분할」 절의 계획 커밋 목록과 실제 `git log`를 대조하여 차이를 식별한다.
+`pr{N}/persistent/implementation.md`의 `### N.` 계획 커밋 항목 목록과 실제 `git log`를 대조하여 차이를 식별한다.
 
 대조 기준:
 
