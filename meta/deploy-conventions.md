@@ -51,7 +51,7 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 - `sync:*` 명령이 새 경로·파일·설정을 동기화하도록 바뀌면, 같은 대상의 `unsync:*` 명령도 함께 수정한다.
 - 동기화와 제거는 같은 기준으로 검증한다. sync만 성공하고 unsync 후 잔여 파일이 남는 구조를 만들지 않는다.
 - `sync:*` 명령은 반복 실행해도 중복·오염 없이 같은 상태로 수렴해야 한다.
-- `sync:system`과 `sync:local-system`은 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git worktree add`·`EnterWorktree` 어느 쪽으로 만들어도 self-heal hook이 의존성·hook을 복구한다. 하네스 밖에서 직접 만든 워크트리는 커밋 전에 `npm ci`(또는 `npm run prepare`)를 실행한다.
+- `sync:system`과 `sync:local-system`은 시작 시 `npm run verify:hooks`와 같은 기준으로 AC git hook 준비 상태를 확인한다. 새 AC worktree는 `git worktree add`·`EnterWorktree` 어느 쪽으로 만들어도 self-heal hook이 의존성을 설치한다. 훅 발동은 설정 등록이 보장하므로 self-heal은 편의일 뿐이고, 하네스 밖에서 만든 워크트리는 커밋 전에 `npm ci`를 실행한다.
 - 새 설치·동기화 대상을 추가하면 같은 커밋에서 `sync:<target>`, `unsync:<target>`, `package.json`, `meta/guides/<target>.md`, `meta/guides/index.md`, `meta/INSTALLATION_GUIDE.md`의 안내를 함께 맞춘다.
 - `unsync:*`는 AC가 만든 산출물만 제거해야 한다. 사용자 파일을 지울 가능성이 있으면 marker block, 상태 파일, 동일성 비교, 또는 경로가 AC 전유 산출물 위치임이 보장되는 경우(gitignore된 투영 대상 디렉토리) 중 하나로 AC 관리 여부를 확인한 뒤 제거한다.
 - 새 `sync:*` 구현은 같은 명령을 2회 이상 실행하는 검증과, 대응 `unsync:*` 후 잔여 AC 산출물이 없는지 확인하는 검증을 포함한다.
@@ -73,9 +73,10 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 
 ## AC worktree hook 준비
 
-- AC는 추적되는 `.githooks` 붙박이 훅을 쓴다 — 훅 파일이 체크아웃에 항상 딸려오고 `core.hooksPath`(`.git/config` 공용)를 상속하므로, 워크트리를 어떻게 만들든 첫 커밋부터 훅이 발동한다. "생성 순간 heal"에 의존하지 않는다.
+- AC 훅은 **두 짝**으로 발동한다 — 추적되는 `.githooks` 파일(체크아웃에 항상 딸려옴) + 그것을 가리키는 git 설정 훅 등록(`.git/config` 공용이라 워크트리끼리 공유). 둘 다 워크트리를 어떻게 만들든 따라오므로 첫 커밋부터 훅이 돈다. "생성 순간 heal"에 의존하지 않는다.
+- 등록은 `sync:environment`(전 레포 스윕)와 AC `prepare`(자기 레포)가 한다. **git 2.54 미만은 설정 훅을 조용히 무시하므로** 등록 전에 버전을 확인해 시끄럽게 끊는다(`scripts/lib/git-hooks.mjs`).
 - 직후 PostToolUse self-heal hook(`post-worktree-install` / `post-enterworktree-install`)은 새 워크트리에 **의존성만** 설치한다(husky 셋업 복구는 더 이상 없다). 훅 발동은 `.githooks`가 구조적으로 보장하고, deps는 편의(DX)일 뿐이다 — deps가 없어도 훅은 fail-loud로 커밋을 막는다. self-heal은 하네스를 거친 생성에만 발동하므로, 맨 터미널에서 만든 워크트리는 그 안에서 `npm ci`를 직접 실행한다.
-- 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. `core.hooksPath`(=`.githooks`), `.githooks/commit-msg`, `commitlint` 실행 파일을 확인하고, hooksPath가 어긋나면 `npm run prepare`(= `git config core.hooksPath .githooks`)로 복구한다.
+- 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. git 버전·`.githooks` 파일·설정 훅 등록·`commitlint` 실행 파일을 확인하고, 등록이 어긋나면 재등록으로 복구한다. `core.hooksPath`가 남아 있으면 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행되므로 이것도 어긋남으로 잡는다.
 
 ## deploy/hooks 검증 원칙
 

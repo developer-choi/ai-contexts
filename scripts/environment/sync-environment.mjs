@@ -10,6 +10,7 @@ import {
   setRegValue,
   runs,
 } from './environment-lib.mjs';
+import { assertGitSupportsConfigHooks, registerRepoHooks, tracksHooksDir } from '../lib/git-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -49,39 +50,47 @@ function main() {
   console.log('--- cmd autorun ---');
   syncCmdAutorun(state);
 
-  console.log('--- .githooks hooksPath ---');
-  syncGithooksHooksPath();
+  console.log('--- git 설정 훅 등록 ---');
+  syncRepoGitHooks();
 
   writeState(state);
   console.log('Environment sync complete.');
 }
 
-// husky를 걷어내고 추적되는 .githooks 붙박이 훅으로 전환한 개인 레포들의 core.hooksPath를 멱등하게 세팅한다.
-// 각 레포 prepare(= git config core.hooksPath .githooks)가 npm install 때 이미 박지만, install을 아직 안 한
-// 클론(git pull만 한 다른 머신 등)은 hooksPath가 비어 훅이 조용히 꺼진다. 이 스윕이 그 창을 닫는다.
-// ~/WebstormProjects/<group>/<repo> 중 .githooks가 추적되는 레포만 대상. 이미 .githooks면 건드리지 않는다.
-function syncGithooksHooksPath() {
+// ~/WebstormProjects/<group>/<repo> 중 .githooks가 추적되는 레포마다, 그 훅들을 git 설정 훅으로
+// 등록한다(git-hooks.mjs). 설정은 .git/config에 들어가고 그 파일은 워크트리끼리 공유되므로,
+// 레포당 한 번 등록하면 이후 만드는 워크트리에는 아무것도 갖다 놓지 않아도 훅이 발동한다.
+//
+// 이 등록이 유일한 배선이다 — 각 레포에 prepare나 설치 스크립트를 두지 않는다. 그래서 새 머신에서는
+// 이 명령을 먼저 돌려야 하고, 돌리기 전 클론은 훅이 없는 상태다(가이드의 "새 머신 기준" 참고).
+//
+// 링크된 워크트리(.git이 파일)는 건드리지 않는다 — 설정은 공용이라 primary에서 한 번이면 충분하고,
+// 워크트리를 대상에 넣으면 같은 레포를 여러 번 쓰게 된다.
+function syncRepoGitHooks() {
   const projectsRoot = path.join(home, 'WebstormProjects');
   if (!fs.existsSync(projectsRoot)) {
-    console.log('WebstormProjects 디렉토리가 없어 .githooks 스윕을 건너뜁니다.');
+    console.log('WebstormProjects 디렉토리가 없어 훅 등록을 건너뜁니다.');
     return;
   }
 
+  // 버전이 낮으면 등록해봐야 git이 조용히 무시한다. 레포를 돌기 전에 여기서 끊는다.
+  assertGitSupportsConfigHooks();
+
   const changed = [];
+  const already = [];
   for (const group of readDirsSafe(projectsRoot)) {
     for (const repo of readDirsSafe(path.join(projectsRoot, group))) {
       const repoPath = path.join(projectsRoot, group, repo);
-      // 링크된 워크트리(.git이 파일)는 건드리지 않는다 — core.hooksPath는 공용 config라 그 레포의
-      // primary 워크트리까지 바꿔, 아직 .githooks를 머지 안 한 레포를 조기에 뒤집을 수 있다. primary(.git이 디렉토리)만 대상.
       if (!isPrimaryWorktree(repoPath)) continue;
-      if (!tracksGithooks(repoPath)) continue;
-      if (normalizeGitPath(gitConfigGet(repoPath, 'core.hooksPath')) === '.githooks') continue;
-      childProcess.execFileSync('git', ['-C', repoPath, 'config', 'core.hooksPath', '.githooks'], { stdio: 'ignore' });
-      changed.push(`${group}/${repo}`);
+      if (!tracksHooksDir(repoPath)) continue;
+      const { changed: didChange, hooks } = registerRepoHooks(repoPath);
+      (didChange ? changed : already).push(`${group}/${repo}(${hooks.join(',')})`);
     }
   }
 
-  console.log(changed.length ? `core.hooksPath=.githooks 설정: ${changed.join(', ')}` : '.githooks 추적 레포의 hooksPath가 모두 이미 .githooks입니다.');
+  if (changed.length) console.log(`설정 훅 등록: ${changed.join(', ')}`);
+  console.log(already.length ? `이미 등록됨: ${already.join(', ')}` : '');
+  if (!changed.length && !already.length) console.log('.githooks를 추적하는 레포가 없습니다.');
 }
 
 function readDirsSafe(dir) {
@@ -98,20 +107,6 @@ function isPrimaryWorktree(repoPath) {
   } catch {
     return false;
   }
-}
-
-function tracksGithooks(repoPath) {
-  const result = childProcess.spawnSync('git', ['-C', repoPath, 'ls-files', '.githooks'], { encoding: 'utf8' });
-  return result.status === 0 && result.stdout.trim().length > 0;
-}
-
-function gitConfigGet(repoPath, key) {
-  const result = childProcess.spawnSync('git', ['-C', repoPath, 'config', '--get', key], { encoding: 'utf8' });
-  return result.status === 0 ? result.stdout.trim() : '';
-}
-
-function normalizeGitPath(value) {
-  return value.trim().replaceAll('\\', '/').replace(/\/+$/, '');
 }
 
 function syncPowerShell(state) {

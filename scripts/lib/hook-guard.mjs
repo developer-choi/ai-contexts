@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+
+import { HOOKS_DIR, assertGitSupportsConfigHooks, registerRepoHooks, repoHooksState } from './git-hooks.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
@@ -8,8 +9,8 @@ function ensureHooksReady() {
   let state = checkHooks();
 
   if (!state.ok && state.repairable) {
-    console.log('AC git hook 준비 상태가 불완전합니다. npm run prepare로 복구를 시도합니다.');
-    runPrepare();
+    console.log('AC git hook 준비 상태가 불완전합니다. 설정 훅 재등록으로 복구를 시도합니다.');
+    registerRepoHooks(repoRoot);
     state = checkHooks();
   }
 
@@ -21,7 +22,7 @@ function ensureHooksReady() {
     'AC git hook 준비 상태가 올바르지 않습니다.',
     ...state.issues.map((issue) => `- ${issue}`),
     '',
-    '하네스로 만든 worktree는 self-heal hook이 의존성을 자동 설치합니다. 자동 복구가 안 됐다면 이 worktree에서 npm ci 후 npm run prepare를 실행하세요.',
+    '의존성이 없으면 이 worktree에서 npm ci를 실행하세요. 등록만 다시 하려면 npm run prepare입니다.',
   ];
   throw new Error(lines.join('\n'));
 }
@@ -30,20 +31,32 @@ function checkHooks() {
   const issues = [];
   let repairable = false;
 
-  // AC는 추적되는 .githooks 붙박이 훅을 쓴다. 훅 파일은 체크아웃에 항상 딸려오므로 존재만 확인하고,
-  // git이 못 나르는 core.hooksPath(=.githooks) 한 줄은 npm run prepare(= git config core.hooksPath .githooks)로 복구한다.
-  const hooksPath = readGitConfig('core.hooksPath');
-  if (normalizeGitPath(hooksPath) !== '.githooks') {
-    issues.push(`core.hooksPath가 .githooks가 아님: ${hooksPath || '(unset)'}`);
+  // 훅은 .githooks 파일(체크아웃에 항상 딸려옴) + git 설정 등록(워크트리끼리 공유) 두 짝으로 발동한다.
+  // 파일은 존재만 확인하고, git이 못 나르는 등록 쪽은 재등록으로 복구한다.
+  for (const name of ['commit-msg', 'pre-commit']) {
+    if (!isFile(path.join(repoRoot, HOOKS_DIR, name))) {
+      issues.push(`${HOOKS_DIR}/${name} 파일이 없음`);
+    }
+  }
+
+  // 버전이 낮으면 등록해도 git이 조용히 무시한다 — 재등록으로 못 고치므로 repairable이 아니다.
+  try {
+    assertGitSupportsConfigHooks();
+  } catch (error) {
+    issues.push(error.message);
+    return { ok: false, issues, repairable: false };
+  }
+
+  const state = repoHooksState(repoRoot);
+  if (!state.registered) {
+    issues.push('git 설정 훅이 .githooks와 어긋남 (미등록이거나 목록 불일치)');
     repairable = true;
   }
 
-  if (!isFile(path.join(repoRoot, '.githooks', 'commit-msg'))) {
-    issues.push('.githooks/commit-msg 파일이 없음');
-  }
-
-  if (!isFile(path.join(repoRoot, '.githooks', 'pre-commit'))) {
-    issues.push('.githooks/pre-commit 파일이 없음');
+  // core.hooksPath가 남아 있으면 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행된다.
+  if (state.hooksPath) {
+    issues.push(`core.hooksPath가 남아 있음: ${state.hooksPath}`);
+    repairable = true;
   }
 
   if (!isFile(commitlintBin())) {
@@ -51,40 +64,6 @@ function checkHooks() {
   }
 
   return { ok: issues.length === 0, issues, repairable };
-}
-
-function readGitConfig(key) {
-  const result = spawnSync('git', ['config', '--get', key], {
-    cwd: repoRoot,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-
-  if (result.status === 1) {
-    return '';
-  }
-
-  if (result.status !== 0) {
-    throw new Error((result.stderr || result.error?.message || `git config ${key} 실패`).trim());
-  }
-
-  return result.stdout.trim();
-}
-
-function runPrepare() {
-  const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const result = spawnSync(npm, ['run', 'prepare'], {
-    cwd: repoRoot,
-    stdio: 'inherit',
-  });
-
-  if (result.status !== 0) {
-    throw new Error(result.error?.message || 'npm run prepare 실패');
-  }
-}
-
-function normalizeGitPath(value) {
-  return value.trim().replaceAll('\\', '/').replace(/\/+$/, '');
 }
 
 function commitlintBin() {
