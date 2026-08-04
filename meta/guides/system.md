@@ -14,7 +14,7 @@ npm run sync:system -- <target>
 
 ## 수행 작업
 
-- AC git hook 준비 상태를 먼저 확인합니다. 추적되는 `.githooks` 훅은 체크아웃에 항상 있으므로, `core.hooksPath`가 `.githooks`가 아니면 `npm run prepare`로 설정하고, `commitlint` 의존성이 없으면 실패합니다.
+- AC git hook 준비 상태를 먼저 확인합니다. 훅 파일(`.githooks`)은 추적돼 체크아웃에 항상 딸려오므로 존재만 보고, git이 못 나르는 설정 훅 등록(`hook.repo-*`)이 어긋나 있으면 재등록으로 복구합니다. `core.hooksPath`는 **남아 있으면 안 됩니다** — 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행되므로 어긋남으로 잡습니다. git 버전이 설정 훅 미만이거나 `commitlint` 의존성이 없으면 실패합니다.
 - 이어서 두 생성·판정 계약을 fail-fast로 확인합니다: settings 생성 계약(`verify:settings`)과 git 정책 hook의 판정(`verify:hook-policies`). 둘 다 깨져도 조용하기 때문에 배포 전에 막습니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
