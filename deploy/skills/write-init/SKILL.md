@@ -24,6 +24,7 @@ argument-hint: <type> [<subtype>]
 | `resume-intro` | — | — | 이력서 한줄소개 — 수치 중심 bullet 다단 |
 | `resume-item` | — | — | 이력서 경력기술서 한 항목 — 제목/문제/해결/성과 4줄 블록. write-refine에서 시안 다양화 모드로 진입 |
 | `decision` | — | — | 기술적 의사결정 문서 — 선택지 2개 이상 비교 + 장단점 + 선택 근거 |
+| `article` | — | — | 기술 글·가이드 — 골격(서사구조)을 사례집에서 고른 뒤 채운다 |
 
 subtype 누락·오타 시 한 번 묻고 진행한다.
 
@@ -57,8 +58,8 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 
 ### 1. 템플릿·가이드 로드 (on-demand)
 
-- `templates/<type>.md`가 있으면 Read (pr-body·decision·resume-intro·resume-item).
-- type별 가이드가 있으면 Read: `resume-item`·`resume-intro` → `../../contexts/writing-guide/resume-guide.md`, `decision` → `../../contexts/writing-guide/decision-guide.md`, `readme` → `../../contexts/writing-guide/readme-guide.md`.
+- `templates/<type>.md`가 있으면 Read (pr-body·decision·resume-intro·resume-item·article).
+- type별 가이드가 있으면 Read: `resume-item`·`resume-intro` → `../../contexts/writing-guide/resume-guide.md`, `decision` → `../../contexts/writing-guide/decision-guide.md`, `readme` → `../../contexts/writing-guide/readme-guide.md`, `article` → `../../contexts/writing-guide/article-skeletons.md`.
 - 해법·선택을 담는 글(`decision`·`resume-*`)이면 `../../contexts/writing-guide/tradeoff-guide.md`도 Read한다 (트레이드오프 점검 — 아래 [가드4]).
 - **무조건 전부 로드하지 않는다.** 해당 type에 필요한 것만.
 - 예외 — `pr-comment`(템플릿 없음, 자유 형식: subtype에 따라 질문/제안/해명/감사 구조를 동적 결정), `readme`(템플릿 없음, `readme-guide.md` 구조 따름. 1차 소스는 작업 컨텍스트가 아니라 대상의 SKILL.md/핵심 문서. SKILL.md에 있는 내용은 되묻지 말고 번역하고 빈칸을 최소화).
@@ -67,7 +68,11 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 
 ### 2. 골격 + 뼈대 초안
 
-확정된 핵심 문장에서 파생되는 헤딩만 세운다. 경로별로:
+확정된 핵심 문장에서 파생되는 헤딩만 세운다.
+
+**골격을 만들기 전에 이미 있는 서사를 먼저 본다.** 이번 글이 들어갈 시리즈·디렉토리에 형제 문서가 있으면 그 글이 논지를 펴는 방식을 읽고 따른다. 형제 문서가 없거나 그 방식이 이번 상황에 안 맞으면 `../../contexts/writing-guide/article-skeletons.md`에서 상황에 맞는 골격을 고른다. 둘 다 아닌 구조로 갈 거면 그 이유를 먼저 말한다. 핵심 문장에서 논리적으로 파생됐다는 것만으로는 읽히는 골격이 되지 않는다.
+
+경로별로:
 
 - **막연 (게이트 ON)**: 헤딩 계층(골격)을 먼저 세워 사용자에게 보인다. **헤딩 구조만** 검수받는다(내용 아님). OK 후 내용 채움.
 - **확실 (게이트 OFF)**: 사용자 초안을 골격으로 받아 바로 내용 단계로.

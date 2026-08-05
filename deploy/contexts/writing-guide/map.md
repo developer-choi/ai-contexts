@@ -27,6 +27,7 @@
 | `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
 | `decision` | 기술적 의사결정 문서 관련 | 의사결정 문서 작성/다듬기 시 (`write-init` type: `decision` 또는 `write-refine` frontmatter type: `decision`) |
 | `tradeoff` | 트레이드오프(단점·비용·적용 한계) 명시 | 해법·선택을 담는 글 작성/다듬기 시 (`decision`·`resume-*`·블로그) |
+| `article` | 기술 글의 상황별 골격(서사구조) 사례집 | 기술 글 작성 시 골격 단계 (`write-init` type: `article`) |
 | `package` | 글쓰기 패키지(frontmatter + 본문) 형식 규격 | 패키지를 만들거나 읽을 때 (`write-init` 저장, `write-refine` 입력·입구 정규화) |
 
 ### [CRITICAL] 탐색 절차
