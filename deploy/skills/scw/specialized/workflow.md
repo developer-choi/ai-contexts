@@ -279,7 +279,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 - step 본문(step-4·5·6 등)에 주석 양식·라이프사이클·종료 게이트 같은 코드 룰 본문이 박혀있지 않은가 — 박혀있으면 `conventions/<topic>.md`로 분리하고 본문은 cross-ref만 유지
 - `/code-review` 스킬이 호출 시 `conventions/` 파일을 컨텍스트로 로드하는지 (자동 로드 또는 호출자 명시 전달)
 - 같은 코드 룰이 step 본문과 `conventions/` 양쪽에 분산되어 있지 않은가 (단일 출처 위반 — 본문은 cross-ref만)
-- 린트(commitlint·ESLint·prettier)로 차단 가능한 룰이 본문에 잉여 박혀있지 않은가 — 린트가 담당하면 본문 룰 삭제 (관련 백로그: `lint-blockable-cleanup`)
+- 린트(commitlint·ESLint·prettier)로 차단 가능한 룰이 본문에 잉여 박혀있지 않은가 — 판정은 [lean-prompt.md](lean-prompt.md) 「도구가 강제하는 규약은 재기술도 언급도 하지 않는다」
 
 ## 세션 상호 의심
 
