@@ -12,10 +12,22 @@ write-init 패키지의 **표현**을 다듬는다. frontmatter가 유일한 컨
 
 ## 입력
 
-`/write-refine <파일 경로>`. write-init 패키지(frontmatter + 본문). 형식은 [write-init "패키지 형식"](../write-init/SKILL.md#패키지-형식) 참조.
+`/write-refine <파일 경로>`. 형식은 [package-format.md](../../contexts/writing-guide/package-format.md) 참조.
 
-- frontmatter 없거나 깨짐 → "패키지 형식이 아닙니다. write-init부터 호출하세요"로 종료.
-- 필수 필드 누락 → 동일 종료.
+계약은 하나다 — **refine은 언제나 패키지를 다듬는다.** 패키지가 아닌 입력(레포 상주 문서 등)은 종료시키지 않고 입구에서 패키지로 만든 뒤 같은 파이프라인에 태운다. 모드 분기는 두지 않는다.
+
+### 입구 정규화 — frontmatter 없거나 필수 필드 누락일 때
+
+대상 파일에 frontmatter를 **임시 부착**한 뒤 「1. 파악」으로 진행한다. 별도 staging 사본을 만들지 않는다.
+
+값을 유도하는 순서:
+
+- **문서군** — 대상 파일의 형제 문서(같은 디렉토리·같은 계열)를 읽어 `audience`·`purpose`와 확립된 톤 관례를 유도한다.
+- **대상 레포 CLAUDE.md** — 그 레포의 운영방침·frontmatter 스키마가 있으면 따른다.
+- **본문** — `key_message`는 H1과 첫 문단에서 유도한다. `type`은 문서 성격에 가장 가까운 값을 고른다.
+- 위로 유도할 수 없는 필드만 사용자에게 **한 번** 묻는다. 필드마다 나눠 묻지 않는다.
+
+부착한 frontmatter는 「종결 — 발행처 이관」에서 제거한다.
 
 ## 룰·사례 로드 (on-demand, 무조건 적재 금지)
 
@@ -104,7 +116,9 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 - **패키지 보존**: staging 패키지 파일은 frontmatter를 그대로 둔다 — 다음 세션 write-refine 재실행이 frontmatter만으로 출발하기 때문이다.
 - **확인**: 발행 문서에 frontmatter가 0줄인지 점검한다(`type`·`audience`·`purpose`·`refs` 등 staging 메타가 남으면 안 됨).
 
-발행처가 staging 패키지와 같은 파일 하나뿐이면(별도 발행 위치 없음) frontmatter를 남길지 뗄지 사용자에게 확인한다 — 재실행 가능성과 발행 청결 중 무엇을 우선할지는 사용자 판단이다.
+- **입구 정규화로 부착한 frontmatter는 무조건 제거**: 대상이 원래 레포 상주 문서였다면 그 파일 자체가 발행처다. 확인 없이 떼고, 뗀 사실을 보고한다. 이 경우 재실행은 다음 세션이 다시 입구 정규화를 거치므로 frontmatter를 남길 이유가 없다.
+
+발행처가 staging 패키지와 같은 파일 하나뿐이고 그 frontmatter를 write-init이 만든 것이면, 남길지 뗄지 사용자에게 확인한다 — 재실행 가능성과 발행 청결 중 무엇을 우선할지는 사용자 판단이다.
 
 ## write-init과의 관계
 

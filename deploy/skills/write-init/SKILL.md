@@ -105,44 +105,10 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 
 ### 5. 패키지 저장
 
-확정 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이 파일이 write-refine 입력.
+확정 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이 파일이 write-refine 입력. 형식은 [package-format.md](../../contexts/writing-guide/package-format.md) 참조.
 
-## 패키지 형식
-
-이 섹션이 패키지(frontmatter + 본문 단일 .md) 형식의 SSOT다. write-refine 등 다른 스킬은 형식 정의를 본문으로 재인용하지 말고 이 섹션을 포인터로 가리킨다.
-
-```markdown
----
-type: pr-body
-subtype: recruitment
-audience: 채용담당자
-audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
-purpose: 성능 최적화 어필
-key_message: 무한스크롤 도입으로 초기 렌더 시간 60% 단축
-length_target: 주요 섹션 3-4개, 섹션당 3-4문단
-rendering_env: markdown
-placeholder_policy: keep
-refs:
-  git_log: a1b2c3..d4e5f6
-  related_files:
-    - src/components/InfiniteScroll/
-    - docs/perf.md
----
-
-# PR 본문
-
-## 변경 사항
-...
-```
-
-**필수 필드** (누락 X): `type`, `subtype`, `audience`, `purpose`, `key_message`
-**선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `length_target`, `refs`, `rendering_env`, `placeholder_policy`
-
-- `key_message`: 「핵심 메시지 확정」에서 합의한 문장을 그대로 옮긴다. 저장 시점에 새로 짓지 않는다.
-- `rendering_env`: `markdown` (default, 생략 시 가정) | `plain-text` | `rich-text`. 본문이 출력될 환경. `plain-text`(이력서 입력 필드, 텍스트 폼 등)면 백틱·코드펜스·헤딩 마크 등 마크다운 문법을 본문에 사용하지 않는다.
-- `placeholder_policy`: `keep` (default, 생략 시 가정) | `drop` | `mark`. 사용자가 채울 자리(`n`, `[채울 내용]` 등) 처리 방식. `keep`은 그대로 두고, `drop`은 검증 불가 수치 등을 제거하며, `mark`는 `[...]` 표기만 사용한다.
-
-frontmatter는 새 세션의 write-refine이 작업 히스토리 없이 출발할 수 있게 해주는 핵심 인터페이스다.
+- `key_message`는 「핵심 메시지 확정」에서 합의한 문장을 그대로 옮긴다. 저장 시점에 새로 짓지 않는다(합의 즉시 적어둔 값이 이미 있다).
+- 나머지 필수 필드는 사용자와의 합의·작업 맥락에서 채운다. 근거 없는 값을 지어내지 않는다(날조가드).
 
 ## 산출 후 1회 안내
 
