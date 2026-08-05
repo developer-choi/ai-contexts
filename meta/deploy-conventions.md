@@ -20,6 +20,11 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 
 - **base에는 진짜 공통인 것만 둔다.** 현재는 정책 hook의 논리 목록(`file/event/on`)뿐 — claude·codex가 같은 hook을 쓰므로 한 번만 적고 어댑터가 타겟별로 변환한다.
 - **타겟 전용 설정은 그 타겟 override 파일에 둔다.** 예: model·env·permissions는 Claude 전용이라 `deploy/claude-settings.json`에. codex는 override 없이 hook만, gemini는 hook 없음(override 파일 없으면 `{}`).
+- **`permissions.allow`의 도구 이름은 괄호형(`"Bash(*)"`)으로 적는다.** 괄호 없는 `"Bash"`를 넣으면 거기서 판정이 끝나 그 도구의 승인 창(`ask`)이 "이미 승인됨"으로 흡수된다 — 훅이 낸 `ask`든 `permissions.ask` 규칙이든 가리지 않는다. 허용 범위는 `"Bash(*)"`와 같은데 승인 창만 죽으므로, 얻는 것 없이 방어선만 잃는다.
+  - 실측(2026-08-05, 같은 세션에서 설정만 바꿔가며): `"Bash"`일 때 `git push --dry-run`이 무승인 통과 → `"Bash"` 제거 시 승인 창 등장 → `"Bash(*)"`로 교체해도 승인 창 유지, 그러면서 `hostname`·`git log`는 조용. 2026-07-25 KA `main` 무승인 push 사고의 원인이 이것이다.
+  - 범위를 준 allow는 원래 `ask`를 못 이긴다 — `Bash(git:*)`가 allow에 있어도 push `ask`는 정상으로 떴다. 문제는 "allow가 있다"가 아니라 "괄호가 없다"였다.
+  - **무시되는 범위는 일정하지 않다.** 같은 괄호 없는 allow 아래서 삭제·산출물 수정 훅의 `ask`는 정상으로 떴고 무시된 것은 push뿐이었다(2026-08-05). 어느 것이 무시될지 예측하지 말고, `ask`로 방어선을 세울 때는 실제로 창이 뜨는지 한 번 확인한다.
+- **git hook이 스스로 내는 명령은 권한 계층 밖이다.** 레포의 `post-commit`이 자체적으로 `git push`를 하는 식이면 도구 호출이 아니므로 `permissions.*`도 정책 hook도 관여하지 않는다. 그런 자동 동작은 그 레포의 hook 자체를 고치는 것 말고 막을 방법이 없다.
 - 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.mjs`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
 - `sync:system`은 시작 시 `verify:settings`(생성 계약)·`verify:hook-policies`(정책 hook 판정)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).

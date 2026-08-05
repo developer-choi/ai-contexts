@@ -29,6 +29,7 @@
 - "항상 X" 류 자동 동작은 메모리·선호로 신뢰성 있게 강제되지 않는다 — 하네스가 실행하는 hook이라야 보장된다.
 - 역제안이지 강제가 아니다. 사용자가 원치 않으면 요청대로 진행한다.
 - **AI가 지켜야 하는 규칙을 새로 만들거나 기존 규칙을 손볼 때** — "이건 규칙으로 적어둬야지" 싶은 순간이면 신설·수정 불문 — `deploy/contexts/rules-as-code.md`를 본다.
+- **프롬프트·스킬 문서를 수정할 때** — 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위의 md — 작업 시작 전에 `/scw`를 로드해 본체와 `specialized/` 체크리스트를 확인한다. `specialized/`에는 특정 대상 전용 체크리스트와 모든 프롬프트에 공통으로 걸리는 체크리스트가 섞여 있으니, 대상 전용 항목이 없다고 넘어가지 않는다.
 
 ## 대량 파일 읽기 방지
 - 사용자가 5개 이상의 파일을 동시에 읽으라고 요청하면 즉시 실행하지 않는다. 먼저 확인을 받는다.
@@ -156,12 +157,11 @@ tsc 실행: exit 0, 에러 0건. PR3 stub이 PR2 deliveries 위에 정합하게 
 
 원본 레포 수정은 워크트리를 만들어 거기서 커밋을 쌓고, 현재 master 위로 rebase해 머지 직전 상태까지 만드는 것까지 AI가 한다 (워크트리 사용은 「worktree 감지」). 단계마다 "해도 되나 / 해야 하나"를 묻지 않는다.
 
-- **master 포인터 이동(머지)은 AI가 하지 않는다.** rebase까지 끝낸 뒤 사용자에게 실행할 명령을 안내하고(`git merge --ff-only <branch>` 등) 대기한다. 보호 브랜치(master/main/develop/release) 머지는 사용자 결정이며 `check-git-merge-policy.mjs` hook이 AI 실행을 차단한다.
-  - **예외 — upstream 따라잡기 ff:** 현재 보호 브랜치를 자기 upstream으로 맞추는 동기화(`git merge --ff-only origin/<현재브랜치>`, 인자 없는 `merge --ff-only` 포함)는 결정이 아니라 동기화라 hook이 허용하며 AI가 직접 해도 된다. feature·worktree 브랜치를 보호 브랜치에 올리는 통합 ff는 인자가 upstream이 아니므로 그대로 차단된다.
+- **master 포인터 이동(머지)은 AI가 하지 않는다.** rebase까지 끝낸 뒤 사용자에게 실행할 명령을 안내하고(`git merge --ff-only <branch>` 등) 대기한다. 보호 브랜치(master/main/develop/release) 머지는 사용자 결정이다.
+  - **예외 — upstream 따라잡기 ff:** 현재 보호 브랜치를 자기 upstream으로 맞추는 동기화(`git merge --ff-only origin/<현재브랜치>`, 인자 없는 `merge --ff-only` 포함)는 결정이 아니라 동기화이므로 AI가 직접 해도 된다.
 - 머지 충돌(rebase 중)은 사용자와 함께 해결한다. 멈추고 "이렇게 충돌났다 + 해결 제안"을 제시한 뒤 진행하며, 임의로 한쪽을 채택해 덮어쓰지 않는다.
 - 배포(`npm run sync:*`)는 사용자가 한다 — 실행도, 할지 묻지도 않는다. deploy/ 산출물 sync도 마찬가지.
-- 원격 `git push`는 AI가 직접 할 수 있다. 단 `claude-settings.json`의 `permissions.ask`(`Bash(git push:*)`·`Bash(git -C * push *)`)가 **모든 push**에 사용자 승인 창을 띄운다 — 브랜치를 가리지 않으므로 feature 브랜치도 승인 대상이다. `check-git-push-policy.mjs`는 보호 브랜치일 때 승인 창에 뜰 사유 문구를 만들고, force push(diverged)·`--no-verify`·history rewrite chain·열린 PR 브랜치는 deny로 차단한다.
-  - **훅의 `ask`는 승인 창을 띄우지 못한다.** allow 목록에 `Bash`가 통째로 있으면 훅이 낸 `ask`는 "이미 승인됨"으로 흡수된다(훅의 `deny`는 allow를 이기지만 `ask`는 못 이긴다 — 2026-07-20 실측). 승인 창이 필요한 명령은 훅이 아니라 `permissions.ask` 규칙으로 잡는다.
+- 원격 `git push`는 AI가 직접 할 수 있다.
 
 ## 조사 산출물 출처 포함
 - 외부 소스를 근거로 제시할 때 URL만 나열하지 않는다. 해당 페이지에서 근거가 되는 원문을 함께 인용한다.

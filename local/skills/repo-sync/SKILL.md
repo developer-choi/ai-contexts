@@ -135,7 +135,7 @@ npm run sync:local-system
 
 ## 안전 가드
 
-- 다음 명령은 사용하지 않는다: `git pull`(기본 동작 위험), `git pull --rebase`, `git reset --hard`, `git push --force`(또는 `+`를 붙인 force refspec), `git stash drop`, `git stash clear`.
+- 다음 명령은 사용하지 않는다: `git pull`(기본 동작 위험), `git pull --rebase`, `git stash drop`, `git stash clear`.
 - merge·ff는 항상 `--ff-only` 또는 `fetch origin <b>:<b>` 트릭. fast-forward 불가능한 경우는 ahead·behind 분기에서 이미 보고됐어야 한다.
 - 보호 브랜치는 어떤 경우에도 자동 커밋·푸시 금지. fast-forward만 허용.
 - WIP 커밋은 일반 브랜치 한정. 보호 브랜치는 미커밋이 있어도 stash·복원만 한다.
