@@ -59,7 +59,7 @@ IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 RE
 
 ### 절차
 
-사용자가 새 세션에서 `/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고, 실제 커밋 목록·변경 요약·Test plan·코드블록을 채워 확정한다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 Test plan으로 재활용한다.
+`/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고(「장기세션 재사용」대로 같은 REFINER 세션에서 이어 하며, 컨텍스트가 커졌으면 `/compact` 후 호출), 실제 커밋 목록·변경 요약·Test plan·코드블록을 채워 확정한다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 Test plan으로 재활용한다.
 
 ### 산출물 정리
 

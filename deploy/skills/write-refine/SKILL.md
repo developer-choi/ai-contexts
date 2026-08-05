@@ -1,6 +1,6 @@
 ---
 name: write-refine
-description: write-init이 만든 패키지(frontmatter + 본문 단일 .md)의 톤·표현·분량을 다듬는다. 작업 히스토리 없는 새 세션에서 호출. 사실 검증은 안 함 — 표현만 다룬다.
+description: write-init이 만든 패키지(frontmatter + 본문 단일 .md)의 톤·표현·분량을 다듬는다. 같은 세션에서 이어 호출해도 되고, 히스토리가 무거우면 `/compact` 후 호출한다. 사실 검증은 안 함 — 표현만 다룬다.
 argument-hint: <package-file-path>
 ---
 
@@ -8,7 +8,7 @@ argument-hint: <package-file-path>
 
 ## 목적
 
-write-init 패키지의 **표현**을 다듬는다. frontmatter가 유일한 컨텍스트. **사실·내용은 손대지 않는다** (init에서 확정된 전제).
+write-init 패키지의 **표현**을 다듬는다. frontmatter가 정본 컨텍스트. **사실·내용은 손대지 않는다** (init에서 확정된 전제).
 
 ## 입력
 
@@ -124,4 +124,8 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 
 ## write-init과의 관계
 
-write-init이 내용 채움, write-refine이 톤·구조·분량 다듬기. write-refine은 작업 히스토리 없이 frontmatter만으로 출발.
+write-init이 내용 채움, write-refine이 톤·구조·분량 다듬기.
+
+init과 같은 세션에서 이어 다듬어도 된다. 진입 전 `/compact`를 권장한다 — AI가 밀다가 기각당한 초안 문장이 히스토리에 남아 있으면 표현 개선을 핑계로 되살아나는데, compact 요약은 사용자 발화를 원문 보존하면서 AI 중간 산출은 버리기 때문이다.
+
+**컨텍스트가 어긋나면 frontmatter가 정본이다.** 대화·compact 요약에 남은 잔재가 frontmatter와 다르면 frontmatter를 따른다.
