@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// git 정책 hook의 판정을 회귀 검증한다.
+// 정책 hook(git 계열 + 삭제 가드)의 판정을 회귀 검증한다.
 //
 // 이 훅들은 실패해도 아무 소리를 내지 않는다 — 등록은 정상이고 명령도 정상 실행되며,
 // 다만 특정 형태만 검사를 빠져나간다(`git commit`은 잡는데 `git -C <path> commit`은 놓치는 식).
@@ -7,6 +7,7 @@
 // sync:system이 배포 전 fail-fast로 돌려, 구멍 난 훅이 배포되는 것을 막는다.
 
 import childProcess from 'node:child_process';
+import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -52,6 +53,13 @@ const CASES = [
 
   // --- chain ---
   ['check-git-staging-policy.mjs', 'git status && git -C ~/repo add -A', 'deny', 'chain 뒷단의 위반도 잡는다'],
+
+  // --- 삭제 가드: 전 경로 검사 + 예외만 통과 ---
+  ['check-rm-policy.mjs', 'rm -rf C:/Windows/Temp/x', 'ask', '시스템 경로 삭제도 잡는다'],
+  ['check-rm-policy.mjs', 'rm -rf ~/x', 'ask', '홈 디렉터리 삭제도 잡는다'],
+  ['check-rm-policy.mjs', 'rm -rf ~/WebstormProjects/main/x', 'ask', '작업 폴더 삭제(기존 동작 유지)'],
+  ['check-rm-policy.mjs', 'rm -rf node_modules', 'pass', '빌드 산출물은 묻지 않는다'],
+  ['check-rm-policy.mjs', `rm -rf "${path.join(os.tmpdir(), 'claude', 'scratch.txt')}"`, 'pass', '임시 디렉터리 하위는 묻지 않는다'],
 ];
 
 function runHook(file, command) {
@@ -72,7 +80,7 @@ function runHook(file, command) {
 }
 
 function main() {
-  console.log('git 정책 hook 판정 검증 중...');
+  console.log('정책 hook 판정 검증 중...');
   const failures = [];
   for (const [file, command, expected, note] of CASES) {
     const { decision, stderr } = runHook(file, command);
@@ -86,10 +94,10 @@ function main() {
     }
   }
   if (failures.length) {
-    console.error(`git 정책 hook 판정 검증 실패: ${failures.length}건`);
+    console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
   }
-  console.log('git 정책 hook 판정 정상');
+  console.log('정책 hook 판정 정상');
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

@@ -1,14 +1,16 @@
-// 삭제 명령(rm 계열·PowerShell Remove-Item 계열)이 ~/WebstormProjects 하위를
-// 지우려 하면 권한 프롬프트(ask)를 띄운다. node_modules 등 빌드 산출물은 통과.
+// 삭제 명령(rm 계열·PowerShell Remove-Item 계열)이 **어느 경로를 향하든** 권한
+// 프롬프트(ask)를 띄운다. 통과는 아래 예외에 해당할 때만이다.
 //
-// 판정: 삭제 대상 인자를 cwd와 합쳐 절대경로로 만든 뒤(~ 확장 포함) WebstormProjects
-// 하위인지 검사한다 → 상대경로·절대경로·틸드·백슬래시를 한 판정으로 커버.
-// 대상이 전부 예외 폴더(어느 세그먼트든 EXEMPT_SEGMENTS)면 묻지 않는다.
+// 판정: 삭제 대상 인자를 cwd와 합쳐 절대경로로 만든 뒤(~ 확장 포함) 예외인지 본다
+// → 상대경로·절대경로·틸드·백슬래시를 한 판정으로 커버.
+// 예외는 두 가지 — 빌드 산출물 폴더(어느 세그먼트든 EXEMPT_SEGMENTS), 임시 디렉터리
+// (os.tmpdir() 하위 — 스크래치패드가 여기 산다) 하위.
+// 예외는 넓히는 방향으로만 조정한다. 노이즈가 나면 예외를 추가하지, 게이트를 되돌리지 않는다.
 import os from "node:os";
 import path from "node:path";
 import { ask, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
-const WS_ROOT = path.join(os.homedir(), "WebstormProjects");
+const TMP_ROOT = os.tmpdir();
 
 // PowerShell Remove-Item 별칭(rm/del/erase/rd/ri/rmdir) + bash rm/rmdir/unlink.
 const DELETE_VERBS = new Set(["rm", "rmdir", "unlink", "del", "erase", "rd", "ri", "remove-item"]);
@@ -21,8 +23,8 @@ const cwd = getCwd(payload) || process.cwd();
 
 if (cmd && shouldAsk(cmd, cwd)) {
   ask(
-    "~/WebstormProjects 하위를 삭제하려는 명령입니다. 의도한 삭제인지 확인하세요 " +
-      "(node_modules·dist 등 빌드 산출물은 묻지 않고 통과합니다).",
+    "파일·폴더를 삭제하려는 명령입니다. 의도한 삭제인지, 경로가 맞는지 확인하세요 " +
+      "(node_modules·dist 등 빌드 산출물과 임시 디렉터리는 묻지 않고 통과합니다).",
   );
 }
 process.exit(0);
@@ -38,8 +40,8 @@ function shouldAsk(command, baseCwd) {
     for (const raw of tokens.slice(1)) {
       if (raw.startsWith("-")) continue; // 플래그/스위치 (-rf, -Recurse, -Path ...)
       const target = resolveArg(raw, baseCwd);
-      if (!target || !underWs(target)) continue; // WebstormProjects 밖 → 무관
-      if (isExempt(target)) continue; // node_modules 등 → 묻지 않음
+      if (!target) continue;
+      if (isExempt(target)) continue; // 빌드 산출물·임시 디렉터리 → 묻지 않음
       asksThisSegment = true;
     }
     if (asksThisSegment) return true;
@@ -74,16 +76,16 @@ function resolveArg(raw, baseCwd) {
   return path.resolve(baseCwd, arg);
 }
 
-function underWs(target) {
-  const t = norm(target);
-  const root = norm(WS_ROOT);
-  return t === root || t.startsWith(root + path.sep);
-}
-
 function isExempt(target) {
+  if (underTmp(target)) return true;
   return norm(target)
     .split(path.sep)
     .some((seg) => EXEMPT_SEGMENTS.has(seg));
+}
+
+// 임시 디렉터리 "하위"만 예외다 — 임시 디렉터리 자체를 통째로 지우는 건 여전히 묻는다.
+function underTmp(target) {
+  return norm(target).startsWith(norm(TMP_ROOT) + path.sep);
 }
 
 // win32는 대소문자 무시.

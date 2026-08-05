@@ -78,13 +78,14 @@
       "note": "파일 존재는 map.md 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: 파일을 추가·수정할 때 그 파일 자신의 frontmatter `tags`에 map.md 「태그」 표의 축(예: always·structure)을 부여한다."
     },
     {
-      "name": "git 정책 hook ↔ 판정 회귀 계약",
+      "name": "정책 hook ↔ 판정 회귀 계약",
       "files": [
         "deploy/hooks/check-git-*.mjs",
+        "deploy/hooks/check-rm-policy.mjs",
         "deploy/hooks/git-command-parser.mjs",
         "scripts/verify/verify-hook-policies.mjs"
       ],
-      "note": "정책 hook은 구멍이 나도 조용하다 — 등록·실행은 정상이고 특정 명령 형태만 검사를 빠져나간다. 그래서 차단·통과 판정을 verify-hook-policies의 케이스 표로 고정한다. hook의 판정 기준을 바꾸거나 새 git 정책 hook을 추가하면 그 표에 케이스를 함께 넣는다. 명령 해석은 git-command-parser 하나만 쓴다(파일별 정규식 금지 — findGitInvocations·partitionArgs로 git -C·chain·따옴표를 일관되게 처리)."
+      "note": "정책 hook은 구멍이 나도 조용하다 — 등록·실행은 정상이고 특정 명령 형태만 검사를 빠져나간다. 그래서 차단·통과 판정을 verify-hook-policies의 케이스 표로 고정한다. hook의 판정 기준을 바꾸거나 새 정책 hook을 추가하면 그 표에 케이스를 함께 넣는다. 명령 해석은 git-command-parser 하나만 쓴다(파일별 정규식 금지 — findGitInvocations·partitionArgs로 git -C·chain·따옴표를 일관되게 처리)."
     },
     {
       "name": "pre-push sync 게이트 ↔ sync 진입점",
