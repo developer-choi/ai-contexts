@@ -37,7 +37,9 @@ export function deny(reason) {
   decide("deny", reason);
 }
 
-// allowlist에 Bash/PowerShell이 있어도 사용자에게 권한 프롬프트를 띄운다(ask가 allow를 덮음).
+// 주의: allowlist에 괄호 없는 도구 이름("Bash")이 있으면 이 ask는 "이미 승인됨"으로 흡수되어 권한
+// 프롬프트가 뜨지 않는다. 괄호형("Bash(*)"·"Bash(git:*)")은 흡수하지 않으므로 ask가 정상 발동한다
+// (2026-08-05 실측). allowlist를 손볼 때 이 형태를 깨뜨리지 말 것.
 export function ask(reason) {
   decide("ask", reason);
 }

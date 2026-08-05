@@ -45,6 +45,8 @@ const CASES = [
   // git 상태를 조회하지 않고 판정이 끝나는 케이스만 고른다(검증이 실행 환경에 의존하지 않게).
   ['check-git-push-policy.mjs', 'git push --no-verify', 'deny', 'push --no-verify 금지'],
   ['check-git-push-policy.mjs', 'git reset --soft HEAD~1 && git push --force', 'deny', 'rewrite+force push chain 금지'],
+  ['check-git-push-policy.mjs', 'git push origin main', 'ask', '보호 브랜치 push는 승인 창을 띄운다'],
+  ['check-git-push-policy.mjs', 'git -C ~/repo push origin develop', 'ask', 'git -C가 껴도 보호 브랜치 push를 잡는다'],
   ['check-git-merge-policy.mjs', 'git -C ~/repo branch -f master', 'deny', '보호 브랜치 포인터 강제 이동'],
   ['check-git-merge-policy.mjs', 'git rebase --abort', 'pass', '진행 중 작업 중단은 허용'],
 

@@ -6,16 +6,10 @@
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   },
   "permissions": {
-    "ask": [
-      "Bash(git push:*)",
-      "Bash(git -C * push *)",
-      "PowerShell(git push:*)",
-      "PowerShell(git -C * push *)"
-    ],
     "allow": [
       "Agent",
       "AskUserQuestion",
-      "Bash",
+      "Bash(*)",
       "Edit",
       "EnterPlanMode",
       "EnterWorktree",
