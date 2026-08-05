@@ -49,8 +49,10 @@ function verifyBase(base, label, check) {
   check(!codex.some((h) => h.event === 'UserPromptSubmit'), `${label} codex: UserPromptSubmit 없음`);
 
   // 이벤트별 단언(해당 이벤트가 있을 때만).
+  // PreToolUse는 매처가 없으면 모든 도구 호출에 걸린다. base의 `on` 토큰이 어댑터 맵에 없으면
+  // matcher()가 undefined를 내며 조용히 그 상태가 되므로, 특정 값이 아니라 "좁혀졌는가"를 본다.
   const claudePre = claude.filter((h) => h.event === 'PreToolUse');
-  if (claudePre.length > 0) check(claudePre.every((h) => h.matcher === 'Bash'), `${label} claude: PreToolUse 매처 Bash`);
+  if (claudePre.length > 0) check(claudePre.every((h) => h.matcher !== null), `${label} claude: PreToolUse 매처 좁혀짐`);
   const codexPre = codex.filter((h) => h.event === 'PreToolUse');
   if (codexPre.length > 0) {
     check(codexPre.some((h) => h.matcher === 'run_command') && codexPre.some((h) => h.matcher === 'Bash'),
