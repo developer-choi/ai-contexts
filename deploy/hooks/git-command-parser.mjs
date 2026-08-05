@@ -127,6 +127,28 @@ export const COMMIT_VALUED_FLAGS = new Set([
   "--pathspec-from-file", "--trailer",
 ]);
 
+// 셸 리다이렉션 토큰과 그 대상을 인자에서 걷어낸다.
+// tokenize는 셸 문법을 모르므로 `<<'MSG'`(heredoc 시작)나 `> out.txt`가 그대로 남고,
+// partitionArgs가 이를 파일 경로(positional)로 센다. "경로를 지정했는가" 판정이
+// heredoc 표식 하나로 뒤집히므로(`git commit -F - <<'MSG'`가 경로 지정으로 보임)
+// 경로를 세기 전에 반드시 통과시킨다.
+const REDIRECT_RE = /^(\d*|&)(>>?|<<?-?|>&|<&)/;
+export function stripRedirections(args) {
+  const out = [];
+  for (let i = 0; i < args.length; i += 1) {
+    const t = args[i];
+    const m = t.match(REDIRECT_RE);
+    if (!m) {
+      out.push(t);
+      continue;
+    }
+    // 연산자만 있는 토큰(`>`)이면 다음 토큰이 대상 파일이라 함께 버린다.
+    // 대상이 붙어 있으면(`>out.txt`·`<<'MSG'`·`2>&1`) 그 토큰만 버린다.
+    if (t.length === m[0].length) i += 1;
+  }
+  return out;
+}
+
 // 서브커맨드 인자를 옵션과 positional(주로 파일 경로)로 가른다.
 // `--` 이후는 전부 positional로 본다(git 규약).
 export function partitionArgs(args, valuedFlags = new Set()) {
