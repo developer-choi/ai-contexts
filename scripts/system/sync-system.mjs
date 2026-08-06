@@ -41,6 +41,8 @@ async function main() {
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'settings', 'verify-settings-projection.mjs')], { stdio: 'inherit' });
   // 정책 hook은 구멍이 나도 조용하다(등록·실행은 정상, 특정 명령 형태만 통과). 배포 전에 판정을 고정한다.
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-hook-policies.mjs')], { stdio: 'inherit' });
+  // 목적 없는 스킬이 배포되면 나중에 본문이 목적에서 벗어났는지 판정할 기준이 없다.
+  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());

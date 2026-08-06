@@ -16,6 +16,7 @@
     "verify:settings": "node scripts/settings/verify-settings-projection.mjs",
     "verify:local-system": "node scripts/local-system/verify-local-system.mjs",
     "verify:links": "node scripts/verify/verify-links.mjs",
+    "verify:skill-purpose": "node scripts/verify/verify-skill-purpose.mjs",
     "scan:code-labels": "node scripts/scan-code-labels.mjs",
     "prepare": "node scripts/environment/register-git-hooks.mjs"
   },
