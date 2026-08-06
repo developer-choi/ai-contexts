@@ -27,6 +27,9 @@ const README = `# Fixture Root
 - [my-repo url gone](https://github.com/developer-choi/fixture-repo/blob/main/docs/gone.md)
 - [my-repo url exists](https://github.com/developer-choi/fixture-repo/blob/main/docs/exists.md)
 - [external 404](https://example.com/404)
+- 인라인 코드 예시: \`[예시](inline-should-not-be-checked.md)\`
+- 이중 백틱 예시: \`\`- [예시 → \`파일.md\`](double-inline-should-not-be-checked.md)\`\`
+- \`code\` [inline code 뒤 진짜 링크](docs/gone-after-code.md)
 
 \`\`\`md
 # 코드펜스 안 헤딩 (무시돼야)
@@ -98,7 +101,16 @@ check("오탐 없음 — 유효 내레포 URL exists.md", () =>
   assert.ok(!broken.some((b) => b.category === "myrepo-url" && b.target.includes("exists.md"))),
 );
 check("오탐 없음 — 코드펜스 안 링크 미검사", () =>
-  assert.ok(!broken.some((b) => b.target.includes("should-not-be-checked"))),
+  assert.ok(!broken.some((b) => b.target === "should-not-be-checked.md")),
+);
+check("오탐 없음 — 인라인 코드 안 링크 미검사", () =>
+  assert.ok(!broken.some((b) => b.target === "inline-should-not-be-checked.md"), JSON.stringify(broken)),
+);
+check("오탐 없음 — 이중 백틱 인라인 코드 안 링크 미검사", () =>
+  assert.ok(!broken.some((b) => b.target === "double-inline-should-not-be-checked.md"), JSON.stringify(broken)),
+);
+check("인라인 코드 뒤 진짜 링크는 여전히 검사", () =>
+  assert.ok(broken.some((b) => b.category === "in-repo" && b.target === "docs/gone-after-code.md"), JSON.stringify(broken)),
 );
 check("README 깨진 링크는 readme=true로 분류", () =>
   assert.ok(broken.filter((b) => b.target === "#nonexistent").every((b) => b.readme)),

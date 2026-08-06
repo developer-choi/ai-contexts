@@ -61,6 +61,14 @@ function listMd(repoRoot) {
 // 코드펜스(``` ~~~) 안은 건너뛴다. 참조형 링크([a][ref])는 다루지 않는다(드묾).
 const LINK_RE = /!?\[[^\]]*\]\(\s*([^)\s]+)(?:\s+"[^"]*")?\s*\)/g;
 
+// 인라인 코드(`…`, ``…``) 안의 링크 표기는 "링크는 이렇게 쓴다"는 예시라 대상이 아니다.
+// 여는 백틱 수와 같은 수로 닫히는 구간을 같은 길이의 공백으로 덮어 열 위치를 보존한다.
+const INLINE_CODE_RE = /(`+)((?:(?!\1)[\s\S])*?)\1/g;
+
+function maskInlineCode(line) {
+  return line.replace(INLINE_CODE_RE, (matched) => " ".repeat(matched.length));
+}
+
 function extractLinks(text) {
   const out = [];
   const lines = text.split(/\r?\n/);
@@ -80,7 +88,7 @@ function extractLinks(text) {
       continue;
     }
     if (inFence) continue;
-    for (const m of line.matchAll(LINK_RE)) {
+    for (const m of maskInlineCode(line).matchAll(LINK_RE)) {
       out.push({ target: m[1], line: i + 1 });
     }
   }
