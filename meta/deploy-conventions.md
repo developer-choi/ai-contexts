@@ -47,7 +47,7 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 
 - 동일 복사의 예외 — **SKILL.md `name` 주입**: 스킬 SKILL.md frontmatter에 `name`이 없으면 배포 시 폴더명을 주입한다(`deploy-lib.mjs`의 `injectSkillName`). Antigravity는 frontmatter `name`이 있어야 스킬을 인식하므로(Claude는 폴더명으로 잡음), 소스에는 `name`을 적지 않고 산출물에만 싣는다. 전역 `deploySkills`(`~/.claude`·`~/.codex`·`~/.gemini`)와 로컬 `sync:local-system`(`.claude/skills`·`.agents/skills`) 모두 적용되며, 전역 검증은 주입 결과 기준으로 대조한다(`compareSkillPaths`).
 
-- **원본은 `local/<X>`**, `.claude/<X>`·`.agents/<X>`는 gitignore 산출물. 산출물 직접 수정 금지.
+- **원본은 `local/<X>`**, `.claude/<X>`·`.agents/<X>`는 gitignore 산출물.
 - 새 자산 종류를 추가하려면 `local/`에 디렉토리만 두면 된다 — sync가 일반 순회하므로 스크립트 수정 불필요. settings/hooks처럼 타겟별로 갈리는 자산만 projection 어댑터가 필요하다.
 - `unsync`는 `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 **통째 제거**한다 (동일성 비교 없이). 경로 자체가 AC가 만든 gitignore 산출물이므로, 원본에서 사라진 스킬(orphan)도 함께 청소되고 원본은 `local/`에 남아 re-sync로 복구된다 — 사용자 데이터 손실 위험이 없다. `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`(투영 원본)가 있는 레포에서만 제거한다(비-AC 레포의 사용자 `AGENTS.md` 보호).
 - 새 자산 종류를 `local/`에 추가하면 그 레포 `.gitignore`에 `.claude/<X>/` 항목을 더한다(`.agents/`는 통째 ignore되어 추가 불필요).

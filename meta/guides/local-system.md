@@ -6,8 +6,6 @@
 npm run sync:local-system
 ```
 
-> sync 스크립트는 사용자만 실행합니다. 에이전트는 `block-ac-sync` 훅에 막히므로, 직접 `! npm run sync:local-system`으로 실행하세요.
-
 기본 순회 범위(스킬)는 `~/WebstormProjects/main/`과 `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포입니다. 특정 루트만 지정할 수 있습니다.
 
 ```bash
