@@ -35,7 +35,7 @@ refs:
 ...
 ```
 
-**필수 필드** (누락 X): `type`, `subtype`, `audience`, `purpose`, `key_message`
+**필수 필드** (누락 X): `type`, `audience`, `purpose`, `key_message`. `subtype`은 그 type에서 subtype이 필수일 때만 함께 필수다.
 **선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `length_target`, `refs`, `rendering_env`, `placeholder_policy`, `rejected`
 
 - `type`·`subtype`: 이 글의 종류. 허용 어휘와 subtype 필수 여부는 패키지를 만드는 스킬의 입력 규격이 단일 출처라, 여기서 다시 나열하지 않습니다.

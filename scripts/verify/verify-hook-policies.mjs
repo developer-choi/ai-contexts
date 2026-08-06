@@ -74,9 +74,106 @@ const CASES = [
   ['check-rm-policy.mjs', `rm -rf "${path.join(os.tmpdir(), 'claude', 'scratch.txt')}"`, 'pass', '임시 디렉터리 하위는 묻지 않는다'],
 ];
 
+// 쓰기 시점 정책 hook은 Bash 명령이 아니라 Write/Edit payload를 본다.
+// [hook 파일, {tool_name, tool_input}, 기대 판정, 설명]
+const PKG = '---\ntype: pr-body\naudience: 채용담당자\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n';
+
+const WRITE_CASES = [
+  [
+    'check-package-frontmatter.mjs',
+    { tool_name: 'Write', tool_input: { file_path: 'C:/tmp/pkg.md', content: PKG } },
+    'pass',
+    '필수 필드가 채워진 패키지는 통과',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience: \npurpose: 어필\n---\n\n# 제목\n' },
+    },
+    'deny',
+    '빈 값·누락 필드가 있으면 막는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: pr-comment\naudience: 리뷰어\npurpose: 질문\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'deny',
+    'pr-comment는 subtype도 필수',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/note.md', content: '---\ntype: guide\n---\n\n# 제목\n' },
+    },
+    'pass',
+    '패키지 어휘 밖 type은 무관한 문서라 통과',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/doc.md', content: '# 설명\n\n```markdown\n---\ntype: pr-body\n---\n```\n' },
+    },
+    'pass',
+    '코드펜스 안의 예시 frontmatter는 잡지 않는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.txt', content: '---\ntype: pr-body\n---\n\n# 제목\n' },
+    },
+    'pass',
+    '.md가 아니면 검사 대상이 아니다',
+  ],
+];
+
+// Edit은 new_string이 본문 조각일 수 있어 디스크 내용에 치환을 적용해야 판정이 선다.
+const editCases = (dir) => [
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Edit',
+      tool_input: { file_path: path.join(dir, 'pkg.md'), old_string: 'purpose: 어필', new_string: 'purpose:' },
+    },
+    'deny',
+    '필수 필드 값을 지우는 Edit도 잡는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Edit',
+      tool_input: { file_path: path.join(dir, 'pkg.md'), old_string: '# 제목', new_string: '# 새 제목' },
+    },
+    'pass',
+    '필수 필드를 건드리지 않는 본문 Edit은 통과',
+  ],
+];
+
+function withPackageFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-package-fixture-'));
+  try {
+    fs.writeFileSync(path.join(dir, 'pkg.md'), PKG);
+    return fn(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 function runHook(file, command) {
+  return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } });
+}
+
+function runHookPayload(file, payload) {
   const res = childProcess.spawnSync(process.execPath, [path.join(hooksDir, file)], {
-    input: JSON.stringify({ tool_name: 'Bash', tool_input: { command } }),
+    input: JSON.stringify(payload),
     encoding: 'utf8',
   });
   if (res.error) throw res.error;
@@ -122,6 +219,20 @@ function main() {
     for (const [file, command, expected, note] of [...CASES, ...untrackedCases(dir)]) {
       const { decision, stderr } = runHook(file, command);
       const label = `${file} :: ${command} → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
+    }
+  });
+  // 쓰기 시점 hook: Edit 케이스는 디스크 내용을 읽으므로 fixture 안에서 실행까지 끝낸다.
+  withPackageFixture((dir) => {
+    for (const [file, payload, expected, note] of [...WRITE_CASES, ...editCases(dir)]) {
+      const { decision, stderr } = runHookPayload(file, payload);
+      const label = `${file} :: ${payload.tool_name} ${payload.tool_input.file_path} → ${expected} (${note})`;
       if (decision === expected) {
         console.log(`  PASS  ${label}`);
       } else {

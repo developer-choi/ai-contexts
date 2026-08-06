@@ -49,6 +49,12 @@
       "msg": "Checking for stray tool-artifact tags..."
     },
     {
+      "file": "check-package-frontmatter.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking writing-package frontmatter..."
+    },
+    {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",

@@ -82,6 +82,7 @@
       "files": [
         "deploy/hooks/check-git-*.mjs",
         "deploy/hooks/check-rm-policy.mjs",
+        "deploy/hooks/check-package-frontmatter.mjs",
         "deploy/hooks/git-command-parser.mjs",
         "scripts/verify/verify-hook-policies.mjs"
       ],
