@@ -278,7 +278,7 @@ dispatch 위임 작업은 메인 워크트리에서 직접 수행하지 않는�
 - 워크트리 경로: 메인 repo 옆에 `<repo>-<task>` 형태 (예: `ai-contexts-readme`)
 - base: `origin/<base-branch>` (메인 repo의 로컬 미반영 커밋 회피 — `git fetch origin <base>` 선행)
 - 생성 명령: `git worktree add <path> origin/<base>` (모든 프로젝트 공통)
-  - AC는 생성 직후 self-heal hook이 새 워크트리에 의존성을 자동 설치한다(훅 발동은 추적되는 `.githooks`가 보장) (AC [meta/deploy-conventions.md](../../../meta/deploy-conventions.md) 「AC worktree hook 준비」 참조)
+  - AC 워크트리를 만들 때는 AC [meta/deploy-conventions.md](../../../meta/deploy-conventions.md) 「AC worktree hook 준비」를 따른다
 - 작업·커밋·푸시는 새 워크트리에서 수행. `-result.md`는 원본 위치(`<backlog>/refresh-projects/dispatch/`, `<backlog>`=`~/WebstormProjects/main/backlog`)에 작성
 
 작업 종료 후 워크트리 정리는 회차 마감 후 사용자가 결정 (삭제 또는 유지).

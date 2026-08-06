@@ -6,8 +6,7 @@
 //      .claude/settings.json·.codex/hooks.json (AC + KA 등 per-repo).
 //
 // settings/hooks는 전역 sync:system과 동일한 메커니즘(부분키 머지·생성 계약 fail-fast·배포
-// 후 대조)을 repo-local로 적용한다. 산출물은 gitignore되며, 사용자만
-// `! npm run sync:local-system`으로 실행한다(에이전트는 block-ac-sync 훅에 막힘).
+// 후 대조)을 repo-local로 적용한다. 산출물은 gitignore된다.
 import path from 'node:path';
 import childProcess from 'node:child_process';
 

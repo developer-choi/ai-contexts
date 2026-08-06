@@ -75,14 +75,15 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 - stash pop 충돌 시 stash 남겨두고 `stash-conflict: stash@{0}에 남김` 기록. 자동 해결 금지.
 
 **WIP 커밋** (일반 브랜치 한정):
-- `git add -A`로 미커밋 변경(tracked·untracked 모두) staging 후 커밋.
-- 커밋 메시지는 해당 레포의 commitlint 규칙을 통과하는 양식이면 된다. 작업 중이던 변경의 성격을 반영해 작성.
-- 커밋 실패(commitlint 등) 시 메시지를 조정해 재시도. 그래도 실패하면 `failed: wip commit — <stderr 요약>` 기록.
+- 무엇이 바뀌었는지 모르는 상태에서 커밋하는 단계이므로, **경로 목록을 먼저 얻어 개별 지정**한다. `git status --porcelain -z`(untracked 포함)로 경로를 받아 그대로 staging·커밋 인자에 넘긴다. `-z`를 쓰는 이유는 공백·비ASCII 경로가 인용·이스케이프 없이 NUL 구분으로 나와 그대로 인자가 되기 때문이다.
+- 목록이 비면 미커밋 변경이 없다는 뜻이므로 이 단계를 건너뛴다 (「미커밋 변경 있는 경우」 분기로 들어왔는데 비었다면 그 사이 상태가 바뀐 것이니 재판정한다).
+- rename 항목은 새 경로·옛 경로가 각각 따로 나온다. 둘 다 넘긴다.
+- 커밋 메시지는 작업 중이던 변경의 성격을 반영해 작성.
+- 커밋 실패 시 메시지를 조정해 재시도. 그래도 실패하면 `failed: wip commit — <stderr 요약>` 기록.
 
 **push**:
 - upstream 있으면 `git push origin HEAD`.
 - upstream 없으면 (일반 브랜치만 도달) `git push -u origin <현재 브랜치>`.
-- `--force`·`+<refspec>` 등 force 옵션 절대 금지.
 - push 실패 시 WIP 커밋이 만들어졌다면 `failed: wip committed locally; push failed — <stderr 요약>` 기록 (커밋은 그대로 남김, 사용자가 직접 처리).
 
 ### 4. 다른 보호 브랜치 ff merge 시도
@@ -115,23 +116,9 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 
 ## ai-contexts 배포
 
-레포 동기화가 끝나면 `ai-contexts` 레포에서 아래 명령을 순서대로 실행한다.
+레포 동기화가 끝나면 배포가 남는다. 배포는 사용자가 실행하므로, 스킬은 `ai-contexts` 레포에서 `sync:system` → `sync:local-system` 순으로 실행하도록 사용자에게 안내하고 거기서 끝낸다.
 
-먼저 시스템 자산을 Claude/Codex 홈에 동기화한다.
-
-```
-npm run sync:system
-```
-
-그 다음 로컬 자산(로컬 스킬 + AC settings/hooks)을 동기화한다.
-
-```
-npm run sync:local-system
-```
-
-- `npm run sync:system`은 `deploy/`의 시스템 자산을 `~/.claude`, `~/.codex`, `~/.gemini`에 동기화한다.
-- `sync:local-system`의 스킬 배포 대상은 `~/WebstormProjects/main/`, `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포다. git 동기화 「순회 범위」와 달리 `simplify/`는 제외한다. settings/hooks 배포는 AC 전용이다(`local/` → AC `.claude/settings.json`·`.codex/hooks.json`).
-- 각 레포의 `local/skills`와 `CLAUDE.md`를 원본으로 보고, `.claude/skills`·`.agents/skills`와 `AGENTS.md`/`GEMINI.md`를 생성/갱신한다.
+- `sync:local-system`의 스킬 배포 대상은 git 동기화 「순회 범위」와 달리 `simplify/`를 제외한다. 두 범위가 다르다는 점만 보고에 함께 알린다.
 
 ## 안전 가드
 
