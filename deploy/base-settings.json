@@ -79,6 +79,12 @@
       "msg": "Checking rm policy..."
     },
     {
+      "file": "check-deploy-script-policy.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking deploy script policy..."
+    },
+    {
       "file": "check-git-staging-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",
