@@ -159,12 +159,10 @@ stub 생성 단계에서 사용자가 검토 후 본문까지 채워 사실상 �
 ```
 git reset --soft <stub 직전 커밋>     # stub부터 마지막 리뷰 수정까지 staged
 git reset HEAD                        # 모두 unstage
-git add <슬라이스 1 파일들>
-git commit -m "<슬라이스 1 메시지>"
-git add <슬라이스 2 파일들>
-git commit -m "<슬라이스 2 메시지>"
+git commit <슬라이스 1 파일들> -m "<슬라이스 1 메시지>"
+git commit <슬라이스 2 파일들> -m "<슬라이스 2 메시지>"
 ```
 
-stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 add 안 하면 자동으로 사라짐 — 의도된 정리.
+stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 어느 커밋 인자에도 안 넣으면 자동으로 사라짐 — 의도된 정리.
 
 정리 완료 후 사용자에게 force-push를 요청한다.

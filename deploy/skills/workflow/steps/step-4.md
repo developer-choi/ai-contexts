@@ -141,11 +141,11 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
 #### [CRITICAL] 포맷팅·prettier 영역 한정
 
-전체 `yarn format` / `npx prettier --write .` 같은 **프로젝트 전역 포맷팅 금지**. 본 PR 영역만 한정 적용한다.
+**프로젝트 전역 포맷팅 금지.** 본 PR 영역만 한정 적용한다 — 전역으로 돌리면 이 PR과 무관한 파일까지 diff에 들어와 리뷰어가 변경의 경계를 잃는다.
 
-- ❌ 금지: `yarn format`, `npx prettier --write .`, `yarn prettier`
+- ❌ 금지: `yarn format`, `yarn prettier` 처럼 대상 경로 없이 도는 형태
 - ✓ 허용:
-  - 영역 한정 prettier: `npx prettier --write _fsd/<slice>/ src/<scope>/`
+  - 영역 한정 prettier — 프로젝트에 포맷 스크립트가 있으면 경로 인자를 붙여 (`npm run format -- _fsd/<slice>/ src/<scope>/`), 없으면 `npm exec prettier -- --write _fsd/<slice>/ src/<scope>/`
   - husky lint-staged (pre-commit hook이 staged 파일만 처리)
   - 에디터(IDE)의 파일 저장 시 자동 포맷
 

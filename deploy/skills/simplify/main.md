@@ -65,7 +65,7 @@
 - **양식:** `[타입]/format/original.md`
 
 **별도 커밋** (SKILL.md `작업 공통 규칙`): 원본 문서를 먼저 단독 커밋한 뒤 단순화 커밋을 시작한다.
-- `git add docs/[카테고리]/[대상명]-original.md && git commit -m "docs: [대상명] 원본 분석 문서 작성"`
+- `git commit docs/[카테고리]/[대상명]-original.md -m "docs: [대상명] 원본 분석 문서 작성"`
 - 그 다음 첫 단순화 커밋: `[대상명 단순화 1/10] ...`
 
 ### Step 4. 점진적 단순화 (커밋)
@@ -93,7 +93,7 @@
 - 이런 내용은 별도로 제안하지 말고 문서에 바로 포함한다.
 
 **별도 커밋** (SKILL.md `작업 공통 규칙`):
-- `git add docs/[카테고리]/[대상명]-simplified.md && git commit -m "docs: [대상명] 단순화 분석 문서 작성"`
+- `git commit docs/[카테고리]/[대상명]-simplified.md -m "docs: [대상명] 단순화 분석 문서 작성"`
 
 ### Step 6. 프롬프트 유지보수
 
@@ -136,8 +136,7 @@
 
 **별도 커밋** (SKILL.md `작업 공통 규칙`):
 ```bash
-git add docs/analysis-queue.md
-git commit -m "docs: 분석 목록 업데이트 ([대상명] 완료)"
+git commit docs/analysis-queue.md -m "docs: 분석 목록 업데이트 ([대상명] 완료)"
 ```
 
 ---

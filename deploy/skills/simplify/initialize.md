@@ -36,10 +36,12 @@ git config user.name "Yu Jin Choe"
 git config user.email "forworkchoe@gmail.com"
 
 # 원본 전체를 그대로 1커밋 (정리 X — 정리는 Step 5 끝 두 번째 커밋)
-git add -A
-git commit -m "initial commit"
+git add <최상위 항목들>
+git commit <같은 경로들> -m "initial commit"
 git branch -M main
 ```
+
+최상위 항목 목록은 `git status --porcelain -z`로 얻는다 — 갓 init한 레포라 전부 untracked로 잡히고, `-z`를 쓰면 공백·비ASCII 경로가 인용 없이 나와 그대로 인자가 된다.
 
 ### (선택) 개인 GitHub 계정으로 push
 
@@ -118,9 +120,11 @@ git push -u origin main
 
 Step 3~5의 수정·삭제를 원본 커밋과 분리해 **한 커밋**으로 묶는다. "원본 → 무엇이 제거됐는지"가 diff 한 번으로 보인다.
 
+Step 3~5에서 손댄 경로는 이미 알고 있으므로 그 경로들을 그대로 넘긴다. 기억이 불확실하면 `git status --porcelain -z`로 목록을 확인한 뒤 넘긴다.
+
 ```bash
-git add -A
-git commit -m "chore: 불필요한 파일·설정 삭제"
+git add <Step 3~5에서 손댄 경로들>
+git commit <같은 경로들> -m "chore: 불필요한 파일·설정 삭제"
 ```
 
 > 🔎 **검수**: 정리 결과를 SIMPLIFY_SOURCE `init-review.md`(정리 유형) 기준 리뷰어 서브에이전트로 검수받는다. 소스·테스트 삭제 등 중대 이슈는 사용자 에스컬레이션.
