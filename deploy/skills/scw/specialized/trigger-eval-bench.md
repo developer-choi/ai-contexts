@@ -114,7 +114,7 @@ cd ../<AC>-scw-bench
 | 표준 도구 patch만으로 해결된다고 판단 | `select.select` 윈도우 fix만 적용 → 여전히 0% recall (architectural 이슈 별도) | 「현재 상태」3가지 문제 다 확인 후 결정 |
 | mini test 부실 검증 | exit code 0 + JSON 출력만 보고 "동작"이라 판단. stderr WinError 무시 → 0/1 trigger를 "정상 0 trigger"로 해석 | stderr 끝까지 확인. WinError·Warning 텍스트 grep |
 | 메인 워크트리에서 SKILL.md swap | description 측정 중 사용자 다른 세션이 swap 상태로 실제 사용 → 충돌 commit·index 오염 | 별도 워크트리 필수 (위 「안전 절차」) |
-| 측정 직전 워크트리 description 미확인 | 다른 세션 wip가 워크트리 description을 이미 swap한 채로 R1/R2 측정 → 같은 description 두 번 측정, delta 0이 "변경 효과 없음"으로 오해석 | 측정 시작 전 `git diff <base>..HEAD -- SKILL.md` 필수. wip 보이면 풀거나 base commit 위에서 워크트리 재생성 |
+| 측정 직전 워크트리 description 미확인 | 다른 세션 wip가 워크트리 description을 이미 swap한 채로 두 라운드를 연달아 측정 → 같은 description 두 번 측정, delta 0이 "변경 효과 없음"으로 오해석 | 측정 시작 전 `git diff <base>..HEAD -- SKILL.md` 필수. wip 보이면 풀거나 base commit 위에서 워크트리 재생성 |
 | timeout 부족으로 trigger 케이스 모두 dropout | timeout=60·90으로 측정 → trigger되는 쿼리는 본문 작업까지 130s+ 걸려 다 timeout. should_trigger rate=0%로 잘못 잡힘. early-kill이 stream signal 못 잡으면 timeout까지 진행 | `--timeout 240` 기본값. early-kill 기제가 ttft 8~10s 후 trigger 감지 즉시 kill하므로 정상이면 비싸지 않음 |
 | 라운드 무한 반복 | "0건 수렴까지" 룰 글자대로 따라 5+ 라운드 → LLM 비결정성에 묻힘, 시간 낭비 | 3~4 라운드에서 정체면 description 외 요인(scw 본문 구조, eval set 품질) 재검토 |
 | eval set 작성 시 노골적 인용 | description에 eval 쿼리 표현 그대로 박아넣음 (overfitting) → 측정 과정에선 통과해도 실제 사용성 X | 의도 표현으로 일반화. eval 쿼리는 표본일 뿐 |
