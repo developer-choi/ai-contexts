@@ -85,7 +85,9 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 
 ### 특화 리뷰
 
-검증 대상이 아래 경로에 해당하면, 해당 파일을 읽고 추가 관점으로 리뷰한다.
+프롬프트·스킬 md를 만들거나 고치는 작업이면 레포·경로와 무관하게 항상 [lean-prompt.md](specialized/lean-prompt.md)를 읽고 적용한다 — 아래 표와 달리 조건이 없다. 새로 쓰는 산문에도 적용되며, 리뷰 때만 보는 것이 아니다.
+
+그에 더해, 검증 대상이 아래 경로에 해당하면 해당 파일을 읽고 추가 관점으로 리뷰한다.
 
 | 대상 경로 | 특화 파일 |
 |-----------|-----------|
@@ -95,7 +97,6 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 | `deploy/contexts/writing-guide/` | [writing-guide.md](specialized/writing-guide.md) |
 | `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation-bench.md](specialized/rule-ablation-bench.md) |
 | `SKILL.md` 또는 sub-skill 라우터 파일 | [skill-orchestration.md](specialized/skill-orchestration.md) |
-| 프롬프트·스킬 본문 전반 (`deploy/skills/`·`deploy/rules/`·`deploy/contexts/`) | [lean-prompt.md](specialized/lean-prompt.md) |
 
 대상 경로에 `map.md`가 있으면 추가로 점검한다:
 - **중복**: 하위 파일 간 같거나 비슷한 내용이 있는가
