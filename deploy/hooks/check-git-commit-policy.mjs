@@ -8,7 +8,7 @@ import {
   partitionArgs,
   stripRedirections,
 } from "./git-command-parser.mjs";
-import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // 커밋 명령 자체의 정책. staging 대상 지정(add/-a)은 check-git-staging-policy.mjs 담당.
 // 인접 정규식(`git\s+commit`)으로 보면 `git -C <path> commit`을 통째로 놓치므로 파서로 호출을 찾는다.
@@ -42,6 +42,26 @@ function isSequenceInProgress(cwd) {
   }
 }
 
+// 경로를 지정해도 아직 git에 등록되지 않은 파일은 커밋에 안 들어간다 — git이 조용히
+// 건너뛰고 에러도 안 낸다. 새 파일만 담은 커밋이 통째로 빈 채 성공하는 형태라 출력을
+// 안 세면 못 잡는다. auto-stage-new-file.mjs가 Write 경로는 막아주지만 셸로 만든 파일은
+// 그물 밖이라 여기서 한 번 더 본다.
+function untrackedUnder(cwd, paths) {
+  try {
+    const quoted = paths.map((p) => JSON.stringify(p)).join(" ");
+    const out = execSync(`git status --porcelain --untracked-files=normal -- ${quoted}`, {
+      cwd: cwd || undefined,
+      stdio: ["ignore", "pipe", "ignore"],
+    }).toString();
+    return out
+      .split("\n")
+      .filter((line) => line.startsWith("?? "))
+      .map((line) => line.slice(3).trim());
+  } catch {
+    return [];
+  }
+}
+
 for (const inv of commits) {
   // 리다이렉션을 먼저 걷어낸다 — `<<'MSG'`·`> out.txt`가 남으면 파일 경로로 세어져
   // "경로를 지정했다"고 오판한다(경로 필수 검사가 heredoc 표식 하나로 무력화됨).
@@ -72,6 +92,18 @@ for (const inv of commits) {
       "경로 없는 git commit 금지. staging area race condition 방지를 위해 파일을 직접 지정하세요: " +
         "git commit <files> -m msg. -m·-F·--amend 등 메시지를 넘기는 형태와 무관하게 적용됩니다.",
     );
+  }
+
+  if (positionals.length > 0) {
+    const untracked = untrackedUnder(normalizeCwd(inv.cwd) || getCwd(payload), positionals);
+    if (untracked.length > 0) {
+      const shown = untracked.slice(0, 5).join(", ");
+      ask(
+        `지정한 경로에 git에 등록되지 않은 파일이 ${untracked.length}개 있습니다 — 이대로 커밋하면 ` +
+          `조용히 빠집니다: ${shown}${untracked.length > 5 ? " 외" : ""}. ` +
+          "포함하려면 먼저 git add로 등록하세요. 일부러 빼는 것이면 승인하고 진행하세요.",
+      );
+    }
   }
 }
 

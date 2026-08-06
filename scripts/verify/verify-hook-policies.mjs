@@ -7,6 +7,7 @@
 // sync:system이 배포 전 fail-fast로 돌려, 구멍 난 훅이 배포되는 것을 막는다.
 
 import childProcess from 'node:child_process';
+import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -90,20 +91,46 @@ function runHook(file, command) {
   return { decision: parsed.hookSpecificOutput?.permissionDecision || 'pass', stderr: res.stderr };
 }
 
+// 미등록 파일 경고는 명령 문자열만으로 판정되지 않는다 — 실제 레포 상태를 봐야 한다.
+// tracked 하나, untracked 하나를 가진 임시 레포를 만들어 판정을 고정한다.
+function withUntrackedFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-policy-fixture-'));
+  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+  try {
+    run('git init -q');
+    fs.writeFileSync(path.join(dir, 'tracked.txt'), 'a\n');
+    run('git add tracked.txt');
+    run('git -c user.email=verify@local -c user.name=verify commit -q -m init tracked.txt');
+    fs.writeFileSync(path.join(dir, 'new.txt'), 'b\n');
+    return fn(dir.replace(/\\/g, '/'));
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const untrackedCases = (dir) => [
+  ['check-git-commit-policy.mjs', `git -C ${dir} commit . -m "x"`, 'ask', '경로 안의 미등록 파일을 알린다'],
+  ['check-git-commit-policy.mjs', `git -C ${dir} commit tracked.txt -m "x"`, 'pass', '미등록 파일이 없는 경로는 조용하다'],
+];
+
 function main() {
   console.log('정책 hook 판정 검증 중...');
   const failures = [];
-  for (const [file, command, expected, note] of CASES) {
-    const { decision, stderr } = runHook(file, command);
-    const label = `${file} :: ${command} → ${expected} (${note})`;
-    if (decision === expected) {
-      console.log(`  PASS  ${label}`);
-    } else {
-      console.error(`  FAIL  ${label} — 실제: ${decision}`);
-      if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-      failures.push(label);
+  // fixture 안에서 실행까지 끝낸다 — 케이스 목록만 만들어 나오면 임시 레포가 먼저 지워져
+  // 미등록 파일이 사라진 상태로 판정된다(레포 부재 → 조회 실패 → pass로 통과, 위양성 없이 조용히 무력화).
+  withUntrackedFixture((dir) => {
+    for (const [file, command, expected, note] of [...CASES, ...untrackedCases(dir)]) {
+      const { decision, stderr } = runHook(file, command);
+      const label = `${file} :: ${command} → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
     }
-  }
+  });
   if (failures.length) {
     console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
