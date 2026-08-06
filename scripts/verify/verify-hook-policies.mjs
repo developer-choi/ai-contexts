@@ -135,8 +135,107 @@ const WRITE_CASES = [
   ],
 ];
 
+const mdWrite = (content, file = 'C:/tmp/doc.md') => ({
+  tool_name: 'Write',
+  tool_input: { file_path: file, content },
+});
+
+WRITE_CASES.push(
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('린터(K10)가 본다. E1 커버리지 누락도 같이 본다.\n'),
+    'context',
+    '뜻 없이 홀로 놓인 코드를 알린다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('## TC-A1. 드래그로 닫기\n\n- **TC-A1-1** dismiss 확인\n'),
+    'context',
+    '항목에 지어 붙인 번호도 알린다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('V8 엔진은 L3 스위치와 무관하다. explained H1을 S3에 올린다. ES6 문법.\n'),
+    'pass',
+    '실존 기술 용어만 있으면 조용하다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('설명은 이렇다.\n\n```js\nconst K10 = 1; // E1\n```\n\n인라인은 `TC-A1` 형태다.\n'),
+    'pass',
+    '코드블록·인라인코드 안은 보지 않는다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('[강의](https://www.inflearn.com/course/3%EC%9D%BC) 와 [img]: <data:image/png;base64,A0B0B8>\n'),
+    'pass',
+    'URL·인코딩된 문자열은 보지 않는다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('PR1이 만든 산출물을 PR3에서 쓴다. NEW3 변형도 마찬가지.\n'),
+    'pass',
+    '대문자가 여럿 붙어 접두사가 뜻을 알려주면 조용하다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('## TC_A1. 드래그로 닫기\n'),
+    'context',
+    '밑줄로 이은 것도 하이픈과 같게 잡는다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('R3이 만든 산출물을 R4에서 쓴다.\n'),
+    'context',
+    '같은 모양이라도 접두사가 아무것도 안 알려주면 알린다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('린터(K10)가 본다.\n', 'C:/tmp/doc.txt'),
+    'pass',
+    '.md가 아니면 검사 대상이 아니다',
+  ],
+);
+
+// 레포 제외는 파일 경로 위쪽에 `.git`이 있어야 판정되므로 실제 폴더를 만들어 검증한다.
+const repoCases = (dir) => [
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('린터(K10)가 본다.\n', path.join(dir, 'backlog', 'note.md')),
+    'pass',
+    '제외 목록에 든 레포는 검사하지 않는다',
+  ],
+  [
+    'check-md-code-labels.mjs',
+    mdWrite('린터(K10)가 본다.\n', path.join(dir, 'other-repo', 'note.md')),
+    'context',
+    '제외 목록 밖 레포는 그대로 검사한다',
+  ],
+];
+
+function withRepoFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-repo-fixture-'));
+  try {
+    for (const name of ['backlog', 'other-repo']) {
+      fs.mkdirSync(path.join(dir, name, '.git'), { recursive: true });
+    }
+    return fn(dir);
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 // Edit은 new_string이 본문 조각일 수 있어 디스크 내용에 치환을 적용해야 판정이 선다.
 const editCases = (dir) => [
+  [
+    'check-md-code-labels.mjs',
+    {
+      tool_name: 'Edit',
+      tool_input: { file_path: path.join(dir, 'pkg.md'), old_string: '# 제목', new_string: '# 제목\n\n순서 불일치는 E6가 잡는다.' },
+    },
+    'context',
+    'Edit으로 새로 넣는 코드도 잡는다',
+  ],
   [
     'check-package-frontmatter.mjs',
     {
@@ -185,7 +284,12 @@ function runHookPayload(file, payload) {
   } catch {
     return { decision: `<파싱 불가: ${out.slice(0, 80)}>`, stderr: res.stderr };
   }
-  return { decision: parsed.hookSpecificOutput?.permissionDecision || 'pass', stderr: res.stderr };
+  const decided = parsed.hookSpecificOutput?.permissionDecision;
+  if (decided) return { decision: decided, stderr: res.stderr };
+  // 차단하지 않고 컨텍스트만 주입하는 hook은 permissionDecision을 내지 않는다. 그대로 두면
+  // '조용히 통과'와 구분되지 않아 발동 여부를 검증할 수 없으므로 별도 판정으로 뽑는다.
+  if (parsed.hookSpecificOutput?.additionalContext) return { decision: 'context', stderr: res.stderr };
+  return { decision: 'pass', stderr: res.stderr };
 }
 
 // 미등록 파일 경고는 명령 문자열만으로 판정되지 않는다 — 실제 레포 상태를 봐야 한다.
@@ -229,8 +333,8 @@ function main() {
     }
   });
   // 쓰기 시점 hook: Edit 케이스는 디스크 내용을 읽으므로 fixture 안에서 실행까지 끝낸다.
-  withPackageFixture((dir) => {
-    for (const [file, payload, expected, note] of [...WRITE_CASES, ...editCases(dir)]) {
+  const runWriteCases = (cases) => {
+    for (const [file, payload, expected, note] of cases) {
       const { decision, stderr } = runHookPayload(file, payload);
       const label = `${file} :: ${payload.tool_name} ${payload.tool_input.file_path} → ${expected} (${note})`;
       if (decision === expected) {
@@ -241,7 +345,11 @@ function main() {
         failures.push(label);
       }
     }
-  });
+  };
+  withPackageFixture((dir) => runWriteCases([...WRITE_CASES, ...editCases(dir)]));
+  // 레포 제외는 경로 위쪽의 `.git`으로 판정되므로 fixture 안에서 실행까지 끝낸다 — 폴더가
+  // 먼저 지워지면 레포를 못 찾아 제외가 안 걸린 채로 판정된다.
+  withRepoFixture((dir) => runWriteCases(repoCases(dir)));
   if (failures.length) {
     console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
     process.exit(1);

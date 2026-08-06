@@ -55,6 +55,12 @@
       "msg": "Checking writing-package frontmatter..."
     },
     {
+      "file": "check-md-code-labels.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking markdown for invented code labels..."
+    },
+    {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",
