@@ -61,6 +61,12 @@
       "msg": "Checking markdown for invented code labels..."
     },
     {
+      "file": "check-md-hook-restatement.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Surfacing rules the hooks already enforce..."
+    },
+    {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",

@@ -197,6 +197,41 @@ WRITE_CASES.push(
   ],
 );
 
+const skillDoc = 'C:/tmp/skills/study-report/SKILL.md';
+
+WRITE_CASES.push(
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('## 산출물 저장·커밋\n\n리포트 파일 하나만 커밋한다.\n', skillDoc),
+    'context',
+    '커밋 규약을 쓰려 하면 훅이 이미 막는 목록을 보여준다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('## 리포트 형식\n\n한 일과 새로 생긴 도구를 나눠 적는다.\n', skillDoc),
+    'pass',
+    '커밋·staging 이야기가 없으면 조용하다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('금지 예시다.\n\n```sh\ngit add .\n```\n\n인라인 `git commit -a` 도 마찬가지.\n', skillDoc),
+    'pass',
+    '코드블록·인라인코드 안의 인용은 보지 않는다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('커밋은 이렇게 나눈다.\n', 'C:/tmp/docs/design.md'),
+    'pass',
+    '프롬프트·스킬 문서가 아니면 보지 않는다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('커밋은 이렇게 나눈다.\n', 'C:/tmp/CLAUDE.md'),
+    'context',
+    'CLAUDE.md도 대상이다',
+  ],
+);
+
 // 레포 제외는 파일 경로 위쪽에 `.git`이 있어야 판정되므로 실제 폴더를 만들어 검증한다.
 const repoCases = (dir) => [
   [
@@ -208,6 +243,18 @@ const repoCases = (dir) => [
   [
     'check-md-code-labels.mjs',
     mdWrite('린터(K10)가 본다.\n', path.join(dir, 'other-repo', 'note.md')),
+    'context',
+    '제외 목록 밖 레포는 그대로 검사한다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('리포트 파일 하나만 커밋한다.\n', path.join(dir, 'backlog', 'skills', 'a', 'SKILL.md')),
+    'pass',
+    '제외 목록에 든 레포는 검사하지 않는다',
+  ],
+  [
+    'check-md-hook-restatement.mjs',
+    mdWrite('리포트 파일 하나만 커밋한다.\n', path.join(dir, 'other-repo', 'skills', 'a', 'SKILL.md')),
     'context',
     '제외 목록 밖 레포는 그대로 검사한다',
   ],
