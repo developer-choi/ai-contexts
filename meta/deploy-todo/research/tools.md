@@ -14,7 +14,7 @@
 | **ClaudeCTX** | `claudectx work` / `claudectx personal`로 프로필 전환 | [foxj77/claudectx](https://github.com/foxj77/claudectx) |
 | **CCCS** | 데스크톱 앱 + 시스템 트레이로 프로필 전환 | [breakstring/cccs](https://github.com/breakstring/cccs) |
 | **dot-claude-sync** | git worktree 간 `.claude/` 동기화 (Go CLI) | [yugo-ibuki/dot-claude-sync](https://github.com/yugo-ibuki/dot-claude-sync) |
-| **Claude Sync** | age 암호화 + 클라우드 스토리지(S3, R2, GCS)로 크로스 머신 동기화 | — |
+| **Claude Sync** | age 암호화 + 클라우드 스토리지(`S3`·`R2`·`GCS`)로 크로스 머신 동기화 | — |
 
 ---
 
