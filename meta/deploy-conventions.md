@@ -27,7 +27,7 @@ AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, sett
 - **git hook이 스스로 내는 명령은 권한 계층 밖이다.** 레포의 `post-commit`이 자체적으로 `git push`를 하는 식이면 도구 호출이 아니므로 `permissions.*`도 정책 hook도 관여하지 않는다. 그런 자동 동작은 그 레포의 hook 자체를 고치는 것 말고 막을 방법이 없다.
 - 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.mjs`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
-- `sync:system`은 시작 시 `verify:settings`(생성 계약)·`verify:hook-policies`(정책 hook 판정)로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
+- `sync:system`은 시작 시 verify 계약들로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
 - 정책 hook은 **명령 문자열이 아니라 파싱된 git 호출**을 본다. 인접 정규식으로 검사하면 `git -C <path>`·chain 형태가 조용히 빠져나간다. 새 git 정책 hook은 `deploy/hooks/git-command-parser.mjs`의 `findGitInvocations`·`partitionArgs`를 쓰고, 대표 케이스를 `verify-hook-policies.mjs`에 등록한다.
 
 ## 로컬 settings projection (`local/` → repo-local)
@@ -45,12 +45,24 @@ settings/hooks는 위 전역 메커니즘을 **그대로 미러링한 로컬판*
 
 settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 같은 내용을 쓰므로 타겟별 투영 없이 **동일 복사**한다. `sync:local-system`이 `local/` 하위 디렉토리(`hooks` 제외 — settings projection이 따로 투영)를 `.claude/<X>`와 `.agents/<X>` 양쪽으로 배포한다(`scripts/local-system/sync-local-skills.mjs`).
 
-- 동일 복사의 예외 — **SKILL.md `name` 주입**: 스킬 SKILL.md frontmatter에 `name`이 없으면 배포 시 폴더명을 주입한다(`deploy-lib.mjs`의 `injectSkillName`). Antigravity는 frontmatter `name`이 있어야 스킬을 인식하므로(Claude는 폴더명으로 잡음), 소스에는 `name`을 적지 않고 산출물에만 싣는다. 전역 `deploySkills`(`~/.claude`·`~/.codex`·`~/.gemini`)와 로컬 `sync:local-system`(`.claude/skills`·`.agents/skills`) 모두 적용되며, 전역 검증은 주입 결과 기준으로 대조한다(`compareSkillPaths`).
+- 동일 복사의 예외 — **SKILL.md 배포본 렌더링**: 배포된 md는 소스와 아래가 다르다(`deploy-lib.mjs`의 `renderSkillMd`). 전역 `deploySkills`(`~/.claude`·`~/.codex`·`~/.gemini`)와 로컬 `sync:local-system`(`.claude/skills`·`.agents/skills`) 모두 적용되며, 검증도 렌더 결과 기준으로 대조한다(`compareSkillPaths`).
+  - **`name` 주입** — frontmatter에 `name`이 없으면 폴더명을 넣는다. Antigravity는 `name`이 있어야 스킬을 인식한다(Claude는 폴더명으로 잡는다). 소스는 `name`을 직접 들고 있어도 되며, 이 주입은 빠진 경우의 안전망이다.
+  - **경로 앵커 주입** — 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심는다. 스킬 본문의 상대 경로 링크를 풀려면 스킬 파일 위치를 알아야 하는데, Claude Code는 스킬 로드 시 그 경로를 대화에 넣어주고 Antigravity는 넣지 않는다. 그래서 같은 링크가 한쪽에서만 풀리고, 못 푼 쪽은 **에러 없이 그 지시가 없던 것처럼 진행**해 산출물을 봐야 드러난다. 배포 시점에는 타겟 경로가 확정돼 있으므로 배포가 대신 적어둔다.
+  - 앵커는 SKILL.md만이 아니라 스킬 폴더의 모든 md에 붙되, 각자 자기 디렉토리를 가리킨다. 바깥으로 나가는 참조는 오히려 하위 파일에 몰려 있고 단계도 더 깊다. 예외는 `ANCHOR_EXCLUDED_DIRS` — `templates/`처럼 **사용자 문서로 복사되는 재료**는 앵커가 그 문서로 새어 나가므로 제외한다.
+  - 렌더링은 **멱등이어야 한다** — 배포본에 다시 적용해도 같아야 sync가 "변경 없음"으로 수렴한다. `verify:skill-render`가 두 sync 진입점에서 fail-fast로 이 계약을 고정한다. 앵커 교체는 **본문 맨 앞에 고정**한다. 위치를 안 잡으면 본문이 그 마커를 인용할 때 그 대목이 조용히 지워지고, 멱등은 유지되므로 검증이 못 잡는다.
 
 - **원본은 `local/<X>`**, `.claude/<X>`·`.agents/<X>`는 gitignore 산출물.
 - 새 자산 종류를 추가하려면 `local/`에 디렉토리만 두면 된다 — sync가 일반 순회하므로 스크립트 수정 불필요. settings/hooks처럼 타겟별로 갈리는 자산만 projection 어댑터가 필요하다.
 - `unsync`는 `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 **통째 제거**한다 (동일성 비교 없이). 경로 자체가 AC가 만든 gitignore 산출물이므로, 원본에서 사라진 스킬(orphan)도 함께 청소되고 원본은 `local/`에 남아 re-sync로 복구된다 — 사용자 데이터 손실 위험이 없다. `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`(투영 원본)가 있는 레포에서만 제거한다(비-AC 레포의 사용자 `AGENTS.md` 보호).
 - 새 자산 종류를 `local/`에 추가하면 그 레포 `.gitignore`에 `.claude/<X>/` 항목을 더한다(`.agents/`는 통째 ignore되어 추가 불필요).
+
+## 규칙이 contexts를 가리킬 때는 자리표시자를 쓴다
+
+`deploy/rules/`의 md가 contexts 파일을 가리킬 때는 `{{contexts}}/<파일>` 자리표시자로 적는다. 배포가 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withContextsPath`, 검증은 `compareRulePaths`).
+
+규칙은 타겟마다 사는 곳이 다르다 — claude·codex는 `rules/` 아래 파일이고, gemini는 rules 디렉토리 없이 `GEMINI.md`에 통째로 합쳐진다. 그래서 어떤 상대 경로를 적어도 세 타겟을 동시에 맞출 수 없다. 소스 기준 경로(`deploy/contexts/...`)를 적으면 **cwd가 AC일 때만 우연히 맞고 다른 레포에서는 Claude에서도 어긋난다.**
+
+"AC의 어디를 고치는가"를 설명하는 표·산문은 자리표시자 대상이 아니다 — 그건 따라갈 경로가 아니라 AC 레포의 구조 설명이다.
 
 ## 배포 스크립트 변경 원칙
 

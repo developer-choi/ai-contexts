@@ -20,6 +20,8 @@ async function main() {
 
   // 생성 계약이 깨지면 배포 전에 중단(fail-fast).
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, 'verify-local-system.mjs')], { stdio: 'inherit' });
+  // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
+  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs')], { stdio: 'inherit' });
 
   // 1) 로컬 스킬 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
   console.log('');

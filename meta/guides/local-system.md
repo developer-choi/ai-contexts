@@ -14,12 +14,12 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ## 수행 작업
 
-시작 시 AC git hook 준비 상태와 로컬 settings 생성 계약(`verify:local-system`)을 먼저 확인합니다(fail-fast).
+시작 시 AC git hook 준비 상태와 로컬 settings 생성 계약(`verify:local-system`)과 배포본 md 렌더링의 멱등(`verify:skill-render`)을 먼저 확인합니다(fail-fast).
 
 ### 1. 로컬 자산 (cross-repo)
 
 - `local/` 하위 디렉토리(`skills` 등, `hooks` 제외)를 `.claude/<X>`와 `.agents/<X>` **양쪽**으로 복사합니다. claude·codex가 같은 자산을 쓰므로 동일 복사이며, hooks만 2)에서 타겟별로 따로 투영합니다.
-- 예외: `skills`의 각 SKILL.md frontmatter에 `name`이 없으면 복사 후 폴더명을 주입합니다(Antigravity는 `name`이 있어야 스킬을 인식 — 소스에는 `name`을 적지 않습니다).
+- 예외: `skills`의 각 SKILL.md는 복사 후 배포본 형태로 고칩니다 — frontmatter에 `name`이 없으면 폴더명을 주입하고(Antigravity는 `name`이 있어야 스킬을 인식합니다), 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다(Antigravity는 스킬 위치를 모델에게 알려주지 않아 본문의 상대 경로가 안 풀립니다).
 - 레포 루트 `CLAUDE.md`가 있으면 `AGENTS.md` 및 `GEMINI.md`로 복사합니다.
 - 원본은 `local/`이며, `.claude/<X>`·`.agents/<X>`는 배포 산출물로 봅니다(gitignore).
 

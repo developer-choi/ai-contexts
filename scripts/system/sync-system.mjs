@@ -12,6 +12,7 @@ import {
   claudeSettingsObject,
   codexHooksObject,
   comparePaths,
+  compareRulePaths,
   compareSkillPaths,
   copyPath,
   defaultCodexDir,
@@ -21,6 +22,7 @@ import {
   deployGeminiGlobals,
   deployRootFiles,
   deploySkills,
+  resolveRulePaths,
   ensureDeploySource,
   ensureDir,
   geminiSettingsObject,
@@ -43,6 +45,8 @@ async function main() {
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-hook-policies.mjs')], { stdio: 'inherit' });
   // 목적 없는 스킬이 배포되면 나중에 본문이 목적에서 벗어났는지 판정할 기준이 없다.
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs')], { stdio: 'inherit' });
+  // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
+  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs')], { stdio: 'inherit' });
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());
@@ -66,6 +70,8 @@ async function main() {
     console.log(`  COPY  ${category}/`);
     copied += 1;
   }
+  // 규칙이 가리키는 contexts 경로는 타겟마다 달라 배포 시점에 채운다.
+  resolveRulePaths(targetDir);
 
   copied += deploySkills(targetDir, console.log);
 
@@ -85,7 +91,7 @@ async function main() {
     const target = path.join(targetDir, category);
     if (!existsDir(target)) {
       fail(failures, `${category}/ 존재하지 않음`);
-    } else if (comparePaths(src, target)) {
+    } else if (category === 'rules' ? compareRulePaths(src, target, targetDir) : comparePaths(src, target)) {
       console.log(`  PASS  ${category}/`);
     } else {
       fail(failures, `${category}/ 내용 불일치`);
@@ -235,7 +241,7 @@ function verifyCodexGlobals(targetDir) {
   const targetAgents = path.join(targetDir, 'AGENTS.md');
   if (!pathExists(targetAgents)) {
     fail(failures, 'codex AGENTS.md 존재하지 않음');
-  } else if (fs.readFileSync(targetAgents, 'utf8') === buildCodexAgentsContent()) {
+  } else if (fs.readFileSync(targetAgents, 'utf8') === buildCodexAgentsContent(targetDir)) {
     console.log('  PASS  codex AGENTS.md');
   } else {
     fail(failures, 'codex AGENTS.md 내용 불일치');
@@ -290,7 +296,7 @@ function verifyGeminiGlobals(targetDir) {
   const targetAgents = path.join(targetDir, 'GEMINI.md');
   if (!pathExists(targetAgents)) {
     fail(failures, 'gemini GEMINI.md 존재하지 않음');
-  } else if (fs.readFileSync(targetAgents, 'utf8') === buildGeminiAgentsContent()) {
+  } else if (fs.readFileSync(targetAgents, 'utf8') === buildGeminiAgentsContent(targetDir)) {
     console.log('  PASS  gemini GEMINI.md');
   } else {
     fail(failures, 'gemini GEMINI.md 내용 불일치');

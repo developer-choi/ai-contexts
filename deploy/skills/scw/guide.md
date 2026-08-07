@@ -139,7 +139,6 @@ SKILL.md를 새로 만들거나 수정했으면 H1 바로 아래에 `## 목적`�
 
 - SKILL.md는 H1 제목 바로 아래 첫 섹션으로 `## 목적`을 두고, 스킬의 목표를 한 줄로 적는다. frontmatter `description`은 트리거(언제 부르는가) 판정용이라 매 세션 로드되고, `## 목적`은 호출된 AI가 "왜 이걸 하는가"를 본문 진입에서 잡는 용도다 — 역할이 다르므로 둘 다 둔다. 목적이 이미 lede 한 줄로 적혀 있으면 그 줄을 `## 목적` 섹션으로 승격하고 중복 생성하지 않는다. 「왜 이 스킬이 필요한가」(존재 근거)는 목적과 별개 절이다.
 - 스킬은 `deploy/skills/{skill-name}/`에 생성
-- SKILL.md 소스 frontmatter엔 `name`을 넣지 않는다 (배포가 폴더명에서 주입 — `meta/deploy-conventions.md` 참고)
 - 드래프트 상태면 `STATUS.md`를 함께 생성하여 진행 상황과 남은 작업 기록
 - 실사용 후 안정되면 `STATUS.md` 삭제
 - commitlint scope에 스킬명 추가
