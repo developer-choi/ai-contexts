@@ -115,4 +115,58 @@ function repoHooksState(repoPath) {
   };
 }
 
-export { HOOKS_DIR, assertGitSupportsConfigHooks, listTrackedHooks, registerRepoHooks, repoHooksState, tracksHooksDir };
+// 레포 로컬이 아니라 `--global`(모든 레포 공용)로 거는 훅. `.githooks` 파일이 아니라
+// 절대 경로 스크립트를 직접 호출하므로, 대상 레포가 그 훅을 추적하고 있을 필요가 없다.
+// 별칭 접두사를 repo와 다르게(`ai-contexts`) 둬서 같은 이름 충돌 없이 공존한다.
+const GLOBAL_PREFIX = 'ai-contexts';
+
+// `env`로 `GIT_CONFIG_GLOBAL`을 오버라이드할 수 있게 한다 — 테스트가 실제 `~/.gitconfig`를
+// 건드리지 않고 이 함수들의 계약을 검증하기 위함이다.
+function globalGit(args, { allowFail = false, env } = {}) {
+  const result = spawnSync('git', args, { encoding: 'utf8', env: env ? { ...process.env, ...env } : process.env });
+  if (result.status !== 0 && !allowFail) {
+    throw new Error((result.stderr || `git ${args.join(' ')} 실패`).trim());
+  }
+  return result.status === 0 ? result.stdout.trim() : '';
+}
+
+// 전역 훅 하나를 등록한다(멱등). 반환값은 실제로 설정을 바꿨는지 여부다.
+function registerGlobalHook(alias, event, command, { env } = {}) {
+  assertGitSupportsConfigHooks();
+
+  const commandKey = `hook.${GLOBAL_PREFIX}-${alias}.command`;
+  const eventKey = `hook.${GLOBAL_PREFIX}-${alias}.event`;
+  if (globalHookRegistered(alias, event, command, { env })) return false;
+
+  globalGit(['config', '--global', commandKey, command], { env });
+  globalGit(['config', '--global', eventKey, event], { env });
+  return true;
+}
+
+function unregisterGlobalHook(alias, { env } = {}) {
+  globalGit(['config', '--global', '--remove-section', `hook.${GLOBAL_PREFIX}-${alias}`], { allowFail: true, env });
+}
+
+function globalHookRegistered(alias, event, command, { env } = {}) {
+  const currentCommand = globalGit(['config', '--global', '--get', `hook.${GLOBAL_PREFIX}-${alias}.command`], {
+    allowFail: true,
+    env,
+  });
+  const currentEvent = globalGit(['config', '--global', '--get', `hook.${GLOBAL_PREFIX}-${alias}.event`], {
+    allowFail: true,
+    env,
+  });
+  return currentCommand === command && currentEvent === event;
+}
+
+export {
+  HOOKS_DIR,
+  assertGitSupportsConfigHooks,
+  listTrackedHooks,
+  registerRepoHooks,
+  repoHooksState,
+  tracksHooksDir,
+  registerGlobalHook,
+  unregisterGlobalHook,
+  globalHookRegistered,
+};

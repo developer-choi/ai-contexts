@@ -17,6 +17,7 @@ import {
   deleteRegValue,
   escapeRegExp,
 } from './environment-lib.mjs';
+import { registerGlobalHook, unregisterGlobalHook, globalHookRegistered } from '../lib/git-hooks.mjs';
 
 const failures = [];
 
@@ -86,11 +87,29 @@ function verifyRegistryMechanisms() {
   }
 }
 
+// registerGlobalHook/unregisterGlobalHook/globalHookRegistered(git-hooks.mjs)의 계약을
+// 실제 ~/.gitconfig 대신 GIT_CONFIG_GLOBAL로 가리킨 임시 파일에서 검증한다.
+function verifyGlobalHookMechanism(sandbox) {
+  console.log('--- 전역 git 훅 등록 멱등성 ---');
+  const fakeGlobalConfig = path.join(sandbox, 'gitconfig-test');
+  fs.writeFileSync(fakeGlobalConfig, '', 'utf8');
+  const env = { GIT_CONFIG_GLOBAL: fakeGlobalConfig };
+  const alias = 'verify-test';
+  const command = 'node x.mjs';
+
+  check('최초 등록은 changed=true', registerGlobalHook(alias, 'pre-commit', command, { env }) === true);
+  check('재등록은 changed=false(멱등)', registerGlobalHook(alias, 'pre-commit', command, { env }) === false);
+  check('등록 후 조회 일치', globalHookRegistered(alias, 'pre-commit', command, { env }) === true);
+  unregisterGlobalHook(alias, { env });
+  check('해제 후 조회 불일치', globalHookRegistered(alias, 'pre-commit', command, { env }) === false);
+}
+
 function main() {
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), 'ac-verify-env-'));
   try {
     verifyFileMechanisms(sandbox);
     verifyRegistryMechanisms();
+    verifyGlobalHookMechanism(sandbox);
   } finally {
     fs.rmSync(sandbox, { recursive: true, force: true });
   }

@@ -15,6 +15,7 @@ npm run sync:environment
 - Windows에서 `~/autorun.cmd`를 AC 내용으로 생성·갱신하고, `HKCU\Software\Microsoft\Command Processor`의 `AutoRun`을 `@~/autorun.cmd`로 등록합니다. 대화형 cmd 창을 홈 디렉토리에서 열면 `~/WebstormProjects/main`으로 이동시킵니다. `AutoRun`이 다른 값으로 이미 설정돼 있으면 사용자 설정 보호를 위해 건너뜁니다.
 - `~/WebstormProjects/<group>/<repo>` 중 `.githooks`가 추적되는 레포마다, 그 훅들을 git 설정 훅(`hook.repo-<이름>.command`)으로 멱등하게 등록합니다. 설정은 `.git/config`에 들어가고 그 파일은 워크트리끼리 공유되므로, 레포당 한 번 등록하면 이후 만드는 워크트리에는 아무것도 갖다 놓지 않아도 훅이 발동합니다. 남아 있는 `core.hooksPath`는 해제합니다 — 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행되는 것을 막습니다.
 - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 등록하지 않고 중단합니다 (`winget upgrade --id Git.Git -e`).
+- `scripts/hooks/check-count-hardcoding.mjs`를 `~/.ai-contexts/check-count-hardcoding.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-count-hardcode.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md(`/skills/`·`/rules/`·`/contexts/`·`meta/guides/`·`CLAUDE|AGENTS|GEMINI.md`)의 새로 추가된 줄에서 개수 하드코딩(글로벌 룰 「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지해 경고합니다 — 어느 레포·어느 도구로 커밋하든 발동하지만 커밋을 막지는 않습니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거
@@ -25,7 +26,9 @@ npm run unsync:environment
 
 제거 명령은 AC marker block만 제거합니다. PowerShell 7은 `sync:environment`가 직접 설치했다고 상태 파일에 기록된 경우에만 제거를 시도합니다. `~/autorun.cmd`는 내용이 AC가 쓴 것과 동일할 때만 삭제하고, `AutoRun` 레지스트리는 상태 파일에 AC 등록 기록이 있고 현재 값이 `@~/autorun.cmd`일 때만 제거합니다.
 
-설정 훅 등록은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 그 레포의 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 그 레포가 동작하기 위한 배선으로 봅니다.
+레포 로컬 설정 훅 등록(`hook.repo-*`)은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 그 레포의 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 그 레포가 동작하기 위한 배선으로 봅니다.
+
+전역 개수 하드코딩 훅(`hook.ai-contexts-count-hardcode.*`)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/check-count-hardcoding.mjs`도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다).
 
 ## 반복 실행 기준
 

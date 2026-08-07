@@ -3,6 +3,7 @@ import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   upsertManagedBlock,
   writeWholeFile,
@@ -10,7 +11,12 @@ import {
   setRegValue,
   runs,
 } from './environment-lib.mjs';
-import { assertGitSupportsConfigHooks, registerRepoHooks, tracksHooksDir } from '../lib/git-hooks.mjs';
+import {
+  assertGitSupportsConfigHooks,
+  registerRepoHooks,
+  registerGlobalHook,
+  tracksHooksDir,
+} from '../lib/git-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -18,6 +24,13 @@ const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
 const cmdAutorunFile = path.join(home, 'autorun.cmd');
 const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
+const countHardcodingHookSrc = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'hooks',
+  'check-count-hardcoding.mjs',
+);
+const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
 const cmdAutorunBody = `@echo off
 echo %CMDCMDLINE% | findstr /i " /c " >nul
@@ -53,8 +66,35 @@ function main() {
   console.log('--- git 설정 훅 등록 ---');
   syncRepoGitHooks();
 
+  console.log('--- 개수 하드코딩 검사 훅 ---');
+  syncCountHardcodingHook(state);
+
   writeState(state);
   console.log('Environment sync complete.');
+}
+
+// 프롬프트 md 커밋에서 개수 하드코딩(「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지하는
+// 전역 pre-commit 훅. 어느 레포에서 어느 도구로 커밋하든 발동해야 하므로 레포 로컬 `.githooks`가
+// 아니라 `--global` 설정으로 건다(scripts/lib/git-hooks.mjs의 registerGlobalHook).
+// 스크립트 원본은 AC scripts/hooks/에 두고 ~/.ai-contexts/에 그대로 복사한다 — 도구 중립적인
+// 폴더라 Claude Code 설치 여부와 무관하게 살아 있어야 하는 git 훅에 맞다.
+function syncCountHardcodingHook(state) {
+  assertGitSupportsConfigHooks();
+
+  const body = fs.readFileSync(countHardcodingHookSrc, 'utf8');
+  const status = writeWholeFile(countHardcodingHookDest, body);
+  console.log(
+    {
+      created: `Created ${countHardcodingHookDest}`,
+      updated: `Updated ${countHardcodingHookDest}`,
+      unchanged: `Already up to date: ${countHardcodingHookDest}`,
+    }[status],
+  );
+
+  const command = `node "${countHardcodingHookDest}"`;
+  const changed = registerGlobalHook('count-hardcode', 'pre-commit', command);
+  state.countHardcodingHookSetByAiContexts = true;
+  console.log(changed ? `전역 pre-commit 훅 등록: ${command}` : '전역 pre-commit 훅 이미 등록됨');
 }
 
 // ~/WebstormProjects/<group>/<repo> 중 .githooks가 추적되는 레포마다, 그 훅들을 git 설정 훅으로

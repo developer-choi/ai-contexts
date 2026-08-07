@@ -3,6 +3,7 @@ import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   removeManagedBlocks,
   removeIfIdentical,
@@ -10,6 +11,7 @@ import {
   deleteRegValue,
   runs,
 } from './environment-lib.mjs';
+import { unregisterGlobalHook } from '../lib/git-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -17,6 +19,13 @@ const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
 const cmdAutorunFile = path.join(home, 'autorun.cmd');
 const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
+const countHardcodingHookSrc = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '..',
+  'hooks',
+  'check-count-hardcoding.mjs',
+);
+const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
 const cmdAutorunBody = `@echo off
 echo %CMDCMDLINE% | findstr /i " /c " >nul
@@ -36,6 +45,9 @@ function main() {
 
   console.log('--- cmd autorun ---');
   unsyncCmdAutorun(state);
+
+  console.log('--- 개수 하드코딩 검사 훅 ---');
+  unsyncCountHardcodingHook(state);
 
   if (state.powerShell7InstalledByAiContexts) {
     uninstallPowerShell7(state);
@@ -101,6 +113,22 @@ function unsyncCmdAutorun(state) {
     modified: `Modified outside ai-contexts; leaving ${cmdAutorunFile}`,
     absent: `Already absent: ${cmdAutorunFile}`,
   }[status]);
+}
+
+function unsyncCountHardcodingHook(state) {
+  if (state.countHardcodingHookSetByAiContexts) {
+    unregisterGlobalHook('count-hardcode');
+    delete state.countHardcodingHookSetByAiContexts;
+  }
+
+  const status = removeIfIdentical(countHardcodingHookDest, fs.readFileSync(countHardcodingHookSrc, 'utf8'));
+  console.log(
+    {
+      removed: `Removed ${countHardcodingHookDest}`,
+      modified: `Modified outside ai-contexts; leaving ${countHardcodingHookDest}`,
+      absent: `Already absent: ${countHardcodingHookDest}`,
+    }[status],
+  );
 }
 
 function uninstallPowerShell7(state) {
