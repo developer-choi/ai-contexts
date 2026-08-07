@@ -141,6 +141,21 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 
 스킬이 **설계대로 동작하는가**를 검증한다. 출력 품질이 아니라 오케스트레이션(분기, 순서, 에이전트 구성)이 대상이다.
 
+### 정답은 위임한 문서까지 따라가 확정한다
+
+벤치의 정답을 세울 때 스킬 본문에 적힌 요약을 그대로 쓰지 않는다. 그 요약이 원본과 어긋나 있을 가능성이 바로 벤치가 잡아야 할 대상이라, 그걸 정답으로 삼으면 처음부터 못 잰다. 스킬이 "저쪽이 단일 출처"라고 위임하고 있으면 그 문서를 열어 확정한다.
+
+**before** — KA `/exam` 벤치에서 스킬 본문의 두 줄로 정답을 세웠다:
+
+```
+- [UNVERIFIED] 질문: 출제 포함
+- Official Answer 없는 질문: 출제 제외
+```
+
+이 두 줄 자체가 `/review` 규칙을 옮겨 적으며 "마커 **없이**"라는 조건을 흘린 요약이었다. 정답을 네 문항으로 잡아 채점했고, 실제 정답은 일곱 문항이라 판정이 통째로 뒤집혔다.
+
+**after**: 위임 대상(`/review`)과 마커 정의 원본(`document-structure.md`)을 열어 대조한 뒤 정답을 확정한다. 규칙이 실제로 발동 가능한지도 함께 본다 — 그 해석대로면 한 번도 발동할 수 없는 규칙이면 해석이 틀린 것이다.
+
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조. 특정 스킬의 벤치 대입값(단위 매핑·오라클·fixture)은 해당 스킬의 `specialized/` 파일 참조.
 - description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. [CRITICAL] 작업 시작 전 specialized 파일의 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. skill-creator 표준 도구(`run_eval.py`·`run_loop.py`)는 architectural broken 상태(2026-05-16 기준 미해결, [anthropics/skills#556](https://github.com/anthropics/skills/issues/556))이므로 자체 도구 `scripts/bench-trigger.py` 사용. 6시간 함정 사례 specialized 참조.
 - ablation·기능 벤치를 주기적으로 운용할 때의 환경 격리·절차(워크트리 분리 등)는 [bench-operations.md](specialized/bench-operations.md) 참조.
