@@ -15,7 +15,7 @@
 
 ## 회고 대상 1: 객관·반객관 자동채점
 
-이 보강과 같은 디렉터리의 `score.py`를 산출물에 돌려 객관·반객관 층을 회고 입력으로 띄운다. 사람은 주관(만족·추가교정)만 채운다.
+이 보강과 같은 디렉터리의 `score.mjs`를 산출물에 돌려 객관·반객관 층을 회고 입력으로 띄운다. 사람은 주관(만족·추가교정)만 채운다. 금지어·dash·빈 섹션은 write-refine 자체 자기검토 루프에서 이미 0으로 수렴된 상태로 넘어오므로, 이 실행은 최종 재확인 + 분량·`--props`·누적 토큰/턴까지 포함한 완전한 회고 역할이다.
 
 실행 명령:
 
@@ -61,7 +61,7 @@ node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turn
 
 회수한 항목은 환류 대상에 따라 가른다:
 
-- **톤 교정 사례·놓친 결함·과교정** → pre-exit Step 1 규칙화에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md 목록과 `score.py`의 `BANNED` 사전을 함께 보강한다.
+- **톤 교정 사례·놓친 결함·과교정** → pre-exit Step 1 규칙화에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md의 해당 절과 그 절 끝 `<!-- banned: ... -->` 주석에 함께 추가한다(`score.mjs`가 실행 시점에 읽으므로 별도 코드 수정은 불필요).
 - **경로 오판** → write-init SKILL.md의 경로 판정(사실 질문)에 반영한다.
 
 ## 출력
