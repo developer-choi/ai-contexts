@@ -20,7 +20,7 @@
 실행 명령:
 
 ```
-python score.py <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
+node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
 ```
 
 - `<산출물.md>` — 이번 세션이 다듬은 발행 문서(또는 패키지). frontmatter가 있으면 채점기가 떼고 본문만 잰다.
@@ -31,9 +31,9 @@ python score.py <산출물.md> [--props 명제리스트.txt] [--tokens N] [--tur
 채점기가 띄우는 층:
 
 - **객관** — 분량(자·문장·어절)·토큰·턴. 숫자 그대로.
-- **반객관** — 금지어(7a 한자어·8 추상압축어·9 외래어음차·15a 자기과장어·22 극적수식어·18a 메타안내) · em/en dash(10a) · 내부 작업이력(PR번호·커밋해시·브랜치명, 5a) · 습니다체 휴리스틱(1a) · 빈 섹션 · 핵심명제 누락. 위반 개수와 해당 줄을 출력한다.
+- **반객관** — 금지어(한자어·추상압축어·외래어음차·자기과장어·극적수식어·메타안내) · em/en dash(10a) · 내부 작업이력(PR번호·커밋해시·브랜치명, 5a) · 습니다체 휴리스틱(1a) · 빈 섹션 · 핵심명제 누락. 위반 개수와 해당 줄을 출력한다.
 
-채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다. tone.md에서 금지어가 바뀌면 `score.py`의 `BANNED` 사전을 함께 갱신한다(채점기는 배포본에 임베드한 사본을 돌린다).
+채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다. `score.mjs`가 tone.md의 `<!-- banned: ... -->` 주석을 실행 시점에 직접 읽으므로 별도 동기화가 필요 없다.
 
 반객관은 한국어 단어 경계가 없어 false positive가 난다(`유사` in `유사성`). 출력된 줄을 눈으로 확인하고, 실제 위반만 아래 「반영 위치」로 보낸다.
 

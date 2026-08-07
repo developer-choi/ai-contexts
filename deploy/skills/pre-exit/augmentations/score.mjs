@@ -1,0 +1,248 @@
+#!/usr/bin/env node
+// write 산출물 채점 하네스 (객관 + 반객관 자동 계측).
+//
+// pre-exit write-refine 보강과 write-refine 자체 자기검토 루프가 호출하는 채점 도구.
+// 주관(만족/불만족·추가교정)은 사람 전속이라 여기서 안 잰다. 점수로 합치지 않는다 —
+// 층(객관·반객관)을 따로 출력한다.
+//
+// 금지어 목록은 tone.md의 <!-- banned: ... --> 주석을 실행 시점에 읽어 만든다(SSOT는
+// writing-guide/tone.md). 이 스크립트에는 금지어를 하드코딩하지 않으므로 tone.md가 바뀌면
+// 별도 동기화 없이 그대로 반영된다.
+//
+// 사용:
+//   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
+//
+// 명제리스트(--props): 한 줄에 핵심 명제 하나. 본문에 substring으로 들어있는지만 본다.
+// 토큰·턴(--tokens/--turns): 세션에서 얻는 값. 주면 객관 표에 기록만 한다(자동 산출 불가).
+//
+// 반객관 매칭은 한국어 단어 경계가 없어 false positive가 날 수 있다(예: '유사' in '유사성').
+// 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = path.dirname(fileURLToPath(import.meta.url));
+const TONE_MD = path.join(HERE, "..", "..", "..", "contexts", "writing-guide", "tone.md");
+
+const INTERNAL = {
+  PR번호: /PR\s*#?\d+/g,
+  커밋해시: /\b[0-9a-f]{7,40}\b/g,
+  브랜치명: /\b(feature|fix|chore|refactor)\/\S+/g,
+};
+
+const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
+
+// 1a 습니다체 휴리스틱: 평서문 종결이 반말이면 잡는다. 명사형(이력서)·정중체는 통과.
+const BANMAL_END = /(?:[가-힣])(?:는다|ㄴ다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
+const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아요|에요|예요)\.?$/;
+
+function loadBanned() {
+  const text = fs.readFileSync(TONE_MD, "utf8");
+  const lines = text.split("\n");
+  const banned = {};
+  let heading = null;
+  for (const ln of lines) {
+    const h = ln.match(/^## (.+)/);
+    if (h) {
+      heading = h[1].trim();
+      continue;
+    }
+    const m = ln.match(/<!--\s*banned:\s*(.+?)\s*-->/);
+    if (m && heading) {
+      banned[heading] = m[1].split(",").map((w) => w.trim()).filter(Boolean);
+    }
+  }
+  return banned;
+}
+
+function splitFrontmatter(text) {
+  if (text.startsWith("---")) {
+    const end = text.indexOf("\n---", 3);
+    if (end !== -1) {
+      const nl = text.indexOf("\n", end + 1);
+      return nl !== -1 ? text.slice(nl + 1) : "";
+    }
+  }
+  return text;
+}
+
+// 코드펜스 안·인용블록(>) 줄은 dash/금지어 검사에서 뺀 본문만 돌려준다.
+function stripCodeAndQuotes(rawLines) {
+  const out = [];
+  let inFence = false;
+  rawLines.forEach((ln, i) => {
+    const s = ln.trim();
+    if (s.startsWith("```")) {
+      inFence = !inFence;
+      return;
+    }
+    if (inFence) return;
+    if (s.startsWith(">")) return;
+    out.push([i + 1, ln]);
+  });
+  return out;
+}
+
+function countSentences(body) {
+  const text = body.replace(/```[\s\S]*?```/g, "");
+  return (text.match(/[.!?。]|다\s|요\s|니다/g) ?? []).length;
+}
+
+function objective(body) {
+  const chars = body.replace(/\s/g, "").length;
+  const sents = countSentences(body);
+  const words = body.split(/\s+/).filter(Boolean).length;
+  return { chars, sents, words };
+}
+
+function findBanned(lines, banned) {
+  const hits = [];
+  for (const [cat, words] of Object.entries(banned)) {
+    for (const w of words) {
+      for (const [lineno, ln] of lines) {
+        if (ln.includes(w)) hits.push([cat, w, lineno, ln.trim()]);
+      }
+    }
+  }
+  return hits;
+}
+
+function findInternal(lines) {
+  const hits = [];
+  for (const [cat, rx] of Object.entries(INTERNAL)) {
+    for (const [lineno, ln] of lines) {
+      for (const m of ln.matchAll(new RegExp(rx.source, rx.flags))) {
+        hits.push([cat, m[0], lineno, ln.trim()]);
+      }
+    }
+  }
+  return hits;
+}
+
+function findDashes(lines) {
+  const hits = [];
+  for (const [ch, label] of Object.entries(DASHES)) {
+    for (const [lineno, ln] of lines) {
+      const c = ln.split(ch).length - 1;
+      if (c) hits.push([label, ch, lineno, ln.trim()]);
+    }
+  }
+  return hits;
+}
+
+// 1a — 휴리스틱. 반말 종결로 보이는 본문 줄을 후보로 잡는다.
+function checkPoliteness(lines) {
+  const flags = [];
+  for (const [lineno, ln] of lines) {
+    const s = ln.trim().replace(/\.$/, "");
+    if (!s || s.startsWith("#") || s.startsWith("|") || s.startsWith("-") || s.startsWith("*")) continue;
+    if (BANMAL_END.test(s) && !POLITE_END.test(s)) flags.push([lineno, ln.trim()]);
+  }
+  return flags;
+}
+
+// C1 — 헤딩별 본문이 placeholder만 있거나 1문장 미만이면 빈 섹션.
+function checkEmptySections(text) {
+  const lines = text.split("\n");
+  const heads = [];
+  lines.forEach((ln, i) => {
+    if (/^#{1,6}\s/.test(ln)) heads.push([i, ln]);
+  });
+  const empties = [];
+  heads.forEach(([i, head], idx) => {
+    const end = idx + 1 < heads.length ? heads[idx + 1][0] : lines.length;
+    const body = lines.slice(i + 1, end).join("\n").trim();
+    const bodyWoPh = body.replace(/\[.*?\]/g, "");
+    if (/\[.*?\]/.test(body)) empties.push([head.trim(), "placeholder 잔존"]);
+    else if (bodyWoPh.replace(/\s/g, "").length < 10) empties.push([head.trim(), "내용 1문장 미만"]);
+  });
+  return { empties, nheads: heads.length };
+}
+
+function checkProps(body, propsPath) {
+  const props = fs
+    .readFileSync(propsPath, "utf8")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+  const missing = props.filter((p) => !body.includes(p));
+  return { props, missing };
+}
+
+function section(title) {
+  console.log(`\n${"=".repeat(60)}\n${title}\n${"=".repeat(60)}`);
+}
+
+function parseArgs(argv) {
+  const args = { file: null, props: null, tokens: null, turns: null, resume: false };
+  const rest = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--props") args.props = argv[++i];
+    else if (a === "--tokens") args.tokens = Number(argv[++i]);
+    else if (a === "--turns") args.turns = Number(argv[++i]);
+    else if (a === "--resume") args.resume = true;
+    else rest.push(a);
+  }
+  args.file = rest[0] ?? null;
+  return args;
+}
+
+function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (!args.file) {
+    console.error("사용: node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]");
+    process.exit(1);
+  }
+
+  const raw = fs.readFileSync(args.file, "utf8");
+  const body = splitFrontmatter(raw);
+  const lines = stripCodeAndQuotes(body.split("\n"));
+  const banned = loadBanned();
+
+  section("객관 (자동 계측)");
+  const { chars, sents, words } = objective(body);
+  console.log(`  최종 분량: ${chars}자(공백 제외) / 약 ${sents}문장 / ${words}어절`);
+  console.log(`  누적 토큰: ${args.tokens ?? "미입력 (세션에서 기록)"}`);
+  console.log(`  턴 수    : ${args.turns ?? "미입력 (세션에서 기록)"}`);
+
+  section("반객관 (기계 매칭 — 위반 개수, 적을수록 좋음)");
+  const bannedHits = findBanned(lines, banned);
+  const internalHits = findInternal(lines);
+  const dashHits = findDashes(lines);
+  const politeHits = checkPoliteness(lines);
+  const { empties, nheads } = checkEmptySections(body);
+
+  const dump = (name, hits, fmt) => {
+    console.log(`\n[${name}] ${hits.length}건`);
+    for (const h of hits) console.log("   " + fmt(h));
+  };
+
+  dump("금지어", bannedHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
+  dump("내부 작업이력(5a)", internalHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
+  dump("em/en dash(10a)", dashHits, (h) => `${h[1]} (L${h[2]}): ${h[3].slice(0, 70)}`);
+  console.log(
+    `\n[습니다체(1a) 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능` +
+      (args.resume ? ", 이력서 명사형 허용)" : ")"),
+  );
+  for (const [lineno, ln] of politeHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
+
+  section("완전성 (반객관)");
+  console.log(`[C1 빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
+  for (const [head, why] of empties) console.log(`   ${head}  ← ${why}`);
+  if (args.props) {
+    const { props, missing } = checkProps(body, args.props);
+    console.log(`\n[C2 핵심명제] ${props.length}개 중 ${missing.length}개 누락`);
+    for (const m of missing) console.log(`   누락: ${m}`);
+  } else {
+    console.log("\n[C2 핵심명제] --props 미지정 (G2 명제 리스트 필요)");
+  }
+
+  section("주관 (사람 전속 — 여기서 안 잼)");
+  console.log("  만족/불만족 · 추가교정 횟수 → 눈가림 채점");
+
+  const total = bannedHits.length + internalHits.length + dashHits.length + empties.length;
+  console.log(`\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건 + 습니다체 후보 ${politeHits.length}건`);
+}
+
+main();
