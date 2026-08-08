@@ -91,7 +91,11 @@ function syncCountHardcodingHook(state) {
     }[status],
   );
 
-  const command = `node "${countHardcodingHookDest}"`;
+  // `|| true`로 감싸는 이유: 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막힌다. 스크립트 내부
+  // 오류는 스크립트가 스스로 삼키지만(항상 exit 0), 파일 자체가 없거나 node가 없으면 그 앞에서
+  // non-zero로 죽어 커밋이 차단된다. 정탐률이 낮은 알림 때문에 전체 작업이 멈추면 안 되므로 셸
+  // 수준에서도 통과시킨다. 실측: `|| true`가 없으면 스크립트 경로가 사라졌을 때 커밋이 실제로 거부된다.
+  const command = `node "${countHardcodingHookDest}" || true`;
   const changed = registerGlobalHook('count-hardcode', 'pre-commit', command);
   state.countHardcodingHookSetByAiContexts = true;
   console.log(changed ? `전역 pre-commit 훅 등록: ${command}` : '전역 pre-commit 훅 이미 등록됨');

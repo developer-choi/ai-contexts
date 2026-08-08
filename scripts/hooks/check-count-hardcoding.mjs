@@ -16,6 +16,13 @@ const CLAUDE_LIKE = /^(CLAUDE|AGENTS|GEMINI)\.md$/i;
 // 남의 본문을 예시로 인용하는 자리 — 실측 오탐의 큰 덩어리.
 const EXCLUDE = /\/(writing-guide\/examples|recruitment\/pr-body)\//;
 
+// backlog 레포의 백로그 데이터. `projects/{repo}/active/rules/` 처럼 경로에 `/rules/`가 들어가
+// 프롬프트 문서로 오인되지만, 여기 적히는 개수는 그날 센 측정값(`V2 적중 40줄 / 26개 파일`)이라
+// 일반화하면 기록 자체가 망가진다. 구조적으로 정탐이 나올 수 없는 자리이므로 들어오지 않게 한다.
+// 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사한다.
+const BACKLOG_REPO = "backlog";
+const BACKLOG_DATA = /^\/(projects|articles|roadmaps|archives|side-income|finance)\//;
+
 const KOREAN_QUANTIFIER = /(두|세|네|다섯|여섯)\s*(가지|계약|항목|축|갈래|단계|개)/g;
 const ARABIC_QUANTIFIER = /\d+\s*(개|가지)/g;
 
@@ -85,8 +92,26 @@ function isPromptDoc(file) {
   // 앞에 슬래시를 붙여, 레포 루트 바로 아래(`meta/guides/...`)도 `/meta/guides/`로 잡히게 한다.
   const posix = `/${file.replace(/\\/g, "/").replace(/^\/+/, "")}`;
   if (EXCLUDE.test(posix)) return false;
+  if (BACKLOG_DATA.test(posix) && repoName() === BACKLOG_REPO) return false;
   if (PROMPT_DOC.test(posix)) return true;
   return CLAUDE_LIKE.test(posix.split("/").pop());
+}
+
+// 레포 이름. 워크트리에서도 원본 레포 이름이 나오도록 `--git-common-dir`을 쓴다 — 링크된
+// 워크트리는 폴더명이 `<레포>-<식별>`이라 폴더명만 보면 갈리지 않는다.
+// 경로 판정에서만 쓰이므로 한 번 구해 재사용한다.
+let cachedRepoName;
+function repoName() {
+  if (cachedRepoName !== undefined) return cachedRepoName;
+  try {
+    const commonDir = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
+      encoding: "utf8",
+    }).trim();
+    cachedRepoName = commonDir.replace(/\\/g, "/").replace(/\/\.git\/?$/, "").split("/").pop();
+  } catch {
+    cachedRepoName = "";
+  }
+  return cachedRepoName;
 }
 
 // 코드블록·인라인코드는 걷어낸 뒤 본다 — 금지 예시·인용 코드에 있는 개수까지 잡으면 소음이 된다.
