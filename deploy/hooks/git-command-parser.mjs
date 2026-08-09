@@ -109,12 +109,18 @@ export function splitSegments(command) {
 
 // 공백 분리하되 따옴표로 묶인 덩어리는 한 토큰으로 유지하고 따옴표는 벗긴다.
 // 덕분에 커밋 메시지가 통째로 한 토큰이 되어 메시지 내용이 옵션으로 오인되지 않는다.
+//
+// PowerShell here-string(`@'...'@`)을 따옴표보다 먼저 본다. 여러 줄 커밋 메시지는 이 형태로
+// 들어오는데, 모르고 공백 분리하면 `@'`가 `-m`의 값으로 먹히고 메시지 본문 단어들이 파일
+// 경로(positional)로 세어진다 — "경로를 지정했는가" 판정이 뒤집혀 경로 없는 커밋이 통과한다.
+// 실측(2026-08-09): 같은 커밋을 한 줄 메시지로는 막고 여러 줄 here-string으로는 통과시켰다.
 export function tokenize(value) {
   const tokens = [];
-  const pattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
+  const pattern = /@'([\s\S]*?)'@|@"([\s\S]*?)"@|"([^"]*)"|'([^']*)'|(\S+)/g;
   let match;
   while ((match = pattern.exec(value))) {
-    tokens.push(match[1] || match[2] || match[3]);
+    // 빈 문자열도 값이므로 truthy 판정이 아니라 "매치된 그룹"으로 고른다(`-m ""`).
+    tokens.push(match.slice(1).find((group) => group !== undefined));
   }
   return tokens;
 }
