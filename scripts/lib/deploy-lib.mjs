@@ -297,9 +297,30 @@ function withAnchor(content, dir) {
   return `${prefix}${anchor}\n\n${body}`.replace(/\r?\n*$/, '\n');
 }
 
+// 스킬 본문이 자기 폴더의 스크립트를 실행하라고 할 때 쓰는 자리표시자.
+//
+// 전역 스킬은 어느 레포에서 불릴지 모르는데, `node scripts/foo.mjs`처럼 적으면 그때의 작업
+// 디렉토리가 기준이 돼 엉뚱한 폴더를 뒤진다(2026-08-09 `/backlog` 실패). 맨 앞 앵커가 폴더
+// 경로를 알려주긴 하지만 그건 모델이 읽고 이어붙여 주기를 기대하는 것이고, 여기서 채우면
+// 배포본에 실제 경로가 그대로 박혀 기대할 일이 없어진다. 배포 시점엔 타겟이 확정돼 있다.
+const SKILL_DIR_TOKEN = '{{skill_dir}}';
+
+function withSkillDirPath(content, skillDir) {
+  // 자리표시자 뒤의 `/`까지 함께 바꿔 구분자가 섞이지 않게 한다.
+  return content
+    .split(`${SKILL_DIR_TOKEN}/`).join(`${skillDir}${path.sep}`)
+    .split(SKILL_DIR_TOKEN).join(skillDir);
+}
+
 // 배포된 SKILL.md의 최종 형태. 소스는 건드리지 않고 산출물만 이 모습이 된다.
 function renderSkillMd(content, skillDir) {
-  return withAnchor(withSkillName(content, path.basename(skillDir)), skillDir);
+  return withSkillDirPath(withAnchor(withSkillName(content, path.basename(skillDir)), skillDir), skillDir);
+}
+
+// 스킬 폴더 안의 SKILL.md 아닌 md. 앵커는 자기 디렉토리를 가리키지만 자리표시자는 스킬 루트로
+// 채운다 — 어느 하위 파일에 적든 `{{skill_dir}}/augmentations/score.mjs`가 같은 곳을 가리키게.
+function renderSkillSubMd(content, fileDir, skillDir) {
+  return withSkillDirPath(withAnchor(content, fileDir), skillDir);
 }
 
 // 스킬 폴더 안의 md 중 앵커를 붙이지 않을 것. templates는 사용자 문서로 복사되는 재료라
@@ -319,7 +340,7 @@ function injectSkillName(skillDir) {
     const raw = fs.readFileSync(file, 'utf8');
     const updated = path.basename(file) === 'SKILL.md' && path.dirname(file) === skillDir
       ? renderSkillMd(raw, skillDir)
-      : withAnchor(raw, path.dirname(file));
+      : renderSkillSubMd(raw, path.dirname(file), skillDir);
     if (updated !== raw) fs.writeFileSync(file, updated, 'utf8');
   }
 }
@@ -360,7 +381,7 @@ function compareSkillPaths(src, target, roots = { src, target }) {
     const source = fs.readFileSync(left, 'utf8');
     const expected = leftEntries[i].name === 'SKILL.md' && src === roots.src
       ? renderSkillMd(source, roots.target)
-      : withAnchor(source, target);
+      : renderSkillSubMd(source, target, roots.target);
     if (expected !== fs.readFileSync(right, 'utf8')) return false;
   }
   return true;
@@ -882,6 +903,7 @@ export {
   readManagedKeys,
   compareRulePaths,
   renderSkillMd,
+  renderSkillSubMd,
   resolveRulePaths,
   withAnchor,
   removePath,

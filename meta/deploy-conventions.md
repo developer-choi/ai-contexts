@@ -56,6 +56,16 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 - `unsync`는 `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 **통째 제거**한다 (동일성 비교 없이). 경로 자체가 AC가 만든 gitignore 산출물이므로, 원본에서 사라진 스킬(orphan)도 함께 청소되고 원본은 `local/`에 남아 re-sync로 복구된다 — 사용자 데이터 손실 위험이 없다. `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`(투영 원본)가 있는 레포에서만 제거한다(비-AC 레포의 사용자 `AGENTS.md` 보호).
 - 새 자산 종류를 `local/`에 추가하면 그 레포 `.gitignore`에 `.claude/<X>/` 항목을 더한다(`.agents/`는 통째 ignore되어 추가 불필요).
 
+## 스킬이 자기 폴더의 스크립트를 부를 때는 자리표시자를 쓴다
+
+스킬 본문이 번들 스크립트를 실행하라고 할 때는 `{{skill_dir}}/<경로>`로 적는다. 배포가 그 스킬의 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`, 검증은 `verify:skill-render`).
+
+전역 스킬은 어느 레포에서 작업하다 불릴지 모른다. `node scripts/foo.mjs`처럼 적으면 그때의 작업 디렉토리가 기준이 돼, 같은 이름의 폴더를 가진 레포에서는 엉뚱한 곳을 뒤지다 실패한다(2026-08-09 `/backlog`가 이 모양으로 실패했고, 실행한 쪽은 "스킬이 없는 스크립트를 참조한다"고 오진했다). 맨 앞 앵커가 폴더 경로를 알려주긴 하지만 그건 모델이 읽고 이어붙여 주기를 기대하는 것이라, 배포가 직접 채워 기대할 일을 없앤다.
+
+하위 md에 적어도 스킬 루트로 채워진다 — 앵커(자기 디렉토리)와 기준이 다르다. 실행 위치에 기대는 호출이 남아 있으면 `verify:skill-script-paths`가 배포 전에 끊는다. 로컬 스킬(`local/skills/`)은 그 레포 안에서만 돌아 자기 레포 상대경로가 맞으므로 이 검사 대상이 아니다.
+
+스크립트가 다른 레포 소유면(그 레포 데이터만 다루는 도구면) 자리표시자가 아니라 그 레포에 두고 레포 경로로 부른다.
+
 ## 규칙이 contexts를 가리킬 때는 자리표시자를 쓴다
 
 `deploy/rules/`의 md가 contexts 파일을 가리킬 때는 `{{contexts}}/<파일>` 자리표시자로 적는다. 배포가 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withContextsPath`, 검증은 `compareRulePaths`).
