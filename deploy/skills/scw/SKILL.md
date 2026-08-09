@@ -157,7 +157,7 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 **after**: 위임 대상(`/review`)과 마커 정의 원본(`document-structure.md`)을 열어 대조한 뒤 정답을 확정한다. 규칙이 실제로 발동 가능한지도 함께 본다 — 그 해석대로면 한 번도 발동할 수 없는 규칙이면 해석이 틀린 것이다.
 
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조. 특정 스킬의 벤치 대입값(단위 매핑·오라클·fixture)은 해당 스킬의 `specialized/` 파일 참조.
-- description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. [CRITICAL] 작업 시작 전 specialized 파일의 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. skill-creator 표준 도구(`run_eval.py`·`run_loop.py`)는 architectural broken 상태(2026-05-16 기준 미해결, [anthropics/skills#556](https://github.com/anthropics/skills/issues/556))이므로 자체 도구 `scripts/bench-trigger.py` 사용. 6시간 함정 사례 specialized 참조.
+- description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. [CRITICAL] 작업 시작 전 specialized 파일의 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. skill-creator 표준 도구(`run_eval.py`·`run_loop.py`)는 architectural broken 상태(2026-05-16 기준 미해결, [anthropics/skills#556](https://github.com/anthropics/skills/issues/556))이므로 자체 도구 `bench-trigger.py`(scw 스킬 폴더의 `scripts/`) 사용. 6시간 함정 사례 specialized 참조.
 - ablation·기능 벤치를 주기적으로 운용할 때의 환경 격리·절차(워크트리 분리 등)는 [bench-operations.md](specialized/bench-operations.md) 참조.
 
 ## Eval

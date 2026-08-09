@@ -22,7 +22,7 @@
 
 ## 측정 도구: bench-trigger.py
 
-표준 도구가 broken이라 자체 도구 `scripts/bench-trigger.py` 사용. 동작 원리:
+표준 도구가 broken이라 자체 도구 `bench-trigger.py` 사용 — scw 스킬 폴더의 `scripts/`에 있다(폴더 절대경로는 이 파일 맨 위). AC 레포에도 동명 `scripts/`가 있으므로 상대경로 그대로 부르지 않는다. 동작 원리:
 
 - `claude -p`로 query 호출, `--output-format stream-json`으로 trigger 신호 캡처
 - **`.claude/commands/` 임시 파일 안 만들고**, 측정 대상 `SKILL.md` 자체를 그대로 사용 (skills 디렉토리는 `claude -p`도 인식)
@@ -46,7 +46,7 @@ should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주). UTF-8 BOM
 
 ```powershell
 $env:PYTHONUTF8 = "1"
-& python.exe <scw>/scripts/bench-trigger.py `
+& python.exe <scw 스킬 폴더>/scripts/bench-trigger.py `
   --eval-set <path-to-eval.json> `
   --skill-path <path-to-skill-dir> `
   --runs-per-query 3 `
