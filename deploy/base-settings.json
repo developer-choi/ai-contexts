@@ -121,6 +121,12 @@
       "msg": "Checking team message policy..."
     },
     {
+      "file": "check-blind-measure-prompt.mjs",
+      "event": "PreToolUse",
+      "on": "agent",
+      "msg": "Checking blind measure prompt..."
+    },
+    {
       "file": "snapshot-precompact-transcript.mjs",
       "event": "PreCompact",
       "on": "manual",
