@@ -27,11 +27,12 @@ const countHardcodingHookSrc = path.join(
 );
 const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
+// sync-environment.mjs의 같은 이름 상수와 글자 단위로 일치해야 한다 —
+// removeIfIdentical이 이 문자열로 "AC가 쓴 파일인지"를 판별한다.
 const cmdAutorunBody = `@echo off
-echo %CMDCMDLINE% | findstr /i " /c " >nul
-if errorlevel 1 (
-    if /i "%CD%"=="%USERPROFILE%" cd /d %USERPROFILE%\\WebstormProjects\\main
-)
+if /i not "%CD%"=="%USERPROFILE%" goto :eof
+for %%A in (%CMDCMDLINE%) do if /i "%%~A"=="/c" goto :eof
+cd /d "%USERPROFILE%\\WebstormProjects\\main"
 `;
 
 function main() {

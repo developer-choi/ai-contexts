@@ -32,11 +32,18 @@ const countHardcodingHookSrc = path.join(
 );
 const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
+// AutoRun은 cmd.exe가 뜰 때마다 실행된다. 그래서 여기서 외부 프로그램을 부르면 안 된다 —
+// 파이프(`echo ... | findstr`)는 cmd.exe 자식을 더 만들고, 그 자식들에서 AutoRun이 다시 돌면서
+// %CMDCMDLINE% 안의 따옴표에 명령줄 해석이 깨진다. 그러면 읽을 대상을 잃은 findstr이 남아
+// 키보드 입력을 기다리는데, `cmd /c start`처럼 새 콘솔을 갖는 호출에서는 사용자가 그 창을
+// 닫을 때까지 멈춘다(브라우저 뷰어가 안 열리던 원인).
+//
+// 그래서 판별을 전부 cmd 내장 문법으로만 한다(자식 프로세스 0개).
+// 폴더 검사를 맨 앞에 두어 홈이 아닌 대부분의 호출은 첫 줄에서 끝난다.
 const cmdAutorunBody = `@echo off
-echo %CMDCMDLINE% | findstr /i " /c " >nul
-if errorlevel 1 (
-    if /i "%CD%"=="%USERPROFILE%" cd /d %USERPROFILE%\\WebstormProjects\\main
-)
+if /i not "%CD%"=="%USERPROFILE%" goto :eof
+for %%A in (%CMDCMDLINE%) do if /i "%%~A"=="/c" goto :eof
+cd /d "%USERPROFILE%\\WebstormProjects\\main"
 `;
 
 const powershellProfileBlock = `
