@@ -27,13 +27,13 @@ const countHardcodingHookSrc = path.join(
 );
 const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
-// sync-environment.mjs의 같은 이름 상수와 글자 단위로 일치해야 한다 —
-// removeIfIdentical이 이 문자열로 "AC가 쓴 파일인지"를 판별한다.
-const cmdAutorunBody = `@echo off
-if /i not "%CD%"=="%USERPROFILE%" goto :eof
-for %%A in (%CMDCMDLINE%) do if /i "%%~A"=="/c" goto :eof
-cd /d "%USERPROFILE%\\WebstormProjects\\main"
-`;
+// sync가 배포하는 것과 같은 파일을 읽는다 — removeIfIdentical이 이 내용으로
+// "AC가 쓴 파일인지"를 판별하므로, 사본을 따로 들고 있으면 한쪽만 고쳤을 때
+// unsync가 멀쩡한 산출물을 "사용자가 손댔다"로 오판해 안 지운다.
+const cmdAutorunSrc = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'autorun.cmd',
+);
 
 function main() {
   const state = readState();
@@ -108,7 +108,7 @@ function unsyncCmdAutorun(state) {
     delete state.cmdAutorunRegSetByAiContexts;
   }
 
-  const status = removeIfIdentical(cmdAutorunFile, cmdAutorunBody);
+  const status = removeIfIdentical(cmdAutorunFile, fs.readFileSync(cmdAutorunSrc, 'utf8'));
   console.log({
     removed: `Removed ${cmdAutorunFile}`,
     modified: `Modified outside ai-contexts; leaving ${cmdAutorunFile}`,

@@ -32,19 +32,14 @@ const countHardcodingHookSrc = path.join(
 );
 const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
-// AutoRun은 cmd.exe가 뜰 때마다 실행된다. 그래서 여기서 외부 프로그램을 부르면 안 된다 —
-// 파이프(`echo ... | findstr`)는 cmd.exe 자식을 더 만들고, 그 자식들에서 AutoRun이 다시 돌면서
-// %CMDCMDLINE% 안의 따옴표에 명령줄 해석이 깨진다. 그러면 읽을 대상을 잃은 findstr이 남아
-// 키보드 입력을 기다리는데, `cmd /c start`처럼 새 콘솔을 갖는 호출에서는 사용자가 그 창을
-// 닫을 때까지 멈춘다(브라우저 뷰어가 안 열리던 원인).
-//
-// 그래서 판별을 전부 cmd 내장 문법으로만 한다(자식 프로세스 0개).
-// 폴더 검사를 맨 앞에 두어 홈이 아닌 대부분의 호출은 첫 줄에서 끝난다.
-const cmdAutorunBody = `@echo off
-if /i not "%CD%"=="%USERPROFILE%" goto :eof
-for %%A in (%CMDCMDLINE%) do if /i "%%~A"=="/c" goto :eof
-cd /d "%USERPROFILE%\\WebstormProjects\\main"
-`;
+// 배치 스크립트는 JS 문자열이 아니라 실파일로 둔다(`autorun.cmd`). 문자열로 들고 있으면
+// sync·unsync 양쪽에 같은 내용을 복제해야 하는데(unsync가 글자 단위 일치로 AC 산출물인지
+// 판정한다), 한쪽만 고치면 unsync가 "사용자가 손댄 파일"로 오판해 안 지운다.
+// 이스케이프를 손으로 맞출 일도, 편집기가 batch 문법을 못 잡아줄 일도 없어진다.
+const cmdAutorunSrc = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  'autorun.cmd',
+);
 
 const powershellProfileBlock = `
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
@@ -221,7 +216,7 @@ function syncCmdAutorun(state) {
     return;
   }
 
-  const status = writeWholeFile(cmdAutorunFile, cmdAutorunBody);
+  const status = writeWholeFile(cmdAutorunFile, fs.readFileSync(cmdAutorunSrc, 'utf8'));
   console.log({ created: `Created ${cmdAutorunFile}`, updated: `Updated ${cmdAutorunFile}`, unchanged: `Already up to date: ${cmdAutorunFile}` }[status]);
 
   const desired = `@${cmdAutorunFile}`;
