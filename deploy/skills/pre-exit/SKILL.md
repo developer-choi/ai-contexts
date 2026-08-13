@@ -1,7 +1,7 @@
 ---
 name: pre-exit
 description: 세션을 마무리한다. 문제 리스트업, 규칙화+사례 축적, 미커밋 확인을 수행한다. 세션·작업의 종결·마무리·정리 의도가 보이면 반드시 이 스킬을 호출한다("세션 마무리", "세션 끝내자", "오늘 작업 정리", "오늘 작업 마무리", "작업 마무리", "작업 정리", "회고", "exit", "pre-exit" 등).
-argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | 무인자 시 자동 감지]"
+argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | refresh-prompts | 무인자 시 자동 감지]"
 ---
 
 # 세션 마무리
@@ -22,6 +22,7 @@ argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | 
 | `digest` 인자, 또는 본 세션 `/digest` 호출, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
 | `write-refine` 인자, 또는 본 세션 `/write-refine` 호출 | [augmentations/write-refine.md](augmentations/write-refine.md) |
 | `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-start` · `/routine-summary` 호출 | [augmentations/routine.md](augmentations/routine.md) |
+| `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
 
