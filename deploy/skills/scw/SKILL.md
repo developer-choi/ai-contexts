@@ -127,7 +127,7 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 
 진입 트리거: "스킬 의심 지점 찾아 개선", "비판적으로 따져 다듬어", "벤치 돌려서 개선" 등.
 
-## 0건 수렴까지 재벤치 (필수)
+## 0건 수렴까지 재벤치
 
 벤치 라운드에서 잔류 이슈가 1건이라도 남으면 다음 라운드로 넘어간다. 사용자가 명시적으로 "이 정도면 됐다"·"여기서 멈추자"고 말하기 전에는 자체 판단으로 라운드를 종료하지 않는다. 사용자가 매번 "더 돌려"라고 시키지 않아도 0건 수렴까지 자동 진행한다.
 
@@ -158,7 +158,7 @@ workflow 스킬에서 「이전 PR 산출물 비판적 검토」가 step-4 본�
 
 - 서브에이전트 위임 구조 테스트와 gotchas는 [eval-delegation.md](eval-delegation.md) 참조. 특정 스킬의 벤치 대입값(단위 매핑·오라클·fixture)은 해당 스킬의 `specialized/` 파일 참조.
 - description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval-bench.md](specialized/trigger-eval-bench.md) 참조. [CRITICAL] 작업 시작 전 specialized 파일의 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. skill-creator 표준 도구(`run_eval.py`·`run_loop.py`)는 architectural broken 상태(2026-05-16 기준 미해결, [anthropics/skills#556](https://github.com/anthropics/skills/issues/556))이므로 자체 도구 `bench-trigger.py`(scw 스킬 폴더의 `scripts/`) 사용. 6시간 함정 사례 specialized 참조.
-- ablation·기능 벤치를 주기적으로 운용할 때의 환경 격리·절차(워크트리 분리 등)는 [bench-operations.md](specialized/bench-operations.md) 참조.
+- 벤치를 돌리면 환경 격리·측정 도구 감사·종결 시 정리는 [bench-operations.md](specialized/bench-operations.md)를 따른다 — 회차 운용이든 단발이든 해당한다.
 
 ## Eval
 
