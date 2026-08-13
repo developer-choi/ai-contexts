@@ -41,12 +41,6 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 step-1.1 종료 = `/plan/background/persistent/`에 원본 자료 저장 완료 + 시각 원본(figma 쓰는 모드는 `retained/figma-url.md`·`retained/figma/`, 개인 모드는 `retained/mockup/`(+선택 `retained/spec.md`)) 저장 완료 + 시각 원본 진입 문서 `retained/design-root.md` 산출(원본 위치 + 대조 절차문서만 적는 한 장 — 양식은 [conventions/artifact/design-root.md](../conventions/artifact/design-root.md)) + 컨벤션 인덱스 산출(아래 종료 게이트). 그 이상(분석)은 모두 step-1.2 영역이다.
 
-특히 다음은 **step-1.2** 영역이지 step-1.1이 아니다 — recruitment guide(`requirement-review/recruitment/guide.md`)·planning guide·design guide의 「분석 과정」 절차 일체가 여기 해당:
-- 자료 정독·공동 탐색
-- 시안 분석·페이지별 자료 정리·디자인 시스템 설계 (raw 자료 *수집*은 1.1, 1.2는 그 수집분의 정리·분석)
-- cross-analysis·service-analysis 등 분석 산출물 작성
-- 평가 기준 추론, 프로젝트 결정 사항, 모호한 부분 정리
-
 step-1.1 종료 시, **분석(step-1.2)이나 구현 설계로 진입하기 전에** 위 「컨벤션 소스 수집」 절의 산출을 먼저 낸다. 이를 건너뛰고 다운스트림(PR별 과제 정의·MARKUP)으로 가면 컨벤션 1차 소스를 거기서 재수집하게 되고, 같은 추출 패턴의 Reviewer가 그 누락을 못 잡는 자기증명 루프가 생긴다(SKILL.md 「검증 기준 = 진실 원천」). 컨벤션 파일을 선제안·채택 없이 혼자 읽고 진행하는 것도 위반이다. 작업 레포가 아직 없어 인덱스 작성을 미루는 경우(절 4항)는 연기 사실을 한 줄로 남긴다.
 
 step-1.1은 후속 세션 spawn 분기점이다 — 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다. 위 컨벤션 인덱스 게이트를 낸 뒤 후속 안내를 출력하고 step-1.2로 진입한다.

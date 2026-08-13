@@ -17,7 +17,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
   - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `project.md`의 「의존」 절 — 적는 기준은 [conventions/pr-split.md](../conventions/pr-split.md) 「의존 — 판단거리 노출」).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 앞 PR 위에 얹을 근거가 없다.
   - 앞 PR 위에 얹는 형태(스택)는 **의존이 있을 때의 형태이지 기본값이 아니다.** 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다 — 리뷰 diff에 앞 PR 커밋이 섞이고 불필요한 연쇄 rebase를 부른다.
-- 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다. **다른 PR·세션이 만든 워크트리로 들어가지 않는다** — 각 PR은 자기 브랜치·자기 워크트리에서 완결한다.
+- 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다.
 
 이후 이 단계의 모든 작업(구현 실행 또는 stub 파일 생성·커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
 
@@ -59,18 +59,10 @@ Step 3의 "컨벤션 사전 참조"에서 파악한 컨벤션을 기반으로, �
 stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관련 컨벤션 1차 소스를 **직접 grep**한 후 결과를 stub 주석 `[Convention]` 블록에 인용한다. "안다고 가정"·"이전 세션 기억"·"이전 PR에서 본 패턴"에 의존하지 않는다. 결정·도구 호출·stub 파일 작성 전에 grep 결과를 받는다 — 사후 검증은 늦다.
 
 대상 컨벤션 1차 소스:
-- `docs/ARCHITECTURE.md` — 레이어 의존성, 폴더 구조, Public API 원칙
-- `docs/conventions/*` — 네이밍·레이어·nuqs·patterns 등
-- `_fsd/.../*` — 기존 슬라이스의 평행 사례
+- 프로젝트의 아키텍처·컨벤션 문서와 기존 슬라이스의 평행 사례
 - **작업 대상 디렉터리의 조상 체인 `CLAUDE.md`** — 내용이 다른 문서를 가리키는 포인터면 끝까지 따라가 실제 배치·네이밍 규칙 본문을 확인한다. 한 줄 포인터에서 멈추지 않는다 (하위 CLAUDE.md는 Read 전까지 자동 로드되지 않는다)
 
 `/plan/background/retained/conventions-index.md`가 있으면 거기 등재된 경로를 grep 출발점으로 우선한다.
-
-특히 다음 결정 전에 grep 의무:
-- features/widgets/entities `ui/` 폴더 sub-folder 허용 여부
-- entities `api/types.ts`, `model/types.ts`, `lib/mapper.ts` 배치 — 컨벤션 명시 vs 기존 슬라이스 평행
-- 슬라이스 도메인 그룹화 임계치 (`02-layers.md`의 슬라이스 수 기준)
-- `index.ts` 중간 배럴 허용 여부
 
 ### prop 설계 타당성 — HTML 표준 속성 우선
 

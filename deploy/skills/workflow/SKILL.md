@@ -41,48 +41,7 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 **PLAN/IMPL 분담은 경직 분업이 아니라 선택적 분해다.** PLAN(step-4)은 구현을 수행하는 세션이며, 가벼운 PR은 그 자리에서 실행·커밋해 완결한다. IMPL은 PLAN이 stub으로 분해한 **무거운 구현을 이어받는** 세션이지, "코드+커밋은 IMPL 칸"이라는 고정 배정이 아니다. PLAN이 실행 가능한 작업을 "IMPL 몫"이라며 미루지 않는다 (프레임 근거: step-4 도입부).
 
-### 의존성 그래프
-
-**채용:**
-
-```
-BG.step-1.1 ──→ FOUNDATION (= PRESET_FOUNDATION PR, 표준 step-3~6)
-                  └─ markup 환경 셋팅 완료 ──→ MARKUP
-
-BG가 PR을 확정할 때마다 ──→ 그 PR_{N}_PLAN (일괄 분할 대기 없음. PLAN spawn의 유일 트리거)
-                            의존 PR이 있으면 그 선행이 풀린 뒤 출발
-                            (의존 PR = `project.md` 해당 PR 절의 의존 항목. 직전 번호가 아닐 수 있고 여럿일 수 있다)
-
-[구현 페이즈 — 도미노, 머지 없음. base는 사전 준비에서 사용자 확인 —
- 앞 PR에 의존하면 그 브랜치 위(스택), 독립이면 기본 브랜치에서]
-PR_{N}_PLAN.step-3 종료 ──→ WRITING_IDEATOR (PR 본문 초안 — step-4 진입 전, 상시 세션)
-PR_{N}_PLAN.step-4 stub 만든 경우 ──→ PR_{N}_IMPL ──(step-6 끝)──→ WRITING_REFINER (per-PR·유연 타이밍)
-PR_{N}_PLAN.step-4 실행 이연(무거운 non-stub) ──→ PR_{N}_IMPL ──(step-6 끝)──→ WRITING_REFINER
-PR_{N}_PLAN.step-4 그 자리 실행·커밋 완결(가벼운 PR) ──→ (step-5·6 수행 후) IMPL 세션 없이 WRITING_REFINER
-
-PR_{N}에 의존하는 PR은 여기서 띄우지 않는다 (spawn은 BG 몫). 그 PR은 자기 진입 조건으로 출발한다:
-  PR_{N}이 stub 만든 경우 ──→ PR_{N}.step-4 stub 확정 시점
-  PR_{N}이 stub 안 만든 경우 ──→ PR_{N}.step-6 IMPL 완료 시점 (머지 아님)
-
-[종료 페이즈 — 전 PR IMPL 완료 후 1회, fan-in]
-PR_1..n IMPL 전부 완료 ──→ FINALIZE (replace 오배치 재배치 + 메시지 최종화)
-                            └─→ recruitment 마무리 안내 → (사용자) 머지·제출
-                                (스택은 바텀업, 독립 브랜치는 순서 무관)
-
-PR_{N}_IMPL은 MARKUP 워크트리의 검증된 페이지 마크업 코드를 그대로 가져옴 (재작성 X).
-```
-
-**실무·개인:**
-
-```
-BG.step-1.1 ──→ MARKUP
-BG가 PR을 확정할 때마다 ──→ 그 PR_{N}_PLAN
-
-PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL, PR 본문은 step-3 후 WRITING_IDEATOR·step-6 후 WRITING_REFINER)와 종료 페이즈(전 IMPL 완료 → FINALIZE)는 채용과 동일.
-FINALIZE 종료 ──→ 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관. recruitment 마무리는 채용 전용 — 실무·개인은 곧장 머지).
-```
-
-차이는 MARKUP의 디자인 진실 원천·진실검사뿐 — 모드별 축은 [conventions/modes.md](conventions/modes.md) 매트릭스.
+모드 간 차이는 MARKUP의 디자인 진실 원천·진실검사뿐이고 세션 구성·후속 관계는 같다 — 모드별 축은 [conventions/modes.md](conventions/modes.md) 매트릭스.
 
 ### 세션 spawn 안내 메커니즘
 
@@ -225,7 +184,7 @@ AI 산출물의 역할은 **Implementer 캐시·인덱스**로만 한정한다 �
 사용자 발화에 강도·범위 강조 표현이 등장하면 (예: "풀로", "전부 다", "만만히 보지 마", "세게", "빠짐없이", "엄격하게", "꼼꼼히") 이는 **AI의 1차 후보 범위가 부족할 수 있다는 신호**다. 사용자가 본 1차 후보 안의 풀셋을 뜻하는 게 아니라, AI가 더 큰 1차 소스로 재검증할 것을 요구하는 발화로 해석한다.
 
 발동 절차:
-1. MP `docs/best-practices/*.md`(Glob으로 전체 목록 확인 → frontmatter로 관련 파일 추림 → 매칭 항목 → `docs/patterns/...` 본문)를 즉시 탐색·Read
+1. MP `docs/best-practices/*.md`(전체 목록 확인 → frontmatter로 관련 파일 추림 → 매칭 항목 → `docs/patterns/...` 본문)를 즉시 탐색·Read
 2. 1차 소스에서 발견한 항목이 AI 1차 후보보다 많으면, **추가 항목을 사용자에게 자동 제안** (사용자가 묻기 전에)
 3. 추가 항목이 PR 범위 안인지 사용자 확인 후 implementation에 반영
 
@@ -247,8 +206,6 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 
 특히 빠뜨리기 쉬운 절차:
 - **Reviewer 팀 에이전트 spawn** — 산출물 작성 직후 "사용자 OK 받았으니 다음"으로 자연스레 흐르며 누락. [CRITICAL] 표기에도 미스. **산출물 OK 발화는 reviewer 진입 트리거지 종료 트리거 아님**.
-- **부정 명시 메아리 자가 점검** — 본 SKILL.md 절 (아래)
-- **자가 검토** — 본 SKILL.md 「자가 검토 필수」 절 (아래)
 
 종료 절은 보고·spawn 안내 출력 전에 모두 끝나야 한다. 종료 절 실행 결과는 보고에 합산.
 
