@@ -91,12 +91,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 
-해당 슬라이스의 리뷰 파이프라인이 0건으로 통과하면 그 슬라이스 사이클은 종료한다. **이 시점에는 squash하지 않는다.** 다음 슬라이스의 구현 커밋을 직전 리뷰 수정 커밋들 위에 이어 쌓고, 모든 슬라이스가 끝난 뒤 Step 5.4에서 커밋을 일괄 정리한다.
-
-```
-stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
-                                                  ↑ 종료 직전에 일괄 squash + 재정렬
-```
+해당 슬라이스의 리뷰 파이프라인이 0건으로 통과하면 그 슬라이스 사이클은 종료한다. **이 시점에는 squash하지 않는다.** 다음 슬라이스의 구현 커밋을 직전 리뷰 수정 커밋들 위에 이어 쌓는다.
 
 정리 시점은 step-5 안이 아니라 step-6 사용자 리뷰 완료 후 (stub→IMPL diff 리뷰 가능해야 함). 케이스 분기 사유·절차는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「라이프사이클 > 정리」 참조.
 
@@ -106,7 +101,6 @@ stub | a | a-1 | a-2 | b | b-1 | c | c-1 | c-2 | d ...
 
 - [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
 - **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가 (코드 안 TODO 일관 0건 — PR 이연·외부 의존성은 `project.md`·`overview.md`로 관리)
-- 전체 리뷰 완료 후 step-6에 진입 (커밋 보존 정책은 위 Step 5.0 참조)
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)

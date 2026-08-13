@@ -32,7 +32,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([conventions/plan-folder.md](../conventions/plan-folder.md) 「라이프사이클 규칙」·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 디자인 진실 원천 0건으로 완성하므로(모드별 진실검사는 [modes.md](../conventions/modes.md) 매트릭스) **step-4의 전면 stub 대상이 아니다.** 완성 마크업은 MARKUP 워크트리의 **검증된 페이지 파일을 그대로 PR 워크트리로 가져온다**(재작성 금지 — 검증본이 PR마다 어긋나지 않게. 배치 경로만 판단). 단 **공통 지정 컴포넌트**(MARKUP이 「공통 컴포넌트 확정」으로 추출한 재사용 단위)는 예외로 껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출하고 시각 본문은 MARKUP에서 이동한다 — 재정의 상세는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」. PR 로직은 가져온 마크업 파일을 **수정하지 않고 별도 파일**(hook·컨테이너 등)에서 import·합성해 얹는다 — 디자인 변경으로 마크업을 다시 가져와도 로직이 덮이지 않도록(재수령은 Step 5.2.3). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
+**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 세션이 디자인 진실 원천 0건으로 완성하므로(모드별 진실검사는 [modes.md](../conventions/modes.md) 매트릭스) **step-4의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」 참조(재수령은 Step 5.2.3). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). MARKUP 세션이 figma 자료를 `background/retained/figma/`에 통합 누적하므로 PR 단위 `pr{N}/retained/page*.png`는 생성되지 않는다.
 
 ---
 
@@ -67,7 +67,7 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 `/plan/background/retained/conventions-index.md`가 있으면 거기 등재된 경로를 grep 출발점으로 우선한다.
 
 특히 다음 결정 전에 grep 의무:
-- features/widgets/entities `ui/` 폴더 sub-folder 허용 여부 (예: `grep "ui/" docs/ARCHITECTURE.md docs/conventions/02-layers.md`)
+- features/widgets/entities `ui/` 폴더 sub-folder 허용 여부
 - entities `api/types.ts`, `model/types.ts`, `lib/mapper.ts` 배치 — 컨벤션 명시 vs 기존 슬라이스 평행
 - 슬라이스 도메인 그룹화 임계치 (`02-layers.md`의 슬라이스 수 기준)
 - `index.ts` 중간 배럴 허용 여부
@@ -100,7 +100,7 @@ interface와 test-cases는 별도 md를 만들지 않는다. interface narrative
 
 ## 4. stub 파일 작성 룰
 
-stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 단일 출처. 정의·범위(모든 파일·함수·컴포넌트 stub 필수), 디폴트(미정 placeholder), 양식(.tsx·.module.scss·Hook·test·Fixture·파일 분리), 주석(comments.md cross-ref), 라이프사이클(생성·보존·비판적 검토·정리) 모두 본 컨벤션이 담당.
+stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 단일 출처.
 
 #### markup.md 양식
 
@@ -136,7 +136,7 @@ PR 번호별 분기·조건문 없음. **"인프라성(빌드·린트·포맷·�
 stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
 - 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 (다음 단계의 「커밋 재정렬」 참조)
-- stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다 (글로벌 규칙 「커밋 단위」)
+- stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 
 #### [CRITICAL] 포맷팅·prettier 영역 한정
@@ -144,12 +144,7 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 **프로젝트 전역 포맷팅 금지.** 본 PR 영역만 한정 적용한다 — 전역으로 돌리면 이 PR과 무관한 파일까지 diff에 들어와 리뷰어가 변경의 경계를 잃는다.
 
 - ❌ 금지: `yarn format`, `yarn prettier` 처럼 대상 경로 없이 도는 형태
-- ✓ 허용:
-  - 영역 한정 prettier — 프로젝트에 포맷 스크립트가 있으면 경로 인자를 붙여 (`npm run format -- _fsd/<slice>/ src/<scope>/`), 없으면 `npm exec prettier -- --write _fsd/<slice>/ src/<scope>/`
-  - husky lint-staged (pre-commit hook이 staged 파일만 처리)
-  - 에디터(IDE)의 파일 저장 시 자동 포맷
-
-만약 husky lint-staged가 이미 설치되어 있으면 `yarn format` 단계 자체 생략 — pre-commit hook이 자동 처리.
+- ✓ 허용: 경로를 한정한 prettier 실행, staged 파일만 처리하는 pre-commit hook, 에디터 저장 시 자동 포맷
 
 ---
 
@@ -172,9 +167,8 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 **컨벤션 대조**
 - 각 산출물에 적힌 내용 기반으로 관련 코딩 컨벤션을 찾아 대조한다 (컴포넌트 설계가 있으면 컴포넌트 컨벤션, 테스트 계획이 있으면 테스트 컨벤션)
-- **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 (overview.md는 의도만, reference.md가 컨벤션 인덱스 단일 출처 — step-3 산출물 분담 표 참조)
+- **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 (step-3 「산출물 분담」 표 참조)
 - 프로젝트 유형(회사/개인)에 맞는 경로만 포함되었는지 확인한다
-- stub 파일이 lint·tsc·prettier를 통과하는지 확인 (코드라서 가능)
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
 - **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
 - **코드-narrative 오배치 검출** — **모든 md 산출물**에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2). **단 `implementation.md` 「행동 결정 커버리지」 표의 `it.todo`는 예외** — 상위 결정과의 대조표라 코드에 대응물이 없다 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조). 특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.

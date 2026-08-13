@@ -19,9 +19,8 @@ argument-hint: <세션 이름> <채용|실무|개인>
 - 세션 이름 디폴트 `BG`. 모드 디폴트 없음 (사용자가 명시 전달 — 채용/실무/개인 분기 영향이 크므로 디폴트 추론 위험).
 - 세션 이름: `BG` / `FOUNDATION` / `MARKUP` / `PR_{N}_PLAN` / `PR_{N}_IMPL` / `WRITING_IDEATOR` / `WRITING_REFINER` / `FINALIZE`
 - 모드: `채용` / `실무` / `개인`
-- 호출 예: `/workflow BG 채용`, `/workflow MARKUP 실무`, `/workflow PR_2_PLAN 개인`, `/workflow FINALIZE 채용`
 
-BG가 후속 세션 spawn 안내를 출력할 때 동일 모드 인자를 그대로 포함한다 (다음 세션 시작 시 사용자가 같은 모드 인자로 spawn). 모드 자동 감지(폴더 검사 등) 사용 X.
+모드 자동 감지(폴더 검사 등) 사용 X.
 
 ## 세션
 
@@ -83,7 +82,7 @@ PR 도미노(PR_{N}_PLAN → PR_{N}_IMPL, PR 본문은 step-3 후 WRITING_IDEATO
 FINALIZE 종료 ──→ 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관. recruitment 마무리는 채용 전용 — 실무·개인은 곧장 머지).
 ```
 
-개인은 그래프가 실무와 동일하다. 차이는 MARKUP의 디자인 진실 원천·진실검사뿐 — 모드별 축은 [conventions/modes.md](conventions/modes.md) 매트릭스.
+차이는 MARKUP의 디자인 진실 원천·진실검사뿐 — 모드별 축은 [conventions/modes.md](conventions/modes.md) 매트릭스.
 
 ### 세션 spawn 안내 메커니즘
 
@@ -107,13 +106,13 @@ FINALIZE 종료 ──→ 머지 안내 (스택은 바텀업, 독립 브랜치�
 1. 표에서 자기 후속 명단 추출
 2. 각 후속의 선행 분해 — 자기 선행·방금 끝낸 step은 ✓ (자기 spawn 사실로 충족 추론), 병렬 세션 종료 항목은 미충족 가능 단서로 표시
 3. 후속별 spawn 가능 조건 안내 출력 (`/workflow <세션> <모드>` 인자 포함). 표 (6) 권장 모델도 함께 출력 (예: "Opus 권장"). MARKUP은 입력 모달리티(figma URL이면 Sonnet / 캡처-only면 Opus)에 따라 분기 안내. 사용자가 단서 보고 spawn 판단
-4. 후속 spawn 안내 출력 직후, "이 세션은 종료되었습니다. 회고가 필요한 시점에 `/pre-exit` 호출하세요." 한 줄 안내. 보강·augmentation 디테일은 적지 않는다 (/pre-exit 내부 처리)
+4. 후속 spawn 안내 출력 직후, 세션 종료 + 회고 시점의 `/pre-exit` 호출을 한 줄로 안내. 보강·augmentation 디테일은 적지 않는다 (/pre-exit 내부 처리)
 
 ## 구조
 
 - 각 step은 조건에 해당하는 **하위 스킬을 모두 로드**하는 오케스트레이터이거나, 그 자체가 실행 로직
 - 해당 스킬이 여러 개이면 **순서대로 하나씩** 실행한다 (동시 로드 불가)
-- 각 step의 **산출물이 다음 step의 입력** — step마다 "참고 자료"로 입력 산출물이 명시되어 있음
+- 각 step의 **산출물이 다음 step의 입력**
 - 하위 스킬은 워크플로우 세션의 절차(step 또는 step 없는 세션 본문) 안에서만 호출된다 (독립 호출 없음). 예: MARKUP은 step 없이 본문(markup/)에서 impl-review-loop를 호출
 - MARKUP·WRITING·FINALIZE는 step 번호가 없는 세션 — 본문은 [conventions/session/markup/index.md](conventions/session/markup/index.md)(모드 공통) + 모드 파일([figma.md](conventions/session/markup/figma.md)·[personal.md](conventions/session/markup/personal.md)) / [conventions/session/writing.md](conventions/session/writing.md)(WRITING_IDEATOR·WRITING_REFINER 2절) / [conventions/session/finalize.md](conventions/session/finalize.md) 단일 출처
 
@@ -130,7 +129,7 @@ FINALIZE 종료 ──→ 머지 안내 (스택은 바텀업, 독립 브랜치�
 
 ## 작업 진행 순서
 
-각 세션의 step 매핑. MARKUP·WRITING·FINALIZE는 step 번호가 없어 [conventions/session/markup/index.md](conventions/session/markup/index.md) / [conventions/session/writing.md](conventions/session/writing.md) / [conventions/session/finalize.md](conventions/session/finalize.md) 참조. FOUNDATION은 자기 PR을 표준 step-3~6으로 수행하며, 고유 입력·제약은 [conventions/session/foundation.md](conventions/session/foundation.md) 참조.
+각 세션의 step 매핑. FOUNDATION은 자기 PR을 표준 step-3~6으로 수행하며, 고유 입력·제약은 [conventions/session/foundation.md](conventions/session/foundation.md) 참조.
 
 ### BG (Step 1)
 
@@ -238,7 +237,7 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 
 사용자의 짧은 OK 발화("ㅇ", "좋아", "step-4 진입해", "ok")는 plan mode 면제 트리거가 아니다. 사용자가 명시적으로 "plan mode 끄고 진행"·"바로 작성"이라 발화하지 않는 한 plan mode 진입.
 
-산출물 초안 제시 + 사용자 승인 라운드를 plan mode 안에서 진행. 승인 후 ExitPlanMode로 빠져나와 산출물 작성.
+산출물 초안 제시 + 사용자 승인 라운드를 plan mode 안에서 진행.
 
 ### step 종료 시퀀스 미스킵
 
@@ -253,8 +252,6 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 
 종료 절은 보고·spawn 안내 출력 전에 모두 끝나야 한다. 종료 절 실행 결과는 보고에 합산.
 
-각 step의 전환·세션경계·후속안내(다음 step / 세션 종료 여부 / 메커니즘 발동)는 「step 경계」 표가 소유한다 — step 본문에서 재서술하지 않는다.
-
 ### 자가 검토 필수
 
 각 세션 경계에서 산출물을 2단으로 검증한다. 세션 이름·개수에 의존하지 않는다.
@@ -264,9 +261,9 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 - **다음 세션 시작 시 외부 검증**: 새 세션이 진입하면 이전 세션의 산출물을 외부 시각으로 한 번 더 검증한다. 같은 세션 컨텍스트의 blind spot을 잡기 위함.
 - 같은 세션 안의 step 전환(예: 같은 BG 세션 안 step-1.1→1.2)에는 적용하지 않는다. 세션 분리가 외부 시각의 전제이므로 같은 세션 안은 제외.
 - 산출물 파일이 없는 세션(예: 코드 작업 위주의 IMPL 세션)은 reviewer 에이전트 파이프라인이 검증을 담당하므로 일반 자가 검토는 적용하지 않는다.
-- 발견된 이슈는 수정한 뒤 보고에 포함한다. 반복 횟수·수렴 기준은 글로벌 규칙 「검증은 수렴할 때까지 반복」을 따른다.
+- 발견된 이슈는 수정한 뒤 보고에 포함한다.
 - **핵심 결정 사항을 요약하여 보고**: 사용자가 산출물 전체를 읽지 않아도 핵심을 파악할 수 있게.
-- 보고 형식: 이슈 없으면 "자가 검토 통과" 한 줄로 충분. 이슈 발견 시 "검토 중 X 발견 → 수정 완료" 정도. 항목별 체크리스트·근거를 화면에 줄줄이 노출하지 않는다.
+- 보고 형식: 항목별 체크리스트·근거를 화면에 줄줄이 노출하지 않는다.
 - 각 step의 "보고 내용" 섹션에 정의된 추가 항목이 있으면 함께 따른다.
 
 ### 부정 명시 메아리 자가 점검
@@ -284,7 +281,7 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 
 **판정 우선순위**: 정규식 매치 결과보다 **본 절의 룰 정신(사용자가 적지 말라고 한 모든 것을 적지 않는 게 디폴트)을 우선**한다. 정규식은 트리거 보조이고, 본 정신을 위반하면 매치되지 않아도 메아리로 처리한다. "발화 원문이라 인용일 뿐"·"근거 동반 형식이라 정상"으로 자기 면죄 금지.
 
-산출물 파일을 만드는 세션에서 작성하는 모든 산출물에 적용한다. 위 「자가 검토 필수」의 1:1 대조와 별개 갈래로 보고, 두 점검을 모두 통과해야 산출물 종료다. 반복 횟수·수렴 기준은 글로벌 규칙 「검증은 수렴할 때까지 반복」을 따른다.
+산출물 파일을 만드는 세션에서 작성하는 모든 산출물에 적용한다. 위 「자가 검토 필수」의 1:1 대조와 별개 갈래로 보고, 두 점검을 모두 통과해야 산출물 종료다.
 
 ### 입력 산출물 비판적 검토
 
@@ -300,10 +297,6 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(step-3·step-4
 - 각 step은 `/plan/`을 탐색하여 이전 단계 산출물과 맥락을 스스로 파악한다. 탐색 결과 중 AI 결정·narrative 성격 산출물은 메타 룰 「입력 산출물 비판적 검토」 적용
 - 필요한 맥락이 부족하면 사용자에게 질문한다
 - 이전 step을 거치지 않고 진입해도 자연스럽게 대응 (step 스킵 허용)
-
-### AI 패턴
-- 먼저 생각 제시 → 사용자 의견 구하기 (멈추고 대기)
-- 정보 부족 시 역질문
 
 ### 코드 경계 재설정은 사용자가, AI는 네이밍
 

@@ -68,11 +68,8 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 | `implementation.md` | **구현 계획** ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 신설 시그니처·함수명 OK (rename류 기존 식별자 전사 X — grep 일괄치환 지시로) |
 
 「열려있는 질문」 절의 역할:
-- 본 PR 안에서 해소 안 되는 외부 의존성 (백엔드 응답 형상 확정, 디자인 검수 라운드 결과, 인프라 결정 등 PR이 아닌 외부 작업)
 - step-5에서 코드 안 `TODO` 마커는 본 PR 안에서 모두 해소되어야 하므로, 본 PR이 처리 못 하는 외부 의존성은 본 절에서 관리
-- WRITING_IDEATOR가 초안에 반영 후 WRITING_REFINER가 PR 본문 "Known issues / Follow-up" 절로 확정 반영 (overview.md는 persistent라 원본은 그대로 보존)
-
-**PR 이연 항목은 본 절 대상이 아니다** — `/plan/background/consumable/project.md`의 해당 PR 섹션에 적는다. 예: "PR4에서 만료 안내 배너 추가" 같은 항목은 PR4의 project.md TODO로 직접 들어간다.
+- overview.md는 persistent라 소비처가 반영해도 원본은 그대로 보존
 
 ### 산출물: `/plan/pr{N}/persistent/reference.md`
 
@@ -86,7 +83,7 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 
 overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자에게 안내한다. 자동으로 토론에 진입하지 않으며, 사용자의 명시적 허가가 있을 때에만 진행한다.
 
-- **안내 내용**: overview.md에서 도출한 토론 후보 항목 목록 + 항목별 핵심 쟁점 한 줄 요약. "토론할까요?"만 묻고 끝내지 않는다 — 사용자가 항목을 보고 진행 여부와 범위를 판단할 수 있어야 한다. 각 후보 항목 옆에 trade-off 칸을 비워두고 사용자가 채우게 한 뒤, 그 위에서 토론을 진행한다 (AI가 trade-off를 미리 채우지 않는다)
+- **안내 내용**: overview.md에서 도출한 토론 후보 항목 목록 + 항목별 핵심 쟁점 한 줄 요약. "토론할까요?"만 묻고 끝내지 않는다 — 사용자가 항목을 보고 진행 여부와 범위를 판단할 수 있어야 한다. trade-off는 위 「트레이드오프 작성 주체」를 따른다.
 - **진입 조건**: 사용자가 명시적으로 허가한 경우에만 토론 진입. 사용자가 일부 항목만 선택하면 그 범위로 진행하고, 생략을 원하면 토론 없이 다음 단계로 넘어간다
 - **방식 (허가 시)**: 반대 입장 에이전트(opus)를 spawn하여, 메인 에이전트가 overview.md의 기술 선택을 방어한다
 - **반대 에이전트 행동 규칙**: [/discussion 원칙](../../discussion/SKILL.md) 적용 — 정확성 우선, 모호한 근거 수용 금지
@@ -94,7 +91,7 @@ overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자�
 
 ### 산출물: `/plan/pr{N}/persistent/decisions.md`
 
-본 step에서 초기 작성. 책임·포함·제외 기준·세 갈래 양식·작성 양식·생성 게이트(단발 발화 확인)는 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
+본 step에서 초기 작성. 책임·포함·제외 기준·갈래별 양식·생성 게이트(단발 발화 확인)는 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
 
 ---
 

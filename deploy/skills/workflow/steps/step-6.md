@@ -30,7 +30,7 @@
 
 > [CRITICAL] **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. sonnet 리뷰어 spawn → 금지 주석 0건 확인 후에만 step-6.2로 진입한다. 생략 불가 — "step-5 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
-별도 sonnet 리뷰어를 spawn해 PR diff에 금지 주석이 잔존하는지 재점검한다. step-5 종료 게이트에서 0건이 보장됐어야 하나, 누락 시 본 단계가 안전망.
+별도 sonnet 리뷰어를 spawn해 PR diff에 금지 주석이 잔존하는지 재점검한다.
 
 - 리뷰어 입력: PR diff + [conventions/artifact/comments.md](../conventions/artifact/comments.md)
 - 발견 시: step-5 Implementer 흐름으로 처리 → 다시 Step 6.1.5
@@ -41,12 +41,7 @@
 
 생성 시 등록([conventions/artifact/comments.md](../conventions/artifact/comments.md) 「file-level(blanket) eslint-disable 라이프사이클」)을 빠뜨려 **어느 PR에도 배정 안 된 고아**만 잡는 경량 스캔. 6.1.5(금지 주석 안전망)와 같은 역할이며, 배정이 아니라 표면화가 목적이다.
 
-- **미리팩토링 격리 마커가 붙은 blanket disable 파일만** 타겟한다 (모든 blanket disable을 훑지 않는다 — 생성 파일 등 오탐 회피). 예:
-
-  ```bash
-  grep -rln "eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR)" src/ _fsd/
-  ```
-
+- **미리팩토링 격리 마커가 붙은 blanket disable 파일만** 타겟한다 (모든 blanket disable을 훑지 않는다 — 생성 파일 등 오탐 회피). 마커 문구는 위 comments.md가 단일 출처.
 - 발견 파일 중 `/plan/background/consumable/project.md`에 담당 PR로 등록 안 된 것이 있으면, 그 목록을 사용자에게 **명시 보고**한다. 등록·처리된 파일은 재보고하지 않는다(고아만 표면화).
 - 처리는 배정이 아니라 보고 → 사용자가 어느 PR에 넣을지 결정 → project.md에 등록. step-6은 PR 구현 후라 여기서 끌어와 제거하지 못하므로(보고만 가능) 배정을 대신하지 않는다.
 
@@ -75,7 +70,6 @@ AI 리뷰(Step 6.2 code-review) + 모든 수정 완료 후, **사용자가 직�
 Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 - 현재 커밋 목록 (stub + IMPL + 리뷰 수정) 출력
-- 사용자가 `git log`로 커밋별 변경 추적
 - 사용자 리뷰 통과 시 Step 6.4로 진행
 
 사용자가 추가 수정 요청하면 step-5의 Implementer가 처리 → 다시 Step 6.2 AI 리뷰 → Step 6.3 사용자 리뷰 반복.
@@ -86,7 +80,7 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 AI 코드 리뷰(6.2) + 사용자 코드 리뷰(6.3) 통과 후, 사용자가 PR 변경분을 직접 실행해 검증할 수 있도록 수동 동작 테스트 시나리오를 작성한다.
 
-산출물: `/plan/pr{N}/consumable/user-test-cases.md`. **수동 동작 테스트 전용** — stub의 `it.todo`(자동화 단위 테스트)와는 별개이며 함수 단위 케이스는 적지 않는다.
+산출물: `/plan/pr{N}/consumable/user-test-cases.md`. **수동 동작 테스트 전용** — stub의 `it.todo`(자동화 단위 테스트)와는 별개다.
 
 작성 기준:
 
@@ -100,9 +94,7 @@ AI 코드 리뷰(6.2) + 사용자 코드 리뷰(6.3) 통과 후, 사용자가 PR
 - [ ] <시나리오>: <조건>일 때 <기대 동작>
 ```
 
-Lead는 `git diff`로 변경분을 훑어 TC 추출 → 파일 작성 후 사용자에게 경로 + 테스트 진입 방법(dev 서버 URL 등) 안내. 사용자 실패 발견 시 LLM에게 수정 지시 → 구현 단계 Implementer 처리 → 다시 6.2부터 진행.
-
-WRITING_REFINER에서 PR 본문 Test plan으로 소비한다 (consumable 큐 모델).
+Lead는 변경분을 훑어 TC 추출 → 파일 작성 후 사용자에게 경로 + 테스트 진입 방법(dev 서버 URL 등) 안내. 사용자 실패 발견 시 LLM에게 수정 지시 → 구현 단계 Implementer 처리 → 다시 6.2부터 진행.
 
 ### Step 6.4.1. Figma 시각 대조 + 승인 게이트 (UI 컴포넌트 PR 한정)
 
@@ -123,15 +115,11 @@ UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 
 
 이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 본 PR에서 끝났다고 판단되는 정리도 후속 PR 작업 중 예전 PR의 잘못이 발견되어 다시 손봐야 하는 케이스가 잦으므로, 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다 ([conventions/session/finalize.md](../conventions/session/finalize.md)).
 
-### Step 6.5.1. 백업 브랜치 [CRITICAL]
-
-history rewriting + force-push가 동반되는 작업이다.
-
-### Step 6.5.2. 케이스 분기
+### Step 6.5.1. 케이스 분기
 
 stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식이 갈린다. 케이스별 명령·사유는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「라이프사이클 > 정리」 참조.
 
-### Step 6.5.3. 사용자에게 force-push 요청 안내
+### Step 6.5.2. 사용자에게 force-push 요청 안내
 
 재정렬 완료 후 사용자에게 force-push를 요청한다.
 
@@ -179,7 +167,7 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 - 사용자 리뷰 통과 여부
 - 사용자 동작 테스트 결과 (실패 시 수정 사항 포함)
 - 사용자 Figma 시각 대조 승인 여부 (UI 컴포넌트 PR — 반려·수정분 포함)
-- 커밋 정리·재정렬 결과 (백업 브랜치 이름 + 재정렬 후 커밋 목록)
+- 커밋 정리·재정렬 결과 (재정렬 후 커밋 목록)
 - decisions.md 최신화 항목 (변경·추가된 결정만)
 - 수정 사항
 
