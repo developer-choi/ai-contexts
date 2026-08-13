@@ -1,6 +1,6 @@
 # /pre-exit workflow 보강
 
-세션에서 `/workflow`를 사용했거나 `plan/pr{N}/**` 산출물을 수정한 경우의 추가 회고. pre-exit 본 절차(Step 0~3)와 **함께** 수행한다 (대체 X, 추가 ○).
+세션에서 `/workflow`를 사용했거나 `plan/pr{N}/**` 산출물을 수정한 경우의 추가 회고. pre-exit 본 절차(Step 1~3)와 **함께** 수행한다 (대체 X, 추가 ○).
 
 ## 트리거 조건
 
