@@ -6,7 +6,7 @@ workflow·code-review·scw 등이 코드 작업(구현·리뷰) 중 "관련 컨�
 
 ## AC 텍스트 규칙 ("~해라, ~금지")
 
-`deploy/contexts/coding-standards/{rules,principles}/`에 있다. 폴더 경로가 곧 필터라 별도 목록이 필요 없다:
+이 파일과 같은 폴더의 `coding-standards/{rules,principles}/`에 있다. 폴더 경로가 곧 필터라 별도 목록이 필요 없다:
 
 - 회사 프로젝트: `rules/universal/`·`principles/universal/`만
 - 개인 프로젝트: 위 + `rules/personal/`·`principles/personal/`

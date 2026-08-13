@@ -141,22 +141,41 @@ function checkPoliteness(lines) {
   return flags;
 }
 
-// C1 — 헤딩별 본문이 placeholder만 있거나 1문장 미만이면 빈 섹션.
-function checkEmptySections(text) {
+// C1 — 헤딩별 본문이 1문장 미만이면 빈 섹션. placeholder 잔존은 따로 센다
+// (placeholder_policy: keep이면 남기는 것이 정상이라 위반이 아니다).
+// 마크다운 링크([텍스트](url))는 placeholder 대괄호가 아니므로 먼저 걷어낸다.
+function checkEmptySections(text, placeholderPolicy) {
   const lines = text.split("\n");
   const heads = [];
   lines.forEach((ln, i) => {
-    if (/^#{1,6}\s/.test(ln)) heads.push([i, ln]);
+    if (/^#{1,6}\s/.test(ln)) heads.push([i, ln, ln.match(/^#+/)[0].length]);
   });
   const empties = [];
-  heads.forEach(([i, head], idx) => {
-    const end = idx + 1 < heads.length ? heads[idx + 1][0] : lines.length;
+  const placeholders = [];
+  heads.forEach(([i, head, level], idx) => {
+    const next = heads[idx + 1];
+    // 바로 다음이 더 깊은 헤딩이면 내용을 하위 절이 담는 상위 절이라 빈 섹션이 아니다.
+    if (next && next[2] > level) return;
+    const end = next ? next[0] : lines.length;
     const body = lines.slice(i + 1, end).join("\n").trim();
-    const bodyWoPh = body.replace(/\[.*?\]/g, "");
-    if (/\[.*?\]/.test(body)) empties.push([head.trim(), "placeholder 잔존"]);
-    else if (bodyWoPh.replace(/\s/g, "").length < 10) empties.push([head.trim(), "내용 1문장 미만"]);
+    const bodyWoLinks = body.replace(/\[[^\]]*\]\([^)]*\)/g, "");
+    const bodyWoPh = bodyWoLinks.replace(/\[.*?\]/g, "");
+    const hasPlaceholder = /\[.*?\]/.test(bodyWoLinks);
+    if (hasPlaceholder) placeholders.push(head.trim());
+    // keep 정책에서 placeholder만 있는 절은 사용자가 채울 자리라 C1b로만 보고한다.
+    if (hasPlaceholder && placeholderPolicy === "keep") return;
+    if (bodyWoPh.replace(/\s/g, "").length < 10) empties.push([head.trim(), "내용 1문장 미만"]);
   });
-  return { empties, nheads: heads.length };
+  return { empties, placeholders, nheads: heads.length };
+}
+
+// placeholder를 남기는 것이 정상인지는 frontmatter가 정한다. 없으면 keep(기본값).
+function readPlaceholderPolicy(text) {
+  if (!text.startsWith("---")) return "keep";
+  const end = text.indexOf("\n---", 3);
+  if (end === -1) return "keep";
+  const m = text.slice(3, end).match(/^\s*placeholder_policy:\s*(\S+)/m);
+  return m ? m[1] : "keep";
 }
 
 function checkProps(body, propsPath) {
@@ -211,7 +230,8 @@ function main() {
   const internalHits = findInternal(lines);
   const dashHits = findDashes(lines);
   const politeHits = checkPoliteness(lines);
-  const { empties, nheads } = checkEmptySections(body);
+  const policy = readPlaceholderPolicy(raw);
+  const { empties, placeholders, nheads } = checkEmptySections(body, policy);
 
   const dump = (name, hits, fmt) => {
     console.log(`\n[${name}] ${hits.length}건`);
@@ -230,6 +250,12 @@ function main() {
   section("완전성 (반객관)");
   console.log(`[C1 빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
   for (const [head, why] of empties) console.log(`   ${head}  ← ${why}`);
+  const phCounts = policy !== "keep";
+  console.log(
+    `\n[C1b placeholder 잔존] ${placeholders.length}개 섹션 · placeholder_policy: ${policy}` +
+      (phCounts ? " (위반)" : " (남기는 것이 정상 — 위반 아님)"),
+  );
+  for (const head of placeholders) console.log(`   ${head}`);
   if (args.props) {
     const { props, missing } = checkProps(body, args.props);
     console.log(`\n[C2 핵심명제] ${props.length}개 중 ${missing.length}개 누락`);
@@ -241,7 +267,12 @@ function main() {
   section("주관 (사람 전속 — 여기서 안 잼)");
   console.log("  만족/불만족 · 추가교정 횟수 → 눈가림 채점");
 
-  const total = bannedHits.length + internalHits.length + dashHits.length + empties.length;
+  const total =
+    bannedHits.length +
+    internalHits.length +
+    dashHits.length +
+    empties.length +
+    (phCounts ? placeholders.length : 0);
   console.log(`\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건 + 습니다체 후보 ${politeHits.length}건`);
 }
 

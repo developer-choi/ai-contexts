@@ -32,7 +32,7 @@
 
 ### [CRITICAL] 탐색 절차
 
-1. `deploy/contexts/writing-guide/**/*.md`를 Glob해 전체 파일 목록을 얻는다(map.md 제외).
+1. 이 파일이 있는 폴더의 `**/*.md`를 Glob해 전체 파일 목록을 얻는다(map.md 제외).
 2. frontmatter에 `always` 태그가 있는 파일은 작업 내용과 무관하게 전부 Read한다. 건너뛰지 않는다.
 3. 현재 작업과 관련된 다른 태그가 있는 파일을 frontmatter `tags`로 확인해 추가로 Read한다.
 4. 톤 규칙 + 사례를 하나씩 대조한다.
