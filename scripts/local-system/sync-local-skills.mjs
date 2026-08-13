@@ -47,9 +47,11 @@ function main(opts = {}) {
 
 // local/ 하위에서 claude·codex 공통으로 배포하는 디렉토리. hooks는 settings projection이
 // .claude/hooks·.codex/hooks로 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
-// contexts는 스킬 supporting file의 단일 정본(local/contexts/, git 추적·비배포)이라 제외한다 — 배포하면
-// .claude/contexts·.agents/contexts로 복제돼 한 파일이 3벌이 되므로, 스킬은 repo-상대 local/contexts/...로 참조한다.
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'contexts']);
+// contexts는 배포한다 — 스킬 본문의 `../../contexts/...`가 풀리는 자리가 배포본 옆이기 때문이다.
+// 한때 사본이 세 벌 되는 것을 피하려 제외했는데, 제외해도 그전에 배포된 사본은 남고 sync가 더는
+// 덮어쓰지 않아 조용히 낡는다. KA가 그 상태로 2026-06-14자 규칙을 두 달간 읽었다(2026-08-14 발견).
+// 배포하면 sync마다 덮어써져 낡을 수 없고, 고아는 unsync가 청소한다.
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
 
 function localDeployDirs(repo) {
   const localDir = path.join(repo, 'local');
