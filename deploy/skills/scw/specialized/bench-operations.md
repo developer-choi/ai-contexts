@@ -22,7 +22,7 @@ ZERO 격리 가능 여부는 **측정 대상이 워커에 어떻게 로드되나
 
 | 대상 | 로드 방식 | ZERO 격리 | 실행 |
 |---|---|---|---|
-| 배포된 규칙 (`deploy/rules/`→`~/.claude/rules/`, `CLAUDE.md`) | 모든 워커에 자동 | 워크트리 분리로 **불가** — 배포본이 `~/.claude`에 살아있어 ZERO 무효. API/외부 주입 필수 | 나중 (하네스 셋업) |
+| 배포된 규칙 (`deploy/rules/`→`~/.claude/rules/`, `CLAUDE.md`) | 모든 워커에 자동 | 워크트리 분리로는 **불가**(배포본이 `~/.claude`에 살아있어 ZERO 무효). `claude -p --setting-sources ""`로 떼어내고 `--append-system-prompt`로 변형을 주입한다 — rule-ablation-bench 「상속 경로」 | 하네스 셋업 후 |
 | 온디맨드 contexts (스킬이 호출 시 로드) | 자동 아님 | 변형 명시 주입이면 성립 | 중간 |
 | 호출형 스킬 (`scw`·`workflow` 등 invoke해야 발동) | 호출 안 하면 안 뜸 | without_skill ZERO 깨끗 | **먼저** (싸고 깨끗, 병렬 가능) |
 
