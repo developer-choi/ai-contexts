@@ -45,7 +45,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제
    | 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
    | UI 마크업, 접근성, UX | `web-design-guidelines` |
 
-   외부 스킬을 적용하는 리뷰는 **sonnet 리뷰어**가 담당한다 (외부 스킬마다 sonnet 리뷰어 1명씩 — default는 단일 리뷰어가 함께 참조, advanced는 3단계 참고).
+   외부 스킬을 적용하는 리뷰는 **sonnet 리뷰어**가 담당한다.
 
    외부 스킬이 설치돼 있지 않으면(Skill tool 목록에 없거나 형제 경로 `../<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다.
 
@@ -69,7 +69,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제
 
 #### default 모드
 
-단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행하며, 1단계 4번에서 선별된 외부 스킬이 있으면 그 관점도 함께 적용한다.
+단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행하며, 1단계 3번에서 선별된 외부 스킬이 있으면 그 관점도 함께 적용한다.
 
 #### advanced 모드
 
@@ -78,7 +78,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제
 Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
 - **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
-- **External-Skill Reviewer ×M**: 1단계 4번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 메인이 전달한 해당 외부 스킬(`../<name>/SKILL.md`) 내용만 컨텍스트로 받아 그 관점으로 diff를 리뷰한다.
+- **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
 Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인).
@@ -89,17 +89,12 @@ coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer 미실행. �
 
 용도: 신규 코드 작성 전 기존 코드를 새 스탠다드에 맞춰 정렬하는 마이그레이션. 자유 리뷰가 끼면 범위가 흐려지므로 분리.
 
-호출 예: `/code-review <리뷰 대상> --coding-standards <경로들> --mode only-standards`
-
 ### 4. 이슈 목록 산출
 
-발견한 이슈를 severity별로 정리하여 반환한다. 컨벤션 기반 지적에는 근거가 되는 컨벤션 파일 경로와 라인번호를 함께 명시한다 (예: `coding-standards/naming.md:12 — camelCase 규칙 위반`).
+컨벤션 기반 지적에는 근거가 되는 컨벤션 파일 경로와 라인번호를 함께 명시한다.
 
 ---
 
 ## 후속 연결 (사용자 판단)
 
-이슈 목록 산출 후, 다음 단계는 호출 맥락에 따라 다르다:
-
-- **step-6에서 호출**: step-6이 Implementer에게 수정 지시 → 재리뷰 루프
-- **독립 호출**: 사용자가 코멘트할 항목을 선택하면 `/pr-comment-write`로 넘긴다
+독립 호출이면 사용자가 코멘트할 항목을 선택하고, 그다음은 `/pr-comment-write`로 넘긴다. 워크플로우가 호출한 경우의 수정·재리뷰 흐름은 호출한 쪽이 소유한다.
