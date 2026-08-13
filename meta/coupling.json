@@ -73,9 +73,11 @@
       "name": "writing-guide map.md",
       "files": [
         "deploy/contexts/writing-guide/map.md",
-        "deploy/contexts/writing-guide/**"
+        "deploy/contexts/writing-guide/**",
+        "deploy/skills/write-init/SKILL.md",
+        "deploy/skills/write-refine/SKILL.md"
       ],
-      "note": "파일 존재는 map.md 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: 파일을 추가·수정할 때 그 파일 자신의 frontmatter `tags`에 map.md 「태그」 표의 축(예: always·structure)을 부여한다."
+      "note": "파일 존재는 map.md 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: 파일을 추가·수정할 때 그 파일 자신의 frontmatter `tags`에 map.md 「태그」 표의 축(예: always·structure)을 부여한다. write-init·write-refine의 로드 목록은 이 태그 축을 손으로 옮긴 사본이다 — 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`/scw` `specialized/cross-cli.md`) 위임하지 않고 사본을 유지하기로 했다. 태그 축이 늘거나 사용 시점이 바뀌면 두 스킬의 목록에도 반영한다."
     },
     {
       "name": "정책 hook ↔ 판정 회귀 계약",
