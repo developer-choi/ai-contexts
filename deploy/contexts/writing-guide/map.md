@@ -24,7 +24,7 @@
 | `process` | 작업·절차 서술 사례 | 절차·과정 서술을 점검할 때 |
 | `pr` | PR 본문 관련 | PR 작성/리뷰 시 |
 | `readme` | README 관련 | README 작성 시 |
-| `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (`write-init` type: `resume-item` 또는 `write-refine` frontmatter type: `resume-item`) |
+| `resume` | 이력서·경력기술서 관련 | 이력서 작성/다듬기 시 (type: `resume-item`·`resume-intro`) |
 | `decision` | 기술적 의사결정 문서 관련 | 의사결정 문서 작성/다듬기 시 (`write-init` type: `decision` 또는 `write-refine` frontmatter type: `decision`) |
 | `tradeoff` | 트레이드오프(단점·비용·적용 한계) 명시 | 해법·선택을 담는 글 작성/다듬기 시 (`decision`·`resume-*`·블로그) |
 | `article` | 기술 글의 상황별 골격(서사구조) 사례집 | 기술 글 작성 시 골격 단계 (`write-init` type: `article`) |
