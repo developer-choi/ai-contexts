@@ -67,6 +67,12 @@
       "msg": "Surfacing rules the hooks already enforce..."
     },
     {
+      "file": "check-skill-purpose-section.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking skill purpose section..."
+    },
+    {
       "file": "check-shell-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",

@@ -253,6 +253,51 @@ WRITE_CASES.push(
   ],
 );
 
+WRITE_CASES.push(
+  [
+    'check-skill-purpose-section.mjs',
+    mdWrite('# 스킬\n\n## 목적\n\n한 줄로 끝낸다.\n\n안 하면 이런 일이 벌어진다.\n\n## 절차\n\n돈다.\n', skillDoc),
+    'context',
+    '목적 아래 이유 단락이 붙으면 알린다',
+  ],
+  [
+    'check-skill-purpose-section.mjs',
+    mdWrite('# 스킬\n\n## 목적\n\n한 줄로 끝낸다. 두 문장이어도 한 문단이다.\n\n## 절차\n\n돈다.\n', skillDoc),
+    'pass',
+    '한 문단이면 문장이 여럿이어도 조용하다',
+  ],
+  [
+    'check-skill-purpose-section.mjs',
+    {
+      tool_name: 'Edit',
+      tool_input: { file_path: skillDoc, new_string: '## 목적\n\n한 줄로 끝낸다.\n' },
+    },
+    'pass',
+    '조각이 다음 헤딩 전에 끝나고 문단이 하나면 판단을 미룬다',
+  ],
+  [
+    'check-skill-purpose-section.mjs',
+    {
+      tool_name: 'Edit',
+      tool_input: { file_path: skillDoc, new_string: '## 목적\n\n한 줄로 끝낸다.\n\n안 하면 이런 일이 벌어진다.\n' },
+    },
+    'context',
+    '조각이 안 끝나도 이미 문단이 둘이면 확정이다',
+  ],
+  [
+    'check-skill-purpose-section.mjs',
+    mdWrite('# 문서\n\n## 목적\n\n한 줄.\n\n둘째 문단.\n', 'C:/tmp/docs/design.md'),
+    'pass',
+    'SKILL.md가 아니면 보지 않는다',
+  ],
+  [
+    'check-skill-purpose-section.mjs',
+    mdWrite('# 스킬\n\n## 목적\n\n예시는 이렇다.\n\n```sh\nnpm run x\n\nnpm run y\n```\n\n## 절차\n\n돈다.\n', skillDoc),
+    'context',
+    '코드블록 안 빈 줄은 문단을 가르지 않는다 (블록 앞뒤 두 덩어리라 알린다)',
+  ],
+);
+
 // 레포 제외는 파일 경로 위쪽에 `.git`이 있어야 판정되므로 실제 폴더를 만들어 검증한다.
 const repoCases = (dir) => [
   [
