@@ -5,6 +5,7 @@
   "private": false,
   "scripts": {
     "prepare": "node scripts/environment/register-git-hooks.mjs",
+    "check:links": "node scripts/check-links.mjs",
     "scan:code-labels": "node scripts/scan-code-labels.mjs",
     "sync:environment": "node scripts/environment/sync-environment.mjs",
     "sync:local-system": "node scripts/local-system/sync-local-system.mjs",

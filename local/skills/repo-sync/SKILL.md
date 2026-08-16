@@ -44,11 +44,7 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 - `origin/<현재 브랜치>` ref가 없으면:
   - 일반 브랜치: ahead = HEAD 커밋 수, behind = 0으로 간주 (= 새 원격 브랜치 생성을 위한 첫 push 대상).
   - 보호 브랜치: `blocked: no origin tracking` 기록 후 다음 레포로.
-- ref가 있으면 다음 명령으로 산출.
-  ```
-  git rev-list --left-right --count origin/<현재 브랜치>...HEAD
-  ```
-  출력은 `<behind>\t<ahead>` (왼쪽=origin에만 있음=behind, 오른쪽=로컬에만 있음=ahead).
+- ref가 있으면 `origin/<현재 브랜치>`와 HEAD의 양쪽 전용 커밋 수를 센다.
 
 #### 3-2. 분기 — 미커밋 변경 **없는** 경우
 
@@ -70,21 +66,15 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 
 #### 3-4. 세부 절차
 
-**stash**:
-- `git stash push -m "repo-sync <ISO 시각>"` (untracked 제외 — `-u` 금지). 보호 브랜치 분기에서만 사용.
-- stash pop 충돌 시 stash 남겨두고 `stash-conflict: stash@{0}에 남김` 기록. 자동 해결 금지.
+**stash**: 보호 브랜치 분기에서만 쓰고, untracked는 담지 않는다. 다른 세션이 같은 stash 스택을 쓰므로 이 회차가 만든 항목을 식별할 수 있게 이름을 남긴다. pop 충돌 시 stash를 남겨두고 `stash-conflict: <위치>에 남김` 기록 — 자동 해결 금지.
 
 **WIP 커밋** (일반 브랜치 한정):
-- 무엇이 바뀌었는지 모르는 상태에서 커밋하는 단계이므로, **경로 목록을 먼저 얻어 개별 지정**한다. `git status --porcelain -z`(untracked 포함)로 경로를 받아 그대로 staging·커밋 인자에 넘긴다. `-z`를 쓰는 이유는 공백·비ASCII 경로가 인용·이스케이프 없이 NUL 구분으로 나와 그대로 인자가 되기 때문이다.
+- 무엇이 바뀌었는지 모르는 상태에서 커밋하는 단계라, 경로 목록을 먼저 얻어 개별 지정한다(untracked 포함). rename 항목은 새 경로·옛 경로가 따로 나오므로 둘 다 넘긴다.
 - 목록이 비면 미커밋 변경이 없다는 뜻이므로 이 단계를 건너뛴다 (「미커밋 변경 있는 경우」 분기로 들어왔는데 비었다면 그 사이 상태가 바뀐 것이니 재판정한다).
-- rename 항목은 새 경로·옛 경로가 각각 따로 나온다. 둘 다 넘긴다.
 - 커밋 메시지는 작업 중이던 변경의 성격을 반영해 작성.
 - 커밋 실패 시 메시지를 조정해 재시도. 그래도 실패하면 `failed: wip commit — <stderr 요약>` 기록.
 
-**push**:
-- upstream 있으면 `git push origin HEAD`.
-- upstream 없으면 (일반 브랜치만 도달) `git push -u origin <현재 브랜치>`.
-- push 실패 시 WIP 커밋이 만들어졌다면 `failed: wip committed locally; push failed — <stderr 요약>` 기록 (커밋은 그대로 남김, 사용자가 직접 처리).
+**push**: upstream이 없으면(일반 브랜치만 도달) 이번 push에서 함께 설정한다. push 실패 시 WIP 커밋이 만들어졌다면 `failed: wip committed locally; push failed — <stderr 요약>` 기록 (커밋은 그대로 남김, 사용자가 직접 처리).
 
 ### 4. 다른 보호 브랜치 ff merge 시도
 
@@ -99,9 +89,7 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 
 ### 5. 실패 처리
 
-- 어느 단계에서 git 명령이 실패해도 다음 레포로 계속 진행.
-- 실패한 레포는 가능한 한 원래 상태로 복귀 (stash가 있으면 pop 시도) 후 결과 행에 `failed: <명령> — <stderr 요약>` 기록.
-- 마지막에 모든 실패·차단·dirty 사유를 사용자에게 한 번에 보고.
+실패한 레포는 가능한 한 원래 상태로 복귀시킨다 (stash가 있으면 pop 시도).
 
 ## 결과 리포트
 
@@ -109,16 +97,10 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 
 - 레포 경로 (`main/ai-contexts` 형태로 축약)
 - 현재 브랜치
-- 현재 브랜치 상태 (`up-to-date` / `pulled +N` / `pushed +N` / `pulled +M, wip-pushed +1` 등 / `dirty` / `blocked: <사유>` / `failed: <명령>`)
+- 현재 브랜치 상태 (위 3-2·3-3 표의 결과 문자열)
 - 보호 브랜치 결과 (변동·차단 있는 것만, 예: `master ff +1, develop ff 불가`)
 
 `blocked`·`failed`·`dirty`·`ff 불가` 행이 있으면 표 아래에 "사용자 조치 필요" 섹션을 만들어 레포별로 추천 액션을 짧게 안내.
-
-## ai-contexts 배포
-
-레포 동기화가 끝나면 배포가 남는다. 배포는 사용자가 실행하므로, 스킬은 `ai-contexts` 레포에서 `sync:system` → `sync:local-system` 순으로 실행하도록 사용자에게 안내하고 거기서 끝낸다.
-
-- `sync:local-system`의 스킬 배포 대상은 git 동기화 「순회 범위」와 달리 `simplify/`를 제외한다. 두 범위가 다르다는 점만 보고에 함께 알린다.
 
 ## 안전 가드
 

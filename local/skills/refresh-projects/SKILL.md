@@ -1,15 +1,16 @@
 ---
 name: refresh-projects
-description: 등록된 프로젝트의 커밋 이력을 추적하여 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화한다. 레포지토리 점검, 주간 리뷰, 전체 프로젝트 최신화 요청 시 사용.
+description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을 추적해 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화하고, 커밋에 안 나타나는 것(끊어진 링크·아무도 안 가리키는 문서·쌓인 백로그)도 같은 회차에서 전수로 턴다. 레포지토리 점검, 주간 리뷰, 전체 프로젝트 최신화, 백로그 정비 요청 시 사용.
 ---
 
 # Refresh Projects
 
 ## 목적
 
-내 레포들에서 특정 기간 동안 발생한 작업과 그 영향 범위를 전수조사해 최신화하고, 그 기간에 배운 것을 외부에 배포한다.
+내 프로젝트들을 한 회차로 갱신한다. 갱신은 두 축이다.
 
-프로젝트별 커밋 이력을 state.json에 기록하여 "여기까지 최신화했다"를 추적한다. 다음 실행은 그 해시 이후 범위만 자동으로 처리한다.
+- **변경을 따라가는 축** — 지난 회차 이후 쌓인 작업과 그 영향 범위를 전수조사해 정비하고, 대표 창구를 갱신하고, 그 기간에 배운 것을 파생 프로젝트로 배포한다. 어디까지 훑었는지는 state.json이 들고 있어 다음 회차가 그 뒤부터 잇는다.
+- **변경과 무관하게 낡는 것을 터는 축** — 끊어진 링크, 아무도 안 가리키는 문서, 쌓인 백로그. 아무 커밋에도 안 나타나므로 증분 추적 없이 매 회차 전수로 훑고, 변경이 없는 회차에도 돈다.
 
 ## 프로젝트 레지스트리
 
@@ -66,13 +67,7 @@ state.json을 로드하고 각 프로젝트별로 `<저장된 해시>..HEAD` 범
   - Deploy 자체(KQ): 자체 최근 변환 커밋 SHA
   - 역할 불명확·스킬 완전 없음: 현재 HEAD
 
-Orphan 유효성 체크:
-
-```bash
-git cat-file -e <hash> && git merge-base --is-ancestor <hash> HEAD
-```
-
-둘 다 통과해야 유효.
+복구한 해시는 실존하면서 현재 브랜치의 조상이어야 유효하다.
 
 #### 짝꿍 드리프트 점검
 
@@ -87,20 +82,15 @@ git cat-file -e <hash> && git merge-base --is-ancestor <hash> HEAD
 
 그 프로젝트 Maintain 린트가 이미 강제하는 면(파일 존재·목록 정합 — KA 미러는 `/validate`, AC는 `verify:settings`)은 중복 보고하지 않는다. 드리프트 점검은 린트가 못 잡는 잔여 면(왜·역할·메타 결정)을 띄우는 용도이므로, 그 각도로 보고한다.
 
-#### 깨진 링크 전수 검출 (diff 무관)
+#### 링크·고아 전수 검출 (diff 무관)
 
-diff와 무관하게 매 회차, 레지스트리 레포 전체의 추적되는 `.md`에서 깨진 링크를 결정적으로 검출한다 — 링크 대상이 발밑에서 사라지면 그 링크를 품은 문서는 안 바뀌어 diff에 안 잡히고, 깨진 채 오래 살기 때문이다.
-
-```bash
-node scripts/check-links.mjs <레지스트리 레포 경로들>
-```
-
-`scripts/check-links.mjs`(AC master 스크립트)는 in-page 앵커·in-repo 상대경로·내 레포 GitHub URL을 결정적으로 검사하고, 모르는 외부 URL은 체크하지 않고 pile로 모은다. 외부 HTTP는 보지 않는다(GitHub 페이지 내 404도 200을 반환해 무의미). 깨진 항목이 있으면 exit 1.
+diff와 무관하게 매 회차, 레지스트리 레포 전체를 대상으로 AC의 `check:links`를 돌린다. 이 검사가 diff 흐름의 사각을 메운다 — 링크 대상이 발밑에서 사라지면 그 링크를 품은 문서는 안 바뀌어 diff에 안 잡히고, 아무도 안 가리키는 문서는 애초에 아무 커밋에도 안 나타난다.
 
 결과를 다음으로 라우팅한다:
 
 - **README 깨진 링크** → [Phase 4-readme](#phase-4-readme-대표-창구-갱신) dispatch가 고친다(갱신 대상 README에 깨진 링크 목록을 함께 박는다).
 - **비-README 깨진 링크** → [Phase 2](#phase-2-최신화-계획-제출) 계획에 **보고만** 한다(자동수정 금지 — 어떻게 고칠지는 판단이 필요하고, 대상 레포의 Maintain·사용자 몫이다).
+- **아무도 안 가리키는 md** → [Phase 2](#phase-2-최신화-계획-제출) 계획에 보고한다. 존폐는 사용자가 정한다(오탐이 섞일 수 있고, 지우는 판단은 되돌리기 어렵다).
 - **모르는 외부 URL pile** → 사용자에게 리스트로 보고한다(직접 확인).
 
 변경 있는 프로젝트가 하나도 없으면 diff 기반 최신화(Phase 2~4)를 건너뛴다. 단 위 검출에서 후보가 나오면 diff가 없어도 그 후보만 Phase 2 보고·Phase 4-readme 수정으로 처리한다.
@@ -116,10 +106,8 @@ Phase 1에서 "변경 있음"으로 확인된 프로젝트에 대해 Phase 3~4 �
 레지스트리의 Phase 3 스킬이 등록된 프로젝트별로 팀 에이전트를 위임한다. 각 스킬이 최신화 작업을 수행하고 커밋한다.
 
 팀 에이전트 지시:
-- 대상 프로젝트의 스킬 파일(SKILL.md)을 읽고, 기술된 대로 실행하라
 - 대상 파일 목록: `<저장된 해시>..HEAD` diff에서 추출
 - **규칙 변경 감지**: diff 범위에 본 스킬의 SKILL.md, 참조 contexts, 또는 그 스킬이 호출하는 검증 스크립트가 포함되어 있으면, scope를 "프로젝트 전체 파일"로 확장하라
-- 수정 후 커밋까지 완료하라
 
 ### Phase 4: 병렬 dispatch — Readme + Deploy
 
@@ -165,13 +153,7 @@ KA 기반 변환이므로 Phase 3의 KA Maintain 완료 후 실행한다. KQ는 
 
 1. **KA HEAD 잠금**: 현재 KA HEAD를 캡처. 이 SHA를 `KA_DEPLOY_SHA`로 기억하고 Phase 4-kq 전체에서 동일 값을 사용. 이후 KA가 변동해도 본 회차는 잠금 SHA 기준.
 
-2. **후보 리스트업**: KA에서 `KA_DEPLOY_SHA` 시점의 후보를 산출.
-   ```bash
-   cd <KA 경로>
-   KA_HEAD=<KA_DEPLOY_SHA> npm run list-candidates -- \
-     --out refresh-projects/dispatch/candidates-<KA_DEPLOY_SHA>.json
-   ```
-   결과 JSON을 dispatch 디렉토리에 저장.
+2. **후보 리스트업**: KA의 `list-candidates`를 `KA_DEPLOY_SHA` 시점 기준으로 돌려 후보를 산출하고, 결과 JSON을 dispatch 디렉토리에 저장한다.
 
 3. **dry-run 보고**: 후보 리스트를 사용자에게 그룹화하여 제출.
    - **NEW** (KQ에 없음 — 첫 변환 대상)
@@ -188,12 +170,11 @@ KA 기반 변환이므로 Phase 3의 KA Maintain 완료 후 실행한다. KQ는 
    dispatch md에는 다음을 박는다:
    - 잠금 SHA (`KA_DEPLOY_SHA`)
    - 전체 candidates JSON 경로 (절대 경로)
-   - 실행 명령 예시 (`npm run parse -- --candidates <path>`)
    - 결과 md 작성 경로 (`<dispatch>-result.md`)
 
 6. **결과 수신**: 사용자가 dispatch md를 새 세션에서 실행하고 `-result.md`를 도착시킨다. 도착하면 마무리. 누락 시 보고 + 대기.
 
-7. **state.json 갱신 + 정리**: KA·KQ의 hash와 refreshedAt을 갱신. backlog 레포에 커밋. **dispatch 산출물(`kq-update-quiz.md` + `-result.md`, `candidates-<SHA>.json`)은 회차 종료 시점에 `git rm`으로 모두 삭제** — 다음 회차로 누적 금지. 회차 시작 시점에 `refresh-projects/dispatch/` 디렉토리가 비어 있어야 한다 (남아 있으면 직전 회차 정리 누락이므로 먼저 정리).
+7. **state.json 갱신 + 정리**: KA·KQ의 hash와 refreshedAt을 갱신하고 backlog 레포에 커밋한다. dispatch 산출물 정리는 [위임 플로우](#위임-플로우)가 소유한다.
 
 ##### 규칙 변경 감지
 
@@ -234,7 +215,6 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — Phase 1
 ### 마무리
 
 - 파일을 쪼개거나 옮겨도 갱신할 목차가 없다 — 인덱스 정책은 backlog 레포 `CLAUDE.md` 「인덱스 파일 없음 — 조망은 frontmatter 스캔」을 따른다.
-- backlog 레포에서 수행하고 커밋한다 (커밋 규칙은 그 레포 `CLAUDE.md` 「이 레포」).
 - 정비 후 `/backlog`의 「보고」 형식으로 분리·통합·이동·삭제 내역을 사용자에게 보고한다.
 
 ## 백로그 반영 sweep
@@ -253,8 +233,7 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — 「백�
 
 ### 마무리
 
-- 반영됐다고 판정한 항목은 **자동 삭제하지 않는다**. 목록을 사용자에게 "이미 반영된 듯 — 삭제할까요?"로 보고하고 승인받은 것만 삭제한다. 오탐 시 멀쩡한 백로그가 소실되기 때문이다.
-- 삭제는 backlog 레포 커밋으로 마감한다 (post-commit이 origin으로 자동 push).
+반영됐다고 판정한 항목은 **자동 삭제하지 않는다**. 목록을 사용자에게 보고하고 승인받은 것만 삭제한다. 오탐 시 멀쩡한 백로그가 소실되기 때문이다.
 
 ## 커밋 단위
 
@@ -273,9 +252,8 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다** — 「백�
 dispatch 위임 작업은 메인 워크트리에서 직접 수행하지 않는다. 사용자가 메인 워크트리에서 병행 작업할 수 있고, 메인의 modified·untracked 파일과 작업 커밋이 섞일 위험이 있다. dispatch md에 다음을 박아 새 세션이 별도 워크트리에서 작업하도록 강제한다.
 
 - 워크트리 경로: 메인 repo 옆에 `<repo>-<task>` 형태 (예: `ai-contexts-readme`)
-- base: `origin/<base-branch>` (메인 repo의 로컬 미반영 커밋 회피 — `git fetch origin <base>` 선행)
-- 생성 명령: `git worktree add <path> origin/<base>` (모든 프로젝트 공통)
-  - AC 워크트리를 만들 때는 AC [meta/deploy-conventions.md](../../../meta/deploy-conventions.md) 「AC worktree hook 준비」를 따른다
+- base: `origin/<base-branch>` (메인 repo의 로컬 미반영 커밋 회피 — fetch 선행)
+- AC 워크트리를 만들 때는 AC [meta/deploy-conventions.md](../../../meta/deploy-conventions.md) 「AC worktree hook 준비」를 따른다
 - 작업·커밋·푸시는 새 워크트리에서 수행. `-result.md`는 원본 위치(`<backlog>/refresh-projects/dispatch/`, `<backlog>`=`~/WebstormProjects/main/backlog`)에 작성
 
 작업 종료 후 워크트리 정리는 회차 마감 후 사용자가 결정 (삭제 또는 유지).
@@ -283,12 +261,10 @@ dispatch 위임 작업은 메인 워크트리에서 직접 수행하지 않는�
 ### 위임 플로우
 
 1. **지시 프롬프트 작성**: 메인 에이전트(현재 세션)가 `refresh-projects/dispatch/<project>.md`에 작업 지시를 작성한다. 포함 항목: 워크트리 분리 절차(위 「dispatch 워크트리 분리」 참조), 대상 프로젝트, 해시 범위, 해당 프로젝트 스킬 경로, 대상 파일 목록, 반영 규칙, 커밋 정책.
-2. **사용자 안내**: 다음 형식으로 전달한다.
-   > 다음 md를 새 AI 작업 세션(Claude Code 또는 Codex)에 복사해 실행해 주세요. 새 세션은 메인 에이전트이므로 현재 런타임의 `team-agent` 규칙에 따라 병렬 위임이 가능하면 사용하고, 불가능하면 순차 실행 후 제한 사항을 결과에 기록합니다. 완료 후 `-result.md` 경로를 알려주시면 이어서 진행합니다.
-   > 경로: `refresh-projects/dispatch/<project>.md`
+2. **사용자 안내**: md 경로를 주고 새 세션에서 실행해 달라고 안내한다. 그 세션은 메인 에이전트이므로 병렬 위임이 가능하면 쓰고, 막히면 순차 실행 후 제한 사항을 결과에 적는다는 것도 함께 알린다.
 3. **새 세션 실행**: 사용자가 연 세션의 메인 에이전트가 지시대로 실행하고, 결과를 `refresh-projects/dispatch/<project>-result.md`에 기록한다.
 4. **결과 통합**: 현재 세션에서 결과 md를 읽고 state.json 갱신 등 마무리를 수행한다.
-5. **dispatch md 정리**: 마무리 후 `refresh-projects/dispatch/` 하위 지시·결과 md는 삭제한다.
+5. **dispatch 산출물 정리**: 마무리 후 `refresh-projects/dispatch/` 하위(지시 md·결과 md·중간 산출 JSON)를 모두 삭제한다 — 다음 회차로 누적 금지. 회차 시작 시점에 이 디렉토리가 비어 있어야 하며, 남아 있으면 직전 회차 정리 누락이므로 먼저 정리한다.
 
 소규모 작업(단일 파일 수정, Maintain 일부)은 기존대로 팀 에이전트 유지. **단 Phase 4(Readme·KQ Deploy)는 규모와 무관하게 항상 병렬 dispatch 위임** (위 Phase 4 참조).
 
@@ -296,9 +272,4 @@ dispatch 위임 작업은 메인 워크트리에서 직접 수행하지 않는�
 
 ### KQ: update-quiz
 
-Phase 4-kq가 발행한 dispatch md를 새 세션에서 실행한다. dispatch에 박힌 candidates JSON 경로로 `npm run parse -- --candidates <path>` 호출. `generated/<slug>.json` + `topics.json` 갱신. 자체 KA 발견·필터링 금지 (받은 셋만 변환).
-
-## 범위
-
-- **포함**: 커밋 탐색, Maintain/Readme/Deploy 실행, state.json 관리
-- **제외**: 스킬이 수정하지 못한 항목 (사용자가 직접 해결)
+Phase 4-kq가 발행한 dispatch md를 새 세션에서 실행한다. dispatch에 박힌 candidates JSON 경로로 KQ의 `parse`를 호출해 `generated/<slug>.json` + `topics.json`을 갱신한다. 자체 KA 발견·필터링 금지 (받은 셋만 변환).
