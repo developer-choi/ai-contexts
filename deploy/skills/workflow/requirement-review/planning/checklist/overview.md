@@ -29,3 +29,7 @@
 
 ## 7. 기능별 점검 → [features.md](./features.md)
 
+## 8. 페이지 간 점검 → [cross-page.md](./cross-page.md)
+
+페이지별 루프가 아니라 모든 페이지를 마친 뒤 「종합」에서 적용한다.
+

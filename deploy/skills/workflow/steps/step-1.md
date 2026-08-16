@@ -61,7 +61,7 @@ step-1.1은 후속 세션 spawn 분기점이다 — 전환·세션경계·후속
 
 `planning`·`design` ON/OFF를 물을 때, 리뷰 대상에 목업·시안이 없고 기존 구현 코드만 있으면(기존 동작 코드 개선형 과제 등) 그 사실을 함께 알리고 "코드를 기획·디자인 자료 대용으로 써서 체크리스트를 리뷰할까요?"로 묻는다. 켜면 각 guide.md의 "코드기반 모드" 절차로 진행한다.
 
-산출물을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다. PLAN/IMPL 세션에 미루어야 할 항목(validation 규칙, 함수 시그니처, 구현 task 단위 등)은 BG에서 적지 않는다.
+산출물을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다.
 
 ### 중복 조기 발견
 

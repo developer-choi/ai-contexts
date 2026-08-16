@@ -2,6 +2,8 @@
 
 페이지 단위 리뷰가 끝난 뒤, 전체 플로우 관점에서 점검한다.
 
+**소유 범위 — 페이지를 벗어나는 이동·이탈·복귀.** 페이지 하나에서 닫히는 예외는 [edge-cases.md](./edge-cases.md)가 소유하며, 단계가 있는 플로우 특유의 것은 [page-type/sequential-flow.md](../../page-type/sequential-flow.md)가 여기에 더한다.
+
 ---
 
 ## 1. 페이지 간 데이터 흐름

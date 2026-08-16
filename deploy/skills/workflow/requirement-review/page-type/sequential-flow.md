@@ -2,6 +2,8 @@
 
 여러 페이지를 순서대로 거쳐야 하는 플로우에 추가 적용한다. (온보딩, 회원가입 단계 등)
 
+일반적인 이탈·복귀는 [planning/checklist/cross-page.md](../planning/checklist/cross-page.md)가 이미 묻는다. 여기서는 **단계가 있어서 생기는 것**만 더한다.
+
 ## 네비게이션
 
 - A에서 B로 보낼 때 push vs replace 중 무엇이 맞는가? (뒤로가기로 이전 단계에 돌아가야 하면 push, 돌아가면 안 되면 replace)

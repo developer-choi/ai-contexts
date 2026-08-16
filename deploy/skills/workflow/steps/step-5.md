@@ -59,7 +59,7 @@ step-5 진입 직후 본 PR 영역에서 [conventions/artifact/comments.md](../c
 
 ### Step 5.2.1. TODO 주석 처리
 
-IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 처리 시점」 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 PR 이연 마커 코드 안 금지 룰은 컨벤션이 단일 출처.
+IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 처리」 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 PR 이연 마커 코드 안 금지 룰은 컨벤션이 단일 출처.
 
 ### Step 5.2.2. gotchas
 

@@ -24,7 +24,7 @@
       cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다(프로젝트 라이프타임 내내 구현 우선순위 판단에 참조) — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분은 처음부터 `background/consumable/project.md`에 직접 기록한다(중간 산출물에 임시로 적어두지 않는다)
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 대상 서비스 분석 ([requirement-review/recruitment/service-analysis.md] 참조). 개발 내내 컨셉 판단 기준으로 참조되므로 retained
     consumable/         ← AI 산출물·분류 모호 자료. 소비 시 즉시 폐기 (큐 모델)
-      project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성). step-1 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md](pr-split.md)). PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
+      project.md        ← step-1 recruitment 분석 중 직접 기록 시작(놓치기 쉬운 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO — 없으면 이 시점에 생성). step-1 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
       global.md         ← step-1 requirement-review (planning) 산출물. 전체 서비스 맥락·공통 컴포넌트·TODO. step-4 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       page-{페이지명}.md ← step-1 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동. PR 번호를 확정 시점에 부여하므로 폴더 번호와 PR 번호가 어긋나지 않는다
