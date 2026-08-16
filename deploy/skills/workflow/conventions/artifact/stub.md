@@ -72,13 +72,7 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 
 결정 미정 영역은 placeholder + 마커만 두고 구현 단계로 미룬다.
 
-| 케이스 | stub 처리 |
-|---|---|
-| `useEffect` | 의존성·정리 함수 결정됐으면 시그니처 + `[stub]`. 미결이면 사용자 질문 |
-| Context Provider | 트리 위치·value 타입 결정됐으면 stub. 미결이면 사용자 질문 → 결정 후 stub. 결정 못 하면 placeholder + `// TODO [AI_IMPL]:` |
-| 페이지 routing (Next.js app router) | `page.tsx`/`layout.tsx`/`loading.tsx`/`error.tsx` 항상 stub 생성 |
-| Server Component vs Client | `'use client'` 결정됐으면 명시. 미결이면 사용자 질문 |
-| 외부 라이브러리 호출 | API 메서드 결정됐으면 import + 호출 stub. 미결이면 placeholder 변수 |
+페이지 routing(Next.js app router)만 예외다 — `page.tsx`/`layout.tsx`/`loading.tsx`/`error.tsx`는 미정이어도 항상 stub을 만든다.
 
 ## 양식
 

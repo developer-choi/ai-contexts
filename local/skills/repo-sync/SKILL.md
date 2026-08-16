@@ -46,23 +46,14 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
   - 보호 브랜치: `blocked: no origin tracking` 기록 후 다음 레포로.
 - ref가 있으면 `origin/<현재 브랜치>`와 HEAD의 양쪽 전용 커밋 수를 센다.
 
-#### 3-2. 분기 — 미커밋 변경 **없는** 경우
+#### 3-2. 분기
 
-| ahead | behind | 일반 브랜치 | 보호 브랜치 |
-|---|---|---|---|
-| 0 | 0 | `up-to-date` | `up-to-date` |
-| 0 | >0 | ff merge → `pulled +N` | ff merge → `pulled +N` |
-| >0 | 0 | push → `pushed +N` | `blocked: protected branch ahead +N` |
-| >0 | >0 | `blocked: ahead N, behind M (fast-forward 불가)` | `blocked: ahead N, behind M (fast-forward 불가)` |
+- behind만 있으면 ff merge → `pulled +N`. 미커밋 변경이 있으면 stash로 비켜두고 merge 후 pop한다.
+- ahead와 behind가 둘 다 있으면 fast-forward가 안 되므로 `blocked: ahead N, behind M (fast-forward 불가)`. WIP 커밋·stash를 하지 않는다.
+- 일반 브랜치는 ahead를 push하고, 미커밋 변경이 있으면 WIP 커밋으로 묶어 함께 올린다(`pushed +N` / `wip-pushed +N`).
+- 보호 브랜치는 자동으로 push하지 않는다. 미커밋 변경은 그대로 두고 `dirty`로 기록한다.
 
-#### 3-3. 분기 — 미커밋 변경 **있는** 경우
-
-| ahead | behind | 일반 브랜치 | 보호 브랜치 |
-|---|---|---|---|
-| 0 | 0 | WIP 커밋 → push → `wip-pushed +1` | `dirty` (그대로 둠, stash·커밋·푸시 안 함) |
-| 0 | >0 | stash → ff merge → stash pop → WIP 커밋 → push → `pulled +M, wip-pushed +1` | stash → ff merge → stash pop → `pulled +M, dirty` |
-| >0 | 0 | WIP 커밋 → push (기존 ahead와 함께) → `wip-pushed +N` | `blocked: protected branch ahead +N (uncommitted)` |
-| >0 | >0 | `blocked: ahead N, behind M (uncommitted, fast-forward 불가)` (WIP 커밋·stash 안 함) | 동일 |
+**보호 브랜치에 ahead가 있으면 `blocked: protected branch ahead +N`으로 기록한다** (미커밋 변경이 함께 있으면 `(uncommitted)`를 덧붙인다). "자동 push 안 함"에서 이 기록이 파생되지 않아 따로 못박는다 — 조용히 `up-to-date`로 넘어가면 올릴 커밋이 있다는 사실이 묻힌다.
 
 #### 3-4. 세부 절차
 
@@ -83,7 +74,7 @@ description: ~/WebstormProjects/main/, ~/WebstormProjects/my-else/, ~/WebstormPr
 - 로컬에 그 브랜치가 존재하지 않으면 스킵.
 - 그 브랜치가 다른 워크트리에 체크아웃돼 있으면 스킵 (해당 워크트리가 자기 차례에 처리).
 - 그 외:
-  - `git fetch origin <branch>:<branch>` 시도.
+  - 체크아웃 없이 ff를 시도한다.
   - 성공 = fast-forward 완료 → `<branch> ff +N` 기록 (N은 갱신 전후 커밋 차이).
   - 실패 = fast-forward 불가 → `<branch> ff 불가` 기록. 보고만, 자동 처리 안 함.
 

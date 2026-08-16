@@ -32,10 +32,6 @@
 - **학습 목적**:
     - 대부분 기본값(false) 사용 → 항상 켜진 상태
     - 예외 케이스는 학습에 불필요
-- **복잡도**:
-    - 각 disable prop마다 조건문 추가
-    - 상호 의존성 (disableAutoFocus면 disableRestoreFocus도 고려)
-    - 테스트 케이스 2^n개 (n = disable props 개수)
 - **현실**: 99% 기본값 사용
 
 **삭제 대상**:
@@ -72,10 +68,6 @@ function FocusTrap() {
 - **학습 목적**:
     - ref 병합은 고급 주제
     - 단순한 ref 하나로도 컴포넌트 이해 가능
-- **복잡도**:
-    - `useForkRef` 유틸리티 필요
-    - React.cloneElement로 자식 복제
-    - ref 콜백 함수 생성 및 메모이제이션
 - **대안**: ref 하나만 사용
 
 **삭제 대상**:
@@ -108,10 +100,6 @@ return <div ref={rootRef}>{children}</div>;
     - 현대 브라우저만 타겟
     - 호환성 코드는 레거시 지원용으로 학습과 무관
     - 표준 API 사용이 더 명확함
-- **복잡도**:
-    - Feature detection 조건문
-    - Polyfill import 및 관리
-    - Vendor prefix (-webkit-, -moz-, -ms-)
 
 **삭제 대상**:
 - IE11 대응 코드
@@ -141,10 +129,6 @@ const ownerDocument = node.ownerDocument;
 - **학습 목적**:
     - 이벤트 기반 처리가 더 직관적
     - Interval은 브라우저 버그 우회용 (학습과 무관)
-- **복잡도**:
-    - setInterval/clearInterval 관리
-    - 메모리 누수 방지 (cleanup)
-    - Polling 주기 최적화
 - **성능**: Polling 대신 이벤트 리스너 → CPU 사용 감소
 
 **삭제 대상**:
@@ -178,10 +162,6 @@ return () => doc.removeEventListener('focusin', handleFocusIn);
     - 일반적인 케이스만 이해해도 충분
     - 특수 케이스는 고급 주제
     - 80%의 경우에 동작하면 학습 목적으로 충분
-- **복잡도**:
-    - 각 타입별로 다른 처리
-    - Edge case detection 코드
-    - 방어적 if문 남발
 
 **삭제 대상**:
 - 특정 타입별 예외 처리
@@ -213,9 +193,6 @@ if (isSentinelNode(event.target)) {
 - **학습 목적**:
     - 알고리즘 자체가 학습 주제가 아님
     - 단순한 방법으로도 대부분 정상 동작
-- **복잡도**:
-    - 수십 줄의 계산/정렬 로직
-    - 배열 분리 → 정렬 → 병합
 
 **삭제 대상**:
 - 복잡한 정렬/탐색 알고리즘 → 단순한 대안으로 대체
@@ -248,9 +225,6 @@ const focusableNodes = rootRef.current.querySelectorAll('[tabindex], a, button, 
 - **학습 목적**:
     - 한 곳에서만 쓰면 인라인이 더 명확
     - "무엇을 하는가"가 바로 보임
-- **복잡도**:
-    - 함수 정의 찾아가며 읽어야 함
-    - 함수 이름으로 추상화 → 세부 동작 숨김
 - **원칙**: YAGNI - 실제로 재사용할 때만 함수화
 
 **삭제 대상**:
@@ -281,9 +255,6 @@ const index = parseInt(element.getAttribute('tabindex') || '', 10);
 - **학습 목적**:
     - 학습용으로는 최신 방식 하나만 이해하면 충분
     - 옛날 API를 배울 이유 없음
-- **복잡도**:
-    - 두 가지 API 병합 로직
-    - fallback 체인 (a ?? b ?? c)
 - **혼란**: "어느 걸 써야 하나?" → 선택지 줄이기
 
 **삭제 대상**:
@@ -316,9 +287,6 @@ const backdropProps = {
     - PropTypes는 타입 검증 도구이지 핵심 로직이 아님
     - TypeScript를 사용하면 빌드 타임에 검증 (더 강력)
     - displayName은 DevTools에서만 유용
-- **복잡도**:
-    - PropTypes 100줄 이상
-    - 실제 코드보다 메타데이터가 더 많음
 - **프로덕션**: PropTypes는 빌드 시 제거됨
 
 **삭제 대상**:
@@ -356,9 +324,6 @@ function Dialog({ open, onClose, children }) {
 - **학습 목적**:
     - 클라이언트 전용 학습 환경에서 SSR 대응 코드는 불필요
     - 핵심 로직을 가리는 부가 코드
-- **복잡도**:
-    - `useState(false)` + `useLayoutEffect(() => setMounted(true), [])` 조합
-    - mounted 여부에 따른 조건부 렌더링 (`mounted ? ... : null`)
 - **현실**: Next.js 등 SSR 프레임워크 없이는 의미 없음
 
 **삭제 대상**:

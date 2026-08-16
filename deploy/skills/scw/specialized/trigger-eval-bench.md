@@ -28,12 +28,7 @@
 
 ## 입력 eval set
 
-```json
-[
-  {"query": "사용자가 입력할 만한 문장 (구체적·현실적, 백스토리 포함)", "should_trigger": true},
-  {"query": "트리거되면 안 되는 문장 (인접 도메인 함정 포함)", "should_trigger": false}
-]
-```
+최상위 배열에 `query`(사용자가 입력할 만한 문장 — 구체적·현실적, 백스토리 포함)와 `should_trigger`(불리언) 두 키를 가진 객체를 담는다.
 
 should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주). UTF-8 BOM 금지 (Python json 파서 실패).
 
@@ -56,11 +51,7 @@ JSON 핵심 필드:
 - `summary.should_not_trigger_triggered_rate` — false positive (0.0~0.1)
 - `results[].rate` — 쿼리별 trigger 비율 (M/N runs)
 
-FAIL 분류:
-- **핵심 진입 신호 누락** → description에 자연어 키워드 추가
-- **모호한 케이스** → 안 잡혀도 무방. false positive 위험이 더 큼
-- **변동성 (rate 0.3~0.6)** → LLM 비결정성. description 신호 약함, 보강 후 재측정
-- **추상 쿼리 (예: "description 너무 길어")** → claude가 자체 답변. 어떤 description으로도 trigger 안 됨. eval set 품질 문제이지 description 문제 아님 (skill-creator 본문: "Simple queries... won't trigger skills regardless of description quality").
+FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 claude가 자체 답변하므로 어떤 description으로도 trigger되지 않는다 — eval set 품질 문제이지 description 문제가 아니다 (skill-creator 본문: "Simple queries... won't trigger skills regardless of description quality").
 
 ## 안전 절차 — SKILL.md swap이 위험한 이유
 

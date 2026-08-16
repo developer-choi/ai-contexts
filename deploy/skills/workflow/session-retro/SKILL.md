@@ -27,7 +27,7 @@ description: 세션 로그에서 대화 타임라인을 뽑고(단계 1), workfl
 
 1. **대상 세션 jsonl 확정** — 자기 회고이므로 대상은 보통 **자기 자신**의 로그.
    - 로그 위치: `~/.claude/projects/<프로젝트슬러그>/<세션id>.jsonl`
-   - 슬러그 = cwd 경로 구분자를 `-`로 치환 (예: `C--Users-forwo-WebstormProjects-recruitment-mycle`). 프로젝트 찾기 = 디렉토리명 부분일치.
+   - 슬러그 = cwd 경로 구분자를 `-`로 치환 (예: `C--Users-forwo-WebstormProjects-recruitment-mycle`).
    - 각 `.jsonl`의 첫/끝 `timestamp`(시작·종료·소요시간)와 첫 사용자 텍스트로 대상 세션을 특정 → 사용자와 확정. (자기 세션 식별이 모호하면 후보를 표로 제시해 확인받는다.)
    - **용도 확인**: 회고용(내부)인지 제출용(채용과제가 세션 내역 제출을 요구하는 경우)인지 사용자에게 확인 — 제출용이면 「제출용 정제」 발동.
 2. **추출** — 아래 스크립트 템플릿을 세션에 맞게 수정해 실행.
@@ -42,8 +42,6 @@ description: 세션 로그에서 대화 타임라인을 뽑고(단계 1), workfl
 
 1. **상단 조망** — 메타 인용·합계 아래에 `# 시간대별 요약본` 섹션을 두고, 각 구간을 `- **{n/dd HH:MM ~ HH:MM (소요분)}** — 한 일 요약` 리스트로 나열한다(전체를 한눈에 조망).
 2. **하단 대화** — 이어서 대화내역을 각 구간 `## {n/dd HH:MM ~ HH:MM (소요분)} — 한 일 요약` 헤딩으로 끊고, 그 아래 해당 시각의 원문 대화 블록을 둔다(헤딩이 곧 그 구간 대화의 앵커).
-
-조망 목록(`#`)과 구간별 대화(`##`)가 **둘 다** 있어야 한다.
 
 존재 이유: 순서대로 읽을 땐 안 보이지만 구간으로 모아 보면 "헐 이걸 이 시간만큼 써서 했다고?"가 드러난다 — 회고의 핵심 재료.
 
@@ -83,71 +81,19 @@ AI 요약(절차 3)까지 끝난 평면 타임라인에, 구간 시작시각+헤
 - AI·시스템 블록은 손대지 않는다 (AI 요약 치환은 절차 3에서 이미 완료).
 - 정제 후 **사용자에게 정제 결과 검토를 받는다** — 외부 제출물이므로 사용자 최종 확인 필수.
 
-### 스크립트 템플릿
+### 추출 스크립트 — jsonl을 읽을 때만 아는 것
 
-세션마다 수정할 곳: `SESSION_JSONL`(대상 세션=자기 자신), `OUT`(출력 경로), 긴 붙여넣기 요약 분기(세션별 내용 확인 후 작성).
+jsonl을 md 타임라인으로 바꾸는 스크립트는 그 자리에서 짠다. 로그 포맷을 직접 열어보지 않으면 모르는 것만 아래에 둔다.
 
-```js
-import fs from 'node:fs';
+| 무엇 | 왜 |
+|---|---|
+| `isMeta`가 붙은 엔트리는 건너뛴다 | 대화가 아니라 시스템 주입이다 |
+| 텍스트가 빈 user 엔트리(= tool_result만 든 것)는 건너뛴다 | 도구 반환이 발화로 잡힌다 |
+| user 텍스트에 `<command-name>`이 있으면 그 안의 명령만 뽑는다 | 슬래시 명령이 래퍼 태그째 들어온다 |
+| 5분 안에 한쪽이 다른 쪽의 앞부분인 user 발화가 연속하면 하나로 합치고 수정 횟수를 센다 | 입력창 재전송이 별개 발화로 쌓인다 |
+| AI 엔트리가 연속하면 하나로 합친다 | 한 턴이 여러 엔트리로 쪼개진다 |
 
-const SESSION_JSONL = String.raw`C:\Users\forwo\.claude\projects\<프로젝트슬러그>\<세션id>.jsonl`; // ★수정
-const OUT = String.raw`<프로젝트경로>\plan\retrospective\<세션이름>.md`; // ★수정
-const lines = fs.readFileSync(SESSION_JSONL, 'utf8').split('\n').filter(Boolean);
-
-const raw = [];
-for (const line of lines) {
-  let e; try { e = JSON.parse(line); } catch { continue; }
-  if (!e.message || e.isMeta) continue;
-  if (e.type === 'user') {
-    const c = e.message.content;
-    let text = typeof c === 'string' ? c
-      : Array.isArray(c) ? c.filter(b => b.type === 'text').map(b => b.text).join('\n') : '';
-    text = text.trim();
-    if (!text) continue; // tool_result-only
-    if (text.startsWith('<system-reminder>') || text.startsWith('<local-command-stdout>')) continue;
-    raw.push({ ts: new Date(e.timestamp), who: 'user', text });
-  } else if (e.type === 'assistant') {
-    const text = (e.message.content || []).filter(b => b.type === 'text').map(b => b.text).join('\n').trim();
-    if (text) raw.push({ ts: new Date(e.timestamp), who: 'AI', text });
-  }
-}
-
-const items = raw.map(({ ts, who, text }) => {
-  if (who === 'AI') return { ts, who, text };
-  if (text.includes('<command-name>')) {
-    const name = (text.match(/<command-name>([^<]*)<\/command-name>/) || [])[1]?.trim() ?? '';
-    const args = (text.match(/<command-args>([^<]*)<\/command-args>/) || [])[1]?.trim() ?? '';
-    return { ts, who: '사용자', text: `\`${name.startsWith('/') ? name : '/' + name}${args ? ' ' + args : ''}\`` };
-  }
-  if (text.startsWith('This session is being continued'))
-    return { ts, who: '시스템', text: `[컨텍스트 압축 요약 — \`/compact\` 자동 생성. 원문 약 ${(text.length/1000).toFixed(1)}k자 생략]` };
-  if (text.length > 2000) // ★세션별로 내용 보고 [한 줄 요약] 직접 작성 권장
-    return { ts, who: '사용자', text: `[긴 붙여넣기 생략(약 ${(text.length/1000).toFixed(1)}k자) — 첫 줄: ${text.split('\n')[0].slice(0, 80)}]` };
-  return { ts, who: '사용자', text };
-});
-
-const merged = [];
-for (const cur of items) {
-  const prev = merged[merged.length - 1];
-  if (prev && prev.who === '사용자' && cur.who === '사용자' && cur.ts - prev.ts <= 5 * 60 * 1000 &&
-    (cur.text.startsWith(prev.text) || prev.text.startsWith(cur.text))) {
-    if (cur.text.length >= prev.text.length) { cur.edits = (prev.edits ?? 1) + 1; merged[merged.length - 1] = cur; }
-    else prev.edits = (prev.edits ?? 1) + 1;
-    continue;
-  }
-  if (prev && prev.who === 'AI' && cur.who === 'AI') { prev.text += '\n\n' + cur.text; continue; }
-  merged.push(cur);
-}
-
-const pad = n => String(n).padStart(2, '0');
-let md = `# <세션이름> 세션 — 대화 타임라인 (${merged.length}건)\n\n`; // ★헤더 안내문 보강
-for (const { ts, who, text, edits } of merged) {
-  const stamp = `${ts.getMonth() + 1}/${pad(ts.getDate())} ${pad(ts.getHours())}:${pad(ts.getMinutes())}`;
-  md += `**${stamp} · ${who}**${edits ? ` (입력 수정 ×${edits})` : ''}\n\n${text}\n\n---\n\n`;
-}
-fs.writeFileSync(OUT, md);
-console.log('entries:', merged.length);
-```
+출력은 `**{n/dd HH:MM} · {사용자|AI|시스템}**` 헤더 + 본문 + `---` 구분자의 블록 반복이다 — 절차 3·4가 이 블록을 단위로 센다.
 
 ---
 

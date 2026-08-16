@@ -21,19 +21,7 @@
 
 ## 상단 출처 블록 (회사 프로젝트 한정)
 
-신규 stub 파일 상단에 첨부.
-
-```
-/* TODO [USER_REVIEW]
-
-[Convention]
-설명 — 경로:라인번호
-
-[Reference]
-설명 — 경로:라인번호
-
-*/
-```
+신규 stub 파일 상단에 `TODO [USER_REVIEW]` 블록 주석으로 첨부한다. 항목마다 `설명 — 경로:라인번호` 한 줄.
 
 - `[Convention]`: 컨벤션 문서 경로 + 라인 범위
 - `[Reference]`: 컨벤션에 없을 때만, 기존 코드 평행 사례 경로
@@ -113,27 +101,14 @@
 
 ### 처리 (구현 중)
 
-| 만난 마커 | 처리 |
-|---|---|
-| `// TODO [USER_REVIEW]:` 잔존 | 시작 게이트에서 차단됐어야 함. 만나면 사용자 보고 |
-| `// TODO [AI_IMPL]:` | 코드로 채우며 같은 커밋에서 즉시 삭제 |
-| `/* TODO [USER_REVIEW] ... */` 상단 블록 | 출처 확인 완료 후 블록 전체 삭제 |
-
+- `TODO [AI_IMPL]`은 코드로 채우며 같은 커밋에서 즉시 삭제한다. 별도 정리 커밋 X
 - 미해결 `TODO [AI_IMPL]` 잔존 채 구현 종료 X
-- 별도 정리 커밋 X (해결 커밋에 주석 삭제 함께)
 
 ### 종료 게이트 (구현 마무리)
 
 구현 대상 경로에서 `TODO` 잔존 라인을 센다. `TODO [USER_REVIEW]`·`TODO [AI_IMPL]`·상단 블록·기타 `// TODO:` 형태 모두 0건. 잔존 시 종료 불가.
 
 ## 판단 경계 사례
-
-| 사례 | 분류 |
-|---|---|
-| 헬퍼 함수 동작 설명, 컨벤션 출처 인라인 메모, placeholder 의도 | `TODO [USER_REVIEW]` |
-| scss 토큰 매핑, 미구현 컴포넌트·기능, 본 PR 안 끝나는 디자인/백엔드 후속 작업 | `TODO [AI_IMPL]` |
-| 본 PR 외부 의존성 (디자인 검수 별도 일정, 백엔드 합의 지연 등) | `plan/{prN}/persistent/overview.md` 「열려있는 질문」 |
-| 다른 PR로 이연 (PR4에서 X 추가 등) | `/plan/background/consumable/project.md` 해당 PR 섹션 |
 
 판단 기준: 본 PR IMPL 처리 → 코드 안 TODO. 외부 의존성 → overview.md. 다른 PR 이연 → project.md.
 

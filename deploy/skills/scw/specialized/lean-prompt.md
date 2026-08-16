@@ -36,10 +36,6 @@ git branch --no-merged <기본브랜치>
 
 **after**: 삭제. 형식·type·scope는 commitlint가 강제한다.
 
-**before** — 위를 고치며 `conventions/artifact/stub.md`·`steps/step-4.md`에 남긴 "커밋 메시지 형식은 프로젝트 commitlint 규약을 따른다"
-
-**after**: 그 줄도 삭제.
-
 **강제 표면은 레포 설정만이 아니다.** 전역 훅(`~/.claude/hooks/`)과 전역 룰도 SSOT다. 레포에 commitlint·husky가 없다고 "강제하는 도구가 없으니 본문에 적어야 한다"로 넘어가지 말고, 전역 쪽이 이미 막는지 확인한 뒤 판정한다.
 
 **before** — PP `local/skills/study-report/SKILL.md`에 새로 쓴 절: "리포트 파일 하나만 커밋한다", "내가 만들지 않은 변경이 섞여 있으면 커밋하지 않는다"
