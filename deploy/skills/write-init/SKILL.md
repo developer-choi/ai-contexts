@@ -60,6 +60,7 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 
 - `templates/<type>.md`가 있으면 Read (pr-body·decision·resume-intro·resume-item·article).
 - type별 가이드가 있으면 Read: `resume-item`·`resume-intro` → `../../contexts/writing-guide/resume-guide.md`, `decision` → `../../contexts/writing-guide/decision-guide.md`, `readme` → `../../contexts/writing-guide/readme-guide.md`, `article` → `../../contexts/writing-guide/article-skeletons.md`.
+- `pr-body` subtype `recruitment`면 `../../contexts/writing-guide/templates/pr-body/`의 구조 가이드를 하나 골라 함께 Read한다. 이번 작업에 **측정한 수치가 있으면 `recruitment-evidence.md`**(그 수치를 증거로 세우는 구조), 없으면 **`recruitment-narrative.md`**(목표에서 결론까지 이야기로 잇는 구조)다. 판단이 갈리면 사용자에게 묻는다.
 - 해법·선택을 제시하는 절이 있으면 `../../contexts/writing-guide/tradeoff-guide.md`도 Read한다 (아래 [가드4]). `decision`·`resume-*`는 항상 해당하고, 다른 type도 본문에 비교·선택 절이 보이면 해당한다.
 - 예외 — `pr-comment`(템플릿 없음, 자유 형식: subtype에 따라 질문/제안/해명/감사 구조를 동적 결정), `readme`(템플릿 없음, `readme-guide.md`가 구조와 1차 소스를 소유).
 - **대상 레포 규약 따르기**: 글이 다른 레포(MP·AC·DC 등)에 들어가면 그 레포의 CLAUDE.md 운영방침·frontmatter 스키마를 따른다. 출처 문서가 있으면 그 구조를 골격으로 삼고, 시리즈면 N개 skeleton을 동시에 만든다.
@@ -75,6 +76,8 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 - **막연 (게이트 ON)**: 헤딩 계층(골격)을 먼저 세워 사용자에게 보인다. **헤딩 구조만** 검수받는다(내용 아님). OK 후 내용 채움.
 - **확실 (게이트 OFF)**: 사용자 초안을 골격으로 받아 바로 내용 단계로.
 - **재활용 (델타)**: 기존 확정본을 기준 골격으로, 추가·삭제되는 헤딩만 짚어 확인.
+
+**사용자가 지운 섹션은 되살리지 않는다**: 초안에서 사용자가 삭제한 섹션은 "이 내용이 불필요하다"는 명시적 의사다. 재작성·보강에서 다시 넣지 않는다. 그 내용이 필요하다고 판단되면 임의로 복원하지 말고 사용자에게 되살릴지 묻는다.
 
 **축 이탈 판정**: 각 헤딩이 핵심 문장의 어느 단계인지 말할 수 있어야 한다. 말할 수 없으면 그 헤딩은 넣지 않는다. 기존 본문(확실·재활용 경로)에 이미 있으면 다른 절에 흡수하거나 뺀다고 사용자에게 보고한다 — 임의로 남겨두면 축이 둘로 갈린 채 상세 채움에 들어간다.
 
@@ -94,6 +97,8 @@ subtype 누락·오타 시 한 번 묻고 진행한다.
 
 - **before**: 서브에이전트가 찾은 "스크린리더(VoiceOver/NVDA)에서 접근성 실패" 사례를 저자가 겪은 직접 개발 단점으로 서술.
 - **after**: 저자에게 확인 → 실제 경험은 "iOS·안드로이드·크롬 등 모던 브라우저 간헐 버그·디버깅 고통"이라 그것으로 교체, 스크린리더 사례는 제거.
+
+가드1·가드3의 사례집은 [`../../contexts/writing-guide/examples/accuracy.md`](../../contexts/writing-guide/examples/accuracy.md)다. 근거 인용·수치의 실제 의미·비교 서술의 차별점을 검증하는 사례가 여기 있으므로, 본문에 외부 근거나 수치가 들어가면 Read한다.
 
 **[가드4] 트레이드오프 누락 점검**: 해법·선택을 제시하는 절마다 그 선택과 맞바꾼 것이 적혀 있는지 점검하고, 빠졌으면 [tradeoff-guide.md](../../contexts/writing-guide/tradeoff-guide.md)를 따라 처리한다.
 

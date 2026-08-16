@@ -79,6 +79,4 @@ coding-standards/
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-- [writing-guide/tone.md](deploy/contexts/writing-guide/tone.md) — 문서 톤 (습니다체, 문장 역할)
-- [writing-guide/templates/pr-body/recruitment-narrative.md](deploy/contexts/writing-guide/templates/pr-body/recruitment-narrative.md) — 채용과제 PR 본문 (서사형)
-- [writing-guide/templates/pr-body/recruitment-evidence.md](deploy/contexts/writing-guide/templates/pr-body/recruitment-evidence.md) — 채용과제 PR 본문 (증거형)
+[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서가 언제 걸리는지는 [map.md](deploy/contexts/writing-guide/map.md)의 태그 표를 봅니다.

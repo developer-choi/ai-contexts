@@ -35,7 +35,6 @@ write-init 패키지의 **표현**을 다듬는다. frontmatter가 정본 컨텍
 - **사례**: type·맥락에 맞는 것만 Read.
   - 모든 type: `../../contexts/writing-guide/examples/tone.md` (금지어·말투 변별)
   - 문단·구조 이슈 보이면: `../../contexts/writing-guide/examples/structure.md`
-  - 절차·과정 서술을 점검할 때: `../../contexts/writing-guide/examples/process.md`
   - `resume-item`·`resume-intro`: `../../contexts/writing-guide/examples/resume.md` + `../../contexts/writing-guide/resume-guide.md`
   - `readme`: `../../contexts/writing-guide/readme-guide.md`
   - 본문에 수치·단정 표현이 있거나 요약·축소 정확성 관련: `../../contexts/writing-guide/examples/accuracy.md` (단정 수위를 낮추는 것까지가 표현 다듬기다. 사실 자체의 검증은 init 책임)
