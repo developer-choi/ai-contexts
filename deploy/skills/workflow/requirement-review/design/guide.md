@@ -50,5 +50,4 @@
 
 #### 종합
 
-planning 플래그도 켜져 있으면, planning과 design의 종합을 마지막에 한 번 통합 처리한다.
 design 단독(planning 꺼짐)이면 design 관점의 종합만 수행한다: global.md 공통 컴포넌트 정리, 페이지 간 디자인 패턴 일관성 점검.

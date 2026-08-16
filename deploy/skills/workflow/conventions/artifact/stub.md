@@ -144,11 +144,7 @@ stub 코드는 SKILL.md [CRITICAL] 「입력 산출물 비판적 검토」 메�
 
 #### 케이스 A — stub이 빈 껍데기
 
-stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐.
-
-```
-git rebase -i <stub 직전 커밋>   # stub drop, 슬라이스별 IMPL + 리뷰 수정은 fixup squash
-```
+stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐. stub 커밋을 drop하고 슬라이스별 IMPL에 리뷰 수정을 합친다.
 
 비대화형 환경(claude code 등 `git rebase -i` 불가) → 케이스 B 방식 그대로 적용해도 결과 동일.
 
@@ -156,13 +152,6 @@ git rebase -i <stub 직전 커밋>   # stub drop, 슬라이스별 IMPL + 리뷰 
 
 stub 생성 단계에서 사용자가 검토 후 본문까지 채워 사실상 단일 IMPL 커밋. soft reset으로 풀어 슬라이스별 재분할.
 
-```
-git reset --soft <stub 직전 커밋>     # stub부터 마지막 리뷰 수정까지 staged
-git reset HEAD                        # 모두 unstage
-git commit <슬라이스 1 파일들> -m "<슬라이스 1 메시지>"
-git commit <슬라이스 2 파일들> -m "<슬라이스 2 메시지>"
-```
-
-stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 어느 커밋 인자에도 안 넣으면 자동으로 사라짐 — 의도된 정리.
+stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 재분할 대상에서 빼 사라지게 둔다 — 의도된 정리.
 
 정리 완료 후 사용자에게 force-push를 요청한다.

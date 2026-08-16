@@ -35,8 +35,6 @@
 */
 ```
 
-- `/* TODO [USER_REVIEW]`로 시작 (grep 가능 마커)
-- `경로:라인번호`는 라인 끝
 - `[Convention]`: 컨벤션 문서 경로 + 라인 범위
 - `[Reference]`: 컨벤션에 없을 때만, 기존 코드 평행 사례 경로
 - 둘 다 해당하면 둘 다 (Convention 우선)
@@ -74,27 +72,6 @@
 
 1차 입력 인용 필요 시 분배된 영속 파일로 우회. 예: `page.md:30` → stub 코드 한글 요약 또는 `decisions.md` 결정 항목.
 
-### 양식 예시
-
-```ts
-/* TODO [USER_REVIEW]
-
-[Convention]
-파일 경로/폴더/네이밍 — docs/conventions/...:line
-
-[Reference]
-파일 전체 평행 사례 — _fsd/.../FileName.tsx:line-range
-
-*/
-
-import { ... } from '...';
-
-// TODO [USER_REVIEW]: 호출 패턴 컨벤션 — docs/conventions/...:line
-const result = await someCall();
-
-// TODO [AI_IMPL]: gap 토큰 — markup.md "X.module.scss"
-```
-
 ## PR 이연 마커 — 코드 안 금지
 
 본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
@@ -128,9 +105,7 @@ const result = await someCall();
 
 ### IMPL 시작 게이트 (구현 진입 시)
 
-```bash
-grep -rn "TODO \[USER_REVIEW\]" _fsd/<slice>/ src/<scope>/
-```
+구현 대상 경로에서 `TODO [USER_REVIEW]` 잔존 라인을 센다.
 
 - 0건 → IMPL 진행
 - 1건 이상 → IMPL 중단, 잔존 라인 사용자 보고
@@ -149,11 +124,7 @@ grep -rn "TODO \[USER_REVIEW\]" _fsd/<slice>/ src/<scope>/
 
 ### 종료 게이트 (구현 마무리)
 
-```bash
-grep -rn "TODO" _fsd/<slice>/ src/<scope>/
-```
-
-`TODO [USER_REVIEW]`·`TODO [AI_IMPL]`·상단 블록·기타 `// TODO:` 형태 모두 0건. 잔존 시 종료 불가.
+구현 대상 경로에서 `TODO` 잔존 라인을 센다. `TODO [USER_REVIEW]`·`TODO [AI_IMPL]`·상단 블록·기타 `// TODO:` 형태 모두 0건. 잔존 시 종료 불가.
 
 ## 판단 경계 사례
 
