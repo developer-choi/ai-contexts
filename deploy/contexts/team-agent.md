@@ -4,13 +4,12 @@
 
 ## Claude Code
 
-Agent Teams는 experimental 기능이라 환경변수 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`이 켜져 있어야 한다 (AC는 `claude-settings.json`의 `env`에 설정해 배포한다). 켜져 있으면 `SendMessage` 도구가 활성화된다.
+Agent Teams는 experimental 기능이라 환경변수 `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1`이 켜져 있어야 한다. 켜져 있으면 `SendMessage` 도구가 활성화된다.
 
 팀 생성은 **암묵적**이다. 별도 셋업 도구 없이 첫 팀원을 띄우는 순간 세션 단위 팀이 자동 생성되고, 세션 종료 시 자동 정리된다.
 
 - **Agent** 호출 시 `name`을 지정하면 이름으로 호명 가능한 팀원이 된다 (`name` 없으면 일회성 서브에이전트).
 - 팀원 간 후속 지시·다라운드 토론은 **SendMessage**로 전달한다 (`to`에 팀원 이름, 메인 대화는 `"main"`).
-- 백그라운드(`run_in_background`)로 띄운 팀원은 완료·메시지 시 메인이 자동으로 통지받는다.
 - 팀원 프롬프트에 **결과를 `SendMessage`로 `to: "main"`에 보내라**고 명시한다. 팀원의 평문 출력은 메인에 전달되지 않아, 명시하지 않으면 작업을 끝내고도 통지만 오고 결과가 오지 않는다.
 
 > 과거(v2.1.178 이전)에는 `TeamCreate`/`TeamDelete`로 팀을 명시 생성·삭제하고 `team_name` 파라미터로 지정했다. 두 도구는 제거됐고 `team_name`은 받아도 무시된다(deprecated). 옛 절차를 따르지 않는다.

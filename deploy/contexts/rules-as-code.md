@@ -81,16 +81,3 @@ codegen만 성격이 다르다. 나머지는 위반을 *잡지만* codegen은 �
 변경분만 보는 검사는 만들기 쉽지만, 규칙을 만들기 전부터 있던 위반은 그 줄을 직접 건드리기 전까지 남는다. 그렇다고 규칙을 새로 만들 때마다 전체를 훑어 정리하면 규칙 수만큼 비용이 곱해져 아무도 안 하게 된다.
 
 **이 커밋이 건드린 파일을 통째로 본다.** 이미 그 파일을 열어놓은 자리라 고치는 비용이 가장 싸고, 옛 위반이 손대는 김에 하나씩 걷히면서, 규칙이 늘어도 커밋당 비용은 안 는다.
-
-## 수단 매핑 — 무엇을 무엇으로
-
-게이트를 통과한 규칙을 어느 도구로 내릴지:
-
-- TypeScript 타입·컴파일 옵션 → `tsconfig.json` (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes 등)
-- JS/TS 코드 패턴 → ESLint 룰 (no-restricted-syntax, no-restricted-imports, 커스텀 룰 등)
-- CSS/SCSS 패턴 → Stylelint 룰
-- 커밋 메시지 형식·범위 → commitlint 룰
-- 파일 구조·금지 경로 → Husky hook·정책 hook·CI lint
-- 마크다운·문서 형식 → markdownlint, prettier, remark 룰
-
-도구로 잡히는 것은 도구로, 의미·맥락 판단이 필요한 것만 프롬프트 규칙으로 남긴다. 양쪽 다 필요한 경우(도구가 부분만 잡는 경우) 보완 관계를 명시한다.

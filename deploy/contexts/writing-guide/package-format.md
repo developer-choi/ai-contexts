@@ -35,8 +35,7 @@ refs:
 ...
 ```
 
-**필수 필드** (누락 X): `type`, `audience`, `purpose`, `key_message`. `subtype`은 그 type에서 subtype이 필수일 때만 함께 필수다.
-**선택 필드** (불확실 시 비우거나 `미상` 표기 허용): `audience_knowledge`, `length_target`, `refs`, `rendering_env`, `placeholder_policy`, `rejected`
+어느 필드가 필수인지는 `deploy/hooks/check-package-frontmatter.mjs`가 저장 시점에 거부로 판정합니다. 선택 필드는 불확실하면 비우거나 `미상`으로 둡니다.
 
 - `type`·`subtype`: 이 글의 종류. 허용 어휘와 subtype 필수 여부는 패키지를 만드는 스킬의 입력 규격이 단일 출처라, 여기서 다시 나열하지 않습니다.
 - `key_message`: 이 글에서 독자가 가져갈 한 문장. 저장 시점에 새로 짓지 않고 합의된 문장을 그대로 옮깁니다.

@@ -41,12 +41,8 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 
 ### 소주제 (AC 안에서 어디로)
 
-- `deploy/contexts/` 하위 → 각 디렉토리의 `map.md` 역할 섹션
+- `deploy/contexts/` 하위 → 그 영역의 인덱스가 정한 자리에 둔다. 코드 작업 자산은 [`code-map.md`](deploy/contexts/code-map.md), 글쓰기 자산은 [`writing-guide/map.md`](deploy/contexts/writing-guide/map.md)이고, 각 「역할」 절이 무엇을 받는지 정한다. 어느 인덱스에도 안 걸리는 자산은 `deploy/contexts/` 바로 아래 단일 파일로 둔다 — 인덱스 없는 하위 디렉토리를 새로 만들면 그 안의 문서를 아무도 찾지 못한다.
 - `deploy/skills/` (전역 배포) / `local/skills/` (AC 로컬)
-
-## contexts 하위 디렉토리 관리
-
-- 내용을 추가·수정·삭제할 때 `map.md` 상단의 "역할" 섹션을 확인하고 적합한 위치에 배치한다
 
 ## README 관리
 
