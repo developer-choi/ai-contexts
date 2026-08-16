@@ -12,10 +12,6 @@
 
 사용자와 대상 라이브러리를 정한 뒤, 작업 폴더(예: `~/WebstormProjects/simplify/`) 하위에 `simplified-<라이브러리명>`으로 shallow clone한다.
 
-```bash
-git clone --depth 1 <repo-url> simplified-<라이브러리명>
-```
-
 - 클론한 **원본은 이 시점에 손대지 않는다.** package.json `name` 교정·파일 삭제 등 모든 정리는 첫 커밋(원본) 이후 Step 3~5에서 한다.
 
 ---
@@ -26,22 +22,7 @@ shallow clone은 히스토리가 불완전하므로 git을 재초기화하고, *
 
 - ⚠️ **이 첫 커밋은 정리 전 원본이다.** Step 3~5의 삭제·수정을 이 커밋 *전에* 하지 않는다. 원본을 history에 남겨야 이후 "무엇이 제거됐는지"를 과거 버전과 diff할 수 있다 — 이게 이 스킬의 핵심 가치다.
 - **로컬 git 정체성은 이 커밋 전에 설정한다** — 그래야 initial commit부터 개인 계정으로 author된다. 글로벌 `git config --global user.email`이 **개인 계정(`forworkchoe@gmail.com`)이 아니면**(회사 계정 등) 로컬 config를 개인 계정으로 설정한다. (글로벌이 이미 개인 계정이면 생략.)
-
-```bash
-rm -rf .git
-git init
-
-# 개인 계정 로컬 config — 반드시 첫 커밋 전에 설정
-git config user.name "Yu Jin Choe"
-git config user.email "forworkchoe@gmail.com"
-
-# 원본 전체를 그대로 1커밋 (정리 X — 정리는 Step 5 끝 두 번째 커밋)
-git add <최상위 항목들>
-git commit <같은 경로들> -m "initial commit"
-git branch -M main
-```
-
-최상위 항목 목록은 `git status --porcelain -z`로 얻는다 — 갓 init한 레포라 전부 untracked로 잡히고, `-z`를 쓰면 공백·비ASCII 경로가 인용 없이 나와 그대로 인자가 된다.
+- 기본 브랜치는 `main`으로 둔다.
 
 ### (선택) 개인 GitHub 계정으로 push
 
@@ -49,15 +30,6 @@ git branch -M main
 
 **비공개(`--private`)로 만든다.** 이 프로젝트는 원본 OSS를 정리한 포크이고(init Step 3에서 LICENSE 삭제),
 학습용 산출물이므로 공개 재배포 대신 개인 비공개 레포로 둔다.
-
-```bash
-gh repo create <개인 GitHub 핸들>/simplified-<라이브러리명> --private
-git remote add origin https://github.com/<개인 GitHub 핸들>/simplified-<라이브러리명>.git
-git push -u origin main
-```
-
-- 토큰을 remote URL에 박지 않는다 — credential helper(`git config --global credential.helper manager`)를 사용한다.
-- `gh` CLI 미설치 시 `winget install GitHub.cli` 후 `gh auth login`으로 인증.
 
 ---
 
@@ -119,13 +91,6 @@ git push -u origin main
 ### 두 번째 커밋 — 정리 내역
 
 Step 3~5의 수정·삭제를 원본 커밋과 분리해 **한 커밋**으로 묶는다. "원본 → 무엇이 제거됐는지"가 diff 한 번으로 보인다.
-
-Step 3~5에서 손댄 경로는 이미 알고 있으므로 그 경로들을 그대로 넘긴다. 기억이 불확실하면 `git status --porcelain -z`로 목록을 확인한 뒤 넘긴다.
-
-```bash
-git add <Step 3~5에서 손댄 경로들>
-git commit <같은 경로들> -m "chore: 불필요한 파일·설정 삭제"
-```
 
 > 🔎 **검수**: 정리 결과를 SIMPLIFY_SOURCE `init-review.md`(정리 유형) 기준 리뷰어 서브에이전트로 검수받는다. 소스·테스트 삭제 등 중대 이슈는 사용자 에스컬레이션.
 
@@ -194,7 +159,7 @@ simplified-[라이브러리명]/
 
 해당 라이브러리 특화 유지 패턴입니다. 작업하면서 축적합니다.
 
-- **스캐폴딩**: SIMPLIFY_SOURCE `[타입]/format/keep-patterns.md` 양식을 기반으로 생성
+- **스캐폴딩**: SIMPLIFY_SOURCE `format/keep-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 예상되는 유지 패턴을 초안으로 작성
 - 라이브러리 종류와 무관한 공통 유지 패턴은 SIMPLIFY_SOURCE `common-keep-patterns.md`에 있으므로 중복 작성하지 않음
 
@@ -209,7 +174,7 @@ simplified-[라이브러리명]/
 - 예(X): "Dialog.tsx의 backdrop 제거" → 이건 특정 파일 작업 기록
 
 **작성 가이드**:
-- **스캐폴딩**: SIMPLIFY_SOURCE `[타입]/format/simplification-patterns.md` 양식을 기반으로 생성
+- **스캐폴딩**: SIMPLIFY_SOURCE `format/simplification-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 **예상되는 반복 패턴**을 초안으로 작성
 - 단순화 작업을 진행하면서 **패턴별로 실제 적용 예시**(커밋 해시 선택사항) 추가
 - 라이브러리 종류와 무관한 공통 패턴은 SIMPLIFY_SOURCE `common-simplification-patterns.md`에 있으므로 중복 작성하지 않음
@@ -222,7 +187,7 @@ simplified-[라이브러리명]/
 
 **가장 작고 단순한 대상**(의존성 적고, 코드 짧고, 독립적인 것) 하나를 골라 `main.md` 프로세스대로 처음부터 끝까지 수행한다. 큐 읽기·그룹 추가·문서/목록 갱신 절차는 `main.md`를 따른다.
 
-이 첫 작업은 **방향 잡기**가 목적이다 — 이 라이브러리에서 반복 제거할 패턴, 유지할 대상, 적절한 커밋 단위를 파악한다. 파악한 내용은 `main.md` Step 6 절차대로 패턴 문서에 반영하고, 이후 대상은 그 방향을 기반으로 진행한다.
+이 첫 작업은 **방향 잡기**가 목적이다 — 이 라이브러리에서 반복 제거할 패턴, 유지할 대상, 적절한 커밋 단위를 파악한다. 파악한 내용은 `main.md` 「프롬프트 유지보수」 절차대로 패턴 문서에 반영하고, 이후 대상은 그 방향을 기반으로 진행한다.
 
 > 🔎 **검수**: `main.md`에서 계획서를 작성한 뒤 **사용자 승인 전에** SIMPLIFY_SOURCE `init-review.md`(첫 계획 유형) 기준 리뷰어 서브에이전트로 검수받는다.
 
