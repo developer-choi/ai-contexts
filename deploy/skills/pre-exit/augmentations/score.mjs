@@ -169,6 +169,38 @@ function checkEmptySections(text, placeholderPolicy) {
   return { empties, placeholders, nheads: heads.length };
 }
 
+// decision 문서의 비교 구조. 「방법이 둘 이상인가」와 「각 방법이 장단점을 둘 다 채웠는가」는
+// 헤딩·리터럴 매칭이라 판단이 안 든다 — decision-guide 산문이 표기를 못박는 대신 여기서 잡는다.
+// (탈락 사유가 실제로 드러나는가는 판단이 남아 여기서 안 본다.)
+const METHOD_HEAD = /^###\s+방법\s*\d+\./;
+
+function checkDecisionStructure(text) {
+  const lines = text.split("\n");
+  const heads = [];
+  lines.forEach((ln, i) => {
+    if (METHOD_HEAD.test(ln)) heads.push([i, ln.trim()]);
+    else if (/^#{1,3}\s/.test(ln) && heads.length) heads.push([i, null]); // 같은/상위 레벨 헤딩 = 구간 끝
+  });
+  const methods = [];
+  for (let k = 0; k < heads.length; k++) {
+    if (!heads[k][1]) continue;
+    const end = heads[k + 1] ? heads[k + 1][0] : lines.length;
+    const body = lines.slice(heads[k][0] + 1, end);
+    const filled = (label) => {
+      const at = body.findIndex((ln) => ln.includes(`**${label}:**`));
+      if (at === -1) return false;
+      const after = body[at].split(`**${label}:**`)[1] ?? "";
+      const rest = body.slice(at + 1).join("\n");
+      // 라벨 뒤 같은 줄이 비었으면 다음 라벨/헤딩 전까지의 줄로 채워졌는지 본다.
+      if (after.trim()) return true;
+      const upto = rest.split(/\n(?=\*\*\S+?:\*\*|#{1,6}\s)/)[0] ?? "";
+      return upto.replace(/\s/g, "").length > 0;
+    };
+    methods.push({ head: heads[k][1], 장점: filled("장점"), 단점: filled("단점") });
+  }
+  return methods;
+}
+
 // placeholder를 남기는 것이 정상인지는 frontmatter가 정한다. 없으면 keep(기본값).
 function readPlaceholderPolicy(text) {
   if (!text.startsWith("---")) return "keep";
@@ -176,6 +208,14 @@ function readPlaceholderPolicy(text) {
   if (end === -1) return "keep";
   const m = text.slice(3, end).match(/^\s*placeholder_policy:\s*(\S+)/m);
   return m ? m[1] : "keep";
+}
+
+function readDocType(text) {
+  if (!text.startsWith("---")) return null;
+  const end = text.indexOf("\n---", 3);
+  if (end === -1) return null;
+  const m = text.slice(3, end).match(/^\s*type:\s*(\S+)/m);
+  return m ? m[1] : null;
 }
 
 function checkProps(body, propsPath) {
@@ -256,6 +296,16 @@ function main() {
       (phCounts ? " (위반)" : " (남기는 것이 정상 — 위반 아님)"),
   );
   for (const head of placeholders) console.log(`   ${head}`);
+  if (readDocType(raw) === "decision") {
+    const methods = checkDecisionStructure(body);
+    const holes = methods.filter((m) => !m.장점 || !m.단점);
+    console.log(`\n[decision 비교 구조] 방법 ${methods.length}개` + (methods.length < 2 ? " (2개 미만 — 보강 필요)" : ""));
+    for (const m of holes) {
+      const miss = [!m.장점 && "장점", !m.단점 && "단점"].filter(Boolean).join("·");
+      console.log(`   ${m.head}  ← ${miss} 누락·공란`);
+    }
+  }
+
   if (args.props) {
     const { props, missing } = checkProps(body, args.props);
     console.log(`\n[C2 핵심명제] ${props.length}개 중 ${missing.length}개 누락`);
