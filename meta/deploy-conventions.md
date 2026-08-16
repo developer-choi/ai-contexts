@@ -1,6 +1,6 @@
 # 배포 시스템 수정 규약
 
-AC의 배포 시스템(`scripts/sync-*.js`·`unsync-*.js`, `deploy/hooks/`, settings.json hook, AC worktree)을 수정·추가할 때 따르는 규칙.
+AC의 배포 시스템(`scripts/` 하위 sync·unsync 스크립트, `deploy/hooks/`, settings.json hook, AC worktree)을 수정·추가할 때 따르는 규칙.
 
 ## 목적: 어느 에이전트가 와도 동일하게 동작
 
@@ -54,7 +54,6 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 - **원본은 `local/<X>`**, `.claude/<X>`·`.agents/<X>`는 gitignore 산출물.
 - 새 자산 종류를 추가하려면 `local/`에 디렉토리만 두면 된다 — sync가 일반 순회하므로 스크립트 수정 불필요. settings/hooks처럼 타겟별로 갈리는 자산만 projection 어댑터가 필요하다.
 - `unsync`는 `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 **통째 제거**한다 (동일성 비교 없이). 경로 자체가 AC가 만든 gitignore 산출물이므로, 원본에서 사라진 스킬(orphan)도 함께 청소되고 원본은 `local/`에 남아 re-sync로 복구된다 — 사용자 데이터 손실 위험이 없다. `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`(투영 원본)가 있는 레포에서만 제거한다(비-AC 레포의 사용자 `AGENTS.md` 보호).
-- 새 자산 종류를 `local/`에 추가하면 그 레포 `.gitignore`에 `.claude/<X>/` 항목을 더한다(`.agents/`는 통째 ignore되어 추가 불필요).
 
 ## 스킬이 자기 폴더의 스크립트를 부를 때는 자리표시자를 쓴다
 
@@ -97,7 +96,7 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 
 ## 배포 스크립트 관리
 
-`scripts/sync-*.js` 또는 `scripts/unsync-*.js`의 동작이 바뀌면 `meta/guides/` 하위의 관련 가이드도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
+sync·unsync 스크립트의 동작이 바뀌면 `meta/guides/` 하위의 관련 가이드도 같이 최신화한다. 가이드는 AI 에이전트가 코드를 안 읽고 가이드만 보고 실행하는 것을 전제로 작성되어, 어긋나면 잘못된 결과로 이어진다.
 
 ## AC worktree hook 준비
 

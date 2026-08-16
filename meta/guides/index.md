@@ -10,17 +10,15 @@
 
 - `sync:*`: AC가 관리하는 원하는 상태로 맞춥니다. 반복 실행해도 같은 상태로 수렴해야 합니다.
 - `unsync:*`: 대응하는 `sync:*`가 만든 AC 관리 산출물만 제거합니다.
-- `verify:hooks`: AC의 git 훅 발동 조건(`.githooks` 파일·설정 훅 등록·git 버전·`commitlint`)을 확인하고 등록이 어긋나면 복구합니다. 새 worktree에서 커밋하기 전에 실행합니다.
-- `verify:settings`: `deploy/base-settings.json`에서 타겟별 설정을 생성하는 계약을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
-- `verify:hook-policies`: git 정책 hook에 대표 명령을 흘려 차단·통과 판정을 확인합니다. `sync:system`이 시작 시 자동 실행합니다.
-- `verify:local-system`: `local/base-settings.json`에서 repo-local 설정을 생성하는 계약을 확인합니다. `sync:local-system`이 시작 시 자동 실행합니다.
+- `verify:*`: 배포 전 계약을 확인만 합니다(쓰기 없음). `sync:*` 진입점이 시작 시 fail-fast로 부르는 것이 무엇인지는 그 스크립트가 정본입니다 — 여기에 옮겨 적지 않습니다.
+- `verify:hooks`는 예외로 등록이 어긋나면 복구까지 합니다. 새 worktree에서 커밋하기 전에 직접 실행합니다.
 
 ## 새 대상 추가 기준
 
 새 설치·동기화 대상을 추가할 때는 같은 변경 안에서 다음 항목을 함께 맞춥니다.
 
 - `package.json`에 `sync:<target>`과 `unsync:<target>`을 함께 등록합니다.
-- `scripts/sync-<target>.js`와 `scripts/unsync-<target>.js`를 함께 추가합니다.
+- sync·unsync 스크립트를 기존 타겟과 같은 배치로 함께 추가합니다.
 - `meta/guides/<target>.md`에 수행 작업, 제거 기준, 반복 실행 기준을 적습니다.
 - 이 인덱스와 `meta/INSTALLATION_GUIDE.md`에 새 대상이 필요한 사용자 흐름을 반영합니다.
 - `sync:<target>`은 2회 이상 실행해도 중복 산출물을 만들지 않아야 합니다.

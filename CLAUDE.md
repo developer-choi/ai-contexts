@@ -22,7 +22,7 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 
 다음을 수정·추가할 때 [meta/deploy-conventions.md](meta/deploy-conventions.md)를 먼저 본다.
 
-- `scripts/sync-*.js`·`unsync-*.js` 또는 sync/unsync 타겟
+- sync/unsync 스크립트 또는 sync/unsync 타겟
 - `deploy/hooks/`(전역)·`local/hooks/`(AC 로컬)의 정책 hook
 - `deploy/base-settings.json`·`local/base-settings.json` 등 settings 생성 소스
 - settings.json의 PreToolUse/PostToolUse hook
@@ -31,7 +31,7 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 ## 로컬 스킬 원본 기준
 
 - 프로젝트 로컬 스킬의 원본은 `local/skills/`이다. `.claude/skills/`(Claude가 읽음)와 `.agents/skills/`(Codex가 읽음)는 거기서 배포된 산출물이다 (gitignore).
-- 전역 스킬의 원본은 `deploy/skills/`이며, Claude와 Codex 타겟으로 함께 배포된다.
+- 전역 스킬의 원본은 `deploy/skills/`이며, `sync:system`이 전 타겟에 함께 배포한다.
 
 ## 폴더 규칙
 
