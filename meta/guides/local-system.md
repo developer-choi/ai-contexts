@@ -14,7 +14,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ## 수행 작업
 
-시작 시 AC git hook 준비 상태와 로컬 settings 생성 계약(`verify:local-system`)과 배포본 md 렌더링의 멱등(`verify:skill-render`)을 먼저 확인합니다(fail-fast).
+시작 시 AC git hook 준비 상태와 `verify:*` 계약을 먼저 확인합니다(fail-fast). 어느 검사를 부르는지는 `scripts/local-system/sync-local-system.mjs`가 정본입니다.
 
 ### 1. 로컬 자산 (cross-repo)
 

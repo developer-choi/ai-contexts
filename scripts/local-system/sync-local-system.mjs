@@ -22,6 +22,8 @@ async function main() {
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, 'verify-local-system.mjs')], { stdio: 'inherit' });
   // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
   childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs')], { stdio: 'inherit' });
+  // 목적 검사는 AC 안에서만 돌고 있었다. 남의 레포 local/skills도 같은 규칙을 받으므로 여기서 함께 본다.
+  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs'), '--local'], { stdio: 'inherit' });
 
   // 1) 로컬 스킬 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
   console.log('');

@@ -59,7 +59,7 @@
         "scripts/check-links.mjs",
         "scripts/verify/verify-links.mjs"
       ],
-      "note": "verify-links는 check-links의 export(scan·classify·githubSlug·headingSlugs·extractLinks·repoSlug)를 직접 import해 회귀 검증한다. check-links의 export 시그니처·분류(anchor/in-repo/myrepo-url/external) 동작을 바꾸면 verify-links의 픽스처·단언을 함께 고친다."
+      "note": "verify-links는 check-links의 export(scan·classify·githubSlug·headingSlugs·extractLinks·repoSlug·findOrphans)를 직접 import해 회귀 검증한다. check-links의 export 시그니처·분류(anchor/in-repo/myrepo-url/external) 동작이나 고아 판정(호명·바구니) 규칙을 바꾸면 verify-links의 픽스처·단언을 함께 고친다."
     },
     {
       "name": "coding-standards 탐색 절차 (code-map.md)",
