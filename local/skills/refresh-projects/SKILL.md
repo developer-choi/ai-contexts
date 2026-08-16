@@ -157,7 +157,7 @@ KA 기반 변환이므로 Phase 3의 KA Maintain 완료 후 실행한다. KQ는 
 
 3. **dry-run 보고**: 후보 리스트를 사용자에게 그룹화하여 제출.
    - **NEW** (KQ에 없음 — 첫 변환 대상)
-   - **CHANGED** (`lastCommitDate`가 직전 회차 `state.json.KQ.refreshedAt` 이후). `lastCommitDate`는 날짜 단위라 refreshedAt와 같은 날이면 intra-day 변경(같은 날 더 늦은 시각 커밋)을 놓친다. 같은 날인 후보는 커밋 시각·`diff`로 OA·질문 실변경을 확인해 판정한다
+   - **CHANGED** (`lastCommitDate`가 직전 회차 `state.json.KQ.refreshedAt` 이후)
    - **UNCHANGED** (변경 없음, 재변환 불필요)
    - **SKIPPED** (선정 기준 미달 — `skipped.reason`별로 분리)
    - 출처별 추가 분리: `official` / `google-doc` / `unverified` / 미상
