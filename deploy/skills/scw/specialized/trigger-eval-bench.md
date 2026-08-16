@@ -4,7 +4,7 @@
 
 [CRITICAL] 작업 시작 전 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. 같은 6시간 함정 재발 방지용이다.
 
-## 현재 상태 (2026-05-16 기준)
+## 현재 상태 (2026-08-15 재확인)
 
 **skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**. Anthropic 공식 fix 없음. 모든 관련 이슈·PR OPEN 상태.
 
@@ -22,14 +22,9 @@
 
 ## 측정 도구: bench-trigger.py
 
-표준 도구가 broken이라 자체 도구 `bench-trigger.py` 사용 — scw 스킬 폴더의 `scripts/`에 있다(폴더 절대경로는 이 파일 맨 위). AC 레포에도 동명 `scripts/`가 있으므로 상대경로 그대로 부르지 않는다. 동작 원리:
+표준 도구가 broken이라 자체 도구 `bench-trigger.py` 사용 — scw 스킬 폴더의 `scripts/`에 있다(폴더 절대경로는 이 파일 맨 위). AC 레포에도 동명 `scripts/`가 있으므로 상대경로 그대로 부르지 않는다.
 
-- `claude -p`로 query 호출, `--output-format stream-json`으로 trigger 신호 캡처
-- **`.claude/commands/` 임시 파일 안 만들고**, 측정 대상 `SKILL.md` 자체를 그대로 사용 (skills 디렉토리는 `claude -p`도 인식)
-- `subprocess.Popen` + reader thread + `queue.Queue` 패턴으로 stream-json을 line-by-line 소비. `select.select`이 윈도우 파이프 fd를 못 받는 문제 우회
-- `Skill` tool_use 감지 즉시 `process.kill()` — early termination. trigger-positive 쿼리도 ~10s 안에 종료. 본문 작업까지 대기하면 130s+
-
-hysteric-lab이 제안한 fix(`commands/` → `skills/`)와 같은 방향을 자체 구현한 것. 우연이 아니라 broken 표준의 자연스러운 우회.
+측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 측정 대상 `SKILL.md` 자체를 그대로 잰다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
 
 ## 입력 eval set
 
@@ -44,19 +39,9 @@ should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주). UTF-8 BOM
 
 ## 호출
 
-```powershell
-$env:PYTHONUTF8 = "1"
-& python.exe <scw 스킬 폴더>/scripts/bench-trigger.py `
-  --eval-set <path-to-eval.json> `
-  --skill-path <path-to-skill-dir> `
-  --runs-per-query 3 `
-  --num-workers 3 `
-  --timeout 240 `
-  --model claude-sonnet-4-6 `
-  --out <result.json> `
-  --verbose
-```
+인자 목록은 `--help`가 정본이다. 기본값을 그냥 쓰면 안 되는 것만 아래에 둔다.
 
+- 윈도우에선 `PYTHONUTF8=1`을 켜고 부른다. 안 켜면 한글 쿼리가 cp949로 읽혀 깨진다.
 - `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
 - `--runs-per-query 3`: LLM 비결정성 보정. 3 권장.
 - `--num-workers 3`: 윈도우에선 동시 `claude -p` 부하 고려. 5+로 늘리면 socket·메모리 한계.
@@ -81,29 +66,13 @@ FAIL 분류:
 
 bench-trigger.py는 측정 대상 SKILL.md를 **현 상태 그대로 측정**한다. description 변경 효과 비교(BEFORE/AFTER)를 하려면 SKILL.md를 일시 변경해야 하는데, **메인 워크트리의 SKILL.md를 swap하면 사용자의 다른 세션이 그 swap 상태로 실제 사용 영향**을 받는다.
 
-[CRITICAL] description 비교 측정은 **반드시 별도 워크트리**에서 수행한다:
-
-```powershell
-# scw 워크트리 만들기 (master 위에 ahead 있는 경우 worktree 룰 발동)
-git -C <AC> worktree add ../<AC>-scw-bench -b chore/scw-<topic> <base-commit>
-
-# 그 워크트리 안의 SKILL.md만 수정·측정
-cd ../<AC>-scw-bench
-# Edit local/skills/<name>/SKILL.md line 3 description
-# bench-trigger.py --skill-path ./local/skills/<name>
-```
-
-이렇게 하면 메인 워크트리의 실제 사용 환경은 영향 없음.
+[CRITICAL] description 비교 측정은 **반드시 별도 워크트리**에서 수행한다. 그 워크트리 안의 SKILL.md만 고치고 `--skill-path`를 거기로 겨눠, 메인 워크트리의 실제 사용 환경은 건드리지 않는다.
 
 [CRITICAL] **측정 시작 직전 워크트리 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- local/skills/<name>/SKILL.md`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 워크트리 재생성.
 
-## 자동화: run_loop의 대체
+## 자동 루프는 없다
 
-`skill-creator`의 `run_loop.py`는 자동 5-iteration 최적화(eval + improve_description + iterate + train/test split + best_description 선정) 도구지만 위의 architectural 이슈로 broken. bench-trigger.py는 측정만 wrapping, 자동 루프 미구현.
-
-자동 루프 옵션:
-- **수동 라운드**: description 한 줄 수정 → bench-trigger.py 측정 → 잔류 FAIL 패턴 분석 → 또 수정 → 반복. 라운드당 7~10분. **최대 3~4 라운드까지만 시도** (그 이상은 LLM 비결정성에 묻힘).
-- **hysteric-lab의 manual workaround**: 50줄 bash + 사람 눈 verdict. 가장 신뢰 가능. 자동화 X.
+bench-trigger.py는 측정만 감싼다. description 수정 → 재측정 → 잔류 FAIL 분석은 사람이 라운드로 돈다(상한은 아래 함정 표).
 
 ## 함정 — 피해야 할 6시간 사례
 
@@ -111,11 +80,7 @@ cd ../<AC>-scw-bench
 
 | 함정 | 증상 | 예방 |
 |---|---|---|
-| 표준 도구 patch만으로 해결된다고 판단 | `select.select` 윈도우 fix만 적용 → 여전히 0% recall (architectural 이슈 별도) | 「현재 상태」3가지 문제 다 확인 후 결정 |
 | mini test 부실 검증 | exit code 0 + JSON 출력만 보고 "동작"이라 판단. stderr WinError 무시 → 0/1 trigger를 "정상 0 trigger"로 해석 | stderr 끝까지 확인. WinError·Warning 텍스트 grep |
-| 메인 워크트리에서 SKILL.md swap | description 측정 중 사용자 다른 세션이 swap 상태로 실제 사용 → 충돌 commit·index 오염 | 별도 워크트리 필수 (위 「안전 절차」) |
-| 측정 직전 워크트리 description 미확인 | 다른 세션 wip가 워크트리 description을 이미 swap한 채로 두 라운드를 연달아 측정 → 같은 description 두 번 측정, delta 0이 "변경 효과 없음"으로 오해석 | 측정 시작 전 `git diff <base>..HEAD -- SKILL.md` 필수. wip 보이면 풀거나 base commit 위에서 워크트리 재생성 |
-| timeout 부족으로 trigger 케이스 모두 dropout | timeout=60·90으로 측정 → trigger되는 쿼리는 본문 작업까지 130s+ 걸려 다 timeout. should_trigger rate=0%로 잘못 잡힘. early-kill이 stream signal 못 잡으면 timeout까지 진행 | `--timeout 240` 기본값. early-kill 기제가 ttft 8~10s 후 trigger 감지 즉시 kill하므로 정상이면 비싸지 않음 |
 | 라운드 무한 반복 | "0건 수렴까지" 룰 글자대로 따라 5+ 라운드 → LLM 비결정성에 묻힘, 시간 낭비 | 3~4 라운드에서 정체면 description 외 요인(scw 본문 구조, eval set 품질) 재검토 |
 | eval set 작성 시 노골적 인용 | description에 eval 쿼리 표현 그대로 박아넣음 (overfitting) → 측정 과정에선 통과해도 실제 사용성 X | 의도 표현으로 일반화. eval 쿼리는 표본일 뿐 |
 | Anthropic 표준 가정 무비판 신뢰 | "skill-creator 플러그인이 표준이라 동작할 것" → 6시간 후 broken 확인 | GitHub 이슈/PR 먼저 검색. 표준 도구도 broken 가능 |
@@ -127,17 +92,3 @@ cd ../<AC>-scw-bench
 - 트리거 결정은 모델별로 다름. 측정 모델과 사용자 환경 모델 다르면 결과 해석 주의.
 - timeout 짧으면 false negative.
 - 트리거 감지는 stream-json의 `Skill` tool_use에서 `"skill":"<name>"` 매칭. 다른 tool 형태는 미감지.
-
-## 워크스페이스 컨벤션
-
-```
-$env:TEMP/<skill>-trigger-eval/
-  eval_set.json                  # UTF-8 BOM 없이
-  iteration-1/
-    before.json + before.log
-    after.json + after.log
-  iteration-2/                    # 라운드 추가 시
-    ...
-```
-
-작업 종료 후 `Remove-Item -Recurse -Force $env:TEMP/<skill>-trigger-eval/` 정리.

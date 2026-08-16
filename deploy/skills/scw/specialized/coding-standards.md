@@ -1,6 +1,6 @@
 # Coding-Standards 특화 체크리스트
 
-`contexts/coding-standards/` 리뷰 시 추가로 점검하는 항목. 파일 목록은 `rules/**/*.md`·`principles/**/*.md`를 Glob해 얻는다(별도 map.md 없음, 태그 정의는 [../../../contexts/code-map.md](../../../contexts/code-map.md) 참조).
+`contexts/coding-standards/` 리뷰 시 추가로 점검하는 항목. 탐색 절차와 폴더·태그 정의는 [../../../contexts/code-map.md](../../../contexts/code-map.md)가 정본이다.
 
 ## [CRITICAL] 분류 검증
 
@@ -8,14 +8,11 @@
 
 ### rules vs principles 분류
 
-- **rules/**: 중간 모델(e.g. sonnet)이 코드와 규칙을 1:1 대조하여 위반 여부를 판단할 수 있는 항목
-- **principles/**: 최상위 모델(e.g. opus)이 맥락을 이해하고 판단해야 하는 항목
-- 판단 기준: "이 규칙을 위반했는지 코드만 보고 기계적으로 체크 가능한가?" → rules, 아니면 → principles
+판단 기준: "이 규칙을 위반했는지 코드만 보고 기계적으로 체크 가능한가?" → rules, 아니면 → principles.
 
 ### personal vs universal 분류
 
-- **universal/**: 회사에서도 적용 가능한 범용 규칙
-- **personal/**: 개인 프로젝트 전용 규칙
+판단 기준: 회사 프로젝트에서도 그대로 적용되는가 → universal, 개인 프로젝트에서만 성립하는가 → personal.
 
 ### 하위 폴더·파일 배치
 
@@ -25,4 +22,4 @@
 
 ## 태그 검증
 
-태그 정의(의미)는 `code-map.md`, 개별 파일 태그 부여는 각 파일 자신의 frontmatter `tags`에 있다. `code-map.md`에 정의된 태그 목록과 각 파일의 태그 부여가 올바른지 점검한다.
+정의된 태그 목록과 각 파일이 실제로 부여한 태그가 맞는지 점검한다.

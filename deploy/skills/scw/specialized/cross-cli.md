@@ -46,4 +46,4 @@ Antigravity의 검색 도구는 시스템 `grep`을 호출한다. Windows 기본
 - Claude Code — `~/.claude/projects/<인코딩된 경로>/<세션 id>.jsonl`
 - Antigravity — `~/.gemini/antigravity-cli/conversations/<대화 id>.db` (SQLite `steps` 테이블)
 
-어느 파일을 열었는지, 무엇을 검색했는지, 무엇이 왜 실패했는지가 순서대로 남는다. 스킬을 고친 뒤 같은 입력으로 양쪽을 돌려 이 기록을 대조하면, 고친 문장이 실제로 효과가 있었는지 판정된다.
+스킬을 고친 뒤 같은 입력으로 양쪽을 돌려 이 기록을 대조하면, 고친 문장이 실제로 효과가 있었는지 판정된다.
