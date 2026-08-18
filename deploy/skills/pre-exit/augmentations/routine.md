@@ -1,6 +1,6 @@
 # /pre-exit routine 보강
 
-`private-playground` 세션에서 루틴 데이터를 다룰 때 스크립트 우회 여부를 점검하는 추가 회고. pre-exit 본 절차(Step 1~3)와 **함께** 수행한다 (대체 X, 추가 ○).
+`private-playground` 세션에서 루틴 데이터를 다룰 때 스크립트 우회 여부를 점검하는 추가 회고. pre-exit 본 절차와 **함께** 수행한다 (대체 X, 추가 ○).
 
 ## 트리거 조건
 

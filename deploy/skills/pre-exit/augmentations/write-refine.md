@@ -1,6 +1,6 @@
 # /pre-exit write-refine 보강
 
-세션에서 `/write-refine`을 사용한 경우의 추가 회고. pre-exit 본 절차(Step 1~3)와 **함께** 수행한다 (대체 X, 추가 ○).
+세션에서 `/write-refine`을 사용한 경우의 추가 회고. pre-exit 본 절차와 **함께** 수행한다 (대체 X, 추가 ○).
 
 채택된 write 도구(write-init·write-refine)의 상시 강화회고 루프다. 실문서를 다듬을 때마다 결과물을 채점하고 교정 사례를 회수해 writing-guide·스킬 본문으로 환류한다. 회고는 세 층이다 — **객관·반객관은 채점기가 자동으로 띄우고, 주관(톤 교정·만족)은 사람이 채운다.**
 
