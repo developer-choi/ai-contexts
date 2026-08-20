@@ -18,7 +18,7 @@ MARKUP은 전 페이지를 훑는 유일 세션이라 반복되는 컴포넌트�
 
 ## 자료 참조 (수집은 step-1.1)
 
-만들 컴포넌트 종류·이름·커버리지는 디자인 진실 원천을 직독해 MARKUP이 직접 확정한다 (「공통 컴포넌트 확정」) — project.md를 되읽지 않는다. 각 컴포넌트의 디자인 디테일 원천(재료)과 그 참조 방식은 모드 파일이 정의한다. 이 프로젝트의 구체 원본 위치와 대조 절차문서는 진입 문서 `background/retained/design-root.md`가 가리킨다 ([../../artifact/design-root.md](../../artifact/design-root.md) 양식).
+각 컴포넌트의 디자인 디테일 원천(재료)과 그 참조 방식은 모드 파일이 정의한다. 이 프로젝트의 구체 원본 위치와 대조 절차문서는 진입 문서 `background/retained/design-root.md`가 가리킨다 ([../../artifact/design-root.md](../../artifact/design-root.md) 양식).
 
 개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 step-1 「컨벤션 소스 수집」이 단일 출처.
 
@@ -40,8 +40,7 @@ MARKUP은 전 페이지를 훑는 유일 세션이라 반복되는 컴포넌트�
 
 ## 산출물 형태
 
-- **markup 워크트리의 `.tsx` / `.module.scss` 코드** (메인 산출물 — project.md의 모든 페이지·도메인 컴포넌트, 디자인 진실 원천 0건 수렴 상태)
-- 마크업 작성의 입력 자료는 모드 파일 참조
+마크업 작성의 입력 자료는 모드 파일 참조.
 
 ## 포트 룰
 

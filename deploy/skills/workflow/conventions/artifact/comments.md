@@ -4,15 +4,11 @@
 
 ## 적용 대상
 
-| 프로젝트 종류 | 상단 출처 블록 | 인라인 마커 |
-|---|---|---|
-| 회사 프로젝트 | 필수 | 필수 |
-| 개인 레포 | 미적용 | 필수 |
-| 채용과제 | 미적용 | 필수 |
+인라인 마커는 모든 프로젝트 종류에 적용하고, 상단 출처 블록은 회사 프로젝트에만 적용한다.
 
 ### [CRITICAL] 적용 조건 해석
 
-위 표 「프로젝트 종류」만으로 판단. 자체 변수 도입 금지:
+「프로젝트 종류」만으로 판단. 자체 변수 도입 금지:
 
 - "컨벤션 문서 부재 → 출처 명시 가치 낮음" — **금지**. ESLint·prettier·기존 코드 패턴이 진실 원천이며 `[Reference]` 인용 가능
 - "PR 크기 작음·위반 risk 낮음" — **금지**. 비용·risk 판단은 사용자 권한
@@ -36,10 +32,10 @@
 
 ## 본문 인라인 마커
 
-| 마커 | 처리자 | 수명 |
-|---|---|---|
-| `// TODO [USER_REVIEW]:` | 사용자(검토) | PLAN 승인 후 삭제 |
-| `// TODO [AI_IMPL]:` | AI/개발자(구체화) | IMPL 시 코드로 채우며 삭제 |
+| 마커 | 처리자 |
+|---|---|
+| `// TODO [USER_REVIEW]:` | 사용자(검토) |
+| `// TODO [AI_IMPL]:` | AI/개발자(구체화) |
 
 대상:
 
@@ -57,8 +53,6 @@
 
 - ✓ `docs/conventions/*`, `docs/ARCHITECTURE.md`, `_fsd/.../*`, `plan/{prN}/persistent/*`
 - ❌ `plan/{prN}/consumable/*`, `plan/{prN}/retained/*`, 분배 후 삭제될 1차 입력 (사용자 작성 `page.md`, BG AI 산출물)
-
-1차 입력 인용 필요 시 분배된 영속 파일로 우회. 예: `page.md:30` → stub 코드 한글 요약 또는 `decisions.md` 결정 항목.
 
 ## PR 이연 마커 — 코드 안 금지
 
@@ -78,8 +72,6 @@
 파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 `/plan/background/consumable/project.md`의 **담당 PR 섹션에 "PR{N}에서 disable 제거 + 규칙 준수 수정" TODO로 등록**한다. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
 
 - 격리 마커에 **추적 가능한 고정 문구**를 남긴다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`) — step-6 백스톱이 이 문구로 고아를 탐지한다.
-- 등록된 항목의 집행은 기존 step-3 「project.md 현재 PR 절 소비」가 담당한다 (새 게이트 없음).
-- 생성 시 등록을 빠뜨려 어느 PR에도 안 걸린 고아는 step-6 백스톱(step-6.md 「미배정 blanket eslint-disable 고아 점검」)이 잡는다.
 
 인라인 disable(`// eslint-disable-next-line`)은 본 소절 대상이 아니다 — file-level blanket 블록만.
 
@@ -88,7 +80,7 @@
 ### 생성 (신규 stub 작성 시)
 
 - 상단 블록(회사 프로젝트) + 인라인 마커 적용
-- **기존 stub 파일 갱신 시 재추가 금지** — 사용자가 정리한 TODO 주석 보존. Edit 우선, Write로 갱신 시 보존 의식
+- **기존 stub 파일 갱신 시 재추가 금지** — 사용자가 정리한 TODO 주석 보존
 - `system-reminder` "modified, intentional, don't revert" 안내된 파일은 재추가 절대 금지
 
 ### IMPL 시작 게이트 (구현 진입 시)
@@ -108,10 +100,6 @@
 
 구현 대상 경로에서 `TODO` 잔존 라인을 센다. `TODO [USER_REVIEW]`·`TODO [AI_IMPL]`·상단 블록·기타 `// TODO:` 형태 모두 0건. 잔존 시 종료 불가.
 
-## 판단 경계 사례
-
-판단 기준: 본 PR IMPL 처리 → 코드 안 TODO. 외부 의존성 → overview.md. 다른 PR 이연 → project.md.
-
 ## 제외 대상
 
 본 컨벤션 인라인 마커 룰 대상 아님:
@@ -120,4 +108,4 @@
 - 코드 카테고리 마커 (`// 404`, `// 400` 등)
 - 컨벤션상 명시된 JSDoc (`@param`, `@returns`)
 
-원칙: stub 단계 본문 주석 최소화. 글로벌 룰 "Default to writing no comments" 우선. placeholder 의도가 의도적으로 비명확한 경우만 마커 사용.
+원칙: stub 단계 본문 주석 최소화. placeholder 의도가 의도적으로 비명확한 경우만 마커 사용.

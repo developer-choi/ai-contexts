@@ -16,11 +16,9 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 - **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — step-4 전면 stub 대상이 아니다.
 - **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../session/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출**한다 — 다운스트림 PR이 그 시그니처에 기대어 병렬화하기 위함. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지 — 이중 SSOT·드리프트 회피). props도 PR 소유이되(MARKUP props는 임시 비계), step-4 stub 공표 후엔 다운스트림 계약이라 freeze.
 
-PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다(디자인 변경 재수령 시 로직 보존). step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다. 아래 예시의 컴포넌트는 그 로직 컴포넌트 기준이다 (페이지 시각 마크업은 가져오므로 stub 안 함).
+PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다(디자인 변경 재수령 시 로직 보존). step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
 ### 로직 컴포넌트 트리 예시
-
-가져온 시각 마크업(`UsersPageView`)은 stub 대상 아님 — PR이 만드는 로직 컨테이너·hook을 stub한다.
 
 ```tsx
 // UsersPageContainer.tsx — 로직 컨테이너(PR이 만듦): 가져온 마크업에 데이터·핸들러 주입
@@ -78,7 +76,7 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 
 ### 주석
 
-[comments.md](./comments.md) 단일 출처 참조. 상단 출처 블록·인라인 마커·라이프사이클·게이트 모두 거기.
+[comments.md](./comments.md) 단일 출처 참조.
 
 ### `.tsx`
 
@@ -87,10 +85,6 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 - 합성하면 트리 골조 + 조건부 렌더링 골조
 - 조건은 placeholder 변수 (`const isLoading = false; // TODO [AI_IMPL]: 로딩 상태 — useUserQuery isLoading 결합`)
 - 책임 설명은 함수명 충분하면 생략, 아니면 1줄 JSDoc
-
-### `.module.scss`
-
-마크업 스타일(`.module.scss`)은 MARKUP 세션이 figma 0건으로 완성하므로 **step-4 stub 대상이 아니다.** step-4는 마크업 scss를 만들지 않는다 (마크업 코드는 MARKUP 완성본을 PR로 가져온다).
 
 ### Hook · 페이지
 
@@ -109,7 +103,6 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 
 ### 파일 분리 단위
 
-- PR이 만들 모든 파일을 stub으로 생성
 - 분리 단위는 프로젝트 컨벤션
 - 컨벤션 부재 시 사용자 질문 (디폴트 안 박음)
 
@@ -117,7 +110,6 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 
 ### 생성
 
-- 위 양식·디폴트로 stub 파일 생성
 - 주석은 [comments.md](./comments.md) 「라이프사이클 > 생성」 적용
 
 ### 보존
@@ -139,8 +131,6 @@ stub 코드는 SKILL.md [CRITICAL] 「입력 산출물 비판적 검토」 메�
 #### 케이스 A — stub이 빈 껍데기
 
 stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐. stub 커밋을 drop하고 슬라이스별 IMPL에 리뷰 수정을 합친다.
-
-비대화형 환경(claude code 등 `git rebase -i` 불가) → 케이스 B 방식 그대로 적용해도 결과 동일.
 
 #### 케이스 B — stub이 본문 안고 있음
 

@@ -12,11 +12,11 @@ UI 컴포넌트가 있는 PR이면 `pr{N}/retained/` 하위에 필수 생성한�
 
 ## 기록 시점 — Background 단계 보류
 
-Background 단계(requirement-review 등) 산출물에는 CSS·레이아웃 수준 값(높이, 색상 토큰, 타이포그래피, 정렬)을 기록하지 않는다. Step 4 구현 방침 단계까지 보류한 뒤 markup.md에 일괄 정리.
+Background 단계(requirement-review 등) 산출물에는 CSS·레이아웃 수준 값을 기록하지 않는다. Step 4 구현 방침 단계까지 보류한 뒤 markup.md에 일괄 정리.
 
 ## 「Figma 원본 링크 인덱스」 절
 
-markup.md 상단에 필수. **컴포넌트 종류별 × 상태별로 figma 원본 URL을 사용자가 직접 입력**한다. AI가 추론으로 URL을 짐작해 박지 않는다 — 누락·오류 위험.
+markup.md 상단에 필수. **컴포넌트 종류별 × 상태별로 figma 원본 URL을 사용자가 직접 입력**한다. AI가 추론으로 URL을 짐작해 박지 않는다.
 
 ```markdown
 ## Figma 원본 링크 인덱스
@@ -30,11 +30,6 @@ markup.md 상단에 필수. **컴포넌트 종류별 × 상태별로 figma 원�
 - default: https://...
 - selected: https://...
 ```
-
-작성 절차:
-
-1. AI가 본 PR이 만들 컴포넌트 종류와 각 컴포넌트의 가능 상태를 목록으로 추출해 사용자에게 제시
-2. 사용자가 각 항목에 figma URL을 입력 (또는 N/A — 해당 상태가 figma에 없으면)
 
 ## 검증 기준 — figma 원본 직접 fetch
 

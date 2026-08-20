@@ -4,9 +4,9 @@
 
 ## cwd — 코드 워크트리 무관
 
-`/plan/`은 글로벌 gitignore라 main repo 한 곳에 있고 워크트리는 절대경로로 참조한다(`steps/step-4.md`의 gitignore 규칙). WRITING은 코드 워크트리가 필요 없고 main repo의 공유 `/plan/`만 읽고 쓴다.
+WRITING은 코드 워크트리가 필요 없고 main repo의 공유 `/plan/`만 읽고 쓴다(`steps/step-4.md`의 gitignore 규칙).
 
-REFINER가 커밋 로그를 읽을 때 pr{N}→워크트리→브랜치명은 `git worktree list` + FOUNDATION 명명규칙으로 유도한다. **실무·개인 모드는 FOUNDATION이 없으므로** `git worktree list`가 워크트리→브랜치를 직접 매핑하는 것으로 조회한다.
+REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 워크트리 목록과 FOUNDATION 명명규칙으로 유도한다.
 
 ## 장기세션 재사용
 
@@ -39,7 +39,6 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 채용 모드이면 write-init 호출 전에 이 PR의 성격으로 주제를 식별하고, [../../recruitment/pr-body/](../../recruitment/pr-body/)를 글롭해 매칭되는 완성본(그 주제의 미리 써둔 PR 본문)이 있으면 그 파일을 복사 기점으로 삼아 이번에 안 한 항목·섹션을 빼고 과제 고유 값을 채운다. 매칭이 없으면 일반 write-init로 진행한다.
 
 - 주제 식별은 PR 성격(세팅·인프라·공통 컴포넌트·리스트/상세/폼/인증 페이지·횡단 결정)으로 하는 **LLM 판단**이다. 스킬 본문에 주제 목록·파일명을 하드코딩하지 않는다 — 실제 대상은 폴더 글롭 결과다.
-- 폴더가 비어 있거나 매칭 파일이 없으면 폴백(일반 write-init)이므로, 완성본이 아직 없는 주제여도 배선은 그대로 동작한다.
 
 ## WRITING_REFINER — 확정 (각 PR step-6 종료 후)
 

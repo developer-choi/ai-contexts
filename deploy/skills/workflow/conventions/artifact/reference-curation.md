@@ -22,11 +22,9 @@ persistent에 두는 사유: 회사·프로젝트 컨벤션 경로는 코드 리
 - 파일 경로·네이밍 → stub 자체로
 - 토큰 사용 규칙·에러처리 전략 같은 명시 규칙 → reference.md로
 
-이를 통해 구현 단계에서 컨벤션 원본을 가급적 덜 보게 한다. 각 stub 파일·잔존 md에는 적지 않고 reference.md에 통합 명시.
-
 ## 소비처
 
 - step-4: 파생 산출물 작성 시 참조
 - step-5: Lead가 팀에게 컨텍스트 주입할 때 함께 전달 (Markup·Feature Implementer, Coding-Standards Reviewer, Advanced Reviewer)
-- step-6: code-review 입력에 포함 (회사 컨벤션은 리뷰어가 자체적으로 못 가지므로)
+- step-6: code-review 입력에 포함
 - 후속 PR / 미래 다른 프로젝트: 같은 컨벤션 환경이면 재참조

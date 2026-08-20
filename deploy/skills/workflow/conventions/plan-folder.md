@@ -1,7 +1,5 @@
 # /plan/ 폴더 구조
 
-워크플로우 산출물 폴더 구조 + 라이프사이클 규칙 + consumable 자가 정리 양식 + 피그마 캐싱 룰 단일 출처.
-
 ## 폴더 트리
 
 ```
@@ -35,7 +33,7 @@
       decisions.md      ← step-3 산출물 + step-6.6 갱신
       reference.md      ← step-3·4 누적
       implementation.md ← step-4 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조
-      overview.md       ← step-3 산출물. 다독자가 읽으며(read) 어느 소비처도 삭제하지 않는다
+      overview.md       ← step-3 산출물
     retained/           ← step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
       markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 step-6.4.1 (figma 충실도 검증 자체는 MARKUP 담당)
     consumable/
@@ -49,7 +47,7 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 
 ## 라이프사이클 규칙
 
-- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움. 회사 컨텍스트 의존 결정·컨벤션 인덱스·구현 인수인계 자료(`implementation.md`)·PR 목표·범위 회고 기록(`overview.md`) 등 미래 비교·회고 가치. 파일별 예외 없이 균일하게 "안 지움" — 폴더명이 곧 라이프사이클 계약.
+- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움. 파일별 예외 없이 균일하게 "안 지움" — 폴더명이 곧 라이프사이클 계약.
 - **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
 - **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
 
@@ -74,7 +72,6 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 소비→삭제의 **메커니즘**(삭제 여부·granularity=절 단위·제목 보존 안 함·파일 삭제 조건)은 위 「라이프사이클 규칙」 + 「consumable/ 산출물 자가 정리 안내문」 두 곳에만 산다. 각 소비처 step은 **"소비" 선언만** 한다 — 삭제·절 단위·제목 보존 같은 동작 스펙을 재진술하지 않는다.
 
 - **제목·포인터를 남기지 않는다**: consumable은 순수 큐라 소비한 절을 통째 삭제하고, 모든 절이 비면 파일을 삭제한다. "제목만 남긴다"·"pointer skeleton" 같은 과보존은 절이 안 비어 파일 삭제가 영영 발동 안 하므로 금지.
-- 소비처에 "삭제한다"를 재진술하면 메커니즘이 두 곳(SSOT + step)으로 갈라져 드리프트 원천이 된다. plan-folder만 고치면 전 소비처 동작이 바뀌도록 유지한다.
 
 ## 피그마 URL·캡처 캐싱
 
@@ -82,6 +79,6 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 
 - 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
 
-캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (step-1.1에서 수집). 페이지·섹션·위젯·컴포넌트 어느 단위 캡처든 같은 폴더에.
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (step-1.1에서 수집). 어느 단위 캡처든 같은 폴더에.
 
 step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

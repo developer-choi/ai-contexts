@@ -12,7 +12,7 @@ figma 원본이 디자인 진실 원천인 모드. 공통 절차는 [index.md](i
 
 ## (채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리
 
-채용과제는 회사가 지원자에게 준 **샘플/스타터 코드** 위에서 작업하는 경우가 흔하다. 진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다 — 워크트리에 이미 있는 **스타터 코드**(컴포넌트·스타일·폴더 구조)를 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다. (`requirement-review/recruitment/guide.md`의 "기존 코드베이스에 설치·사용 중인 스택을 결정된 사실로 흡수하지 않는다"와 같은 원칙 — 마크업 단계에서도 반복 적용)
+채용과제는 회사가 지원자에게 준 **샘플/스타터 코드** 위에서 작업하는 경우가 흔하다. 진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다 — 워크트리에 이미 있는 **스타터 코드**(컴포넌트·스타일·폴더 구조)를 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다 ([requirement-review/recruitment/guide.md](../../../requirement-review/recruitment/guide.md)와 같은 원칙).
 
 **디자인시스템 컴포넌트가 필요하면 MP `packages/design-system`의 검증된 컴포넌트(Button·Card·TextField 등)를 복사해 온다 — 맨땅에서 다시 만들지 않는다.** 두 가지 이유: (a) 이미 테스트·스토리북까지 검증돼 품질·코딩스탠다드 정합이 따라온다, (b) 이 마크업을 그대로 가져가는 후속 구현 세션과 디자인시스템 컴포넌트 PR도 같은 MP를 소스로 쓰므로, MARKUP이 다른 데서 지으면 마크업을 실제 PR로 이식할 때 어긋난다 — 같은 원천을 써야 매끄럽게 합쳐진다.
 
@@ -35,8 +35,4 @@ figma 원본 직접 fetch — Figma Reviewer ↔ 구현자 대조 루프. 대조
 
 ## 매칭표 생성 (실무 프로젝트만)
 
-실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer 주입 전에 [figma-component-mapping-guide.md](../../figma-component-mapping-guide.md)에 따라 매칭표를 생성하고 재료에 포함한다. (채용은 피그마 dev 권한이 없어 MCP·매칭표 불가 — 캡처 기준.)
-
-## 산출물 입력
-
-`background/retained/figma-url.md`, `background/retained/figma/...`
+실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer 주입 전에 [figma-component-mapping-guide.md](../../figma-component-mapping-guide.md)에 따라 매칭표를 생성하고 재료에 포함한다. 채용은 피그마 dev 권한이 없어 MCP·매칭표가 불가하므로 캡처를 기준으로 삼는다 — 본 절이 그 게이트의 단일 출처다.

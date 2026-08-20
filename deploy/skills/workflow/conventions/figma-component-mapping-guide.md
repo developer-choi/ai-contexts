@@ -2,11 +2,6 @@
 
 > 피그마 MCP가 제공하지 않는 variant props(styleType, size 등)를 디자인시스템 원본 소스에서 역추론하여 매칭표를 만든다.
 
-## 적용 조건
-
-- 실무 프로젝트만 (채용과제는 피그마 dev 권한 없으므로 불가)
-- 피그마 MCP 연결 상태
-
 ## 왜 필요한가
 
 피그마 MCP(`get_design_context`)는 React+Tailwind 참조 코드를 반환하지만, 컴포넌트 variant 속성(`styleType=neutralPrimary`, `size=medium` 등)은 포함하지 않는다. CSS 토큰만으로는 props를 정확히 결정할 수 없어 오매핑이 반복된다.
@@ -15,10 +10,8 @@
 
 Markup Implementer spawn 직전에 Lead가 수행한다.
 
-1. 사용자에게 **디자인시스템 원본 레포 경로** 요청 (예: `~/workspace/langdy/langdy-design-system`)
+1. 사용자에게 **디자인시스템 원본 레포 경로** 요청
 2. 매칭표를 `/plan/background/consumable/figma-component-mapping.md`에 저장 ([템플릿](../template/figma-component-mapping.md) 참조)
-3. 마크업 시 피그마 CSS 토큰을 매칭표와 대조하여 props 결정
-4. 새 컴포넌트 발견 시 매칭표에 추가
 
 ## 검증
 

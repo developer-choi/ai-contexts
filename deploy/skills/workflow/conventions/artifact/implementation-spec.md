@@ -10,7 +10,7 @@
 
 정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 (step-4 §5 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭하고 **확정 SHA는 박지 않는다** — history rewrite로 무효화돼 정정 부담만 낳고, SHA의 진실 원천은 git이다 (decisions-lifecycle.md 「갱신」과 동일 원칙).
 
-`persistent/` 하위에 둔다. step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 소비. 사용자 명시 폐기 전까지 보존 (커밋 정리 시점이 PR 머지 이후로 길 수 있어 보존).
+`persistent/` 하위에 둔다. step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 소비. 사용자 명시 폐기 전까지 보존.
 
 ## 양식
 
@@ -41,7 +41,7 @@
   | 제출 성공 시 머무름=reset (decisions.md 열린 질문 「제출 후 화면」) | (빈칸 → 누락) | — |
 
 - **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 step-4 종료 시퀀스의 코드-narrative 오배치 점검 모두에 걸리지 않는다. 상위 결정(코드에 없는 것)과의 **대조표**라 양쪽을 한 셀에 놓아야 빈칸이 누락으로 보이기 때문이며, 코드를 그대로 옮겨 적는 나열과 성격이 다르다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
-- 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시(예: E2E에서 다룸)여야 인정
+- 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
 - **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지**
 - 오라클은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다 (decisions도 AI 산출물 — 행동 결정 추출이 좁으면 이 표도 좁아지므로, 갈래 수가 의심되면 1차 입력으로 소급 대조)
 
