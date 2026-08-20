@@ -20,9 +20,9 @@
 
 윈도우 patch만으로 해결 안 됨. 표준 도구 자체가 구조적으로 동작 안 함.
 
-## 측정 도구: bench-trigger.py
+## 측정 도구: bench-trigger.mjs
 
-표준 도구가 broken이라 자체 도구 `bench-trigger.py` 사용 — scw 스킬 폴더의 `scripts/`에 있다(폴더 절대경로는 이 파일 맨 위). AC 레포에도 동명 `scripts/`가 있으므로 상대경로 그대로 부르지 않는다.
+표준 도구가 broken이라 자체 도구 `{{skill_dir}}/scripts/bench-trigger.mjs`를 쓴다. AC 레포에도 동명 `scripts/`가 있으므로 상대경로 그대로 부르지 않는다.
 
 측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 측정 대상 `SKILL.md` 자체를 그대로 잰다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
 
@@ -30,13 +30,12 @@
 
 최상위 배열에 `query`(사용자가 입력할 만한 문장 — 구체적·현실적, 백스토리 포함)와 `should_trigger`(불리언) 두 키를 가진 객체를 담는다.
 
-should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주). UTF-8 BOM 금지 (Python json 파서 실패).
+should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주).
 
 ## 호출
 
 인자 목록은 `--help`가 정본이다. 기본값을 그냥 쓰면 안 되는 것만 아래에 둔다.
 
-- 윈도우에선 `PYTHONUTF8=1`을 켜고 부른다. 안 켜면 한글 쿼리가 cp949로 읽혀 깨진다.
 - `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
 - `--runs-per-query 3`: LLM 비결정성 보정. 3 권장.
 - `--num-workers 3`: 윈도우에선 동시 `claude -p` 부하 고려. 5+로 늘리면 socket·메모리 한계.
@@ -50,12 +49,13 @@ JSON 핵심 필드:
 - `summary.should_trigger_triggered_rate` — 평균 trigger rate (0.7+ 권장)
 - `summary.should_not_trigger_triggered_rate` — false positive (0.0~0.1)
 - `results[].rate` — 쿼리별 trigger 비율 (M/N runs)
+- `summary.failed_total` — 실행 실패 총계. 실패한 런은 트리거를 못 잰 것이라 그 쿼리는 PASS/FAIL 대신 `보류(재측정)`로 찍힌다
 
 FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 claude가 자체 답변하므로 어떤 description으로도 trigger되지 않는다 — eval set 품질 문제이지 description 문제가 아니다 (skill-creator 본문: "Simple queries... won't trigger skills regardless of description quality").
 
 ## 안전 절차 — SKILL.md swap이 위험한 이유
 
-bench-trigger.py는 측정 대상 SKILL.md를 **현 상태 그대로 측정**한다. description 변경 효과 비교(BEFORE/AFTER)를 하려면 SKILL.md를 일시 변경해야 하는데, **메인 워크트리의 SKILL.md를 swap하면 사용자의 다른 세션이 그 swap 상태로 실제 사용 영향**을 받는다.
+bench-trigger.mjs는 측정 대상 SKILL.md를 **현 상태 그대로 측정**한다. description 변경 효과 비교(BEFORE/AFTER)를 하려면 SKILL.md를 일시 변경해야 하는데, **메인 워크트리의 SKILL.md를 swap하면 사용자의 다른 세션이 그 swap 상태로 실제 사용 영향**을 받는다.
 
 [CRITICAL] description 비교 측정은 **반드시 별도 워크트리**에서 수행한다. 그 워크트리 안의 SKILL.md만 고치고 `--skill-path`를 거기로 겨눠, 메인 워크트리의 실제 사용 환경은 건드리지 않는다.
 
@@ -63,7 +63,7 @@ bench-trigger.py는 측정 대상 SKILL.md를 **현 상태 그대로 측정**한
 
 ## 자동 루프는 없다
 
-bench-trigger.py는 측정만 감싼다. description 수정 → 재측정 → 잔류 FAIL 분석은 사람이 라운드로 돈다(상한은 아래 함정 표).
+bench-trigger.mjs는 측정만 감싼다. description 수정 → 재측정 → 잔류 FAIL 분석은 사람이 라운드로 돈다(상한은 아래 함정 표).
 
 ## 함정 — 피해야 할 6시간 사례
 

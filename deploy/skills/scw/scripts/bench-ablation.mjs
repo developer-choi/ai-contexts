@@ -1,0 +1,423 @@
+#!/usr/bin/env node
+// 규칙 ablation 벤치 — `claude -p`를 격리 환경에서 돌려 규칙 유무가 응답을 바꾸는지 잰다.
+//
+// 왜 API가 아니라 CLI를 모는가:
+// 측정 대상 규칙은 `~/.claude/rules/*.md`에 살고, 보통의 `claude -p`와 모든 서브에이전트가
+// 그걸 자동 로드한다 — 그래서 기본 상태로는 규칙 없는 ZERO 팔이 성립하지 않는다
+// (specialized/rule-ablation-bench.md 「상속 경로」).
+//
+// 격리 방식 (사용 전 실측으로 확인됨):
+// - `--setting-sources ""`가 배포된 설정·메모리 원천(사용자·프로젝트 규칙, CLAUDE.md)을 통째로 뗀다.
+// - `--append-system-prompt`로 통제된 시스템 프롬프트를 도로 넣는다. 팔마다 이 텍스트만 다르다.
+// - 콜마다 빈 임시 cwd에서 돌려 프로젝트 CLAUDE.md가 범위에 안 들어오게 한다.
+//
+// CLI의 기존 OAuth 로그인을 쓴다 — `ANTHROPIC_API_KEY` 불필요.
+//
+// eval-set JSON 스키마:
+// {
+//   "rule_id": "...",
+//   "base_system": "...{TARGET}...",           // {TARGET}이 팔 텍스트로 치환된다
+//   "variants": {"ZERO": "", "V1": "..."},
+//   "grader": {                                 // 전 시나리오 기본 채점 분류지
+//     "instruction": "(선택) 채점자에게 줄 추가 지시",
+//     "classes": [{"id": "ONE_AT_A_TIME", "desc": "..."}, {"id": "DUMP_ALL", "desc": "..."}]
+//   },
+//   "scenarios": [
+//     {"id": "P1", "type": "positive", "user": "...", "pass_when": ["ONE_AT_A_TIME"]},
+//     {"id": "M1", "type": "positive", "user": "...",  // 다축 — 한 응답을 독립 항목 여럿으로 잰다
+//      "grader": {"axes": [
+//        {"id": "field_a", "question": "...", "classes": [{"id": "YES", "desc": "..."},
+//                                                          {"id": "NO", "desc": "..."}],
+//         "pass_when": ["YES"]}
+//      ]}}
+//   ],
+//   "inheritance_signatures": ["...", "..."]    // ZERO 응답이 이 문구를 재사용하면 환경 상속 의심
+// }
+//
+// 분류지는 스크립트 상수가 아니라 eval-set이 소유한다 — 측정 대상마다 분류가 다르기 때문이다.
+// 시나리오에 `grader`가 있으면 그것이, 없으면 최상위 `grader`가 쓰인다.
+import { execFile } from 'node:child_process';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import process from 'node:process';
+
+const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json> [옵션]
+
+  --eval-set <경로>      측정 명세 JSON (필수)
+  --out <경로>           결과 JSON 출력 경로 (필수)
+  --reps <n>             시나리오×팔당 반복 수 (기본 7)
+  --model <id>           측정 대상 생성 모델 (기본 claude-sonnet-4-6)
+  --grader-model <id>    채점 모델 (기본 claude-sonnet-4-6)
+  --workers <n>          동시 실행 상한 (기본 8)
+  --timeout <초>         콜당 타임아웃 (기본 180)
+  --variants <a,b>       팔 필터
+  --scenarios <a,b>      시나리오 필터
+  --dump-dir <경로>      런별 원본 JSON 덤프 위치
+  --verbose              진행 로그를 stderr로
+`;
+
+function parseArgs(argv) {
+  const flags = new Set(['--verbose', '--help', '-h']);
+  const args = {};
+  for (let i = 0; i < argv.length; i++) {
+    const key = argv[i];
+    if (!key.startsWith('--') && key !== '-h') throw new Error(`알 수 없는 인자: ${key}`);
+    if (flags.has(key)) { args[key.replace(/^-+/, '')] = true; continue; }
+    const value = argv[++i];
+    if (value === undefined) throw new Error(`${key}에 값이 없다`);
+    args[key.slice(2)] = value;
+  }
+  return args;
+}
+
+// Windows에선 `claude`가 확장자 없이 PATH에 안 잡힌다. .exe를 먼저 찾고,
+// .cmd 셔임만 있으면 shell을 거쳐 부른다(그 경로는 개행 포함 인자가 깨질 수 있어 한 번 경고한다).
+function resolveClaude() {
+  const exts = process.platform === 'win32'
+    ? ['.exe', '.com', '', '.cmd', '.bat']
+    : [''];
+  for (const dir of (process.env.PATH || '').split(path.delimiter)) {
+    if (!dir) continue;
+    for (const ext of exts) {
+      const candidate = path.join(dir, `claude${ext}`);
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
+    }
+  }
+  return 'claude';
+}
+
+const CLAUDE = resolveClaude();
+const NEEDS_SHELL = /\.(cmd|bat)$/i.test(CLAUDE);
+let shellWarned = false;
+
+function execFileAsync(file, args, options) {
+  return new Promise((resolve) => {
+    execFile(file, args, options, (error, stdout, stderr) => {
+      if (error) {
+        resolve({
+          stdout: error.stdout ?? stdout ?? '',
+          stderr: error.stderr ?? stderr ?? '',
+          code: typeof error.code === 'number' ? error.code : 1,
+          killed: Boolean(error.killed) || error.signal != null,
+        });
+        return;
+      }
+      resolve({ stdout: stdout ?? '', stderr: stderr ?? '', code: 0, killed: false });
+    });
+  });
+}
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * 격리된 `claude -p` 콜 한 번. stdout 텍스트를 돌려주거나, 반복 실패 시 던진다.
+ *
+ * 임시 cwd는 응답을 손에 쥔 **뒤** finally에서 지운다. 윈도우에선 `claude`가 자기 cwd 안
+ * 파일 핸들을 쥔 채 끝나 정리가 WinError 32로 터지는데, 예전 파이썬판은 그 예외가
+ * `with` 블록 밖으로 새어 이미 받은 응답을 통째로 버렸다(2026-08-15 round7: 266런 전멸).
+ * `force`+재시도로 대부분 넘기고, 그래도 남는 예외는 삼킨다 — 정리는 실패해도 되지만
+ * 토큰을 쓰고 받은 응답은 버리면 안 된다.
+ */
+async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
+  let last = '';
+  for (let i = 0; i < tries; i++) {
+    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'abl_'));
+    let result;
+    try {
+      if (NEEDS_SHELL && !shellWarned) {
+        shellWarned = true;
+        process.stderr.write(`경고: ${CLAUDE} 셔임을 shell 경유로 부른다 — 개행 포함 인자가 깨질 수 있다\n`);
+      }
+      result = await execFileAsync(
+        CLAUDE,
+        ['-p', prompt, '--model', model, '--setting-sources', '', '--append-system-prompt', system],
+        { cwd, timeout: timeoutMs, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, shell: NEEDS_SHELL },
+      );
+    } finally {
+      try {
+        fs.rmSync(cwd, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+      } catch {
+        // 정리 실패는 결과에 영향을 주지 않는다.
+      }
+    }
+
+    const out = (result.stdout || '').trim();
+    if (result.code === 0 && out) return out;
+    last = result.killed ? 'timeout' : `rc=${result.code} err=${(result.stderr || '').slice(0, 160)}`;
+    await sleep(2000 * (i + 1));
+  }
+  throw new Error(`claude -p 실패: ${last}`);
+}
+
+/** 시나리오가 쓸 채점 축 목록. 단축이면 길이 1, 다축이면 축마다 하나. */
+function axesOf(scenario, spec) {
+  const grader = scenario.grader ?? spec.grader;
+  if (!grader) {
+    throw new Error(`채점 분류지가 없다 (시나리오 ${scenario.id}) — eval-set에 grader.classes 또는 grader.axes를 둔다`);
+  }
+  const axes = Array.isArray(grader.axes)
+    ? grader.axes.map((axis) => ({ ...axis }))
+    : [{ id: null, question: null, classes: grader.classes, pass_when: scenario.pass_when }];
+
+  for (const axis of axes) {
+    const label = axis.id ? `${scenario.id}#${axis.id}` : scenario.id;
+    if (!Array.isArray(axis.classes) || axis.classes.length === 0) {
+      throw new Error(`분류지가 비었다 (${label})`);
+    }
+    const ids = axis.classes.map((c) => c.id);
+    if (!Array.isArray(axis.pass_when) || axis.pass_when.length === 0) {
+      throw new Error(`통과조건(pass_when)이 없다 (${label})`);
+    }
+    const unknown = axis.pass_when.filter((id) => !ids.includes(id));
+    if (unknown.length > 0) {
+      throw new Error(`통과조건이 분류지에 없는 값을 가리킨다 (${label}): ${unknown.join(', ')}`);
+    }
+  }
+  return { axes, instruction: grader.instruction ?? null };
+}
+
+function graderSystem(axes, instruction) {
+  const head = '너는 어시스턴트 응답을 아래 분류지로 채점하는 채점자다. 내용 정확성이 아니라 분류지가 정의한 축만 본다.';
+  const extra = instruction ? `${instruction}\n` : '';
+  const listing = (classes) => classes.map((c) => `- ${c.id}: ${c.desc}`).join('\n');
+
+  if (axes.length === 1 && axes[0].id === null) {
+    const shape = axes[0].classes.map((c) => c.id).join('|');
+    return `${head}\n${extra}다음 중 정확히 하나로 분류한다:\n${listing(axes[0].classes)}\n`
+      + `반드시 아래 JSON만 출력한다(다른 텍스트 금지):\n`
+      + `{"class": "${shape}", "reason": "한 문장"}`;
+  }
+
+  const blocks = axes.map((axis) => `[${axis.id}] ${axis.question ?? ''}\n${listing(axis.classes)}`).join('\n\n');
+  const shape = axes
+    .map((axis) => `"${axis.id}": {"class": "${axis.classes.map((c) => c.id).join('|')}", "reason": "한 문장"}`)
+    .join(', ');
+  return `${head}\n${extra}아래 항목을 각각 독립적으로 판정한다 — 한 항목의 판정이 다른 항목에 영향을 주지 않는다.\n\n${blocks}\n\n`
+    + `반드시 아래 JSON만 출력한다(다른 텍스트 금지):\n{${shape}}`;
+}
+
+function extractJson(raw) {
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    return JSON.parse(match[0]);
+  } catch {
+    return null;
+  }
+}
+
+async function gradeRun(userText, response, axes, instruction, model, timeoutMs) {
+  const prompt = `[사용자 요청]\n${userText}\n\n[어시스턴트 응답]\n${response}\n\n위 응답을 분류지대로 채점해라.`;
+  const raw = await claudeP(prompt, graderSystem(axes, instruction), model, timeoutMs);
+  const obj = extractJson(raw);
+  const parseError = (axis) => ({
+    axis: axis.id, class: 'PARSE_ERROR', passed: false, failed: true, reason: raw.slice(0, 200),
+  });
+  if (!obj) return axes.map(parseError);
+
+  return axes.map((axis) => {
+    const node = axis.id === null ? obj : obj[axis.id];
+    const cls = node && typeof node === 'object' ? node.class : undefined;
+    if (!axis.classes.some((c) => c.id === cls)) return parseError(axis);
+    return {
+      axis: axis.id,
+      class: cls,
+      passed: axis.pass_when.includes(cls),
+      failed: false,
+      reason: typeof node.reason === 'string' ? node.reason : '',
+    };
+  });
+}
+
+async function runOne(job, spec, args) {
+  const { scenario, target } = job;
+  const { axes, instruction } = axesOf(scenario, spec);
+  const timeoutMs = Number(args.timeout ?? 180) * 1000;
+  const system = spec.base_system.replaceAll('{TARGET}', target);
+
+  let response;
+  try {
+    response = await claudeP(scenario.user, system, args.model, timeoutMs);
+  } catch (error) {
+    return {
+      response: '',
+      axes: axes.map((axis) => ({
+        axis: axis.id, class: 'ERROR', passed: false, failed: true, reason: String(error.message).slice(0, 200),
+      })),
+    };
+  }
+
+  try {
+    return { response, axes: await gradeRun(scenario.user, response, axes, instruction, args['grader-model'], timeoutMs) };
+  } catch (error) {
+    return {
+      response,
+      axes: axes.map((axis) => ({
+        axis: axis.id, class: 'GRADER_ERROR', passed: false, failed: true, reason: String(error.message).slice(0, 200),
+      })),
+    };
+  }
+}
+
+/** 동시 실행 상한을 건 Promise 풀. 완료 순서와 무관하게 입력 순서로 결과를 돌려준다. */
+async function pool(items, limit, worker) {
+  const results = new Array(items.length);
+  let cursor = 0;
+  const runners = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    for (;;) {
+      const index = cursor++;
+      if (index >= items.length) return;
+      results[index] = await worker(items[index], index);
+    }
+  });
+  await Promise.all(runners);
+  return results;
+}
+
+// BOM이 붙은 eval-set은 JSON.parse가 못 읽으므로 여기서 떼어낸다.
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, ''));
+}
+
+async function main() {
+  const args = parseArgs(process.argv.slice(2));
+  if (args.help || args.h) { process.stdout.write(USAGE); return; }
+  if (!args['eval-set'] || !args.out) { process.stderr.write(USAGE); process.exitCode = 2; return; }
+
+  args.reps = Number(args.reps ?? 7);
+  args.model ??= 'claude-sonnet-4-6';
+  args['grader-model'] ??= 'claude-sonnet-4-6';
+  const workers = Number(args.workers ?? 8);
+
+  const spec = readJson(args['eval-set']);
+  const signatures = spec.inheritance_signatures ?? [];
+  let variants = spec.variants;
+  let scenarios = spec.scenarios;
+
+  if (args.variants) {
+    const keep = new Set(args.variants.split(','));
+    variants = Object.fromEntries(Object.entries(variants).filter(([name]) => keep.has(name)));
+  }
+  if (args.scenarios) {
+    const keep = new Set(args.scenarios.split(','));
+    scenarios = scenarios.filter((s) => keep.has(s.id));
+  }
+
+  const variantNames = Object.keys(variants);
+  const jobs = [];
+  for (const scenario of scenarios) {
+    for (const [variant, target] of Object.entries(variants)) {
+      for (let rep = 0; rep < args.reps; rep++) jobs.push({ scenario, variant, target, rep });
+    }
+  }
+
+  // 분류지 오류는 콜을 쓰기 전에 끊는다.
+  for (const scenario of scenarios) axesOf(scenario, spec);
+
+  if (args.verbose) {
+    process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
+      + `scenarios=${scenarios.map((s) => s.id).join(',')} reps=${args.reps} `
+      + `-> ${jobs.length}런 x2콜 (gen=${args.model}, workers=${workers})\n`);
+  }
+  if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
+
+  let done = 0;
+  const runs = await pool(jobs, workers, async (job) => {
+    const result = await runOne(job, spec, args);
+    done += 1;
+    if (args['dump-dir']) {
+      fs.writeFileSync(
+        path.join(args['dump-dir'], `${job.scenario.id}_${job.variant}_r${job.rep}.json`),
+        JSON.stringify({ scenario: job.scenario.id, variant: job.variant, rep: job.rep, ...result }, null, 2),
+        'utf8',
+      );
+    }
+    if (args.verbose) {
+      const marks = result.axes
+        .map((a) => `${a.axis ? `${a.axis}=` : ''}${a.class}${a.passed ? '(PASS)' : ''}`)
+        .join(' ');
+      process.stderr.write(`  [${done}/${jobs.length}] ${job.scenario.id}/${job.variant} r${job.rep} ${marks}\n`);
+    }
+    return { job, result };
+  });
+
+  // 행 = 시나리오(단축) 또는 시나리오#축(다축). 다축은 축마다 독립 판정이므로 행을 나눈다.
+  const table = {};
+  for (const scenario of scenarios) {
+    const { axes } = axesOf(scenario, spec);
+    for (const axis of axes) {
+      const rowId = axis.id ? `${scenario.id}#${axis.id}` : scenario.id;
+      table[rowId] = {
+        scenario: scenario.id,
+        axis: axis.id,
+        type: scenario.type,
+        pass_when: axis.pass_when,
+        variants: Object.fromEntries(variantNames.map((v) => [v, { pass: 0, n: 0, failed: 0, classes: {} }])),
+        failed_total: 0,
+        verdict_withheld: false,
+      };
+    }
+  }
+
+  const inheritance = [];
+  for (const { job, result } of runs) {
+    for (const axisResult of result.axes) {
+      const rowId = axisResult.axis ? `${job.scenario.id}#${axisResult.axis}` : job.scenario.id;
+      const cell = table[rowId].variants[job.variant];
+      cell.n += 1;
+      if (axisResult.passed) cell.pass += 1;
+      if (axisResult.failed) { cell.failed += 1; table[rowId].failed_total += 1; }
+      cell.classes[axisResult.class] = (cell.classes[axisResult.class] ?? 0) + 1;
+    }
+    if (job.variant === 'ZERO' && result.response) {
+      const hit = signatures.filter((sig) => result.response.includes(sig));
+      if (hit.length > 0) {
+        inheritance.push({ scenario: job.scenario.id, signatures: hit, excerpt: result.response.slice(0, 160) });
+      }
+    }
+  }
+
+  let failedTotal = 0;
+  for (const row of Object.values(table)) {
+    row.verdict_withheld = row.failed_total > 0;
+    failedTotal += row.failed_total;
+  }
+
+  fs.writeFileSync(args.out, JSON.stringify({
+    rule_id: spec.rule_id,
+    model: args.model,
+    grader_model: args['grader-model'],
+    reps: args.reps,
+    failed_total: failedTotal,
+    table,
+    inheritance_flags: inheritance,
+  }, null, 2), 'utf8');
+
+  const rowIds = Object.keys(table);
+  const lines = [
+    '',
+    `# ablation: ${spec.rule_id}  (model=${args.model}, reps=${args.reps})`,
+    '',
+    `| 시나리오 | type | ${variantNames.join(' | ')} | 실패 | 판정 |`,
+    `|${'---|'.repeat(variantNames.length + 4)}`,
+  ];
+  for (const rowId of rowIds) {
+    const row = table[rowId];
+    const cells = variantNames.map((v) => `${row.variants[v].pass}/${row.variants[v].n}`);
+    // 실패한 런은 채점 결과가 비어 실제 0점과 같은 모양으로 찍힌다. 열이 없으면
+    // 측정 안 된 구간이 "델타 없음"으로 읽히므로 실패 수와 보류 표시를 함께 낸다.
+    lines.push(`| ${rowId} | ${row.type} | ${cells.join(' | ')} | ${row.failed_total} | `
+      + `${row.verdict_withheld ? '보류(재측정)' : '-'} |`);
+  }
+  lines.push('');
+  lines.push(`실행 실패: ${failedTotal}건` + (failedTotal > 0 ? ' — 실패가 있는 행은 판정하지 않는다' : ''));
+  lines.push(`환경상속 의심: ${inheritance.length}건`
+    + inheritance.map((f) => `\n  - ${f.scenario}: ${f.signatures.join(', ')}`).join(''));
+  process.stdout.write(`${lines.join('\n')}\n`);
+}
+
+main().catch((error) => {
+  process.stderr.write(`${error.stack ?? error}\n`);
+  process.exitCode = 1;
+});
