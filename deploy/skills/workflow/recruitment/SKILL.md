@@ -182,7 +182,7 @@ PR 분할 안내·최종 제출 QA체크리스트·어필·회고 양식은 완�
 
 과제 종료는 workflow 종료와 같은 시점이므로, workflow를 타고 진행한 각 세션에 다시 들어가 `session-retro`로 자기 회고를 돌리도록 안내한다. 절차는 [session-retro/SKILL.md](../session-retro/SKILL.md). 채용 특유는:
 
-- 과제가 대화내역 제출을 요구하면 뽑기(단계 1)의 「제출용 정제」 모드를 켠다.
+- 과제가 대화내역 제출을 요구하면 `session-timeline`을 제출용 모드로 호출한다. 절차는 [session-timeline/SKILL.md](../session-timeline/SKILL.md).
 - 회고 산출물(`plan/retrospective/*.md`)을 7-1 아카이브 레포에 함께 회수한다.
 
 - **완료 판정**: 대상 세션마다 `plan/retrospective/*.md` 존재.

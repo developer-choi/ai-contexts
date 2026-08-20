@@ -90,6 +90,6 @@ force-push 요청 후, 전 PR의 `pr{N}/consumable/`을 훑어 잔존 산출물�
 
 ## 세션 자기 회고 안내 (실무·개인)
 
-커밋 최종화(replace + 메시지 최종화 + force-push 요청)가 끝난 사후 시점이므로, 후속 안내에 더해 **각 세션이 자기 자신을 회고**하도록 안내한다 — "workflow를 타고 진행한 각 세션에 다시 들어가 `session-retro`로 자기 회고를 돌리세요(타임라인 뽑기 → 시간소비·위임·병렬 3관점)". 순회 개수는 사용자가 감당 가능한 만큼. 절차는 [session-retro/SKILL.md](../../session-retro/SKILL.md).
+커밋 최종화(replace + 메시지 최종화 + force-push 요청)가 끝난 사후 시점이므로, 후속 안내에 더해 **각 세션이 자기 자신을 회고**하도록 안내한다 — "workflow를 타고 진행한 각 세션에 다시 들어가 `session-retro`로 자기 회고를 돌리세요". 순회 개수는 사용자가 감당 가능한 만큼. 절차는 [session-retro/SKILL.md](../../session-retro/SKILL.md).
 
 안내만 한다 — 본 세션이 회고를 직접 수행하지 않는다(회고 주체는 각 대상 세션 자신).
