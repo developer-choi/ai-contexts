@@ -181,3 +181,29 @@ AI로 라이브러리 원본 코드를 분석해 공통 동작을 도출
 - 유연성 자체는 사실이므로 유지하되, 양쪽에 동등하게 성립하는 점을 솔직하게 명시
 - 단정조 "고유 장점 없음" 대신 "동등 + 배선은 label이 간단" 수준으로 톤 완화
 - 비교 서술에서 "A만의 장점"을 올릴 때는 실제로 B에서는 안 되는지 직접 검증해야 함
+
+---
+
+## 인용문을 원문에서 복사하지 않고 기억으로 재구성
+
+> 관련: tone.md "외부 인용문(`>`)은 원문 보존"
+
+**배경**: React 공식문서를 근거로 쓴 기술 글. 글 끝 References의 영어 인용 8건 중 1건이 원문에 없는 문장이었습니다. 사용자가 원문을 직접 열어보고 "마지막줄은 공식문서에 없더라"로 잡아냈습니다.
+
+**Bad (AI)**
+
+```
+> Unlike state, setting state re-renders a component. Changing a ref does not!
+```
+
+- `https://react.dev/learn/referencing-values-with-refs`의 실제 원문은 `Like state, refs are retained by React between re-renders. However, setting state re-renders a component. Changing a ref does not!`
+- 앞 문장의 머리(`Like state,`)를 떼어 뒷 문장에 붙이면서 `Like`가 `Unlike`로 뒤집힘
+- 원문에 없는 문장인 데다, "ref도 state처럼 리렌더 사이에 유지된다"는 원문의 뜻을 정반대로 바꿈
+- 인용부호가 붙어 있어 독자는 원문을 열기 전까지 의심할 단서가 없음
+
+**Result (사용자 확정)**
+
+해당 인용 삭제. 같은 절의 나머지 인용은 원문과 대조해 일치를 확인하고 유지.
+
+- 인용블록을 채우기 전에 그 URL을 실제로 열어 응답에서 문자열을 복사한다
+- 문장 경계를 넘어 조각을 잇지 않는다 — 이으면 어느 원문에도 없는 문장이 만들어진다
