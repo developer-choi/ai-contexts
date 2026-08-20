@@ -67,7 +67,6 @@ AI가 작성하는 코드의 양이 늘수록, 사람이 리뷰해야 할 양도
 - [workflow](deploy/skills/workflow/README.md): 기획서나 피그마 같은 자료에서 출발해 단계마다 방향을 정하며 PR을 만드는 프로세스
   - [requirement-review](deploy/skills/workflow/requirement-review/README.md): 기획서, 디자인 시안, 채용 과제를 개발에 들어가기 전에 개발자 관점에서 점검
   - [bug-investigation](deploy/skills/bug-investigation/README.md): 버그의 근본 원인을 추적하고 수정 방안을 제안
-  - [pr-comment-respond](deploy/skills/workflow/pr-comment-respond/README.md): 내 PR에 달린 리뷰 피드백에 대응
 
 ### 리뷰
 
