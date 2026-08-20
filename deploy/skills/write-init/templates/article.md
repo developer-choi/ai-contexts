@@ -27,7 +27,7 @@ article은 골격이 곧 글의 성패다. 헤딩을 세우기 전에 [article-s
 
 ## length_target default
 
-단계 3개 + 오답 사례 + 결론 = 약 1500-2500단어. frontmatter `length_target` 명시 시 우선.
+각 단계 + 오답 사례 + 결론 = 약 1500-2500단어. frontmatter `length_target` 명시 시 우선.
 
 ## key_message 작성 가이드
 
