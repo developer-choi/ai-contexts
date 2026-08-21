@@ -18,19 +18,6 @@ Background 단계(requirement-review 등) 산출물에는 CSS·레이아웃 수�
 
 markup.md 상단에 필수. **컴포넌트 종류별 × 상태별로 figma 원본 URL을 사용자가 직접 입력**한다. AI가 추론으로 URL을 짐작해 박지 않는다.
 
-```markdown
-## Figma 원본 링크 인덱스
-
-### Button
-- default: https://...
-- hover: https://...
-- disabled: https://...
-
-### Card
-- default: https://...
-- selected: https://...
-```
-
 ## 검증 기준 — figma 원본 직접 fetch
 
 MARKUP의 Figma Reviewer(빌드 시 figma 0건 검증)와 step-6.4.1 사용자(PR 시각 대조)는 「Figma 원본 링크 인덱스」 절의 URL로 figma 원본을 직접 fetch해 코드와 대조한다. 매칭표는 컨텍스트 보조이며 검증 기준 아님 (SKILL.md 「검증 기준 = 진실 원천」).
