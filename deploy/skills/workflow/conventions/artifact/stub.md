@@ -18,21 +18,6 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 
 PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
-### 로직 컴포넌트 트리 예시
-
-```tsx
-// UsersPageContainer.tsx — 로직 컨테이너(PR이 만듦): 가져온 마크업에 데이터·핸들러 주입
-export function UsersPageContainer() {
-  const { users } = useUsers();              // 아래 hook
-  return <UsersPageView users={users} />;    // UsersPageView = MARKUP에서 가져옴 (수정 X)
-}
-
-// useUsers.ts — 내부 로직도 stub 필수
-export function useUsers() {
-  throw new Error('not implemented');
-}
-```
-
 ### 함수 호출 그래프 예시
 
 ```ts

@@ -16,14 +16,6 @@
 
 각 커밋 항목은 **신설** 구현 파일과 대응 테스트 파일(stub `*.test.tsx`)을 sub-bullet으로 나란히 명시. **테스트 파일 안의 `it.todo` 문자열은 옮겨 적지 않는다** — 그 목록의 진실 원천은 stub 파일이다. rename·이동 커밋은 파일·식별자를 나열하지 말고 "grep `<패턴>` → 치환" 한 줄로 접는다(정확한 경로·식별자 전사 X). 면제는 사유를 함께 적는다 (예: "page/layout이라 단위테스트 면제, E2E에서 다룸").
 
-예시:
-
-```
-### N. feat: shared/components/AlertModal
-- 신규: AlertModal.tsx
-- 신규: AlertModal.test.tsx
-```
-
 ## `it.todo` 매칭 게이트
 
 같은 매칭 룰이 **상류→하류 사슬**로 두 시점에 적용된다: `decisions 행동 결정 → it.todo → 실제 it(...)`.
@@ -37,8 +29,6 @@
 
   | 행동 결정 (decisions 출처) | 커버 `it.todo` | 면제 사유 |
   |---|---|---|
-  | 제출 성공 시 페이지 이동 (decisions.md 「제출 처리」) | '성공 시 성공 라우트로 이동' | — |
-  | 제출 성공 시 머무름=reset (decisions.md 열린 질문 「제출 후 화면」) | (빈칸 → 누락) | — |
 
 - **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 step-4 종료 시퀀스의 코드-narrative 오배치 점검 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
 - 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
