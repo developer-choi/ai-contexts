@@ -74,18 +74,12 @@
 
 단순화 문서 커밋 후, 아래 체크리스트를 순회하며 업데이트 필요 여부를 확인한다. 이번 작업에서 발견한 새 패턴·변경사항을 각 문서에 반영한다.
 
-#### 패턴 문서
 - [ ] SIMPLIFY_SOURCE `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
 - [ ] SIMPLIFY_SOURCE `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
 - [ ] SIMPLIFY_TARGET `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
 - [ ] SIMPLIFY_TARGET `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
   - 특정 파일 하나의 작업 내역이 아니다
   - 2개 이상의 파일/컴포넌트에서 공통되는 패턴만 기록
-
-#### 양식 문서
-- [ ] SIMPLIFY_SOURCE `format/original.md` — 원본 분석 양식 개선할 점?
-- [ ] SIMPLIFY_SOURCE `format/simplified.md` — 단순화 분석 양식 개선할 점?
-- [ ] SIMPLIFY_SOURCE `format/commit.md` — 계획서 양식 개선할 점?
 
 ### Step 6. 분석 목록 업데이트
 
