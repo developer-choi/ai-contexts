@@ -38,25 +38,6 @@
 - `disable*` 계열 props → 분기 제거, 기능을 항상 켜진 상태로 고정
 - 조건부 활성화 로직
 
-**예시**:
-```javascript
-// ❌ 삭제 대상
-function FocusTrap({ disableAutoFocus = false, disableEnforceFocus = false }) {
-  if (!disableAutoFocus) {
-    node.focus();
-  }
-  if (!disableEnforceFocus) {
-    enforceFocus();
-  }
-}
-
-// ✅ 단순화 결과
-function FocusTrap() {
-  node.focus();
-  enforceFocus();
-}
-```
-
 ---
 
 ## 복잡한 Ref 처리 제거
@@ -74,19 +55,6 @@ function FocusTrap() {
 - `useForkRef(ref1, ref2)` → 하나의 ref만 사용
 - 복잡한 ref 병합 로직
 - React.cloneElement로 ref 주입
-
-**예시**:
-```javascript
-// ❌ 삭제 대상
-const handleRef = useForkRef(forwardedRef, innerRef);
-const childRef = getReactElementRef(children);
-const handleChildRef = useForkRef(handleRef, childRef);
-return React.cloneElement(children, { ref: handleChildRef });
-
-// ✅ 단순화 결과
-const rootRef = useRef(null);
-return <div ref={rootRef}>{children}</div>;
-```
 
 ---
 
@@ -107,17 +75,6 @@ return <div ref={rootRef}>{children}</div>;
 - Polyfill
 - Feature detection 조건문
 
-**예시**:
-```javascript
-// ❌ 삭제 대상
-const ownerDocument = (node ? node.ownerDocument : document) || document;
-const isIE = typeof window !== 'undefined' && 'ActiveXObject' in window;
-if (!Array.from) { /* polyfill */ }
-
-// ✅ 단순화 결과
-const ownerDocument = node.ownerDocument;
-```
-
 ---
 
 ## Interval/Polling 로직 제거
@@ -134,21 +91,6 @@ const ownerDocument = node.ownerDocument;
 **삭제 대상**:
 - `setInterval()`로 주기적 상태 체크
 - interval ID 관리 코드
-
-**예시**:
-```javascript
-// ❌ 삭제 대상
-const intervalId = setInterval(() => {
-  if (doc.activeElement !== rootRef.current) {
-    rootRef.current.focus();
-  }
-}, 50);
-return () => clearInterval(intervalId);
-
-// ✅ 단순화 결과
-doc.addEventListener('focusin', handleFocusIn);
-return () => doc.removeEventListener('focusin', handleFocusIn);
-```
 
 ---
 
@@ -197,23 +139,6 @@ if (isSentinelNode(event.target)) {
 **삭제 대상**:
 - 복잡한 정렬/탐색 알고리즘 → 단순한 대안으로 대체
 
-**예시**:
-```javascript
-// ❌ 삭제 대상 (60줄의 tabIndex 정렬 알고리즘)
-function orderByTabIndex(nodes) {
-  const regular = [];
-  const ordered = [];
-  nodes.forEach(node => {
-    if (node.tabIndex > 0) ordered.push(node);
-    else regular.push(node);
-  });
-  return [...ordered.sort((a, b) => a.tabIndex - b.tabIndex), ...regular];
-}
-
-// ✅ 단순화 결과 (DOM 순서 그대로 사용)
-const focusableNodes = rootRef.current.querySelectorAll('[tabindex], a, button, input');
-```
-
 ---
 
 ## 유틸리티 함수 제거
@@ -229,20 +154,6 @@ const focusableNodes = rootRef.current.querySelectorAll('[tabindex], a, button, 
 
 **삭제 대상**:
 - 한 번만 사용되는 helper 함수들 → 사용처에 인라인 또는 제거
-
-**예시**:
-```javascript
-// ❌ 삭제 대상 (별도 유틸리티 함수)
-function getTabIndex(node) {
-  const tabIndex = parseInt(node.getAttribute('tabindex') || '', 10);
-  return Number.isNaN(tabIndex) ? -1 : tabIndex;
-}
-// 사용처
-const index = getTabIndex(element);
-
-// ✅ 단순화 결과 (인라인)
-const index = parseInt(element.getAttribute('tabindex') || '', 10);
-```
 
 ---
 
@@ -260,20 +171,6 @@ const index = parseInt(element.getAttribute('tabindex') || '', 10);
 **삭제 대상**:
 - deprecated 표시된 props
 - 옛날 API를 새로운 API로 변환하는 병합 코드
-
-**예시**:
-```javascript
-// ❌ 삭제 대상 (deprecated prop과 새 API 병합)
-const BackdropSlot = slots?.backdrop ?? BackdropComponent ?? DefaultBackdrop;
-const backdropProps = {
-  ...BackdropProps,
-  ...slotProps?.backdrop,
-  ...componentsProps?.backdrop,
-};
-
-// ✅ 단순화 결과 (하나의 고정된 컴포넌트)
-<DefaultBackdrop onClick={onClose} open={open} />
-```
 
 ---
 
@@ -294,25 +191,6 @@ const backdropProps = {
 - `displayName` - 디버깅용
 - `defaultProps` - 함수 파라미터 기본값으로 대체
 
-**예시**:
-```javascript
-// ❌ 삭제 대상 (100줄 이상의 메타데이터)
-Dialog.propTypes = {
-  open: PropTypes.bool.isRequired,
-  onClose: PropTypes.func,
-  children: PropTypes.node,
-  fullScreen: PropTypes.bool,
-  // ... 30개 이상의 prop 정의
-};
-Dialog.displayName = 'Dialog';
-Dialog.defaultProps = { maxWidth: 'sm' };
-
-// ✅ 단순화 결과
-function Dialog({ open, onClose, children }) {
-  // 함수 파라미터에서 직접 기본값 설정
-}
-```
-
 ---
 
 ## SSR 마운트 안전성 패턴 제거
@@ -331,14 +209,3 @@ function Dialog({ open, onClose, children }) {
 - `useLayoutEffect(() => setMounted(true), [])`
 - `mounted && ...` 조건부 렌더링 → 직접 렌더링으로 대체
 
-**예시**:
-```javascript
-// ❌ 삭제 대상
-const [mounted, setMounted] = React.useState(false);
-useLayoutEffect(() => setMounted(true), []);
-const container = mounted && globalThis?.document?.body;
-return container ? ReactDOM.createPortal(children, container) : null;
-
-// ✅ 단순화 결과
-return ReactDOM.createPortal(children, document.body);
-```
