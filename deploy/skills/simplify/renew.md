@@ -10,7 +10,7 @@ renew는 새 절차를 정의하지 않는다. `initialize.md`의 **Step 3~8을 
 
 ### 스킵하는 단계 (재실행하지 않음)
 
-- **Step 1 (shallow clone)** — 이미 클론돼 있다.
+- **Step 1 (shallow clone)**
 - **Step 2 (git 재초기화 + 원본 커밋)** — 히스토리를 다시 만들지 않는다. (아래 「한계」 참조)
 - **Step 9 (첫 간소화)** — 소스를 재간소화하지 않는다.
 
@@ -21,7 +21,7 @@ renew는 새 절차를 정의하지 않는다. `initialize.md`의 **Step 3~8을 
 | 3~5 정리 (README·package.json·파일·.gitignore) | 옛 스킬이 안 지운 cruft만 추가로 삭제·교정한다. 변경이 있으면 별도 커밋. 이미 정리된 항목은 건드리지 않는다. |
 | 6 구조 | 폴더 구조를 현행 표준에 맞춘다. 기존 분석 문서·소스 위치는 보존하고 누락된 구조만 보강. |
 | 7 구조·큐 문서 | `docs/codebase-structure.md`·`docs/analysis-queue.md`를 현행 양식으로 **재포맷**한다. 양식·형식만 현행화하고 내용은 보존한다. |
-| 8 패턴 문서 | `instructions/keep-patterns.md`·`instructions/simplification-patterns.md`를 현행 규칙으로 **재분류·재검증**한다. 예: `[반복]`(여러 파일) vs `[단일]`(한 파일 서브시스템) 분류, lanes류 delta-over-sibling `CONTESTED` 표기. |
+| 8 패턴 문서 | `instructions/keep-patterns.md`·`instructions/simplification-patterns.md`를 현행 규칙으로 **재분류·재검증**한다. |
 
 ## [CRITICAL] 보존 — 절대 건드리지 않는 것
 

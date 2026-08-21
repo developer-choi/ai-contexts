@@ -58,7 +58,7 @@ Scope 제거·forwardRef 제거 같은 구조적/기계적 변환은 **최소선
 
 ### 코드 읽기 전용
 
-이 프로젝트의 목적은 소스 코드를 읽고 이해하는 것이다. 의존성 설치·실행·빌드를 하지 않는다 — `npm/yarn install`, `yarn test`, `tsc`, `npm run build` 등을 실행하지 않으며, package.json의 실행 관련 설정도 초기 세팅에서 제거한다(`initialize.md`).
+이 프로젝트의 목적은 소스 코드를 읽고 이해하는 것이다. 의존성 설치·실행·빌드를 하지 않으며, package.json의 실행 관련 설정도 초기 세팅에서 제거한다(`initialize.md`).
 
 ### 산출물 문서는 별도 커밋
 
