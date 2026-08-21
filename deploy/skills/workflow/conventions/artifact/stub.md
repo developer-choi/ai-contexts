@@ -14,9 +14,9 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 **마크업 예외 (재정의)**: 마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
 
 - **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — step-4 전면 stub 대상이 아니다.
-- **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../session/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출**한다 — 다운스트림 PR이 그 시그니처에 기대어 병렬화하기 위함. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지 — 이중 SSOT·드리프트 회피). props도 PR 소유이되(MARKUP props는 임시 비계), step-4 stub 공표 후엔 다운스트림 계약이라 freeze.
+- **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../session/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출**한다 — 다운스트림 PR이 그 시그니처에 기대어 병렬화하기 위함. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), step-4 stub 공표 후엔 다운스트림 계약이라 freeze.
 
-PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다(디자인 변경 재수령 시 로직 보존). step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
+PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
 ### 로직 컴포넌트 트리 예시
 
@@ -64,8 +64,6 @@ export type UserListResponse = {
 };
 ```
 
-step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.md 「step-4 vs step-5 코드 작성 경계」 참조.
-
 ## 디폴트 — 미정 항목 처리
 
 결정 미정 영역은 placeholder + 마커만 두고 구현 단계로 미룬다.
@@ -94,7 +92,6 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 ### `*.test.tsx`
 
 - `describe + it.todo('한 줄 자연어')`
-- 위치·중첩 깊이는 프로젝트 컨벤션
 
 ### Fixture
 
@@ -120,7 +117,7 @@ step-4 vs step-5 경계의 항목별 매핑·점검은 scw/specialized/workflow.
 
 ### 비판적 검토
 
-stub 코드는 SKILL.md [CRITICAL] 「입력 산출물 비판적 검토」 메타 룰 적용 대상. 구현 진입 시 stub 결정·구조를 무비판 수용하지 않고 비판적으로 검토. 더 나은 방법·문제 발견 시 사용자에게 보고.
+구현 진입 시 stub 결정·구조를 무비판 수용하지 않고 비판적으로 검토. 더 나은 방법·문제 발견 시 사용자에게 보고.
 
 ### 정리
 

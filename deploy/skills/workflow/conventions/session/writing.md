@@ -62,7 +62,7 @@ IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 RE
 
 ### 산출물 정리
 
-확정된 `pr-body.md`를 PR 본문으로 복사·게시한 뒤 삭제한다(다른 산출물로 이관·녹이는 「소비」가 아니라 REFINER 자신의 저작물을 게시 후 정리하는 것). 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). **overview.md는 persistent라 소비 대상이 아니다** — REFINER는 pr-body 큐레이션에 읽기만 하고 삭제하지 않는다. consumable 소비 후 정리는 큐 모델을 따른다 ([../plan-folder.md](../plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
+확정된 `pr-body.md`를 PR 본문으로 복사·게시한 뒤 삭제한다. 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). **overview.md는 persistent라 소비 대상이 아니다** — REFINER는 pr-body 큐레이션에 읽기만 하고 삭제하지 않는다. consumable 소비 후 정리는 큐 모델을 따른다 ([../plan-folder.md](../plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
 
 - **`/plan/pr{N}/persistent/` 하위는 정리 대상에서 제외** — 영구 보존 자료. 대조도 수행하지 않는다.
 

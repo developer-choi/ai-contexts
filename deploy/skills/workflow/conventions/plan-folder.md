@@ -13,13 +13,13 @@
     retained/
       folder-structure.md ← FOUNDATION 산출 (채용만)
       tech-constraints.md ← BG.step-1 산출
-      conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성). 양식·작성 절차는 step-1 「컨벤션 소스 수집」 참조
+      conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성)
       figma-url.md      ← step-1.1 수집 (figma 쓰는 모드)
       figma/            ← step-1.1 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
       mockup/           ← step-1.1 수집 (개인 모드)
       spec.md           ← step-1.1 수집 (개인 모드, 선택 — 화면에 안 담기는 동작을 저자가 미리 아는 경우)
       design-root.md    ← step-1.1 산출. 양식·규칙은 [conventions/artifact/design-root.md] 참조
-      cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다 — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분은 처음부터 `background/consumable/project.md`에 직접 기록한다
+      cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
     consumable/
       project.md        ← step-1 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). step-1 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
