@@ -8,7 +8,7 @@
 
 코드·다른 절차에 이미 있는 것은 담지 않는다 — 구현 순서는 커밋 순번이, `it.todo` 매핑은 stub `*.test.tsx`가, 종료 점검은 step-5의 게이트(리뷰 파이프라인의 진실검사·「마무리」)가 각각 진실 원천이다.
 
-정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 (step-4 §5 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭하고 **확정 SHA는 박지 않는다** — history rewrite로 무효화돼 정정 부담만 낳고, SHA의 진실 원천은 git이다 (decisions-lifecycle.md 「갱신」과 동일 원칙).
+정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 (step-4 「stub 커밋」 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭하고 **확정 SHA는 박지 않는다** — history rewrite로 무효화돼 정정 부담만 낳고, SHA의 진실 원천은 git이다 (decisions-lifecycle.md 「갱신」과 동일 원칙).
 
 `persistent/` 하위에 둔다. step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 소비. 사용자 명시 폐기 전까지 보존.
 
