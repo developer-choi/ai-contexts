@@ -39,15 +39,7 @@ shallow clone은 히스토리가 불완전하므로 git을 재초기화하고, *
 
 ### package.json
 
-실행/빌드/테스트 관련 설정을 모두 제거한다:
-
-- `scripts` — 빌드/테스트/린트 등 모든 스크립트
-- `devDependencies` — 전부
-- `dependencies` — 전부
-- 배포 관련 필드 — `publishConfig`, `repository`, `bugs`, `homepage`, `funding`, `engines` 등
-- 빌드 관련 필드 — `main`, `module`, `exports`, `types`, `files`, `sideEffects` 등
-
-남길 필드: `name`, `version`, `description`, `private: true`
+남길 필드는 `name`, `version`, `description`, `private: true`뿐이다. 실행·빌드·테스트·배포 관련 필드는 전부 제거한다.
 
 - 원본에 `version`이 없으면 `0.0.0`. monorepo 루트처럼 `name`이 `root` 등 라이브러리명과 무관하면 `simplified-<라이브러리명>`으로 교정.
 ---
