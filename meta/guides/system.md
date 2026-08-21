@@ -15,7 +15,7 @@ npm run sync:system -- <target>
 ## 수행 작업
 
 - AC git hook 준비 상태를 먼저 확인합니다. 훅 파일(`.githooks`)은 추적돼 체크아웃에 항상 딸려오므로 존재만 보고, git이 못 나르는 설정 훅 등록(`hook.repo-*`)이 어긋나 있으면 재등록으로 복구합니다. `core.hooksPath`는 **남아 있으면 안 됩니다** — 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행되므로 어긋남으로 잡습니다. git 버전이 설정 훅 미만이거나 `commitlint` 의존성이 없으면 실패합니다.
-- 이어서 생성·판정 계약을 fail-fast로 확인합니다: settings 생성 계약(`verify:settings`), git 정책 hook의 판정(`verify:hook-policies`), 모든 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose`), 배포본 md 렌더링의 멱등(`verify:skill-render`), 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`). 깨져도 조용하기 때문에 배포 전에 막습니다.
+- 이어서 생성·판정 계약을 fail-fast로 확인합니다: settings 생성 계약(`verify:settings`), git 정책 hook의 판정(`verify:hook-policies`), AC 안 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose` — 남의 레포 `local/skills`는 `sync:local-system`이 본다), 배포본 md 렌더링의 멱등(`verify:skill-render`), 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`). 깨져도 조용하기 때문에 배포 전에 막습니다.
 - 기존 AC 배포 파일을 제거한 뒤 다시 복사해 고아 파일을 방지합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`를 카테고리 단위로 복사합니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 항목 단위로 복사합니다. 복사 후 각 스킬 SKILL.md를 배포본 형태로 고칩니다 — frontmatter에 `name`이 없으면 폴더명을 주입하고(Antigravity는 `name`이 있어야 스킬을 인식), 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다(Antigravity는 스킬 위치를 모델에게 알려주지 않아 본문의 상대 경로가 안 풀립니다). 검증도 이 결과를 기준으로 대조합니다.
