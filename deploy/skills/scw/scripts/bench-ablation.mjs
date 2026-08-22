@@ -120,6 +120,12 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * 토큰을 쓰고 받은 응답은 버리면 안 된다.
  */
 async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
+  // `/`로 시작하는 프롬프트는 CLI가 슬래시 명령으로 가로채 `Unknown command:` 한 줄만 돌려주는데,
+  // 그게 rc=0에 비어있지 않은 stdout이라 실패로 안 세고 채점자가 그 한 줄을 성실히 분류한다.
+  // 측정 안 된 구간이 델타로 둔갑하므로 콜을 쓰기 전에 끊는다 (2026-08-22 round15 실측: 스모크 12런 전멸).
+  if (prompt.trimStart().startsWith('/')) {
+    throw new Error(`프롬프트가 '/'로 시작한다 — CLI가 슬래시 명령으로 가로챈다. 스킬 호출은 "\`/x\`를 부른다"처럼 문장 안에 넣어라: ${prompt.slice(0, 60)}`);
+  }
   let last = '';
   for (let i = 0; i < tries; i++) {
     const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'abl_'));
@@ -143,6 +149,9 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
     }
 
     const out = (result.stdout || '').trim();
+    if (out.startsWith('Unknown command:')) {
+      throw new Error(`CLI가 프롬프트를 슬래시 명령으로 가로챘다: ${out.slice(0, 120)}`);
+    }
     if (result.code === 0 && out) return out;
     last = result.killed ? 'timeout' : `rc=${result.code} err=${(result.stderr || '').slice(0, 160)}`;
     await sleep(2000 * (i + 1));
@@ -197,14 +206,60 @@ function graderSystem(axes, instruction) {
     + `반드시 아래 JSON만 출력한다(다른 텍스트 금지):\n{${shape}}`;
 }
 
-function extractJson(raw) {
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) return null;
-  try {
-    return JSON.parse(match[0]);
-  } catch {
-    return null;
+/**
+ * 첫 `{`부터 괄호 균형이 맞는 지점까지 잘라낸다. 문자열 리터럴 안의 중괄호와 이스케이프는 세지 않는다.
+ * 균형이 안 맞은 채 끝나면 `truncated`로, 그때까지의 열린 문자열·중괄호 상태를 함께 돌려준다.
+ */
+function scanBraces(raw) {
+  const start = raw.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < raw.length; i++) {
+    const ch = raw[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}' && --depth === 0) return { text: raw.slice(start, i + 1), truncated: false };
   }
+  return { text: raw.slice(start), truncated: true, depth, inString };
+}
+
+/**
+ * 채점자 응답에서 JSON을 건진다. 후보를 셋으로 좁혀 차례로 시도한다 —
+ * ① 괄호 균형이 맞는 첫 덩이 ② 첫 `{`~마지막 `}` greedy ③ 열린 문자열·중괄호만 닫아 붙인 복구본.
+ *
+ * ③이 필요한 이유: 채점자 출력이 닫는 `}` 없이 끊기는 일이 실제로 난다. 분류(`{"class": "BOTH", ...`)는
+ * 이미 다 나온 뒤인데 greedy 한 번만 쓰면 행 전체가 PARSE_ERROR로 버려진다
+ * (2026-08-22 round15 실측: 30런 중 2건, 그 때문에 묶음 하나를 세 번 다시 돌렸다).
+ * 없는 값을 지어내지 않고 이미 나온 필드만 건진다.
+ */
+function extractJson(raw) {
+  const scanned = scanBraces(raw);
+  const candidates = [];
+  if (scanned && !scanned.truncated) candidates.push(scanned.text);
+  const greedy = raw.match(/\{[\s\S]*\}/);
+  if (greedy) candidates.push(greedy[0]);
+  if (scanned?.truncated) {
+    const closed = scanned.text.replace(/,\s*$/, '');
+    candidates.push(closed + (scanned.inString ? '"' : '') + '}'.repeat(scanned.depth));
+  }
+
+  for (const text of candidates) {
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed && typeof parsed === 'object') return parsed;
+    } catch {
+      // 다음 후보로.
+    }
+  }
+  return null;
 }
 
 async function gradeRun(userText, response, axes, instruction, model, timeoutMs) {
