@@ -19,9 +19,9 @@ argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | 
 | 인자 / 감지 조건 | 보강 파일 |
 |---|---|
 | `workflow` 인자, 또는 이 세션에 `plan/pr{N}/**` 변경 존재 | [augmentations/workflow.md](augmentations/workflow.md) |
-| `digest` 인자, 또는 본 세션 `/digest` 호출, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
+| `digest` 인자, 또는 본 세션 `/digest` 호출·digest OFF 직후, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
 | `write-refine` 인자, 또는 본 세션 `/write-refine` 호출 | [augmentations/write-refine.md](augmentations/write-refine.md) |
-| `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-start` · `/routine-summary` 호출 | [augmentations/routine.md](augmentations/routine.md) |
+| `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-*` 스킬 호출 | [augmentations/routine.md](augmentations/routine.md) |
 | `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.

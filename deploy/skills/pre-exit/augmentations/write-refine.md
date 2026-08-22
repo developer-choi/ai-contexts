@@ -11,7 +11,7 @@
 - `/pre-exit write-refine` 명시 호출
 - 무인자 `/pre-exit`에서 자동 감지: 본 세션에서 `/write-refine` 호출 사실을 회상 가능
 
-자동 감지 시, 보강 실행 전 "write-refine 세션이 감지됐습니다. 채점·교정 사례 회고를 진행할까요?"로 사용자 확인을 받는다.
+자동 감지 시, 보강 실행 전 사용자 확인을 받는다.
 
 ## 회고 대상 1: 객관·반객관 자동채점
 
@@ -23,17 +23,14 @@
 node {{skill_dir}}/augmentations/score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
 ```
 
-- `<산출물.md>` — 이번 세션이 다듬은 발행 문서(또는 패키지). frontmatter가 있으면 채점기가 떼고 본문만 잰다.
-- `--props` — 사용자가 사전 분해한 핵심 명제 리스트(한 줄 1명제). 핵심명제 누락 점검용. 없으면 그 점검은 건너뛴다.
-- `--tokens`·`--turns` — 세션에서 얻은 누적 토큰·왕복 수. 자동 산출 불가라 주면 객관 표에 기록만 한다.
-- `--resume` — 이력서(명사형 종결)면 1a 습니다체 휴리스틱에서 명사형을 통과시킨다.
+`--tokens`·`--turns`는 자동 산출이 안 되므로 세션에서 얻은 누적치를 직접 넘긴다.
 
 채점기가 띄우는 층:
 
 - **객관** — 분량(자·문장·어절)·토큰·턴. 숫자 그대로.
 - **반객관** — 금지어 · em/en dash(10a) · 내부 작업이력(5a) · 습니다체 휴리스틱(1a) · 빈 섹션 · placeholder 잔존 · 핵심명제 누락. 위반 개수와 해당 줄을 출력한다. 눈으로 확인해야 하는 항목(습니다체 휴리스틱, `placeholder_policy: keep`의 placeholder)은 기계 적발 합계에서 빠진다.
 
-채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다. `score.mjs`가 tone.md의 `<!-- banned: ... -->` 주석을 실행 시점에 직접 읽으므로 별도 동기화가 필요 없다.
+채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다.
 
 반객관은 한국어 단어 경계가 없어 false positive가 난다(`유사` in `유사성`). 출력된 줄을 눈으로 확인하고, 실제 위반만 아래 「반영 위치」로 보낸다.
 
