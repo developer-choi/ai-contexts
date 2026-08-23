@@ -18,6 +18,8 @@
 //   "rule_id": "...",
 //   "base_system": "...{TARGET}...",           // {TARGET}이 팔 텍스트로 치환된다
 //   "variants": {"ZERO": "", "V1": "..."},
+//   "variant_cwds": {"ZERO": "/path/to/wt-zero", "V1": "/path/to/wt-v1"},  // (선택) 팔별 작업 폴더
+
 //   "grader": {                                 // 전 시나리오 기본 채점 분류지
 //     "instruction": "(선택) 채점자에게 줄 추가 지시",
 //     "classes": [{"id": "ONE_AT_A_TIME", "desc": "..."}, {"id": "DUMP_ALL", "desc": "..."}]
@@ -113,13 +115,17 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 /**
  * 격리된 `claude -p` 콜 한 번. stdout 텍스트를 돌려주거나, 반복 실패 시 던진다.
  *
+ * `fixedCwd`가 오면 그 폴더에서 돈다(만들지도 지우지도 않는다). 측정 대상이 시스템 프롬프트가 아니라
+ * **워커가 열어야 할 파일**일 때 쓴다 — `claude -p`는 cwd 밖 절대경로를 읽기 거부하므로(실측),
+ * 팔마다 변형을 적용한 체크아웃을 cwd로 줘야 "그 파일을 여는가"를 잴 수 있다.
+ *
  * 임시 cwd는 응답을 손에 쥔 **뒤** finally에서 지운다. 윈도우에선 `claude`가 자기 cwd 안
  * 파일 핸들을 쥔 채 끝나 정리가 WinError 32로 터지는데, 예전 파이썬판은 그 예외가
  * `with` 블록 밖으로 새어 이미 받은 응답을 통째로 버렸다(2026-08-15 round7: 266런 전멸).
  * `force`+재시도로 대부분 넘기고, 그래도 남는 예외는 삼킨다 — 정리는 실패해도 되지만
  * 토큰을 쓰고 받은 응답은 버리면 안 된다.
  */
-async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
+async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = null) {
   // `/`로 시작하는 프롬프트는 CLI가 슬래시 명령으로 가로채 `Unknown command:` 한 줄만 돌려주는데,
   // 그게 rc=0에 비어있지 않은 stdout이라 실패로 안 세고 채점자가 그 한 줄을 성실히 분류한다.
   // 측정 안 된 구간이 델타로 둔갑하므로 콜을 쓰기 전에 끊는다 (2026-08-22 round15 실측: 스모크 12런 전멸).
@@ -128,7 +134,7 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
   }
   let last = '';
   for (let i = 0; i < tries; i++) {
-    const cwd = fs.mkdtempSync(path.join(os.tmpdir(), 'abl_'));
+    const cwd = fixedCwd ?? fs.mkdtempSync(path.join(os.tmpdir(), 'abl_'));
     let result;
     try {
       if (NEEDS_SHELL && !shellWarned) {
@@ -142,7 +148,7 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3) {
       );
     } finally {
       try {
-        fs.rmSync(cwd, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+        if (!fixedCwd) fs.rmSync(cwd, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
       } catch {
         // 정리 실패는 결과에 영향을 주지 않는다.
       }
@@ -293,7 +299,8 @@ async function runOne(job, spec, args) {
 
   let response;
   try {
-    response = await claudeP(scenario.user, system, args.model, timeoutMs);
+    // 채점 콜은 파일을 안 보므로 팔별 cwd를 주지 않는다 — 생성 콜만 그 안에서 돈다.
+    response = await claudeP(scenario.user, system, args.model, timeoutMs, 3, spec.variant_cwds?.[job.variant] ?? null);
   } catch (error) {
     return {
       response: '',
@@ -369,6 +376,12 @@ async function main() {
 
   // 분류지 오류는 콜을 쓰기 전에 끊는다.
   for (const scenario of scenarios) axesOf(scenario, spec);
+
+  // 없는 팔별 폴더도 마찬가지 — cwd가 없으면 그 팔 전 런이 실패해 "델타 없음"으로 읽힌다.
+  for (const [variant, cwd] of Object.entries(spec.variant_cwds ?? {})) {
+    if (!variantNames.includes(variant)) continue;
+    if (!fs.existsSync(cwd)) throw new Error(`팔 작업 폴더가 없다 (${variant}): ${cwd}`);
+  }
 
   if (args.verbose) {
     process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
