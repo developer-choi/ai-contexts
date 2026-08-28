@@ -65,6 +65,17 @@ settings/hooks를 제외한 repo-local 자산(스킬 등)은 claude·codex가 �
 
 스크립트가 다른 레포 소유면(그 레포 데이터만 다루는 도구면) 자리표시자가 아니라 그 레포에 두고 레포 경로로 부른다.
 
+### 여러 스킬이 함께 쓰는 스크립트는 `{{contexts}}`로 부른다
+
+한 스킬의 번들이 아니라 **여러 스킬이 공유하는** 스크립트는 `deploy/contexts/` 바로 아래 한 벌만 두고, 스킬 본문에서 `{{contexts}}/<파일>`로 부른다. 배포가 그 타겟의 contexts 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillContextsPath`, 검증은 `verify:skill-render`).
+
+`{{skill_dir}}`은 자기 폴더 안만 가리킬 수 있어 이 경우를 못 덮는다. 그렇다고 소유자를 한 스킬로 정해 나머지가 그 폴더를 가리키면, 그 스킬을 옮기거나 지울 때 나머지가 조용히 깨진다.
+
+- **전역 스킬**은 `<타겟>/skills/<이름>`에 깔리므로 contexts가 두 단계 위 형제다 — 배포가 스킬 경로에서 유도한다.
+- **로컬 스킬**(`local/skills/`)은 레포 안 `.claude/skills/`·`.agents/skills/`에 깔리는데 contexts는 레포에 없다. 그래서 `sync-local-skills.mjs`가 그 에이전트의 전역 contexts(`.claude/`→`~/.claude/contexts`, `.agents/`→`~/.codex/contexts`)를 명시로 넘긴다. 유도에 맡기면 없는 경로(`<레포>/.claude/contexts`)가 채워진다.
+
+특정 에이전트의 홈 경로를 본문에 직접 적지 않는다. 지금 이 기기에서는 `~/.claude`가 항상 깔려 있어 동작하지만, 그건 배포 구성에 기댄 우연이고 다른 에이전트를 가리키는 문서에 남으면 「어느 에이전트가 와도 동일하게 동작」이 깨진다.
+
 ## 규칙이 contexts를 가리킬 때는 자리표시자를 쓴다
 
 `deploy/rules/`의 md가 contexts 파일을 가리킬 때는 `{{contexts}}/<파일>` 자리표시자로 적는다. 배포가 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withContextsPath`, 검증은 `compareRulePaths`).

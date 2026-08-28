@@ -21,7 +21,12 @@ const SOURCES = {
   '본문이 마커를 인용': '---\ndescription: 설명\n---\n\n# 제목\n\n<!-- deploy-anchor -->\n인용된 예시 줄\n\n## 다음 절\n',
   // 자기 폴더 스크립트 호출. 자리표시자가 안 채워지면 배포본이 그대로 실행 위치에 의존한다.
   '자리표시자 있음': '---\ndescription: 설명\n---\n\n# 제목\n\n`node {{skill_dir}}/scripts/x.mjs --flag`\n',
+  // 여러 스킬이 공유하는 contexts 스크립트 호출. 자기 폴더 밖이라 skill_dir로는 못 가리킨다.
+  'contexts 자리표시자 있음': '---\ndescription: 설명\n---\n\n# 제목\n\n`node {{contexts}}/shared.mjs open x`\n',
 };
+
+// 전역 스킬은 `<타겟>/skills/<이름>`에 깔리므로 contexts는 두 단계 위 형제다.
+const contextsOf = (skillDir) => path.resolve(skillDir, '..', '..', 'contexts');
 
 const anchorCount = (text) => (text.match(/<!-- deploy-anchor -->/g) || []).length;
 // 앵커가 가리키는 경로만 본다 — 본문에 채워진 경로(자리표시자 산물)까지 섞어 보면 판정이 흐려진다.
@@ -61,6 +66,17 @@ for (const [label, source] of Object.entries(SOURCES)) {
     // 타겟이 갈리는 기준도 소스다 — 배포본을 다시 렌더해 타겟을 바꾸는 경로는 존재하지 않는다.
     check('타겟이 바뀌면 채워진 경로도 바뀜', renderSkillMd(source, CLAUDE_DIR).includes(`${CLAUDE_DIR}${path.sep}scripts/x.mjs`));
   }
+
+  // contexts 자리표시자는 스킬 폴더가 아니라 그 타겟의 contexts를 가리켜야 한다. 안 채워지면
+  // 배포본을 읽는 쪽이 `{{contexts}}`를 실제 경로로 착각해 그대로 실행한다.
+  if (source.includes('{{contexts}}')) {
+    check('contexts 자리표시자가 채워짐',
+      !once.includes('{{contexts}}') && once.includes(`${contextsOf(GEMINI_DIR)}${path.sep}shared.mjs`));
+    check('타겟이 바뀌면 contexts 경로도 바뀜',
+      renderSkillMd(source, CLAUDE_DIR).includes(`${contextsOf(CLAUDE_DIR)}${path.sep}shared.mjs`));
+    // 스킬 폴더 안이 아니라 형제 폴더를 가리킨다 — skill_dir로 채워지면 없는 경로가 된다.
+    check('스킬 폴더 안을 가리키지 않음', !once.includes(`${GEMINI_DIR}${path.sep}shared.mjs`));
+  }
 }
 
 // SKILL.md가 아닌 하위 md에도 같은 앵커가 붙는다. 바깥으로 나가는 참조가 여기 더 많다.
@@ -74,6 +90,16 @@ check('자기 디렉터리를 가리킴', sub.includes(SUB_DIR));
 check('frontmatter를 만들지 않음', !sub.startsWith('---'));
 // 앵커는 자기 디렉토리를, 자리표시자는 스킬 루트를 가리킨다 — 하위 파일에 적어도 같은 곳이 된다.
 check('자리표시자가 스킬 루트로 채워짐', !sub.includes('{{skill_dir}}') && sub.includes(`${CLAUDE_DIR}${path.sep}scripts/x.mjs`));
+
+// 로컬 스킬은 레포 안(`.claude/skills/`)에 깔리는데 공용 스크립트는 레포에 없다. 기본값으로
+// 두면 없는 경로(`<레포>/.claude/contexts`)가 채워지므로, 부르는 쪽이 전역 contexts를 넘긴다.
+const LOCAL_SKILL_DIR = path.join('C:', 'repo', '.claude', 'skills', 'sample');
+const GLOBAL_CONTEXTS = path.join('C:', 'Users', 'tester', '.claude', 'contexts');
+const local = renderSkillMd(SOURCES['contexts 자리표시자 있음'], LOCAL_SKILL_DIR, GLOBAL_CONTEXTS);
+console.log('로컬 스킬(전역 contexts 명시)');
+check('넘겨준 전역 contexts로 채워짐', local.includes(`${GLOBAL_CONTEXTS}${path.sep}shared.mjs`));
+check('레포 안 경로로 새지 않음', !local.includes(path.join('C:', 'repo', '.claude', 'contexts')));
+check('앵커는 그대로 자기 위치', anchorLine(local).includes(LOCAL_SKILL_DIR));
 
 if (failed > 0) {
   console.error(`\nSKILL.md 렌더링 계약 위반 ${failed}건`);

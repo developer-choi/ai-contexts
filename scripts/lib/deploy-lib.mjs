@@ -312,15 +312,31 @@ function withSkillDirPath(content, skillDir) {
     .split(SKILL_DIR_TOKEN).join(skillDir);
 }
 
+// 전역 스킬은 `<타겟>/skills/<이름>`에 깔리므로 그 타겟의 contexts는 두 단계 위 형제다.
+// 로컬 스킬은 레포 안(`.claude/skills/`)에 깔리는데 contexts는 레포에 없으므로, 부르는 쪽이
+// 그 에이전트의 전역 contexts를 직접 넘긴다.
+function contextsDirForSkill(skillDir) {
+  return path.resolve(skillDir, '..', '..', 'contexts');
+}
+
+// 여러 스킬이 함께 쓰는 contexts 스크립트를 부를 때 쓴다. `{{skill_dir}}`은 자기 폴더 안만
+// 가리킬 수 있어 이 경우를 못 덮는다.
+function withSkillContextsPath(content, contextsDir) {
+  return content
+    .split(`${CONTEXTS_TOKEN}/`).join(`${contextsDir}${path.sep}`)
+    .split(CONTEXTS_TOKEN).join(contextsDir);
+}
+
 // 배포된 SKILL.md의 최종 형태. 소스는 건드리지 않고 산출물만 이 모습이 된다.
-function renderSkillMd(content, skillDir) {
-  return withSkillDirPath(withAnchor(withSkillName(content, path.basename(skillDir)), skillDir), skillDir);
+function renderSkillMd(content, skillDir, contextsDir = contextsDirForSkill(skillDir)) {
+  const named = withSkillName(content, path.basename(skillDir));
+  return withSkillContextsPath(withSkillDirPath(withAnchor(named, skillDir), skillDir), contextsDir);
 }
 
 // 스킬 폴더 안의 SKILL.md 아닌 md. 앵커는 자기 디렉토리를 가리키지만 자리표시자는 스킬 루트로
 // 채운다 — 어느 하위 파일에 적든 `{{skill_dir}}/augmentations/score.mjs`가 같은 곳을 가리키게.
-function renderSkillSubMd(content, fileDir, skillDir) {
-  return withSkillDirPath(withAnchor(content, fileDir), skillDir);
+function renderSkillSubMd(content, fileDir, skillDir, contextsDir = contextsDirForSkill(skillDir)) {
+  return withSkillContextsPath(withSkillDirPath(withAnchor(content, fileDir), skillDir), contextsDir);
 }
 
 // 스킬 폴더 안의 md 중 앵커를 붙이지 않을 것. templates는 사용자 문서로 복사되는 재료라
@@ -333,14 +349,14 @@ function anchorExcluded(skillDir, filePath) {
 }
 
 // 배포된 스킬 디렉토리의 md를 배포본 형태로 고친다. 산출물만 고치고 소스는 건드리지 않는다.
-function injectSkillName(skillDir) {
+function injectSkillName(skillDir, contextsDir = contextsDirForSkill(skillDir)) {
   for (const file of collectMarkdown(skillDir)) {
     if (anchorExcluded(skillDir, file)) continue;
 
     const raw = fs.readFileSync(file, 'utf8');
     const updated = path.basename(file) === 'SKILL.md' && path.dirname(file) === skillDir
-      ? renderSkillMd(raw, skillDir)
-      : renderSkillSubMd(raw, path.dirname(file), skillDir);
+      ? renderSkillMd(raw, skillDir, contextsDir)
+      : renderSkillSubMd(raw, path.dirname(file), skillDir, contextsDir);
     if (updated !== raw) fs.writeFileSync(file, updated, 'utf8');
   }
 }

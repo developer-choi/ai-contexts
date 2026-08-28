@@ -76,6 +76,10 @@ function syncRepo(repo) {
     const synced = [];
     const claudeDir = path.join(repo, '.claude');
     const agentsDir = path.join(repo, '.agents');
+    // 로컬 스킬이 `{{contexts}}`로 부르는 공용 스크립트는 레포가 아니라 그 에이전트의 전역
+    // contexts에 산다. `.claude/`는 Claude가, `.agents/`는 Codex가 읽으므로 각자의 홈으로 푼다.
+    const globalContextsFor = (targetDir) =>
+      path.join(resolveUserPath(targetDir === agentsDir ? '~/.codex' : '~/.claude'), 'contexts');
     for (const name of deployDirs) {
       const source = path.join(repo, 'local', name);
       ensureDir(claudeDir);
@@ -86,7 +90,9 @@ function syncRepo(repo) {
         // 스킬 SKILL.md에는 폴더명 name을 주입한다(Antigravity는 name 필수 — deploy-lib 참고).
         if (name === 'skills') {
           for (const skill of listEntries(dest)) {
-            if (skill.isDirectory()) injectSkillName(path.join(dest, skill.name));
+            if (skill.isDirectory()) {
+              injectSkillName(path.join(dest, skill.name), globalContextsFor(targetDir));
+            }
           }
         }
       }
