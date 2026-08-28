@@ -2,7 +2,7 @@
 disable-model-invocation: true
 name: pre-exit
 description: 세션을 마무리한다. 문제 리스트업, 규칙화+사례 축적, 미커밋 확인, 커밋 정리를 수행한다.
-argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | refresh-prompts | 무인자 시 자동 감지]"
+argument-hint: "[보강 회고: workflow | digest | write-refine | routine | refresh-prompts (무인자 시 자동 감지) / 오답노트: error-notebook]"
 ---
 
 # 세션 마무리
@@ -26,6 +26,8 @@ argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | 
 | `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
+
+표에 없는 인자가 하나 더 있다 — `error-notebook`은 보강 파일을 부르지 않고 Step 1의 「몰라서 물어본 질문 수집」을 켠다.
 
 ### 회고 스펙은 어디에 쓰는가
 
@@ -95,6 +97,8 @@ AI가 제안했으나 사용자가 그대로 받지 않고 다르게 판단한 �
 이 항목들은 규칙화 대상에 합류한다. 반복될 선호로 보이는지, 그 세션 한정 사정으로 보이는지는 **판단을 적어 함께 올리되 거르지 않는다** — 어느 쪽인지는 사용자가 안다. 반영 위치는 해당 스킬(digest/explain/review 등)의 제안 규칙이다.
 
 ### 몰라서 물어본 질문 수집
+
+**`error-notebook` 인자가 있을 때만 수행한다.** 없으면 이 절을 통째로 건너뛴다 — 남길 질문이 나오는 세션은 드문데 훑기·판정·HTML·브라우저 띄우기는 매번 나가므로, 빈 산출물이 회고의 나머지를 덮는다.
 
 위 수집들은 AI 동작과 사용자 요청을 다룬다. 여기서는 **사용자가 몰라서 물어본 질문 자체**를 모은다. 같은 것을 다음 세션에 또 묻는 일을 막고, 몰랐던 원인이 "우리 문서에 안 적혀 있어서"였다면 그 사실을 드러내기 위해서다.
 
