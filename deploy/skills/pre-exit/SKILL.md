@@ -1,6 +1,7 @@
 ---
+disable-model-invocation: true
 name: pre-exit
-description: 세션을 마무리한다. 문제 리스트업, 규칙화+사례 축적, 미커밋 확인, 커밋 정리를 수행한다. 세션·작업의 종결·마무리·정리 의도가 보이면 반드시 이 스킬을 호출한다("세션 마무리", "세션 끝내자", "오늘 작업 정리", "오늘 작업 마무리", "작업 마무리", "작업 정리", "회고", "exit", "pre-exit" 등).
+description: 세션을 마무리한다. 문제 리스트업, 규칙화+사례 축적, 미커밋 확인, 커밋 정리를 수행한다.
 argument-hint: "[보강 키워드: workflow | digest | write-refine | routine | refresh-prompts | 무인자 시 자동 감지]"
 ---
 

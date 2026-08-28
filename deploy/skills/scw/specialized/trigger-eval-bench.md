@@ -2,6 +2,8 @@
 
 스킬 description의 트리거 정확도(false negative/positive)를 측정한다.
 
+frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 아니다 — 그 description은 모델 컨텍스트에 올라가지 않아 측정할 트리거가 없다. 사용자만 부르게 하려는 스킬은 재려 하지 말고 그 필드를 켠다.
+
 [CRITICAL] 작업 시작 전 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. 같은 6시간 함정 재발 방지용이다.
 
 ## 현재 상태 (2026-08-15 재확인)
@@ -76,7 +78,7 @@ bench-trigger.mjs는 측정만 감싼다. description 수정 → 재측정 → �
 | eval set 작성 시 노골적 인용 | description에 eval 쿼리 표현 그대로 박아넣음 (overfitting) → 측정 과정에선 통과해도 실제 사용성 X | 의도 표현으로 일반화. eval 쿼리는 표본일 뿐 |
 | Anthropic 표준 가정 무비판 신뢰 | "skill-creator 플러그인이 표준이라 동작할 것" → 6시간 후 broken 확인 | GitHub 이슈/PR 먼저 검색. 표준 도구도 broken 가능 |
 | non-trigger run이 cwd 오염 | 트리거 안 되는 액션형 쿼리는 `claude -p`가 본문 작업까지 수행 → repo 루트에 파일 생성·`git add`까지 함(early-kill은 트리거 시에만 발동). 측정 후 stray 산출물 잔존 | 글로벌 스킬 측정은 빈 scratch 디렉토리에서 실행(`find_project_root`가 cwd로 fallback). 로컬 스킬은 in-repo 불가피하니 측정 직후 `git status`로 stray 파일·staging 점검·정리 필수 |
-| disclaimer만으로 자동 트리거 차단 시도 | description에 "자동 트리거하지 않는다"를 붙여도 도메인 의미 매칭(bait)이 남으면 강매칭 쿼리에서 누설(실측 0.30) | 명시 호출 전용 스킬은 도메인 키워드를 description에서 제거하고 제약만 남긴다(bait 제거). 실측 0.30→0.00 수렴 |
+| 산문으로 자동 트리거 차단 시도 | description에 "자동 트리거하지 않는다"를 붙여도 도메인 의미 매칭(bait)이 남으면 강매칭 쿼리에서 누설(실측 0.30). bait를 걷어 0.00까지 내렸으나 이는 문장으로 확률을 누르는 우회였다 | frontmatter `disable-model-invocation: true`를 켠다. 모델 호출을 하네스가 거부하고 description은 모델 컨텍스트에서 빠지므로 누설 자체가 성립하지 않는다 |
 
 ## Limitations
 

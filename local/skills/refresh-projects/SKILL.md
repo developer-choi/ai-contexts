@@ -1,6 +1,7 @@
 ---
+disable-model-invocation: true
 name: refresh-projects
-description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을 추적해 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화하고, 커밋에 안 나타나는 것(끊어진 링크·아무도 안 가리키는 문서·쌓인 백로그)도 같은 회차에서 전수로 턴다. 레포지토리 점검, 주간 리뷰, 전체 프로젝트 최신화, 백로그 정비 요청 시 사용.
+description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을 추적해 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화하고, 커밋에 안 나타나는 것(끊어진 링크·아무도 안 가리키는 문서·쌓인 백로그)도 같은 회차에서 전수로 턴다.
 ---
 
 # Refresh Projects

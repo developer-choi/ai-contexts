@@ -1,6 +1,7 @@
 ---
+disable-model-invocation: true
 name: simplify
-description: 수동 호출 전용 스킬. 사용자가 `/simplify` 슬래시 명령을 직접 입력한 경우에만 동작한다. 자동 트리거 대상이 아니므로 다른 어떤 요청에도 이 스킬을 선택하지 말 것.
+description: 라이브러리를 학습에 필요한 구현만 남겨 단순화한다.
 argument-hint: "[init | renew | 작업 단계]"
 ---
 
