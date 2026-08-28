@@ -28,7 +28,7 @@ AC의 배포 시스템(`scripts/` 하위 sync·unsync 스크립트, `deploy/hook
 - 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.mjs`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
 - `sync:system`은 시작 시 verify 계약들로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
-- 정책 hook은 **명령 문자열이 아니라 파싱된 git 호출**을 본다. 인접 정규식으로 검사하면 `git -C <path>`·chain 형태가 조용히 빠져나간다. 새 git 정책 hook은 `deploy/hooks/git-command-parser.mjs`의 `findGitInvocations`·`partitionArgs`를 쓰고, 대표 케이스를 `verify-hook-policies.mjs`에 등록한다.
+- 정책 hook은 **명령 문자열이 아니라 파싱된 git 호출**을 본다. 인접 정규식으로 검사하면 `git -C <path>`·chain 형태가 조용히 빠져나간다. 새 git 정책 hook은 `deploy/hooks/git-command-parser.mjs`의 `findGitInvocations`·`partitionArgs`를 쓰고, 대표 케이스를 `verify-hook-policies.mjs`에 등록한다. 짧은 옵션은 토큰 정확 일치로 보지 않는다 — 값을 붙이거나(`-F-`) 묶어 쓰면(`-sF-`) 모양이 달라져 검사를 빠져나가므로 `commitShortFlagChars`로 글자 단위로 본다.
 
 ## 로컬 settings projection (`local/` → repo-local)
 

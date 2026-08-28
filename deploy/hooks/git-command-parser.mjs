@@ -114,15 +114,49 @@ export function splitSegments(command) {
 // 들어오는데, 모르고 공백 분리하면 `@'`가 `-m`의 값으로 먹히고 메시지 본문 단어들이 파일
 // 경로(positional)로 세어진다 — "경로를 지정했는가" 판정이 뒤집혀 경로 없는 커밋이 통과한다.
 // 실측(2026-08-09): 같은 커밋을 한 줄 메시지로는 막고 여러 줄 here-string으로는 통과시켰다.
+//
+// 붙어 있는 조각들은 셸과 같이 한 토큰으로 이어 붙인다(`-m"여러 단어"` → `-m여러 단어`).
+// 조각마다 토큰을 끊으면 옵션에 값을 붙여 쓴 형태에서 값의 단어들이 파일 경로로 세어져
+// "경로를 지정했는가" 판정이 뒤집힌다 — 위 here-string 사고와 같은 구멍이다.
 export function tokenize(value) {
   const tokens = [];
-  const pattern = /@'([\s\S]*?)'@|@"([\s\S]*?)"@|"([^"]*)"|'([^']*)'|(\S+)/g;
+  // 마지막 대안은 따옴표를 뺀 조각이다. 짝이 맞는 따옴표는 앞 대안이 먼저 먹으므로,
+  // 여기 남는 홑따옴표는 짝 없는 것(`don't`)이고 글자 그대로 이어 붙인다.
+  const pattern = /@'([\s\S]*?)'@|@"([\s\S]*?)"@|"([^"]*)"|'([^']*)'|[^\s'"]+|['"]/g;
   let match;
+  let buf = null;
+  let end = -1;
   while ((match = pattern.exec(value))) {
     // 빈 문자열도 값이므로 truthy 판정이 아니라 "매치된 그룹"으로 고른다(`-m ""`).
-    tokens.push(match.slice(1).find((group) => group !== undefined));
+    const piece = match.slice(1).find((group) => group !== undefined) ?? match[0];
+    if (buf !== null && match.index === end) buf += piece;
+    else {
+      if (buf !== null) tokens.push(buf);
+      buf = piece;
+    }
+    end = pattern.lastIndex;
   }
+  if (buf !== null) tokens.push(buf);
   return tokens;
+}
+
+// `git commit`의 짧은 옵션 중 값을 먹는 것들. 묶음(`-sF-`)을 읽을 때 여기서 멈춘다.
+// 출처: git-commit(1) OPTIONS — `-c`/`-C`/`-F`/`-m`/`-t`/`-U<n>`은 값 필수, `-u[<mode>]`·`-S[<key-id>]`는 선택.
+const COMMIT_SHORT_VALUED = new Set(["c", "C", "F", "m", "t", "u", "S", "U"]);
+
+// 짧은 옵션 토큰에서 "옵션으로 유효한 글자들"을 뽑는다. git은 짧은 옵션에 값을 붙여 쓰는 것도
+// (`-F-`, `-m'msg'`), 다른 짧은 옵션과 묶는 것도(`-sF-`) 허용하므로, 토큰을 정확 일치로만 보면
+// 이 형태들이 검사를 통째로 빠져나간다. 값을 먹는 글자를 만나면 그 뒤는 값이라 멈춘다 —
+// `-uno`(--untracked-files=no)의 'n'이나 `-Sm`(키 이름 m)을 옵션으로 오독하지 않기 위함이다.
+export function commitShortFlagChars(token) {
+  if (!/^-[^-]/.test(token)) return [];
+  const chars = [];
+  for (const ch of token.slice(1)) {
+    if (!/[a-zA-Z]/.test(ch)) break;
+    chars.push(ch);
+    if (COMMIT_SHORT_VALUED.has(ch)) break;
+  }
+  return chars;
 }
 
 // `git commit`에서 다음 토큰을 값으로 먹는 플래그들(`=`로 붙이는 형태는 자체로 한 토큰이라 불필요).

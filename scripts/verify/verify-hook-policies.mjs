@@ -46,6 +46,11 @@ const CASES = [
   ['check-git-commit-policy.mjs', "git commit -m @'\nfix: 여러 줄 메시지\n'@", 'deny', 'here-string 본문이 경로로 오인되지 않는다'],
   ['check-git-commit-policy.mjs', 'git commit -m @"\nfix: 확장 here-string\n"@', 'deny', '큰따옴표 here-string도 같다'],
   ['check-git-commit-policy.mjs', "git commit -m @'\n한단어\n'@", 'deny', '한 단어짜리 here-string도 경로가 아니다'],
+  // 값을 붙여 쓴 짧은 옵션(`-m"..."`). 붙어 있는 조각을 한 토큰으로 이어 붙이지 않으면
+  // 메시지 본문 단어가 경로로 세어져 here-string과 같은 구멍이 난다.
+  ['check-git-commit-policy.mjs', 'git commit -m"여러 단어 메시지"', 'deny', '붙여 쓴 메시지 본문이 경로로 오인되지 않는다'],
+  ['check-git-commit-policy.mjs', "git commit -F- <<'MSG'\nfix: x\nMSG", 'deny', '-F를 붙여 써도 경로는 필수'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -uno', 'deny', '-uno는 --untracked-files=no라 메시지가 아니다'],
 
   // --- 통과해야 하는 형태 (오탐 방지) ---
   ['check-git-commit-policy.mjs', 'git commit a.txt -m "x"', 'pass', '파일 지정 커밋'],
@@ -54,6 +59,11 @@ const CASES = [
   ['check-git-commit-policy.mjs', 'git commit --amend --no-edit a.txt', 'pass', '경로를 준 amend는 통과'],
   ['check-git-commit-policy.mjs', 'git commit --allow-empty -m "x"', 'pass', '빈 커밋은 경로가 없는 게 정상'],
   ['check-git-commit-policy.mjs', "git commit a.txt -m @'\nfix: 여러 줄 메시지\n'@", 'pass', 'here-string이어도 경로를 주면 통과'],
+  // 값을 붙여 쓴·묶어 쓴 짧은 메시지 옵션. 정확 일치로 보던 때는 메시지를 넘겼는데도
+  // "메시지 없음"으로 거부됐다 (2026-08-29 실측).
+  ['check-git-commit-policy.mjs', "git commit a.txt -F- <<'MSG'\nfix: x\nMSG", 'pass', '-F에 값을 붙여 써도 메시지로 본다'],
+  ['check-git-commit-policy.mjs', "git commit a.txt -m'x'", 'pass', "-m'msg'도 메시지로 본다"],
+  ['check-git-commit-policy.mjs', "git commit a.txt -sF- <<'MSG'\nfix: x\nMSG", 'pass', '짧은 옵션 묶음(-sF-)도 메시지로 본다'],
   ['check-git-staging-policy.mjs', "git commit a.txt -m @'\ngit add . 를 금지\n'@", 'pass', 'here-string 본문의 문구는 옵션이 아니다'],
   ['check-git-staging-policy.mjs', 'git commit a.txt -m "git add . 를 금지"', 'pass', '메시지 안의 문구는 옵션이 아니다'],
   ['check-git-staging-policy.mjs', 'git commit a.txt -m "-a 옵션 관련 수정"', 'pass', '메시지 값이 옵션으로 오인되지 않는다'],

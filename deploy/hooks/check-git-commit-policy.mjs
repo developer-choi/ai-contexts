@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   COMMIT_VALUED_FLAGS,
+  commitShortFlagChars,
   findGitInvocations,
   normalizeCwd,
   partitionArgs,
@@ -20,10 +21,16 @@ if (commits.length === 0) process.exit(0);
 // 메시지를 넘기는 통로 전부. `-m`만 보면 나머지 형태가 검사를 통째로 빠져나간다 —
 // 2026-08-05 PP 사고가 정확히 `git commit -F -`(표준입력 heredoc)였고, 경로 검사를
 // `-m`이 있을 때만 돌리던 탓에 남의 staged 파일 2개가 딸려 들어갔다.
-const MESSAGE_FLAGS = new Set([
-  "-m", "--message", "-F", "--file", "-c", "-C", "--reuse-message", "--reedit-message", "--squash", "--fixup",
+//
+// 긴 옵션만 목록으로 보고 짧은 옵션은 글자 단위로 본다. 짧은 옵션은 값을 붙여 쓰거나(`-F-`)
+// 다른 짧은 옵션과 묶어 쓸 수 있어(`-sF-`) 토큰이 그때마다 달라지고, 목록에 없는 모양이
+// 되는 순간 "메시지 없음"으로 떨어져 멀쩡한 커밋이 거부된다
+// (2026-08-29 실측: `git commit <경로> -F-`가 그렇게 막혔다).
+const LONG_MESSAGE_FLAGS = new Set([
+  "--message", "--file", "--reuse-message", "--reedit-message", "--squash", "--fixup",
 ]);
 const MESSAGE_EQ_RE = /^--(message|file|reuse-message|reedit-message|squash|fixup)=/;
+const SHORT_MESSAGE_CHARS = new Set(["m", "F", "c", "C"]);
 
 // 병합·체리픽·리버트 진행 중에는 git이 부분 커밋 자체를 거부한다
 // ("fatal: cannot do a partial commit during a merge"). 경로를 줄 방법이 없으므로 이때만
@@ -73,7 +80,12 @@ for (const inv of commits) {
 
   // 메시지 없는 커밋은 에디터를 띄운다 — 비대화형 셸에서 멈추거나 빈 메시지로 끝난다.
   // 기존 메시지를 그대로 쓰는 `--amend --no-edit` 형태만 예외.
-  const hasMessage = options.some((t) => MESSAGE_FLAGS.has(t) || MESSAGE_EQ_RE.test(t));
+  const hasMessage = options.some(
+    (t) =>
+      LONG_MESSAGE_FLAGS.has(t) ||
+      MESSAGE_EQ_RE.test(t) ||
+      commitShortFlagChars(t).some((ch) => SHORT_MESSAGE_CHARS.has(ch)),
+  );
   if (!hasMessage && !options.includes("--no-edit")) {
     deny("메시지 없는 git commit 금지. -m 또는 -F로 커밋 메시지를 직접 작성하세요.");
   }
