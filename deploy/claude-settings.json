@@ -9,6 +9,10 @@
   },
   "permissions": {
     "defaultMode": "acceptEdits",
+    "ask": [
+      "Bash(*bench-ablation.mjs*)",
+      "PowerShell(*bench-ablation.mjs*)"
+    ],
     "allow": [
       "Agent",
       "AskUserQuestion",
