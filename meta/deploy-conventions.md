@@ -28,6 +28,7 @@ AC의 배포 시스템(`scripts/` 하위 sync·unsync 스크립트, `deploy/hook
 - 타겟마다 hook 런타임이 다르므로(codex엔 SendMessage tool·UserPromptSubmit 없음, PreToolUse를 `*`로 통합) matcher·이벤트 변환은 `settings-projection.mjs`의 어댑터(`HOOK_ADAPTERS`)가 담당한다. 타겟 추가·변경은 어댑터와 호출부(`*SettingsObject`)만 고친다.
 - override 파일은 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사 대상에서 제외한다(생성 재료이지 그대로 배포하는 파일이 아님).
 - `sync:system`은 시작 시 verify 계약들로 fail-fast하고, 배포 시 생성 객체와 배포본을 대조한다(claude/gemini `verifySettings`, codex `verifyJsonExact`).
+- **레포 단위 면제는 `deploy/hooks/free-git-repos.mjs` 한 곳에서만 정한다.** 브랜치 정책(merge·push·reset)을 통째로 걷는 개인 레포 목록이며, 훅마다 조건을 따로 적으면 어느 훅이 어디서 꺼지는지가 흩어져 아무도 전체를 못 본다. 면제 판정은 폴더명이 아니라 `--git-common-dir`로 구한 원본 레포 이름이다(워크트리는 폴더명이 달라 안 갈린다). 파일 단위 커밋 강제(staging·commit 훅)는 브랜치 정책이 아니므로 이 목록의 대상이 아니다.
 - 정책 hook은 **명령 문자열이 아니라 파싱된 git 호출**을 본다. 인접 정규식으로 검사하면 `git -C <path>`·chain 형태가 조용히 빠져나간다. 새 git 정책 hook은 `deploy/hooks/git-command-parser.mjs`의 `findGitInvocations`·`partitionArgs`를 쓰고, 대표 케이스를 `verify-hook-policies.mjs`에 등록한다. 짧은 옵션은 토큰 정확 일치로 보지 않는다 — 값을 붙이거나(`-F-`) 묶어 쓰면(`-sF-`) 모양이 달라져 검사를 빠져나가므로 `commitShortFlagChars`로 글자 단위로 본다.
 
 ## 로컬 settings projection (`local/` → repo-local)

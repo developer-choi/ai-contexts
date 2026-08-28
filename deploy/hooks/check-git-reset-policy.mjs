@@ -1,5 +1,6 @@
+import { allInFreeRepos } from "./free-git-repos.mjs";
 import { findGitInvocations } from "./git-command-parser.mjs";
-import { deny, getCommand, readPayload } from "./hook-utils.mjs";
+import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // git reset --hard / --mixed 금지. --soft만 허용한다. AI는 무조건 차단하고, 정말 필요하면
 // 사용자가 직접 실행한다 (hook은 AI 도구 호출만 게이트하므로 사용자 터미널 명령엔 영향 없음).
@@ -9,10 +10,14 @@ import { deny, getCommand, readPayload } from "./hook-utils.mjs";
 // 이 훅이 reset 정책의 단일 창구다 (git -C·chain까지 파싱). 거친 정규식 차단은 두지 않는다 —
 // check-shell-policy.js에 같은 차단을 또 두면 한 명령에 deny 메시지가 두 번 뜬다.
 // git 상태와 무관한 정적 패턴 매칭이라 PreToolUse 타이밍 갭이 없다.
-const cmd = getCommand(readPayload());
+const payload = readPayload();
+const cmd = getCommand(payload);
 if (typeof cmd !== "string" || !/\breset\b/.test(cmd)) process.exit(0);
 
 const resets = findGitInvocations(cmd, "reset");
+// 면제 레포(free-git-repos.mjs)에서는 이 정책을 통째로 걷는다.
+if (allInFreeRepos(resets, getCwd(payload))) process.exit(0);
+
 const hard = resets.some((inv) => inv.args.includes("--hard"));
 const mixed = resets.some((inv) => inv.args.includes("--mixed"));
 

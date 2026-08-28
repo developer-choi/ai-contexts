@@ -444,6 +444,52 @@ const untrackedCases = (dir) => [
   ['check-git-commit-policy.mjs', `git -C ${dir} commit tracked.txt -m "x"`, 'pass', '미등록 파일이 없는 경로는 조용하다'],
 ];
 
+// 레포 면제(`free-git-repos.mjs`)는 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가
+// 있어야 판정된다. 면제 이름(`backlog`)과 아닌 이름(`ai-contexts`)을 나란히 만들어, 같은 명령이
+// 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
+function withFreeRepoFixture(fn) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-free-repo-'));
+  try {
+    const made = {};
+    for (const name of ['backlog', 'ai-contexts']) {
+      const dir = path.join(root, name);
+      fs.mkdirSync(dir);
+      const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+      run('git init -q -b main');
+      fs.writeFileSync(path.join(dir, 'a.txt'), 'a\n');
+      run('git add a.txt');
+      run('git -c user.email=verify@local -c user.name=verify commit -q -m init a.txt');
+      made[name] = dir.replace(/\\/g, '/');
+    }
+    return fn(made);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
+const freeRepoCases = ({ backlog: free, 'ai-contexts': gated }) => [
+  // 면제 레포 — 세 정책이 통째로 걷힌다.
+  ['check-git-merge-policy.mjs', `git -C ${free} merge feature`, 'pass', '면제 레포는 보호 브랜치 머지도 통과'],
+  ['check-git-merge-policy.mjs', `git -C ${free} cherry-pick abc123`, 'pass', '면제 레포는 체리픽도 통과'],
+  ['check-git-merge-policy.mjs', `git -C ${free} branch -f main abc123`, 'pass', '면제 레포는 포인터 강제 이동도 통과'],
+  ['check-git-push-policy.mjs', `git -C ${free} push origin main`, 'pass', '면제 레포는 보호 브랜치 push도 통과'],
+  ['check-git-reset-policy.mjs', `git -C ${free} reset --hard`, 'pass', '면제 레포는 reset --hard도 통과'],
+
+  // 면제 아닌 레포 — 기존 판정 그대로.
+  ['check-git-merge-policy.mjs', `git -C ${gated} merge feature`, 'deny', '면제 밖은 보호 브랜치 머지 차단 유지'],
+  ['check-git-merge-policy.mjs', `git -C ${gated} branch -f main abc123`, 'deny', '면제 밖은 포인터 강제 이동 차단 유지'],
+  ['check-git-push-policy.mjs', `git -C ${gated} push origin main`, 'ask', '면제 밖은 보호 브랜치 push 승인 유지'],
+  ['check-git-reset-policy.mjs', `git -C ${gated} reset --hard`, 'deny', '면제 밖은 reset --hard 차단 유지'],
+
+  // 한 명령이 두 레포를 섞어 부르면 정책을 유지한다 — 면제 레포에 얹혀 검사가 꺼지지 않게.
+  [
+    'check-git-reset-policy.mjs',
+    `git -C ${free} reset --hard && git -C ${gated} reset --hard`,
+    'deny',
+    '면제 레포와 섞이면 면제되지 않는다',
+  ],
+];
+
 function main() {
   console.log('정책 hook 판정 검증 중...');
   const failures = [];
@@ -451,6 +497,20 @@ function main() {
   // 미등록 파일이 사라진 상태로 판정된다(레포 부재 → 조회 실패 → pass로 통과, 위양성 없이 조용히 무력화).
   withUntrackedFixture((dir) => {
     for (const [file, command, expected, note] of [...CASES, ...untrackedCases(dir)]) {
+      const { decision, stderr } = runHook(file, command);
+      const label = `${file} :: ${command} → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
+    }
+  });
+  // 레포 면제는 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
+  withFreeRepoFixture((repos) => {
+    for (const [file, command, expected, note] of freeRepoCases(repos)) {
       const { decision, stderr } = runHook(file, command);
       const label = `${file} :: ${command} → ${expected} (${note})`;
       if (decision === expected) {

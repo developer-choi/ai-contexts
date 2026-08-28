@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
+import { allInFreeRepos } from "./free-git-repos.mjs";
 import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
-import { deny, getCommand, readPayload } from "./hook-utils.mjs";
+import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // 보호 브랜치(master/main/develop/release)로의 머지·포인터 이동을 AI가 직접 못 하게 막는다.
 // 머지 결정은 사용자 몫이라 hook은 AI 도구 호출만 게이트한다(사용자 터미널 명령엔 영향 없음).
@@ -12,7 +13,8 @@ import { deny, getCommand, readPayload } from "./hook-utils.mjs";
 //      결정이 끝난 원격 커밋을 로컬에 맞추는 ff라 사용자 결정이 아니다. feature→master 같은 통합 ff는 그대로 차단.
 // push(refspec→보호 브랜치)는 check-git-push-policy.mjs가 이미 담당하므로 여기서 중복 처리하지 않는다
 // (한 명령에 deny가 두 번 뜨는 것을 막는다). reset 포인터 이동은 check-git-reset-policy.mjs 담당.
-const cmd = getCommand(readPayload());
+const payload = readPayload();
+const cmd = getCommand(payload);
 if (typeof cmd !== "string") process.exit(0);
 if (!/\b(merge|pull|rebase|cherry-pick|branch|checkout|switch)\b/.test(cmd)) process.exit(0);
 
@@ -24,6 +26,12 @@ const MERGE_MSG =
 
 const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
 const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));
+
+// 면제 레포(free-git-repos.mjs)에서는 이 정책을 통째로 걷는다. 이 훅이 보는 호출을 다 모아
+// 한 번에 판정한다 — 아래 두 갈래(정적 매칭·HEAD 기반)가 같은 기준으로 갈려야 한다.
+const GATED_SUBCOMMANDS = ["branch", "checkout", "switch", "merge", "pull", "rebase", "cherry-pick"];
+const gated = GATED_SUBCOMMANDS.flatMap((sub) => findGitInvocations(cmd, sub));
+if (allInFreeRepos(gated, cdCwd || getCwd(payload))) process.exit(0);
 
 // --- 1. 정적 매칭: 포인터를 보호 브랜치로 강제 이동/재설정하는 명령 ---
 // branch -f <protected> [start] — 첫 positional(이동 대상 브랜치명)만 본다.
