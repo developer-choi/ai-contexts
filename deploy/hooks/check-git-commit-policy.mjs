@@ -74,7 +74,8 @@ for (const inv of commits) {
   // "경로를 지정했다"고 오판한다(경로 필수 검사가 heredoc 표식 하나로 무력화됨).
   const { options, positionals } = partitionArgs(stripRedirections(inv.args), COMMIT_VALUED_FLAGS);
 
-  if (options.includes("--no-verify") || options.includes("-n")) {
+  // `-n`도 글자 단위로 본다 — `-sn`·`-nm x`처럼 묶어 쓰면 정확 일치를 그대로 빠져나간다.
+  if (options.includes("--no-verify") || options.some((t) => commitShortFlagChars(t).includes("n"))) {
     deny("--no-verify 금지. pre-commit hook을 우회하지 마세요.");
   }
 

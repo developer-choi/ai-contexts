@@ -26,6 +26,13 @@ const CASES = [
   // --- 인접 형태 (기존 동작 유지) ---
   ['check-git-commit-policy.mjs', 'git commit -m "x"', 'deny', 'bare commit'],
   ['check-git-commit-policy.mjs', 'git commit --no-verify -m "x" a.txt', 'deny', '--no-verify 금지'],
+  // 짧은 옵션을 묶거나 값을 붙이면 토큰이 통짜가 아니게 된다 — 정확 일치로 보던 때는
+  // 아래 형태들이 --no-verify·auto-stage 금지를 그대로 빠져나갔다.
+  ['check-git-commit-policy.mjs', 'git commit a.txt -sn -m "x"', 'deny', '묶어 쓴 -n도 --no-verify다'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -nm "x"', 'deny', '메시지와 묶인 -n도 잡는다'],
+  ['check-git-staging-policy.mjs', "git commit a.txt -aF- <<'MSG'\nfix: x\nMSG", 'deny', '값이 붙은 묶음의 -a도 잡는다'],
+  ['check-git-staging-policy.mjs', 'git commit a.txt -am"여러 단어"', 'deny', '메시지를 붙여 쓴 -am도 잡는다'],
+  ['check-git-staging-policy.mjs', 'git commit a.txt -uall -m "x"', 'pass', '-uall(--untracked-files=all)의 값 글자는 옵션이 아니다'],
   ['check-git-staging-policy.mjs', 'git add .', 'deny', 'add .'],
   ['check-git-staging-policy.mjs', 'git add -A', 'deny', 'add -A'],
 
