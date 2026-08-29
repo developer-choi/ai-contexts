@@ -38,6 +38,7 @@
       "WebFetch",
       "WebSearch",
       "Write",
+      "mcp__claude-in-chrome__*",
       "mcp__claude_ai_Google_Drive__download_file_content",
       "mcp__claude_ai_Google_Drive__get_file_metadata",
       "mcp__claude_ai_Google_Drive__get_file_permissions",
