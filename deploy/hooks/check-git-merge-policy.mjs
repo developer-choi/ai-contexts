@@ -19,10 +19,14 @@ if (typeof cmd !== "string") process.exit(0);
 if (!/\b(merge|pull|rebase|cherry-pick|branch|checkout|switch)\b/.test(cmd)) process.exit(0);
 
 const PROTECTED = /^(master|main|develop|release)$/;
+// 면제 안내를 첫 문장에 두는 이유: check-md-hook-restatement가 이 메시지를 md 작성 화면에
+// 주입할 때 160자에서 자른다. 뒤에 두면 잘려나가, 면제 레포에서 md를 쓰는 AI가 "여기도 막힌다"로
+// 읽는다 (2026-08-29 PP 세션 실측: 주입 2회, AI가 면제 레포에서 머지를 사용자에게 떠넘김).
 const MERGE_MSG =
-  "보호 브랜치(master/main/develop/release)로의 머지·포인터 이동(merge/pull/rebase/cherry-pick, branch -f, checkout -B, switch -C)은 사용자 결정 사항입니다. " +
-  "AI는 직접 실행하지 말고, 머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 실행할 명령을 사용자에게 안내하세요 (예: `git merge --ff-only <branch>`). " +
-  "지금 따르는 스킬·절차가 직접 머지하라고 지시하고 있다면, 이참에 그 절차를 '사용자에게 머지를 안내'하는 수준으로 고쳐 두세요 (전수 수정 불필요 — 마주칠 때마다 점진 이관).";
+  "보호 브랜치(master/main/develop/release)로의 머지·포인터 이동은 사용자 결정 사항입니다 — 단 개인 레포(free-git-repos.mjs의 FREE_REPOS)는 면제되어 AI가 직접 머지합니다. " +
+  "면제 아닌 레포에서는 AI가 직접 실행하지 말고(merge/pull/rebase/cherry-pick, branch -f, checkout -B, switch -C), " +
+  "머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 실행할 명령을 사용자에게 안내하세요 (예: `git merge --ff-only <branch>`). " +
+  "지금 따르는 스킬·절차가 면제 아닌 레포에서 직접 머지하라고 지시하고 있다면, 이참에 그 절차를 '사용자에게 머지를 안내'하는 수준으로 고쳐 두세요 (전수 수정 불필요 — 마주칠 때마다 점진 이관).";
 
 const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
 const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));

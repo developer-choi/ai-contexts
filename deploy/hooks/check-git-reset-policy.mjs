@@ -27,8 +27,8 @@ if (hard || mixed) {
   if (hard) reasons.push("--hard는 워킹 디렉터리의 미커밋 변경과 reset으로 건너뛴 미푸시 커밋을 되돌릴 수 없게 지웁니다");
   if (mixed) reasons.push("--mixed는 staged 변경을 모두 unstage합니다");
   deny(
-    `git reset ${used} 금지, --soft만 사용하세요. ${reasons.join(". ")}. ` +
-      "정말 필요하면 사용자에게 직접 실행을 요청하세요.",
+    `git reset ${used} 금지, --soft만 사용하세요 — 단 개인 레포(free-git-repos.mjs의 FREE_REPOS)는 면제입니다. ` +
+      `${reasons.join(". ")}. 정말 필요하면 사용자에게 직접 실행을 요청하세요.`,
   );
 }
 
