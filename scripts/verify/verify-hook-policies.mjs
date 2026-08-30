@@ -86,6 +86,14 @@ const CASES = [
   ['check-git-push-policy.mjs', 'git -C ~/repo push origin develop', 'ask', 'git -C가 껴도 보호 브랜치 push를 잡는다'],
   ['check-git-merge-policy.mjs', 'git -C ~/repo branch -f master', 'deny', '보호 브랜치 포인터 강제 이동'],
   ['check-git-merge-policy.mjs', 'git rebase --abort', 'pass', '진행 중 작업 중단은 허용'],
+  // 폴더가 실존하면 브랜치 조회 실패는 그대로 fail-open이다(비-git 디렉터리·detached HEAD 오차단 방지).
+  // 아래 「폴더를 못 정한 경우」의 차단과 갈리는 지점이라 함께 고정한다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C "${os.tmpdir().replace(/\\/g, '/')}" merge feature`,
+    'pass',
+    '실존하는 비-git 폴더는 fail-open 유지',
+  ],
 
   // --- chain ---
   ['check-git-staging-policy.mjs', 'git status && git -C ~/repo add -A', 'deny', 'chain 뒷단의 위반도 잡는다'],
@@ -447,11 +455,13 @@ const untrackedCases = (dir) => [
 // 레포 면제(`free-git-repos.mjs`)는 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가
 // 있어야 판정된다. 면제 이름(`backlog`)과 아닌 이름(`ai-contexts`)을 나란히 만들어, 같은 명령이
 // 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
+// `knowledge-archive`는 같은 재료를 detached HEAD로 떼어둔 것이다 — 머지 훅이 "폴더를 못 정한 경우"를
+// 차단하면서 detached HEAD를 오차단하지 않는지 가르려면 진짜 detached 레포가 필요하다.
 function withFreeRepoFixture(fn) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-free-repo-'));
   try {
     const made = {};
-    for (const name of ['backlog', 'ai-contexts']) {
+    for (const name of ['backlog', 'ai-contexts', 'knowledge-archive']) {
       const dir = path.join(root, name);
       fs.mkdirSync(dir);
       const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
@@ -459,6 +469,7 @@ function withFreeRepoFixture(fn) {
       fs.writeFileSync(path.join(dir, 'a.txt'), 'a\n');
       run('git add a.txt');
       run('git -c user.email=verify@local -c user.name=verify commit -q -m init a.txt');
+      if (name === 'knowledge-archive') run('git checkout -q --detach HEAD');
       made[name] = dir.replace(/\\/g, '/');
     }
     return fn(made);
@@ -467,7 +478,7 @@ function withFreeRepoFixture(fn) {
   }
 }
 
-const freeRepoCases = ({ backlog: free, 'ai-contexts': gated }) => [
+const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive': detached }) => [
   // 면제 레포 — 세 정책이 통째로 걷힌다.
   ['check-git-merge-policy.mjs', `git -C ${free} merge feature`, 'pass', '면제 레포는 보호 브랜치 머지도 통과'],
   ['check-git-merge-policy.mjs', `git -C ${free} cherry-pick abc123`, 'pass', '면제 레포는 체리픽도 통과'],
@@ -480,6 +491,35 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated }) => [
   ['check-git-merge-policy.mjs', `git -C ${gated} branch -f main abc123`, 'deny', '면제 밖은 포인터 강제 이동 차단 유지'],
   ['check-git-push-policy.mjs', `git -C ${gated} push origin main`, 'ask', '면제 밖은 보호 브랜치 push 승인 유지'],
   ['check-git-reset-policy.mjs', `git -C ${gated} reset --hard`, 'deny', '면제 밖은 reset --hard 차단 유지'],
+
+  // 경로를 셸 변수로 넘기면 훅은 셸 확장 전 원문(`$V`)을 받는다. 예전엔 그 폴더에서 브랜치를 못 읽고
+  // fail-open으로 흘러 머지 판정이 통째로 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현).
+  // 폴더를 못 정하면 통과시키지 않는다 — 면제 레포도 예외가 아니다(면제 판정 자체가 서지 않는다).
+  [
+    'check-git-merge-policy.mjs',
+    `V="${gated}"; git -C "$V" merge feature`,
+    'deny',
+    '셸 변수 경로여도 머지 판정을 건너뛰지 않는다',
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `V="${free}"; git -C "$V" merge feature`,
+    'deny',
+    '면제 레포도 폴더를 못 정하면 통과시키지 않는다',
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `V="${gated}"; git -C "$V" rebase --continue`,
+    'pass',
+    '진행 중 작업 복구는 폴더를 못 정해도 통과',
+  ],
+  // 위 차단이 detached HEAD까지 삼키면 rebase/cherry-pick 중의 정상 상태가 오차단된다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${detached} merge feature`,
+    'pass',
+    'detached HEAD는 보호 브랜치가 아니라 그대로 통과',
+  ],
 
   // 한 명령이 두 레포를 섞어 부르면 정책을 유지한다 — 면제 레포에 얹혀 검사가 꺼지지 않게.
   [

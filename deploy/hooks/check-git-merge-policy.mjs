@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { allInFreeRepos } from "./free-git-repos.mjs";
 import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
 import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
@@ -27,6 +28,13 @@ const MERGE_MSG =
   "면제 아닌 레포에서는 AI가 직접 실행하지 말고(merge/pull/rebase/cherry-pick, branch -f, checkout -B, switch -C), " +
   "머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 실행할 명령을 사용자에게 안내하세요 (예: `git merge --ff-only <branch>`). " +
   "지금 따르는 스킬·절차가 면제 아닌 레포에서 직접 머지하라고 지시하고 있다면, 이참에 그 절차를 '사용자에게 머지를 안내'하는 수준으로 고쳐 두세요 (전수 수정 불필요 — 마주칠 때마다 점진 이관).";
+
+// 판정 불가로 차단할 때의 안내. MERGE_MSG와 분리한다 — 여기서 걸린 명령은 보호 브랜치를 건드리는지
+// 아직 모르는 상태라, "사용자에게 머지를 안내하라"가 아니라 "경로를 통째로 적어 다시 실행하라"가 답이다.
+const UNRESOLVED_CWD_MSG = (cwd) =>
+  `훅이 판정할 작업 폴더를 찾지 못했습니다 (cwd=${cwd}). 경로를 셸 변수로 넘기면(\`K=<path>; git -C "$K" merge …\`) ` +
+  "훅은 셸 확장 전 원문을 받아 보호 브랜치 머지 판정을 돌리지 못하므로 차단합니다. " +
+  '경로를 통째로 적어 다시 실행하세요 (예: `git -C "<레포 절대경로>" merge --ff-only <branch>`).';
 
 const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
 const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));
@@ -59,6 +67,12 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
   for (const inv of findGitInvocations(cmd, sub)) {
     if (inv.args.some((t) => CONTROL.test(t))) continue;
     const invCwd = normalizeCwd(inv.cwd) || cdCwd;
+    // 폴더를 못 정하면 통과시키지 않는다(free-git-repos.mjs의 판정 불가 처리와 같은 방향).
+    // 훅은 셸이 변수를 풀기 전의 명령 원문을 받으므로 `K=<path>; git -C "$K" merge`의 cwd는 `$K`라는
+    // 글자 그대로 들어오고, 그 폴더에서 브랜치를 못 읽어 아래 fail-open으로 흘러 판정이 통째로
+    // 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현: 같은 merge를 통째 경로로는 막고
+    // 셸 변수로는 통과시켰다). detached HEAD는 폴더가 실존해 이 갈래에 안 걸리고 fail-open이 받는다.
+    if (invCwd && !existsSync(invCwd)) deny(UNRESOLVED_CWD_MSG(invCwd));
     const gitOpts = invCwd ? { encoding: "utf8", cwd: invCwd, stdio: "pipe" } : { encoding: "utf8", stdio: "pipe" };
     let branch;
     try {
