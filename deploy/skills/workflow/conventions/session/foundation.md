@@ -58,8 +58,9 @@
 
 - 린트 (ESLint 룰·플러그인)
 - 포맷 (Prettier + ignore)
-- **커밋 컨벤션 강제** (commitlint + husky **commit-msg** hook)
-- **pre-commit hook** (husky + lint-staged)
+- **커밋 컨벤션 강제** (commitlint + **commit-msg** 훅)
+- **pre-commit 훅** (lint-staged)
+- **훅 배선·배포** (git 설정 훅 + `prepare`가 부르는 레포 내 등록 스크립트 — `monorepo-playground/templates/recruitment/README.md`)
 - tsconfig 강화
 - 빌드·스타일링 (vite/next + scss/tailwind)
 - 환경 일관성 (.editorconfig·.nvmrc 등)
