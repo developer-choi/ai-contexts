@@ -18,6 +18,7 @@ npm run sync:environment
   - `unsync:environment`로는 이 정리를 못 합니다. 그 명령은 레포별 훅 등록을 건드린 적이 없고 PowerShell 7 제거·gitignore·autorun 해제를 합니다.
 - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 등록하지 않고 중단합니다 (`winget upgrade --id Git.Git -e`).
 - `scripts/hooks/check-count-hardcoding.mjs`를 `~/.ai-contexts/check-count-hardcoding.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-count-hardcode.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md(`/skills/`·`/rules/`·`/contexts/`·`meta/guides/`·`CLAUDE|AGENTS|GEMINI.md`)를 통째로 훑어 개수 하드코딩(글로벌 룰 「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지해 경고합니다 — 어느 레포·어느 도구로 커밋하든 발동하지만 커밋을 막지는 않습니다.
+  - 스텝 번호 범위 호명(`Step 1~3`)도 같은 훅이 별도 문구로 경고합니다. 지는 불변식이 같기 때문입니다 — 문서 구조에 묶인 숫자가 구조가 바뀔 때 조용히 낡습니다. 번호 매긴 단계를 헤딩으로 정의하는 파일은 자기 목차를 부르는 것이라 이 검사에서 제외합니다.
   - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
