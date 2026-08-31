@@ -280,6 +280,39 @@ WRITE_CASES.push(
 
 WRITE_CASES.push(
   [
+    'check-md-rule-as-code.mjs',
+    mdWrite('## 다른 파일의 단계는 번호로 가리키지 않는다\n\n번호로 부르면 단계가 끼는 순간 낡는다.\n', skillDoc),
+    'context',
+    '규칙 절을 새로 세우면 도구로 내릴 수 있는지 묻는다',
+  ],
+  [
+    'check-md-rule-as-code.mjs',
+    mdWrite('## 리포트 형식\n\n한 일과 새로 생긴 도구를 나눠 적는다.\n', skillDoc),
+    'pass',
+    '절을 세워도 금지 어미가 없으면 조용하다',
+  ],
+  [
+    'check-md-rule-as-code.mjs',
+    mdWrite('이 표현은 쓰지 않는다.\n', skillDoc),
+    'pass',
+    '절 신설 없이 산문만 다듬으면 조용하다',
+  ],
+  [
+    'check-md-rule-as-code.mjs',
+    mdWrite('금지 예시다.\n\n```md\n## 값을 옮겨 적지 않는다\n```\n', skillDoc),
+    'pass',
+    '코드블록 안의 인용은 보지 않는다',
+  ],
+  [
+    'check-md-rule-as-code.mjs',
+    mdWrite('## 값을 옮겨 적지 않는다\n\n사본을 두지 않는다.\n', 'C:/tmp/docs/design.md'),
+    'pass',
+    '프롬프트·스킬 문서가 아니면 보지 않는다',
+  ],
+);
+
+WRITE_CASES.push(
+  [
     'check-skill-purpose-section.mjs',
     mdWrite('# 스킬\n\n## 목적\n\n한 줄로 끝낸다.\n\n안 하면 이런 일이 벌어진다.\n\n## 절차\n\n돈다.\n', skillDoc),
     'context',

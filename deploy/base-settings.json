@@ -67,6 +67,12 @@
       "msg": "Surfacing rules the hooks already enforce..."
     },
     {
+      "file": "check-md-rule-as-code.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Asking whether this rule can be pushed into code..."
+    },
+    {
       "file": "check-skill-purpose-section.mjs",
       "event": "PreToolUse",
       "on": "edit",

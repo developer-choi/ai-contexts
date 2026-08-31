@@ -19,7 +19,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { addContext, getToolName, readPayload } from "./hook-utils.mjs";
+import { addContext, getToolName, isPromptDoc, prose, readPayload, repoNameOf } from "./hook-utils.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
@@ -42,7 +42,7 @@ const input = payload.tool_input ?? {};
 const filePath = typeof input.file_path === "string" ? input.file_path : "";
 if (!filePath || path.extname(filePath).toLowerCase() !== ".md") process.exit(0);
 if (!isPromptDoc(filePath)) process.exit(0);
-if (SKIP_REPOS.has(repoName(filePath))) process.exit(0);
+if (SKIP_REPOS.has(repoNameOf(filePath))) process.exit(0);
 
 const written = typeof input.content === "string" ? input.content : typeof input.new_string === "string" ? input.new_string : "";
 if (!TOPICS.test(prose(written))) process.exit(0);
@@ -66,33 +66,6 @@ addContext(
   ].join("\n"),
   "PreToolUse",
 );
-
-// 프롬프트·스킬 문서만 본다. 일반 문서까지 걸면 커밋 이야기가 나올 때마다 떠서 소음이 된다.
-function isPromptDoc(file) {
-  const posix = file.replace(/\\/g, "/");
-  if (/\/(skills|rules|contexts)\//.test(posix)) return true;
-  return /^(CLAUDE|AGENTS|GEMINI)\.md$/i.test(path.basename(posix));
-}
-
-// 위로 올라가며 `.git`을 만나는 첫 폴더가 그 파일의 레포다.
-function repoName(file) {
-  let dir = path.dirname(path.resolve(file));
-  for (;;) {
-    if (fs.existsSync(path.join(dir, ".git"))) return path.basename(dir);
-    const up = path.dirname(dir);
-    if (up === dir) return "";
-    dir = up;
-  }
-}
-
-// 코드블록·인라인코드는 걷어낸 뒤 본다. 금지 예시로 명령어를 인용하는 자리가 많아, 안 걷어내면
-// 인용만 있는 편집에도 뜬다.
-function prose(src) {
-  return src
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/~~~[\s\S]*?~~~/g, " ")
-    .replace(/`[^`\n]*`/g, " ");
-}
 
 // 같은 폴더의 다른 정책 훅에서 거부 사유를 읽어온다. 사본을 두지 않으려는 것이므로, 못 읽으면
 // 그 파일은 조용히 건너뛴다 — 알림 하나가 짧아질 뿐이다.
