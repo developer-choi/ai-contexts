@@ -13,9 +13,10 @@ import {
 } from './environment-lib.mjs';
 import {
   assertGitSupportsConfigHooks,
-  registerRepoHooks,
   registerGlobalHook,
-  tracksHooksDir,
+  registerRepoHookWiring,
+  clearLegacyRepoHooks,
+  localHooksPath,
 } from '../lib/git-hooks.mjs';
 
 const home = os.homedir();
@@ -66,7 +67,7 @@ function main() {
   syncCmdAutorun(state);
 
   console.log('--- git 설정 훅 등록 ---');
-  syncRepoGitHooks();
+  syncRepoHookWiring();
 
   console.log('--- 개수 하드코딩 검사 훅 ---');
   syncCountHardcodingHook(state);
@@ -103,40 +104,55 @@ function syncCountHardcodingHook(state) {
   console.log(changed ? `전역 pre-commit 훅 등록: ${command}` : '전역 pre-commit 훅 이미 등록됨');
 }
 
-// ~/WebstormProjects/<group>/<repo> 중 .githooks가 추적되는 레포마다, 그 훅들을 git 설정 훅으로
-// 등록한다(git-hooks.mjs). 설정은 .git/config에 들어가고 그 파일은 워크트리끼리 공유되므로,
-// 레포당 한 번 등록하면 이후 만드는 워크트리에는 아무것도 갖다 놓지 않아도 훅이 발동한다.
+// `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**에 건다(git-hooks.mjs). 레포별 등록이
+// 아니라 전역인 이유는 등록이 `.git/config`에 사는데 clone이 그 파일을 안 가져오기 때문이다 —
+// 레포마다 등록하는 한 "클론만 하면 훅이 돈다"가 원리적으로 불가능하다.
 //
-// 이 등록이 유일한 배선이다 — 각 레포에 prepare나 설치 스크립트를 두지 않는다. 그래서 새 머신에서는
-// 이 명령을 먼저 돌려야 하고, 돌리기 전 클론은 훅이 없는 상태다(가이드의 "새 머신 기준" 참고).
+// 이 등록이 유일한 배선이다 — 각 레포에 prepare나 설치 스크립트를 두지 않는다. 기기당 한 번
+// 이 명령을 돌리면 그 뒤로 클론하는 레포도, 새로 파는 워크트리도 아무것도 안 해도 훅이 돈다.
 //
-// 링크된 워크트리(.git이 파일)는 건드리지 않는다 — 설정은 공용이라 primary에서 한 번이면 충분하고,
-// 워크트리를 대상에 넣으면 같은 레포를 여러 번 쓰게 된다.
-function syncRepoGitHooks() {
+// 대가: 이 명령을 안 돌린 기기에서는 **모든 레포**가 검사 없이 통과한다. 구멍의 개수가 줄고
+// 크기가 커지는 맞바꿈이며, 대신 점검이 싸다 — `git config --global --get-regexp '^hook\.'`
+// 한 줄이면 전 레포 커버 여부를 안다.
+function syncRepoHookWiring() {
+  const changed = registerRepoHookWiring();
+  console.log(changed.length ? `전역 훅 등록: ${changed.join(', ')}` : '전역 훅 이미 등록됨');
+
+  cleanLegacyRepoHooks();
+}
+
+// 전역 배선 이전의 레포별 등록(`hook.repo-*`)을 걷는다. 남겨두면 전역 훅과 둘 다 돌아 같은
+// 검사가 두 번 실행된다. 링크된 워크트리(.git이 파일)는 건너뛴다 — 설정은 공용이라 primary에서
+// 한 번이면 충분하다.
+//
+// 사실상 기기당 한 번이면 끝나는 이관이라 별도 1회성 스크립트로 뺄까 했지만, 여기 두면 기기마다
+// 무엇을 돌려야 하는지 기억할 일이 없어진다. 두 번째 실행부터는 지울 것이 없어 읽기만 하고,
+// 레포 39개 기준 1.4초라 winget·레지스트리 조회에 묻힌다(2026-08-31 실측).
+//
+// `core.hooksPath`는 **지우지 않고 보고만 한다** — 우리가 안 건 값을 가진 레포가 있다.
+function cleanLegacyRepoHooks() {
   const projectsRoot = path.join(home, 'WebstormProjects');
-  if (!fs.existsSync(projectsRoot)) {
-    console.log('WebstormProjects 디렉토리가 없어 훅 등록을 건너뜁니다.');
-    return;
-  }
+  if (!fs.existsSync(projectsRoot)) return;
 
-  // 버전이 낮으면 등록해봐야 git이 조용히 무시한다. 레포를 돌기 전에 여기서 끊는다.
-  assertGitSupportsConfigHooks();
-
-  const changed = [];
-  const already = [];
+  const cleared = [];
+  const hooksPathFound = [];
   for (const group of readDirsSafe(projectsRoot)) {
     for (const repo of readDirsSafe(path.join(projectsRoot, group))) {
       const repoPath = path.join(projectsRoot, group, repo);
       if (!isPrimaryWorktree(repoPath)) continue;
-      if (!tracksHooksDir(repoPath)) continue;
-      const { changed: didChange, hooks } = registerRepoHooks(repoPath);
-      (didChange ? changed : already).push(`${group}/${repo}(${hooks.join(',')})`);
+
+      const removed = clearLegacyRepoHooks(repoPath);
+      if (removed) cleared.push(`${group}/${repo}(${removed})`);
+
+      const hooksPath = localHooksPath(repoPath);
+      if (hooksPath) hooksPathFound.push(`${group}/${repo} → ${hooksPath}`);
     }
   }
 
-  if (changed.length) console.log(`설정 훅 등록: ${changed.join(', ')}`);
-  console.log(already.length ? `이미 등록됨: ${already.join(', ')}` : '');
-  if (!changed.length && !already.length) console.log('.githooks를 추적하는 레포가 없습니다.');
+  if (cleared.length) console.log(`옛 레포별 등록 정리: ${cleared.join(', ')}`);
+  if (hooksPathFound.length) {
+    console.log(`core.hooksPath 남음(안 건드림, 우리가 건 값인지 직접 확인): ${hooksPathFound.join(', ')}`);
+  }
 }
 
 function readDirsSafe(dir) {

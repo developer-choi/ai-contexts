@@ -13,7 +13,9 @@ npm run sync:environment
 - `~/.gitignore_global`에 AC 관리 block으로 `backlog/` 패턴을 추가합니다.
 - `core.excludesFile`이 비어 있으면 `~/.gitignore_global`을 등록합니다.
 - Windows에서 `~/autorun.cmd`를 AC 내용으로 생성·갱신하고, `HKCU\Software\Microsoft\Command Processor`의 `AutoRun`을 `@~/autorun.cmd`로 등록합니다. 대화형 cmd 창을 홈 디렉토리에서 열면 `~/WebstormProjects/main`으로 이동시킵니다. `AutoRun`이 다른 값으로 이미 설정돼 있으면 사용자 설정 보호를 위해 건너뜁니다.
-- `~/WebstormProjects/<group>/<repo>` 중 `.githooks`가 추적되는 레포마다, 그 훅들을 git 설정 훅(`hook.repo-<이름>.command`)으로 멱등하게 등록합니다. 설정은 `.git/config`에 들어가고 그 파일은 워크트리끼리 공유되므로, 레포당 한 번 등록하면 이후 만드는 워크트리에는 아무것도 갖다 놓지 않아도 훅이 발동합니다. 남아 있는 `core.hooksPath`는 해제합니다 — 파일 훅과 설정 훅이 둘 다 돌아 같은 검사가 두 번 실행되는 것을 막습니다.
+- `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**(`hook.ai-contexts-githooks-<이벤트>.*`)에 이벤트마다 멱등하게 등록합니다. 레포별로 등록하지 않는 이유는 등록이 `.git/config`에 사는데 clone이 그 파일을 안 가져오기 때문입니다 — 전역이면 그 뒤로 클론하는 레포도, 새로 파는 워크트리도 아무것도 안 해도 훅이 발동합니다. `.githooks/`가 없는 레포는 조용히 통과하므로 모든 레포에 걸려도 무해합니다.
+  - 옛 방식의 잔재(레포별 `hook.repo-*` 등록)를 발견하면 걷어냅니다 — 남겨두면 전역 훅과 둘 다 돌아 같은 검사가 두 번 실행됩니다. 이미 이관된 기기에서는 지울 것이 없어 읽기만 합니다. **`core.hooksPath`는 지우지 않고 보고만 합니다** — 우리가 안 건 값을 가진 레포(훅을 일부러 꺼둔 것, 옛 husky 과제 레포)가 섞여 있어, 지우면 꺼둔 훅이 되살아나거나 husky 배선이 끊깁니다.
+  - `unsync:environment`로는 이 정리를 못 합니다. 그 명령은 레포별 훅 등록을 건드린 적이 없고 PowerShell 7 제거·gitignore·autorun 해제를 합니다.
 - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 등록하지 않고 중단합니다 (`winget upgrade --id Git.Git -e`).
 - `scripts/hooks/check-count-hardcoding.mjs`를 `~/.ai-contexts/check-count-hardcoding.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-count-hardcode.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md(`/skills/`·`/rules/`·`/contexts/`·`meta/guides/`·`CLAUDE|AGENTS|GEMINI.md`)를 통째로 훑어 개수 하드코딩(글로벌 룰 「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지해 경고합니다 — 어느 레포·어느 도구로 커밋하든 발동하지만 커밋을 막지는 않습니다.
   - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
@@ -29,7 +31,7 @@ npm run unsync:environment
 
 제거 명령은 AC marker block만 제거합니다. PowerShell 7은 `sync:environment`가 직접 설치했다고 상태 파일에 기록된 경우에만 제거를 시도합니다. `~/autorun.cmd`는 내용이 AC가 쓴 것과 동일할 때만 삭제하고, `AutoRun` 레지스트리는 상태 파일에 AC 등록 기록이 있고 현재 값이 `@~/autorun.cmd`일 때만 제거합니다.
 
-레포 로컬 설정 훅 등록(`hook.repo-*`)은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 그 레포의 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 그 레포가 동작하기 위한 배선으로 봅니다.
+`.githooks` 배선(`hook.ai-contexts-githooks-*`)은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 이 기기의 모든 레포에서 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 레포들이 동작하기 위한 배선으로 봅니다.
 
 전역 개수 하드코딩 훅(`hook.ai-contexts-count-hardcode.*`)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/check-count-hardcoding.mjs`도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다).
 

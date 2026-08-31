@@ -17,7 +17,15 @@ import {
   deleteRegValue,
   escapeRegExp,
 } from './environment-lib.mjs';
-import { registerGlobalHook, unregisterGlobalHook, globalHookRegistered } from '../lib/git-hooks.mjs';
+import {
+  HOOK_EVENTS,
+  registerGlobalHook,
+  unregisterGlobalHook,
+  globalHookRegistered,
+  registerRepoHookWiring,
+  unregisterRepoHookWiring,
+  missingRepoHookWiring,
+} from '../lib/git-hooks.mjs';
 
 const failures = [];
 
@@ -102,6 +110,16 @@ function verifyGlobalHookMechanism(sandbox) {
   check('등록 후 조회 일치', globalHookRegistered(alias, 'pre-commit', command, { env }) === true);
   unregisterGlobalHook(alias, { env });
   check('해제 후 조회 불일치', globalHookRegistered(alias, 'pre-commit', command, { env }) === false);
+
+  // `.githooks/` 배선은 이벤트 하나라도 빠지면 그 이벤트의 검사가 통째로 무음 통과한다.
+  // "일부만 걸린 상태"를 빠짐으로 잡아내는지가 이 검사의 핵심이다.
+  check('배선 최초 등록은 전 이벤트', registerRepoHookWiring({ env }).length === HOOK_EVENTS.length);
+  check('배선 재등록은 없음(멱등)', registerRepoHookWiring({ env }).length === 0);
+  check('전부 걸리면 빠진 이벤트 없음', missingRepoHookWiring({ env }).length === 0);
+  unregisterGlobalHook(`githooks-${HOOK_EVENTS[0]}`, { env });
+  check('하나만 빠져도 잡아냄', missingRepoHookWiring({ env }).join() === HOOK_EVENTS[0]);
+  unregisterRepoHookWiring({ env });
+  check('일괄 해제 후 전부 빠짐', missingRepoHookWiring({ env }).length === HOOK_EVENTS.length);
 }
 
 function main() {
