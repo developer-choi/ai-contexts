@@ -7,9 +7,13 @@
 // 몇 개를 빠뜨린다.
 //
 // 사용: node <이 파일> <session.jsonl> [--out <파일>] [--tz <IANA 타임존>]
+//       node <이 파일> --list <cwd 경로> [--tz <IANA 타임존>]
+//         → 그 프로젝트의 세션 후보를 시작·종료·소요·첫 발화와 함께 나열한다
 // 표준출력으로 블록 통계를 찍는다 — 후처리 스크립트가 보존을 검증할 기준선이다.
 
 import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
 
 const RESEND_WINDOW_MS = 5 * 60 * 1000;
 const COMPACT_PREFIX = 'This session is being continued from a previous conversation';
@@ -20,6 +24,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--out') args.out = argv[++i];
     else if (argv[i] === '--tz') args.tz = argv[++i];
+    else if (argv[i] === '--list') args.list = argv[++i];
     else rest.push(argv[i]);
   }
   args.input = rest[0];
@@ -172,9 +177,57 @@ function render(blocks, tz) {
     .join('\n');
 }
 
+// 로그 디렉토리 이름은 cwd의 경로 구분자를 `-`로 바꾼 것이다 (`C:\Users\…` → `C--Users-…`).
+// 이 변환과 후보 훑기를 산문에 적어두면 매번 사람이 슬러그를 짓고 jsonl을 하나씩 열어
+// 첫/끝 timestamp를 읽어 표를 만들게 된다 — 엉뚱한 세션을 골라도 타임라인을 다 뽑고 나서야 드러난다.
+function listSessions(cwd, tz) {
+  const slug = path.resolve(cwd).replace(/[:\\/]/g, '-');
+  const dir = path.join(os.homedir(), '.claude', 'projects', slug);
+  if (!fs.existsSync(dir)) {
+    console.error(`로그 디렉토리 없음: ${dir}`);
+    console.error(`(cwd "${cwd}" → 슬러그 "${slug}")`);
+    process.exit(1);
+  }
+
+  const rows = fs
+    .readdirSync(dir)
+    .filter((name) => name.endsWith('.jsonl'))
+    .map((name) => {
+      const blocks = mergeAssistantRuns(mergeResends(toBlocks(readEntries(path.join(dir, name)), tz)));
+      if (!blocks.length) return { name, blocks: 0 };
+      const first = blocks[0];
+      const last = blocks[blocks.length - 1];
+      const minutes = Math.round((new Date(last.at) - new Date(first.at)) / 60000);
+      const opener = blocks.find((b) => b.speaker === '사용자') ?? first;
+      return {
+        name,
+        blocks: blocks.length,
+        from: stamp(first.at, tz),
+        to: stamp(last.at, tz),
+        minutes,
+        opener: opener.text.replace(/\s+/g, ' ').slice(0, 60),
+      };
+    })
+    .sort((a, b) => (a.from ?? '').localeCompare(b.from ?? ''));
+
+  console.log(`${dir}\n`);
+  for (const r of rows) {
+    if (!r.blocks) {
+      console.log(`${r.name}  (발화 0건)`);
+      continue;
+    }
+    console.log(`${r.name}\n  ${r.from} ~ ${r.to} (${r.minutes}분) · ${r.blocks}블록\n  첫 발화: ${r.opener}`);
+  }
+}
+
 const args = parseArgs(process.argv.slice(2));
+if (args.list) {
+  listSessions(args.list, args.tz);
+  process.exit(0);
+}
 if (!args.input) {
   console.error('사용: node <이 파일> <session.jsonl> [--out <파일>] [--tz <IANA 타임존>]');
+  console.error('      node <이 파일> --list <cwd 경로>');
   process.exit(1);
 }
 

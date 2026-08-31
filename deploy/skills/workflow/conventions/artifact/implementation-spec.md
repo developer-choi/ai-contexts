@@ -32,9 +32,9 @@
 
 - **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 step-4 종료 시퀀스의 코드-narrative 오배치 점검 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
 - 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
-- **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지**
+- **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지** — `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md>`가 센다. 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 그대로 사람 몫이고, 기계가 하는 것은 채워진 표에 빈 행이 있는지뿐이다
 - 오라클은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다 (decisions도 AI 산출물 — 행동 결정 추출이 좁으면 이 표도 좁아지므로, 갈래 수가 의심되면 1차 입력으로 소급 대조)
 
 ### IMPL 종료 시점 — `it.todo` ↔ 실제 `it(...)` 케이스
 
-stub `*.test.tsx`의 `it.todo` 자연어와 실제 작성된 `it(...)` 케이스를 대조. 누락된 todo가 있으면 사용자 보고.
+`node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <테스트 경로>`가 대조한다. 짝이 없는 `it.todo`가 나오면 사용자에게 보고한다 — 문구만 다듬어 옮긴 것인지 정말 빠진 것인지는 사람이 가른다.

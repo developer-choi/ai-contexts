@@ -30,16 +30,30 @@ function collect(dir, found = []) {
   return found;
 }
 
+// `{{skill_dir}}`는 **스킬 루트**로 채워진다(deploy-lib의 renderSkillSubMd가 하위 파일에도 같은
+// 값을 넘긴다). 그래서 하위 폴더의 스크립트를 `{{skill_dir}}/scripts/x.mjs`로 적으면 배포본이
+// 없는 경로를 가리키는데, 앵커 검사만으로는 통과한다 — 자리표시자로 시작하니까.
+// 실제로 그렇게 깨진 줄이 여섯 개 있었고 아무도 안 잡았다. 채워질 경로가 실재하는지까지 본다.
+function resolveSkillDir(file) {
+  const rel = path.relative(path.join(repoRoot, ROOT), file).replaceAll('\\', '/');
+  return path.join(repoRoot, ROOT, rel.split('/')[0]); // deploy/skills/<스킬명>
+}
+
 const offenders = [];
+const missing = [];
 for (const file of collect(path.join(repoRoot, ROOT))) {
+  const skillDir = resolveSkillDir(file);
   fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, index) => {
     for (const match of line.matchAll(INVOCATION)) {
-      if (ANCHORED.test(match[1])) continue;
-      offenders.push({
-        file: path.relative(repoRoot, file).replaceAll('\\', '/'),
-        lineNo: index + 1,
-        line: line.trim(),
-      });
+      const raw = match[1];
+      const where = { file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() };
+      if (!ANCHORED.test(raw)) {
+        offenders.push(where);
+        continue;
+      }
+      if (!raw.startsWith('{{skill_dir}}/')) continue; // 다른 앵커는 이 레포 밖을 가리킬 수 있어 실재를 못 본다
+      const target = path.join(skillDir, raw.slice('{{skill_dir}}/'.length));
+      if (!fs.existsSync(target)) missing.push({ ...where, target: path.relative(repoRoot, target).replaceAll('\\', '/') });
     }
   });
 }
@@ -50,7 +64,16 @@ if (offenders.length > 0) {
   console.error('');
   console.error('스크립트가 스킬 폴더에 있으면 `{{skill_dir}}/<경로>`로 적는다 — 배포가 절대경로로 채운다.');
   console.error('다른 레포 소유면 그 레포 경로를 앞에 붙여 적는다.');
-  process.exit(1);
 }
 
-console.log(`${ROOT}/ 스크립트 호출 모두 실행 위치 무관`);
+if (missing.length > 0) {
+  console.error(`${offenders.length ? '\n' : ''}{{skill_dir}}가 없는 파일을 가리킨다:`);
+  for (const { file, lineNo, target } of missing) console.error(`  ${file}:${lineNo} → ${target}`);
+  console.error('');
+  console.error('{{skill_dir}}는 스킬 루트로 채워진다 — 하위 폴더의 스크립트는 그 폴더까지 적는다.');
+  console.error('  예: session-timeline/SKILL.md에서 → {{skill_dir}}/session-timeline/scripts/x.mjs');
+}
+
+if (offenders.length + missing.length > 0) process.exit(1);
+
+console.log(`${ROOT}/ 스크립트 호출 모두 실행 위치 무관, 가리키는 파일 실재`);

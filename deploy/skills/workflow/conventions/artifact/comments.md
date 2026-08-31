@@ -54,12 +54,14 @@
 - ✓ `docs/conventions/*`, `docs/ARCHITECTURE.md`, `_fsd/.../*`, `plan/{prN}/persistent/*`
 - ❌ `plan/{prN}/consumable/*`, `plan/{prN}/retained/*`, 분배 후 삭제될 1차 입력 (사용자 작성 `page.md`, BG AI 산출물)
 
+소멸 버킷(`consumable`·`retained`)을 인용한 것은 위 두 게이트가 함께 짚는다. **인용 시점엔 경로가 실존하므로 아무 신호가 없다** — 소비·삭제된 뒤 그 TODO를 채우러 온 사람이 출처를 잃고, 그게 이 규칙이 막으려던 상황이다.
+
 ## PR 이연 마커 — 코드 안 금지
 
 본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
 
 - ❌ `// TODO: PR4에서 X 추가`, `// TODO [PR4]: ...`
-- ✓ `/plan/background/consumable/project.md` 해당 PR 섹션에 항목 추가
+- ✓ `project-md.mjs add-todo --pr {N}`으로 그 PR의 TODO에 등록
 
 본 PR 외부 의존성(백엔드 합의·디자인 검수·인프라 등):
 
@@ -69,9 +71,9 @@
 
 ## file-level(blanket) eslint-disable 라이프사이클
 
-파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 `/plan/background/consumable/project.md`의 **담당 PR 섹션에 "PR{N}에서 disable 제거 + 규칙 준수 수정" TODO로 등록**한다. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
+파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 등록한다 — `node {{skill_dir}}/scripts/project-md.mjs <project.md> add-todo --pr {N} --item "{파일}: disable 제거 + 규칙 준수 수정"`. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
 
-- 격리 마커에 **추적 가능한 고정 문구**를 남긴다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`) — step-6 백스톱이 이 문구로 고아를 탐지한다.
+- 격리 마커에 **`미리팩토링 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). step-6 백스톱이 이 문자열로 고아를 찾으므로, 문구를 고쳐 쓰면 그 파일은 탐지에서 조용히 빠진다 — 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
 
 인라인 disable(`// eslint-disable-next-line`)은 본 소절 대상이 아니다 — file-level blanket 블록만.
 
@@ -85,7 +87,7 @@
 
 ### IMPL 시작 게이트 (구현 진입 시)
 
-구현 대상 경로에서 `TODO [USER_REVIEW]` 잔존 라인을 센다. 1건이라도 있으면 IMPL을 중단하고 잔존 라인을 사용자에게 보고한다. 상단 블록 `/* TODO [USER_REVIEW] ... */`도 같은 검사 대상.
+`node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로> --marker USER_REVIEW`. 1건이라도 걸리면 IMPL을 중단하고 잔존 라인을 사용자에게 보고한다.
 
 ### 처리 (구현 중)
 
@@ -94,7 +96,7 @@
 
 ### 종료 게이트 (구현 마무리)
 
-구현 대상 경로에서 `TODO` 잔존 라인을 센다. `TODO [USER_REVIEW]`·`TODO [AI_IMPL]`·상단 블록·기타 `// TODO:` 형태 모두 0건. 잔존 시 종료 불가.
+`node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로>`. 형태를 가리지 않고 0건이어야 하며, 잔존 시 종료 불가. 게이트를 아예 안 돈 세션과 돌아서 0건인 세션은 산출물상 구분되지 않으므로 결과를 보고에 싣는다.
 
 ## 제외 대상
 
