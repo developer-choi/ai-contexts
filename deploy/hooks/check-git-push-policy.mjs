@@ -1,5 +1,5 @@
 import { execSync } from "node:child_process";
-import { allInFreeRepos } from "./free-git-repos.mjs";
+import { allInPolicyExemptRepos } from "./policy-exempt-repos.mjs";
 import { findGitInvocations, normalizeCwd, parseGitInvocation, splitSegments, tokenize } from "./git-command-parser.mjs";
 import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
@@ -10,9 +10,9 @@ if (typeof cmd !== "string") process.exit(0);
 const pushInvocations = findGitInvocations(cmd, "push");
 if (pushInvocations.length === 0) process.exit(0);
 
-// 면제 레포(free-git-repos.mjs)에서는 이 정책을 통째로 걷는다. chain 검사보다 먼저 본다 —
+// 면제 레포(policy-exempt-repos.mjs)에서는 이 정책을 통째로 걷는다. chain 검사보다 먼저 본다 —
 // 뒤에 두면 면제 레포의 `reset && push --force`가 여기서 먼저 막힌다.
-if (allInFreeRepos(pushInvocations, getCwd(payload))) process.exit(0);
+if (allInPolicyExemptRepos(pushInvocations, getCwd(payload))) process.exit(0);
 
 // chained 우회 차단: 같은 명령에 history rewrite와 force push가 함께 들어오면, PreToolUse 훅은
 // rewrite 실행 전 상태로 1회만 검사하므로 push 시점의 실제 diff를 못 본다 (reset && push --force 패턴).

@@ -452,7 +452,7 @@ const untrackedCases = (dir) => [
   ['check-git-commit-policy.mjs', `git -C ${dir} commit tracked.txt -m "x"`, 'pass', '미등록 파일이 없는 경로는 조용하다'],
 ];
 
-// 레포 면제(`free-git-repos.mjs`)는 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가
+// 레포 면제(`policy-exempt-repos.mjs`)는 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가
 // 있어야 판정된다. 면제 이름(`backlog`)과 아닌 이름(`ai-contexts`)을 나란히 만들어, 같은 명령이
 // 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
 // `knowledge-archive`는 같은 재료를 detached HEAD로 떼어둔 것이다 — 머지 훅이 "폴더를 못 정한 경우"를

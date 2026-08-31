@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { allInFreeRepos } from "./free-git-repos.mjs";
+import { allInPolicyExemptRepos } from "./policy-exempt-repos.mjs";
 import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
 import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
@@ -24,7 +24,7 @@ const PROTECTED = /^(master|main|develop|release)$/;
 // 주입할 때 160자에서 자른다. 뒤에 두면 잘려나가, 면제 레포에서 md를 쓰는 AI가 "여기도 막힌다"로
 // 읽는다 (2026-08-29 PP 세션 실측: 주입 2회, AI가 면제 레포에서 머지를 사용자에게 떠넘김).
 const MERGE_MSG =
-  "보호 브랜치(master/main/develop/release)로의 머지·포인터 이동은 사용자 결정 사항입니다 — 단 개인 레포(free-git-repos.mjs의 FREE_REPOS)는 면제되어 AI가 직접 머지합니다. " +
+  "보호 브랜치(master/main/develop/release)로의 머지·포인터 이동은 사용자 결정 사항입니다 — 단 git 정책 면제 레포(policy-exempt-repos.mjs의 POLICY_EXEMPT_REPOS)는 면제되어 AI가 직접 머지합니다. " +
   "면제 아닌 레포에서는 AI가 직접 실행하지 말고(merge/pull/rebase/cherry-pick, branch -f, checkout -B, switch -C), " +
   "머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 실행할 명령을 사용자에게 안내하세요 (예: `git merge --ff-only <branch>`). " +
   "지금 따르는 스킬·절차가 면제 아닌 레포에서 직접 머지하라고 지시하고 있다면, 이참에 그 절차를 '사용자에게 머지를 안내'하는 수준으로 고쳐 두세요 (전수 수정 불필요 — 마주칠 때마다 점진 이관).";
@@ -39,11 +39,11 @@ const UNRESOLVED_CWD_MSG = (cwd) =>
 const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
 const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));
 
-// 면제 레포(free-git-repos.mjs)에서는 이 정책을 통째로 걷는다. 이 훅이 보는 호출을 다 모아
+// 면제 레포(policy-exempt-repos.mjs)에서는 이 정책을 통째로 걷는다. 이 훅이 보는 호출을 다 모아
 // 한 번에 판정한다 — 아래 두 갈래(정적 매칭·HEAD 기반)가 같은 기준으로 갈려야 한다.
 const GATED_SUBCOMMANDS = ["branch", "checkout", "switch", "merge", "pull", "rebase", "cherry-pick"];
 const gated = GATED_SUBCOMMANDS.flatMap((sub) => findGitInvocations(cmd, sub));
-if (allInFreeRepos(gated, cdCwd || getCwd(payload))) process.exit(0);
+if (allInPolicyExemptRepos(gated, cdCwd || getCwd(payload))) process.exit(0);
 
 // --- 1. 정적 매칭: 포인터를 보호 브랜치로 강제 이동/재설정하는 명령 ---
 // branch -f <protected> [start] — 첫 positional(이동 대상 브랜치명)만 본다.
@@ -67,7 +67,7 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
   for (const inv of findGitInvocations(cmd, sub)) {
     if (inv.args.some((t) => CONTROL.test(t))) continue;
     const invCwd = normalizeCwd(inv.cwd) || cdCwd;
-    // 폴더를 못 정하면 통과시키지 않는다(free-git-repos.mjs의 판정 불가 처리와 같은 방향).
+    // 폴더를 못 정하면 통과시키지 않는다(policy-exempt-repos.mjs의 판정 불가 처리와 같은 방향).
     // 훅은 셸이 변수를 풀기 전의 명령 원문을 받으므로 `K=<path>; git -C "$K" merge`의 cwd는 `$K`라는
     // 글자 그대로 들어오고, 그 폴더에서 브랜치를 못 읽어 아래 fail-open으로 흘러 판정이 통째로
     // 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현: 같은 merge를 통째 경로로는 막고
