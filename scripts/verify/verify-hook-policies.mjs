@@ -159,7 +159,19 @@ const WRITE_CASES = [
       tool_input: { file_path: 'C:/tmp/note.md', content: '---\ntype: guide\n---\n\n# 제목\n' },
     },
     'pass',
-    '패키지 어휘 밖 type은 무관한 문서라 통과',
+    '패키지 어휘 밖 type이라도 다른 필수 필드가 없으면 무관한 문서라 통과',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: pr_body\naudience: 채용담당자\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'deny',
+    'type 오타는 self-filter를 빠져나가 아무 검사도 안 받으므로, 나머지 필수 필드가 있으면 막는다',
   ],
   [
     'check-package-frontmatter.mjs',

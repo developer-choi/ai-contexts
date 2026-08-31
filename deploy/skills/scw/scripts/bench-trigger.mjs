@@ -205,8 +205,11 @@ async function main() {
   }
 
   const runsPerQuery = Number(args['runs-per-query'] ?? 3);
-  const workers = Number(args['num-workers'] ?? 5);
-  const timeoutMs = Number(args.timeout ?? 60) * 1000;
+  // 기본값이 곧 권장값이다. 예전엔 5·60이었고 산문이 "매번 3·240을 붙여라"로 그 차이를 메웠는데,
+  // 빠뜨리면 60초에서 끊긴다 — 트리거되는 쿼리는 본문 작업이 130초를 넘으므로 **정상 트리거가
+  // 미트리거로 찍혀 description이 나쁜 것으로 오판된다.** 워커도 윈도우에서 5+면 socket·메모리에 걸린다.
+  const workers = Number(args['num-workers'] ?? 3);
+  const timeoutMs = Number(args.timeout ?? 240) * 1000;
   const threshold = Number(args['trigger-threshold'] ?? 0.5);
   const model = args.model ?? 'claude-sonnet-4-6';
 
@@ -276,6 +279,10 @@ async function main() {
   const shouldNot = perQuery.filter((r) => !r.should_trigger);
   const mean = (rows) => (rows.length > 0 ? rows.reduce((sum, r) => sum + r.rate, 0) / rows.length : 0);
 
+  // 집계 합격선. 쿼리 개별 판정(--trigger-threshold)과 다른 축이다 — 이쪽은 description 전체의 판정.
+  const TRIGGER_FLOOR = 0.7;
+  const FALSE_POSITIVE_CEIL = 0.1;
+
   const summary = {
     passed: passedCount,
     total: perQuery.length,
@@ -297,9 +304,16 @@ async function main() {
     '',
     `통과: ${summary.passed}/${summary.total}   실행 실패: ${failedTotal}건`
       + (failedTotal > 0 ? ' — 실패가 있는 행은 판정하지 않는다' : ''),
-    `should_trigger 평균 rate: ${summary.should_trigger_triggered_rate.toFixed(2)}`,
-    `should_not_trigger 평균 rate: ${summary.should_not_trigger_triggered_rate.toFixed(2)}`,
-  ];
+    // 두 집계값의 합격선까지 여기서 낸다. 예전엔 숫자만 찍고 0.7·0.1과의 대조를 산문이 시켰는데,
+    // 0.65를 통과로 읽어도 아무 데서도 안 걸리고 그 description이 그대로 배포된다.
+    `should_trigger 평균 rate: ${summary.should_trigger_triggered_rate.toFixed(2)} `
+      + `(${summary.should_trigger_triggered_rate >= TRIGGER_FLOOR ? 'PASS' : `FAIL — ${TRIGGER_FLOOR} 이상 권장`})`,
+    `should_not_trigger 평균 rate: ${summary.should_not_trigger_triggered_rate.toFixed(2)} `
+      + `(${summary.should_not_trigger_triggered_rate <= FALSE_POSITIVE_CEIL ? 'PASS' : `FAIL — ${FALSE_POSITIVE_CEIL} 이하 권장`})`,
+    failedTotal > 0
+      ? '실행 실패가 있어 두 평균이 낮게 잡힐 수 있다 — 재측정 전에는 FAIL을 확정으로 읽지 않는다'
+      : '',
+  ].filter((l) => l !== '');
   process.stdout.write(`${lines.join('\n')}\n`);
 }
 

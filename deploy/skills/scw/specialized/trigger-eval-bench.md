@@ -39,17 +39,15 @@ should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주).
 인자 목록은 `--help`가 정본이다. 기본값을 그냥 쓰면 안 되는 것만 아래에 둔다.
 
 - `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
-- `--runs-per-query 3`: LLM 비결정성 보정. 3 권장.
-- `--num-workers 3`: 윈도우에선 동시 `claude -p` 부하 고려. 5+로 늘리면 socket·메모리 한계.
 - 모델: sonnet (SCW 「Eval」 룰).
-- `--timeout 240`: 90·120으로는 부족. trigger되는 쿼리는 본문 작업 130s+ 걸리는데 early-kill 신호 못 잡으면 통째 timeout. 240 권장.
+
+반복·워커·타임아웃은 권장값이 곧 기본값이라 안 붙여도 된다. 예전엔 기본값이 달라 산문이 "매번 이걸 붙여라"로 그 차이를 메웠는데, 한 번 빠뜨리면 60초에서 끊겼다 — 트리거되는 쿼리는 본문 작업이 130초를 넘으므로 **정상 트리거가 미트리거로 찍혀 description이 나쁜 것으로 오판된다.**
 
 ## 결과 해석
 
 JSON 핵심 필드:
 - `summary.passed/total` — 통과 비율
-- `summary.should_trigger_triggered_rate` — 평균 trigger rate (0.7+ 권장)
-- `summary.should_not_trigger_triggered_rate` — false positive (0.0~0.1)
+- `summary.should_trigger_triggered_rate`·`should_not_trigger_triggered_rate` — 두 집계 평균. 합격선 판정은 스크립트가 표 아래에 PASS/FAIL로 붙인다(눈으로 대조하면 0.65를 통과로 읽어도 아무 데서도 안 걸리고 그 description이 그대로 배포된다)
 - `results[].rate` — 쿼리별 trigger 비율 (M/N runs)
 - `summary.failed_total` — 실행 실패 총계. 실패한 런은 트리거를 못 잰 것이라 그 쿼리는 PASS/FAIL 대신 `보류(재측정)`로 찍힌다
 

@@ -50,10 +50,26 @@ if (EDIT_TOOLS.has(getToolName(payload))) {
             `필드 의미는 deploy/contexts/writing-guide/package-format.md 참조.`,
         );
       }
+    } else if (fields && looksLikePackage(fields)) {
+      // 어휘를 벗어난 type은 위 self-filter를 그냥 빠져나간다 — 즉 **오타일수록 검사가 느슨해지는**
+      // 방향으로 실패한다(`pr_body`·`pr-review`로 적으면 아무 검사도 안 받는다). 그런데 입구
+      // 정규화가 붙인 frontmatter는 사용자가 볼 일이 없어 더 안 드러난다.
+      // 나머지 필수 필드가 함께 있으면 그건 글쓰기 패키지가 맞고 type만 어긋난 것이다.
+      deny(
+        `글쓰기 패키지로 보이는데 type이 어휘 밖입니다: ${fields.type ? `"${fields.type}"` : "(없음)"}. ` +
+          `허용 값: ${[...PACKAGE_TYPES].join(", ")}. ` +
+          `어휘를 벗어난 값은 필수 필드 검사를 통째로 빠져나가므로 여기서 막습니다.`,
+      );
     }
   }
 }
 process.exit(0);
+
+// type 말고 나머지 필수 필드가 둘 이상 있으면 글쓰기 패키지로 본다. 하나만으로는
+// 무관한 md(`purpose:` 하나 쓰는 문서 등)가 걸리므로 둘을 요구한다.
+function looksLikePackage(fields) {
+  return REQUIRED_FIELDS.filter((f) => f !== "type" && fields[f]).length >= 2;
+}
 
 // 저장 후 파일이 갖게 될 텍스트. Edit은 new_string이 본문 조각일 수 있어 디스크 내용에
 // 치환을 적용해야 frontmatter를 볼 수 있다 — 그래야 "값을 지우는 Edit"도 잡힌다.

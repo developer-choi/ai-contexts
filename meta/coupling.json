@@ -1,6 +1,14 @@
 {
   "groups": [
     {
+      "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅",
+      "files": [
+        "deploy/skills/write-init/SKILL.md",
+        "deploy/hooks/check-package-frontmatter.mjs"
+      ],
+      "note": "type 목록과 subtype 필수 여부가 두 곳에 산다 — write-init 「입력」 표와 훅의 PACKAGE_TYPES·SUBTYPE_REQUIRED_TYPES. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 필수 필드 검사를 통째로 빠져나간다(훅이 PACKAGE_TYPES로 self-filter하므로 미등록 type은 검사가 아예 안 걸린다). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 둘 다 고치고 verify-hook-policies에 케이스를 넣는다."
+    },
+    {
       "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 회차 점검",
       "files": [
         "deploy/hooks/surface-coupling.mjs",

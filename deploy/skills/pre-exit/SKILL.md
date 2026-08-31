@@ -25,6 +25,8 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | ref
 | `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-*` 스킬 호출 | [augmentations/routine.md](augmentations/routine.md) |
 | `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 
+감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포>`가 낸다. 대화 쪽 조건(그 스킬을 이 세션에서 불렀는가)은 세션만 아는 사실이라 그대로 판단한다.
+
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
 
 표에 없는 인자가 하나 더 있다 — `error-notebook`은 보강 파일을 부르지 않고 Step 1의 「몰라서 물어본 질문 수집」을 켠다.
@@ -56,8 +58,8 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | ref
 문제 추출 전에, 이 세션의 pre-compact 스냅샷이 있는지 확인한다. compaction(대화 요약 압축)은 full tool output·intermediate reasoning을 버려서, 압축 이전의 세밀한 사용자 교정이 현재 컨텍스트에서 휘발됐을 수 있다. PreCompact hook이 매 compaction마다 transcript를 자기소유 폴더에 스냅샷해두므로 그 파일로 회수한다.
 
 절차:
-1. `~/.claude/precompact-snapshots/`에 이 세션 `session_id`로 시작하는 스냅샷이 있는지 확인한다 (없으면 이 세션은 압축이 없었던 것 — 건너뛴다).
-2. 있으면 그 transcript(여럿이면 가장 최근 것)를 Read해 압축 이전 구간의 사용자 교정·반려·방향 수정을 회수한다.
+1. `node {{skill_dir}}/scripts/session-state.mjs snapshots --session <session_id>`. 폴더 경로·파일명 규약·최신 선택은 그 스크립트가 안다 — 손으로 글롭하면 빗나갔을 때 "압축이 없었다"로 결론내고 넘어가 그 구간의 교정이 통째로 유실된다.
+2. 나온 파일(여럿이면 맨 위)을 Read해 압축 이전 구간의 사용자 교정·반려·방향 수정을 회수한다.
 3. 회수한 항목을 아래 「문제 추출」 목록에 합류시킨다 (현재 컨텍스트에 이미 남아 있는 항목과 중복되면 합친다).
 
 스냅샷 jsonl은 verbatim 복사본이라 줄별 스키마가 미문서화다 — 정밀 파싱에 의존하지 말고, 사용자 발화(`type=user` 류)와 교정 맥락을 읽어내는 데 쓴다.
@@ -240,7 +242,7 @@ node {{contexts}}/local-html-roundtrip.mjs open pre-exit <만든 html 경로>
 
 - 대상은 이번 세션이 만든, 아직 기본 브랜치에 머지되지 않은 커밋이다. 이전 세션 커밋과 머지된 것은 건드리지 않는다
 - 파일 하나를 쓸 때마다 커밋하게 하는 스킬이 돌았으면 커밋이 잘게 남는 것이 정상이다. 그 조각들이 한 작업이면 하나로 합친다. 서로 다른 작업이면 작업 수만큼 남긴다
-- 합친 뒤 정리 전과 파일 내용이 같은지 확인하고, 무엇을 무엇으로 합쳤는지 보고한다
+- 정리를 **시작하기 전에** 그 시점 SHA를 잡아두고, 합친 뒤 `node {{skill_dir}}/scripts/session-state.mjs squash-check --repo <레포> --before <그 SHA>`로 파일 내용이 같은지 본다. 무엇을 무엇으로 합쳤는지는 함께 보고한다. **이 단계는 사용자 지시를 안 기다리므로 사람 눈이 안 거친다** — 합치다 hunk가 빠져도 커밋 로그는 깔끔해 보이고, 잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다
 - workflow 세션은 대상이 아니다 — 커밋 정리 시점을 그 스킬의 「Step 6.5. 1회차 커밋 정리·재정렬」이 소유한다
 
 ## Step 4. 워크트리 정리

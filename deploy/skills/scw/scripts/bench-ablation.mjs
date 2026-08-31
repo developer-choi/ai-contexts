@@ -57,10 +57,11 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --scenarios <a,b>      시나리오 필터
   --dump-dir <경로>      런별 원본 JSON 덤프 위치
   --verbose              진행 로그를 stderr로
+  --allow-over-cap       한 번의 발사 상한(100콜)을 의도적으로 넘길 때
 `;
 
 function parseArgs(argv) {
-  const flags = new Set(['--verbose', '--help', '-h']);
+  const flags = new Set(['--verbose', '--allow-over-cap', '--help', '-h']);
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
@@ -374,6 +375,27 @@ async function main() {
     }
   }
 
+  // 한 번의 발사 상한. 런마다 생성 1콜 + 채점 1콜이라 콜 수는 여기서 확정된다.
+  // 분류지·폴더 점검보다 먼저 본다 — 쪼개야 하는 회차라면 그 사실을 먼저 알아야 스펙을 손보는
+  // 순서가 헛돌지 않는다. 셋 다 콜을 쓰기 전이다.
+  //
+  // 왜 스크립트가 막나: 2026-08-15 round7에서 324콜을 한 번에 쏘아 창이 소진됐고 뒤쪽
+  // 시나리오 10개가 죽었다. 죽은 런은 채점이 비어 요약 표에 0점으로 찍혔고, **양 팔이 나란히
+  // 0이라 "델타 없음 → 삭제 유지"로 읽히는 표**가 나왔다 — 측정 안 된 구간이 삭제 근거로
+  // 둔갑했다. 곱셈을 사람이 하면 그 곱을 안 해보고 쏘는 회차가 나오고, 넘겼다는 사실은 표가
+  // 0으로 채워진 뒤에야, 그것도 델타로 위장해 드러난다.
+  const CALL_CAP = 100;
+  const calls = jobs.length * 2;
+  if (calls > CALL_CAP && !args['allow-over-cap']) {
+    throw new Error(
+      `${calls}콜 (런 ${jobs.length} x 2) — 한 번의 발사 상한 ${CALL_CAP}콜을 넘는다.\n`
+      + `  시나리오 ${scenarios.length} x 팔 ${variantNames.length} x 반복 ${args.reps} x 2 = ${calls}\n`
+      + `  묶음을 가르지 말고 케이스 필터(--scenarios·--variants)로 배치를 끊고 결과는 한 md에 모은다.\n`
+      + `  콜 수는 대리 지표다 — 프롬프트가 길거나 같은 창에서 다른 작업을 돌렸으면 더 낮게 잡는다.\n`
+      + `  의도한 초과면 --allow-over-cap.`,
+    );
+  }
+
   // 분류지 오류는 콜을 쓰기 전에 끊는다.
   for (const scenario of scenarios) axesOf(scenario, spec);
 
@@ -386,7 +408,7 @@ async function main() {
   if (args.verbose) {
     process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
       + `scenarios=${scenarios.map((s) => s.id).join(',')} reps=${args.reps} `
-      + `-> ${jobs.length}런 x2콜 (gen=${args.model}, workers=${workers})\n`);
+      + `-> ${jobs.length}런 x2콜 = ${calls}/${CALL_CAP}콜 (gen=${args.model}, workers=${workers})\n`);
   }
   if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
 
