@@ -13,10 +13,19 @@
 // 제3의 에이전트가 Start-Process 쪽으로 떨어져 "종료코드 0인데 창만 안 뜨는" 조용한 실패를
 // 한다 — Antigravity에서 실제로 관측된 모양이다.
 //
-// schtasks 따옴표 함정(같은 실측):
-//   /tr "cmd /c start \"\" \"<경로>\"" → ERROR: Invalid argument/option 으로 깨진다
-//   /tr "explorer.exe <경로>"          → 창은 뜨지만 Last Result 1이라 성공 판정에 못 쓴다
-//   경로를 박은 .cmd를 만들어 /tr에 그 파일만 넘기는 방식만 둘 다 만족한다.
+// 따옴표 함정(같은 실측):
+//   cmd /c start "" "<경로>" 를 작업 명령에 직접 넣으면 인자 파싱에서 깨진다.
+//   explorer.exe <경로> 는 창은 뜨지만 종료코드가 1이라 성공 판정에 못 쓴다.
+//   경로를 박은 .cmd를 만들어 그 파일만 넘기는 방식만 둘 다 만족한다.
+//
+// 배터리 함정(2026-09-01 실측, 노트북):
+//   예약작업은 기본값이 "AC 전원일 때만 실행"이라, 배터리로 돌면 만들어만 지고 Queued로
+//   남아 영영 안 돈다. 그런데 **한 번도 안 돈 작업의 Last Result는 0**이라, 그 값만 보면
+//   성공으로 읽힌다 — 실측: Status=Queued / Last Result=0 / 창은 안 뜸. 로그만 남고
+//   브라우저가 안 뜨는 조용한 실패가 여기서 나왔다.
+//   그래서 (1) 배터리에서도 돌도록 설정을 얹고, (2) 실행 여부를 Last Result가 아니라
+//   "이번 호출 뒤에 실제로 돈 시각(LastRunTime)"으로 판정한다. 안 돌았으면 실패로 낸다.
+//   schtasks.exe에는 배터리 설정을 켜는 스위치가 없어 등록을 PowerShell 쪽으로 옮겼다.
 //
 // 사용:
 // (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 그 에이전트의 절대경로로
@@ -32,8 +41,9 @@ import path from "node:path";
 // PP routine/scripts/cli/saveWeeklyForm.ts의 MAX_AGE_MS와 같은 값이다.
 const DEFAULT_MAX_AGE_MS = 30 * 60 * 1000;
 
-// schtasks /run이 대화형 데스크톱으로 작업을 넘기고 Last Result가 갱신될 때까지의 여유.
-const RUN_SETTLE_MS = 3000;
+// 작업이 대화형 데스크톱으로 넘어가 실제로 돌 때까지 기다리는 한도와 확인 간격.
+const RUN_TIMEOUT_MS = 15000;
+const RUN_POLL_MS = 250;
 
 const USAGE = `사용:
   open <마커> <html경로|-> [--slug <슬러그>]
@@ -105,54 +115,75 @@ function open(argv) {
   const cmdPath = path.join(os.tmpdir(), `${marker}-${slug}-open.cmd`);
   fs.writeFileSync(cmdPath, `start "" "${htmlPath}"\r\n`, { encoding: "utf8" });
 
-  // 실패해도 예약작업은 반드시 지우고 나간다. fail()은 process.exit이라 finally를 건너뛰므로
-  // try 안에서 부르지 않고, 사유만 들고 나와 정리 뒤에 낸다.
+  // fail()은 process.exit이라 finally를 건너뛴다. 정리는 PowerShell 쪽 finally가 맡고,
+  // 여기서는 사유만 들고 나와 마지막에 낸다.
   const taskName = `LHR_${marker}_${process.pid}`;
   let reason = null;
   try {
-    run(["/create", "/tn", taskName, "/tr", cmdPath, "/sc", "ONCE", "/st", "23:59", "/it", "/f"]);
-    run(["/run", "/tn", taskName]);
-    sleepSync(RUN_SETTLE_MS);
-
-    const result = lastResult(taskName);
-    if (result !== 0) {
-      reason = `브라우저를 띄우지 못했다 (schtasks Last Result: ${result}). 열려던 파일: ${htmlPath}`;
+    const verdict = runTask(taskName, cmdPath);
+    if (verdict.startsWith("NEVER_RAN")) {
+      reason =
+        `예약작업이 등록됐지만 실행되지 않았다 (상태: ${verdict.slice(10) || "알 수 없음"}).\n` +
+        `열려던 파일: ${htmlPath}\n` +
+        `브라우저에서 위 경로를 직접 열면 내용은 그대로 볼 수 있다.`;
+    } else if (verdict.startsWith("TIMEOUT")) {
+      reason = `예약작업이 ${RUN_TIMEOUT_MS}ms 안에 끝나지 않았다 (상태: ${verdict.slice(8)}). 열려던 파일: ${htmlPath}`;
+    } else if (verdict !== "OK 0") {
+      reason = `브라우저를 띄우지 못했다 (작업 종료코드: ${verdict.replace(/^OK /, "")}). 열려던 파일: ${htmlPath}`;
     }
   } catch (error) {
     // 작업 스케줄러 사용이 정책으로 막힌 기기에서 여기로 온다. 스택 대신 무엇이 막혔는지 낸다.
-    reason = `예약작업으로 브라우저를 열지 못했다 (schtasks 실행 실패). 열려던 파일: ${htmlPath}\n${error.message}`;
-  }
-
-  try {
-    run(["/delete", "/tn", taskName, "/f"]);
-  } catch {
-    // 지우기 실패가 오픈 자체를 무르지는 않는다. 다음 실행이 /f로 덮어쓰지만 흔적은 남으므로 알린다.
-    console.error(`경고: 임시 예약작업 ${taskName}을 지우지 못했다. 작업 스케줄러에서 확인할 것.`);
+    reason = `예약작업으로 브라우저를 열지 못했다 (등록·실행 실패). 열려던 파일: ${htmlPath}\n${error.message}`;
   }
 
   if (reason) fail(1, reason);
   console.log(htmlPath);
 }
 
-function sleepSync(ms) {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+// PowerShell 리터럴로 안전하게 넘긴다. 임시 폴더 경로에 공백·작은따옴표가 섞여도 깨지지 않는다.
+function psLiteral(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
 }
 
-function run(args) {
-  return execFileSync("schtasks", args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-}
+/**
+ * 예약작업을 등록·실행하고 실제로 돌았는지까지 확인한 뒤 지운다.
+ *
+ * 등록·실행·판정·삭제를 PowerShell 한 번에 묶는다. 프로세스를 네 번 나눠 띄우면 중간에
+ * 세션이 끊겼을 때 작업만 기기에 남는다.
+ *
+ * 판정은 종료코드가 아니라 LastRunTime으로 한다 — 한 번도 안 돈 작업도 종료코드는 0이라,
+ * 그것만 보면 배터리로 막혀 대기 중인 작업을 성공으로 읽는다.
+ *
+ * @returns `OK <종료코드>` | `NEVER_RAN <상태>` | `TIMEOUT <상태>`
+ */
+function runTask(taskName, cmdPath) {
+  return powershell(`
+    $ErrorActionPreference = 'Stop'
+    $name = ${psLiteral(taskName)}
+    $action = New-ScheduledTaskAction -Execute ${psLiteral(cmdPath)}
+    # 로그온한 사용자로 돌아야 창이 사용자 데스크톱에 뜬다(schtasks의 /it에 해당).
+    $principal = New-ScheduledTaskPrincipal -UserId ([Security.Principal.WindowsIdentity]::GetCurrent().Name) -LogonType Interactive
+    # 기본값은 "AC 전원일 때만 실행"이라 배터리에서는 Queued로 남아 영영 안 돈다.
+    $settings = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries
+    Register-ScheduledTask -TaskName $name -Action $action -Principal $principal -Settings $settings -Force | Out-Null
+    try {
+      # 안 돈 작업의 LastRunTime은 아주 먼 과거다. 이 시각보다 뒤면 이번 호출로 돈 것이다.
+      $startedAt = (Get-Date).AddSeconds(-5)
+      Start-ScheduledTask -TaskName $name
+      $deadline = (Get-Date).AddMilliseconds(${RUN_TIMEOUT_MS})
+      do {
+        Start-Sleep -Milliseconds ${RUN_POLL_MS}
+        $state = (Get-ScheduledTask -TaskName $name).State
+        $info = Get-ScheduledTaskInfo -TaskName $name
+      } while ($state -ne 'Ready' -and (Get-Date) -lt $deadline)
 
-// schtasks /query의 출력은 로케일에 따라 "Last Result"·"마지막 결과"로 갈린다.
-// 라벨을 맞히는 대신 /fo LIST에서 값이 정수 하나인 줄을 찾는다.
-function lastResult(taskName) {
-  const out = execFileSync("schtasks", ["/query", "/tn", taskName, "/fo", "LIST", "/v"], {
-    encoding: "utf8",
-  });
-  for (const line of out.split(/\r?\n/)) {
-    const match = /^(?:Last Result|마지막 결과)\s*:\s*(-?\d+)\s*$/.exec(line);
-    if (match) return Number(match[1]);
-  }
-  return null;
+      if ($info.LastRunTime -lt $startedAt) { "NEVER_RAN $state" }
+      elseif ($state -ne 'Ready') { "TIMEOUT $state" }
+      else { "OK $($info.LastTaskResult)" }
+    } finally {
+      Unregister-ScheduledTask -TaskName $name -Confirm:$false
+    }
+  `).trim();
 }
 
 // ---------------------------------------------------------------- collect
