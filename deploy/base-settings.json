@@ -103,6 +103,12 @@
       "msg": "Checking git commit policy..."
     },
     {
+      "file": "check-md-section-refs.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking markdown section references..."
+    },
+    {
       "file": "check-git-push-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",

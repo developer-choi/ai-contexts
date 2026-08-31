@@ -530,6 +530,45 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
   ],
 ];
 
+// 절 참조 검사(`check-md-section-refs.mjs`)는 staged md와 그 md가 가리키는 대상 파일을 둘 다
+// 디스크에서 읽는다 — 명령 문자열만으로는 판정이 안 선다. 대상 문서 하나와, 그것을 가리키는
+// 네 형태(정상 앵커·깨진 앵커·옛 「」 표기·코드블록 안 예시)를 staged 상태로 만들어 고정한다.
+// 파일을 나눠 두는 이유: 한 파일에 섞으면 차단이 알림을 가려 알림 케이스를 못 잰다.
+function withSectionRefFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-section-ref-'));
+  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+  try {
+    run('git init -q');
+    fs.writeFileSync(
+      path.join(dir, 'target.md'),
+      '# 대상\n\n## 메모·기록 도구 분리\n\n본문\n\n## 사전 준비: 브랜치 생성\n\n본문\n',
+    );
+    // 산문(「」)은 앞머리만 불러도 인정하지만, 앵커 **링크**는 전체 이름이라야 실제로 그 절로
+    // 뛴다. 두 기준이 갈리는 자리라 링크 쪽을 케이스로 고정한다.
+    fs.writeFileSync(path.join(dir, 'alias-link.md'), '[사전 준비](target.md#사전-준비)를 따른다.\n');
+    fs.writeFileSync(path.join(dir, 'alias-prose.md'), '`target.md`의 「사전 준비」를 따른다.\n');
+    fs.writeFileSync(path.join(dir, 'ok.md'), '[메모·기록 도구 분리](target.md#메모기록-도구-분리)를 따른다.\n');
+    fs.writeFileSync(path.join(dir, 'broken.md'), '[메모 기록 도구](target.md#메모와-기록-도구를-나눈다)를 따른다.\n');
+    fs.writeFileSync(path.join(dir, 'legacy.md'), '`target.md`의 「메모·기록 도구 분리」를 따른다.\n');
+    fs.writeFileSync(path.join(dir, 'fenced.md'), '예시:\n\n```markdown\n[없는 절](target.md#없는-절)\n```\n');
+    return fn(dir.replace(/\\/g, '/'), (files) => {
+      run('git reset -q');
+      run(`git add ${files.join(' ')}`);
+    });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const sectionRefCases = [
+  [['target.md', 'ok.md'], 'pass', '앵커가 실재하는 절을 가리키면 조용하다'],
+  [['target.md', 'broken.md'], 'deny', '대상 파일에 없는 절을 가리키면 차단한다'],
+  [['legacy.md'], 'context', '옛 「」 표기는 차단이 아니라 알림이다'],
+  [['fenced.md'], 'pass', '코드블록 안의 예시 링크는 보지 않는다'],
+  [['target.md', 'alias-link.md'], 'deny', '앞머리만 적은 앵커 링크는 그 절로 안 뛰므로 차단한다'],
+  [['target.md', 'alias-prose.md'], 'context', '산문은 앞머리만 불러도 차단하지 않는다'],
+];
+
 function main() {
   console.log('정책 hook 판정 검증 중...');
   const failures = [];
@@ -580,6 +619,26 @@ function main() {
   // 레포 제외는 경로 위쪽의 `.git`으로 판정되므로 fixture 안에서 실행까지 끝낸다 — 폴더가
   // 먼저 지워지면 레포를 못 찾아 제외가 안 걸린 채로 판정된다.
   withRepoFixture((dir) => runWriteCases(repoCases(dir)));
+  // 절 참조 검사는 staged 목록과 대상 파일을 디스크에서 읽으므로 fixture 안에서 실행까지 끝낸다.
+  // 케이스마다 stage 대상이 달라 스테이징을 매번 다시 잡는다.
+  withSectionRefFixture((dir, stage) => {
+    for (const [files, expected, note] of sectionRefCases) {
+      stage(files);
+      const { decision, stderr } = runHookPayload('check-md-section-refs.mjs', {
+        tool_name: 'Bash',
+        tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
+        cwd: dir,
+      });
+      const label = `check-md-section-refs.mjs :: [${files.join(', ')}] → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
+    }
+  });
   if (failures.length) {
     console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
