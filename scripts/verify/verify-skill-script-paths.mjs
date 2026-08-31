@@ -13,6 +13,12 @@ import path from 'node:path';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const ROOT = 'deploy/skills';
+// contexts·rules도 배포돼 여러 에이전트가 읽는다. 스킬만 보던 시절 `deploy/contexts/`의
+// 사용법 주석이 `~/.claude/...`를 박아둔 채 남아 있었고(codex·gemini에서 없는 경로),
+// 검사기는 `~`를 앵커로 쳐서 통과시켰다.
+const EXTRA_ROOTS = ['deploy/contexts', 'deploy/rules'];
+// 특정 에이전트의 홈을 박은 경로. 자리표시자로 적어야 각 타겟의 실제 경로로 채워진다.
+const AGENT_HOME = /^~[\\/]\.(claude|codex|gemini)\b/;
 
 // 인터프리터 + (옵션들) + 스크립트 파일 경로. 산문에 나온 파일 이름은 잡지 않는다.
 const INVOCATION = /(?:^|[\s(`"'&|])(?:node|python3?|python\.exe|tsx|bash|sh|npx)\s+(?:--?[\w-]+\s+)*([^\s`"'|;)]+\.(?:mjs|cjs|js|ts|mts|py|sh))/g;
@@ -20,12 +26,12 @@ const INVOCATION = /(?:^|[\s(`"'&|])(?:node|python3?|python\.exe|tsx|bash|sh|npx
 // 기준점이 확정된 형태 — 절대경로·홈·환경변수·자리표시자·`<설명>` 꼴은 통과.
 const ANCHORED = /^(\/|~|\$|<|\{\{|[A-Za-z]:[\\/])/;
 
-function collect(dir, found = []) {
+function collect(dir, found = [], extra) {
   if (!fs.existsSync(dir)) return found;
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) collect(full, found);
-    else if (entry.name.endsWith('.md')) found.push(full);
+    if (entry.isDirectory()) collect(full, found, extra);
+    else if (entry.name.endsWith('.md') || (extra && extra(entry.name))) found.push(full);
   }
   return found;
 }
@@ -41,21 +47,32 @@ function resolveSkillDir(file) {
 
 const offenders = [];
 const missing = [];
-for (const file of collect(path.join(repoRoot, ROOT))) {
-  const skillDir = resolveSkillDir(file);
-  fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, index) => {
-    for (const match of line.matchAll(INVOCATION)) {
-      const raw = match[1];
-      const where = { file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() };
-      if (!ANCHORED.test(raw)) {
-        offenders.push(where);
-        continue;
+const agentHome = [];
+
+// .mjs 주석 안의 사용법도 본다 — 그 줄을 따라 치는 것은 사람·AI이고, 깨진 경로는 md와 똑같이 안 닿는다.
+const isSource = (f) => /\.(mjs|cjs|js)$/.test(f);
+const roots = [ROOT, ...EXTRA_ROOTS];
+for (const root of roots) {
+  for (const file of collect(path.join(repoRoot, root), [], root === ROOT ? undefined : isSource)) {
+    const skillDir = root === ROOT ? resolveSkillDir(file) : null;
+    fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, index) => {
+      for (const match of line.matchAll(INVOCATION)) {
+        const raw = match[1];
+        const where = { file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() };
+        if (AGENT_HOME.test(raw)) {
+          agentHome.push(where);
+          continue;
+        }
+        if (!ANCHORED.test(raw)) {
+          offenders.push(where);
+          continue;
+        }
+        if (!skillDir || !raw.startsWith('{{skill_dir}}/')) continue; // 다른 앵커는 이 레포 밖을 가리킬 수 있어 실재를 못 본다
+        const target = path.join(skillDir, raw.slice('{{skill_dir}}/'.length));
+        if (!fs.existsSync(target)) missing.push({ ...where, target: path.relative(repoRoot, target).replaceAll('\\', '/') });
       }
-      if (!raw.startsWith('{{skill_dir}}/')) continue; // 다른 앵커는 이 레포 밖을 가리킬 수 있어 실재를 못 본다
-      const target = path.join(skillDir, raw.slice('{{skill_dir}}/'.length));
-      if (!fs.existsSync(target)) missing.push({ ...where, target: path.relative(repoRoot, target).replaceAll('\\', '/') });
-    }
-  });
+    });
+  }
 }
 
 if (offenders.length > 0) {
@@ -74,6 +91,14 @@ if (missing.length > 0) {
   console.error('  예: session-timeline/SKILL.md에서 → {{skill_dir}}/session-timeline/scripts/x.mjs');
 }
 
-if (offenders.length + missing.length > 0) process.exit(1);
+if (agentHome.length > 0) {
+  console.error(`${offenders.length + missing.length ? '\n' : ''}특정 에이전트의 홈 경로를 박은 호출:`);
+  for (const { file, lineNo, line } of agentHome) console.error(`  ${file}:${lineNo}: ${line}`);
+  console.error('');
+  console.error('배포는 claude·codex·gemini 셋 다에 깔린다 — `~/.claude/...`는 나머지 둘에서 없는 경로다.');
+  console.error('`{{contexts}}/<파일>`·`{{skill_dir}}/<경로>`로 적으면 배포가 각 타겟의 절대경로로 채운다.');
+}
 
-console.log(`${ROOT}/ 스크립트 호출 모두 실행 위치 무관, 가리키는 파일 실재`);
+if (offenders.length + missing.length + agentHome.length > 0) process.exit(1);
+
+console.log(`${roots.join('·')} 스크립트 호출 모두 실행 위치 무관, 가리키는 파일 실재`);

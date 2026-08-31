@@ -281,8 +281,6 @@ AI 설정(규칙·스킬·hook·settings)은 아래 원본에서 고친다. 배�
 
 테스트 목적으로 배포 위치를 직접 고쳤으면, 결과를 AC 원본에 반영하고 배포까지 완료한다.
 
-반영 명령은 **사용자가 실행한다.** AI는 읽기전용 `verify:*`까지만 돌린다.
-
 | 구분 | 원본 수정 위치 | 배포 위치 | 반영 명령 |
 |---|---|---|---|
 | 글로벌 규칙·컨텍스트·hooks·설정 | AC `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/base-settings.json`(공통), `deploy/*-settings.json`(타겟 override) | `~/.claude/`, `~/.codex/`, `~/.gemini/` | AC에서 `npm run sync:system` |

@@ -19,8 +19,10 @@
 //   경로를 박은 .cmd를 만들어 /tr에 그 파일만 넘기는 방식만 둘 다 만족한다.
 //
 // 사용:
-//   node ~/.claude/contexts/local-html-roundtrip.mjs open <마커> <html경로|-> [--slug <슬러그>]
-//   node ~/.claude/contexts/local-html-roundtrip.mjs collect <마커> [--max-age-ms N] [--out <경로>]
+// (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 그 에이전트의 절대경로로
+//  채운다. 여기 홈 경로를 박아두면 codex·gemini에서 그대로 따라 친 사람이 없는 경로를 친다.)
+//   node <이 파일> open <마커> <html경로|-> [--slug <슬러그>]
+//   node <이 파일> collect <마커> [--max-age-ms N] [--out <경로>]
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
