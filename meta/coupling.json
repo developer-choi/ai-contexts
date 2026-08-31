@@ -1,6 +1,22 @@
 {
   "groups": [
     {
+      "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 회차 점검",
+      "files": [
+        "deploy/hooks/surface-coupling.mjs",
+        "scripts/refresh-projects-scan.mjs"
+      ],
+      "note": "meta/coupling.json의 files 항목을 glob(*, **, ?)으로 읽는 규칙이 두 곳에 산다. 훅은 배포돼 나가는 파일이라 AC scripts/를 import할 수 없어 공용 모듈로 못 묶었다. 한쪽만 고치면 편집 시점에는 뜨는 그룹이 회차 점검에서 안 뜨거나 그 반대가 되고, 회차 점검은 훅이 놓친 것을 메우려고 있으므로 그 어긋남은 조용하다. glob 문법 해석을 바꾸면 둘 다 고친다."
+    },
+    {
+      "name": "refresh-projects 레지스트리·덤프 표 ↔ 파서",
+      "files": [
+        "local/skills/refresh-projects/SKILL.md",
+        "scripts/refresh-projects-scan.mjs"
+      ],
+      "note": "스캔이 SKILL.md의 「프로젝트 레지스트리」(첫 헤더 `약어`)와 「만료 덤프 정리」(첫 헤더 `대상`) 표를 마크다운 그대로 파싱해 대상을 정한다 — 사본을 안 두려고 표를 데이터로 쓴다. 표의 헤더 이름·열 순서·기한 표기(`N일`·`N달` 등)를 바꾸면 파서도 함께 고친다. 안 그러면 프로젝트가 목록에서 조용히 빠지거나 기한을 못 읽어 만료 판정이 사라진다."
+    },
+    {
       "name": "settings hook 등록·투영",
       "files": [
         "deploy/base-settings.json",
