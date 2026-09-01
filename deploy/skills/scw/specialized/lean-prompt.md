@@ -12,19 +12,6 @@
 - 위반: 그 절차에 딸린 ceremony·보고 양식(백업 브랜치 네이밍, "이런 문구로 보고하라" 같은 문안 틀)까지 적음. AI가 알아서 하는 부분이라 what에 포함되지 않는다
 - 정답: what만 남기고 명령어·양식 제거
 
-**before** — `conventions/session/finalize.md` 「진입 실측」 표 좌열:
-
-```
-gh pr list --state all
-git branch --no-merged <기본브랜치>
-```
-
-**after**: "이미 머지된 PR이 있는지" (명령어 삭제)
-
-**before** — `conventions/commits.md` 「백업 브랜치 [CRITICAL]」의 `git branch backup/...`·`git reset --hard ...` 블록과 force-push 보고 양식
-
-**after**: 통째 제거. 백업은 명령어 없이 한 줄만 — "history rewrite 전 백업을 떠두면 되돌리기 쉽다, 안 떴어도 reflog로 복구"
-
 ## 도구가 강제하는 규약은 재기술도 언급도 하지 않는다
 
 린트·hook·commitlint가 결정론적으로 잡는 형식은 그 도구가 SSOT다. 본문이 형식을 다시 적으면 두 곳이 어긋나고, "그 도구를 따른다"는 한 줄조차 도구가 이미 차단하는 것을 다시 부탁하는 잉여다.
@@ -32,15 +19,7 @@ git branch --no-merged <기본브랜치>
 - 위반: 도구가 강제하는 형식·규약을 본문이 재기술하거나, 그걸 따르라고 언급
 - 정답: 재기술 0줄, 언급 0줄
 
-**before** — `conventions/commits.md`의 커밋 메시지 라이프사이클 표·stub 커밋·잔존 md 커밋 절이 `chore(<scope>): ...`·`docs(<scope>): ...` 형식을 나열
-
-**after**: 삭제. 형식·type·scope는 commitlint가 강제한다.
-
 **강제 표면은 레포 설정만이 아니다.** 전역 훅(`~/.claude/hooks/`)과 전역 룰도 SSOT다. 레포에 commitlint·husky가 없다고 "강제하는 도구가 없으니 본문에 적어야 한다"로 넘어가지 말고, 전역 쪽이 이미 막는지 확인한 뒤 판정한다.
-
-**before** — PP `local/skills/study-report/SKILL.md`에 새로 쓴 절: "리포트 파일 하나만 커밋한다", "내가 만들지 않은 변경이 섞여 있으면 커밋하지 않는다"
-
-**after**: 삭제. staging 범위 한정은 `check-git-staging-policy.mjs`가 막고(`git add .`·`-A` 금지, 파일 개별 지정 강제), 남의 변경을 커밋하지 않는 것은 전역 Git 룰이 SSOT다.
 
 ## 산문을 고치기 전에 상황을 없앨 수 있는지 본다
 

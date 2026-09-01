@@ -133,8 +133,9 @@ sync·unsync 스크립트의 동작이 바뀌면 `meta/guides/` 하위의 관련
 
 ## settings.json hook 작성 위치
 
-`~/.claude/settings.json`(또는 프로젝트 settings.json)의 PreToolUse / PostToolUse hook은 인라인 명령으로 작성하지 않는다. 항상 별도 `.js` 파일로 분리하고 settings.json에는 `node -e "require('...')"` 형태로 require만 등록한다.
+settings.json의 PreToolUse / PostToolUse hook은 인라인 명령으로 작성하지 않는다. 훅 하나가 파일 하나다.
 
 - 인라인은 디버그 로깅·점진 수정·라인 번호 추적이 어렵고, 패치 시 편집 단위가 settings.json 전체가 되어 hook 코드만 독립 검증할 수 없다.
-- 분리된 `.js`는 Read / Edit / 검증을 hook 단위로 처리할 수 있다.
-- AC `deploy/hooks/`에 원본을 두고 `npm run sync:system`으로 `~/.claude/hooks/`에 배포하는 패턴을 따른다.
+- 파일로 분리하면 Read / Edit / 검증을 hook 단위로 처리할 수 있다.
+
+settings.json에 어떤 명령 문자열로 등록되는지는 `scripts/settings/settings-projection.mjs`가 정하고 `verify-settings-projection.mjs`가 회귀 검증한다 — 손으로 적지 않는다.

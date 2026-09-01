@@ -107,7 +107,7 @@ E·B 압축본은 원본보다 트리거 어휘가 짧아져 매칭 범위가 **
 
 ## workspace / 커밋 규칙
 
-- 벤치 workspace: `bench/workspace/<target>/<rule-id>/runs/`. 완료 후 `rm -rf`
+- 벤치 workspace: `bench/workspace/<target>/<rule-id>/runs/`. 완료 후 정리한다
 - 판정 보류 사유·다음 단계는 결과 보고에 기록
 - 커밋 순서: 규칙 파일 수정 → roadmap. 두 커밋 분리 (한 커밋에 섞지 않음)
 
