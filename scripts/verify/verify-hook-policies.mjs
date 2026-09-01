@@ -607,6 +607,20 @@ function withSectionRefFixture(fn) {
     fs.writeFileSync(path.join(dir, 'cmd-missing.md'), '`/scaffold https://example.com/1` 실행 시 생성되는 파일들.\n');
     fs.writeFileSync(path.join(dir, 'cmd-builtin.md'), '`/compact 후 이어서` 진행한다.\n');
     fs.writeFileSync(path.join(dir, 'cmd-bare.md'), '엔드포인트는 `/users`, `/settings` 두 개다.\n');
+    // 외부 URL은 이 레포에 없는 것이 정상이다. 안 거르면 GitHub·공식문서의 `.md#앵커`가
+    // 로컬 파일로 읽혀 무관한 커밋을 통째로 막는다(전수 실측: backlog가 그렇게 막혀 있었다).
+    fs.writeFileSync(path.join(dir, 'external.md'), '[출처](https://example.com/docs/guide.md#anchor)를 본다.\n');
+    // `경로` + 「절」 + 콜론 뒤 코드펜스가 그 파일에서 그대로 옮겨온 것인지 본다.
+    fs.writeFileSync(
+      path.join(dir, 'quote-ok.md'),
+      '**before** — `target.md` 「메모·기록 도구 분리」:\n\n```\n## 메모·기록 도구 분리\n```\n',
+    );
+    fs.writeFileSync(
+      path.join(dir, 'quote-stale.md'),
+      '**before** — `target.md` 「메모·기록 도구 분리」:\n\n```\ngh pr list --state all\n```\n',
+    );
+    // 세 조각이 다 모이지 않으면 예시용 경로와 구분이 안 되므로 보지 않는다.
+    fs.writeFileSync(path.join(dir, 'quote-loose.md'), '`target.md`를 참고한다.\n\n```\n실재하지 않는 내용\n```\n');
     return fn(dir.replace(/\\/g, '/'), (files) => {
       run('git reset -q');
       run(`git add ${files.join(' ')}`);
@@ -629,6 +643,11 @@ const sectionRefCases = [
   [['cmd-missing.md'], 'context', '없는 커맨드를 인자와 함께 호명하면 알린다'],
   [['cmd-builtin.md'], 'pass', '빌트인 커맨드 호명은 조용하다'],
   [['cmd-bare.md'], 'pass', '인자 없는 백틱 경로는 커맨드로 보지 않는다'],
+  [['external.md'], 'pass', '외부 URL은 로컬 파일로 보지 않는다'],
+  // 인용 머리줄은 `경로` + 「절」이라 옛 표기 알림에도 걸린다 — 차단이 아니라는 것이 여기서 재는 것이다.
+  [['target.md', 'quote-ok.md'], 'context', '인용한 코드블록이 대상 파일에 있으면 차단하지 않는다'],
+  [['target.md', 'quote-stale.md'], 'deny', '인용한 코드블록이 대상 파일에 없으면 차단한다'],
+  [['target.md', 'quote-loose.md'], 'pass', '경로만 있고 「절」·콜론이 없으면 인용으로 보지 않는다'],
 ];
 
 function main() {

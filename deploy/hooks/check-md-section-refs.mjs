@@ -97,6 +97,14 @@ const BUILTIN_COMMANDS = new Set([
 // 대상 파일 하나당 앵커 집합을 한 번만 만든다. 여러 파일이 같은 문서를 가리키는 것이 흔하다.
 const anchorCache = new Map();
 
+// `경로` + 「절」 + 콜론으로 끝나는 줄. 바로 다음 줄이 코드펜스일 때만 그 내용을 대조한다.
+// 경로도 절도 멀쩡한데 **인용한 본문만** 사라지는 형태를 잡는다 — 위 검사들은 가리키는 주소만
+// 보므로 이건 아무도 안 본다. lean-prompt.md의 before 블록 넷이 그렇게 낡아 있었다.
+//
+// 세 조각이 한 줄에 다 모인 꼴로 좁힌 이유: 넓게(경로가 있는 줄 근처의 아무 코드펜스) 잡으면
+// 워크스페이스 실측 9건이 **전부** `foo.md`·`<rel>.md` 같은 예시용 경로라 오탐만 남는다.
+const FENCE_QUOTE_LEAD = /`([^`\s]+\.\w+)`[^`\n]*[「【]([^」】\n]+)[」】][^\n]*:\s*$/u;
+
 // 레포당 한 번만 만드는 색인들.
 let docIndexCache = null;
 let commandCache = null;
@@ -122,7 +130,7 @@ if (!staged.length) process.exit(0);
 
 const found = inspect(root, staged);
 
-if (found.broken.length || found.codeRefs.length) {
+if (found.broken.length || found.codeRefs.length || found.quotes.length) {
   deny(formatBroken(found));
 }
 if (found.legacy.length || found.commands.length) {
@@ -134,7 +142,7 @@ process.exit(0);
 
 // 훅과 실측이 함께 쓰는 몸통. 파일 목록을 받아 네 갈래로 나눠 담는다.
 function inspect(root, files) {
-  const found = { broken: [], legacy: [], codeRefs: [], commands: [] };
+  const found = { broken: [], legacy: [], codeRefs: [], commands: [], quotes: [] };
   for (const rel of files) {
     const abs = path.join(root, rel);
     let src;
@@ -148,6 +156,7 @@ function inspect(root, files) {
       collectBrokenAnchors(rel, abs, src, found.broken);
       collectLegacyRefs(root, rel, abs, src, found.legacy);
       collectMissingCommands(root, rel, src, found.commands);
+      collectFenceQuotes(rel, abs, src, found.quotes);
       continue;
     }
     // 코드 파일에는 앵커 링크 검사를 돌리지 않는다. 세 레포 전수에서 코드 안의
@@ -167,6 +176,10 @@ function inspect(root, files) {
 function collectBrokenAnchors(rel, abs, src, out) {
   for (const m of matchesOutsideCode(src, ANCHOR_LINK)) {
     const [, text, href, rawAnchor] = m.match;
+    // 외부 URL은 대상이 이 레포에 없는 것이 정상이다. 안 거르면 GitHub·공식문서의 `.md#앵커`
+    // 링크를 로컬 파일로 착각해 "대상 파일이 없습니다"로 차단한다 — 전수 실측에서 backlog가
+    // 그 이유로 세 파일에서 막혀 있었다(네이버 로그인 문서·css-modules·dnd 예제 링크).
+    if (/^[a-z][\w+.-]*:\/\//i.test(href) || href.startsWith("//")) continue;
     const target = path.resolve(path.dirname(abs), href);
     if (!isFile(target)) {
       out.push({ rel, line: m.line, text, href, anchor: rawAnchor, why: "대상 파일이 없습니다", near: [] });
@@ -339,6 +352,41 @@ function listDir(dir) {
   }
 }
 
+// `경로` + 「절」 + 콜론 다음 줄의 코드펜스가 그 파일에서 그대로 옮겨온 것인지 본다.
+// 빈 줄과 펜스 자체는 세지 않고, 남은 줄이 하나라도 대상에 없으면 낡은 인용으로 본다.
+function collectFenceQuotes(rel, abs, src, out) {
+  const lines = src.split(/\r?\n/);
+  let fenced = false;
+  for (let i = 0; i < lines.length; i++) {
+    if (/^\s*(```|~~~)/.test(lines[i])) {
+      fenced = !fenced;
+      continue;
+    }
+    if (fenced) continue;
+    const lead = FENCE_QUOTE_LEAD.exec(lines[i]);
+    if (!lead) continue;
+    let j = i + 1;
+    while (j < lines.length && lines[j].trim() === "") j++;
+    if (j >= lines.length || !/^\s*(```|~~~)/.test(lines[j])) continue;
+    const target = path.resolve(path.dirname(abs), lead[1]);
+    if (!isFile(target)) continue; // 경로 자체가 없는 것은 앵커 검사 몫이다
+    const quoted = [];
+    for (let k = j + 1; k < lines.length && !/^\s*(```|~~~)/.test(lines[k]); k++) {
+      if (lines[k].trim()) quoted.push(lines[k].trim());
+    }
+    if (!quoted.length) continue;
+    let body = "";
+    try {
+      body = fs.readFileSync(target, "utf8");
+    } catch {
+      continue;
+    }
+    const missing = quoted.filter((q) => !body.includes(q));
+    if (!missing.length) continue;
+    out.push({ rel, line: i + 1, href: lead[1], section: lead[2], total: quoted.length, missing });
+  }
+}
+
 // ── 앵커 ──────────────────────────────────────────────────────────────────────
 
 // 대상 파일의 앵커 후보: 헤딩 + 굵은 라벨(`**이름**:`).
@@ -477,6 +525,12 @@ function formatBroken(found) {
     lines.push(`      대상 문서에 그 절이 없습니다`);
     for (const n of it.near) lines.push(`      이름이 비슷한 절: 「${n}」  ← 개명된 것 같습니다`);
   }
+  for (const it of found.quotes) {
+    lines.push(`  ${it.rel}:${it.line}`);
+    lines.push(`    \`${it.href}\` 「${it.section}」 뒤 코드블록`);
+    lines.push(`      인용한 ${it.total}줄 중 ${it.missing.length}줄이 그 파일에 없습니다`);
+    for (const q of it.missing.slice(0, 3)) lines.push(`        ${q}`);
+  }
   lines.push(
     "",
     "  → 대상 파일을 열어 실제 절 이름을 확인하고 인용을 맞추세요.",
@@ -581,6 +635,11 @@ function runScan(dir) {
   for (const [label, items, render] of [
     ["[차단] 앵커 링크", found.broken, (it) => `${it.rel}:${it.line}  [${it.text}](${it.href}#${it.anchor}) — ${it.why}`],
     ["[차단] 코드의 절 인용", found.codeRefs, (it) => `${it.rel}:${it.line}  ${it.doc} '${it.section}' → ${it.href}`],
+    [
+      "[차단] 코드블록 인용문",
+      found.quotes,
+      (it) => `${it.rel}:${it.line}  \`${it.href}\` 「${it.section}」 — ${it.missing.length}/${it.total}줄 없음`,
+    ],
     ["[알림] 옛 「」 표기", found.legacy, (it) => `${it.rel}:${it.line}  ${it.href} 「${it.section}」${it.suggestion ? "" : "  ← 미해결"}`],
     ["[알림] 커맨드 호명", found.commands, (it) => `${it.rel}:${it.line}  /${it.name}`],
   ]) {
