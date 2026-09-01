@@ -575,9 +575,10 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
   ],
 ];
 
-// 절 참조 검사(`check-md-section-refs.mjs`)는 staged md와 그 md가 가리키는 대상 파일을 둘 다
+// 절 참조 검사(`check-md-section-refs.mjs`)는 staged 파일과 그것이 가리키는 대상을 둘 다
 // 디스크에서 읽는다 — 명령 문자열만으로는 판정이 안 선다. 대상 문서 하나와, 그것을 가리키는
-// 네 형태(정상 앵커·깨진 앵커·옛 「」 표기·코드블록 안 예시)를 staged 상태로 만들어 고정한다.
+// 여러 형태(정상·깨진 앵커, 옛 「」 표기, 코드블록 안 예시, 코드의 문자열 인용, 커맨드 호명)를
+// staged 상태로 만들어 고정한다.
 // 파일을 나눠 두는 이유: 한 파일에 섞으면 차단이 알림을 가려 알림 케이스를 못 잰다.
 function withSectionRefFixture(fn) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-section-ref-'));
@@ -596,6 +597,16 @@ function withSectionRefFixture(fn) {
     fs.writeFileSync(path.join(dir, 'broken.md'), '[메모 기록 도구](target.md#메모와-기록-도구를-나눈다)를 따른다.\n');
     fs.writeFileSync(path.join(dir, 'legacy.md'), '`target.md`의 「메모·기록 도구 분리」를 따른다.\n');
     fs.writeFileSync(path.join(dir, 'fenced.md'), '예시:\n\n```markdown\n[없는 절](target.md#없는-절)\n```\n');
+    // 코드는 문서를 **경로가 아니라 이름으로** 부른다(KA 린터 `rule` 필드, AC 훅 주석).
+    // 이름은 레포의 md 색인으로 되돌리므로 대상 md도 함께 스테이지해야 판정이 선다.
+    fs.writeFileSync(path.join(dir, 'code-ok.mts'), 'const RULE = "target \'메모·기록 도구 분리\'";\n');
+    fs.writeFileSync(path.join(dir, 'code-broken.mts'), 'const RULE = "target \'메모와 기록 도구를 나눈다\'";\n');
+    // 이름이 어느 md로도 안 풀리면 인용이 아니다 — 코드에 흔한 `말 '따옴표'` 꼴을 차단하지 않는다.
+    fs.writeFileSync(path.join(dir, 'code-unrelated.mts'), 'const KIND = "widget \'없는 문서의 없는 절\'";\n');
+    // 커맨드 호명은 **인자를 달고 불리는 꼴**만 본다. 이름만 적힌 백틱은 URL 경로와 안 갈린다.
+    fs.writeFileSync(path.join(dir, 'cmd-missing.md'), '`/scaffold https://example.com/1` 실행 시 생성되는 파일들.\n');
+    fs.writeFileSync(path.join(dir, 'cmd-builtin.md'), '`/compact 후 이어서` 진행한다.\n');
+    fs.writeFileSync(path.join(dir, 'cmd-bare.md'), '엔드포인트는 `/users`, `/settings` 두 개다.\n');
     return fn(dir.replace(/\\/g, '/'), (files) => {
       run('git reset -q');
       run(`git add ${files.join(' ')}`);
@@ -612,6 +623,12 @@ const sectionRefCases = [
   [['fenced.md'], 'pass', '코드블록 안의 예시 링크는 보지 않는다'],
   [['target.md', 'alias-link.md'], 'deny', '앞머리만 적은 앵커 링크는 그 절로 안 뛰므로 차단한다'],
   [['target.md', 'alias-prose.md'], 'context', '산문은 앞머리만 불러도 차단하지 않는다'],
+  [['target.md', 'code-ok.mts'], 'pass', '코드가 문자열로 든 절 인용이 실재하면 조용하다'],
+  [['target.md', 'code-broken.mts'], 'deny', '코드가 든 절 이름이 문서에 없으면 차단한다'],
+  [['target.md', 'code-unrelated.mts'], 'pass', '문서 이름으로 안 풀리는 문자열은 인용이 아니다'],
+  [['cmd-missing.md'], 'context', '없는 커맨드를 인자와 함께 호명하면 알린다'],
+  [['cmd-builtin.md'], 'pass', '빌트인 커맨드 호명은 조용하다'],
+  [['cmd-bare.md'], 'pass', '인자 없는 백틱 경로는 커맨드로 보지 않는다'],
 ];
 
 function main() {
