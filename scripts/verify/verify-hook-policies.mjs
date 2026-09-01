@@ -650,6 +650,63 @@ const sectionRefCases = [
   [['target.md', 'quote-loose.md'], 'pass', '경로만 있고 「절」·콜론이 없으면 인용으로 보지 않는다'],
 ];
 
+// 역방향(가리켜지는 쪽 개명)은 **커밋 전 판본**과 대조해야 판정이 서므로 이력이 있는 레포가
+// 필요하다. 위 fixture는 첫 커밋이 없어 같이 못 쓴다 — 거기에 이력을 넣으면 staged 목록이
+// 달라져 위 케이스가 통째로 함께 흔들린다.
+// 대상 문서 둘을 두는 이유: 앵커 링크로 부르는 쪽과 옛 「」 표기로만 부르는 쪽이 각각 혼자
+// 차단을 일으키는지 재야 하는데, 한 문서를 같이 가리키면 앞의 차단이 뒤를 가린다.
+function withSectionRefReverseFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-section-ref-rev-'));
+  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+  const write = (name, body) => fs.writeFileSync(path.join(dir, name), body);
+  try {
+    run('git init -q');
+    write('doc.md', '# 문서\n\n## 옛 이름\n\n본문\n\n## 그대로\n\n본문\n');
+    write('other.md', '# 다른 문서\n\n## 옛 절\n\n본문\n');
+    write('link.md', '[옛 이름](doc.md#옛-이름)를 따른다.\n');
+    write('note.md', '`other.md`의 「옛 절」을 따른다.\n');
+    // 이 커밋이 깨뜨린 것이 아닌 기존 미해결. 발동이 안 좁혀져 있으면 무관한 커밋마다 뜬다.
+    write('stale.md', '[없는 절](doc.md#처음부터-없던-절)를 따른다.\n');
+    run('git add .');
+    run('git -c user.email=verify@local -c user.name=verify commit -q -m init');
+    return fn(dir.replace(/\\/g, '/'), (edit, files) => {
+      run('git reset -q');
+      run('git checkout -q -- .');
+      edit(write);
+      run(`git add ${files.join(' ')}`);
+    });
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const sectionRefReverseCases = [
+  [
+    (write) => write('doc.md', '# 문서\n\n## 새 이름\n\n본문\n\n## 그대로\n\n본문\n'),
+    ['doc.md'],
+    'deny',
+    '개명한 파일만 스테이지해도 그 절을 가리키던 앵커 링크가 걸린다',
+  ],
+  [
+    (write) => write('other.md', '# 다른 문서\n\n## 새 절\n\n본문\n'),
+    ['other.md'],
+    'deny',
+    '옛 「」 표기로만 가리키던 인용도 역방향에서는 차단이다',
+  ],
+  [
+    (write) => write('doc.md', '# 문서\n\n## 옛 이름\n\n고친 본문\n\n## 그대로\n\n본문\n'),
+    ['doc.md'],
+    'pass',
+    '헤딩이 그대로면 레포에 기존 미해결이 있어도 조용하다',
+  ],
+  [
+    (write) => write('doc.md', '# 문서\n\n## 옛 이름\n\n본문\n\n## 아무도 안 부르는 이름\n\n본문\n'),
+    ['doc.md'],
+    'pass',
+    '아무도 안 가리키던 절의 개명은 걸리지 않는다',
+  ],
+];
+
 function main() {
   console.log('정책 hook 판정 검증 중...');
   const failures = [];
@@ -711,6 +768,25 @@ function main() {
         cwd: dir,
       });
       const label = `check-md-section-refs.mjs :: [${files.join(', ')}] → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
+    }
+  });
+  // 역방향은 커밋 전 판본을 `git show`로 읽으므로 이력이 있는 fixture 안에서 끝낸다.
+  withSectionRefReverseFixture((dir, prepare) => {
+    for (const [edit, files, expected, note] of sectionRefReverseCases) {
+      prepare(edit, files);
+      const { decision, stderr } = runHookPayload('check-md-section-refs.mjs', {
+        tool_name: 'Bash',
+        tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
+        cwd: dir,
+      });
+      const label = `check-md-section-refs.mjs :: [${files.join(', ')}] 역방향 → ${expected} (${note})`;
       if (decision === expected) {
         console.log(`  PASS  ${label}`);
       } else {

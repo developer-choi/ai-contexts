@@ -1,6 +1,6 @@
 // 다른 문서의 절·커맨드를 가리키는 인용이 실제로 그 대상에 닿는지 커밋 시점에 본다.
 //
-// 네 검사를 한 훅에 담되 세기가 다르다:
+// 다섯 검사를 한 훅에 담되 세기가 다르다:
 //   [차단] 앵커 링크 `[절 이름](경로.md#앵커)`의 앵커가 대상 파일에 없으면 거부한다.
 //     앵커 문자열과 대상 파일 헤딩을 대조할 뿐이라 판단이 0이다.
 //   [차단] 코드가 문자열로 든 절 인용 `content-format §3 '빈 섹션 금지'`이 안 닿으면 거부한다.
@@ -16,6 +16,9 @@
 //     — 가리키는 쪽만 읽으면 멀쩡해 보인다(DP 16회차에 없는 `/scaffold` 실행 안내가 그렇게
 //     살아 있었다). 차단이 아닌 이유는 아는 이름 목록이 원리상 안 닫히기 때문이다 —
 //     빌트인·플러그인 커맨드와 다른 레포의 로컬 스킬은 이 레포 안에서 셀 수가 없다.
+//   [차단] 위 넷과 **반대 방향** — 이 커밋이 헤딩을 개명한 md를 가리키던 인용이 안 닿게 됐으면
+//     거부한다. 위 넷은 스테이지된 파일에서 나가는 링크만 보므로, 개명한 쪽만 커밋하면
+//     끊긴 인용을 아무도 안 본다. 발동·세기의 근거는 아래 「역방향」 절에 적었다.
 //
 // 백틱 안의 레포 상대 경로는 보지 않는다. 링크 형태(`[글자](경로)`)는 scripts/check-links.mjs가
 // 이미 전수로 보고, 백틱 형태는 남의 레포 경로를 그대로 적는 자리가 많아(AC 스킬 본문이 소비
@@ -130,7 +133,10 @@ if (!staged.length) process.exit(0);
 
 const found = inspect(root, staged);
 
-if (found.broken.length || found.codeRefs.length || found.quotes.length) {
+const lost = lostAnchors(root, staged);
+found.reverse = lost.size ? collectReverse(root, staged, lost) : [];
+
+if (found.broken.length || found.codeRefs.length || found.quotes.length || found.reverse.length) {
   deny(formatBroken(found));
 }
 if (found.legacy.length || found.commands.length) {
@@ -142,7 +148,7 @@ process.exit(0);
 
 // 훅과 실측이 함께 쓰는 몸통. 파일 목록을 받아 네 갈래로 나눠 담는다.
 function inspect(root, files) {
-  const found = { broken: [], legacy: [], codeRefs: [], commands: [], quotes: [] };
+  const found = { broken: [], legacy: [], codeRefs: [], commands: [], quotes: [], reverse: [] };
   for (const rel of files) {
     const abs = path.join(root, rel);
     let src;
@@ -182,7 +188,7 @@ function collectBrokenAnchors(rel, abs, src, out) {
     if (/^[a-z][\w+.-]*:\/\//i.test(href) || href.startsWith("//")) continue;
     const target = path.resolve(path.dirname(abs), href);
     if (!isFile(target)) {
-      out.push({ rel, line: m.line, text, href, anchor: rawAnchor, why: "대상 파일이 없습니다", near: [] });
+      out.push({ rel, line: m.line, target, text, href, anchor: rawAnchor, why: "대상 파일이 없습니다", near: [] });
       continue;
     }
     // 링크는 전체 이름으로만 통과시킨다. 앞머리 별칭으로 적힌 앵커는 실제로 그 절로 안 뛰므로
@@ -193,6 +199,7 @@ function collectBrokenAnchors(rel, abs, src, out) {
     out.push({
       rel,
       line: m.line,
+      target,
       text,
       href,
       anchor: rawAnchor,
@@ -236,7 +243,9 @@ function collectLegacyRefs(root, rel, abs, src, out) {
     out.push({
       rel,
       line: m.line,
+      target,
       section,
+      leaf,
       href,
       suggestion: full ? `[${leaf}](${href}#${slug(full)})` : null,
     });
@@ -254,6 +263,7 @@ function collectCodeSectionRefs(root, rel, abs, src, out) {
     out.push({
       rel,
       line: m.line,
+      target,
       doc: skill ? `${name} SKILL` : name,
       section,
       href: path.relative(root, target).split(path.sep).join("/"),
@@ -272,6 +282,68 @@ function collectMissingCommands(root, rel, src, out) {
     if (name.includes(":") && known.has(name.split(":")[0])) continue;
     out.push({ rel, line: m.line, name });
   }
+}
+
+// ── 역방향 ────────────────────────────────────────────────────────────────────
+
+// 위 검사들은 전부 **나가는** 링크만 본다 — 스테이지된 파일이 남을 가리킬 때만 대조한다.
+// 헤딩을 개명한 파일만 스테이지에 올라오면 그 파일을 가리키던 쪽은 아무도 안 보므로, 인용이
+// 끊기는 경로 절반이 검사 밖에 있었다. 가리켜지는 쪽 편집자는 자기를 누가 부르는지 모른다.
+//
+// **발동을 좁히는 것이 이 검사의 전부다.** 무조건 레포를 훑으면 기존 미해결이 커밋마다 전부
+// 뜬다(2026-09-02 전수 실측: AC 0건·KA 0건·DP 2건). 이번 커밋이 **절을 잃은 md**에 대해,
+// 그리고 **그 잃은 절을 부르던 인용**에 대해서만 본다. 나머지는 이 커밋이 깬 것이 아니다.
+//
+// 세기가 알림이 아니라 차단인 이유: 걸리는 인용은 커밋 직전까지 그 절에 **실제로 닿아
+// 있었다**. 옛 「」 표기가 나가는 방향에서 알림인 것은 인용과 강조를 글자로 못 갈라서인데,
+// 여기서는 글자가 아니라 이력이 가른다 — 강조 낱말이 하필 옆에 적힌 그 파일의 헤딩으로
+// 풀려 있을 수는 없다. 같은 실측에서 「경로에 인접하고 실제로 풀리는」 「」 인용을 세 레포
+// 전수로 훑어 전부 진짜 절 참조였고 강조가 0건이었다 — 역방향이 볼 모집단이 그것이다.
+//
+// 전수를 훑는 비용은 node 기동을 포함해 0.2초대다(2026-09-02, 레포별 3회 반복 측정).
+// 커밋 시점에 얹을 수 있는 값이라, 회차 스크립트로 미루거나(발견이 회차만큼 늦다)
+// 역인덱스를 캐시하는(캐시가 낡으면 조용히 틀린다) 대가를 질 이유가 없다.
+function lostAnchors(root, staged) {
+  const lost = new Map();
+  for (const rel of staged) {
+    if (path.extname(rel).toLowerCase() !== ".md") continue;
+    const before = git(["show", `HEAD:${rel}`], root);
+    if (!before) continue; // 새 파일이거나 첫 커밋 — 잃을 절이 없다
+    const now = anchorsOf(path.join(root, rel)).loose;
+    const gone = new Set();
+    for (const key of anchorsFromSource(before).loose.keys()) if (!now.has(key)) gone.add(key);
+    if (gone.size) lost.set(path.join(root, rel), gone);
+  }
+  return lost;
+}
+
+// 레포 전체를 **나가는 방향과 같은 수집 함수로** 훑고, 잃은 절을 부르던 것만 남긴다.
+// 역인덱스를 따로 짜지 않는 이유가 이것이다 — 갈라지면 역방향이 순방향과 다른 판정을 한다.
+function collectReverse(root, staged, lost) {
+  const skip = new Set(staged); // 스테이지된 파일은 나가는 방향이 이미 봤다
+  const files = (git(["ls-files"], root) || "").split("\n").filter((p) => {
+    const ext = path.extname(p).toLowerCase();
+    return (ext === ".md" || CODE_EXTENSIONS.has(ext)) && !skip.has(p);
+  });
+  const found = inspect(root, files);
+  // 별칭 규칙은 닿는지 볼 때와 같은 것을 쓴다 — 앞머리로 부르던 인용이 역방향에서만 안 잡히면
+  // 개명 알림이 부르는 방식에 따라 갈린다. `Set`도 `Map`도 `has`라 그대로 넘긴다.
+  const brokenByRename = (it, section) => {
+    const gone = lost.get(it.target);
+    return gone ? sectionResolves(section, gone) : false;
+  };
+  const hits = [];
+  for (const it of found.broken) {
+    if (brokenByRename(it, decodeAnchor(it.anchor))) hits.push({ ...it, quote: `[${it.text}](${it.href}#${it.anchor})` });
+  }
+  for (const it of found.codeRefs) {
+    if (brokenByRename(it, it.section)) hits.push({ ...it, quote: `${it.doc} '${it.section}'` });
+  }
+  for (const it of found.legacy) {
+    // 알림 쪽 목록은 풀린 인용까지 담고 있다. 안 풀린 것(`suggestion` 없음)만 역방향 대상이다.
+    if (!it.suggestion && brokenByRename(it, it.leaf)) hits.push({ ...it, quote: `${it.href} 「${it.section}」` });
+  }
+  return hits;
 }
 
 // ── 대상 찾기 ─────────────────────────────────────────────────────────────────
@@ -400,10 +472,16 @@ function anchorsOf(file) {
   try {
     src = fs.readFileSync(file, "utf8");
   } catch {
-    const empty = { exact: new Map(), loose: new Map() };
-    anchorCache.set(file, empty);
-    return empty;
+    src = "";
   }
+  const result = anchorsFromSource(src);
+  anchorCache.set(file, result);
+  return result;
+}
+
+// 디스크가 아니라 **내용**에서 앵커를 뽑는 갈래. 역방향 검사가 커밋 전 판본(`git show`)의
+// 앵커를 같은 기준으로 세야 해서 갈라 뒀다 — 기준이 갈리면 "잃은 절"이 헛집힌다.
+function anchorsFromSource(src) {
   const raws = [];
   let fenced = false;
   for (const line of src.split(/\r?\n/)) {
@@ -435,9 +513,7 @@ function anchorsOf(file) {
   for (const raw of raws) add(loose, slug(cutTail(clean(raw))), clean(raw));
   for (const raw of raws) add(loose, slug(headOf(raw)), clean(raw));
   for (const raw of raws) add(loose, slug(dropMarker(clean(raw))), clean(raw));
-  const result = { exact, loose };
-  anchorCache.set(file, result);
-  return result;
+  return { exact, loose };
 }
 
 // 헤딩의 앞머리 — 뒤에 붙은 부연을 뗀 부분. 이 레포들은 절을 가리킬 때 앞머리만 부른다
@@ -531,12 +607,20 @@ function formatBroken(found) {
     lines.push(`      인용한 ${it.total}줄 중 ${it.missing.length}줄이 그 파일에 없습니다`);
     for (const q of it.missing.slice(0, 3)) lines.push(`        ${q}`);
   }
+  for (const it of found.reverse) {
+    lines.push(`  ${it.rel}:${it.line}  ← 이 커밋이 개명한 절을 가리키고 있습니다`);
+    lines.push(`    ${it.quote}`);
+    for (const n of it.near ?? []) lines.push(`      이름이 비슷한 절: 「${n}」  ← 새 이름인 것 같습니다`);
+  }
   lines.push(
     "",
     "  → 대상 파일을 열어 실제 절 이름을 확인하고 인용을 맞추세요.",
     "  → 절이 통째로 사라졌으면, 인용만 고치지 말고 가리키던 문장 자체가",
     "     아직 유효한지 보세요. 근거가 없어졌을 수 있습니다.",
   );
+  if (found.reverse.length) {
+    lines.push("  → `←` 표시가 붙은 파일은 이 커밋에 없습니다. 고친 뒤 함께 스테이지하세요.");
+  }
   const soft = found.legacy.length + found.commands.length;
   if (soft) {
     lines.push("", `  (알림 대상도 ${soft}건 있습니다. 그건 차단 대상이 아닙니다.)`);
