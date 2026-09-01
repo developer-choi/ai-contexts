@@ -1,10 +1,13 @@
-// 로컬 HTML을 만들어 브라우저로 열고, 사용자가 채운 값을 클립보드로 되받는 왕복 절차.
+// 로컬 HTML을 만들어 기본 브라우저로 여는 절차.
 //
 // 다섯 스킬(KA exam·KA digest·PP routine-summary·PP routine-start·AC pre-exit)이 같은 절차를
 // 각자 산문으로 다시 적고 있었고, 옮겨 적는 사이에 이미 어긋났다 — schtasks 우회가 exam에만
-// 있고 나머지 넷에는 없었다. 이 절차에는 LLM 판단이 없으므로(인코딩·오픈 명령·회수·신선도
-// 검증) 산문 정본화 대신 여기 코드 한 곳에 둔다. 스킬에는 HTML 본문·payload 스키마·회수값
-// 해석만 남는다.
+// 있고 나머지 넷에는 없었다. 이 절차에는 LLM 판단이 없으므로(인코딩·오픈 명령) 산문 정본화
+// 대신 여기 코드 한 곳에 둔다. 스킬에는 HTML 본문·payload 스키마·payload 해석만 남는다.
+//
+// 값을 되받는 쪽은 여기 없다. 사용자가 폼의 [복사하기]로 복사한 JSON을 채팅에 그대로
+// 붙여넣으므로, 클립보드를 뒤지던 `collect`는 걷어냈다. 마커(`__skill`)·신선도(`ts`) 검증은
+// 각 스킬의 저장 스크립트가 한다 (본보기: PP `routine/scripts/cli/saveWeeklyForm.ts`).
 //
 // 환경 분기를 두지 않는다. 2026-08-29 실측:
 //   Start-Process <로컬 .html>  → Claude Code 뜸 / Antigravity 안 뜸(종료코드는 0)
@@ -31,15 +34,10 @@
 // (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 그 에이전트의 절대경로로
 //  채운다. 여기 홈 경로를 박아두면 codex·gemini에서 그대로 따라 친 사람이 없는 경로를 친다.)
 //   node <이 파일> open <마커> <html경로|-> [--slug <슬러그>]
-//   node <이 파일> collect <마커> [--max-age-ms N] [--out <경로>]
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-
-// 클립보드 payload가 이 나이를 넘으면 이전 회차·다른 세션의 잔여로 본다.
-// PP routine/scripts/cli/saveWeeklyForm.ts의 MAX_AGE_MS와 같은 값이다.
-const DEFAULT_MAX_AGE_MS = 30 * 60 * 1000;
 
 // 작업이 대화형 데스크톱으로 넘어가 실제로 돌 때까지 기다리는 한도와 확인 간격.
 const RUN_TIMEOUT_MS = 15000;
@@ -50,11 +48,7 @@ const USAGE = `사용:
       HTML을 BOM 없는 UTF-8로 임시 폴더에 쓰고 기본 브라우저로 연다.
       html경로가 '-'이면 표준입력에서 읽는다. 성공 시 열린 절대경로를 stdout에 낸다.
 
-  collect <마커> [--max-age-ms N] [--out <경로>]
-      클립보드를 읽어 JSON으로 파싱하고 __skill 마커와 ts 신선도를 확인한다.
-      성공 시 payload를 stdout(또는 --out 파일)에 낸다.
-      실패 시 사용자에게 그대로 보여줄 안내 문구를 stderr에 내고 종료코드로 사유를 가른다:
-        2 = JSON 파싱 실패   3 = 마커 불일치   4 = 오래된 payload`;
+  폼에 채운 값은 사용자가 [복사하기]로 복사해 채팅에 그대로 붙여넣는다 — 여기서 되받지 않는다.`;
 
 // ---------------------------------------------------------------- 공용
 
@@ -186,43 +180,6 @@ function runTask(taskName, cmdPath) {
   `).trim();
 }
 
-// ---------------------------------------------------------------- collect
-
-function collect(argv) {
-  const marker = safeMarker(argv[0]);
-  const maxAgeMs = Number(readOption(argv, "--max-age-ms") ?? DEFAULT_MAX_AGE_MS);
-  const outPath = readOption(argv, "--out");
-
-  // 클립보드에 BOM이 섞여 들어오면 JSON.parse가 그 한 글자 때문에 통째로 실패한다.
-  const clipboard = powershell("Get-Clipboard -Raw").replace(/^﻿/, "");
-
-  let payload;
-  try {
-    payload = JSON.parse(clipboard);
-  } catch {
-    fail(2, "클립보드가 JSON이 아니다 — 폼의 [복사하기]를 다시 눌러줘.");
-  }
-
-  if (payload?.__skill !== marker) {
-    fail(
-      3,
-      `클립보드에 담긴 것이 이 폼의 값이 아니다 (기대: ${marker}, 실제: ${JSON.stringify(payload?.__skill)}) — 폼의 [복사하기]를 다시 눌러줘.`
-    );
-  }
-
-  if (typeof payload.ts === "number" && Date.now() - payload.ts > maxAgeMs) {
-    fail(4, "클립보드에 담긴 값이 오래됐다 (이전 회차·다른 세션의 잔여) — 폼의 [복사하기]를 다시 눌러줘.");
-  }
-
-  const json = JSON.stringify(payload);
-  if (outPath) {
-    fs.writeFileSync(outPath, json, { encoding: "utf8" });
-    console.log(outPath);
-  } else {
-    console.log(json);
-  }
-}
-
 // ---------------------------------------------------------------- 진입점
 
 function readOption(argv, name) {
@@ -237,5 +194,4 @@ if (!subcommand || subcommand === "--help" || subcommand === "-h") {
 }
 
 if (subcommand === "open") open(rest);
-else if (subcommand === "collect") collect(rest);
 else fail(1, `모르는 서브커맨드: ${subcommand}\n\n${USAGE}`);
