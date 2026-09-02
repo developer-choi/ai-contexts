@@ -33,7 +33,12 @@ const BACKLOG_REPO = "backlog";
 const BACKLOG_DATA = /^\/(projects|articles|roadmaps|archives|side-income|finance)\//;
 
 const KOREAN_QUANTIFIER = /(두|세|네|다섯|여섯)\s*(가지|계약|항목|축|갈래|단계|개)/g;
-const ARABIC_QUANTIFIER = /\d+\s*(개|가지)/g;
+
+// 아라비아형은 숫자와 수량어를 띄우지 않는다 — 사이를 벌리면 날짜 뒤의 `개`로 시작하는 낱말이
+// 통째로 걸린다. `2026-08-18 개정`이 `18 개`로 잡혔다. 2026-09-02 실측: AC·PP·BL 전 프롬프트
+// md에서 숫자와 `개`·`가지` 사이가 벌어진 자리는 4건이고 넷 다 이 꼴이라, 띄어쓰기를 버려서
+// 잃는 정탐이 없다. `개(?![가-힣])`로 막는 길은 `이름이 0개여도` 같은 정탐을 함께 죽인다.
+const ARABIC_QUANTIFIER = /\d+(개|가지)/g;
 
 // 스텝 번호 호명. 범위 표기만 본다 — 범위는 남의 절차 전체를 통째로 부르는 꼴이라 다른 파일을
 // 가리키는 경우가 대부분이고, 단일 `Step 2`까지 잡으면 자기 파일이 자기 단계를 부르는 정상
@@ -87,6 +92,10 @@ function main() {
   }
 }
 
+// 안내는 "정리해도 된다"가 아니라 "지금 정리한다"로 적는다. 고를 여지를 남기면 읽고도 사용자에게
+// 되넘긴다 — 2026-09-02 PP 지원동기 커밋에서 이 훅이 28건을 냈는데, 「손대는 김에」를 읽은
+// 세션이 그대로 "별도로 다룰지 정해주세요"로 보고를 닫았고 사용자가 "겸사겸사 같이 수정해"로
+// 다시 시켰다. 그대로 둘 줄이 대부분이더라도 판정 자체는 그 자리에서 끝나야 한다.
 function printReports(heading, reports, advice) {
   console.log(heading);
   for (const { file, lineNo, line, hits } of reports.slice(0, MAX_REPORTS)) {
@@ -96,7 +105,9 @@ function printReports(heading, reports, advice) {
     console.log(`  ... 그 밖에 ${reports.length - MAX_REPORTS}건 더`);
   }
   console.log("");
-  console.log("이번에 고친 줄이 아니어도 같은 파일이면 손대는 김에 함께 정리한다.");
+  console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다.");
+  console.log('      "따로 다룰까요"로 사용자에게 넘기지 않는다. 줄마다 아래로 판정해 고칠 것은 고치고,');
+  console.log("      그대로 둘 것은 둔 뒤 몇 건을 어떤 사유로 뒀는지만 보고에 한 줄로 적는다.");
   for (const line of advice) console.log(line);
   console.log("");
 }
