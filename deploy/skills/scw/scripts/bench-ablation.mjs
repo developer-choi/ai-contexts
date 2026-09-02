@@ -19,6 +19,7 @@
 //   "base_system": "...{TARGET}...",           // {TARGET}이 팔 텍스트로 치환된다
 //   "variants": {"ZERO": "", "V1": "..."},
 //   "variant_cwds": {"ZERO": "/path/to/wt-zero", "V1": "/path/to/wt-v1"},  // (선택) 팔별 작업 폴더
+//   "worker_permission_mode": "acceptEdits",    // (선택) 생성 콜의 --permission-mode. 없으면 안 붙인다
 
 //   "grader": {                                 // 전 시나리오 기본 채점 분류지
 //     "instruction": "(선택) 채점자에게 줄 추가 지시",
@@ -38,6 +39,16 @@
 //
 // 분류지는 스크립트 상수가 아니라 eval-set이 소유한다 — 측정 대상마다 분류가 다르기 때문이다.
 // 시나리오에 `grader`가 있으면 그것이, 없으면 최상위 `grader`가 쓰인다.
+//
+// `worker_permission_mode`도 같은 이유로 eval-set이 소유한다 — 파일을 고치는 작업을 재는 벤치와
+// 판단만 재는 벤치가 필요로 하는 권한이 다르다. 기본은 안 붙이는 것이라 기존 eval-set의 동작은
+// 그대로다. 유효값은 CLI가 정본이고 틀린 값은 CLI가 거부해 그 콜이 실행 실패로 잡힌다.
+//
+// 왜 필요한가: `--setting-sources ''`는 배포된 규칙과 함께 권한 설정도 떼어내, 워커가 파일을
+// 못 고친다. 그런데 그 거부("파일 수정 권한이 필요합니다")는 rc=0에 정상 응답이라 실행 실패로
+// 안 세어지고 채점자가 그 한 줄을 성실히 분류한다 — 안 잰 구간이 Δ=0으로 찍힌다
+// (2026-09-02 rules-as-code 트리거 벤치 실측: 스모크 9런 전멸, 우회하려 시나리오를 "문안만
+// 내라"로 바꿨더니 이번엔 그 지시가 압박이 되어 본 발사 90콜이 통째로 판정 보류).
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -94,6 +105,11 @@ const CLAUDE = resolveClaude();
 const NEEDS_SHELL = /\.(cmd|bat)$/i.test(CLAUDE);
 let shellWarned = false;
 
+// 워커가 권한이 없어 작업을 못 했다고 말하는 응답. 이 거부는 rc=0에 정상 응답이라 실행 실패로
+// 안 잡히고, 채점자가 그 한 줄을 성실히 분류해 안 잰 구간이 점수로 찍힌다. 근사 매칭이라 판정이
+// 아니라 경고로만 쓴다 — 놓치면 회차가 통째로 날아가고, 헛짚어도 사람이 응답을 보면 그만이다.
+const PERMISSION_REFUSAL = /권한(이|을)?\s*(필요|없|거부|허용)|permission (to|is|denied|required)|need.{0,12}permission/i;
+
 function execFileAsync(file, args, options) {
   return new Promise((resolve) => {
     execFile(file, args, options, (error, stdout, stderr) => {
@@ -126,7 +142,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  * `force`+재시도로 대부분 넘기고, 그래도 남는 예외는 삼킨다 — 정리는 실패해도 되지만
  * 토큰을 쓰고 받은 응답은 버리면 안 된다.
  */
-async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = null) {
+async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = null, permissionMode = null) {
   // `/`로 시작하는 프롬프트는 CLI가 슬래시 명령으로 가로채 `Unknown command:` 한 줄만 돌려주는데,
   // 그게 rc=0에 비어있지 않은 stdout이라 실패로 안 세고 채점자가 그 한 줄을 성실히 분류한다.
   // 측정 안 된 구간이 델타로 둔갑하므로 콜을 쓰기 전에 끊는다 (2026-08-22 round15 실측: 스모크 12런 전멸).
@@ -144,7 +160,10 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = n
       }
       result = await execFileAsync(
         CLAUDE,
-        ['-p', prompt, '--model', model, '--setting-sources', '', '--append-system-prompt', system],
+        [
+          '-p', prompt, '--model', model, '--setting-sources', '', '--append-system-prompt', system,
+          ...(permissionMode ? ['--permission-mode', permissionMode] : []),
+        ],
         { cwd, timeout: timeoutMs, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, shell: NEEDS_SHELL },
       );
     } finally {
@@ -300,8 +319,11 @@ async function runOne(job, spec, args) {
 
   let response;
   try {
-    // 채점 콜은 파일을 안 보므로 팔별 cwd를 주지 않는다 — 생성 콜만 그 안에서 돈다.
-    response = await claudeP(scenario.user, system, args.model, timeoutMs, 3, spec.variant_cwds?.[job.variant] ?? null);
+    // 채점 콜은 파일을 안 보므로 팔별 cwd도 편집 권한도 주지 않는다 — 생성 콜만 그 안에서 돈다.
+    response = await claudeP(
+      scenario.user, system, args.model, timeoutMs, 3,
+      spec.variant_cwds?.[job.variant] ?? null, spec.worker_permission_mode ?? null,
+    );
   } catch (error) {
     return {
       response: '',
@@ -451,7 +473,11 @@ async function main() {
   }
 
   const inheritance = [];
+  const permissionBlocked = [];
   for (const { job, result } of runs) {
+    if (PERMISSION_REFUSAL.test(result.response ?? '')) {
+      permissionBlocked.push({ scenario: job.scenario.id, variant: job.variant, excerpt: result.response.slice(0, 120) });
+    }
     for (const axisResult of result.axes) {
       const rowId = axisResult.axis ? `${job.scenario.id}#${axisResult.axis}` : job.scenario.id;
       const cell = table[rowId].variants[job.variant];
@@ -482,6 +508,7 @@ async function main() {
     failed_total: failedTotal,
     table,
     inheritance_flags: inheritance,
+    permission_blocked: permissionBlocked,
   }, null, 2), 'utf8');
 
   const rowIds = Object.keys(table);
@@ -504,6 +531,11 @@ async function main() {
   lines.push(`실행 실패: ${failedTotal}건` + (failedTotal > 0 ? ' — 실패가 있는 행은 판정하지 않는다' : ''));
   lines.push(`환경상속 의심: ${inheritance.length}건`
     + inheritance.map((f) => `\n  - ${f.scenario}: ${f.signatures.join(', ')}`).join(''));
+  if (permissionBlocked.length > 0) {
+    const where = [...new Set(permissionBlocked.map((f) => `${f.scenario}/${f.variant}`))].join(', ');
+    lines.push(`권한 거부 응답: ${permissionBlocked.length}건 — 워커가 작업을 못 했다. `
+      + `eval-set에 worker_permission_mode를 주고 다시 잰다 (${where})`);
+  }
   process.stdout.write(`${lines.join('\n')}\n`);
 }
 
