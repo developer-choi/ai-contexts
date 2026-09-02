@@ -69,10 +69,12 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --dump-dir <경로>      런별 원본 JSON 덤프 위치
   --verbose              진행 로그를 stderr로
   --allow-over-cap       한 번의 발사 상한(100콜)을 의도적으로 넘길 때
+  --resume               --dump-dir에 이미 성공한 런이 있으면 콜 대신 그 파일을 쓴다.
+                         죽은 발사를 같은 명령으로 다시 치면 죽은 런만 나간다
 `;
 
 function parseArgs(argv) {
-  const flags = new Set(['--verbose', '--allow-over-cap', '--help', '-h']);
+  const flags = new Set(['--verbose', '--allow-over-cap', '--resume', '--help', '-h']);
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
@@ -406,12 +408,32 @@ async function main() {
   // 0이라 "델타 없음 → 삭제 유지"로 읽히는 표**가 나왔다 — 측정 안 된 구간이 삭제 근거로
   // 둔갑했다. 곱셈을 사람이 하면 그 곱을 안 해보고 쏘는 회차가 나오고, 넘겼다는 사실은 표가
   // 0으로 채워진 뒤에야, 그것도 델타로 위장해 드러난다.
+  // `--resume`이면 이미 성공한 런을 콜 대신 파일에서 읽는다. 한도가 끊겨 죽은 발사를 그대로
+  // 다시 치면 살아남은 런은 건너뛰고 죽은 것만 나간다 — 성공한 런에 두 번 돈 내는 일이 없어진다.
+  // 조각을 나눌 때도 같은 dump-dir 하나만 쓰면 되므로 반복 번호가 조각마다 겹치지 않는다.
+  const dumpPath = (job) => (args['dump-dir']
+    ? path.join(args['dump-dir'], `${job.scenario.id}_${job.variant}_r${job.rep}.json`)
+    : null);
+  const loadDone = (job) => {
+    const file = dumpPath(job);
+    if (!args.resume || !file || !fs.existsSync(file)) return null;
+    try {
+      const saved = readJson(file);
+      // 실패한 런은 안 건진다 — 그게 다시 쏴야 하는 것들이다.
+      return Array.isArray(saved.axes) && !saved.axes.some((a) => a.failed) ? saved : null;
+    } catch {
+      return null;
+    }
+  };
+  for (const job of jobs) job.done = loadDone(job);
+  const pending = jobs.filter((job) => !job.done);
+
   const CALL_CAP = 100;
-  const calls = jobs.length * 2;
+  const calls = pending.length * 2;
   if (calls > CALL_CAP && !args['allow-over-cap']) {
     throw new Error(
-      `${calls}콜 (런 ${jobs.length} x 2) — 한 번의 발사 상한 ${CALL_CAP}콜을 넘는다.\n`
-      + `  시나리오 ${scenarios.length} x 팔 ${variantNames.length} x 반복 ${args.reps} x 2 = ${calls}\n`
+      `${calls}콜 (런 ${pending.length} x 2) — 한 번의 발사 상한 ${CALL_CAP}콜을 넘는다.\n`
+      + `  시나리오 ${scenarios.length} x 팔 ${variantNames.length} x 반복 ${args.reps} x 2 = ${jobs.length * 2}\n`
       + `  묶음을 가르지 말고 케이스 필터(--scenarios·--variants)로 배치를 끊고 결과는 한 md에 모은다.\n`
       + `  콜 수는 대리 지표다 — 프롬프트가 길거나 같은 창에서 다른 작업을 돌렸으면 더 낮게 잡는다.\n`
       + `  의도한 초과면 --allow-over-cap.`,
@@ -430,17 +452,21 @@ async function main() {
   if (args.verbose) {
     process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
       + `scenarios=${scenarios.map((s) => s.id).join(',')} reps=${args.reps} `
-      + `-> ${jobs.length}런 x2콜 = ${calls}/${CALL_CAP}콜 (gen=${args.model}, workers=${workers})\n`);
+      + `-> ${pending.length}런 x2콜 = ${calls}/${CALL_CAP}콜`
+      + `${jobs.length > pending.length ? ` (이어받음 ${jobs.length - pending.length}런)` : ''}`
+      + ` (gen=${args.model}, workers=${workers})\n`);
   }
   if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
 
   let done = 0;
   const runs = await pool(jobs, workers, async (job) => {
+    if (job.done) return { job, result: job.done };
     const result = await runOne(job, spec, args);
     done += 1;
-    if (args['dump-dir']) {
+    const file = dumpPath(job);
+    if (file) {
       fs.writeFileSync(
-        path.join(args['dump-dir'], `${job.scenario.id}_${job.variant}_r${job.rep}.json`),
+        file,
         JSON.stringify({ scenario: job.scenario.id, variant: job.variant, rep: job.rep, ...result }, null, 2),
         'utf8',
       );
@@ -449,7 +475,7 @@ async function main() {
       const marks = result.axes
         .map((a) => `${a.axis ? `${a.axis}=` : ''}${a.class}${a.passed ? '(PASS)' : ''}`)
         .join(' ');
-      process.stderr.write(`  [${done}/${jobs.length}] ${job.scenario.id}/${job.variant} r${job.rep} ${marks}\n`);
+      process.stderr.write(`  [${done}/${pending.length}] ${job.scenario.id}/${job.variant} r${job.rep} ${marks}\n`);
     }
     return { job, result };
   });
