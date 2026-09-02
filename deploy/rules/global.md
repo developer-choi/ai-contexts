@@ -297,7 +297,7 @@ AI 설정(규칙·스킬·hook·settings)은 아래 원본에서 고친다. 배�
 
 | 조건 | 참고 |
 |---|---|
-| AI가 지켜야 할 규칙을 새로 만들거나 손볼 때 ("이건 규칙으로 적어둬야지" 싶은 순간이면 신설·수정 불문) | `{{contexts}}/rules-as-code.md` |
+| `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위 md에 규칙 문장을 쓰거나 고칠 때 (레포 불문, 절 신설·기존 절 수정 불문) | `{{contexts}}/rules-as-code.md` |
 | 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위의 md를 만들거나 고칠 때 (한 줄짜리 절 추가여도, "이 문서에 ~를 보강해줘" 같은 작업 지시로 들어와도 해당) | `/scw` |
 | "팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시 | `{{contexts}}/team-agent.md` |
 
