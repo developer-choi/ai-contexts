@@ -9,7 +9,7 @@
 // 격리 방식 (사용 전 실측으로 확인됨):
 // - `--setting-sources ""`가 배포된 설정·메모리 원천(사용자·프로젝트 규칙, CLAUDE.md)을 통째로 뗀다.
 // - `--append-system-prompt`로 통제된 시스템 프롬프트를 도로 넣는다. 팔마다 이 텍스트만 다르다.
-// - 콜마다 빈 임시 cwd에서 돌려 프로젝트 CLAUDE.md가 범위에 안 들어오게 한다.
+// - call마다 빈 임시 cwd에서 돌려 프로젝트 CLAUDE.md가 범위에 안 들어오게 한다.
 //
 // CLI의 기존 OAuth 로그인을 쓴다 — `ANTHROPIC_API_KEY` 불필요.
 //
@@ -19,7 +19,7 @@
 //   "base_system": "...{TARGET}...",           // {TARGET}이 팔 텍스트로 치환된다
 //   "variants": {"ZERO": "", "V1": "..."},
 //   "variant_cwds": {"ZERO": "/path/to/wt-zero", "V1": "/path/to/wt-v1"},  // (선택) 팔별 작업 폴더
-//   "worker_permission_mode": "acceptEdits",    // (선택) 생성 콜의 --permission-mode. 없으면 안 붙인다
+//   "worker_permission_mode": "acceptEdits",    // (선택) 생성 call의 --permission-mode. 없으면 안 붙인다
 
 //   "grader": {                                 // 전 시나리오 기본 채점 분류지
 //     "instruction": "(선택) 채점자에게 줄 추가 지시",
@@ -42,13 +42,13 @@
 //
 // `worker_permission_mode`도 같은 이유로 eval-set이 소유한다 — 파일을 고치는 작업을 재는 벤치와
 // 판단만 재는 벤치가 필요로 하는 권한이 다르다. 기본은 안 붙이는 것이라 기존 eval-set의 동작은
-// 그대로다. 유효값은 CLI가 정본이고 틀린 값은 CLI가 거부해 그 콜이 실행 실패로 잡힌다.
+// 그대로다. 유효값은 CLI가 정본이고 틀린 값은 CLI가 거부해 그 call이 실행 실패로 잡힌다.
 //
 // 왜 필요한가: `--setting-sources ''`는 배포된 규칙과 함께 권한 설정도 떼어내, 워커가 파일을
-// 못 고친다. 그런데 그 거부("파일 수정 권한이 필요합니다")는 rc=0에 정상 응답이라 실행 실패로
+// 못 고친다. 그run데 그 거부("파일 수정 권한이 필요합니다")는 rc=0에 정상 응답이라 실행 실패로
 // 안 세어지고 채점자가 그 한 줄을 성실히 분류한다 — 안 잰 구간이 Δ=0으로 찍힌다
-// (2026-09-02 rules-as-code 트리거 벤치 실측: 스모크 9런 전멸, 우회하려 시나리오를 "문안만
-// 내라"로 바꿨더니 이번엔 그 지시가 압박이 되어 본 발사 90콜이 통째로 판정 보류).
+// (2026-09-02 rules-as-code 트리거 벤치 실측: 스모크 9 run 전멸, 우회하려 시나리오를 "문안만
+// 내라"로 바꿨더니 이번엔 그 지시가 압박이 되어 본 발사 90 call이 통째로 판정 보류).
 import { execFile } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -63,14 +63,14 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --model <id>           측정 대상 생성 모델 (기본 claude-sonnet-4-6)
   --grader-model <id>    채점 모델 (기본 claude-sonnet-4-6)
   --workers <n>          동시 실행 상한 (기본 8)
-  --timeout <초>         콜당 타임아웃 (기본 180)
+  --timeout <초>         call당 타임아웃 (기본 180)
   --variants <a,b>       팔 필터
   --scenarios <a,b>      시나리오 필터
-  --dump-dir <경로>      런별 원본 JSON 덤프 위치
+  --dump-dir <경로>      run별 원본 JSON 덤프 위치
   --verbose              진행 로그를 stderr로
-  --allow-over-cap       한 번의 발사 상한(100콜)을 의도적으로 넘길 때
-  --resume               --dump-dir에 이미 성공한 런이 있으면 콜 대신 그 파일을 쓴다.
-                         죽은 발사를 같은 명령으로 다시 치면 죽은 런만 나간다
+  --allow-over-cap       한 번의 발사 상한(100 call)을 의도적으로 넘길 때
+  --resume               --dump-dir에 이미 성공한 run이 있으면 call 대신 그 파일을 쓴다.
+                         죽은 발사를 같은 명령으로 다시 치면 죽은 run만 나간다
 `;
 
 function parseArgs(argv) {
@@ -132,7 +132,7 @@ function execFileAsync(file, args, options) {
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * 격리된 `claude -p` 콜 한 번. stdout 텍스트를 돌려주거나, 반복 실패 시 던진다.
+ * 격리된 `claude -p` call 한 번. stdout 텍스트를 돌려주거나, 반복 실패 시 던진다.
  *
  * `fixedCwd`가 오면 그 폴더에서 돈다(만들지도 지우지도 않는다). 측정 대상이 시스템 프롬프트가 아니라
  * **워커가 열어야 할 파일**일 때 쓴다 — `claude -p`는 cwd 밖 절대경로를 읽기 거부하므로(실측),
@@ -140,14 +140,14 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
  *
  * 임시 cwd는 응답을 손에 쥔 **뒤** finally에서 지운다. 윈도우에선 `claude`가 자기 cwd 안
  * 파일 핸들을 쥔 채 끝나 정리가 WinError 32로 터지는데, 예전 파이썬판은 그 예외가
- * `with` 블록 밖으로 새어 이미 받은 응답을 통째로 버렸다(2026-08-15 round7: 266런 전멸).
+ * `with` 블록 밖으로 새어 이미 받은 응답을 통째로 버렸다(2026-08-15 round7: 266 run 전멸).
  * `force`+재시도로 대부분 넘기고, 그래도 남는 예외는 삼킨다 — 정리는 실패해도 되지만
  * 토큰을 쓰고 받은 응답은 버리면 안 된다.
  */
 async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = null, permissionMode = null) {
   // `/`로 시작하는 프롬프트는 CLI가 슬래시 명령으로 가로채 `Unknown command:` 한 줄만 돌려주는데,
   // 그게 rc=0에 비어있지 않은 stdout이라 실패로 안 세고 채점자가 그 한 줄을 성실히 분류한다.
-  // 측정 안 된 구간이 델타로 둔갑하므로 콜을 쓰기 전에 끊는다 (2026-08-22 round15 실측: 스모크 12런 전멸).
+  // 측정 안 된 구간이 델타로 둔갑하므로 call을 쓰기 전에 끊는다 (2026-08-22 round15 실측: 스모크 12 run 전멸).
   if (prompt.trimStart().startsWith('/')) {
     throw new Error(`프롬프트가 '/'로 시작한다 — CLI가 슬래시 명령으로 가로챈다. 스킬 호출은 "\`/x\`를 부른다"처럼 문장 안에 넣어라: ${prompt.slice(0, 60)}`);
   }
@@ -265,7 +265,7 @@ function scanBraces(raw) {
  *
  * ③이 필요한 이유: 채점자 출력이 닫는 `}` 없이 끊기는 일이 실제로 난다. 분류(`{"class": "BOTH", ...`)는
  * 이미 다 나온 뒤인데 greedy 한 번만 쓰면 행 전체가 PARSE_ERROR로 버려진다
- * (2026-08-22 round15 실측: 30런 중 2건, 그 때문에 묶음 하나를 세 번 다시 돌렸다).
+ * (2026-08-22 round15 실측: 30 run 중 2건, 그 때문에 묶음 하나를 세 번 다시 돌렸다).
  * 없는 값을 지어내지 않고 이미 나온 필드만 건진다.
  */
 function extractJson(raw) {
@@ -321,7 +321,7 @@ async function runOne(job, spec, args) {
 
   let response;
   try {
-    // 채점 콜은 파일을 안 보므로 팔별 cwd도 편집 권한도 주지 않는다 — 생성 콜만 그 안에서 돈다.
+    // 채점 call은 파일을 안 보므로 팔별 cwd도 편집 권한도 주지 않는다 — 생성 call만 그 안에서 돈다.
     response = await claudeP(
       scenario.user, system, args.model, timeoutMs, 3,
       spec.variant_cwds?.[job.variant] ?? null, spec.worker_permission_mode ?? null,
@@ -399,18 +399,18 @@ async function main() {
     }
   }
 
-  // 한 번의 발사 상한. 런마다 생성 1콜 + 채점 1콜이라 콜 수는 여기서 확정된다.
+  // 한 번의 발사 상한. run마다 생성 1 call + 채점 1 call이라 call 수는 여기서 확정된다.
   // 분류지·폴더 점검보다 먼저 본다 — 쪼개야 하는 회차라면 그 사실을 먼저 알아야 스펙을 손보는
-  // 순서가 헛돌지 않는다. 셋 다 콜을 쓰기 전이다.
+  // 순서가 헛돌지 않는다. 셋 다 call을 쓰기 전이다.
   //
-  // 왜 스크립트가 막나: 2026-08-15 round7에서 324콜을 한 번에 쏘아 창이 소진됐고 뒤쪽
-  // 시나리오 10개가 죽었다. 죽은 런은 채점이 비어 요약 표에 0점으로 찍혔고, **양 팔이 나란히
+  // 왜 스크립트가 막나: 2026-08-15 round7에서 324 call을 한 번에 쏘아 창이 소진됐고 뒤쪽
+  // 시나리오 10개가 죽었다. 죽은 run은 채점이 비어 요약 표에 0점으로 찍혔고, **양 팔이 나란히
   // 0이라 "델타 없음 → 삭제 유지"로 읽히는 표**가 나왔다 — 측정 안 된 구간이 삭제 근거로
   // 둔갑했다. 곱셈을 사람이 하면 그 곱을 안 해보고 쏘는 회차가 나오고, 넘겼다는 사실은 표가
   // 0으로 채워진 뒤에야, 그것도 델타로 위장해 드러난다.
-  // `--resume`이면 이미 성공한 런을 콜 대신 파일에서 읽는다. 한도가 끊겨 죽은 발사를 그대로
-  // 다시 치면 살아남은 런은 건너뛰고 죽은 것만 나간다 — 성공한 런에 두 번 돈 내는 일이 없어진다.
-  // 조각을 나눌 때도 같은 dump-dir 하나만 쓰면 되므로 반복 번호가 조각마다 겹치지 않는다.
+  // `--resume`이면 이미 성공한 run을 call 대신 파일에서 읽는다. 한도가 끊겨 죽은 발사를 그대로
+  // 다시 치면 살아남은 run은 건너뛰고 죽은 것만 나간다 — 성공한 run에 두 번 돈 내는 일이 없어진다.
+  // chunk를 나눌 때도 같은 dump-dir 하나만 쓰면 되므로 반복 번호가 chunk마다 겹치지 않는다.
   const dumpPath = (job) => (args['dump-dir']
     ? path.join(args['dump-dir'], `${job.scenario.id}_${job.variant}_r${job.rep}.json`)
     : null);
@@ -419,7 +419,7 @@ async function main() {
     if (!args.resume || !file || !fs.existsSync(file)) return null;
     try {
       const saved = readJson(file);
-      // 실패한 런은 안 건진다 — 그게 다시 쏴야 하는 것들이다.
+      // 실패한 run은 안 건진다 — 그게 다시 쏴야 하는 것들이다.
       return Array.isArray(saved.axes) && !saved.axes.some((a) => a.failed) ? saved : null;
     } catch {
       return null;
@@ -432,18 +432,18 @@ async function main() {
   const calls = pending.length * 2;
   if (calls > CALL_CAP && !args['allow-over-cap']) {
     throw new Error(
-      `${calls}콜 (런 ${pending.length} x 2) — 한 번의 발사 상한 ${CALL_CAP}콜을 넘는다.\n`
+      `${calls} call (run ${pending.length} x 2) — 한 번의 발사 상한 ${CALL_CAP} call을 넘는다.\n`
       + `  시나리오 ${scenarios.length} x 팔 ${variantNames.length} x 반복 ${args.reps} x 2 = ${jobs.length * 2}\n`
-      + `  묶음을 가르지 말고 케이스 필터(--scenarios·--variants)로 배치를 끊고 결과는 한 md에 모은다.\n`
-      + `  콜 수는 대리 지표다 — 프롬프트가 길거나 같은 창에서 다른 작업을 돌렸으면 더 낮게 잡는다.\n`
+      + `  묶음을 가르지 말고 케이스 필터(--scenarios·--variants)로 batch를 끊고 결과는 한 md에 모은다.\n`
+      + `  call 수는 대리 지표다 — 프롬프트가 길거나 같은 창에서 다른 작업을 돌렸으면 더 낮게 잡는다.\n`
       + `  의도한 초과면 --allow-over-cap.`,
     );
   }
 
-  // 분류지 오류는 콜을 쓰기 전에 끊는다.
+  // 분류지 오류는 call을 쓰기 전에 끊는다.
   for (const scenario of scenarios) axesOf(scenario, spec);
 
-  // 없는 팔별 폴더도 마찬가지 — cwd가 없으면 그 팔 전 런이 실패해 "델타 없음"으로 읽힌다.
+  // 없는 팔별 폴더도 마찬가지 — cwd가 없으면 그 팔 전 run이 실패해 "델타 없음"으로 읽힌다.
   for (const [variant, cwd] of Object.entries(spec.variant_cwds ?? {})) {
     if (!variantNames.includes(variant)) continue;
     if (!fs.existsSync(cwd)) throw new Error(`팔 작업 폴더가 없다 (${variant}): ${cwd}`);
@@ -452,8 +452,8 @@ async function main() {
   if (args.verbose) {
     process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
       + `scenarios=${scenarios.map((s) => s.id).join(',')} reps=${args.reps} `
-      + `-> ${pending.length}런 x2콜 = ${calls}/${CALL_CAP}콜`
-      + `${jobs.length > pending.length ? ` (이어받음 ${jobs.length - pending.length}런)` : ''}`
+      + `-> ${pending.length} run x2 call = ${calls}/${CALL_CAP} call`
+      + `${jobs.length > pending.length ? ` (이어받음 ${jobs.length - pending.length} run)` : ''}`
       + ` (gen=${args.model}, workers=${workers})\n`);
   }
   if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
@@ -548,7 +548,7 @@ async function main() {
   for (const rowId of rowIds) {
     const row = table[rowId];
     const cells = variantNames.map((v) => `${row.variants[v].pass}/${row.variants[v].n}`);
-    // 실패한 런은 채점 결과가 비어 실제 0점과 같은 모양으로 찍힌다. 열이 없으면
+    // 실패한 run은 채점 결과가 비어 실제 0점과 같은 모양으로 찍힌다. 열이 없으면
     // 측정 안 된 구간이 "델타 없음"으로 읽히므로 실패 수와 보류 표시를 함께 낸다.
     lines.push(`| ${rowId} | ${row.type} | ${cells.join(' | ')} | ${row.failed_total} | `
       + `${row.verdict_withheld ? '보류(재측정)' : '-'} |`);
