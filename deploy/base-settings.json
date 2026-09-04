@@ -73,6 +73,12 @@
       "msg": "Asking whether this rule can be pushed into code..."
     },
     {
+      "file": "check-md-rule-example.mjs",
+      "event": "PreToolUse",
+      "on": "edit",
+      "msg": "Checking for examples attached to rules..."
+    },
+    {
       "file": "check-skill-purpose-section.mjs",
       "event": "PreToolUse",
       "on": "edit",
