@@ -1,8 +1,11 @@
 #!/usr/bin/env node
-// 세션 마감 전에 훑어야 할 상태 셋 — 압축 스냅샷, 보강 매칭 근거, squash 전후 동일성.
+// 세션 마감 전에 훑어야 할 상태 넷 — 사용자 발화 전수, 압축 스냅샷, 보강 매칭 근거, squash 전후 동일성.
 //
-// 셋 다 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
+// 넷 다 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
 //
+//   user-turns — 「사용자 지적을 빠짐없이 회수한다」. 세는 일을 산문이 부탁하면 세는 척해도 아무도 못
+//     막는다. 실측(2026-09-03 이에이트 세션): 첫 회고 목록 7건, 실제 13건. 압축 스냅샷과 달리
+//     라이브 transcript는 압축 여부와 무관하게 항상 있으므로 발화 전수는 언제나 뽑힌다.
 //   snapshots — 스냅샷을 *쓰는* 쪽은 코드인데(hooks/snapshot-precompact-transcript.mjs) 읽는
 //     진입점이 없어, 폴더 경로와 파일명 규약을 산문에서 읽어 손으로 글롭했다. 빗나가면
 //     "이 세션은 압축이 없었다"로 결론내고 넘어가 압축 구간의 사용자 교정이 통째로 유실된다.
@@ -16,6 +19,7 @@
 // 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
 //
 // 사용:
+//   node <이 파일> user-turns --session <session_id>
 //   node <이 파일> snapshots --session <session_id>
 //   node <이 파일> changed --repo <레포> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포> --before <정리 전 ref>
@@ -29,6 +33,117 @@ import path from 'node:path';
 // 여기 사본을 두는 이유는 훅이 배포돼 나가는 파일이라 import가 안 되기 때문이고, 그래서
 // meta/coupling.json에 짝꿍으로 올려 뒀다.
 const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
+
+// 라이브 transcript. 폴더명은 cwd를 인코딩한 것이지만 세션이 옮겨 다니면 어긋나므로, 인코딩을
+// 흉내내지 않고 세션 id로 된 파일을 찾는다(실측 8000여 폴더에서 0.2초 미만).
+const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
+
+// CLI가 그 자리에서 돌린 명령의 출력·주의문이 user 엔트리에 섞여 들어온다. 발화 뒤에 붙는 일도
+// 있어 첫머리 검사로는 못 걷는다.
+const LOCAL_COMMAND_TAGS = /<local-command-(stdout|stderr|caveat)>[\s\S]*?<\/local-command-\1>/g;
+
+// 사용자가 친 것이 아닌데 `type=user`로 들어오는 것들. 런타임이 사용자 자리에 끼워 넣는 주입이라
+// 회고가 세면 안 되는 쪽이다. 마커가 **줄 첫머리**에 오는 것만 잡는다 — 본문 중간에 인용된
+// 같은 글자에는 안 걸린다.
+const INJECTED = [
+  /^Another Claude session sent a message/,
+  /^<teammate-message\b/,
+  /^<bash-stdout>/,
+  /^<bash-stderr>/,
+  /^\[Request interrupted by user/,
+  /^Caveat: The messages below were generated/,
+  /^This session is being continued from a previous conversation/,
+];
+
+// 긴 붙여넣기는 통째로 실으면 회고 입력을 덮는다. 다만 지시는 붙여넣은 자료 **뒤에** 붙는 일이
+// 잦아서, 앞만 자르면 정작 지적이 잘린다. 그래서 앞뒤를 함께 남긴다.
+const HEAD = 1200;
+const TAIL = 300;
+
+function findTranscript(session) {
+  if (!fs.existsSync(TRANSCRIPT_ROOT)) return null;
+  for (const dir of fs.readdirSync(TRANSCRIPT_ROOT)) {
+    const p = path.join(TRANSCRIPT_ROOT, dir, `${session}.jsonl`);
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
+// 사용자 자리에 실린 텍스트. 도구 결과·서브에이전트 줄은 여기서 걸러진다. 주입인지 아닌지는
+// 아직 안 가른다 — 중단 횟수처럼 주입 쪽에서만 세는 것이 있다.
+function rawUserText(entry) {
+  if (entry.type !== 'user' || entry.isSidechain || entry.isMeta) return null;
+  const content = entry.message?.content;
+  const text =
+    typeof content === 'string'
+      ? content
+      : Array.isArray(content)
+        ? content.filter((b) => b.type === 'text').map((b) => b.text).join('\n')
+        : '';
+  return text.trim() ? text : null;
+}
+
+// 사용자가 실제로 친 것만 남긴다. 남길 게 없으면 null.
+function typedText(raw) {
+  const stripped = raw.replace(LOCAL_COMMAND_TAGS, '').trim();
+  if (!stripped) return null;
+  // 백그라운드 task 알림은 래핑이 두 가지라(감싸 오는 형태·곧장 태그로 시작하는 형태) 첫머리로 안 갈린다.
+  if (stripped.includes('<task-notification>')) return null;
+  if (INJECTED.some((re) => re.test(stripped))) return null;
+
+  // 슬래시 커맨드는 호출 자체가 발화다(그게 지적인지는 회고가 판정한다). 나머지 래퍼는 벗긴다.
+  const name = stripped.match(/<command-name>([^<]*)<\/command-name>/)?.[1]?.trim();
+  if (name) {
+    const args = stripped.match(/<command-args>([\s\S]*?)<\/command-args>/)?.[1]?.trim();
+    return `${name}${args ? ` ${args}` : ''}`;
+  }
+  const bash = stripped.match(/<bash-input>([\s\S]*?)<\/bash-input>/)?.[1]?.trim();
+  if (bash) return `! ${bash}`;
+
+  const text = stripped.replace(/<system-reminder>[\s\S]*?<\/system-reminder>/g, '').trim();
+  return text || null;
+}
+
+// 한 발화가 엔트리 둘로 쌓이는 자리가 둘 있다 — 사용자가 입력창에서 고쳐 다시 보낸 것, 그리고
+// CLI가 한 입력을 두 번 기록한 것(`/compact`은 맨 텍스트와 래핑된 형태로 2ms 간격에 두 번 남는다).
+// 어느 쪽이든 「같은 지적이 두 번 왔는가」에 오탐으로 걸리므로 합친다. 둘을 갈라 라벨에 적지는
+// 않는다 — 텍스트만으로는 어느 쪽인지 안 갈리고, 확인 안 된 원인을 매번 단정해 찍게 된다.
+//
+// 다만 CLI가 `promptSource: queued`로 표시한 것은 AI가 답하기 전에 사용자가 따로 밀어 넣은 별개
+// 메시지라 합치면 안 된다. 이 표시는 옛 기록에 없으므로(실측 1161개 세션 중 708건이 무표기)
+// 앞부분 일치 판정을 없애지 않고 그 위에 얹는다.
+//
+// 가르는 것은 시간이 아니라 **그 사이에 AI가 답했는가**다. 답이 끼어 있으면 뒤엣것은 그 답을
+// 보고 한 새 발화이지 재전송이 아니다. 시간으로 자르면 양쪽으로 틀린다 — 실측에서 글자가 똑같은
+// 재전송이 10.9초 뒤에 온 사례가 있고(창을 좁히면 한 발화가 둘로 쪼개진다), 같은 「ㅇㅋ」가 4분
+// 35초 간격의 서로 다른 대답이었던 사례도 있다(창을 넓히면 번호가 조용히 빠진다).
+//
+// 합칠 때는 나중에 보낸 쪽이 최종본이다 — 긴 쪽을 고르면 사용자가 지운 문장이 되살아나 원문
+// 아닌 것이 회고의 증거로 남는다.
+function mergeResends(turns) {
+  const merged = [];
+  for (const turn of turns) {
+    const prev = merged.at(-1);
+    const isResend =
+      prev &&
+      turn.source !== 'queued' &&
+      turn.replies === prev.replies &&
+      (turn.text.startsWith(prev.text) || prev.text.startsWith(turn.text));
+    if (!isResend) {
+      merged.push({ ...turn });
+      continue;
+    }
+    prev.edits = (prev.edits ?? 0) + 1;
+    prev.text = turn.text;
+    prev.at = turn.at;
+  }
+  return merged;
+}
+
+function clip(text) {
+  if (text.length <= HEAD + TAIL) return text;
+  return `${text.slice(0, HEAD)}\n… (총 ${text.length}자 중 가운데 생략) …\n${text.slice(-TAIL)}`;
+}
 
 // 보강 매칭 조건 중 **파일로 판정되는 것만**. 대화 쪽 조건(그 스킬을 불렀는가)은 세션만 안다.
 const AUGMENTATION_PATHS = [
@@ -49,6 +164,58 @@ function git(cwd, args) {
   } catch (e) {
     return { error: `${e.stderr || e.message}`.trim().split('\n').pop() };
   }
+}
+
+if (command === 'user-turns') {
+  const session = optOf('session');
+  if (!session) {
+    console.error('user-turns 에는 --session <session_id> 가 필요합니다.');
+    process.exit(1);
+  }
+  const file = findTranscript(session);
+  if (!file) {
+    // 이 폴더는 Claude Code만 쓴다. 같은 스킬이 다른 CLI로도 배포되므로 여기서 죽는 것이
+    // 정상 경로일 수 있다 — 그때 회고가 "세어봤다"로 되돌아가면 이 서브커맨드를 만든 이유가
+    // 사라지므로, 대신 무엇을 해야 하는지까지 적어 보낸다.
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
+    console.error('세션 id가 틀렸거나, 이 CLI가 Claude Code 형식 기록을 안 남기는 것이다.');
+    console.error('발화 전수를 못 뽑았으면 세어보는 것으로 대신하지 말고, 못 뽑았다는 사실과 사유를 회고 첫머리에 적는다.');
+    process.exit(1);
+  }
+  const raw_turns = [];
+  let interrupts = 0;
+  let replies = 0; // 지금까지 AI가 답한 횟수. 재전송과 새 발화를 가르는 기준이다.
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue; // 쓰는 중이라 끊긴 마지막 줄
+    }
+    if (entry.type === 'assistant' && !entry.isSidechain) {
+      replies += 1;
+      continue;
+    }
+    const raw = rawUserText(entry);
+    if (!raw) continue;
+    if (/^\[Request interrupted by user/.test(raw.trimStart())) interrupts += 1;
+    const text = typedText(raw);
+    if (text) raw_turns.push({ at: entry.timestamp, text, replies, source: entry.promptSource });
+  }
+  const turns = mergeResends(raw_turns);
+
+  console.log(`[사용자 발화 전수] ${turns.length}건 — ${file}`);
+  console.log('회고는 이 번호를 하나도 빼지 않고 표에 옮긴다. 「지적 없음」인 번호도 행으로 남긴다.\n');
+  turns.forEach(({ at, text, edits }, i) => {
+    console.log(`### ${i + 1}. ${at ?? ''}${edits ? ` (같은 발화 ×${edits} 합침 — 반복 지적이 아니다)` : ''}`);
+    console.log(clip(text));
+    console.log('');
+  });
+  if (interrupts) {
+    console.log(`[중단] 사용자가 응답을 끊은 횟수 ${interrupts}회 — 내용이 없어 번호를 안 붙였다. 끊긴 자리에서 무엇을 하다 끊겼는지는 회고가 본다.`);
+  }
+  process.exit(0);
 }
 
 if (command === 'snapshots') {
