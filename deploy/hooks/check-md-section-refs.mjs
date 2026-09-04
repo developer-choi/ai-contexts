@@ -231,7 +231,7 @@ function collectLegacyRefs(root, rel, abs, src, out) {
     // (다른 레포를 가리키거나 이름만 부른 것) 알려봐야 할 수 있는 일이 없다.
     const target = resolveDoc(root, abs, href);
     if (!target) continue;
-    const { loose } = anchorsOf(target);
+    const { loose, headingNames } = anchorsOf(target);
     // 「A > B」는 중첩 헤딩 경로다(상위 절 > 하위 절). 마디마다 대조하고, 링크로는 마지막
     // 마디를 쓴다 — 앵커는 헤딩 하나만 가리킬 수 있어 실제로 뛸 곳이 그쪽이다.
     const segments = section.split(">").map((s) => s.trim()).filter(Boolean);
@@ -240,6 +240,8 @@ function collectLegacyRefs(root, rel, abs, src, out) {
     // 앵커는 앞머리 별칭이 아니라 **전체 헤딩**의 슬러그여야 실제로 뛴다. 표시 글자는
     // 원래 부르던 이름을 그대로 두고, 주소만 전체 이름으로 채운 제안을 낸다.
     const full = resolved ? loose.get(slug(leaf)) : null;
+    // 이름이 풀려도 그게 헤딩이 아니면 앵커를 못 건다. 그 자리는 제안 대신 사정을 적는다.
+    const linkable = full != null && headingNames.has(full);
     out.push({
       rel,
       line: m.line,
@@ -247,7 +249,8 @@ function collectLegacyRefs(root, rel, abs, src, out) {
       section,
       leaf,
       href,
-      suggestion: full ? `[${leaf}](${href}#${slug(full)})` : null,
+      suggestion: linkable ? `[${leaf}](${href}#${slug(full)})` : null,
+      labelOnly: full != null && !linkable ? full : null,
     });
   }
 }
@@ -483,6 +486,9 @@ function anchorsOf(file) {
 // 앵커를 같은 기준으로 세야 해서 갈라 뒀다 — 기준이 갈리면 "잃은 절"이 헛집힌다.
 function anchorsFromSource(src) {
   const raws = [];
+  // 헤딩에서 온 이름만 따로 센다. 굵은 글씨 라벨은 이름을 알아보는 데는 쓰지만 앵커가
+  // 안 생겨서, 그쪽으로 `#슬러그`를 제안하면 링크 검사에서 깨진다.
+  const headingNames = new Set();
   let fenced = false;
   for (const line of src.split(/\r?\n/)) {
     if (/^\s*(```|~~~)/.test(line)) {
@@ -493,6 +499,7 @@ function anchorsFromSource(src) {
     const heading = /^#{1,6}\s+(.+?)\s*$/.exec(line);
     if (heading) {
       raws.push(heading[1]);
+      headingNames.add(clean(heading[1]));
       continue;
     }
     const label = /^\s*(?:[-*]\s*)?\*\*(.+?)\*\*\s*[::]/.exec(line);
@@ -513,7 +520,7 @@ function anchorsFromSource(src) {
   for (const raw of raws) add(loose, slug(cutTail(clean(raw))), clean(raw));
   for (const raw of raws) add(loose, slug(headOf(raw)), clean(raw));
   for (const raw of raws) add(loose, slug(dropMarker(clean(raw))), clean(raw));
-  return { exact, loose };
+  return { exact, loose, headingNames };
 }
 
 // 헤딩의 앞머리 — 뒤에 붙은 부연을 뗀 부분. 이 레포들은 절을 가리킬 때 앞머리만 부른다
@@ -638,17 +645,24 @@ function formatSoft(found) {
     for (const it of found.legacy) {
       lines.push(`  ${it.rel}:${it.line}  ${it.href} 「${it.section}」`);
       if (it.suggestion) lines.push(`    → ${it.suggestion}`);
+      else if (it.labelOnly)
+        lines.push(
+          `    → 「${it.section}」 — 절 제목이 아니라 본문 굵은 글씨라 앵커가 안 생깁니다.`,
+          `      그 줄이 속한 절로 링크하고, 어느 줄인지는 본문에 적으세요.`,
+        );
       else lines.push(`    → 대상 파일에 그 이름의 절이 없습니다. 실제 절 이름을 확인하세요.`);
     }
     lines.push(
       "",
-      "이건 이번 변경으로 생긴 위반이 아닙니다. 인용 표기를 앵커 링크로 옮기는 중인데,",
-      "한 번에 다 바꾸지 않고 '건드린 파일만 그때그때' 방식이라 이 파일을 연 김에 뜹니다.",
+      "인용 표기를 앵커 링크로 옮기는 중입니다. 한 번에 다 바꾸지 않고 '건드린 파일만",
+      "그때그때' 방식이라, 이 파일을 연 지금이 그 자리입니다.",
       "",
-      "  · 하던 일과 무관한 변경이니 별도 커밋으로 나누세요.",
+      "  · 지금 고칩니다. 다음으로 미루면 이 파일을 다시 열 때까지 안 고쳐집니다.",
+      "  · 하던 일과 섞이지 않게 별도 커밋으로 나누세요. 미루라는 뜻이 아니라,",
+      "    같은 커밋에 담지 말라는 뜻입니다.",
       "  · 「」가 다른 문서의 절이 아니라 강조·낱말이면(「차이」·「저희」 등) 그대로 두세요.",
       "    이 알림은 그 판정을 대신하지 않습니다.",
-      "  · 지금 안 고쳐도 커밋은 통과합니다.",
+      "  · 제안된 주소가 대상 파일에 실제로 있는지는 옮긴 뒤 링크 검사로 확인하세요.",
     );
   }
   if (found.commands.length) {
