@@ -58,10 +58,10 @@ node {{skill_dir}}/augmentations/score.mjs <산출물.md> [--props 명제리스�
 
 회수한 항목은 환류 대상에 따라 가른다:
 
-- **톤 교정 사례·놓친 결함·과교정** → pre-exit Step 1 규칙화에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md의 해당 절과 그 절 끝 `<!-- banned: ... -->` 주석에 함께 추가한다(`score.mjs`가 실행 시점에 읽으므로 별도 코드 수정은 불필요).
+- **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md의 해당 절과 그 절 끝 `<!-- banned: ... -->` 주석에 함께 추가한다(`score.mjs`가 실행 시점에 읽으므로 별도 코드 수정은 불필요).
 - **경로 오판** → write-init SKILL.md의 경로 판정(사실 질문)에 반영한다.
 - **잘 읽힌 새 글 골격** → [article-skeletons.md](../../../contexts/writing-guide/article-skeletons.md)에 어떤 상황에서 쓴 골격인지와 함께 누적한다. 이 파일은 골격을 고르는 쪽만 참조하고 있어, 여기서 되돌려 쌓지 않으면 처음 만든 몇 개에 고정된다.
 
 ## 출력
 
-본 보강은 별도 보고 섹션을 만들지 않는다. 채점기 출력과 회수한 교정 사례·특화 점검 결과를 pre-exit Step 1 문제 목록(선호 신호)에 합류시켜, Step 1 규칙화에서 위 「반영 위치」대로 처리한다. 채점 위반·교정 사례가 모두 0건이면 "write-refine 채점·교정 사례 없음"으로 보고하고 넘어간다.
+본 보강은 별도 보고 섹션을 만들지 않는다. 채점기 출력과 회수한 교정 사례·특화 점검 결과를 pre-exit 「문제 리스트업 + 규칙화」의 문제 목록(선호 신호)에 합류시켜, 그 규칙화 단계에서 위 「반영 위치」대로 처리한다. 채점 위반·교정 사례가 모두 0건이면 "write-refine 채점·교정 사례 없음"으로 보고하고 넘어간다.

@@ -17,7 +17,7 @@
 
 PP의 `routine/docs/scripts-reference.md`에 등재된 스크립트 목록을 기준으로, 이 세션에서 `routine/scripts/common/storage.ts`의 `readJson` / `writeJson`을 **직접** 호출한 경우가 있는지 회상한다.
 
-대응 스크립트가 **있는데** 직접 호출했으면 Step 1 문제 목록에 추가하고, 대응 스크립트가 **없으면** 그 작업을 `scripts-reference.md`에 등재하자고 제안한다.
+대응 스크립트가 **있는데** 직접 호출했으면 「문제 리스트업 + 규칙화」의 문제 목록에 추가하고, 대응 스크립트가 **없으면** 그 작업을 `scripts-reference.md`에 등재하자고 제안한다.
 
 ### 신규 스크립트 후보 탐지
 
@@ -40,10 +40,10 @@ routine-start/summary를 굴린 오늘 세션 전체를 돌이켜 회고한다. 
 
 ## 반영 위치
 
-- 스크립트 우회 발견 → Step 1 문제 목록 (AI 규칙화 후보)
+- 스크립트 우회 발견 → 「문제 리스트업 + 규칙화」의 문제 목록 (AI 규칙화 후보)
 - 스크립트 없는 작업 발견 → `routine/docs/scripts-reference.md` 등재 제안
 - 절차 보완 발견 → 해당 SKILL.md/design.md/스크립트 갱신 제안 (일일 routine 커밋과 별도 커밋)
 
 ## 출력
 
-별도 보고 섹션 없음. 발견 항목은 Step 1 문제 목록에 흡수한다.
+별도 보고 섹션 없음. 발견 항목은 「문제 리스트업 + 규칙화」의 문제 목록에 흡수한다.
