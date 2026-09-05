@@ -16,8 +16,7 @@
 //     잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다. 트리 해시 둘을 맞대면 끝날 일이다.
 //   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
-//     인상에 남은 두어 개만 올라온다 — 실측(2026-09-05, 최근 실세션 20개)으로 한 세션이 여는
-//     프롬프트 문서가 평균 7.7개, 많으면 45개다.
+//     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
 //
 // 판단은 안 한다 — 어느 보강을 돌릴지(대화 쪽 조건은 세션만 안다), 어느 커밋이 한 작업인지,
 // 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
@@ -158,6 +157,38 @@ function clip(text) {
 // 「잘못 놓였다」가 말이 되는 문서만 센다 — 스킬·컨텍스트·규칙과 레포 규칙 파일. 코드나 백로그
 // 항목을 읽은 것은 그 회차가 그걸 다뤘다는 뜻이지 배치가 틀렸다는 신호가 아니다.
 const PROMPT_DOC = /(\/(skills|contexts|rules)\/.*\.md$)|(\/(CLAUDE|AGENTS|GEMINI)\.md$)/;
+
+// 문서를 여는 길은 `Read` 만이 아니다. 셸로 통째로 찍으면 같은 분량이 컨텍스트에 들어오는데
+// 도구 이름이 달라 안 세어졌다 — 2026-09-05 벤치에서 한 팔이 네 문서를 `cat` 한 번으로 열었고
+// 눈금에는 0건이 남았다. 오차가 한 방향(과소)이라 「안 차는 눈금」으로만 드러나서, 장치가
+// 고장난 것인지 정말 후보가 없는 것인지 안 갈린다.
+//
+// 읽는 명령만 센다. 명령줄에 `.md` 가 보이면 다 세는 쪽은 `ls *.md`·`git commit x.md`·`> x.md`
+// 까지 읽은 것으로 쳐서, 세션이 열지도 않은 문서에 「안 썼다」가 찍힌다. 그건 없는 신호를
+// 만들어내는 것이라 못 센 것보다 나쁘다 — 그 신호를 받은 회차가 멀쩡한 문서를 옮긴다.
+const BASH_READER = new Set(['cat', 'head', 'tail', 'less', 'more', 'bat', 'type']);
+
+function bashReads(command, cwd) {
+  if (!command) return [];
+  const out = [];
+  // `a && cat x`·`a; cat x`·`a | cat` 처럼 이어 붙은 것은 토막마다 앞머리를 본다.
+  for (const segment of String(command).split(/&&|\|\||;|\|/)) {
+    const words = segment.trim().split(/\s+/);
+    let i = 0;
+    while (i < words.length && /^[A-Za-z_]\w*=/.test(words[i])) i += 1; // `FOO=1 cat x`
+    if (!BASH_READER.has(path.basename(words[i] ?? '').replace(/\.exe$/, ''))) continue;
+    for (const word of words.slice(i + 1)) {
+      if (word.startsWith('-')) continue;
+      const arg = word.replace(/^["']|["']$/g, '').replaceAll('\\', '/');
+      if (!PROMPT_DOC.test(arg)) continue;
+      // 상대 경로는 그 회차가 서 있던 자리에서 푼다. 이 스크립트가 도는 자리에서 풀면
+      // sourcePath 의 git 질의가 엉뚱한 레포를 답해 키가 조용히 다른 파일로 붙는다.
+      const abs = /^(\/|[A-Za-z]:)/.test(arg) ? arg : path.resolve(cwd ?? '.', arg);
+      out.push(String(abs).replaceAll('\\', '/'));
+    }
+  }
+  return out;
+}
 
 // 같은 문서가 여러 경로로 열린다 — 워크트리는 레포마다 다른 폴더이고, 글로벌 자산은 CLI마다
 // 홈 아래에 사본이 깔린다. 경로 그대로 키를 잡으면 한 파일의 눈금이 서넛으로 갈려 「열 번 중
@@ -382,18 +413,24 @@ if (command === 'read-files') {
     }
     const content = entry.message?.content;
     if (!Array.isArray(content)) continue;
+    const note = (norm) => {
+      const key = sourcePath(norm);
+      const seen = reads.get(key) ?? { count: 0, sub: false };
+      seen.count += 1;
+      seen.sub ||= Boolean(entry.isSidechain);
+      reads.set(key, seen);
+    };
     for (const block of content) {
       if (block.type !== 'tool_use') continue;
+      if (block.name === 'Bash') {
+        for (const norm of bashReads(block.input?.command, entry.cwd)) note(norm);
+        continue;
+      }
       const target = block.input?.file_path;
       if (!target) continue;
       const norm = String(target).replaceAll('\\', '/');
       if (block.name === 'Read') {
-        if (!PROMPT_DOC.test(norm)) continue;
-        const key = sourcePath(norm);
-        const seen = reads.get(key) ?? { count: 0, sub: false };
-        seen.count += 1;
-        seen.sub ||= Boolean(entry.isSidechain);
-        reads.set(key, seen);
+        if (PROMPT_DOC.test(norm)) note(norm);
       } else if (block.name === 'Edit' || block.name === 'Write' || block.name === 'NotebookEdit') {
         touched.add(sourcePath(norm));
       }
