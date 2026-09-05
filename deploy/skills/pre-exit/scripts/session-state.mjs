@@ -14,6 +14,10 @@
 //   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. Step 3은 사용자 지시를
 //     기다리지 않으므로 사람 눈이 안 거친다. rebase 중 hunk가 빠져도 로그는 깔끔해 보이고,
 //     잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다. 트리 해시 둘을 맞대면 끝날 일이다.
+//   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
+//     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
+//     인상에 남은 두어 개만 올라온다 — 실측(2026-09-05, 최근 실세션 20개)으로 한 세션이 여는
+//     프롬프트 문서가 평균 7.7개, 많으면 45개다.
 //
 // 판단은 안 한다 — 어느 보강을 돌릴지(대화 쪽 조건은 세션만 안다), 어느 커밋이 한 작업인지,
 // 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
@@ -23,6 +27,7 @@
 //   node <이 파일> snapshots --session <session_id>
 //   node <이 파일> changed --repo <레포> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포> --before <정리 전 ref>
+//   node <이 파일> read-files --session <session_id>
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -143,6 +148,61 @@ function mergeResends(turns) {
 function clip(text) {
   if (text.length <= HEAD + TAIL) return text;
   return `${text.slice(0, HEAD)}\n… (총 ${text.length}자 중 가운데 생략) …\n${text.slice(-TAIL)}`;
+}
+
+// 「잘못 놓였다」가 말이 되는 문서만 센다 — 스킬·컨텍스트·규칙과 레포 규칙 파일. 코드나 백로그
+// 항목을 읽은 것은 그 회차가 그걸 다뤘다는 뜻이지 배치가 틀렸다는 신호가 아니다.
+const PROMPT_DOC = /(\/(skills|contexts|rules)\/.*\.md$)|(\/(CLAUDE|AGENTS|GEMINI)\.md$)/;
+
+// 같은 문서가 여러 경로로 열린다 — 워크트리는 레포마다 다른 폴더이고, 글로벌 자산은 CLI마다
+// 홈 아래에 사본이 깔린다. 경로 그대로 키를 잡으면 한 파일의 눈금이 서넛으로 갈려 「열 번 중
+// 여덟 번」이 영영 안 찬다. 그래서 고칠 자리, 곧 **원본의 레포 상대 경로**로 되돌린다.
+const DEPLOYED_ASSET = /\/\.(?:claude|codex|gemini)\/((?:skills|contexts|rules)\/.*)$/;
+const repoRootCache = new Map();
+
+function sourcePath(file) {
+  // 배포 위치의 정본은 AC다(글로벌 규칙 「AI 설정을 고칠 위치」). 고칠 곳을 적어야 회차가 손댄다.
+  const deployed = file.match(DEPLOYED_ASSET);
+  if (deployed) return `ai-contexts/deploy/${deployed[1]}`;
+  // 그 회차가 파일을 옮기거나 지웠으면 폴더째 없어져 git 질의가 실패한다 — 남아 있는 가장 가까운
+  // 조상에게 묻는다. 레포 소속은 조상이 정하므로 답은 같다.
+  let dir = path.dirname(file);
+  while (!fs.existsSync(dir) && path.dirname(dir) !== dir) dir = path.dirname(dir);
+  if (!repoRootCache.has(dir)) {
+    const top = git(dir, ['rev-parse', '--show-toplevel']);
+    const common = git(dir, ['rev-parse', '--path-format=absolute', '--git-common-dir']);
+    repoRootCache.set(
+      dir,
+      top.error || common.error
+        ? null
+        : {
+            top: top.replaceAll('\\', '/'),
+            // 워크트리의 common-dir은 원본 레포의 .git이라, 이름이 원본으로 수렴한다.
+            name: common.replaceAll('\\', '/').replace(/\/\.git\/?$/, '').split('/').pop(),
+          },
+    );
+  }
+  const repo = repoRootCache.get(dir);
+  if (!repo || !file.startsWith(`${repo.top}/`)) return file;
+  // 워크트리 폴더가 아직 살아 있으면 toplevel이 그쪽을 가리켜 접두사가 안 남지만, 이미 지워졌으면
+  // 조상까지 올라오느라 `.claude/worktrees/<브랜치>/`가 상대경로에 남는다. 두 경우를 같게 만든다.
+  const rel = file.slice(repo.top.length + 1).replace(/^\.?(claude\/)?worktrees\/[^/]+\//, '');
+  return `${repo.name}/${rel}`;
+}
+
+// 세션이 끝나기 전에 워크트리를 지우면(면제 레포에서는 AI가 그 자리에서 지운다) 위 git 질의가
+// 통째로 실패해 원경로가 그대로 키가 된다. 그때는 이번에 이미 풀린 키들과 꼬리를 맞대 되돌린다 —
+// 맞는 키가 **하나일 때만** 합친다. 둘 이상이면 어느 레포인지 못 가리므로 원경로로 둔다.
+function collapseUnresolved(keys) {
+  const isAbsolute = (k) => k.startsWith('/') || /^[A-Za-z]:/.test(k);
+  const resolved = keys.filter((k) => !isAbsolute(k));
+  const map = new Map();
+  for (const key of keys) {
+    if (!isAbsolute(key)) continue;
+    const hits = resolved.filter((r) => key.endsWith(`/${r.slice(r.indexOf('/') + 1)}`));
+    if (hits.length === 1) map.set(key, hits[0]);
+  }
+  return map;
 }
 
 // 보강 매칭 조건 중 **파일로 판정되는 것만**. 대화 쪽 조건(그 스킬을 불렀는가)은 세션만 안다.
@@ -291,6 +351,80 @@ if (command === 'squash-check') {
   console.log('  ✗ 파일 내용이 달라졌다. 합치다 hunk가 빠졌을 수 있다:');
   console.log(diff.split('\n').map((l) => `    ${l}`).join('\n'));
   process.exit(1);
+}
+
+if (command === 'read-files') {
+  const session = optOf('session');
+  if (!session) {
+    console.error('read-files 에는 --session <session_id> 가 필요합니다.');
+    process.exit(1);
+  }
+  const file = findTranscript(session);
+  if (!file) {
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
+    console.error('기억으로 목록을 만들지 않는다 — 못 뽑았다는 사실을 회고에 적고 이번 회차는 기록을 건너뛴다.');
+    process.exit(1);
+  }
+  const reads = new Map();
+  const touched = new Set();
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    const content = entry.message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const block of content) {
+      if (block.type !== 'tool_use') continue;
+      const target = block.input?.file_path;
+      if (!target) continue;
+      const norm = String(target).replaceAll('\\', '/');
+      if (block.name === 'Read') {
+        if (!PROMPT_DOC.test(norm)) continue;
+        const key = sourcePath(norm);
+        const seen = reads.get(key) ?? { count: 0, sub: false };
+        seen.count += 1;
+        seen.sub ||= Boolean(entry.isSidechain);
+        reads.set(key, seen);
+      } else if (block.name === 'Edit' || block.name === 'Write' || block.name === 'NotebookEdit') {
+        touched.add(sourcePath(norm));
+      }
+    }
+  }
+
+  for (const [from, to] of collapseUnresolved([...new Set([...reads.keys(), ...touched])])) {
+    if (reads.has(from)) {
+      const seen = reads.get(to) ?? { count: 0, sub: false };
+      seen.count += reads.get(from).count;
+      seen.sub ||= reads.get(from).sub;
+      reads.set(to, seen);
+      reads.delete(from);
+    }
+    if (touched.delete(from)) touched.add(to);
+  }
+
+  const rows = [...reads.entries()].sort((a, b) => b[1].count - a[1].count);
+  console.log(`[읽은 프롬프트 문서] ${rows.length}건 — ${file}`);
+  if (!rows.length) {
+    console.log('이 세션은 프롬프트 문서를 안 열었다. 올릴 기록이 없다.');
+    process.exit(0);
+  }
+  console.log('여기에 세션이 두 칸을 채운다 — **어느 진입점(스킬·역할)이 이 문서를 물었는가**와 **썼는가**.');
+  console.log('둘 다 기계가 못 낸다. 진입점은 스킬이 자동으로 붙으면 기록에 안 남고(실측 20세션 중 6건만 남았다),');
+  console.log('사용 여부는 애초에 파일에 안 적힌다.');
+  console.log('판정 문장은 「참고했나」가 아니라 **「이 문서가 없었으면 결과가 달라졌나」**다 — 앞의 문장으로 물으면');
+  console.log('열어본 것이 전부 "썼다"로 답해진다.\n');
+  for (const [p, { count, sub }] of rows) {
+    const marks = [count > 1 ? `×${count}` : null, sub ? '서브에이전트' : null, touched.has(p) ? '이번에 고침' : null]
+      .filter(Boolean)
+      .join(', ');
+    console.log(`  ${p}${marks ? `  (${marks})` : ''}`);
+  }
+  console.log('\n한 세션의 「안 씀」은 신호가 아니라 눈금 하나다 — 그 자리에서 "쪼개라"고 결론내지 않는다.');
+  process.exit(0);
 }
 
 console.error(`모르는 명령: ${command ?? '(없음)'}`);
