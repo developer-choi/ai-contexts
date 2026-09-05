@@ -121,7 +121,7 @@
         "deploy/skills/workflow/session-timeline/scripts/extract-timeline.mjs",
         "deploy/skills/pre-exit/scripts/session-state.mjs"
       ],
-      "note": "jsonl을 직접 열어보지 않으면 모르는 함정들(메타 주입·tool_result만 든 user 엔트리·래퍼 태그째 들어오는 슬래시 명령·백그라운드 알림의 두 가지 래핑·local-command 출력·입력창 재전송)이 두 파일에 각각 적혀 있다. extract-timeline은 AI 발화까지 담은 타임라인을 렌더하고 session-state의 user-turns는 사용자 발화만 번호 붙여 내는지라 출력과 병합 정책이 달라 한 함수로 못 묶었다 — 게다가 둘 다 배포돼 나가는 스킬 스크립트라 공용 모듈을 둘 자리가 없다. 새 함정을 한쪽에서 발견하면 다른 쪽에도 넣는다. 안 그러면 한쪽 산출물에만 주입이 '사용자 발화'로 새고, 그 사실은 산출물을 눈으로 훑기 전까지 안 드러난다. 등록 시점(2026-09-04) 실측 불일치 — 팀메이트 유휴 알림('Another Claude session sent a message'로 시작하고 isMeta가 안 붙는다)과 줄 첫머리 <bash-stdout>·<bash-stderr>가 extract-timeline에는 안 걸려 타임라인에 '사용자' 화자로 찍힌다. session-state 쪽에만 필터가 있다. 이 줄을 지우기 전에 extract-timeline에 이식했는지 확인한다."
+      "note": "jsonl을 직접 열어보지 않으면 모르는 함정들(메타 주입·tool_result만 든 user 엔트리·래퍼 태그째 들어오는 슬래시 명령·백그라운드 알림의 두 가지 래핑·local-command 출력·입력창 재전송)이 두 파일에 각각 적혀 있다. extract-timeline은 AI 발화까지 담은 타임라인을 렌더하고 session-state의 user-turns는 사용자 발화만 번호 붙여 내는지라 출력과 병합 정책이 달라 한 함수로 못 묶었다 — 게다가 둘 다 배포돼 나가는 스킬 스크립트라 공용 모듈을 둘 자리가 없다. 새 함정을 한쪽에서 발견하면 다른 쪽에도 넣는다. 안 그러면 한쪽 산출물에만 주입이 '사용자 발화'로 새고, 그 사실은 산출물을 눈으로 훑기 전까지 안 드러난다. 주입 목록은 양쪽 모두 파일 안에 INJECTED 상수로 서 있고, 줄 첫머리 마커만 잡는다 — 본문 중간에 인용된 같은 글자에는 안 걸린다. 두 목록이 어긋나면 같은 세션에 두 산출물이 다른 발화 수를 낸다."
     },
     {
       "name": "pre-push sync 게이트 ↔ sync 진입점",

@@ -83,6 +83,28 @@ function unwrapTaskNotification(text) {
   return `[백그라운드 task 완료 알림 — ${label}. 결과 본문 생략]`;
 }
 
+// 사용자가 친 것이 아닌데 `type=user`로 들어오고 `isMeta`도 안 붙는 것들. 런타임이 사용자 자리에
+// 끼워 넣는 주입이라 「사용자」로 찍히면 타임라인 위에서 도는 판정이 전부 오염된다. 마커가
+// **줄 첫머리**에 오는 것만 잡는다 — 본문 중간에 인용된 같은 글자에는 안 걸린다.
+// 짝꿍인 pre-exit `session-state.mjs`의 `INJECTED`와 같은 목록을 본다. 한쪽에서 새 꼴을
+// 발견하면 다른 쪽에도 넣는다 — 안 그러면 한쪽 산출물에만 주입이 발화로 샌다.
+const INJECTED = [
+  { re: /^Another Claude session sent a message/, label: '다른 세션이 보낸 메시지' },
+  { re: /^<teammate-message\b/, label: '팀메이트 메시지' },
+  { re: /^<agent-message\b/, label: '에이전트 메시지' },
+  { re: /^<cross-session-message\b/, label: '다른 세션이 보낸 메시지' },
+  { re: /^\[Request interrupted by user/, label: '사용자가 중단함' },
+];
+
+// 셸 출력은 화자가 없다 — 남길 것이 아니라 뺄 것이다.
+const SHELL_OUTPUT = /^<bash-(stdout|stderr)>/;
+
+function classifyInjection(text) {
+  if (SHELL_OUTPUT.test(text)) return { drop: true };
+  const hit = INJECTED.find((item) => item.re.test(text));
+  return hit ? { label: `[${hit.label} — 본문 생략]` } : null;
+}
+
 function readEntries(file) {
   return fs
     .readFileSync(file, 'utf8')
@@ -119,6 +141,12 @@ function toBlocks(entries, tz) {
     const notification = unwrapTaskNotification(raw);
     if (notification) {
       blocks.push({ speaker: '시스템', at: entry.timestamp, text: notification });
+      continue;
+    }
+    const injection = classifyInjection(raw);
+    if (injection) {
+      if (injection.drop) continue;
+      blocks.push({ speaker: '시스템', at: entry.timestamp, text: injection.label });
       continue;
     }
     if (raw.startsWith(COMPACT_PREFIX)) {
