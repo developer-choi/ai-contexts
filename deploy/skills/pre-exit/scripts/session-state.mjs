@@ -14,6 +14,8 @@
 //   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. Step 3은 사용자 지시를
 //     기다리지 않으므로 사람 눈이 안 거친다. rebase 중 hunk가 빠져도 로그는 깔끔해 보이고,
 //     잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다. 트리 해시 둘을 맞대면 끝날 일이다.
+//   retro-table — 「빈칸이 하나라도 있으면 산출물 실패다」. 빠뜨린 쪽이 자기가 빠뜨린 것을 세는
+//     구조라 산문으로는 아무도 못 막는다. user-turns가 낸 번호가 정답지고 표가 채점 대상이다.
 //   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
 //     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
@@ -28,6 +30,7 @@
 //   node <이 파일> squash-check --repo <레포> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
 //   node <이 파일> read-usage --from <판정 json>
+//   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -262,10 +265,11 @@ function git(cwd, args) {
   }
 }
 
-if (command === 'user-turns') {
-  const session = optOf('session');
+// 발화 전수를 뽑는 두 진입점(user-turns가 목록을 내고, retro-table이 그 목록과 표를 맞댄다)이
+// 같은 transcript 해석을 쓴다. 한쪽만 고치면 표 검사가 목록에 없는 번호를 요구하게 된다.
+function transcriptOrDie(session, who) {
   if (!session) {
-    console.error('user-turns 에는 --session <session_id> 가 필요합니다.');
+    console.error(`${who} 에는 --session <session_id> 가 필요합니다.`);
     process.exit(1);
   }
   const file = findTranscript(session);
@@ -278,6 +282,12 @@ if (command === 'user-turns') {
     console.error('발화 전수를 못 뽑았으면 세어보는 것으로 대신하지 말고, 못 뽑았다는 사실과 사유를 회고 첫머리에 적는다.');
     process.exit(1);
   }
+  return file;
+}
+
+if (command === 'user-turns') {
+  const session = optOf('session');
+  const file = transcriptOrDie(session, 'user-turns');
   const raw_turns = [];
   let interrupts = 0;
   let replies = 0; // 지금까지 AI가 답한 횟수. 재전송과 새 발화를 가르는 기준이다.
@@ -548,6 +558,105 @@ if (command === 'read-usage') {
     console.log('  backlog projects/ai-contexts/active/scw/읽었는데-안-쓴-파일-누적.md');
     console.log('이 사실을 회고 보고에 넣는다. 사용자가 묻기를 기다리지 않는다.');
   }
+  process.exit(0);
+}
+
+// 「문제 추출」 표가 발화 전수를 실제로 다 받았는지 맞대 본다. 산문이 "빈칸이 하나라도 있으면
+// 산출물 실패다"라고 적고 있지만, 빠뜨린 쪽이 자기가 빠뜨린 것을 세는 구조라 아무도 못 막는다.
+// user-turns가 낸 번호가 정답지고, 표는 채점 대상이다.
+if (command === 'retro-table') {
+  const session = optOf('session');
+  const table = optOf('table');
+  if (!table) {
+    console.error('retro-table 에는 --table <표가 담긴 md 파일> 이 필요합니다.');
+    process.exit(1);
+  }
+  const file = transcriptOrDie(session, 'retro-table');
+
+  const raw_turns = [];
+  let replies = 0;
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (entry.type === 'assistant' && !entry.isSidechain) {
+      replies += 1;
+      continue;
+    }
+    const raw = rawUserText(entry);
+    if (!raw) continue;
+    if (/^\[Request interrupted by user/.test(raw.trimStart())) continue;
+    const text = typedText(raw);
+    if (text) raw_turns.push({ at: entry.timestamp, text, replies, source: entry.promptSource });
+  }
+  const total = mergeResends(raw_turns).length;
+
+  let md;
+  try {
+    md = fs.readFileSync(table, 'utf8');
+  } catch {
+    console.error(`표 파일을 못 읽었다: ${table}`);
+    process.exit(1);
+  }
+
+  // 헤더·구분선을 뺀 본문 행만 본다. 셀 안의 escape된 파이프(\|)는 칸을 안 가른다.
+  const rows = [];
+  for (const line of md.split('\n')) {
+    const t = line.trim();
+    if (!t.startsWith('|')) continue;
+    if (/^\|[\s:|-]+\|$/.test(t)) continue; // 구분선
+    const body = t.slice(1, t.endsWith('|') ? -1 : undefined);
+    const cells = body.split(/(?<!\\)\|/).map((c) => c.replace(/\\\|/g, '|').trim());
+    if (cells.length < 3) continue;
+    if (/^#$/.test(cells[0])) continue; // 헤더
+    rows.push(cells);
+  }
+
+  const seen = new Map(); // 번호 → 행 수
+  const blanks = [];
+  const unnumbered = [];
+  for (const cells of rows) {
+    const n = Number(cells[0]);
+    if (!Number.isInteger(n) || n < 1) {
+      unnumbered.push(cells[0]);
+      continue;
+    }
+    seen.set(n, (seen.get(n) ?? 0) + 1);
+    // 한 발화가 지적 여럿을 담으면 같은 번호로 행을 나누므로, 빈칸 판정은 행 단위다.
+    if (!cells[1] || !cells[2]) blanks.push(n);
+  }
+
+  const missing = [];
+  for (let n = 1; n <= total; n += 1) if (!seen.has(n)) missing.push(n);
+  const extra = [...seen.keys()].filter((n) => n > total).sort((a, b) => a - b);
+
+  console.log(`[회고 표 대조] 발화 전수 ${total}건 / 표에 오른 번호 ${seen.size}개 (행 ${rows.length}개)`);
+  let failed = false;
+  if (missing.length) {
+    failed = true;
+    console.log(`  빠진 번호 ${missing.length}개: ${missing.join(', ')}`);
+  }
+  if (blanks.length) {
+    failed = true;
+    console.log(`  빈칸이 있는 번호: ${[...new Set(blanks)].join(', ')} — 「지적」과 「어디로 갔나」는 둘 다 채운다`);
+  }
+  if (extra.length) {
+    failed = true;
+    console.log(`  발화 전수를 넘는 번호: ${extra.join(', ')}`);
+  }
+  if (unnumbered.length) {
+    failed = true;
+    console.log(`  번호가 아닌 첫 칸 ${unnumbered.length}개: ${unnumbered.slice(0, 5).join(' / ')}`);
+  }
+  if (failed) {
+    console.log('산출물 실패다. 표를 채운 뒤 다시 돌린다 — 세어보는 것으로 대신하지 않는다.');
+    process.exit(1);
+  }
+  console.log('  빠진 번호·빈칸 없음.');
   process.exit(0);
 }
 

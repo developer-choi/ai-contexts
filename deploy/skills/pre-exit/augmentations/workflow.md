@@ -22,13 +22,13 @@
 
 각 미탐색 링크를 Read해 룰·체크리스트·산출물 요구사항을 추출하고, 산출물(`plan/pr{N}/**`)·작업 결과에 대조한다. 반영 안 된 룰은 「문제 리스트업 + 규칙화」의 문제 목록에 추가한다.
 
-회상 누락 보완: 본 세션의 pre-compact 스냅샷이 있으면(검출은 SKILL.md 「pre-compact 스냅샷 회수」), 그 transcript에서 Read한 `workflow/**/*.md` 항목을 추출해 보강한다.
+회상 누락 보완: 본 세션의 pre-compact 스냅샷이 있으면(검출은 step-1.md 「pre-compact 스냅샷 회수」), 그 transcript에서 Read한 `workflow/**/*.md` 항목을 추출해 보강한다.
 
 ### 첫 사용자 요청 vs 산출물 1:1 대조
 
 세션 첫 사용자 메시지(또는 명시적 요구사항 메시지)를 회상하고, 산출물(`plan/pr{N}/**`·코드·커밋)에서 각 요구사항 충족 여부를 체크한다. 대응 없는 항목은 「문제 리스트업 + 규칙화」의 문제 목록에 추가한다.
 
-회상이 압축으로 흐릿하면 pre-compact 스냅샷 transcript의 첫 사용자 항목으로 보강한다(검출은 SKILL.md 「pre-compact 스냅샷 회수」).
+회상이 압축으로 흐릿하면 pre-compact 스냅샷 transcript의 첫 사용자 항목으로 보강한다(검출은 step-1.md 「pre-compact 스냅샷 회수」).
 
 ### 보고 vs 실제 변경 대조
 
