@@ -60,6 +60,8 @@ const LOCAL_COMMAND_TAGS = /<local-command-(stdout|stderr|caveat)>[\s\S]*?<\/loc
 const INJECTED = [
   /^Another Claude session sent a message/,
   /^<teammate-message\b/,
+  /^<agent-message\b/,
+  /^<cross-session-message\b/,
   /^<bash-stdout>/,
   /^<bash-stderr>/,
   /^\[Request interrupted by user/,

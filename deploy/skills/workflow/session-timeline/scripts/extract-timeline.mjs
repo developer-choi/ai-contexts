@@ -115,6 +115,7 @@ const INJECTED = [
   { re: /^<agent-message\b/, label: '에이전트 메시지' },
   { re: /^<cross-session-message\b/, label: '다른 세션이 보낸 메시지' },
   { re: /^\[Request interrupted by user/, label: '사용자가 중단함' },
+  { re: /^Caveat: The messages below were generated/, label: '런타임 주의문' },
 ];
 
 // 셸 출력은 화자가 없다 — 남길 것이 아니라 뺄 것이다.
@@ -179,6 +180,9 @@ function toBlocks(entries, tz) {
       blocks.push({ speaker: '사용자', at: entry.timestamp, text: `\`${command}\``, command });
       continue;
     }
+    // 짝꿍인 session-state는 여기서 `<system-reminder>`를 걷는데 이쪽은 안 걷는다 — 위의
+    // isMeta 스킵과 COMPACT_PREFIX가 이미 덮기 때문이다. 실측(2026-09-06, 기록 1,154개):
+    // 알림이 실린 비-meta user 엔트리는 5건뿐이고 다섯 다 압축 요약이라 그 분기로 빠진다.
     blocks.push({ speaker: '사용자', at: entry.timestamp, text: raw });
   }
   return blocks;
