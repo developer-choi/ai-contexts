@@ -69,7 +69,28 @@ function unwrapCommand(text) {
   if (!name) return null;
   const argsMatch = text.match(/<command-args>([\s\S]*?)<\/command-args>/);
   const args = argsMatch ? argsMatch[1].trim() : '';
-  return `\`${name[1].trim()}${args ? ` ${args}` : ''}\``;
+  return `${name[1].trim()}${args ? ` ${args}` : ''}`;
+}
+
+// 내장 명령(`/compact`·`/model`·`/clear` 등)은 사용자가 친 평문과 래퍼가 **각각** user 엔트리로
+// 들어온다. 둘 사이에 다른 블록이 끼기도 해서 이웃끼리 비교하는 `mergeResends`가 못 합친다.
+// 명령 하나가 발화 두 건으로 서면 발화 수를 세는 회고가 그만큼 부풀고, 승인 횟수처럼 개수
+// 자체가 지표인 자리가 틀어진다. 래퍼 쪽을 걷고 평문 쪽을 남긴다 — 사용자가 실제로 친 시각이
+// 그쪽이다. 인자가 붙는 사용자 정의 명령은 래퍼만 들어오므로 짝이 없어 그대로 남는다.
+const COMMAND_PAIR_WINDOW_MS = 5000;
+
+function dropDuplicateCommands(blocks) {
+  return blocks.filter((block, i) => {
+    if (!block.command) return true;
+    return !blocks.some(
+      (other, j) =>
+        j !== i &&
+        other.speaker === '사용자' &&
+        !other.command &&
+        other.text === block.command &&
+        Math.abs(new Date(other.at) - new Date(block.at)) <= COMMAND_PAIR_WINDOW_MS,
+    );
+  });
 }
 
 // 백그라운드 task 완료 알림은 래핑이 두 가지다 —
@@ -153,7 +174,12 @@ function toBlocks(entries, tz) {
       blocks.push({ speaker: '시스템', at: entry.timestamp, text: '[이전 대화 압축 요약]' });
       continue;
     }
-    blocks.push({ speaker: '사용자', at: entry.timestamp, text: unwrapCommand(raw) ?? raw });
+    const command = unwrapCommand(raw);
+    if (command) {
+      blocks.push({ speaker: '사용자', at: entry.timestamp, text: `\`${command}\``, command });
+      continue;
+    }
+    blocks.push({ speaker: '사용자', at: entry.timestamp, text: raw });
   }
   return blocks;
 }
@@ -221,7 +247,9 @@ function listSessions(cwd, tz) {
     .readdirSync(dir)
     .filter((name) => name.endsWith('.jsonl'))
     .map((name) => {
-      const blocks = mergeAssistantRuns(mergeResends(toBlocks(readEntries(path.join(dir, name)), tz)));
+      const blocks = mergeAssistantRuns(
+        mergeResends(dropDuplicateCommands(toBlocks(readEntries(path.join(dir, name)), tz))),
+      );
       if (!blocks.length) return { name, blocks: 0 };
       const first = blocks[0];
       const last = blocks[blocks.length - 1];
@@ -259,7 +287,9 @@ if (!args.input) {
   process.exit(1);
 }
 
-const blocks = mergeAssistantRuns(mergeResends(toBlocks(readEntries(args.input), args.tz)));
+const blocks = mergeAssistantRuns(
+  mergeResends(dropDuplicateCommands(toBlocks(readEntries(args.input), args.tz))),
+);
 const output = render(blocks, args.tz);
 
 if (args.out) fs.writeFileSync(args.out, output, 'utf8');
