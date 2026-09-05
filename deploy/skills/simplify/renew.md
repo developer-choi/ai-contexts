@@ -4,24 +4,24 @@
 
 모델과 이 스킬은 계속 개선되므로, 옛 스킬로 init된 프로젝트는 시간이 지나면 인프라가 낡은 표준이 된다. renew는 **소스·완료기록·패턴 내용을 보존한 채** 재생성 가능한 인프라만 현행 표준으로 다시 적용한다.
 
-## 절차 — `initialize.md` Step 3~8 재실행
+## 절차 — `initialize.md` 재실행 (스킵 단계 제외)
 
-renew는 새 절차를 정의하지 않는다. `initialize.md`의 **Step 3~8을 기존 프로젝트에 재실행**하되, 아래 "스킵"과 "단계별 차이"를 적용한다. 각 단계의 본문·검수 체크포인트(`init-review.md`)는 `initialize.md`를 단일 출처로 따른다.
+renew는 새 절차를 정의하지 않는다. `initialize.md`의 단계 중 **아래 「스킵하는 단계」를 뺀 나머지를 기존 프로젝트에 재실행**하되, "단계별 차이"를 적용한다. 각 단계의 본문·검수 체크포인트(`init-review.md`)는 `initialize.md`를 단일 출처로 따른다.
 
 ### 스킵하는 단계 (재실행하지 않음)
 
-- **Step 1 (shallow clone)**
-- **Step 2 (git 재초기화 + 원본 커밋)** — 히스토리를 다시 만들지 않는다. (아래 「한계」 참조)
-- **Step 9 (첫 간소화)** — 소스를 재간소화하지 않는다.
+- **「대상 라이브러리 shallow clone」**
+- **「git 재초기화 + 원본 1커밋」** — 히스토리를 다시 만들지 않는다. (아래 「한계」 참조)
+- **「첫 간소화로 방향 잡기」** — 소스를 재간소화하지 않는다.
 
 ### 단계별 차이 (기존 프로젝트 재적용)
 
-| Step | renew에서의 의미 |
+| `initialize.md` 단계 | renew에서의 의미 |
 |---|---|
-| 3~5 정리 (README·package.json·파일·.gitignore) | 옛 스킬이 안 지운 cruft만 추가로 삭제·교정한다. 변경이 있으면 별도 커밋. 이미 정리된 항목은 건드리지 않는다. |
-| 6 구조 | 폴더 구조를 현행 표준에 맞춘다. 기존 분석 문서·소스 위치는 보존하고 누락된 구조만 보강. |
-| 7 구조·큐 문서 | `docs/codebase-structure.md`·`docs/analysis-queue.md`를 현행 양식으로 **재포맷**한다. 양식·형식만 현행화하고 내용은 보존한다. |
-| 8 패턴 문서 | `instructions/keep-patterns.md`·`instructions/simplification-patterns.md`를 현행 규칙으로 **재분류·재검증**한다. |
+| 정리 (README·package.json·파일·.gitignore) | 옛 스킬이 안 지운 cruft만 추가로 삭제·교정한다. 변경이 있으면 별도 커밋. 이미 정리된 항목은 건드리지 않는다. |
+| 「프로젝트 구조 세팅」 | 폴더 구조를 현행 표준에 맞춘다. 기존 분석 문서·소스 위치는 보존하고 누락된 구조만 보강. |
+| 「코드베이스 구조 분석」 (구조·큐 문서) | `docs/codebase-structure.md`·`docs/analysis-queue.md`를 현행 양식으로 **재포맷**한다. 양식·형식만 현행화하고 내용은 보존한다. |
+| 「프로젝트별 특화 파일 생성」 (패턴 문서) | `instructions/keep-patterns.md`·`instructions/simplification-patterns.md`를 현행 규칙으로 **재분류·재검증**한다. |
 
 ## [CRITICAL] 보존 — 절대 건드리지 않는 것
 
