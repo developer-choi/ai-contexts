@@ -112,6 +112,14 @@ let shellWarned = false;
 // 아니라 경고로만 쓴다 — 놓치면 회차가 통째로 날아가고, 헛짚어도 사람이 응답을 보면 그만이다.
 const PERMISSION_REFUSAL = /권한(이|을)?\s*(필요|없|거부|허용)|permission (to|is|denied|required)|need.{0,12}permission/i;
 
+// 워커가 시나리오에 나온 파일을 빈 cwd에서 찾다 못 찾고 "그 파일이 없다"로 응답을 여는 경우.
+// 위 권한 거부와 같은 성질인데 "권한"이라는 낱말이 없어 그쪽 정규식에 안 걸린다. 요청받은
+// 산출물을 뒤에 다 내놓아도 채점자는 첫머리를 보고 「착수를 미뤘다」로 분류하므로, 안 잰 구간이
+// 점수가 되어 팔 간 델타로 둔갑한다 (2026-09-05 direction-remeasure 실측: 대조 시나리오 5 run 중
+// 2건이 표를 다 내고도 이렇게 실패로 찍혀 그 팔이 5/5에서 3/5로 내려갔다. 시나리오 끝에
+// "파일은 못 여니 주어진 것만 보고 답해" 한 줄을 붙이자 90 run 중 26건이던 적중이 0건이 됐다).
+const MISSING_FILE = /(디렉터리|디렉토리|파일|경로)(이|가|을|를)?\s*(현재 작업 디렉터리에\s*)?(없|존재하지 않)|붙여넣어\s*주시(면|거나)|경로를\s*(직접\s*)?알려주시/;
+
 function execFileAsync(file, args, options) {
   return new Promise((resolve) => {
     execFile(file, args, options, (error, stdout, stderr) => {
@@ -500,9 +508,13 @@ async function main() {
 
   const inheritance = [];
   const permissionBlocked = [];
+  const missingFile = [];
   for (const { job, result } of runs) {
     if (PERMISSION_REFUSAL.test(result.response ?? '')) {
       permissionBlocked.push({ scenario: job.scenario.id, variant: job.variant, excerpt: result.response.slice(0, 120) });
+    }
+    if (MISSING_FILE.test(result.response ?? '')) {
+      missingFile.push({ scenario: job.scenario.id, variant: job.variant, excerpt: result.response.slice(0, 120) });
     }
     for (const axisResult of result.axes) {
       const rowId = axisResult.axis ? `${job.scenario.id}#${axisResult.axis}` : job.scenario.id;
@@ -535,6 +547,7 @@ async function main() {
     table,
     inheritance_flags: inheritance,
     permission_blocked: permissionBlocked,
+    missing_file: missingFile,
   }, null, 2), 'utf8');
 
   const rowIds = Object.keys(table);
@@ -561,6 +574,12 @@ async function main() {
     const where = [...new Set(permissionBlocked.map((f) => `${f.scenario}/${f.variant}`))].join(', ');
     lines.push(`권한 거부 응답: ${permissionBlocked.length}건 — 워커가 작업을 못 했다. `
       + `eval-set에 worker_permission_mode를 주고 다시 잰다 (${where})`);
+  }
+  if (missingFile.length > 0) {
+    const where = [...new Set(missingFile.map((f) => `${f.scenario}/${f.variant}`))].join(', ');
+    lines.push(`파일 못 찾음 응답: ${missingFile.length}건 — 워커가 시나리오 속 파일을 cwd에서 찾다 `
+      + `못 찾고 그 이야기로 응답을 열었다. 채점자가 그 첫머리를 분류하므로 이 run들은 안 잰 것이다. `
+      + `시나리오에서 그 파일을 지우거나 "파일은 못 여니 주어진 것만 보고 답해"를 박고 다시 잰다 (${where})`);
   }
   process.stdout.write(`${lines.join('\n')}\n`);
 }
