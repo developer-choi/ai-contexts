@@ -98,6 +98,18 @@ const CASES = [
   // --- chain ---
   ['check-git-staging-policy.mjs', 'git status && git -C ~/repo add -A', 'deny', 'chain 뒷단의 위반도 잡는다'],
 
+  // --- git -C 경로의 홈 약어 (사유는 check-shell-policy.mjs의 해당 룰 주석) ---
+  ['check-shell-policy.mjs', 'git -C ~/repo status', 'deny', '~ 경로를 잡는다'],
+  ['check-shell-policy.mjs', 'git -C $HOME/repo status', 'deny', '$HOME도 같은 표기다'],
+  ['check-shell-policy.mjs', 'git -C "${HOME}/repo" status', 'deny', '따옴표로 감싸도 잡는다'],
+  ['check-shell-policy.mjs', 'git --no-pager -C ~/repo log', 'deny', '전역 옵션이 앞에 껴도 잡는다'],
+  ['check-shell-policy.mjs', 'git status && git -C ~/repo status', 'deny', 'chain 뒷단의 -C도 잡는다'],
+  ['check-shell-policy.mjs', 'git -C C:/Users/x/repo status', 'pass', '절대 경로는 통과'],
+  // git 호출에만 거는 것이 이 룰의 핵심 제약이다 — 전역으로 막으면 오탐이 쌓여 훅이 통째로 무시된다.
+  ['check-shell-policy.mjs', 'ls ~/repo/', 'pass', 'git이 아닌 명령의 ~는 통과'],
+  ['check-shell-policy.mjs', 'node ~/scripts/a.mjs', 'pass', 'node도 마찬가지'],
+  ['check-shell-policy.mjs', 'git commit a.md -m "git -C ~/repo 금지 훅 추가"', 'pass', '메시지 안의 인용은 실행이 아니다'],
+
   // --- 삭제 가드: 전 경로 검사 + 예외만 통과 ---
   ['check-rm-policy.mjs', 'rm -rf C:/Windows/Temp/x', 'ask', '시스템 경로 삭제도 잡는다'],
   ['check-rm-policy.mjs', 'rm -rf ~/x', 'ask', '홈 디렉터리 삭제도 잡는다'],

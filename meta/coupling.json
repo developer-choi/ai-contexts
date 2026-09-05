@@ -112,6 +112,7 @@
         "deploy/hooks/check-rm-policy.mjs",
         "deploy/hooks/check-package-frontmatter.mjs",
         "deploy/hooks/check-deploy-script-policy.mjs",
+        "deploy/hooks/check-shell-policy.mjs",
         "deploy/hooks/git-command-parser.mjs",
         "scripts/verify/verify-hook-policies.mjs"
       ],
