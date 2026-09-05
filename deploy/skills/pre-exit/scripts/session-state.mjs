@@ -28,6 +28,7 @@
 //   node <이 파일> changed --repo <레포> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
+//   node <이 파일> read-usage --from <판정 json>
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -42,6 +43,10 @@ const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
 // 라이브 transcript. 폴더명은 cwd를 인코딩한 것이지만 세션이 옮겨 다니면 어긋나므로, 인코딩을
 // 흉내내지 않고 세션 id로 된 파일을 찾는다(실측 8000여 폴더에서 0.2초 미만).
 const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
+
+// 읽고 안 쓴 문서의 누계. 기기를 넘어 쌓여야 신호가 차므로 백로그 레포에 둔다(같은 이유로
+// refresh-prompts·refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
+const USAGE_FILE = path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
 
 // CLI가 그 자리에서 돌린 명령의 출력·주의문이 user 엔트리에 섞여 들어온다. 발화 뒤에 붙는 일도
 // 있어 첫머리 검사로는 못 걷는다.
@@ -424,6 +429,75 @@ if (command === 'read-files') {
     console.log(`  ${p}${marks ? `  (${marks})` : ''}`);
   }
   console.log('\n한 세션의 「안 씀」은 신호가 아니라 눈금 하나다 — 그 자리에서 "쪼개라"고 결론내지 않는다.');
+  process.exit(0);
+}
+
+if (command === 'read-usage') {
+  const from = optOf('from');
+  if (!from) {
+    console.error('read-usage 에는 --from <판정 json> 이 필요합니다.');
+    console.error('형식: { "<진입점>\\t<read-files가 낸 경로>": "used" | "unused" | "excluded" }');
+    process.exit(1);
+  }
+  if (!fs.existsSync(USAGE_FILE)) {
+    // 백로그 레포가 없는 기기에서는 조용히 넘어간다 — 이 기록은 기기 간 공유가 목적이라
+    // 레포 없이 만들면 다음 세션이 못 읽는다.
+    console.log(`${USAGE_FILE} 이 없다 — 이 기기에는 기록을 둘 자리가 없으므로 건너뛴다.`);
+    process.exit(0);
+  }
+  let verdicts;
+  try {
+    verdicts = JSON.parse(fs.readFileSync(from, 'utf8'));
+  } catch (error) {
+    console.error(`판정 파일을 못 읽었다: ${error.message}`);
+    process.exit(1);
+  }
+  const state = JSON.parse(fs.readFileSync(USAGE_FILE, 'utf8'));
+  state.docs ??= {};
+  state.excluded ??= [];
+  const today = new Date().toISOString().slice(0, 10);
+  let added = 0;
+  let skipped = 0;
+  for (const [key, verdict] of Object.entries(verdicts)) {
+    if (!key.includes('\t')) {
+      console.error(`진입점이 없다: ${JSON.stringify(key)} — "<진입점>\\t<경로>" 형식이어야 한다.`);
+      process.exit(1);
+    }
+    if (verdict === 'excluded') {
+      if (!state.excluded.includes(key)) state.excluded.push(key);
+      delete state.docs[key];
+      continue;
+    }
+    if (verdict !== 'used' && verdict !== 'unused') {
+      console.error(`모르는 판정 ${JSON.stringify(verdict)} (${key}) — used·unused·excluded 중 하나여야 한다.`);
+      process.exit(1);
+    }
+    // 사용자가 「안 고친다」고 판정한 것은 다시 안 뜬다. 안 그러면 두 번째 회차부터 같은
+    // 목록을 다시 보게 되고, 그게 이런 장치가 무뎌지는 가장 흔한 경로다.
+    if (state.excluded.includes(key)) {
+      skipped += 1;
+      continue;
+    }
+    const row = (state.docs[key] ??= { read: 0, unused: 0, last: today });
+    row.read += 1;
+    if (verdict === 'unused') row.unused += 1;
+    row.last = today;
+    added += 1;
+  }
+  fs.writeFileSync(USAGE_FILE, `${JSON.stringify(state, null, 2)}\n`);
+  console.log(`[읽고 안 쓴 문서 누계] ${added}건 반영${skipped ? `, 제외 목록에 있어 건너뜀 ${skipped}건` : ''} — ${USAGE_FILE}`);
+
+  // 몇 번 중 몇 번이면 후보인가는 아직 안 정해졌다 — 표본이 사고 사례 하나뿐이라, 첫 회수
+  // 회차가 분포를 보고 사용자와 함께 정한다. 그때 그 값을 state.threshold 에 적으면 아래가
+  // 목록을 좁힌다. 안 적혀 있으면 좁히지 않고 상위 몇 줄만 보여준다.
+  const rows = Object.entries(state.docs).sort((a, b) => b[1].unused - a[1].unused);
+  const t = state.threshold;
+  const ripe = t ? rows.filter(([, v]) => v.read >= t.read && v.unused / v.read >= t.unusedRatio) : rows.slice(0, 10);
+  if (ripe.length) {
+    console.log(t ? `\n선(${t.read}회 이상, 안 쓴 비율 ${t.unusedRatio} 이상)을 넘은 것:` : '\n안 쓴 횟수 상위 (선은 아직 안 정해졌다 — 분포를 보는 용도다):');
+    for (const [key, v] of ripe) console.log(`  ${v.unused}/${v.read}  ${key.replace('\t', ' → ')}`);
+    console.log('\n여기서 결론내지 않는다 — 배치를 고칠지는 refresh-prompts 회차가 사용자와 함께 정한다.');
+  }
   process.exit(0);
 }
 
