@@ -25,7 +25,7 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | ref
 | `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-*` 스킬 호출 | [augmentations/routine.md](augmentations/routine.md) |
 | `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 
-감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포>`가 낸다. 대화 쪽 조건(그 스킬을 이 세션에서 불렀는가)은 세션만 아는 사실이라 그대로 판단한다.
+감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포 경로>`가 낸다. 대화 쪽 조건(그 스킬을 이 세션에서 불렀는가)은 세션만 아는 사실이라 그대로 판단한다.
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
 
@@ -50,7 +50,7 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | ref
 
 - 대상은 이번 세션이 만든, 아직 기본 브랜치에 머지되지 않은 커밋이다. 이전 세션 커밋과 머지된 것은 건드리지 않는다
 - 파일 하나를 쓸 때마다 커밋하게 하는 스킬이 돌았으면 커밋이 잘게 남는 것이 정상이다. 그 조각들이 한 작업이면 하나로 합친다. 서로 다른 작업이면 작업 수만큼 남긴다
-- 정리를 **시작하기 전에** 그 시점 SHA를 잡아두고, 합친 뒤 `node {{skill_dir}}/scripts/session-state.mjs squash-check --repo <레포> --before <그 SHA>`로 파일 내용이 같은지 본다. 무엇을 무엇으로 합쳤는지는 함께 보고한다
+- 정리를 **시작하기 전에** 그 시점 SHA를 잡아두고, 합친 뒤 `node {{skill_dir}}/scripts/session-state.mjs squash-check --repo <레포 경로> --before <그 SHA>`로 파일 내용이 같은지 본다. 무엇을 무엇으로 합쳤는지는 함께 보고한다
 - workflow 세션은 대상이 아니다 — 커밋 정리 시점을 그 스킬의 「1회차 커밋 정리·재정렬」이 소유한다
 
 ## Step 4. 워크트리 정리

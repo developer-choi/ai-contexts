@@ -6,7 +6,7 @@
 //
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
-//   node <이 파일> review-bypass --repo <레포> --base <기준 ref>
+//   node <이 파일> review-bypass --repo <레포 경로> --base <기준 ref>
 //   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로>]
 //
 // 걸린 것이 있으면 exit 1.

@@ -26,8 +26,8 @@
 // 사용:
 //   node <이 파일> user-turns --session <session_id>
 //   node <이 파일> snapshots --session <session_id>
-//   node <이 파일> changed --repo <레포> [--base <ref>]
-//   node <이 파일> squash-check --repo <레포> --before <정리 전 ref>
+//   node <이 파일> changed --repo <레포 경로> [--base <ref>]
+//   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
 //   node <이 파일> read-usage --from <판정 json>
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
