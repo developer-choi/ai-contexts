@@ -12,7 +12,7 @@ UI 컴포넌트가 있는 PR이면 `pr{N}/retained/` 하위에 필수 생성한�
 
 ## 기록 시점 — Background 단계 보류
 
-Background 단계(requirement-review 등) 산출물에는 CSS·레이아웃 수준 값을 기록하지 않는다. Step 4 구현 방침 단계까지 보류한 뒤 markup.md에 일괄 정리.
+Background 단계(requirement-review 등) 산출물에는 CSS·레이아웃 수준 값을 기록하지 않는다. [구현 단계](../../steps/step-4.md)의 구현 방침까지 보류한 뒤 markup.md에 일괄 정리.
 
 ## 「Figma 원본 링크 인덱스」 절
 

@@ -16,7 +16,7 @@ workflow·code-review·scw 등이 코드 작업(구현·리뷰) 중 "관련 컨�
 
 | 태그 | 의미 | 사용 시점 |
 |------|------|-----------|
-| `file-folder-structure` | 파일·폴더 분리 기준 | Step 4에서 구현 구조 설계 시 |
+| `file-folder-structure` | 파일·폴더 분리 기준 | workflow 구현 단계에서 구조 설계 시 |
 
 ## MP 구현 패턴
 
