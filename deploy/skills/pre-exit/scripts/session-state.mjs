@@ -535,6 +535,19 @@ if (command === 'read-usage') {
     for (const [key, v] of ripe) console.log(`  ${v.unused}/${v.read}  ${key.replace('\t', ' → ')}`);
     console.log('\n여기서 결론내지 않는다 — 배치를 고칠지는 refresh-prompts 회차가 사용자와 함께 정한다.');
   }
+
+  // 선이 아직 안 정해진 동안에도 착수 조건에 닿았는지는 여기서 판정한다. 숫자를 가진 쪽이
+  // 판정까지 해야 한다 — 「10회면 연다」를 백로그 본문에만 두면 그 본문을 여는 세션이 있어야
+  // 알게 되고, 그 세션이 없어서 눈금이 차도 아무 일이 안 일어난다. 위 목록은 도달 여부와
+  // 무관하게 같은 모양으로 찍혀서 눈으로는 안 갈린다.
+  // 10인 근거는 read-usage.md 「열 번 중 여덟 번이 되어야 신호다」 — 분모가 열은 돼야 한다.
+  const READY_AT = 10;
+  const reached = rows.filter(([, v]) => v.read >= READY_AT);
+  if (!t && reached.length) {
+    console.log(`\n[착수 조건 도달] ${reached.length}건이 ${READY_AT}회 이상 열렸다 — 선을 정할 때다.`);
+    console.log('  backlog projects/ai-contexts/active/scw/읽었는데-안-쓴-파일-누적.md');
+    console.log('이 사실을 회고 보고에 넣는다. 사용자가 묻기를 기다리지 않는다.');
+  }
   process.exit(0);
 }
 
