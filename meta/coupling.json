@@ -9,12 +9,13 @@
       "note": "type 목록과 subtype 필수 여부가 두 곳에 산다 — write-init 「입력」 표와 훅의 PACKAGE_TYPES·SUBTYPE_REQUIRED_TYPES. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 필수 필드 검사를 통째로 빠져나간다(훅이 PACKAGE_TYPES로 self-filter하므로 미등록 type은 검사가 아예 안 걸린다). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 둘 다 고치고 verify-hook-policies에 케이스를 넣는다."
     },
     {
-      "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 회차 점검",
+      "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 커밋 시점 검사 ↔ 회차 점검",
       "files": [
         "deploy/hooks/surface-coupling.mjs",
+        "scripts/hooks/check-coupling-patterns.mjs",
         "scripts/refresh-projects-scan.mjs"
       ],
-      "note": "meta/coupling.json의 files 항목을 glob(*, **, ?)으로 읽는 규칙이 두 곳에 산다. 훅은 배포돼 나가는 파일이라 AC scripts/를 import할 수 없어 공용 모듈로 못 묶었다. 한쪽만 고치면 편집 시점에는 뜨는 그룹이 회차 점검에서 안 뜨거나 그 반대가 되고, 회차 점검은 훅이 놓친 것을 메우려고 있으므로 그 어긋남은 조용하다. glob 문법 해석을 바꾸면 둘 다 고친다."
+      "note": "meta/coupling.json의 files 항목을 glob(*, **, ?)으로 읽는 규칙이 위 파일마다 산다. 서로를 import할 수 없는 자리들이다 — surface-coupling은 ~/.claude/hooks/로 배포돼 나가고, check-coupling-patterns는 ~/.ai-contexts/로 복사돼 나가며, refresh-projects-scan만 AC 안에 남는다. 한쪽만 고치면 편집 시점에는 뜨는 그룹이 커밋 시점 검사나 회차 점검에서 안 뜨거나 그 반대가 되고, 뒤 둘은 앞이 놓친 것을 메우려고 있으므로 그 어긋남은 조용하다. glob 문법 해석을 바꾸면 전부 고친다."
     },
     {
       "name": "refresh-projects 레지스트리·덤프 표 ↔ 파서",
@@ -65,9 +66,10 @@
       "files": [
         "scripts/environment/sync-environment.mjs",
         "scripts/environment/unsync-environment.mjs",
+        "scripts/environment/precommit-hooks.mjs",
         "meta/guides/environment.md"
       ],
-      "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
+      "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다. 전역 pre-commit 검사 훅은 precommit-hooks.mjs의 PRECOMMIT_HOOKS 표가 정본이라 sync·unsync 양쪽이 그 표를 읽는다 — 훅을 더하거나 빼면 그 표를 고치고 가이드 「수행 작업」에도 그 훅이 무엇을 검사하는지 적는다. alias·stateKey는 이미 배포된 기기의 등록·상태 파일과 맞물려 있어 바꾸지 않는다."
     },
     {
       "name": "environment 메커니즘 계약",

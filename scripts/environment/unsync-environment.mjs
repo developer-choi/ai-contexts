@@ -12,6 +12,7 @@ import {
   runs,
 } from './environment-lib.mjs';
 import { unregisterGlobalHook } from '../lib/git-hooks.mjs';
+import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest } from './precommit-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -19,13 +20,6 @@ const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
 const cmdAutorunFile = path.join(home, 'autorun.cmd');
 const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
-const countHardcodingHookSrc = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  'hooks',
-  'check-count-hardcoding.mjs',
-);
-const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
 // sync가 배포하는 것과 같은 파일을 읽는다 — removeIfIdentical이 이 내용으로
 // "AC가 쓴 파일인지"를 판별하므로, 사본을 따로 들고 있으면 한쪽만 고쳤을 때
@@ -47,8 +41,10 @@ function main() {
   console.log('--- cmd autorun ---');
   unsyncCmdAutorun(state);
 
-  console.log('--- 개수 하드코딩 검사 훅 ---');
-  unsyncCountHardcodingHook(state);
+  for (const hook of PRECOMMIT_HOOKS) {
+    console.log(`--- ${hook.label} ---`);
+    unsyncPrecommitHook(state, hook);
+  }
 
   if (state.powerShell7InstalledByAiContexts) {
     uninstallPowerShell7(state);
@@ -116,18 +112,21 @@ function unsyncCmdAutorun(state) {
   }[status]);
 }
 
-function unsyncCountHardcodingHook(state) {
-  if (state.countHardcodingHookSetByAiContexts) {
-    unregisterGlobalHook('count-hardcode');
-    delete state.countHardcodingHookSetByAiContexts;
+// 등록 해제는 상태 파일 기록이 있을 때만, 파일 제거는 AC가 쓴 내용과 동일할 때만 한다.
+// 목록은 sync와 같은 precommit-hooks.mjs를 읽으므로, 훅이 늘어도 한쪽만 걷히는 일이 없다.
+function unsyncPrecommitHook(state, hook) {
+  if (state[hook.stateKey]) {
+    unregisterGlobalHook(hook.alias);
+    delete state[hook.stateKey];
   }
 
-  const status = removeIfIdentical(countHardcodingHookDest, fs.readFileSync(countHardcodingHookSrc, 'utf8'));
+  const dest = precommitHookDest(hook);
+  const status = removeIfIdentical(dest, fs.readFileSync(precommitHookSrc(hook), 'utf8'));
   console.log(
     {
-      removed: `Removed ${countHardcodingHookDest}`,
-      modified: `Modified outside ai-contexts; leaving ${countHardcodingHookDest}`,
-      absent: `Already absent: ${countHardcodingHookDest}`,
+      removed: `Removed ${dest}`,
+      modified: `Modified outside ai-contexts; leaving ${dest}`,
+      absent: `Already absent: ${dest}`,
     }[status],
   );
 }

@@ -22,6 +22,11 @@ npm run sync:environment
   - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
+- `scripts/hooks/check-coupling-patterns.mjs`를 `~/.ai-contexts/check-coupling-patterns.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-coupling-patterns.*`)으로 멱등하게 등록합니다. 커밋하는 레포에 `meta/coupling.json`이 있으면 등록된 짝꿍 패턴 **하나하나**가 실물 파일을 가리키는지 확인해 경고합니다 — 커밋을 막지는 않습니다.
+  - 왜 필요한가: 짝꿍을 띄우는 편집 시점 훅(`surface-coupling`)은 「편집 중인 파일이 어느 묶음에 드는가」만 봅니다. 묶음 쪽 패턴이 낡아 아무 파일도 안 가리키게 되면 그 훅에서는 「이 파일은 짝꿍이 아니다」와 똑같은 모양이 되어, 짝꿍 대조가 통째로 꺼진 상태가 매 편집마다 통과처럼 보입니다(`deploy/contexts/rules-as-code.md` 「대상 0개는 통과가 아니라 고장이다」).
+  - 등록부를 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돕니다. 패턴이 죽는 계기는 등록부를 고칠 때가 아니라 다른 파일이 옮겨갈 때라, 등록부를 건드린 커밋만 보면 죽은 뒤 아무도 등록부를 안 여는 동안 계속 안 잡힙니다.
+  - 아직 만들지 않은 짝을 자리만 잡아둔 경우는 그 묶음의 `pending`(패턴 → 사유)으로 면제합니다. 사유는 필수이며 너무 짧으면 형식 오류로 걸립니다. 면제한 패턴에 실물이 생기면 「면제 낡음」으로 걸려 걷을 자리를 알려줍니다.
+  - **면제 건수는 출력할 때마다 함께 냅니다.** 면제가 늘어나는 것이 안 보이면 이 검사는 「죽은 패턴에 면제를 붙인다」로 우회되어 초록불인 채 꺼집니다. 면제가 늘어나는 계기는 등록부를 고치는 것뿐이라, 깨끗해도 `meta/coupling.json`이 스테이징된 커밋에서는 한 줄 요약(묶음·패턴·면제 건수)을 냅니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거
@@ -34,7 +39,7 @@ npm run unsync:environment
 
 `.githooks` 배선(`hook.ai-contexts-githooks-*`)은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 이 기기의 모든 레포에서 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 레포들이 동작하기 위한 배선으로 봅니다.
 
-전역 개수 하드코딩 훅(`hook.ai-contexts-count-hardcode.*`)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/check-count-hardcoding.mjs`도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다).
+전역 검사 훅(개수 하드코딩 `hook.ai-contexts-count-hardcode.*`, 짝꿍 등록부 `hook.ai-contexts-coupling-patterns.*`)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/`의 스크립트 사본도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다). 어느 훅을 이렇게 다루는지는 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, sync·unsync가 그 표를 함께 읽습니다.
 
 ## 반복 실행 기준
 

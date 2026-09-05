@@ -18,6 +18,7 @@ import {
   clearLegacyRepoHooks,
   localHooksPath,
 } from '../lib/git-hooks.mjs';
+import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest } from './precommit-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -25,13 +26,6 @@ const stateFile = path.join(stateDir, 'environment-state.json');
 const globalGitignore = path.join(home, '.gitignore_global');
 const cmdAutorunFile = path.join(home, 'autorun.cmd');
 const cmdProcessorKey = 'HKCU\\Software\\Microsoft\\Command Processor';
-const countHardcodingHookSrc = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  'hooks',
-  'check-count-hardcoding.mjs',
-);
-const countHardcodingHookDest = path.join(stateDir, 'check-count-hardcoding.mjs');
 
 // 배치 스크립트는 JS 문자열이 아니라 실파일로 둔다(`autorun.cmd`). 문자열로 들고 있으면
 // sync·unsync 양쪽에 같은 내용을 복제해야 하는데(unsync가 글자 단위 일치로 AC 산출물인지
@@ -69,28 +63,29 @@ function main() {
   console.log('--- git 설정 훅 등록 ---');
   syncRepoHookWiring();
 
-  console.log('--- 개수 하드코딩 검사 훅 ---');
-  syncCountHardcodingHook(state);
+  for (const hook of PRECOMMIT_HOOKS) {
+    console.log(`--- ${hook.label} ---`);
+    syncPrecommitHook(state, hook);
+  }
 
   writeState(state);
   console.log('Environment sync complete.');
 }
 
-// 프롬프트 md 커밋에서 개수 하드코딩(「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지하는
-// 전역 pre-commit 훅. 어느 레포에서 어느 도구로 커밋하든 발동해야 하므로 레포 로컬 `.githooks`가
-// 아니라 `--global` 설정으로 건다(scripts/lib/git-hooks.mjs의 registerGlobalHook).
-// 스크립트 원본은 AC scripts/hooks/에 두고 ~/.ai-contexts/에 그대로 복사한다 — 도구 중립적인
-// 폴더라 Claude Code 설치 여부와 무관하게 살아 있어야 하는 git 훅에 맞다.
-function syncCountHardcodingHook(state) {
+// AC가 얹는 pre-commit 검사 훅 하나를 배포·등록한다. 어느 레포에서 어느 도구로 커밋하든
+// 발동해야 하므로 레포 로컬 `.githooks`가 아니라 `--global` 설정으로 건다
+// (scripts/lib/git-hooks.mjs의 registerGlobalHook). 목록은 precommit-hooks.mjs가 정본이다.
+function syncPrecommitHook(state, hook) {
   assertGitSupportsConfigHooks();
 
-  const body = fs.readFileSync(countHardcodingHookSrc, 'utf8');
-  const status = writeWholeFile(countHardcodingHookDest, body);
+  const dest = precommitHookDest(hook);
+  const body = fs.readFileSync(precommitHookSrc(hook), 'utf8');
+  const status = writeWholeFile(dest, body);
   console.log(
     {
-      created: `Created ${countHardcodingHookDest}`,
-      updated: `Updated ${countHardcodingHookDest}`,
-      unchanged: `Already up to date: ${countHardcodingHookDest}`,
+      created: `Created ${dest}`,
+      updated: `Updated ${dest}`,
+      unchanged: `Already up to date: ${dest}`,
     }[status],
   );
 
@@ -98,9 +93,9 @@ function syncCountHardcodingHook(state) {
   // 오류는 스크립트가 스스로 삼키지만(항상 exit 0), 파일 자체가 없거나 node가 없으면 그 앞에서
   // non-zero로 죽어 커밋이 차단된다. 정탐률이 낮은 알림 때문에 전체 작업이 멈추면 안 되므로 셸
   // 수준에서도 통과시킨다. 실측: `|| true`가 없으면 스크립트 경로가 사라졌을 때 커밋이 실제로 거부된다.
-  const command = `node "${countHardcodingHookDest}" || true`;
-  const changed = registerGlobalHook('count-hardcode', 'pre-commit', command);
-  state.countHardcodingHookSetByAiContexts = true;
+  const command = `node "${dest}" || true`;
+  const changed = registerGlobalHook(hook.alias, 'pre-commit', command);
+  state[hook.stateKey] = true;
   console.log(changed ? `전역 pre-commit 훅 등록: ${command}` : '전역 pre-commit 훅 이미 등록됨');
 }
 
