@@ -25,6 +25,12 @@ export const PRECOMMIT_HOOKS = [
     label: '짝꿍 등록부 검사 훅',
     stateKey: 'couplingPatternsHookSetByAiContexts',
   },
+  {
+    alias: 'md-size',
+    file: 'check-md-size.mjs',
+    label: '문서 크기 검사 훅',
+    stateKey: 'mdSizeHookSetByAiContexts',
+  },
 ];
 
 const hooksDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'hooks');
