@@ -40,9 +40,11 @@ npm run sync:local-system
 ```
 deploy/skills/<스킬명>/
 ├── SKILL.md        # 필수. AI가 로드하는 스킬 정의
-├── README.md       # 필수. 사람용 설명 (AI 지시 금지)
+├── README.md       # 루트 README가 소개하는 스킬만. 사람용 설명 (AI 지시 금지)
 └── ...             # SKILL.md에서 참조하는 보조 파일
 ```
+
+`README.md`는 **밖에서 읽을 사람이 있는 스킬에만** 둡니다. 루트 [README.md](README.md)가 소개 문단이나 목록에서 그 스킬을 가리키고 있으면 필요하고, 안 가리키면 만들지 않습니다 — 아무도 안 들어오는 자리에 사람용 설명을 두면 스킬을 고칠 때마다 같이 낡습니다. 이 저장소를 고치는 데만 쓰는 스킬이 그 자리입니다.
 
 `SKILL.md`에는 YAML frontmatter가 필요합니다.
 
