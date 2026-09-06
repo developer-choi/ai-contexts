@@ -1,7 +1,3 @@
----
-tags: [package]
----
-
 # package-format
 
 글쓰기 패키지(frontmatter + 본문 단일 .md)의 형식 SSOT입니다. 패키지를 만드는 쪽도 다듬는 쪽도 형식 정의를 본문으로 재인용하지 않고 이 파일을 포인터로 가리킵니다.

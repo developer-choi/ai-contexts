@@ -1,7 +1,3 @@
----
-tags: [resume]
----
-
 # 이력서 경력기술서 교정 사례
 
 ## 방법(how) vs 성과(outcome) 구분

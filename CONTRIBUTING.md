@@ -79,4 +79,4 @@ coding-standards/
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서가 언제 걸리는지는 [map.md](deploy/contexts/writing-guide/map.md)의 태그 표를 봅니다.
+[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 그 문서를 부르는 스킬(`write-init`·`write-refine`)의 로드 목록이 정합니다.

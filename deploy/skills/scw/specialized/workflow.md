@@ -31,7 +31,7 @@ step 파일을 리뷰한 보고에는 이 스윕의 결과를 **항상 한 항�
 - **세션 이름 직접 호명** — `BACKGROUND_SESSION`, `PLANNING_SESSION`, `IMPLEMENTATION_SESSION`, `WRITING_SESSION` 등
 - **산출물 파일명 열거** — `overview`, `logic`, `interface`, `implementation`, `test-cases`, `markup` 등 그 시점의 step 산출물명
 
-step 번호를 직접 부르는 것(`step-3에서`, `step-5의 마무리에서`)도 같은 축인데, 이쪽은 [다른 파일의 단계는 번호로 가리키지 않는다](../SKILL.md#다른-파일의-단계는-번호로-가리키지-않는다)가 경로를 안 가리고 잡는다.
+step 번호를 직접 부르는 것(`step-3에서`, `step-5의 마무리에서`)도 같은 축인데, 이쪽은 [다른 파일의 단계는 번호로 가리키지 않는다](../rounds/editing.md#다른-파일의-단계는-번호로-가리키지-않는다)가 경로를 안 가리고 잡는다.
 
 ### 예외
 
