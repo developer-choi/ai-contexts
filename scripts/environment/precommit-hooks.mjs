@@ -31,6 +31,12 @@ export const PRECOMMIT_HOOKS = [
     label: '문서 크기 검사 훅',
     stateKey: 'mdSizeHookSetByAiContexts',
   },
+  {
+    alias: 'guide-post-pair',
+    file: 'check-guide-post-pair.mjs',
+    label: '가이드-포스트 짝 검사 훅',
+    stateKey: 'guidePostPairHookSetByAiContexts',
+  },
 ];
 
 const hooksDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'hooks');

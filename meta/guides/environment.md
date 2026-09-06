@@ -35,6 +35,10 @@ npm run sync:environment
   - 이미 선을 넘은 문서는 등재해 조용히 둡니다(`node ~/.ai-contexts/check-md-size.mjs --write-baseline`). 첫날 수십 건을 매 커밋 쏟으면 그 경고를 안 보게 되고, 그러면 새로 넘는 파일도 함께 묻힙니다. 등재분은 더 커질 때만 걸리고, 선 아래로 내려오면 알립니다 — 그 줄은 `--settle`이 걷습니다(검사가 말없이 고치면 사용자가 낸 적 없는 diff가 `backlog`에 쌓이므로 자동이 아니라 사람이 부르는 명령입니다). 등재 목록은 크기 × 닿는 곳 순으로 적혀 그대로 다이어트 대상 목록이 됩니다.
   - `local/` 아래에 산출물이 함께 사는 레포는 그 자리를 `exclude`에 경로 접두사로 적습니다(PP의 제출한 자소서 폴더가 그 경우입니다). 어느 폴더가 산출물인지는 사람만 아는 사실이라 검사가 이름으로 못 가릅니다. 등재를 다시 쓸 때 그 목록과 다른 레포의 항목은 그대로 유지됩니다.
   - 지식 글·백로그 항목은 검사하지 않습니다. 한 주제를 길게 쓰는 것이 정상이라 같은 선을 대면 전부 걸리고, 그러면 이 검사가 통째로 무시됩니다.
+- `scripts/hooks/check-guide-post-pair.mjs`를 `~/.ai-contexts/check-guide-post-pair.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-guide-post-pair.*`)으로 멱등하게 등록합니다. MP `docs/guides/<주제>/step<N>.md`와 블로그 `posts/<주제>-step<N>.md`는 같은 본문을 담는 한 짝인데, 두 레포는 서로를 모릅니다 — 한쪽만 올려도 그 레포 안에서는 아무 신호가 안 나고 링크가 깨지지도 않아 렌더링으로도 안 드러납니다. 이번 커밋이 한쪽을 건드렸는데 짝 레포에 다른 쪽이 없으면 경고합니다 — 커밋을 막지는 않습니다.
+  - **두 레포 밖에서는 아무 일도 하지 않습니다.** 자기 레포가 그 둘 중 하나인지를 `--git-common-dir`로 구한 원본 경로로 판정하므로, 워크트리에서 커밋해도 같게 갈립니다.
+  - **시리즈 문서(`step<N>`)만 봅니다.** 두 레포에 같은 이름 규칙으로 사는 것은 시리즈뿐이고, 주제 이름이 slug에 안 붙는 묶음까지 덮으려면 어느 쪽 규칙인지를 매번 판단해야 합니다. 판단이 남는 검사는 넓힐수록 오탐으로 무뎌지므로 규칙이 결정론인 범위에서 끊습니다.
+  - **짝 레포를 못 찾으면 조용히 통과하지 않고 그 사실을 냅니다.** 레포가 옮겨가면 이 검사는 아무것도 못 보면서 매 커밋 성공하게 되고, 죽었다는 사실이 아무 데도 안 남습니다. 두 레포의 자리는 스크립트 상단 `REPOS`가 정본입니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거
@@ -47,7 +51,7 @@ npm run unsync:environment
 
 `.githooks` 배선(`hook.ai-contexts-githooks-*`)은 `unsync:environment`가 **되돌리지 않습니다** — 되돌리면 이 기기의 모든 레포에서 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 레포들이 동작하기 위한 배선으로 봅니다.
 
-전역 검사 훅(개수 하드코딩 `hook.ai-contexts-count-hardcode.*`, 짝꿍 등록부 `hook.ai-contexts-coupling-patterns.*`, 문서 크기 `hook.ai-contexts-md-size.*`)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/`의 스크립트 사본도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다). 어느 훅을 이렇게 다루는지는 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, sync·unsync가 그 표를 함께 읽습니다.
+전역 검사 훅(바로 위 `.githooks` 배선을 뺀 나머지 `hook.ai-contexts-*`로, 「수행 작업」이 하나씩 설명합니다)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/`의 스크립트 사본도 제거합니다(AC가 쓴 내용과 동일할 때만 — 사용자가 직접 고쳤으면 남겨둡니다). 어느 훅을 이렇게 다루는지는 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, sync·unsync가 그 표를 함께 읽습니다.
 
 ## 반복 실행 기준
 
