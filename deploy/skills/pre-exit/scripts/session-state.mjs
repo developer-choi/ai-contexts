@@ -267,8 +267,72 @@ function git(cwd, args) {
   }
 }
 
+// 모델이 도구를 돌리는 사이에 사용자가 보낸 메시지는 `type: "user"` 줄이 아예 안 생기고
+// `queue-operation`으로만 남는다. 닫히는 꼴이 둘이라 여기서 갈라야 한다:
+//   - `dequeue` — 나중에 정식 턴으로 들어와 `type: "user"` 줄이 따로 생긴다. 여기서 세면 두 번이다
+//   - `remove` + `reason: "absorbed_mid_turn"` — 돌던 턴이 그대로 삼켜서 user 줄이 안 생긴다.
+//     이쪽만 새는 쪽이고, 실제 작업 지시가 통째로 회고 표에서 빠졌다(2026-09-06 실측 3건).
+// 주입 필터는 큐에도 그대로 댄다 — 큐로 들어오는 task 알림이 실제로 있다.
+function queuedTurn(entry, pending, replies) {
+  // 큐는 content로 짝을 맞춘다. 같은 글자를 두 번 올리는 일이 있으므로 시각을 쌓아 두고 먼저
+  // 올린 것부터 뺀다 — 덮어쓰면 앞 메시지가 뒤 메시지의 시각을 갖는다.
+  const content = typeof entry.content === 'string' ? entry.content : '';
+  if (entry.operation === 'enqueue') {
+    if (content) pending.set(content, [...(pending.get(content) ?? []), entry.timestamp]);
+    return null;
+  }
+  const waiting = pending.get(content) ?? [];
+  const enqueuedAt = waiting.shift();
+  if (!waiting.length) pending.delete(content);
+  if (entry.operation !== 'remove' || entry.reason !== 'absorbed_mid_turn') return null;
+  const text = typedText(content);
+  if (!text) return null;
+  // 시각은 enqueue 쪽 — 사용자가 실제로 친 시각이 그쪽이다.
+  // `source: 'queued'`는 재전송 합치기에서 빼는 표시이기도 하다. 큐 메시지는 앞 발화를 고쳐
+  // 다시 보낸 것이 아니라 그 위에 얹은 별개 지시다.
+  return { at: enqueuedAt ?? entry.timestamp, text, replies, source: 'queued' };
+}
+
 // 발화 전수를 뽑는 두 진입점(user-turns가 목록을 내고, retro-table이 그 목록과 표를 맞댄다)이
 // 같은 transcript 해석을 쓴다. 한쪽만 고치면 표 검사가 목록에 없는 번호를 요구하게 된다.
+function collectTurns(file) {
+  const raw = [];
+  const pending = new Map(); // 큐에 올라와 아직 안 닫힌 메시지 → enqueue 시각
+  let interrupts = 0;
+  let replies = 0; // 지금까지 AI가 답한 횟수. 재전송과 새 발화를 가르는 기준이다.
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue; // 쓰는 중이라 끊긴 마지막 줄
+    }
+    if (entry.type === 'assistant' && !entry.isSidechain) {
+      replies += 1;
+      continue;
+    }
+    if (entry.type === 'queue-operation') {
+      const turn = queuedTurn(entry, pending, replies);
+      if (turn) raw.push(turn);
+      continue;
+    }
+    const text = rawUserText(entry);
+    if (!text) continue;
+    if (/^\[Request interrupted by user/.test(text.trimStart())) {
+      interrupts += 1;
+      continue;
+    }
+    const typed = typedText(text);
+    if (typed) raw.push({ at: entry.timestamp, text: typed, replies, source: entry.promptSource });
+  }
+  // 큐 메시지는 enqueue 시각이 기록 순서보다 앞서므로 시각으로 섞는다. 뒤에 몰아 붙이면
+  // "무슨 일을 하다 이 지시가 왔나"가 안 보인다. 시각이 같으면 기록 순서를 지킨다.
+  const order = new Map(raw.map((t, i) => [t, i]));
+  raw.sort((a, b) => String(a.at ?? '').localeCompare(String(b.at ?? '')) || order.get(a) - order.get(b));
+  return { turns: mergeResends(raw), interrupts };
+}
+
 function transcriptOrDie(session, who) {
   if (!session) {
     console.error(`${who} 에는 --session <session_id> 가 필요합니다.`);
@@ -290,28 +354,7 @@ function transcriptOrDie(session, who) {
 if (command === 'user-turns') {
   const session = optOf('session');
   const file = transcriptOrDie(session, 'user-turns');
-  const raw_turns = [];
-  let interrupts = 0;
-  let replies = 0; // 지금까지 AI가 답한 횟수. 재전송과 새 발화를 가르는 기준이다.
-  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-    if (!line) continue;
-    let entry;
-    try {
-      entry = JSON.parse(line);
-    } catch {
-      continue; // 쓰는 중이라 끊긴 마지막 줄
-    }
-    if (entry.type === 'assistant' && !entry.isSidechain) {
-      replies += 1;
-      continue;
-    }
-    const raw = rawUserText(entry);
-    if (!raw) continue;
-    if (/^\[Request interrupted by user/.test(raw.trimStart())) interrupts += 1;
-    const text = typedText(raw);
-    if (text) raw_turns.push({ at: entry.timestamp, text, replies, source: entry.promptSource });
-  }
-  const turns = mergeResends(raw_turns);
+  const { turns, interrupts } = collectTurns(file);
 
   console.log(`[사용자 발화 전수] ${turns.length}건 — ${file}`);
   console.log('회고는 이 번호를 하나도 빼지 않고 표에 옮긴다. 「지적 없음」인 번호도 행으로 남긴다.\n');
@@ -574,28 +617,7 @@ if (command === 'retro-table') {
     process.exit(1);
   }
   const file = transcriptOrDie(session, 'retro-table');
-
-  const raw_turns = [];
-  let replies = 0;
-  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-    if (!line) continue;
-    let entry;
-    try {
-      entry = JSON.parse(line);
-    } catch {
-      continue;
-    }
-    if (entry.type === 'assistant' && !entry.isSidechain) {
-      replies += 1;
-      continue;
-    }
-    const raw = rawUserText(entry);
-    if (!raw) continue;
-    if (/^\[Request interrupted by user/.test(raw.trimStart())) continue;
-    const text = typedText(raw);
-    if (text) raw_turns.push({ at: entry.timestamp, text, replies, source: entry.promptSource });
-  }
-  const total = mergeResends(raw_turns).length;
+  const total = collectTurns(file).turns.length;
 
   let md;
   try {

@@ -141,9 +141,56 @@ function readEntries(file) {
     });
 }
 
+// 모델이 도구를 돌리는 사이에 사용자가 보낸 메시지는 `type: "user"` 줄이 아예 안 생기고
+// `queue-operation`으로만 남는다. `dequeue`로 닫힌 것은 나중에 정식 턴으로 들어와 user 줄이
+// 따로 생기므로 여기서 담으면 두 번이고, `remove` + `reason: "absorbed_mid_turn"`으로 닫힌 것만
+// 타임라인에서 통째로 빠지는 쪽이다. 짝꿍인 pre-exit `session-state.mjs`가 같은 자리를 본다.
+function queuedEntry(entry) {
+  if (entry.operation !== 'remove' || entry.reason !== 'absorbed_mid_turn') return null;
+  if (typeof entry.content !== 'string' || !entry.content.trim()) return null;
+  // 시각은 enqueue 쪽 — 사용자가 실제로 친 시각이 그쪽이다. 짝이 없으면 remove 시각으로 둔다.
+  // `queued` 표시는 재전송 합치기에서 빼는 표식이다 — 큐 메시지는 앞 발화를 고쳐 다시 보낸 것이
+  // 아니라 그 위에 얹은 별개 지시라, 앞 발화와 글자가 겹쳐도 합치면 그 지시가 도로 사라진다.
+  return {
+    type: 'user',
+    timestamp: entry.enqueuedAt ?? entry.timestamp,
+    promptSource: 'queued',
+    message: { content: entry.content },
+  };
+}
+
+// 큐 메시지는 enqueue 시각이 기록 순서보다 앞서므로 시각으로 섞는다. 뒤에 몰아 붙이면
+// "무슨 일을 하다 이 지시가 왔나"가 안 보인다. 시각이 같으면 기록 순서를 지킨다.
+function withQueued(entries) {
+  // 큐는 content로 짝을 맞춘다. 같은 글자를 두 번 올리는 일이 있으므로 시각을 쌓아 두고 먼저
+  // 올린 것부터 뺀다 — 덮어쓰면 앞 메시지가 뒤 메시지의 시각을 갖는다.
+  const at = new Map(); // 아직 안 닫힌 큐 메시지 → enqueue 시각들
+  const out = [];
+  for (const entry of entries) {
+    if (entry.type !== 'queue-operation') {
+      out.push(entry);
+      continue;
+    }
+    const content = typeof entry.content === 'string' ? entry.content : '';
+    if (entry.operation === 'enqueue') {
+      if (content) at.set(content, [...(at.get(content) ?? []), entry.timestamp]);
+      continue;
+    }
+    const waiting = at.get(content) ?? [];
+    const enqueuedAt = waiting.shift();
+    if (!waiting.length) at.delete(content);
+    const queued = queuedEntry({ ...entry, enqueuedAt });
+    if (queued) out.push(queued);
+  }
+  const order = new Map(out.map((e, i) => [e, i]));
+  return out.sort(
+    (a, b) => String(a.timestamp ?? '').localeCompare(String(b.timestamp ?? '')) || order.get(a) - order.get(b),
+  );
+}
+
 function toBlocks(entries, tz) {
   const blocks = [];
-  for (const entry of entries) {
+  for (const entry of withQueued(entries)) {
     if (entry.type !== 'user' && entry.type !== 'assistant') continue;
     if (entry.isMeta) continue; // 대화가 아니라 시스템 주입이다
     if (entry.isSidechain) continue; // 서브에이전트 내부 턴이라 이 세션의 발화가 아니다
@@ -175,15 +222,16 @@ function toBlocks(entries, tz) {
       blocks.push({ speaker: '시스템', at: entry.timestamp, text: '[이전 대화 압축 요약]' });
       continue;
     }
+    const queued = entry.promptSource === 'queued';
     const command = unwrapCommand(raw);
     if (command) {
-      blocks.push({ speaker: '사용자', at: entry.timestamp, text: `\`${command}\``, command });
+      blocks.push({ speaker: '사용자', at: entry.timestamp, text: `\`${command}\``, command, queued });
       continue;
     }
     // 짝꿍인 session-state는 여기서 `<system-reminder>`를 걷는데 이쪽은 안 걷는다 — 위의
     // isMeta 스킵과 COMPACT_PREFIX가 이미 덮기 때문이다. 실측(2026-09-06, 기록 1,154개):
     // 알림이 실린 비-meta user 엔트리는 5건뿐이고 다섯 다 압축 요약이라 그 분기로 빠진다.
-    blocks.push({ speaker: '사용자', at: entry.timestamp, text: raw });
+    blocks.push({ speaker: '사용자', at: entry.timestamp, text: raw, queued });
   }
   return blocks;
 }
@@ -197,6 +245,7 @@ function mergeResends(blocks) {
       prev &&
       prev.speaker === '사용자' &&
       block.speaker === '사용자' &&
+      !block.queued &&
       new Date(block.at) - new Date(prev.at) <= RESEND_WINDOW_MS &&
       (block.text.startsWith(prev.text) || prev.text.startsWith(block.text));
     if (!isResend) {
