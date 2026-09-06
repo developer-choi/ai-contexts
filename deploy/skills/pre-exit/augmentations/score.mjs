@@ -9,6 +9,10 @@
 // writing-guide/tone.md). 이 스크립트에는 금지어를 하드코딩하지 않으므로 tone.md가 바뀌면
 // 별도 동기화 없이 그대로 반영된다.
 //
+// <!-- banned-context: ... -->는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만
+// 위반 등)이다. 매칭은 하되 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라,
+// 정상 문장이 걸릴 수 있는 항목을 넣으면 멀쩡한 문장을 깎아야 0이 된다.
+//
 // 사용:
 //   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
 //
@@ -40,6 +44,7 @@ function loadBanned() {
   const text = fs.readFileSync(TONE_MD, "utf8");
   const lines = text.split("\n");
   const banned = {};
+  const contextual = {};
   let heading = null;
   for (const ln of lines) {
     const h = ln.match(/^## (.+)/);
@@ -47,12 +52,13 @@ function loadBanned() {
       heading = h[1].trim();
       continue;
     }
-    const m = ln.match(/<!--\s*banned:\s*(.+?)\s*-->/);
+    const m = ln.match(/<!--\s*banned(-context)?:\s*(.+?)\s*-->/);
     if (m && heading) {
-      banned[heading] = m[1].split(",").map((w) => w.trim()).filter(Boolean);
+      const words = m[2].split(",").map((w) => w.trim()).filter(Boolean);
+      (m[1] ? contextual : banned)[heading] = words;
     }
   }
-  return banned;
+  return { banned, contextual };
 }
 
 function splitFrontmatter(text) {
@@ -257,7 +263,7 @@ function main() {
   const raw = fs.readFileSync(args.file, "utf8");
   const body = splitFrontmatter(raw);
   const lines = stripCodeAndQuotes(body.split("\n"));
-  const banned = loadBanned();
+  const { banned, contextual } = loadBanned();
 
   section("객관 (자동 계측)");
   const { chars, sents, words } = objective(body);
@@ -267,6 +273,7 @@ function main() {
 
   section("반객관 (기계 매칭 — 위반 개수, 적을수록 좋음)");
   const bannedHits = findBanned(lines, banned);
+  const contextHits = findBanned(lines, contextual);
   const internalHits = findInternal(lines);
   const dashHits = findDashes(lines);
   const politeHits = checkPoliteness(lines);
@@ -279,6 +286,8 @@ function main() {
   };
 
   dump("금지어", bannedHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
+  console.log(`\n[문맥 확인 필요] ${contextHits.length}건 (합계에서 뺌 — 쓰임을 보고 실제 위반만 고른다)`);
+  for (const h of contextHits) console.log(`   ${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
   dump("내부 작업이력(5a)", internalHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
   dump("em/en dash(10a)", dashHits, (h) => `${h[1]} (L${h[2]}): ${h[3].slice(0, 70)}`);
   console.log(
@@ -323,7 +332,10 @@ function main() {
     dashHits.length +
     empties.length +
     (phCounts ? placeholders.length : 0);
-  console.log(`\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건 + 습니다체 후보 ${politeHits.length}건`);
+  console.log(
+    `\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건` +
+      ` + 눈으로 확인 후보 ${politeHits.length + contextHits.length}건(습니다체 ${politeHits.length} · 문맥 ${contextHits.length})`,
+  );
 }
 
 main();

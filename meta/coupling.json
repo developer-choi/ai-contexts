@@ -135,6 +135,16 @@
         "scripts/local-system/sync-local-system.mjs"
       ],
       "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-system·sync-local-system의 진입 경로(scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩해 실행·게이트한다. 이 두 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
+    },
+    {
+      "name": "금지어 주석 — tone.md ↔ 채점기",
+      "files": [
+        "deploy/contexts/writing-guide/tone.md",
+        "deploy/skills/pre-exit/augmentations/score.mjs",
+        "deploy/skills/pre-exit/augmentations/write-refine.md",
+        "deploy/skills/write-refine/SKILL.md"
+      ],
+      "note": "tone.md의 <!-- banned: --> · <!-- banned-context: --> 주석이 채점기의 검사 목록 정본이다. 낱말은 tone.md에만 있고 채점기는 실행 시점에 읽으므로 사본은 없지만, 주석 이름과 두 갈래의 뜻은 네 곳에 걸쳐 있다 — 채점기의 파싱, 회고 보강의 「어느 주석에 넣을지」 안내, write-refine 검수의 0-강제 예외 목록. banned-context는 합계에서 빠지는 것이 규정의 전부라, 채점기가 합계에 도로 넣으면 정상 문장이 0-수렴에 걸려 깎이고 그 손실은 산출물에서만 드러난다. 주석 이름을 바꾸거나 갈래를 더하면 네 곳을 함께 고친다."
     }
   ]
 }

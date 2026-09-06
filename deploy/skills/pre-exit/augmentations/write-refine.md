@@ -28,9 +28,9 @@ node {{skill_dir}}/augmentations/score.mjs <산출물.md> [--props 명제리스�
 채점기가 띄우는 층:
 
 - **객관** — 분량(자·문장·어절)·토큰·턴. 숫자 그대로.
-- **반객관** — 금지어 · em/en dash(10a) · 내부 작업이력(5a) · 습니다체 휴리스틱(1a) · 빈 섹션 · placeholder 잔존 · 핵심명제 누락. 위반 개수와 해당 줄을 출력한다. 눈으로 확인해야 하는 항목(습니다체 휴리스틱, `placeholder_policy: keep`의 placeholder)은 기계 적발 합계에서 빠진다.
+- **반객관** — 금지어 · em/en dash(10a) · 내부 작업이력(5a) · 습니다체 휴리스틱(1a) · 빈 섹션 · placeholder 잔존 · 핵심명제 누락. 위반 개수와 해당 줄을 출력한다. 눈으로 확인해야 하는 항목(문맥 확인 필요, 습니다체 휴리스틱, `placeholder_policy: keep`의 placeholder)은 기계 적발 합계에서 빠진다.
 
-채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다.
+채점기 금지어 목록의 SSOT는 [writing-guide/tone.md](../../../contexts/writing-guide/tone.md)다. 그 파일의 `<!-- banned: -->` 주석은 낱말이 나오면 곧 위반인 것, `<!-- banned-context: -->`는 쓰임을 봐야 갈리는 것(주어가 글쓴이일 때만 위반 등)이다. 뒤엣것은 합계에 안 들어간다 — 합계는 0까지 미는 값이라, 정상 문장이 걸릴 수 있는 항목을 넣으면 멀쩡한 문장을 깎아야 0이 된다. **금지어를 새로 굳힐 때 어느 주석에 넣을지가 이 갈림이다.**
 
 반객관은 한국어 단어 경계가 없어 false positive가 난다(`유사` in `유사성`). 출력된 줄을 눈으로 확인하고, 실제 위반만 아래 「반영 위치」로 보낸다.
 
@@ -59,7 +59,7 @@ node {{skill_dir}}/augmentations/score.mjs <산출물.md> [--props 명제리스�
 
 회수한 항목은 환류 대상에 따라 가른다:
 
-- **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md의 해당 절과 그 절 끝 `<!-- banned: ... -->` 주석에 함께 추가한다(`score.mjs`가 실행 시점에 읽으므로 별도 코드 수정은 불필요).
+- **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 tone.md의 해당 절과 그 절 끝 주석에 함께 추가한다(`score.mjs`가 실행 시점에 읽으므로 별도 코드 수정은 불필요). **주석은 둘 중 하나를 고른다** — 그 낱말이 나오면 무조건 위반이면 `banned:`, 쓰임에 따라 정상일 수 있으면 `banned-context:`. 판단이 안 서면 뒤엣것으로 넣는다. 앞엣것에 잘못 넣으면 멀쩡한 문장이 0-수렴에 걸려 깎인다.
 - **경로 오판** → write-init SKILL.md의 경로 판정(사실 질문)에 반영한다.
 - **잘 읽힌 새 글 골격** → [article-skeletons.md](../../../contexts/writing-guide/article-skeletons.md)에 어떤 상황에서 쓴 골격인지와 함께 누적한다. 이 파일은 골격을 고르는 쪽만 참조하고 있어, 여기서 되돌려 쌓지 않으면 처음 만든 몇 개에 고정된다.
 
