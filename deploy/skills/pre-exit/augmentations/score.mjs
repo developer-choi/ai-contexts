@@ -147,6 +147,30 @@ function checkPoliteness(lines) {
   return flags;
 }
 
+// 개수를 선언해 놓고 이어지는 줄이 리스트로 안 열리는 자리. tone.md 「비교/나열은 리스트로」가
+// 이미 덮는데 기계가 안 봐서 계속 새던 축이다. 수량어는 평범한 서술에도 흔해서(「두 가지에
+// 걸립니다」·「두 개 이상을 합치는」) 선언 종결 꼴로 좁혔다 — 넓게 잡으면 오탐이 대부분이다.
+const COUNT_DECL = /(?:두 가지|세 가지|네 가지|다섯 가지|[2-9]가지|두 개|세 개)\s*(?:뿐)?(?:이|가|은|는)?\s*(?:있습니다|입니다|였습니다|있었습니다)\.?/;
+
+function checkCountDeclaration(lines) {
+  const hits = [];
+  for (let i = 0; i < lines.length; i++) {
+    const s = lines[i][1].trim();
+    if (!s || s.startsWith("#") || s.startsWith("|")) continue;
+    const m = COUNT_DECL.exec(s);
+    if (!m) continue;
+    // 선언 뒤에 같은 줄로 설명이 이어지면 그 자리에서 산문으로 푼 것이다.
+    const tail = s.slice(m.index + m[0].length).trim();
+    if (!tail) {
+      // 줄이 선언으로 끝났으면 이어지는 첫 줄이 리스트로 열리는지 본다.
+      const next = lines.slice(i + 1).find(([, ln]) => ln.trim());
+      if (next && /^\s*(?:[-*+]|\d+\.)\s/.test(next[1])) continue;
+    }
+    hits.push([lines[i][0], s]);
+  }
+  return hits;
+}
+
 // C1 — 헤딩별 본문이 1문장 미만이면 빈 섹션. placeholder 잔존은 따로 센다
 // (placeholder_policy: keep이면 남기는 것이 정상이라 위반이 아니다).
 // 마크다운 링크([텍스트](url))는 placeholder 대괄호가 아니므로 먼저 걷어낸다.
@@ -295,6 +319,9 @@ function main() {
       (args.resume ? ", 이력서 명사형 허용)" : ")"),
   );
   for (const [lineno, ln] of politeHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
+  const countHits = checkCountDeclaration(lines);
+  console.log(`\n[개수 선언 뒤 리스트 없음] ${countHits.length}건 (눈으로 확인 — 핵심 나열이면 번호 목록으로)`);
+  for (const [lineno, ln] of countHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
 
   section("완전성 (반객관)");
   console.log(`[C1 빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
@@ -334,7 +361,8 @@ function main() {
     (phCounts ? placeholders.length : 0);
   console.log(
     `\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건` +
-      ` + 눈으로 확인 후보 ${politeHits.length + contextHits.length}건(습니다체 ${politeHits.length} · 문맥 ${contextHits.length})`,
+      ` + 눈으로 확인 후보 ${politeHits.length + contextHits.length + countHits.length}건` +
+      `(습니다체 ${politeHits.length} · 문맥 ${contextHits.length} · 개수 선언 ${countHits.length})`,
   );
 }
 
