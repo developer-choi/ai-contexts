@@ -51,6 +51,26 @@ function inScope(rel, exclude) {
   return !exclude.some((prefix) => rel === prefix || rel.startsWith(prefix));
 }
 
+// 스캔 한 벌. 검사·등재·해제가 같은 계산을 쓴다 — 두 벌이 되면 선 해석이 갈린다.
+function measure(config) {
+  const entries = indexedMd(config.exclude); // [{ sha, rel }]
+  const sizes = objectSizes(entries.map((e) => e.sha));
+  const bodies = objectBodies(entries.map((e) => e.sha));
+  const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
+
+  const reach = ancestorCounts(files);
+  const limitFor = (rel) => (reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT);
+  return { files, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
+}
+
+// 선 아래로 내려온 등재분. 파일이 지워졌을 때도 걷을 자리다.
+function settledOf(baseline, files, limitFor) {
+  return Object.keys(baseline).filter((rel) => {
+    const f = files.find((x) => x.rel === rel);
+    return !f || f.size < limitFor(rel);
+  });
+}
+
 function main() {
   const repo = repoName();
   if (!repo) return;
@@ -58,16 +78,8 @@ function main() {
   const config = readConfig(repo);
   if (!config) return; // backlog가 없거나 파싱이 깨졌다 — 조용히 통과한다
 
-  const entries = indexedMd(config.exclude); // [{ sha, rel }]
-  if (!entries.length) return;
-
-  const sizes = objectSizes(entries.map((e) => e.sha));
-  const bodies = objectBodies(entries.map((e) => e.sha));
-  const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
-
-  const reach = ancestorCounts(files);
-  const limitFor = (rel) => (reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT);
-  const over = files.filter((f) => f.size >= limitFor(f.rel));
+  const { files, reach, limitFor, over } = measure(config);
+  if (!files.length) return;
 
   const baseline = config.files;
   if (!baseline) {
@@ -89,10 +101,7 @@ function main() {
     else if (f.size > was) grown.push({ ...f, was });
   }
   // 선 아래로 내려온 등재분은 기준선에서 걷을 자리다. 안 걷으면 다시 커져도 「등재분」으로 조용하다.
-  const settled = Object.keys(baseline).filter((rel) => {
-    const f = files.find((x) => x.rel === rel);
-    return !f || f.size < limitFor(rel);
-  });
+  const settled = settledOf(baseline, files, limitFor);
 
   if (!fresh.length && !grown.length && !settled.length) return;
 
@@ -123,7 +132,10 @@ function main() {
     report(
       "[문서 크기] 기준선에 등재된 파일이 선 아래로 내려왔다 — 등재를 걷을 자리다:",
       settled,
-      [`판단: ${CONFIG_FILE}의 "${repo}"에서 그 줄을 지운다. 남겨두면 다시 커져도 「등재분」으로 조용히 통과한다.`],
+      [
+        `걷으려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --settle`,
+        "남겨두면 다시 커져도 「등재분」으로 조용히 통과한다.",
+      ],
     );
   }
 }
@@ -281,9 +293,7 @@ function readWhole() {
 
 // `files`가 null이면 이 레포의 등재가 아직 없다는 뜻이고, 반환 자체가 null이면 설정을 못 읽어
 // 검사를 건너뛴다는 뜻이다. `exclude`는 등재가 없어도 쓰이므로 두 경우를 갈라 둔다.
-function readConfig(repo) {
-  const whole = readWhole();
-  if (!whole) return null;
+function configOf(whole, repo) {
   const entry = whole.repos[repo];
   return {
     files: entry && typeof entry.files === "object" && entry.files ? entry.files : null,
@@ -291,31 +301,44 @@ function readConfig(repo) {
   };
 }
 
-function writeBaseline() {
+function readConfig(repo) {
+  const whole = readWhole();
+  return whole ? configOf(whole, repo) : null;
+}
+
+// 등재 추가·해제가 공통으로 필요한 것. 못 열면 사유를 내고 null을 준다.
+function openForWrite() {
   const repo = repoName();
   if (!repo) {
     console.error("git 레포가 아니다.");
     process.exitCode = 1;
-    return;
+    return null;
   }
   const whole = readWhole();
   if (!whole) {
     console.error(`설정 파일이 없다: ${CONFIG_FILE}`);
-    console.error("backlog 레포가 클론된 기기에서만 등재할 수 있다.");
+    console.error("backlog 레포가 클론된 기기에서만 등재를 고칠 수 있다.");
     process.exitCode = 1;
-    return;
+    return null;
   }
-  const config = readConfig(repo);
-  const entries = indexedMd(config.exclude);
-  const sizes = objectSizes(entries.map((e) => e.sha));
-  const bodies = objectBodies(entries.map((e) => e.sha));
-  const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
-  const reach = ancestorCounts(files);
+  return { repo, whole, config: configOf(whole, repo) };
+}
 
-  const over = files
-    .filter((f) => f.size >= (reach.get(f.rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT))
-    // 큰 것부터가 아니라 「크기 × 닿는 곳」이 큰 것부터 적는다 — 그 순서가 곧 손댈 순서다.
-    .sort((a, b) => b.size * Math.max(reach.get(b.rel), 1) - a.size * Math.max(reach.get(a.rel), 1));
+function saveWhole(whole) {
+  fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
+  fs.writeFileSync(CONFIG_FILE, JSON.stringify(whole, null, 2) + "\n", "utf8");
+}
+
+function writeBaseline() {
+  const opened = openForWrite();
+  if (!opened) return;
+  const { repo, whole, config } = opened;
+  const { reach, over: unsorted } = measure(config);
+
+  // 큰 것부터가 아니라 「크기 × 닿는 곳」이 큰 것부터 적는다 — 그 순서가 곧 손댈 순서다.
+  const over = [...unsorted].sort(
+    (a, b) => b.size * Math.max(reach.get(b.rel), 1) - a.size * Math.max(reach.get(a.rel), 1),
+  );
 
   // `exclude`는 사람이 적은 것이라 다시 쓸 때 그대로 들고 간다 — 안 그러면 등재를 갱신할 때마다
   // 산출물 폴더가 검사 대상으로 되살아난다. 다른 레포의 항목도 건드리지 않는다.
@@ -325,18 +348,48 @@ function writeBaseline() {
   for (const f of over) entry.files[f.rel] = f.size;
   whole.repos[repo] = entry;
 
-  fs.mkdirSync(path.dirname(CONFIG_FILE), { recursive: true });
-  fs.writeFileSync(CONFIG_FILE, JSON.stringify(whole, null, 2) + "\n", "utf8");
+  saveWhole(whole);
 
   console.log(`${CONFIG_FILE}의 "${repo}"에 ${over.length}건 등재했다 (크기 × 닿는 곳 순):`);
   for (const f of over) console.log(`  ${String(f.size).padStart(6)}B x ${reach.get(f.rel)}곳  ${f.rel}`);
 }
 
+// 선 아래로 내려온 등재분을 걷는다. 커밋마다 도는 검사가 말없이 고치면 사용자가 낸 적 없는 diff가
+// backlog에 쌓이므로(그 레포는 커밋마다 자동 push한다), 자동이 아니라 사람이 부르는 명령으로 둔다.
+function settleBaseline() {
+  const opened = openForWrite();
+  if (!opened) return;
+  const { repo, whole, config } = opened;
+  if (!config.files) {
+    console.log(`${CONFIG_FILE}에 "${repo}"의 등재가 없다 — 걷을 것이 없다.`);
+    return;
+  }
+
+  const { files, limitFor } = measure(config);
+  const settled = settledOf(config.files, files, limitFor);
+  if (!settled.length) {
+    console.log(`"${repo}"의 등재분 중 선 아래로 내려온 것이 없다 — 그대로 둔다.`);
+    return;
+  }
+
+  console.log(`${CONFIG_FILE}의 "${repo}"에서 ${settled.length}건을 걷었다:`);
+  for (const rel of settled) {
+    const f = files.find((x) => x.rel === rel);
+    const now = f ? `${f.size}B (선 ${limitFor(rel)}B)` : "검사 대상에 없음 (삭제·이름 변경·제외)";
+    console.log(`  ${rel} — 등재 ${config.files[rel]}B → ${now}`);
+    delete whole.repos[repo].files[rel];
+  }
+
+  saveWhole(whole);
+}
+
 try {
   if (process.argv.includes("--write-baseline")) writeBaseline();
+  else if (process.argv.includes("--settle")) settleBaseline();
   else main();
 } catch (error) {
   console.error(`[문서 크기 훅 내부 오류, 건너뜀] ${error.message}`);
 }
-// 문서가 큰 것이 사람의 커밋을 막을 일은 아니다 — 항상 통과시킨다.
-process.exit(0);
+// 문서가 큰 것이 사람의 커밋을 막을 일은 아니다 — 검사(main)는 exitCode를 안 세우므로 늘 0이다.
+// 사람이 부른 `--write-baseline`·`--settle`이 설정을 못 열었을 때만 그 실패가 그대로 나간다.
+process.exit(process.exitCode ?? 0);
