@@ -23,6 +23,15 @@
 // 제외 목록도 개인 도구의 상태라, 남이 클론할 수 있는 레포에 두면 그 사람 클론에 남의 설정이
 // 얹힌다. **backlog가 없는 기기에서는 통째로 no-op 한다** — 설정 없이 도는 것은 이 검사가
 // 아니라 아무 레포에나 경고를 뿌리는 다른 물건이다. (같은 판단을 surface-backlog.mjs가 먼저 했다.)
+//
+// 왜 「이미 알렸다」를 따로 기억하는가: 등재 목록은 사람이 `--write-baseline`을 부를 때만 바뀌는데
+// 검사는 커밋마다 다시 재므로, 한 번 커진 파일은 사람이 등재를 갱신하기 전까지 **똑같은 숫자 한
+// 줄을 매 커밋 영원히** 찍는다(실측: AC step-4.md 한 줄이 24커밋 연속). 그 반복은 새로 넘는 파일을
+// 묻는다 — 첫날 수십 건을 쏟지 않으려고 등재를 둔 것과 같은 이유로 막아야 한다.
+// 기억을 등재 목록에 합치지 않고 `~/.ai-contexts/`에 따로 두는 이유: 등재는 사람이 관리하는
+// 다이어트 대상 목록이고 이 기억은 기계 상태다. 합치면 커밋마다 도는 검사가 backlog에 사용자가
+// 낸 적 없는 diff를 쌓게 되고(그 레포는 커밋마다 자동 push한다), 그건 아래 settleBaseline 주석이
+// 이미 거부한 설계다. 기기별로 따로 기억하고, 파일이 없어지면 한 번 더 찍고 마는 것이 전부다.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -30,6 +39,8 @@ import path from "node:path";
 
 const BACKLOG_ROOT = path.join(os.homedir(), "WebstormProjects", "main", "backlog");
 const CONFIG_FILE = path.join(BACKLOG_ROOT, "meta", "md-size.json");
+// 「이 크기는 이미 알렸다」는 기계 상태. 기기별이고 커밋되지 않는다 — 그래서 등재 목록과 다른 곳에 산다.
+const SEEN_FILE = path.join(hookHome(), "md-size-seen.json");
 
 // 선. 닿는 곳이 FANOUT 이상이면 낮은 선(BUSY), 아니면 높은 선(LONE)을 쓴다.
 const LONE_LIMIT = 25000;
@@ -82,38 +93,52 @@ function main() {
   if (!files.length) return;
 
   const baseline = config.files;
-  if (!baseline) {
-    if (over.length) {
-      console.log(
-        `[문서 크기] 선을 넘은 md ${over.length}건이 있는데 이 레포("${repo}")의 등재가 ${CONFIG_FILE}에 없다.\n` +
-          `  기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline\n` +
-          "  등재 목록이 곧 다이어트 대상 목록이다 — 지우는 파일이 아니라 이어서 볼 목록이다.\n",
-      );
-    }
-    return;
-  }
+  const seenWhole = readSeen();
+  const seen = seenOf(seenWhole, repo);
+  // 알린 적 없거나, 알린 크기보다 더 커졌을 때만 낸다. 같은 크기 그대로면 새 사실이 아니다.
+  const untold = (f) => seen.notified[f.rel] === undefined || f.size > seen.notified[f.rel];
 
-  const fresh = []; // 기준선에 없던 파일이 새로 넘음
-  const grown = []; // 등재돼 있는데 더 커짐
-  for (const f of over) {
-    const was = baseline[f.rel];
-    if (was === undefined) fresh.push(f);
-    else if (f.size > was) grown.push({ ...f, was });
-  }
+  // 미등재 = 선을 넘었는데 기준선에 없는 것. 레포 등재가 통째로 없을 때도 같은 집합이다.
+  const unregistered = over.filter((f) => !baseline || baseline[f.rel] === undefined);
+  const fresh = unregistered.filter(untold);
+  const grown = baseline
+    ? over
+        .filter((f) => baseline[f.rel] !== undefined && f.size > baseline[f.rel] && untold(f))
+        .map((f) => ({ ...f, was: baseline[f.rel] }))
+    : [];
   // 선 아래로 내려온 등재분은 기준선에서 걷을 자리다. 안 걷으면 다시 커져도 「등재분」으로 조용하다.
-  const settled = settledOf(baseline, files, limitFor);
+  const settledAll = baseline ? settledOf(baseline, files, limitFor) : [];
+  const settled = settledAll.filter((rel) => seen.settled[rel] !== baseline[rel]);
 
-  if (!fresh.length && !grown.length && !settled.length) return;
+  saveSeen(seenWhole, repo, {
+    // `over`에서 다시 만들므로 선 아래로 내려온 파일의 기억은 저절로 걷힌다.
+    notified: Object.fromEntries(over.map((f) => [f.rel, Math.max(f.size, seen.notified[f.rel] ?? 0)])),
+    settled: Object.fromEntries(settledAll.map((rel) => [rel, baseline[rel]])),
+  });
 
   if (fresh.length) {
     report(
-      "[문서 크기] 선을 새로 넘은 프롬프트·스킬 md:",
+      baseline
+        ? "[문서 크기] 선을 새로 넘은 프롬프트·스킬 md:"
+        : `[문서 크기] 선을 넘은 md가 있는데 이 레포("${repo}")의 등재가 ${CONFIG_FILE}에 없다:`,
       fresh.map((f) => `${f.rel} — ${f.size}B (닿는 곳 ${reach.get(f.rel)}, 선 ${limitFor(f.rel)}B)`),
-      [
-        "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
-        "무엇을 줄일지는 줄일 후보를 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-        "판정 기준과 후보 갈래는 deploy/skills/scw/specialized/document-diet.md에 있다.",
-      ],
+      baseline
+        ? [
+            "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
+            "무엇을 줄일지는 줄일 후보를 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
+            "판정 기준과 후보 갈래는 deploy/skills/scw/specialized/document-diet.md에 있다.",
+          ]
+        : [
+            `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,
+            "등재 목록이 곧 다이어트 대상 목록이다 — 지우는 파일이 아니라 이어서 볼 목록이다.",
+          ],
+    );
+  } else if (unregistered.length) {
+    // 이미 알린 미등재분까지 통째로 침묵시키면, 등재도 안 된 초과 파일이 어느 목록에도 안 남는다.
+    // 블록은 한 번만 내고, 그 다음부터는 「아직 등재를 안 했다」만 한 줄로 남긴다.
+    console.log(
+      `[문서 크기] 미등재 초과 ${unregistered.length}건 (알림 완료) — 등재: ` +
+        `node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline\n`,
     );
   }
 
@@ -275,6 +300,39 @@ function objectBodies(shas) {
   }
   while (bodies.length < shas.length) bodies.push("");
   return bodies;
+}
+
+// --- 알림 이력 -------------------------------------------------------------
+
+// 깨졌거나 없으면 빈 것으로 본다. 이력이 없다는 것은 "한 번 더 찍는다"일 뿐이라, 이 파일 때문에
+// 검사를 건너뛰거나 커밋을 멈출 이유가 없다.
+function readSeen() {
+  try {
+    const data = JSON.parse(fs.readFileSync(SEEN_FILE, "utf8"));
+    return data && typeof data.repos === "object" && data.repos ? data : { repos: {} };
+  } catch {
+    return { repos: {} };
+  }
+}
+
+function seenOf(whole, repo) {
+  const entry = whole.repos[repo];
+  const map = (v) => (v && typeof v === "object" ? v : {});
+  return { notified: map(entry?.notified), settled: map(entry?.settled) };
+}
+
+// 바뀐 것이 없으면 안 쓴다 — 커밋마다 도는 검사라 같은 내용을 다시 쓰면 디스크만 두드린다.
+// 쓰기 실패는 삼킨다. 못 써도 다음 커밋에 한 번 더 찍힐 뿐이고, 그것 때문에 커밋이 막히면 안 된다.
+function saveSeen(whole, repo, entry) {
+  const next = { ...whole, repos: { ...whole.repos, [repo]: entry } };
+  const body = JSON.stringify(next, null, 2) + "\n";
+  try {
+    if (fs.existsSync(SEEN_FILE) && fs.readFileSync(SEEN_FILE, "utf8") === body) return;
+    fs.mkdirSync(path.dirname(SEEN_FILE), { recursive: true });
+    fs.writeFileSync(SEEN_FILE, body, "utf8");
+  } catch {
+    /* 이력을 못 남겼다 = 다음에 한 번 더 알린다 */
+  }
 }
 
 // --- 기준선 ---------------------------------------------------------------

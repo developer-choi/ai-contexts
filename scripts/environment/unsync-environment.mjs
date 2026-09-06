@@ -129,6 +129,15 @@ function unsyncPrecommitHook(state, hook) {
       absent: `Already absent: ${dest}`,
     }[status],
   );
+
+  // 훅이 돌면서 스스로 만드는 상태 파일. 내용은 매번 달라 동일성 비교가 안 되지만, 이름도 자리도
+  // AC 전유라(`~/.ai-contexts/`) 사용자 파일을 지울 위험이 없다.
+  for (const name of hook.stateFiles ?? []) {
+    const file = path.join(stateDir, name);
+    const existed = fs.existsSync(file);
+    fs.rmSync(file, { force: true });
+    console.log(existed ? `Removed ${file}` : `Already absent: ${file}`);
+  }
 }
 
 function uninstallPowerShell7(state) {

@@ -30,6 +30,9 @@ export const PRECOMMIT_HOOKS = [
     file: 'check-md-size.mjs',
     label: '문서 크기 검사 훅',
     stateKey: 'mdSizeHookSetByAiContexts',
+    // 훅이 돌면서 스스로 만드는 상태 파일. sync가 만드는 것이 아니라 첫 실행 때 생기므로,
+    // 여기 적어 두지 않으면 unsync가 훅만 걷고 이 파일은 기기에 영영 남는다.
+    stateFiles: ['md-size-seen.json'],
   },
   {
     alias: 'guide-post-pair',
