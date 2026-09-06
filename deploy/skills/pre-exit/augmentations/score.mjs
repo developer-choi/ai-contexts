@@ -147,6 +147,22 @@ function checkPoliteness(lines) {
   return flags;
 }
 
+// 의문형 종결 어미로 끝났는데 물음표가 없는 줄. 판단이 안 드는 구두점이라 합계에 넣는다.
+// 「~는가」 꼴은 뺐다 — 독자에게 묻는 문장 말고 점검 문항(「오해 없이 실행할 수 있는가」)에도
+// 쓰여서, 레포 상주 문서를 다듬을 때 그 문항까지 물음표를 강제하게 된다. tone.md 규칙은
+// 의문형 전부를 덮고, 기계는 독자에게 묻는 꼴만 잡는다.
+const QUESTION_END = /(?:까요|나요|은가요|는가요|던가요)$/;
+
+function checkQuestionMark(lines) {
+  const hits = [];
+  for (const [lineno, ln] of lines) {
+    const s = ln.trim().replace(/^#+\s*/, "").replace(/[*_`\s]+$/, "");
+    if (!s || s.startsWith("|")) continue;
+    if (QUESTION_END.test(s)) hits.push([lineno, ln.trim()]);
+  }
+  return hits;
+}
+
 // 개수를 선언해 놓고 이어지는 줄이 리스트로 안 열리는 자리. tone.md 「비교/나열은 리스트로」가
 // 이미 덮는데 기계가 안 봐서 계속 새던 축이다. 수량어는 평범한 서술에도 흔해서(「두 가지에
 // 걸립니다」·「두 개 이상을 합치는」) 선언 종결 꼴로 좁혔다 — 넓게 잡으면 오탐이 대부분이다.
@@ -314,6 +330,8 @@ function main() {
   for (const h of contextHits) console.log(`   ${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
   dump("내부 작업이력(5a)", internalHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
   dump("em/en dash(10a)", dashHits, (h) => `${h[1]} (L${h[2]}): ${h[3].slice(0, 70)}`);
+  const questionHits = checkQuestionMark(lines);
+  dump("의문형에 물음표 없음", questionHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
   console.log(
     `\n[습니다체(1a) 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능` +
       (args.resume ? ", 이력서 명사형 허용)" : ")"),
@@ -357,6 +375,7 @@ function main() {
     bannedHits.length +
     internalHits.length +
     dashHits.length +
+    questionHits.length +
     empties.length +
     (phCounts ? placeholders.length : 0);
   console.log(
