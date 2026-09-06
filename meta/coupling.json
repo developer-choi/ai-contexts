@@ -101,9 +101,10 @@
         "deploy/contexts/writing-guide/map.md",
         "deploy/contexts/writing-guide/**",
         "deploy/skills/write-init/SKILL.md",
-        "deploy/skills/write-refine/SKILL.md"
+        "deploy/skills/write-refine/SKILL.md",
+        "deploy/skills/write-refine/expression-review.md"
       ],
-      "note": "이 폴더의 파일을 언제 읽을지는 write-init·write-refine의 로드 목록이 정본이다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`/scw` `specialized/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 파일을 추가·삭제하거나 여는 조건이 바뀌면 두 스킬의 로드 목록을 함께 고치고, 두 목록을 맞대어 어긋난 곳이 없는지 본다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
+      "note": "이 폴더의 파일을 언제 읽을지는 write-init·write-refine의 로드 목록이 정본이다. write-refine은 사례 파일을 메인이 읽지 않고 리뷰어에게 경로로 넘기므로, 그 목록이 SKILL.md에 있고 넘기는 규격이 expression-review.md에 있다 — 한쪽만 고치면 리뷰어가 받는 경로와 실제 파일이 어긋나고, 그 어긋남은 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`/scw` `specialized/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 파일을 추가·삭제하거나 여는 조건이 바뀌면 두 스킬의 로드 목록을 함께 고치고, 두 목록을 맞대어 어긋난 곳이 없는지 본다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
     },
     {
       "name": "정책 hook ↔ 판정 회귀 계약",

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // write 산출물 채점 하네스 (객관 + 반객관 자동 계측).
 //
-// pre-exit write-refine 보강과 write-refine 자체 자기검토 루프가 호출하는 채점 도구.
+// pre-exit write-refine 보강과 write-refine 검수의 기계 층이 호출하는 채점 도구.
 // 주관(만족/불만족·추가교정)은 사람 전속이라 여기서 안 잰다. 점수로 합치지 않는다 —
 // 층(객관·반객관)을 따로 출력한다.
 //
