@@ -84,7 +84,7 @@ force-push 요청 후, 전 PR의 `pr{N}/consumable/`을 훑어 잔존 산출물�
 
 본 세션 종료 시 SKILL.md 「세션 spawn 안내 메커니즘」으로 후속을 안내한다.
 
-- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·메일·채용담당자 리뷰·제출·자산 회수. 세션 자기 회고는 7-3에서 호출). 동일 모드 인자(`채용`) 유지.
+- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·채용담당자 리뷰·제출·자산 회수. 세션 자기 회고는 7-3에서 호출). 동일 모드 인자(`채용`) 유지.
 - **실무·개인** — 머지 안내(스택은 바텀업, 독립 브랜치는 순서 무관) + 아래 「세션 자기 회고 안내」. 머지는 사용자 실행.
 
 ## 세션 자기 회고 안내 (실무·개인)
