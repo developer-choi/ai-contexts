@@ -97,9 +97,6 @@ function main() {
   check(['Bash', 'PowerShell', 'Monitor'].every((m) =>
     claudePre.some((h) => h.matcher === m && h.file === 'check-git-push-policy.mjs')),
     'claude: check-git-push-policy가 Bash·PowerShell·Monitor 매처로 fan-out 등록됨');
-  check(['Bash', 'PowerShell', 'Monitor'].every((m) =>
-    claudePre.some((h) => h.matcher === m && h.file === 'check-rm-policy.mjs')),
-    'claude: check-rm-policy가 Bash·PowerShell·Monitor 매처로 fan-out 등록됨');
 
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
@@ -125,9 +122,9 @@ function main() {
   check(!codex.some((h) => h.event === 'PreCompact'),
     'codex: PreCompact hook 미등록');
   // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이
-  // codex에선 '*' 한 그룹으로 접혀야 하므로, check-rm-policy는 정확히 1번만 등록된다.
-  check(codex.filter((h) => h.file === 'check-rm-policy.mjs').length === 1,
-    'codex: check-rm-policy 중복 없이 1회 등록됨');
+  // codex에선 '*' 한 그룹으로 접혀야 하므로, check-git-push-policy는 정확히 1번만 등록된다.
+  check(codex.filter((h) => h.file === 'check-git-push-policy.mjs').length === 1,
+    'codex: check-git-push-policy 중복 없이 1회 등록됨');
 
   if (failures.length) {
     console.error(`settings 생성 계약 검증 실패: ${failures.length}건`);

@@ -91,12 +91,6 @@
       "msg": "Checking shell policy..."
     },
     {
-      "file": "check-rm-policy.mjs",
-      "event": "PreToolUse",
-      "on": "shell",
-      "msg": "Checking rm policy..."
-    },
-    {
       "file": "check-deploy-script-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",
