@@ -28,7 +28,7 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 | 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 | (6) 권장 모델 |
 |---|---|---|---|---|---|---|
-| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md·conventions-index.md / `background/consumable/`: project.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동) | step-1.1 후 → FOUNDATION (채용) 또는 MARKUP (실무·개인), 동일 `<모드>` 인자 / **PR을 확정할 때마다 → 그 PR의 PR_{N}_PLAN**, 동일 `<모드>` 인자 (일괄 분할 없음 — [conventions/pr-split.md](conventions/pr-split.md)) | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 확정이 전 세션의 루트 결정, 오판이 도미노로 전파 |
+| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md·conventions-index.md / `background/consumable/`: project.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동) | (실무·개인) step-1.1 후 → MARKUP, 동일 `<모드>` 인자 / **PR을 확정할 때마다 → 그 PR의 PR_{N}_PLAN**, 동일 `<모드>` 인자 / (채용) `PRESET_FOUNDATION` PR을 확정하면 → FOUNDATION (일괄 분할 없음 — [conventions/pr-split.md](conventions/pr-split.md)) | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토 | **Opus** — PR 확정이 전 세션의 루트 결정, 오판이 도미노로 전파 |
 | **FOUNDATION** (채용만) | `/workflow FOUNDATION 채용` + BG.step-1.1 완료 + `project.md`에 이 PR 확정 | BG `background/persistent/` (채용 원본) | **`PRESET_FOUNDATION` PR을 자기 브랜치·워크트리에서 완결** (폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션) — 절차는 전용 단계가 아니라 **표준 step-3~6**(불필요한 절차는 건너뜀) / `background/retained/folder-structure.md` / markup 워크트리 최소 셋팅. **도구 세팅(`PRESET_SETUP`)은 별개 PR**이며 정상 도미노가 처리 | **markup 워크트리 최소 셋팅 완료 시 → MARKUP** (`/workflow MARKUP 채용`) / 세션 종료 후 → 다른 PR의 PLAN을 여기서 띄우지 않는다 (PLAN spawn은 BG 몫). 이 PR에 의존하는 PR이 있으면 자기 진입 조건으로 출발한다 | 자기 PR 워크트리 (+ markup 워크트리). 다른 PR의 워크트리로 이동하지 않음 | **Sonnet** — 컨벤션 이식 정형 작업, 검수 쉬움 |
 | **MARKUP** | (채용) FOUNDATION이 markup 워크트리 최소 셋팅을 마친 뒤 / (실무·개인) BG.step-1.1 후, `/workflow MARKUP <모드>` 호출 | (채용·실무) step-1.1 수집 figma·시안 자료 / (개인) step-1.1 수집 마크업 시안(`retained/mockup/`) — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + **공통 컴포넌트 확정·독립 산출**(전 페이지 직독, 2군데 이상=공통 → PR 확정이 소비하는 단방향 입력) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) `background/retained/mockup/`(+선택 `retained/spec.md`) | 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) — URL은 노드값이 정답이라 결정론적 번역, 캡처·개인 시안은 명세 완결성이 낮을 수 있어 해석 여지가 큼 |
 | **PR_{N}_PLAN** | **`project.md`에 이 PR 절이 확정됨** (BG의 PR 확정 — 일괄 분할 대기 없음) + 의존 PR이 있는 경우에 한해 (그 PR이 stub 만든 경우 그 PR.step-4 stub, 안 만든 경우 그 PR.step-6 IMPL 완료 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수 있다. `project.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/project.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / **가벼운 PR은 step-4에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | step-3 종료 → WRITING_IDEATOR (PR 본문 초안, step-4 진입 전 같은 세션 도중 안내) / step-4 stub 만든 경우 → PR_{N}_IMPL spawn / stub 없이 실행 이연(무거운 non-stub) → PR_{N}_IMPL spawn / stub 없이 그 자리 실행·커밋 완결(가벼운 PR) → IMPL 세션 없이 WRITING_REFINER **(단 step-5·6 수행 후 — step-4 「종료 시퀀스」 가벼운 PR 분기)** / step-4 stub 확정 시 → **본 PR의 시그니처만 필요한 PR의 출발 게이트 해제 안내** (`project.md`의 의존 항목에서 찾는다. 세션을 새로 띄우라는 spawn 안내가 아니라 게이트가 풀렸다는 안내 — PLAN spawn 자체는 BG의 PR 확정이 유일 트리거) | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** — stub 시그니처가 의존 PR의 공개 계약, 오판 시 도미노 오염 |
@@ -47,6 +47,8 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 각 세션의 끝·분기점 step에서 위 「세션」 표를 참조해 후속 spawn 안내를 출력한다 (본문에 후속 세션 명단을 박지 말 것 — 표 갱신이 단일 소스).
 
+**안내는 지금 띄울 수 있는 후속이 있을 때만 나가는 출력이다.** 없으면 분기점의 응답을 그 step의 종료 결과와 다음 할 일만으로 채우고, 후속 세션이라는 화제 자체를 꺼내지 않는다 — 모드·조건 때문에 띄울 세션이 없다는 설명도, 조건이 차면 안내하겠다는 예고도 그 화제다. 지금 띄울 수 없는 세션 이야기는 사용자가 읽고 할 일이 없는 문장이다.
+
 **분기점 시점 인식**: 자기 세션의 표 (4) 컬럼에 적힌 트리거가 분기점이다. 두 종류가 있다.
 
 - **step 종료형** — "step-X 후" 같은 트리거. 그 step이 세션의 끝이거나 분기점이다.
@@ -54,18 +56,21 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 어느 쪽이든 트리거 즉시 본 절차를 발동한다 — 다음 step·분석성 출력·산출물 작성을 본 절차 전에 시작하지 않는다.
 
-**분석 욕구 가드**: 분기점에서 분석할 자료가 잔뜩 남아 있어도(시안 정독, cross-analysis, 평가 기준 추론 등) spawn 안내를 **먼저** 출력한다. 분석성 출력 텍스트의 분량과 절차 안내의 우선순위를 혼동하지 않는다.
+**분석 욕구 가드**: 분기점에서 분석할 자료가 잔뜩 남아 있어도(시안 정독, cross-analysis, 평가 기준 추론 등) 본 절차를 **먼저** 돈다. 분석성 출력 텍스트의 분량과 절차 안내의 우선순위를 혼동하지 않는다.
 
 - **사건 발생형에서는 안내 후 분석을 이어간다** — 이 가드는 "분석을 하지 말라"가 아니라 "안내보다 먼저 하지 말라"다. PR을 확정했으면 그 자리에서 안내를 내고, 남은 정독·분석을 계속한다.
 - **모아뒀다 한꺼번에 안내하지 않는다.** 확정을 쌓아두고 세션 끝에 몰아서 안내하면 일괄 분할과 같아져 뒤 세션 대기가 되살아난다 — 이 메커니즘이 막으려는 실패 그 자체다.
 
 **fan-in 후속 (FINALIZE)**: 대부분의 후속은 선형(한 세션 종료 → 다음 세션)이지만 FINALIZE는 **fan-in**이다 — 전 PR의 IMPL(step-6)이 끝나야 진입 가능. 이를 안내하는 주체는 **마지막 IMPL 세션**이다. PR_{N}_IMPL이 step-6을 끝낼 때(IMPL 세션 종료), 방금 끝낸 PR이 마지막 IMPL인지 판정(「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준)하고, 마지막이면 WRITING_REFINER 안내에 더해 FINALIZE 진입도 안내한다. 마지막이 아니면 FINALIZE 안내는 출력하지 않는다.
 
-종료 시 LLM 절차:
-1. 표에서 자기 후속 명단 추출
-2. 각 후속의 선행 분해 — 자기 선행·방금 끝낸 step은 ✓ (자기 spawn 사실로 충족 추론), 병렬 세션 종료 항목은 미충족 가능 단서로 표시
-3. 후속별 spawn 가능 조건 안내 출력 (`/workflow <세션> <모드>` 인자 포함). 표 (6) 권장 모델도 함께 출력 (예: "Opus 권장"). MARKUP은 입력 모달리티(figma URL이면 Sonnet / 캡처-only면 Opus)에 따라 분기 안내. 사용자가 단서 보고 spawn 판단
-4. 후속 spawn 안내 출력 직후, 세션 종료 + 회고 시점의 `/pre-exit` 호출을 한 줄로 안내. 보강·augmentation 디테일은 적지 않는다 (/pre-exit 내부 처리)
+분기점 LLM 절차:
+1. 후속 명단 추출 — 자기 행 (4)에서 이번 트리거의 후속을 뽑는다. 이 세션의 앞선 분기점에서 조건 미충족으로 뺀 후속이 있으면 그것도 넣는다
+2. 조건 판정 — 각 후속의 조건은 **그 후속 행의 (1) 진입 조건**에서 분해한다. 자기 행 (4)는 명단만 정하고 조건의 출처가 아니다
+   - 자기 세션이 끝낸 step·자기 spawn 사실로 충족되는 항목 → ✓
+   - 이 세션이 직접 기록하는 산출물로 판정되는 항목(`project.md`에 PR 절이 있는가 등) → 지금 열어 판정한다. 하나라도 미충족이면 그 후속을 명단에서 뺀다
+   - 다른 세션이 진행해야 차는 항목(의존 PR의 stub·IMPL 완료 등) → 그 흔적을 파일로 볼 수 있어도 판정하지 않고, 미충족 가능 단서로 표시해 명단에 둔다
+3. 명단에 남은 후속만 안내한다 — 명단에서 빠진 세션은 언급하지 않고, 명단이 비었으면 아무것도 출력하지 않는다(이 절 첫머리). 명단이 남았으면 후속별 spawn 가능 조건 안내 출력 (`/workflow <세션> <모드>` 인자 포함). 표 (6) 권장 모델도 함께 출력 (예: "Opus 권장"). MARKUP은 입력 모달리티(figma URL이면 Sonnet / 캡처-only면 Opus)에 따라 분기 안내. 사용자가 단서 보고 spawn 판단
+4. 세션이 이 분기점에서 끝나면 후속 명단 유무와 무관하게 `/pre-exit` 호출을 한 줄로 안내한다. 세션이 이어지는 분기점에서는 내지 않는다. 보강·augmentation 디테일은 적지 않는다 (/pre-exit 내부 처리)
 
 ## 구조
 
@@ -132,7 +137,7 @@ FINALIZE가 전 PR을 머지 직전 상태로 정리한 뒤 채용 모드에서 
 
 | step | 세션 내 위치 | 종료 직후 전환 | 세션 경계 | step 고유 종료 절차 (본문 잔류) |
 |---|---|---|---|---|
-| step-1.1 | BG 분기점 | 후속 안내 메커니즘 발동(분석 전) → step-1.2 | 분기점 (세션 계속) | 컨벤션 인덱스 게이트 |
+| step-1.1 | BG 분기점 (실무·개인) | (실무·개인) 후속 안내 메커니즘 발동(분석 전) → step-1.2 / (채용) → step-1.2 | 분기점 (세션 계속) | 컨벤션 인덱스 게이트 |
 | step-1.2 | BG 마지막 | 후속 안내 메커니즘 발동 | BG 세션 종료 | 남은 PR 확정 마무리 |
 | step-3 | PLAN 중간 | → step-4 (WRITING_IDEATOR 초안 트리거는 메커니즘 소관) | 아니오 | overview 소비·의사결정 토론 |
 | step-4 | PLAN 마지막/분기 | 가벼운 PR: step-5·6 수행 후 메커니즘 / stub·이연: PR_{N}_IMPL로 메커니즘 | PLAN 세션 종료 | 리뷰팀 spawn·it.todo 게이트 |
