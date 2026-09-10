@@ -25,10 +25,10 @@ node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>
 
 ## 3. 누계에 더한다
 
-판정을 `{ "<진입점>\t<경로>": "used" | "unused" | "excluded" }` 꼴 json으로 적어 넘긴다. 경로는 앞 절이 낸 것을 **그대로** 옮긴다 — 배포 사본과 워크트리 사본을 원본 하나로 접어서 내주므로, 손으로 고쳐 적으면 한 파일의 눈금이 다시 갈린다.
+판정을 `{ "<진입점>\t<경로>": "used" | "unused" | "excluded" }` 꼴 json으로 적어 넘긴다.
 
 ```
-node {{skill_dir}}/scripts/session-state.mjs read-usage --from <판정 json>
+node {{skill_dir}}/scripts/session-state.mjs read-usage --session <session_id> --from <판정 json>
 ```
 
 누계 파일의 자리·형식·세는 법은 이 스크립트가 소유한다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고, 몇 달 뒤 안 차는 눈금으로만 드러난다.

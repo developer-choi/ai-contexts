@@ -29,7 +29,7 @@
 //   node <이 파일> changed --repo <레포 경로> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
-//   node <이 파일> read-usage --from <판정 json>
+//   node <이 파일> read-usage --session <session_id> --from <판정 json>
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
 
 import { execFileSync } from 'node:child_process';
@@ -444,18 +444,9 @@ if (command === 'squash-check') {
   process.exit(1);
 }
 
-if (command === 'read-files') {
-  const session = optOf('session');
-  if (!session) {
-    console.error('read-files 에는 --session <session_id> 가 필요합니다.');
-    process.exit(1);
-  }
-  const file = findTranscript(session);
-  if (!file) {
-    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
-    console.error('기억으로 목록을 만들지 않는다 — 못 뽑았다는 사실을 회고에 적고 이번 회차는 기록을 건너뛴다.');
-    process.exit(1);
-  }
+// read-files가 목록을 내고, read-usage가 그 목록으로 판정을 맞대 본다(안 연 경로 거부·고친 파일 제외).
+// 둘의 transcript 해석이 갈리면 목록에 있던 경로를 누계가 거부하므로 함수 하나로 둔다.
+function collectReads(file) {
   const reads = new Map();
   const touched = new Set();
   for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
@@ -502,6 +493,52 @@ if (command === 'read-files') {
     }
     if (touched.delete(from)) touched.add(to);
   }
+  return { reads, touched };
+}
+
+// 진입점 칸은 세션이 손으로 채운다. 이름을 자유로 두자 한 스킬이 `/scw`·`scw(editing)`처럼 여러 이름으로
+// 갈려 한 문서의 눈금이 줄마다 나뉘었다 — 경로를 원본 하나로 접은 것과 같은 사정이다. 그래서 스킬 폴더
+// 이름(부르는 이름과 같다)만 받는다. 스킬이 아닌 자리는 역할 이름으로 받는다:
+//   전역규칙 — 전역 규칙·CLAUDE.md 자동 로드·상황별 참고 표가 불러온 문서
+const ENTRY_ROLES = ['전역규칙'];
+
+function knownEntryPoints() {
+  const names = new Set(ENTRY_ROLES);
+  const walk = (dir, depth) => {
+    if (depth < 0 || !fs.existsSync(dir)) return;
+    for (const d of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (!d.isDirectory()) continue;
+      const sub = path.join(dir, d.name);
+      if (fs.existsSync(path.join(sub, 'SKILL.md'))) names.add(d.name);
+      walk(sub, depth - 1); // `workflow/recruitment` 같은 중첩 스킬
+    }
+  };
+  // 전역 스킬은 이 스크립트가 든 skills 폴더에 함께 있다(원본이든 배포본이든).
+  walk(path.resolve(import.meta.dirname, '..', '..'), 2);
+  // 레포 로컬 스킬은 레포마다 따로 산다. 누계 파일과 같은 작업 폴더 규약을 따른다.
+  const projects = path.join(os.homedir(), 'WebstormProjects');
+  const dirs = (p) => (fs.existsSync(p) ? fs.readdirSync(p, { withFileTypes: true }).filter((d) => d.isDirectory()) : []);
+  for (const group of dirs(projects)) {
+    for (const repo of dirs(path.join(projects, group.name))) {
+      walk(path.join(projects, group.name, repo.name, 'local', 'skills'), 2);
+    }
+  }
+  return names;
+}
+
+if (command === 'read-files') {
+  const session = optOf('session');
+  if (!session) {
+    console.error('read-files 에는 --session <session_id> 가 필요합니다.');
+    process.exit(1);
+  }
+  const file = findTranscript(session);
+  if (!file) {
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
+    console.error('기억으로 목록을 만들지 않는다 — 못 뽑았다는 사실을 회고에 적고 이번 회차는 기록을 건너뛴다.');
+    process.exit(1);
+  }
+  const { reads, touched } = collectReads(file);
 
   const rows = [...reads.entries()].sort((a, b) => b[1].count - a[1].count);
   console.log(`[읽은 프롬프트 문서] ${rows.length}건 — ${file}`);
@@ -526,9 +563,12 @@ if (command === 'read-files') {
 
 if (command === 'read-usage') {
   const from = optOf('from');
-  if (!from) {
-    console.error('read-usage 에는 --from <판정 json> 이 필요합니다.');
+  const session = optOf('session');
+  if (!from || !session) {
+    console.error('read-usage 에는 --session <session_id> 와 --from <판정 json> 이 필요합니다.');
     console.error('형식: { "<진입점>\\t<read-files가 낸 경로>": "used" | "unused" | "excluded" }');
+    // 세션 id가 없으면 같은 판정을 여러 번 넣었을 때 가를 방법이 없다 — 한 세션의 13줄이 한꺼번에
+    // ×3으로 더해진 적이 있고, 그중 한 줄은 「3번 중 3번 안 씀」으로 가장 강한 후보처럼 보였다.
     process.exit(1);
   }
   if (!fs.existsSync(USAGE_FILE)) {
@@ -544,30 +584,70 @@ if (command === 'read-usage') {
     console.error(`판정 파일을 못 읽었다: ${error.message}`);
     process.exit(1);
   }
+  const transcript = findTranscript(session);
+  if (!transcript) {
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음) — 판정을 맞대 볼 목록이 없어 더하지 않는다.`);
+    process.exit(1);
+  }
+  const { reads, touched } = collectReads(transcript);
+  const entryPoints = knownEntryPoints();
+
+  // 전부 검사한 뒤에 더한다. 한 줄씩 끊으면 고칠 것을 하나씩만 알게 된다.
+  const problems = [];
+  for (const [key, verdict] of Object.entries(verdicts)) {
+    const [entry, doc] = key.split('\t');
+    if (doc === undefined) {
+      problems.push(`진입점이 없다: ${JSON.stringify(key)} — "<진입점>\\t<경로>" 형식이어야 한다.`);
+      continue;
+    }
+    if (!['used', 'unused', 'excluded'].includes(verdict)) {
+      problems.push(`모르는 판정 ${JSON.stringify(verdict)} (${key}) — used·unused·excluded 중 하나여야 한다.`);
+    }
+    if (!entryPoints.has(entry)) {
+      problems.push(`모르는 진입점 ${JSON.stringify(entry)} — 스킬 폴더 이름이나 역할 이름(${ENTRY_ROLES.join('·')})만 받는다. 괄호로 세부를 붙이지 않는다.`);
+    }
+    // excluded는 누계를 읽는 회차가 넣으므로 그 세션이 연 문서가 아니어도 된다.
+    if (verdict !== 'excluded' && !reads.has(doc)) {
+      problems.push(`이 세션이 안 연 경로 ${JSON.stringify(doc)} — read-files가 낸 경로를 그대로 옮긴다. 손으로 고치면 한 파일의 눈금이 다시 갈린다.`);
+    }
+  }
+  if (problems.length) {
+    for (const p of problems) console.error(p);
+    if (problems.some((p) => p.startsWith('모르는 진입점'))) {
+      console.error(`\n받는 진입점: ${[...entryPoints].sort().join(', ')}`);
+    }
+    process.exit(1);
+  }
+
   const state = JSON.parse(fs.readFileSync(USAGE_FILE, 'utf8'));
   state.docs ??= {};
   state.excluded ??= [];
+  state.sessions ??= {};
   const today = new Date().toISOString().slice(0, 10);
+  // 같은 세션을 다시 넣는 일은 그 세션이 살아 있는 동안에만 생기므로 오래된 id는 걷는다.
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+  for (const [id, day] of Object.entries(state.sessions)) if (day < cutoff) delete state.sessions[id];
+  const counted = Boolean(state.sessions[session]);
   let added = 0;
   let skipped = 0;
+  let edited = 0;
   for (const [key, verdict] of Object.entries(verdicts)) {
-    if (!key.includes('\t')) {
-      console.error(`진입점이 없다: ${JSON.stringify(key)} — "<진입점>\\t<경로>" 형식이어야 한다.`);
-      process.exit(1);
-    }
     if (verdict === 'excluded') {
       if (!state.excluded.includes(key)) state.excluded.push(key);
       delete state.docs[key];
       continue;
     }
-    if (verdict !== 'used' && verdict !== 'unused') {
-      console.error(`모르는 판정 ${JSON.stringify(verdict)} (${key}) — used·unused·excluded 중 하나여야 한다.`);
-      process.exit(1);
-    }
+    if (counted) continue;
     // 사용자가 「안 고친다」고 판정한 것은 다시 안 뜬다. 안 그러면 두 번째 회차부터 같은
     // 목록을 다시 보게 되고, 그게 이런 장치가 무뎌지는 가장 흔한 경로다.
     if (state.excluded.includes(key)) {
       skipped += 1;
+      continue;
+    }
+    // 이번에 고친 파일은 「없었으면 결과가 달라졌나」에 늘 그렇다로 답해진다 — 고치는 것이 곧 결과라서다.
+    // 배치에 대해 아무것도 안 말하면서 분모만 키워, 파일을 많이 만지는 정리 회차일수록 눈금이 흐려진다.
+    if (touched.has(key.split('\t')[1])) {
+      edited += 1;
       continue;
     }
     const row = (state.docs[key] ??= { read: 0, unused: 0, last: today });
@@ -576,8 +656,14 @@ if (command === 'read-usage') {
     row.last = today;
     added += 1;
   }
+  if (!counted) state.sessions[session] = today;
   fs.writeFileSync(USAGE_FILE, `${JSON.stringify(state, null, 2)}\n`);
-  console.log(`[읽고 안 쓴 문서 누계] ${added}건 반영${skipped ? `, 제외 목록에 있어 건너뜀 ${skipped}건` : ''} — ${USAGE_FILE}`);
+  if (counted) {
+    console.log(`[읽고 안 쓴 문서 누계] 이 세션은 이미 더했다 — used·unused는 건너뛰고 excluded만 반영했다 — ${USAGE_FILE}`);
+  } else {
+    const notes = [skipped ? `제외 목록에 있어 건너뜀 ${skipped}건` : null, edited ? `이번에 고친 파일이라 뺌 ${edited}건` : null];
+    console.log(`[읽고 안 쓴 문서 누계] ${added}건 반영${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${USAGE_FILE}`);
+  }
 
   // 몇 번 중 몇 번이면 후보인가는 아직 안 정해졌다 — 표본이 사고 사례 하나뿐이라, 첫 회수
   // 회차가 분포를 보고 사용자와 함께 정한다. 그때 그 값을 state.threshold 에 적으면 아래가
@@ -596,8 +682,11 @@ if (command === 'read-usage') {
   // 알게 되고, 그 세션이 없어서 눈금이 차도 아무 일이 안 일어난다. 위 목록은 도달 여부와
   // 무관하게 같은 모양으로 찍혀서 눈으로는 안 갈린다.
   // 10인 근거는 read-usage.md 「열 번 중 여덟 번이 되어야 신호다」 — 분모가 열은 돼야 한다.
+  // 기록하는 세션은 모두 pre-exit를 돌므로 그 진입점의 문서는 매번 열리고 매번 쓰인다. 그 줄이 채운
+  // 열 번은 배치에 대해 아무것도 안 말하면서 알림만 먼저 울린다.
   const READY_AT = 10;
-  const reached = rows.filter(([, v]) => v.read >= READY_AT);
+  const RECORDER = 'pre-exit';
+  const reached = rows.filter(([key, v]) => v.read >= READY_AT && !key.startsWith(`${RECORDER}\t`));
   if (!t && reached.length) {
     console.log(`\n[착수 조건 도달] ${reached.length}건이 ${READY_AT}회 이상 열렸다 — 선을 정할 때다.`);
     console.log('  backlog projects/ai-contexts/active/scw/읽었는데-안-쓴-파일-누적.md');
