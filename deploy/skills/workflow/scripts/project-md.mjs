@@ -56,10 +56,10 @@ function parseSections(text) {
   const lines = text.split('\n');
   const preamble = [];
   const sections = [];
-  for (const line of lines) {
+  for (const [i, line] of lines.entries()) {
     const m = line.match(/^##\s+(.*)$/);
     if (m) {
-      sections.push({ title: m[1].trim(), body: [] });
+      sections.push({ title: m[1].trim(), line: i + 1, body: [] });
       continue;
     }
     (sections.length ? sections.at(-1).body : preamble).push(line);
@@ -96,6 +96,27 @@ function subsectionLines(body, name) {
   return out;
 }
 
+// 같은 절이 두 번 나오면 읽기는 앞의 것만, 쓰기는 한쪽에만 붙어 나머지가 조용히 빠진다.
+// 항목을 다른 절로 손으로 옮기다 원본 절을 안 지우면 생기고, 파일 끝까지 내려가야 보이는 자리라 눈으로는 놓친다.
+// PR 절은 이름이 아니라 번호가 식별자라 번호로 센다.
+function duplicateSections(sections) {
+  const groups = new Map();
+  const add = (key, label, line) => {
+    if (!groups.has(key)) groups.set(key, { label, lines: [] });
+    groups.get(key).lines.push(line);
+  };
+  for (const s of sections) {
+    const pr = prNumberOf(s.title);
+    if (pr === null) add(`## ${s.title}`, `'## ${s.title}'`, s.line);
+    else add(`PR ${pr}`, `PR ${pr} 절`, s.line);
+    s.body.forEach((l, i) => {
+      const m = l.match(/^###\s+(.*)$/);
+      if (m) add(`${s.line}/${m[1].trim()}`, `'## ${s.title}' 안 '### ${m[1].trim()}'`, s.line + i + 1);
+    });
+  }
+  return [...groups.values()].filter((g) => g.lines.length > 1);
+}
+
 const args = parseArgs(process.argv.slice(2));
 if (!args.file || !args.command) {
   console.error('사용: node <이 파일> <project.md> <list|add-pr|dependents|add-todo> [옵션]');
@@ -105,6 +126,13 @@ if (!args.file || !args.command) {
 // 파일이 없으면 만든다 — 「없으면 이 시점에 생성한다」가 여러 절에 적혀 있다.
 const text = fs.existsSync(args.file) ? fs.readFileSync(args.file, 'utf8') : '';
 const doc = parseSections(text);
+const dups = duplicateSections(doc.sections);
+if (dups.length) {
+  console.error(`같은 절이 두 번 이상 있어 거부한다 — 읽기는 앞의 것만 보고 쓰기는 한쪽에만 붙어, 나머지 내용이 조용히 빠진다 (${args.file}):`);
+  dups.forEach((g) => console.error(`  ${g.label} ${g.lines.length}번 (${g.lines.map((n) => `${n}행`).join(', ')})`));
+  console.error('항목을 옮기다 원본 절을 안 지운 경우가 많다. 내용을 한 절로 합치고 나머지를 지운 뒤 다시 실행한다.');
+  process.exit(1);
+}
 const prSections = doc.sections.filter((s) => prNumberOf(s.title) !== null);
 
 if (args.command === 'list') {
