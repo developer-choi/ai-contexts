@@ -17,7 +17,7 @@ argument-hint: <type> [<subtype>]
 | type | subtype | 필수/선택 | 설명 |
 |------|---------|----------|-----|
 | `pr-body` | (없음) | 선택 | 일반 PR 본문 |
-| `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 — 어필 포인트 강조 |
+| `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 |
 | `readme` | — | — | README (subtype 미사용) |
 | `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
 | `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |

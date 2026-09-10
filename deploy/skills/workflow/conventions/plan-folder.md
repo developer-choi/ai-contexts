@@ -39,7 +39,7 @@
     consumable/
       page.md           ← step-1 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). step-4 「잔여 산출물 소비」에서 분배·소비
       review.md         ← step-6 리뷰 결과. step-6 자체 소비
-      user-test-cases.md ← step-6.4 동작 테스트. WRITING_REFINER가 PR 본문 Test plan으로 재활용
+      user-test-cases.md ← step-6.4 동작 테스트. WRITING_REFINER가 PR 본문의 동작 설명 재료로 재활용
       pr-body.md        ← WRITING_IDEATOR가 초안 저작(잠정) → WRITING_REFINER가 확정·PR 본문 복사·게시. 게시 후 스윕 대상 — step-4 「잔여 산출물 소비」 스윕은 pr-body를 다루지 않는다(REFINER 전용)
 ```
 

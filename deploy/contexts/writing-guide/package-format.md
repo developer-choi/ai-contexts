@@ -27,7 +27,7 @@ refs:
 
 # PR 본문
 
-## 변경 사항
+## 스크롤 끝 감지를 IntersectionObserver로 바꾼 이유
 ...
 ```
 

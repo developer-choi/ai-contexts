@@ -18,7 +18,7 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 ## WRITING_IDEATOR — 초안 (각 PR step-3 종료 후)
 
-계획만으로 쓸 수 있는 PR 본문의 배경·문제·접근·근거를 미리 초안한다. 상세 코드블록·실제 커밋 목록은 REFINER 몫이다.
+계획만으로 쓸 수 있는 PR 본문의 배경·문제·접근·근거를 미리 초안한다. 상세 코드블록은 REFINER 몫이다.
 
 ### 입력
 
@@ -62,7 +62,7 @@ IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 RE
 
 ### 절차
 
-`/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고(「장기세션 재사용」대로 같은 REFINER 세션에서 이어 하며, 컨텍스트가 커졌으면 `/compact` 후 호출), 실제 커밋 목록·변경 요약·Test plan·코드블록을 채워 확정한다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 Test plan으로 재활용한다.
+`/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고(「장기세션 재사용」대로 같은 REFINER 세션에서 이어 하며, 컨텍스트가 커졌으면 `/compact` 후 호출), 실제 구현·커밋과 어긋난 서술을 바로잡고 코드블록을 채워 확정한다. 본문에 담는 재료는 [write-init pr-body 템플릿](../../../write-init/templates/pr-body.md)을 따른다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 본문의 동작 설명 재료로 재활용한다.
 
 ### 산출물 정리
 
