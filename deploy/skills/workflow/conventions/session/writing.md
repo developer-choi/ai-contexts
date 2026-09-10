@@ -30,15 +30,19 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 ### 절차
 
-`/plan/`에 이전 PR의 pr-body.md가 있으면 읽고 섹션 구조·서술 패턴을 맞춘다. `/write-init pr-body`로 `pr{N}/consumable/pr-body.md` **초안**을 생성한다. overview·decisions·reference를 컨텍스트로 전달하되, 특정 파일명을 하드코딩하지 않고 `/plan/pr{N}/`을 탐색하여 존재하는 산출물을 동적으로 참조한다.
+아래 「초안 만들기」대로 `pr{N}/consumable/pr-body.md` **초안**을 만든다.
 
 초안 단계이므로 consumable 소비(삭제)는 하지 않는다. overview는 persistent라 읽기만 하고, pr-body 초안은 **잠정**이다 (REFINER가 실제 커밋·구현 반영으로 확정).
 
-#### 채용 모드 — 완성본 라이브러리 복사 기점
+#### 초안 만들기
 
-채용 모드이면 write-init 호출 전에 이 PR의 성격으로 주제를 식별하고, [../../recruitment/pr-body/](../../recruitment/pr-body/)를 글롭해 매칭되는 완성본(그 주제의 미리 써둔 PR 본문)이 있으면 그 파일을 복사 기점으로 삼아 이번에 안 한 항목·섹션을 빼고 과제 고유 값을 채운다. 매칭이 없으면 일반 write-init로 진행한다.
+write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 것이 없으면 없다고 말하고 넘어간다.
 
-- 주제 식별은 PR 성격(세팅·인프라·공통 컴포넌트·리스트/상세/폼/인증 페이지·횡단 결정)으로 하는 **LLM 판단**이다. 스킬 본문에 주제 목록·파일명을 하드코딩하지 않는다 — 실제 대상은 폴더 글롭 결과다.
+- **이전 PR 본문** — 이전 PR의 본문을 읽고 섹션 구조·서술 패턴을 맞춘다. `/plan/`에 pr-body.md가 남아 있으면 그것을, 게시 후 지워졌으면 GitHub에 게시된 PR 본문을 읽는다.
+- **채용 모드 — 완성본 라이브러리 복사 기점** — 채용 모드이면 이 PR의 성격으로 주제를 식별하고, [../../recruitment/pr-body/](../../recruitment/pr-body/)를 글롭해 매칭되는 완성본(그 주제의 미리 써둔 PR 본문)이 있으면 그 파일을 복사 기점으로 삼아 이번에 안 한 항목·섹션을 빼고 과제 고유 값을 채운다. 매칭이 없으면 일반 write-init로 진행한다.
+  - 주제 식별은 PR 성격(세팅·인프라·공통 컴포넌트·리스트/상세/폼/인증 페이지·횡단 결정)으로 하는 **LLM 판단**이다. 스킬 본문에 주제 목록·파일명을 하드코딩하지 않는다 — 실제 대상은 폴더 글롭 결과다.
+
+그다음 `/write-init pr-body`로 초안을 생성한다. overview·decisions·reference를 컨텍스트로 전달하되, 특정 파일명을 하드코딩하지 않고 `/plan/pr{N}/`을 탐색하여 존재하는 산출물을 동적으로 참조한다.
 
 ## WRITING_REFINER — 확정 (각 PR step-6 종료 후)
 
@@ -54,7 +58,7 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 ### fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
 
-IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 REFINER로 바로 올 수 있다. 그 경우 다듬을 pr-body 초안이 없어 빈손이 되므로, **`/write-init pr-body`를 먼저 호출해 초안을 만든 뒤(IDEATOR 역할 흡수) refine한다.** (IDEATOR-skip 경로에서도 overview는 persistent라 그대로 살아 있어 write-init 입력으로 유효하다.)
+IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 REFINER로 바로 올 수 있다. 그 경우 다듬을 pr-body 초안이 없어 빈손이 되므로, **IDEATOR의 [초안 만들기](#초안-만들기)를 준비 단계부터 그대로 거쳐 초안을 만든 뒤 refine한다.** write-init 호출만 떼어 부르지 않는다. (IDEATOR-skip 경로에서도 overview는 persistent라 그대로 살아 있어 write-init 입력으로 유효하다.)
 
 ### 절차
 
