@@ -454,6 +454,14 @@ function withPackageFixture(fn) {
   }
 }
 
+// [명령, agent_id(없으면 메인), 서브에이전트 안내를 기대하는가(null이면 통과 기대), 설명]
+const WAIT_CASES = [
+  ['sleep 30', null, false, '메인의 빈 대기는 턴을 끝내라고 안내한다'],
+  ['sleep 30', 'a1b2c3', true, '서브에이전트의 빈 대기는 턴을 끝내지 말라고 안내한다'],
+  ['Start-Sleep -Seconds 60', 'a1b2c3', true, 'PowerShell 대기도 서브에이전트 안내'],
+  ['until [ -f out.txt ]; do sleep 5; done', 'a1b2c3', null, '조건을 확인하는 루프는 서브에이전트에서도 통과'],
+];
+
 function runHook(file, command) {
   return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } });
 }
@@ -473,7 +481,7 @@ function runHookPayload(file, payload) {
     return { decision: `<파싱 불가: ${out.slice(0, 80)}>`, stderr: res.stderr };
   }
   const decided = parsed.hookSpecificOutput?.permissionDecision;
-  if (decided) return { decision: decided, stderr: res.stderr };
+  if (decided) return { decision: decided, reason: parsed.hookSpecificOutput.permissionDecisionReason || '', stderr: res.stderr };
   // 차단하지 않고 컨텍스트만 주입하는 hook은 permissionDecision을 내지 않는다. 그대로 두면
   // '조용히 통과'와 구분되지 않아 발동 여부를 검증할 수 없으므로 별도 판정으로 뽑는다.
   if (parsed.hookSpecificOutput?.additionalContext) return { decision: 'context', stderr: res.stderr };
@@ -801,6 +809,22 @@ function main() {
       }
     }
   });
+  // 대기용 빈 명령은 둘 다 막지만 안내가 반대다 — 메인은 턴을 끝내라, 서브에이전트는 끝내지 마라.
+  // 판정만 보면 안내가 뒤바뀌어도 통과하므로 사유 문구까지 고정한다.
+  for (const [command, agentId, expectSubagentMsg, note] of WAIT_CASES) {
+    const payload = { tool_name: 'Bash', tool_input: { command }, ...(agentId ? { agent_id: agentId } : {}) };
+    const { decision, reason = '', stderr } = runHookPayload('check-shell-policy.mjs', payload);
+    const expected = expectSubagentMsg === null ? 'pass' : 'deny';
+    const msgOk = expectSubagentMsg === null || reason.includes('서브에이전트는 턴을 끝내지 마세요') === expectSubagentMsg;
+    const label = `check-shell-policy.mjs :: ${command}${agentId ? ' [서브에이전트]' : ''} → ${expected} (${note})`;
+    if (decision === expected && msgOk) {
+      console.log(`  PASS  ${label}`);
+    } else {
+      console.error(`  FAIL  ${label} — 실제: ${decision} / 사유: ${reason.slice(0, 60)}`);
+      if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+      failures.push(label);
+    }
+  }
   if (failures.length) {
     console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
