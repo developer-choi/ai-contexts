@@ -25,11 +25,21 @@
 // 순서를 이렇게 고정한 이유: 일반 브랜치는 미커밋을 **먼저** 커밋해 ahead로 만든 뒤 판정한다.
 // 그래야 stash가 보호 브랜치 갈래에만 남는다(스킬 「세부 절차」가 정한 제약).
 //
-// 전 레포 순회를 마치면 `sync:environment`를 이어서 돌린다. 다른 기기에서 받아온 AC의 환경 설정
-// (전역 git 훅 배선·pre-commit 검사 훅 등)이 이 기기에 반영되지 않으면, 받기만 하고 검사는 옛것으로
-// 도는 상태가 된다. 배포는 사용자가 부른다는 정책의 예외로 사용자가 직접 정했다(2026-09-14) —
-// 이 스크립트를 부르는 것 자체가 그 배포까지 하겠다는 뜻이다. 레포를 다 받은 **뒤에** 돌려야
-// 받아온 최신 설정이 반영된다. `--root`(픽스처 검증)와 `--wip`(한 레포 후속 호출)에서는 돌리지 않는다.
+// 전 레포 순회를 마치면 배포 세 벌을 이어서 돌린다. 다른 기기에서 받아온 설정(전역 git 훅 배선·
+// 규칙·스킬·레포 로컬 자산)이 이 기기에 반영되지 않으면, 받기만 하고 도는 것은 옛것인 상태가 된다.
+// 배포는 사용자가 부른다는 정책의 예외로 사용자가 직접 정했다(2026-09-14) — 이 스크립트를 부르는 것
+// 자체가 그 배포까지 하겠다는 뜻이다. 레포를 다 받은 **뒤에** 돌려야 받아온 최신 설정이 반영된다.
+// `--root`(픽스처 검증)와 `--wip`(한 레포 후속 호출)에서는 돌리지 않는다.
+//
+// 순서는 뒤가 앞에 기대므로 고정이다:
+//   1. environment — 전역 git 훅 배선을 건다. 2·3이 시작하자마자 `ensureHooksReady()`로 이 배선을
+//      확인하고 없으면 멈추므로, 새 기기·새 이벤트 추가 회차에서는 이것이 먼저여야 나머지가 산다
+//   2. system      — `deploy/`를 `~/.claude`·`~/.codex`·`~/.gemini`로. 전역 contexts가 여기서 채워진다
+//   3. local-system — 각 레포 `local/`을 그 레포 `.claude/`·`.agents/`로. 로컬 스킬의 `{{contexts}}`가
+//      2가 채우는 전역 contexts를 가리키므로 뒤에 온다
+//
+// 앞이 실패해도 뒤를 건너뛰지 않는다 — 한 벌이 깨졌을 때 나머지도 낡았는지를 한 번에 봐야 하고,
+// 실패한 것만 골라 다시 부르면 되기 때문이다. 실패는 결과 표 아래에 단계별로 모아 낸다.
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
@@ -263,30 +273,45 @@ function syncRepo(dir, { wipMessage } = {}) {
   return row;
 }
 
-// 환경 동기화 한 번. 출력은 그대로 흘리되, JSON 모드에서는 stdout을 JSON만 남기려 stderr로 돌린다.
+// 배포 단계. 순서가 곧 의존 순서다(파일 맨 위 주석이 근거를 적어둔다).
+const DEPLOY_STEPS = [
+  { name: "sync:environment", entry: ["environment", "sync-environment.mjs"] },
+  { name: "sync:system", entry: ["system", "sync-system.mjs"] },
+  { name: "sync:local-system", entry: ["local-system", "sync-local-system.mjs"] },
+];
+
+// 배포 한 벌. 출력은 그대로 흘리되, JSON 모드에서는 stdout을 JSON만 남기려 stderr로 돌린다.
 // 실패해도 레포 동기화 결과 표는 내야 하므로 예외를 값으로 돌려준다.
-function syncEnvironment() {
-  const entry = resolve(import.meta.dirname, "environment", "sync-environment.mjs");
+function runDeployStep(step) {
+  const entry = resolve(import.meta.dirname, ...step.entry);
   try {
     execFileSync(process.execPath, [entry], { stdio: ["ignore", AS_JSON ? 2 : "inherit", "inherit"] });
-    return { ok: true };
+    return { name: step.name, ok: true };
   } catch (e) {
-    return { ok: false, err: `exit ${e.status ?? "?"}` };
+    return { name: step.name, ok: false, err: `exit ${e.status ?? "?"}` };
   }
+}
+
+function runDeploySteps() {
+  return DEPLOY_STEPS.map((step) => {
+    if (!AS_JSON) console.log(`--- ${step.name} ---`);
+    const result = runDeployStep(step);
+    if (!AS_JSON) console.log("");
+    return result;
+  });
 }
 
 const targets = WIP_REPO ? [WIP_REPO] : repoDirs();
 const rows = targets.map((dir) => syncRepo(dir, { wipMessage: WIP_REPO === dir ? WIP_MESSAGE : undefined }));
 
-const runEnvironment = !WIP_REPO && !optOf("root");
-if (runEnvironment && !AS_JSON) console.log("--- sync:environment ---");
-const environment = runEnvironment ? syncEnvironment() : null;
-if (runEnvironment && !AS_JSON) console.log("");
+const runDeploy = !WIP_REPO && !optOf("root");
+const deployResults = runDeploy ? runDeploySteps() : [];
+const deployFailures = deployResults.filter((r) => !r.ok);
 
 if (AS_JSON) {
   console.log(JSON.stringify(rows, null, 2));
-  if (environment && !environment.ok) console.error(`sync:environment 실패 (${environment.err})`);
-  process.exit(environment && !environment.ok ? 1 : 0);
+  for (const f of deployFailures) console.error(`${f.name} 실패 (${f.err})`);
+  process.exit(deployFailures.length ? 1 : 0);
 }
 
 const width = (key, head) => Math.max(head.length, ...rows.map((r) => [...String(r[key])].length));
@@ -314,8 +339,9 @@ const attention = rows.filter((r) => /^(blocked|failed|dirty|stash-conflict)/.te
 if (attention.length) {
   console.log(`\n[사용자 조치 필요] ${attention.length}건 — 레포별 추천 액션은 읽는 쪽이 정한다.`);
 }
-if (environment && !environment.ok) {
-  console.log(`\n[사용자 조치 필요] sync:environment 실패 (${environment.err}) — 위 출력에서 원인을 본다.`);
+if (deployFailures.length) {
+  console.log(`\n[사용자 조치 필요] 배포 실패 ${deployFailures.length}건 — 위 출력에서 원인을 본다:`);
+  for (const f of deployFailures) console.log(`  ${f.name} (${f.err}) → 고친 뒤 npm run ${f.name}`);
 }
 
 // 보고 직전에 한 겹 더 본다. 각 분기가 인라인으로 pop을 시도하지만, 그 인라인이 빠진 경로가
