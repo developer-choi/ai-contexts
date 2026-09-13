@@ -37,7 +37,7 @@
 // 왜 Edit/Write가 아니라 커밋 시점인가: 앵커 검사는 상대 경로를 풀어 **다른 파일**의
 // 헤딩을 읽어야 한다. Edit PreToolUse는 쓰려는 문자열만 들고 있어 그 대조를 못 한다.
 //
-// 검사 범위는 이 커밋이 건드린 md·코드 파일 전체다(contexts/rules-as-code.md
+// 검사 범위는 이 커밋이 건드린 md·코드 파일 전체다(contexts/rules-as-code-authoring.md
 // 「검사 범위 — 고친 줄이 아니라 건드린 파일」). 변경분만 보면 규칙 이전의 위반이
 // 그 줄을 건드릴 때까지 남고, 매번 전체를 훑으면 규칙 수만큼 비용이 곱해진다.
 import { execFileSync } from "node:child_process";
