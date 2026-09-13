@@ -254,8 +254,11 @@ function hookHome() {
 
 // 인덱스(= 이번 커밋 이후의 내용)를 본다. 작업 트리를 읽으면 아직 스테이징 안 한 편집까지 세어,
 // 커밋되지 않을 크기로 경고가 난다.
+//
+// `--full-name :/`로 레포 전체를 루트 기준 경로로 받는다. 빼면 부른 폴더 아래만 그 폴더 기준 경로로
+// 나와, 하위 폴더에서 부른 `--settle`이 루트 기준으로 적힌 등재분을 전부 「검사 대상에 없음」으로 걷는다.
 function indexedMd(exclude) {
-  const out = execFileSync("git", ["ls-files", "-s", "-z"], {
+  const out = execFileSync("git", ["ls-files", "-s", "-z", "--full-name", ":/"], {
     encoding: "utf8",
     maxBuffer: 1024 * 1024 * 64,
   });
