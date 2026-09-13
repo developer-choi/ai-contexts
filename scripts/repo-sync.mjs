@@ -12,7 +12,8 @@
 //
 // 사용법:
 //   node scripts/repo-sync.mjs
-//       → 전 레포 순회. WIP이 필요한 레포는 손대지 않고 변경 목록과 함께 `wip-needed`로 낸다
+//       → 전 레포 순회. WIP이 필요한 레포는 손대지 않고 변경 목록과 함께 `wip-needed`로 낸다.
+//         순회를 마치면 `sync:environment`를 이어서 돌린다
 //   node scripts/repo-sync.mjs --wip <레포경로> --message "<커밋 메시지>"
 //       → 그 레포만 WIP 커밋하고 이어서 동기화한다
 //   node scripts/repo-sync.mjs --json
@@ -23,11 +24,17 @@
 //
 // 순서를 이렇게 고정한 이유: 일반 브랜치는 미커밋을 **먼저** 커밋해 ahead로 만든 뒤 판정한다.
 // 그래야 stash가 보호 브랜치 갈래에만 남는다(스킬 「세부 절차」가 정한 제약).
+//
+// 전 레포 순회를 마치면 `sync:environment`를 이어서 돌린다. 다른 기기에서 받아온 AC의 환경 설정
+// (전역 git 훅 배선·pre-commit 검사 훅 등)이 이 기기에 반영되지 않으면, 받기만 하고 검사는 옛것으로
+// 도는 상태가 된다. 배포는 사용자가 부른다는 정책의 예외로 사용자가 직접 정했다(2026-09-14) —
+// 이 스크립트를 부르는 것 자체가 그 배포까지 하겠다는 뜻이다. 레포를 다 받은 **뒤에** 돌려야
+// 받아온 최신 설정이 반영된다. `--root`(픽스처 검증)와 `--wip`(한 레포 후속 호출)에서는 돌리지 않는다.
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const DEFAULT_ROOTS = ["WebstormProjects/main", "WebstormProjects/my-else", "WebstormProjects/simplify"].map((r) =>
   join(homedir(), ...r.split("/")),
@@ -256,12 +263,30 @@ function syncRepo(dir, { wipMessage } = {}) {
   return row;
 }
 
+// 환경 동기화 한 번. 출력은 그대로 흘리되, JSON 모드에서는 stdout을 JSON만 남기려 stderr로 돌린다.
+// 실패해도 레포 동기화 결과 표는 내야 하므로 예외를 값으로 돌려준다.
+function syncEnvironment() {
+  const entry = resolve(import.meta.dirname, "environment", "sync-environment.mjs");
+  try {
+    execFileSync(process.execPath, [entry], { stdio: ["ignore", AS_JSON ? 2 : "inherit", "inherit"] });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, err: `exit ${e.status ?? "?"}` };
+  }
+}
+
 const targets = WIP_REPO ? [WIP_REPO] : repoDirs();
 const rows = targets.map((dir) => syncRepo(dir, { wipMessage: WIP_REPO === dir ? WIP_MESSAGE : undefined }));
 
+const runEnvironment = !WIP_REPO && !optOf("root");
+if (runEnvironment && !AS_JSON) console.log("--- sync:environment ---");
+const environment = runEnvironment ? syncEnvironment() : null;
+if (runEnvironment && !AS_JSON) console.log("");
+
 if (AS_JSON) {
   console.log(JSON.stringify(rows, null, 2));
-  process.exit(0);
+  if (environment && !environment.ok) console.error(`sync:environment 실패 (${environment.err})`);
+  process.exit(environment && !environment.ok ? 1 : 0);
 }
 
 const width = (key, head) => Math.max(head.length, ...rows.map((r) => [...String(r[key])].length));
@@ -288,6 +313,9 @@ if (wip.length) {
 const attention = rows.filter((r) => /^(blocked|failed|dirty|stash-conflict)/.test(r.state) || r.protectedNotes.some((n) => n.includes("불가")));
 if (attention.length) {
   console.log(`\n[사용자 조치 필요] ${attention.length}건 — 레포별 추천 액션은 읽는 쪽이 정한다.`);
+}
+if (environment && !environment.ok) {
+  console.log(`\n[사용자 조치 필요] sync:environment 실패 (${environment.err}) — 위 출력에서 원인을 본다.`);
 }
 
 // 보고 직전에 한 겹 더 본다. 각 분기가 인라인으로 pop을 시도하지만, 그 인라인이 빠진 경로가
