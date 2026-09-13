@@ -35,7 +35,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 - **경로**: `~/WebstormProjects/main/backlog/`
 - **원격**: `https://github.com/developer-choi/backlog` (private). 레포가 없는 기기에서는 위 경로로 클론한다
 
-[CRITICAL] 백로그를 읽거나 쓰기 전에 `~/WebstormProjects/main/backlog/CLAUDE.md`를 Read한다. 영역별 경로·파일명, frontmatter 어휘, 항목 양식, Ready 게이트 문항, 커밋 규칙의 단일 출처다. 본 스킬은 그 규격을 중복 정의하지 않으므로, 읽지 않으면 산출물의 위치·양식을 정할 수 없다.
+[CRITICAL] 백로그를 읽거나 쓰기 전에 `~/WebstormProjects/main/backlog/CLAUDE.md`(영역별 경로·파일명, 커밋 규칙)와 `~/WebstormProjects/main/backlog/projects/CLAUDE.md`(frontmatter 어휘, 항목 양식, Ready 게이트 문항)를 Read한다. 둘이 백로그 규격의 단일 출처다. 본 스킬은 그 규격을 중복 정의하지 않으므로, 읽지 않으면 산출물의 위치·양식을 정할 수 없다.
 
 ---
 
@@ -85,7 +85,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 
 `projects/` 항목(AC 자체 포함)은 아래 중 하나로 분류한다:
 
-- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치는 frontmatter `target`에 적는다 (표기 규격은 백로그 레포 CLAUDE.md 「frontmatter 규칙」).
+- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치는 frontmatter `target`에 적는다 (표기 규격은 백로그 레포 `projects/CLAUDE.md` 「frontmatter 규칙」).
 - **신규**: 기존에 없는 새로운 스킬·작업.
 
 ### 3. 기존 항목 대조
@@ -117,7 +117,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 `ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 사용자가 명시적으로 낮은 상태를 요청하지 않는 한("일단 적어만 둬", "아이디어만" 등) **frontmatter `status: ready`로 등록한다**. 작성 세션이 정보가 가장 풍부한 시점이고, 미뤄둔 보강은 잘 일어나지 않는다. 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니므로 이 기본-ready 대상이 아니다 — `status` 없이 둔다. 다른 projects 항목은 기본 무상태이고, `status: ready`는 opt-in이다(달면 아래 게이트가 적용된다).
 
 - 캡처하면서 「Ready 게이트」 필수 문항을 빈칸 없이 채운다. 채울 정보가 부족하면 등록 전에 사용자에게 그 자리에서 묻는다 — 미뤄두면 안 채워진다.
-- 게이트 문항 판정은 백로그 레포 CLAUDE.md 「검증 절차」를 따른다 — 0건 통과한 뒤 `status: ready`를 단다.
+- 게이트 문항 판정은 백로그 레포 `projects/CLAUDE.md` 「검증 절차」를 따른다 — 0건 통과한 뒤 `status: ready`를 단다.
 - `ideation`/`draft`는 사용자가 명시적으로 요청한 경우에만 쓴다. 이때도 「Draft · Ideation 최소검증」은 채운다.
 
 ---

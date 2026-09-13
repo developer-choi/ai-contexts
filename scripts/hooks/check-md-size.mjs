@@ -56,9 +56,13 @@ const MAX_REPORTS = 20;
 // `local/` 아래에 산출물이 함께 사는 레포가 있어(PP `local/contexts/recruitment/applications/` =
 // 제출한 자소서) 폴더 이름만으로는 못 가른다. 그런 자리는 설정의 `exclude`에 경로 접두사로
 // 적는다 — 어느 폴더가 산출물인지는 사람만 아는 사실이라 검사가 못 알아낸다.
+//
+// 하위 폴더의 `CLAUDE.md`도 잰다. 루트가 무거워 규격을 하위 폴더 규칙 파일로 떼어내면(backlog
+// `projects/CLAUDE.md`), 루트만 재는 검사에서는 뗀 만큼이 통째로 감시 밖으로 빠진다.
 function inScope(rel, exclude) {
   if (!rel.endsWith(".md")) return false;
-  if (!(rel === "CLAUDE.md" || rel.startsWith("local/") || rel.startsWith("deploy/"))) return false;
+  const isRuleFile = rel === "CLAUDE.md" || rel.endsWith("/CLAUDE.md");
+  if (!(isRuleFile || rel.startsWith("local/") || rel.startsWith("deploy/"))) return false;
   return !exclude.some((prefix) => rel === prefix || rel.startsWith(prefix));
 }
 
