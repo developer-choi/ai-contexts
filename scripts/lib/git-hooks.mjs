@@ -19,7 +19,13 @@ const MIN_GIT = { major: 2, minor: 54 };
 // **새 이벤트를 쓰는 레포가 생기면 여기에 더한다** — 안 더하면 그 레포의 검사가 통째로 무음
 // 통과한다. 2026-08-31 실측 기준 사용처: commit-msg(AC), pre-commit(AC·backlog·PP),
 // post-commit(backlog), pre-push(AC).
-const HOOK_EVENTS = ['commit-msg', 'pre-commit', 'post-commit', 'pre-push'];
+//
+// 받아온 뒤 이벤트 셋(post-merge·post-rewrite·post-checkout)은 커밋하지 않는 생성 파일을 다시 굽는
+// 자리다(PP 채용 필터 이력 사본). 머지·`pull`(merge·rebase 둘 다)·clone과 브랜치 전환이 각각 다른
+// 이벤트라, 하나만 걸면 그 경로로 받은 기기에서 사본이 옛것으로 남는다.
+const HOOK_EVENTS = [
+  'commit-msg', 'pre-commit', 'post-commit', 'pre-push', 'post-merge', 'post-rewrite', 'post-checkout',
+];
 
 function git(repoPath, args, { allowFail = false } = {}) {
   const result = spawnSync('git', ['-C', repoPath, ...args], { encoding: 'utf8' });
