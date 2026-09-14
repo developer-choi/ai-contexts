@@ -46,7 +46,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](specialized/requirement-review.md) |
 | `deploy/contexts/writing-guide/` | [writing-guide.md](specialized/writing-guide.md) |
 | `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation-bench.md](specialized/rule-ablation-bench.md) |
-| `SKILL.md` 또는 sub-skill 라우터 파일 | [skill-orchestration.md](specialized/skill-orchestration.md) |
+| `SKILL.md` 또는 sub-skill 라우터 파일 | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) · [skill-orchestration.md](specialized/skill-orchestration.md) |
 
 대상 경로에 `map.md`가 있으면 추가로 점검한다:
 - **중복**: 하위 파일 간 같거나 비슷한 내용이 있는가
