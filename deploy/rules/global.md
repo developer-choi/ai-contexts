@@ -281,7 +281,8 @@ squash·reword·rebase 전에 AI가 스스로 뜬 백업 브랜치는, 정리 �
 | 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위의 md를 만들거나 고칠 때 (한 줄짜리 절 추가여도, "이 문서에 ~를 보강해줘" 같은 작업 지시로 들어와도 해당) | `/scw` |
 | "팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시 | `{{contexts}}/team-agent.md` |
 | 브라우저를 열어 산출물을 확인할 때 | `{{contexts}}/browser-verification.md` |
-| 레포 불문 md에서 다른 문서를 가리키는 줄을 쓰거나, "이건 안 쓴다"를 문서에 남길 때 | `{{contexts}}/doc-writing.md` |
+| 레포 불문 md에서 다른 문서를 가리키는 줄을 쓸 때 | `{{contexts}}/doc-writing.md` |
+| 레포 불문 md에 "이건 안 쓴다"를 남길 때 | `{{contexts}}/prompt-standards/what-to-keep.md` |
 | AI 설정(규칙·스킬·hook·settings)을 고칠 때. 고칠 대상이 배포 위치로 보여 원본을 찾아야 할 때 포함 | `{{contexts}}/ai-config-locations.md` |
 
 ## 메모·기록 도구 분리
