@@ -31,11 +31,11 @@ step 파일을 리뷰한 보고에는 이 스윕의 결과를 **항상 한 항�
 - **세션 이름 직접 호명** — `BACKGROUND_SESSION`, `PLANNING_SESSION`, `IMPLEMENTATION_SESSION`, `WRITING_SESSION` 등
 - **산출물 파일명 열거** — `overview`, `logic`, `interface`, `implementation`, `test-cases`, `markup` 등 그 시점의 step 산출물명
 
-step 번호를 직접 부르는 것(`step-3에서`, `step-5의 마무리에서`)도 같은 축인데, 이쪽은 [다른 파일의 단계는 번호로 가리키지 않는다](../rounds/editing.md#다른-파일의-단계는-번호로-가리키지-않는다)가 경로를 안 가리고 잡는다.
+step 번호를 직접 부르는 것(`step-3에서`, `step-5의 마무리에서`)도 같은 축인데, 이쪽은 [다른 파일의 번호·내부 구조는 역할 이름으로](../../../contexts/prompt-standards/sources-and-links.md#다른-파일의-번호내부-구조는-역할-이름으로-부른다)가 경로를 안 가리고 잡는다.
 
 ### 예외
 
-세션·파일명을 직접 가리켜야 자연스러운 위치는 SKILL.md 상단 `## 세션` 표·`## 작업 진행 순서` 섹션처럼 **그 자체가 인덱스·참조표**일 때다. 인덱스는 이름을 직접 가리키는 게 본질이므로 일반화 대상 아님. 절차·룰의 본문에서만 직접 호명을 피한다.
+세션·파일명을 직접 가리켜도 되는 인덱스·참조표 자리([예외](../../../contexts/prompt-standards/sources-and-links.md#다른-파일의-번호내부-구조는-역할-이름으로-부른다))는 workflow에서 SKILL.md 상단 `## 세션` 표·`## 작업 진행 순서` 섹션이다.
 
 ## 산출물 정의의 옵션 인식 유발 문구
 
@@ -228,7 +228,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 `contexts/coding-standards/{rules,principles}/**/*.md`를 Glob해 전체 규칙 목록을 얻고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다.
 
-- 어떤 step에서도 참조되지 않는 코딩 규칙이 있는지
+- 부르는 자리가 있는지는 [아무도 안 부르는 파일을 두지 않는다](../../../contexts/prompt-standards/sources-and-links.md#아무도-안-부르는-파일을-두지-않는다)로 본다. step-4가 `rules/`·`principles/`를 폴더째 Glob해 고르므로 폴더 참조로 보고, 그 Glob 자리가 사라졌는지를 본다
 - 참조 시점이 부적절한 규칙이 있는지 (예: 코딩 컨벤션이 구현 step이 아닌 곳에만 있는 경우)
 - 새로 추가된 규칙이 적절한 step에 참조되지 않은 경우
 
@@ -243,13 +243,13 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ## 세션 상호 의심
 
-각 세션이 이전 세션·이전 PR 산출물을 무비판적으로 따르지 않고 비판적 검토하는 룰이 있는지. 룰은 SKILL.md [CRITICAL] 「입력 산출물 비판적 검토」 메타 룰로 단일화되어 있어야 하며(step·세션 본문 분산 X), `/plan/` 탐색 지시 위치에는 그 메타 룰 cross-reference 한 줄만 둔다.
+각 세션이 이전 세션·이전 PR 산출물을 무비판적으로 따르지 않고 비판적 검토하는 룰이 있는지. 룰은 SKILL.md [CRITICAL] 「입력 산출물 비판적 검토」 메타 룰로 단일화되어 있어야 한다(step·세션 본문 분산 X).
+
+이 메타 룰이 생긴 사례: 「이전 PR 산출물 비판적 검토」가 step-4 본문에만 박혀 step-3에는 비대칭으로 누락. 사용자가 PR4 사례(BG의 `crypto.getRandomValues` 결정을 step-3 진입 시 무비판 수용)로 짚어줌. 해결: 메타 룰 「입력 산출물 비판적 검토」로 workflow SKILL.md에 박고 step-4 본문 절 제거. workflow의 기존 메타 룰 「자가 검토 필수」와도 책임 분담이 겹치지 않는지 본다.
 
 ## 절차·산출물 명세 단일 출처
 
-같은 절차·산출물 작성법(URL 받는 법, md 양식, 커밋 메시지 양식, 폴더 구조 등)이 여러 step·세션·SKILL 파일에 분산 명세되면 동기화 부담 + 사용자 혼란. 1차 명세는 한 곳, 다른 위치는 트리거 + cross-reference만 박는다.
-
-트리거(언제 그 절차를 발동하는지)는 분산 명시 OK — 절차 본문이 아닌 트리거는 발동 위치마다 자연스럽다. 본 룰이 막는 것은 절차 본문의 분산.
+[여러 곳에 걸리는 규칙은 한 곳에 모으고 트리거만 흩는다](../../../contexts/prompt-standards/sources-and-links.md#여러-곳에-걸리는-규칙은-한-곳에-모으고-트리거만-흩는다)로 본다. workflow에서 대상은 step·세션·SKILL 파일이다.
 
 ### 사례
 
@@ -264,7 +264,7 @@ step-5에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려�
 
 ## /workflow 벤치 — 단위 매핑
 
-이 스킬을 벤치할 때의 workflow 대입값. 일반 방법론은 [eval-delegation.md](../eval-delegation.md), 여기엔 대입값만 둔다 (SRP).
+이 스킬을 벤치할 때의 workflow 대입값. 일반 방법론은 [eval-delegation.md](../eval-delegation.md), 여기엔 대입값만 둔다.
 
 ### 벤치 단위 (일반 원칙 1·2)
 
