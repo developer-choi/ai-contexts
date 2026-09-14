@@ -73,9 +73,10 @@ function measure(config) {
   const bodies = objectBodies(entries.map((e) => e.sha));
   const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
 
-  const reach = ancestorCounts(files);
+  const { parents, ancestors } = referenceGraph(files);
+  const reach = new Map([...ancestors].map(([rel, set]) => [rel, set.size]));
   const limitFor = (rel) => (reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT);
-  return { files, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
+  return { files, parents, ancestors, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
 }
 
 // 선 아래로 내려온 등재분. 파일이 지워졌을 때도 걷을 자리다.
@@ -185,7 +186,8 @@ function report(heading, lines, advice) {
 const LINK_RE = /\]\(([^)\s]+\.md(?:#[^)\s]*)?)\)/g;
 const PATH_RE = /[`'"(\s]((?:\.{1,2}\/)?[A-Za-z0-9_\-./ㄱ-힣]+\.md)(?=[`'")\s,.:]|$)/g;
 
-function ancestorCounts(files) {
+// 파일마다 직접 가리키는 쪽(parents)과, 그 위로 거슬러 닿는 쪽 전부(ancestors)를 낸다.
+function referenceGraph(files) {
   const set = new Set(files.map((f) => f.rel));
   const byBase = new Map();
   for (const f of files) {
@@ -221,7 +223,7 @@ function ancestorCounts(files) {
   }
 
   // 역방향 도달 — 서로 물고 도는 참조가 있어도 멈추도록 방문 표시를 둔다.
-  const counts = new Map();
+  const ancestors = new Map();
   for (const f of files) {
     const seen = new Set();
     const stack = [...parents.get(f.rel)];
@@ -231,9 +233,9 @@ function ancestorCounts(files) {
       seen.add(n);
       for (const p of parents.get(n)) if (!seen.has(p)) stack.push(p);
     }
-    counts.set(f.rel, seen.size);
+    ancestors.set(f.rel, seen);
   }
-  return counts;
+  return { parents, ancestors };
 }
 
 // --- git ------------------------------------------------------------------
@@ -448,13 +450,71 @@ function settleBaseline() {
   saveWhole(whole);
 }
 
+// 파일 하나를 지목해 크기·닿는 곳·선을 묻는다. 커밋 경고와 `--write-baseline`은 선을 넘은 파일만
+// 내므로, 손대기 전에 무게를 재려는 세션은 이것이 없으면 같은 계산을 grep으로 다시 하게 된다.
+// 그 파일이 있는 레포에서 잰다 — 부른 폴더가 다른 레포여도 경로만 맞으면 된다.
+function reportFile(target) {
+  if (!target) {
+    console.error("사용법: check-md-size.mjs --report <md 경로>");
+    process.exitCode = 1;
+    return;
+  }
+  const abs = path.resolve(target);
+  if (!fs.existsSync(abs)) {
+    console.error(`파일이 없다: ${abs}`);
+    process.exitCode = 1;
+    return;
+  }
+  process.chdir(path.dirname(abs));
+  const repo = repoName();
+  if (!repo) {
+    console.error(`git 레포 안의 파일이 아니다: ${abs}`);
+    process.exitCode = 1;
+    return;
+  }
+  const top = execFileSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" }).trim();
+  const rel = path.relative(top, abs).replace(/\\/g, "/");
+
+  // 설정이 없어도 재는 데는 지장이 없다 — 제외 목록만 비는 것이라 그 사실을 함께 낸다.
+  const config = readConfig(repo);
+  const exclude = config?.exclude ?? [];
+  if (!inScope(rel, exclude)) {
+    console.log(`${rel} — 검사 대상 밖이다 (CLAUDE.md·local/·deploy/ 하위 md만 재고, 설정의 exclude는 뺀다).`);
+    return;
+  }
+
+  const { files, parents, ancestors, limitFor } = measure({ exclude });
+  const f = files.find((x) => x.rel === rel);
+  if (!f) {
+    console.log(`${rel} — git 인덱스에 없다. 인덱스에 올라간 내용만 재므로 git add 뒤에 다시 부른다.`);
+    return;
+  }
+
+  const direct = parents.get(rel);
+  const openers = [...ancestors.get(rel)].sort();
+  console.log(`${rel} (레포 "${repo}", git 인덱스 기준)`);
+  console.log(`  크기     ${f.size}B`);
+  console.log(`  선       ${limitFor(rel)}B (닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B)`);
+  console.log(`  닿는 곳  ${openers.length}`);
+  for (const o of openers) console.log(`    ${direct.has(o) ? "직접  " : "거쳐서"} ${o}`);
+  if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
+  console.log(
+    "한계: 이 레포 안의 CLAUDE.md·local/·deploy/ md가 링크나 .md 경로로 가리키는 것만 센다. " +
+      "다른 레포의 스킬·문서가 여는 것, 세션 자동 로드, 훅 주입, 확장자 없이 이름으로만 부르는 참조는 안 잡힌다 — " +
+      "그런 진입점은 따로 찾아 더한다.",
+  );
+}
+
 try {
-  if (process.argv.includes("--write-baseline")) writeBaseline();
+  const reportAt = process.argv.indexOf("--report");
+  if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
+  else if (process.argv.includes("--write-baseline")) writeBaseline();
   else if (process.argv.includes("--settle")) settleBaseline();
   else main();
 } catch (error) {
   console.error(`[문서 크기 훅 내부 오류, 건너뜀] ${error.message}`);
 }
 // 문서가 큰 것이 사람의 커밋을 막을 일은 아니다 — 검사(main)는 exitCode를 안 세우므로 늘 0이다.
-// 사람이 부른 `--write-baseline`·`--settle`이 설정을 못 열었을 때만 그 실패가 그대로 나간다.
+// 사람이 부른 `--write-baseline`·`--settle`이 설정을 못 열었을 때, `--report`가 잴 파일을 못 찾았을 때만
+// 그 실패가 그대로 나간다.
 process.exit(process.exitCode ?? 0);
