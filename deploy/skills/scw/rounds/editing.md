@@ -4,7 +4,7 @@
 
 ## 정본과 참조
 
-규칙을 다른 곳에 두거나 다른 문서·다른 파일의 단계를 가리키는 줄을 쓸 때는 [정본과 참조](../../../contexts/prompt-standards/sources-and-links.md)로 본다.
+다른 문서·다른 파일의 단계나 절을 가리키는 줄을 고치거나 쓰기 전에, 그리고 규칙을 어디에 둘지 정하기 전에 [정본과 참조](../../../contexts/prompt-standards/sources-and-links.md)를 연다.
 
 ## 목적 기반 수단 검증
 
