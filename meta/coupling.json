@@ -130,10 +130,11 @@
       "name": "pre-push sync 게이트 ↔ sync 진입점",
       "files": [
         "scripts/sync-on-push.mjs",
+        "scripts/environment/sync-environment.mjs",
         "scripts/system/sync-system.mjs",
         "scripts/local-system/sync-local-system.mjs"
       ],
-      "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-system·sync-local-system의 진입 경로(scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩해 실행·게이트한다. 이 두 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
+      "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-environment·sync-system·sync-local-system을 이 순서로 실행·게이트하며, 세 진입 경로(scripts/environment/sync-environment.mjs·scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩한다. 이 세 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
     },
     {
       "name": "금지어·경고 레인 — 채점기 ↔ 절차 문서",
