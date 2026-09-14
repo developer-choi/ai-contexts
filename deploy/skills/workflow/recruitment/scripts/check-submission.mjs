@@ -133,7 +133,10 @@ if (command === 'time-pressure') {
 
   const submitRemote = optOf('submit-remote');
   if (submitRemote) {
-    const stale = lines.map((l, i) => [i + 1, l]).filter(([, l]) => l.includes(submitRemote));
+    // 이름 뒤에 레포 이름 글자가 이어지면 다른 레포다(`hello` ≠ `hello-other`). GitHub 경로는 대소문자를 안 가린다.
+    const escaped = submitRemote.replace(/\.git$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pointsToSubmit = new RegExp(`${escaped}(\\.git)?(?![\\w.-])`, 'i');
+    const stale = lines.map((l, i) => [i + 1, l]).filter(([, l]) => pointsToSubmit.test(l));
     console.log(`\n[제출 레포를 가리키는 링크] ${stale.length}건 — 레포가 삭제되면 전부 죽는다`);
     stale.forEach(([n, l]) => console.log(`  :${n} ${l.trim().slice(0, 120)}`));
     if (stale.length) problems.push('제출 레포 링크가 아카이브 링크로 안 바뀌었다');
