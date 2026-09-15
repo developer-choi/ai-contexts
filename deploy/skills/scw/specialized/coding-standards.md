@@ -16,8 +16,10 @@
 
 ### 하위 폴더·파일 배치
 
+폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md#한-파일에는-같은-시점에-읽히는-것만-담는다)로 보고, 아래는 coding-standards 값이다.
+
 - **폴더명**: 기술 스택 또는 도메인인지 (`react/`, `typescript/`, `testing/` 등)
-- **파일명**: "이 파일은 ___에 대한 기준이다"에서 빈칸에 해당하는 판단 주제 또는 기술 단위인지 (`component-split`, `error-handling`, `tanstack-query` 등). 단, 한두 줄짜리 규칙들이 합쳐진 파일은 `basics.md` 같은 포괄적 이름 허용 (분리 시 파일 메타데이터가 토큰을 더 먹으므로)
+- **파일명**: 빈칸에는 판단 주제와 기술 단위를 친다 (`component-split`, `error-handling`, `tanstack-query` 등)
 - **내용과 폴더 주제 일치**: 예) React 컴포넌트 분리 기준이 `quality/`에 있으면 안 됨
 
 ## 태그 검증

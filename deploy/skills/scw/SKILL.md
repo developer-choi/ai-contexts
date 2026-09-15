@@ -27,7 +27,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 ## 문서 무게
 
-프롬프트·스킬 md를 고치러 들어오면 손대기 전에 `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`로 대상 문서의 바이트 크기와 그 문서를 여는 다른 md를 잰다. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값을 [document-diet.md](specialized/document-diet.md)로 판정하고, 걸리면 [줄일 후보를 갈래 가리지 않고 전량 모아](specialized/document-diet.md#후보를-전량-모아-대가별로-낸다) 후보마다 크기와 잃는 것을 함께 적어 낸다. 무엇을 줄일지는 사용자가 고르고, 고른 것이 그 회차의 범위다.
+프롬프트·스킬 md를 고치러 들어오면 손대기 전에 `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`로 대상 문서의 바이트 크기와 그 문서를 여는 다른 md를 잰다. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값을 [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md)로 판정하고, 걸리면 [줄일 후보를 갈래 가리지 않고 전량 모아](specialized/document-diet.md#후보를-전량-모아-대가별로-낸다) 후보마다 크기와 잃는 것을 함께 적어 낸다. 무엇을 줄일지는 사용자가 고르고, 고른 것이 그 회차의 범위다.
 
 고르기 전에 되묻지 않는다. 후보마다 얼마가 갈리는지 재본 뒤 그 결과와 권장안을 함께 낸다.
 
