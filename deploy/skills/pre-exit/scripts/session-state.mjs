@@ -30,6 +30,7 @@
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
 //   node <이 파일> read-usage --session <session_id> --from <판정 json>
+//   node <이 파일> read-usage --list
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
 
 import { execFileSync } from 'node:child_process';
@@ -48,7 +49,9 @@ const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
 
 // 읽고 안 쓴 문서의 누계. 기기를 넘어 쌓여야 신호가 차므로 백로그 레포에 둔다(같은 이유로
 // refresh-prompts·refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
-const USAGE_FILE = path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
+// 환경변수는 실제 누계를 안 건드리고 사본으로 돌려보기 위한 것이다.
+const USAGE_FILE =
+  process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
 
 // CLI가 그 자리에서 돌린 명령의 출력·주의문이 user 엔트리에 섞여 들어온다. 발화 뒤에 붙는 일도
 // 있어 첫머리 검사로는 못 걷는다.
@@ -561,7 +564,39 @@ if (command === 'read-files') {
   process.exit(0);
 }
 
+// 기록하는 세션은 모두 pre-exit를 돌므로 그 진입점의 문서는 매번 열리고 매번 쓰인다 — 배치에 대해
+// 아무것도 안 말하는 줄이라 후보 목록에서 뺀다.
+const RECORDER = 'pre-exit';
+
+// 선은 누계 파일의 threshold가 갖는다. 선을 넘어도 마지막으로 열린 지 오래된 줄은 안 띄운다 —
+// 자리를 고치면 그 진입점이 그 문서를 안 물게 되어 눈금이 멈추는데, 멈춘 줄이 계속 뜨면 알람을
+// 끄려고 따로 손대야 한다. 다시 열리면 last가 갱신돼 도로 뜬다.
+function ripeRows(state, cutoff) {
+  const t = state.threshold;
+  if (!t) return null;
+  return Object.entries(state.docs ?? {})
+    .filter(([key, v]) => !key.startsWith(`${RECORDER}\t`) && v.read >= t.read && v.unused / v.read >= t.unusedRatio && v.last >= cutoff)
+    .sort((a, b) => b[1].unused / b[1].read - a[1].unused / a[1].read);
+}
+
+const rowLine = ([key, v]) => `  ${v.unused}/${v.read}  ${key.replace('\t', ' → ')}`;
+
 if (command === 'read-usage') {
+  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
+  if (rest.includes('--list')) {
+    // 누계 전체를 보는 쪽(refresh-prompts 스캔)용 — 더하지 않고 선을 넘은 것만 낸다.
+    if (!fs.existsSync(USAGE_FILE)) {
+      console.log(`${USAGE_FILE} 이 없다.`);
+      process.exit(0);
+    }
+    const state = JSON.parse(fs.readFileSync(USAGE_FILE, 'utf8'));
+    const ripe = ripeRows(state, cutoff);
+    if (!ripe) console.log('선이 안 정해졌다 — 누계 파일의 threshold에 { "read": N, "unusedRatio": R }를 적는다.');
+    // 아무것도 안 찍히면 명령이 돌았는지부터 헷갈린다.
+    else if (!ripe.length) console.log('선을 넘은 것 없음.');
+    else for (const row of ripe) console.log(rowLine(row));
+    process.exit(0);
+  }
   const from = optOf('from');
   const session = optOf('session');
   if (!from || !session) {
@@ -625,7 +660,6 @@ if (command === 'read-usage') {
   state.sessions ??= {};
   const today = new Date().toISOString().slice(0, 10);
   // 같은 세션을 다시 넣는 일은 그 세션이 살아 있는 동안에만 생기므로 오래된 id는 걷는다.
-  const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
   for (const [id, day] of Object.entries(state.sessions)) if (day < cutoff) delete state.sessions[id];
   const counted = Boolean(state.sessions[session]);
   let added = 0;
@@ -665,32 +699,15 @@ if (command === 'read-usage') {
     console.log(`[읽고 안 쓴 문서 누계] ${added}건 반영${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${USAGE_FILE}`);
   }
 
-  // 몇 번 중 몇 번이면 후보인가는 아직 안 정해졌다 — 표본이 사고 사례 하나뿐이라, 첫 회수
-  // 회차가 분포를 보고 사용자와 함께 정한다. 그때 그 값을 state.threshold 에 적으면 아래가
-  // 목록을 좁힌다. 안 적혀 있으면 좁히지 않고 상위 몇 줄만 보여준다.
-  const rows = Object.entries(state.docs).sort((a, b) => b[1].unused - a[1].unused);
-  const t = state.threshold;
-  const ripe = t ? rows.filter(([, v]) => v.read >= t.read && v.unused / v.read >= t.unusedRatio) : rows.slice(0, 10);
-  if (ripe.length) {
-    console.log(t ? `\n선(${t.read}회 이상, 안 쓴 비율 ${t.unusedRatio} 이상)을 넘은 것:` : '\n안 쓴 횟수 상위 (선은 아직 안 정해졌다 — 분포를 보는 용도다):');
-    for (const [key, v] of ripe) console.log(`  ${v.unused}/${v.read}  ${key.replace('\t', ' → ')}`);
-    console.log('\n여기서 결론내지 않는다 — 배치를 고칠지는 refresh-prompts 회차가 사용자와 함께 정한다.');
-  }
-
-  // 선이 아직 안 정해진 동안에도 착수 조건에 닿았는지는 여기서 판정한다. 숫자를 가진 쪽이
-  // 판정까지 해야 한다 — 「10회면 연다」를 백로그 본문에만 두면 그 본문을 여는 세션이 있어야
-  // 알게 되고, 그 세션이 없어서 눈금이 차도 아무 일이 안 일어난다. 위 목록은 도달 여부와
-  // 무관하게 같은 모양으로 찍혀서 눈으로는 안 갈린다.
-  // 10인 근거는 read-usage.md 「열 번 중 여덟 번이 되어야 신호다」 — 분모가 열은 돼야 한다.
-  // 기록하는 세션은 모두 pre-exit를 돌므로 그 진입점의 문서는 매번 열리고 매번 쓰인다. 그 줄이 채운
-  // 열 번은 배치에 대해 아무것도 안 말하면서 알림만 먼저 울린다.
-  const READY_AT = 10;
-  const RECORDER = 'pre-exit';
-  const reached = rows.filter(([key, v]) => v.read >= READY_AT && !key.startsWith(`${RECORDER}\t`));
-  if (!t && reached.length) {
-    console.log(`\n[착수 조건 도달] ${reached.length}건이 ${READY_AT}회 이상 열렸다 — 선을 정할 때다.`);
-    console.log('  backlog projects/ai-contexts/active/scw/읽었는데-안-쓴-파일-누적.md');
-    console.log('이 사실을 회고 보고에 넣는다. 사용자가 묻기를 기다리지 않는다.');
+  // 선을 넘은 줄 중 이번 세션이 연 것만 알린다. 그 문서를 왜 열었고 무엇에 쓰려 했는지는 이 세션과
+  // 사용자가 지금 기억하고 있고, 누계만 받은 다른 세션은 그 이유를 다시 추적해야 한다. 이번 세션이
+  // 안 연 줄까지 띄우면 매 회고가 같은 목록을 되풀이하게 된다.
+  const ripe = ripeRows(state, cutoff);
+  const mine = (ripe ?? []).filter(([key]) => key in verdicts && verdicts[key] !== 'excluded');
+  if (mine.length) {
+    console.log(`\n[배치 의심] 이번 세션이 연 문서 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
+    for (const row of mine) console.log(rowLine(row));
+    console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 read-usage.md 「선을 넘은 것」.');
   }
   process.exit(0);
 }

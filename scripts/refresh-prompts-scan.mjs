@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // `/refresh-prompts` step 1 「범위 한정」의 기계 파트 — 무엇이 아직 정비 안 됐고, 정비된 것 중
-// 무엇이 그 뒤로 많이 바뀌었는지를 낸다.
+// 무엇이 그 뒤로 많이 바뀌었는지를 낸다. 읽고 안 쓴 문서 누계가 선을 넘은 것은 그보다 앞에 낸다.
 //
 // 왜 스크립트인가: 회차마다 AI가 대상 레포를 손으로 열거하고, 그 안의 프롬프트 md를 세고,
 // state.json 키와 하나씩 맞대보고, 키마다 커밋을 훑어 변경량을 셌다. 판정에 LLM 몫이 없는데
@@ -22,6 +22,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import { defaultLocalRoots, listLocalRepos } from "./local-system/local-deploy-lib.mjs";
 
@@ -183,6 +184,21 @@ for (const key of pathKeys) {
 const dangling = pathKeys.filter((k) => !churn.some((c) => c.key === k));
 
 const out = [];
+
+// ── 배치 의심: 문장 정리보다 먼저 ──────────────────────────────────────────────
+// 세션들이 읽고도 안 쓴 문서의 누계가 선을 넘은 것. 문장을 깎아서는 안 없어지는 문제라, 뜬 것이
+// 있는데 원래 범위의 문장 정리로 들어가면 그 문서를 열고도 지나치게 된다.
+// 선·최근성·제외는 기록 스크립트가 소유한다 — 여기서 누계 파일을 따로 읽어 거르면 조건이 두 벌이 된다.
+const usageFile = backlogRepo && join(backlogRepo, "pre-exit", "read-usage.json");
+if (usageFile && existsSync(usageFile)) {
+  const recorder = fileURLToPath(new URL("../deploy/skills/pre-exit/scripts/session-state.mjs", import.meta.url));
+  const listed = execFileSync(process.execPath, [recorder, "read-usage", "--list"], {
+    encoding: "utf8",
+    env: { ...process.env, READ_USAGE_FILE: usageFile },
+  }).trim();
+  out.push("[배치 의심] 읽고 안 쓴 문서 누계가 선을 넘은 것 — 뜬 것이 있으면 원래 범위보다 먼저 결론낸다", ...listed.split("\n").map((l) => `  ${l.trim()}`), "");
+}
+
 if (behind.length) {
   out.push("[원격보다 뒤처짐] 최신화 전에는 이 레포를 정비하지 않는다 — 낡은 로컬에서 훑으면 다른 기기 변경이 통째로 빠진다");
   behind.forEach((b) => out.push(`  ${b}`));
