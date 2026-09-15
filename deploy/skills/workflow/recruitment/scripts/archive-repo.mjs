@@ -27,6 +27,8 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+// 원본(deploy/)과 배포본(<타겟>/) 모두 skills와 contexts가 형제라 같은 상대경로로 닿는다.
+import { stopServers, withWorktrees } from '../../../../contexts/stop-servers.mjs';
 
 // git이 추적하지 않는 재생성 가능 폴더. 추적되는 같은 이름 폴더는 제출물이라 복사한다.
 const REGENERABLE = new Set(['node_modules', '.next', 'dist', 'build', 'out', '.turbo', '.vite', 'coverage']);
@@ -144,6 +146,12 @@ function create(workdir, name) {
   }
 
   const root = path.resolve(workdir);
+  // 복사 뒤로는 이 작업폴더와 워크트리를 지우는 일만 남는다. 앞 세션들이 띄우고 안 끈 서버가 그 삭제를
+  // 막으므로 여기서 끈다 — 누가 띄웠는지는 안 가린다.
+  const servers = stopServers({ paths: withWorktrees([root]) });
+  if (servers.remaining.length) {
+    fail(`작업폴더·워크트리를 붙잡은 프로세스가 끈 뒤에도 남았다:\n${servers.remaining.map((p) => `  ${p.pid} ${p.name} ${p.cmd}`).join('\n')}`);
+  }
   const tracked = trackedDirs(root);
   const skipped = [];
   fs.cpSync(root, dest, {
@@ -171,6 +179,7 @@ function create(workdir, name) {
   }
   run('git', ['remote', 'add', 'origin', remoteUrl], dest);
 
+  console.log(`[서버] ${servers.hits.length ? `닫음 — 트리 ${servers.stopped.length}개(프로세스 ${servers.hits.length}개)` : '이미 꺼져 있었음'}`);
   console.log(`[복사] ${dest}`);
   console.log(`  제외한 재생성 폴더 ${skipped.length}개${skipped.length ? `: ${skipped.slice(0, 10).join(', ')}` : ''}`);
   console.log(`\n[원격]\n${run('git', ['remote', '-v'], dest)}`);
