@@ -54,5 +54,4 @@ skill-creator의 Capture Intent / Interview 단계에서, 사용자에게 바로
 
 ## gotchas 축적
 
-- 스킬을 처음 만들 때 gotchas는 비워둔다
-- 실사용 중 AI가 반복 실패하는 패턴을 발견하면 SKILL.md에 gotchas 섹션으로 추가
+[스킬 짜임](../../../contexts/prompt-standards/skill-structure.md#gotchas)을 따른다.
