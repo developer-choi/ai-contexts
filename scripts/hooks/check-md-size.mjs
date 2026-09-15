@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// 전역 git pre-commit 훅. 프롬프트·스킬 md가 「주제의 축척은 크기가 정한다」의 선을 넘었는지
-// 커밋마다 전수로 재서 경고한다(차단하지 않는다).
+// 전역 git pre-commit 훅. 프롬프트·스킬 md가 「주제의 축척은 크기가 정한다」(prompt-standards/
+// file-layout.md 「바탕 정의」)의 선을 넘었는지 커밋마다 전수로 재서 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 //
 // 왜 전수인가: 크기는 이번 세션이 무엇을 건드렸는지와 무관한 사실이라, 고친 파일만 보면 아무도
 // 안 고치는 큰 파일이 영영 안 걸린다. 실제로 PP `all-paragraphs.md`는 세 세션이 같은 폴더의
 // 이웃 파일을 쪼개고 지나가는 동안 한 번도 안 걸렸다.
 //
-// 왜 선이 둘인가: 같은 크기여도 여러 곳에서 열리는 문서가 비싸다(`document-diet.md` 「문서의
+// 왜 선이 둘인가: 같은 크기여도 여러 곳에서 열리는 문서가 비싸다(`prompt-standards/file-layout.md` 「문서의
 // 비용은 크기가 아니라 크기 × 불려가는 자리 수」). 그래서 닿는 곳이 많으면 더 낮은 선을 쓴다.
 //
 // 왜 「닿는 곳」을 재귀로 세는가: A가 B만 가리켜도 그 A가 넷에서 열리면 B도 결국 네 경로에서
@@ -130,7 +130,7 @@ function main() {
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
             "무엇을 줄일지는 줄일 후보를 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-            "판정 기준과 후보 갈래는 deploy/skills/scw/specialized/document-diet.md에 있다.",
+            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 후보 갈래는 deploy/skills/scw/specialized/document-diet.md에 있다.",
           ]
         : [
             `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,
