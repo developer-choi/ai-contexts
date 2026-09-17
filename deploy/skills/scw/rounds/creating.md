@@ -10,14 +10,11 @@ skill-creator를 사용하되, 이 프로젝트에서는 추가로 아래를 따
 
 Codex 시스템 skill-creator는 지침 로드와 `init_skill.py` 기반 초기화에 쓸 수 있다. 검증 스크립트가 PyYAML을 요구하는데, 없으면 전역 Python을 건드리지 말고 임시 위치에 격리해 설치하고 그 명령 세션에서만 잡히게 한다. `init_skill.py`가 채워두는 기본 `description: [TODO: ...]`는 YAML 리스트로 해석돼 validator가 실패하므로, 실제 문자열로 바꾼 뒤 검증한다.
 
-## 사전 학습
-
-스킬을 만들기 전에 아래 블로그를 읽어라. how 최소화, gotchas 축적 등 이 가이드의 원칙이 여기서 나왔다:
-- https://claude.com/blog/improving-skill-creator-test-measure-and-refine-agent-skills
-
 ## skill-discovery
 
 신규 스킬을 만들기 전에 `deploy/skills/` 하위 SKILL.md들의 description을 읽어 유사한 스킬을 찾고, 있으면 그 구조·패턴을 참고해 설계한다.
+
+description을 더 트리거가 잘 되게 고치는 작업은 감으로 반복하지 않는다 — [trigger-eval.md](../benching/kinds/trigger-eval.md)로 후보 문안끼리 재서 고른다.
 
 ## 설계 토론 (Capture Intent 보강)
 
