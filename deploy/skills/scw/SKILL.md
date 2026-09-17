@@ -23,7 +23,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | 없던 스킬을 새로 만든다 | [rounds/creating.md](rounds/creating.md) + [rounds/editing.md](rounds/editing.md) |
 | 기존 문서에 규칙을 넣거나 빼거나 고쳐 쓴다 | [rounds/editing.md](rounds/editing.md) |
 | 의심 지점을 훑어 개선한다 | [rounds/reviewing.md](rounds/reviewing.md) + [rounds/editing.md](rounds/editing.md) |
-| 벤치·eval을 돌려 규칙의 효과를 잰다 | [rounds/benching.md](rounds/benching.md) |
+| 벤치·eval을 돌려 규칙의 효과를 잰다 | [benching/SKILL.md](benching/SKILL.md) |
 
 ## 문서 무게
 
