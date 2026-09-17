@@ -35,7 +35,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 프롬프트·스킬 md를 만들거나 고치는 작업이면 레포·경로와 무관하게 항상 [what-to-keep.md](../../contexts/prompt-standards/what-to-keep.md)·[wording.md](../../contexts/prompt-standards/wording.md)·[sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md)·[rules-as-code.md](../../contexts/rules-as-code.md)를 읽고 적용한다 — 아래 표와 달리 조건이 없다. 새로 쓰는 산문에도 적용되며, 리뷰 때만 보는 것이 아니다.
 
-대상이 SKILL.md거나 스킬이 읽는 문서면 [cross-cli.md](specialized/cross-cli.md)도 같이 적용한다. 스킬은 여러 CLI로 함께 배포되는데 한쪽에서만 도는 표현은 에러 없이 무시되므로, 쓰는 시점에 걸러야 한다.
+대상이 SKILL.md거나 스킬이 읽는 문서면 [cross-cli.md](../../contexts/prompt-standards/cross-cli.md)도 같이 적용한다. 스킬은 여러 CLI로 함께 배포되는데 한쪽에서만 도는 표현은 에러 없이 무시되므로, 쓰는 시점에 걸러야 한다.
 
 그에 더해, 대상이 아래 경로에 해당하면 해당 파일을 읽고 추가 관점으로 적용한다.
 
