@@ -234,7 +234,7 @@ step-5에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려�
 
 ## /workflow 벤치 — 단위 매핑
 
-이 스킬을 벤치할 때의 workflow 대입값. 일반 방법론은 [eval-delegation.md](../eval-delegation.md), 여기엔 대입값만 둔다.
+이 스킬을 벤치할 때의 workflow 대입값. 일반 방법론은 [delegation.md](../benching/kinds/delegation.md), 여기엔 대입값만 둔다.
 
 ### 벤치 단위 (일반 원칙 1·2)
 
