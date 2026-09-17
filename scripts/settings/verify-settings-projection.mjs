@@ -9,7 +9,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { buildHooks } from './settings-projection.mjs';
+import { CLAUDE_ONLY_ALIASES, buildHooks } from './settings-projection.mjs';
 
 const baseSettingsSource = path.join(import.meta.dirname, '..', '..', 'deploy', 'base-settings.json');
 
@@ -98,6 +98,20 @@ function main() {
     claudePre.some((h) => h.matcher === m && h.file === 'check-git-push-policy.mjs')),
     'claude: check-git-push-policy가 Bash·PowerShell·Monitor 매처로 fan-out 등록됨');
 
+  // 브라우저 훅의 매처는 정규식이어야 한다. 특수문자 없는 문자열은 통짜 비교라 어느 도구와도
+  // 안 맞아, 훅이 등록된 모습 그대로 한 번도 발동하지 않는다(조용한 무력화).
+  const browserWrite = claudePre.find((h) => h.file === 'check-browser-write-policy.mjs');
+  check(browserWrite !== undefined && /[(|.*]/.test(browserWrite.matcher || ''),
+    'claude: check-browser-write-policy가 정규식 매처로 등록됨');
+  // 쓰기 도구가 하나라도 빠지면 그 도구로 우회한 클릭·입력이 검사를 통과한다. browser_batch는
+  // 다른 도구를 담는 그릇이라 특히 빠지기 쉬워 함께 고정한다.
+  check(['computer', 'form_input', 'javascript_tool', 'file_upload', 'upload_image', 'shortcuts_execute', 'browser_batch']
+    .every((t) => (browserWrite?.matcher || '').includes(t)),
+    'claude: browser-write 매처가 페이지 쓰기 도구 전부를 담음');
+  const browserTrack = claude.find((h) => h.file === 'record-browser-tab-url.mjs');
+  check(browserTrack?.event === 'PostToolUse' && browserTrack?.matcher === 'mcp__claude-in-chrome__.*',
+    'claude: record-browser-tab-url이 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');
+
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
   check(claudeCompact.some((h) => h.matcher === 'manual' && h.file === 'snapshot-precompact-transcript.mjs')
@@ -110,10 +124,14 @@ function main() {
   check(codexPre.length > 0 && codexPre.every((h) => h.matcher === '*'), 'codex: PreToolUse 전부 단일 * 매처');
   check(JSON.stringify(buildHooks(base.hooks, 'codex')).includes("'.codex','hooks'"), 'codex: command dir 토큰 .codex');
   // codex는 UserPromptSubmit 이벤트 hook(surface-backlog), EnterWorktree 전용 hook
-  // (codex엔 그 tool이 없음), PreCompact hook(codex엔 compaction hook 없음)만 빠지고
-  // 나머지는 전부 등록
+  // (codex엔 그 tool이 없음), PreCompact hook(codex엔 compaction hook 없음), claude 전용
+  // 도구를 보는 hook(browser-*: claude-in-chrome은 Claude Code 전용)만 빠지고 나머지는 전부 등록
   const codexExcluded = base.hooks
-    .filter((h) => h.event === 'UserPromptSubmit' || h.event === 'PreCompact' || h.on === 'enterworktree')
+    .filter((h) =>
+      h.event === 'UserPromptSubmit' ||
+      h.event === 'PreCompact' ||
+      h.on === 'enterworktree' ||
+      CLAUDE_ONLY_ALIASES.has(h.on))
     .map((h) => h.file);
   check(baseFiles.filter((f) => !codexExcluded.includes(f)).every((f) => codex.some((h) => h.file === f)),
     'codex: UserPromptSubmit·EnterWorktree 외 모든 hook 등록됨');
@@ -121,6 +139,8 @@ function main() {
     'codex: EnterWorktree 전용 hook 미등록');
   check(!codex.some((h) => h.event === 'PreCompact'),
     'codex: PreCompact hook 미등록');
+  check(!codex.some((h) => h.file === 'check-browser-write-policy.mjs' || h.file === 'record-browser-tab-url.mjs'),
+    'codex: claude-in-chrome 훅 미등록(codex엔 그 도구가 없음)');
   // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이
   // codex에선 '*' 한 그룹으로 접혀야 하므로, check-git-push-policy는 정확히 1번만 등록된다.
   check(codex.filter((h) => h.file === 'check-git-push-policy.mjs').length === 1,
