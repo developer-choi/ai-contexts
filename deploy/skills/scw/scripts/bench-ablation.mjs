@@ -4,7 +4,7 @@
 // 왜 API가 아니라 CLI를 모는가:
 // 측정 대상 규칙은 `~/.claude/rules/*.md`에 살고, 보통의 `claude -p`와 모든 서브에이전트가
 // 그걸 자동 로드한다 — 그래서 기본 상태로는 규칙 없는 ZERO 팔이 성립하지 않는다
-// (specialized/rule-ablation-bench.md 「상속 경로」).
+// (benching/kinds/rule-ablation.md 「상속 경로」).
 //
 // 격리 방식 (사용 전 실측으로 확인됨):
 // - `--setting-sources ""`가 배포된 설정·메모리 원천(사용자·프로젝트 규칙, CLAUDE.md)을 통째로 뗀다.

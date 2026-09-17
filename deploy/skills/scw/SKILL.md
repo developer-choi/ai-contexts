@@ -45,7 +45,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | `deploy/skills/workflow/` | [workflow.md](targets/workflow.md) |
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](targets/requirement-review.md) |
 | `deploy/contexts/writing-guide/` | [writing-guide.md](targets/writing-guide.md) |
-| `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation-bench.md](specialized/rule-ablation-bench.md) |
+| `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation.md](benching/kinds/rule-ablation.md) |
 | `SKILL.md` 또는 sub-skill 라우터 파일 | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) · [skill-orchestration.md](specialized/skill-orchestration.md) |
 
 대상 경로에 `map.md`가 있으면 추가로 점검한다:

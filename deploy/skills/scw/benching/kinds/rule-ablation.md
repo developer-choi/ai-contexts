@@ -1,6 +1,6 @@
 # Rule Ablation Bench 특화 체크리스트
 
-`deploy/rules/`, `deploy/contexts/coding-standards/` 등 **지침/규칙 문서**의 ablation 벤치 시 추가 점검 항목. 일반 스킬 eval은 skill-creator와 scw `guide.md`로 충분하지만, "이 규칙을 없애도 되는가"를 묻는 ablation은 고유 함정이 있어 이 문서로 보완한다.
+`deploy/rules/`, `deploy/contexts/coding-standards/` 등 **지침/규칙 문서**의 ablation 벤치 시 추가 점검 항목. 일반 스킬 eval은 skill-creator와 scw [benching/SKILL.md](../SKILL.md)로 충분하지만, "이 규칙을 없애도 되는가"를 묻는 ablation은 고유 함정이 있어 이 문서로 보완한다.
 
 ## 진입 조건
 
@@ -39,7 +39,7 @@ ZERO subagent가 원본 규칙의 특징 어휘·구절을 응답(본문·도구
 
 - subagent는 메인 cwd 안의 `CLAUDE.md`와 `~/.claude/rules/` 하위 `.md` 전부를 자동 로드한다
 - 워크트리 cwd가 측정 대상 규칙 본문을 그대로 갖고 있으면 ZERO 격리 불가능
-- 회피 — **`claude -p --setting-sources ""`가 배포된 전역 규칙을 통째로 떼어낸다.** 그 위에 `--append-system-prompt`로 변형 텍스트를 도로 넣으면 팔마다 규칙을 통제해 줄 수 있다. 배포본(`~/.claude/rules/`)을 팔마다 갈아끼우는 방식은 다른 세션까지 오염시키므로 쓰지 않는다. 이 하네스는 `{{skill_dir}}/scripts/bench-ablation.mjs`에 구현돼 있다 — 인자와 eval-set 스키마(채점 분류지·통과조건 주입 포함)는 그 파일이 정본이다.
+- 회피 — **`claude -p --setting-sources ""`가 배포된 전역 규칙을 통째로 떼어낸다.** 그 위에 `--append-system-prompt`로 변형 텍스트를 도로 넣으면 팔마다 규칙을 통제해 줄 수 있다. 배포본(`~/.claude/rules/`)을 팔마다 갈아끼우는 방식은 다른 세션까지 오염시키므로 쓰지 않는다. 이 하네스는 `{{skill_dir}}/benching/scripts/bench-ablation.mjs`에 구현돼 있다 — 인자와 eval-set 스키마(채점 분류지·통과조건 주입 포함)는 그 파일이 정본이다.
 - 위 격리가 막히는 경우의 대안:
   - 측정 워크트리 ≠ 메인 cwd로 분리 (메인은 `master` clean, 측정은 별도 워크트리)
   - 외부 환경(`ANTHROPIC_API_KEY` 직접 호출, 다른 계정·프로젝트 cwd)에서 재실행
