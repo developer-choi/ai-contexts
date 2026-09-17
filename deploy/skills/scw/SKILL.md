@@ -42,7 +42,7 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | 대상 경로 | 특화 파일 |
 |-----------|-----------|
 | `deploy/contexts/coding-standards/` | [coding-standards.md](targets/coding-standards.md) |
-| `deploy/skills/workflow/` | [workflow.md](specialized/workflow.md) |
+| `deploy/skills/workflow/` | [workflow.md](targets/workflow.md) |
 | `deploy/skills/workflow/requirement-review/` | [requirement-review.md](targets/requirement-review.md) |
 | `deploy/contexts/writing-guide/` | [writing-guide.md](targets/writing-guide.md) |
 | `deploy/rules/`, 그 외 지침·규칙 나열 문서 (ablation 벤치) | [rule-ablation-bench.md](specialized/rule-ablation-bench.md) |
