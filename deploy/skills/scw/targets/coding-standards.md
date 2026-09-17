@@ -16,7 +16,7 @@
 
 ### 하위 폴더·파일 배치
 
-폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md#한-파일에는-같은-시점에-읽히는-것만-담는다)로 보고, 아래는 coding-standards 값이다.
+폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md#폴더는-같은-주제의-파일을-모은다--그-주제를-무엇으로-잡을지가-먼저다)로 보고, 아래는 coding-standards 값이다.
 
 - **폴더명**: 기술 스택 또는 도메인인지 (`react/`, `typescript/`, `testing/` 등)
 - **파일명**: 빈칸에는 판단 주제와 기술 단위를 친다 (`component-split`, `error-handling`, `tanstack-query` 등)
