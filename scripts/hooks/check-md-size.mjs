@@ -131,7 +131,7 @@ function main() {
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
             "무엇을 줄일지는 줄일 후보를 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 후보 갈래는 deploy/skills/scw/specialized/document-diet.md에 있다.",
+            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 후보 갈래는 deploy/skills/scw/rounds/diet.md에 있다.",
           ]
         : [
             `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,
