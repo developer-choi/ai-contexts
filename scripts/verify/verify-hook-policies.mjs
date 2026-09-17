@@ -462,6 +462,101 @@ const WAIT_CASES = [
   ['until [ -f out.txt ]; do sleep 5; done', 'a1b2c3', null, '조건을 확인하는 루프는 서브에이전트에서도 통과'],
 ];
 
+// --- 브라우저 쓰기 차단 ---
+// 이 훅은 "지금 이 탭이 어느 사이트인가"를 상태 파일로만 판정한다. 기록의 신선도·배치 안의
+// 이동까지 판정에 걸리므로, 명령 문자열 대신 상태 파일을 깔아두고 payload를 흘린다.
+const BROWSER_HOOK = 'check-browser-write-policy.mjs';
+const BLOCKED_TAB = 100; // 차단 도메인, 방금 기록됨
+const FREE_TAB = 200; // 허용 도메인, 방금 기록됨
+const STALE_TAB = 300; // 차단 도메인이지만 기록이 낡음
+const BLOCKED_URL = 'https://securities.miraeasset.com/';
+
+const chrome = (name, input) => ({ tool_name: `mcp__claude-in-chrome__${name}`, tool_input: input });
+const batch = (...actions) => chrome('browser_batch', { actions });
+
+// [payload, 기대 판정, 설명]
+const BROWSER_CASES = [
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: BLOCKED_TAB }), 'deny', '차단 도메인의 클릭'],
+  [chrome('computer', { action: 'type', text: '100', tabId: BLOCKED_TAB }), 'deny', '차단 도메인의 입력'],
+  [chrome('computer', { action: 'key', text: 'Return', tabId: BLOCKED_TAB }), 'deny', '차단 도메인의 키 입력'],
+  [chrome('form_input', { tabId: BLOCKED_TAB, ref: 'ref_1', value: 'x' }), 'deny', '차단 도메인의 폼 입력'],
+  [chrome('javascript_tool', { tabId: BLOCKED_TAB, code: '1' }), 'deny', '차단 도메인의 스크립트 실행'],
+  [chrome('file_upload', { tabId: BLOCKED_TAB, ref: 'ref_1', paths: ['a.txt'] }), 'deny', '차단 도메인의 파일 업로드'],
+  [chrome('upload_image', { tabId: BLOCKED_TAB, ref: 'ref_1', imageId: 'img_1' }), 'deny', '차단 도메인의 이미지 업로드'],
+  [chrome('shortcuts_execute', { tabId: BLOCKED_TAB, command: 'summarize' }), 'deny', '차단 도메인의 단축 실행'],
+
+  // 읽기는 그대로 통과해야 한다 — 막히면 "같이 보며 해설"이라는 목적 자체가 없어진다.
+  [chrome('computer', { action: 'screenshot', tabId: BLOCKED_TAB }), 'pass', '차단 도메인도 스크린샷은 통과'],
+  [chrome('computer', { action: 'scroll', scroll_direction: 'down', coordinate: [10, 10], tabId: BLOCKED_TAB }), 'pass', '스크롤은 읽기'],
+  [chrome('computer', { action: 'hover', coordinate: [10, 10], tabId: BLOCKED_TAB }), 'pass', 'hover는 읽기'],
+  [chrome('read_page', { tabId: BLOCKED_TAB }), 'pass', 'read_page는 통과'],
+  [chrome('navigate', { url: BLOCKED_URL, tabId: BLOCKED_TAB }), 'pass', '차단 도메인으로의 이동 자체는 통과'],
+
+  // 판정 기준이 tabId가 아니라 URL임을 고정한다.
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: FREE_TAB }), 'pass', '허용 도메인의 클릭'],
+
+  // 기록을 못 믿는 경우는 통과가 아니라 거부다.
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: STALE_TAB }), 'deny', '기록이 낡으면 거부'],
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: 999 }), 'deny', '기록 없는 탭은 거부'],
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10] }), 'deny', 'tabId가 없으면 거부'],
+
+  // 배치는 다른 도구를 담는 그릇이라 그 안까지 본다.
+  [batch({ name: 'computer', input: { action: 'left_click', coordinate: [10, 10], tabId: BLOCKED_TAB } }), 'deny', '배치에 담은 클릭도 거부'],
+  [batch({ name: 'computer', input: { action: 'screenshot', tabId: BLOCKED_TAB } }), 'pass', '배치에 담은 읽기는 통과'],
+  [
+    batch(
+      { name: 'navigate', input: { url: BLOCKED_URL, tabId: FREE_TAB } },
+      { name: 'computer', input: { action: 'left_click', coordinate: [10, 10], tabId: FREE_TAB } },
+    ),
+    'deny',
+    '배치 안에서 차단 도메인으로 옮긴 뒤의 클릭도 거부',
+  ],
+  [
+    batch(
+      { name: 'navigate', input: { url: 'https://www.google.com/', tabId: BLOCKED_TAB } },
+      { name: 'computer', input: { action: 'left_click', coordinate: [10, 10], tabId: BLOCKED_TAB } },
+    ),
+    'pass',
+    '배치 안에서 다른 도메인으로 옮기면 그 뒤 클릭은 통과',
+  ],
+];
+
+// 상태 파일을 임시 경로에 깔고 환경변수로 훅에 물린다(실제 기록을 건드리지 않는다).
+function withBrowserStateFixture(fn) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'browser-tab-state-'));
+  const file = path.join(dir, 'browser-tab-urls.json');
+  const now = Date.now();
+  fs.writeFileSync(
+    file,
+    JSON.stringify({
+      [BLOCKED_TAB]: { url: BLOCKED_URL, at: now },
+      [FREE_TAB]: { url: 'https://www.google.com/', at: now },
+      [STALE_TAB]: { url: BLOCKED_URL, at: now - 10 * 60 * 1000 },
+    }),
+  );
+  const prev = process.env.CLAUDE_BROWSER_TAB_URLS_FILE;
+  process.env.CLAUDE_BROWSER_TAB_URLS_FILE = file;
+  try {
+    return fn(file);
+  } finally {
+    if (prev === undefined) delete process.env.CLAUDE_BROWSER_TAB_URLS_FILE;
+    else process.env.CLAUDE_BROWSER_TAB_URLS_FILE = prev;
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+// 받아 적는 쪽이 깨지면 판정 쪽은 전부 거부로 흐른다(조용한 통과는 없지만 브라우저 작업이
+// 통째로 막힌다). 실제 응답 원문 꼴로 기록이 남는지 고정한다.
+const TAB_CONTEXT_RESPONSE = [
+  'Navigated to https://example.com/',
+  '',
+  'Tab Context:',
+  '- Executed on tabId: 2031789807',
+  '- Available tabs:',
+  '  • tabId 2031789807: "example.com" ("https://example.com/")',
+  '  • tabId 555: "미래에셋증권" ("https://securities.miraeasset.com/main")',
+].join('\n');
+
 function runHook(file, command) {
   return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } });
 }
@@ -770,6 +865,39 @@ function main() {
   // 레포 제외는 경로 위쪽의 `.git`으로 판정되므로 fixture 안에서 실행까지 끝낸다 — 폴더가
   // 먼저 지워지면 레포를 못 찾아 제외가 안 걸린 채로 판정된다.
   withRepoFixture((dir) => runWriteCases(repoCases(dir)));
+  // 브라우저 쓰기 차단은 상태 파일을 읽어 판정하므로 fixture(임시 상태 파일) 안에서 끝낸다.
+  withBrowserStateFixture((stateFile) => {
+    for (const [payload, expected, note] of BROWSER_CASES) {
+      const { decision, stderr } = runHookPayload(BROWSER_HOOK, payload);
+      const label = `${BROWSER_HOOK} :: ${payload.tool_name} → ${expected} (${note})`;
+      if (decision === expected) {
+        console.log(`  PASS  ${label}`);
+      } else {
+        console.error(`  FAIL  ${label} — 실제: ${decision}`);
+        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
+        failures.push(label);
+      }
+    }
+    // 받아 적는 쪽: 응답 원문에서 목록의 탭을 전부 뽑아 기록하는지.
+    fs.writeFileSync(stateFile, '{}');
+    runHookPayload('record-browser-tab-url.mjs', {
+      tool_name: 'mcp__claude-in-chrome__navigate',
+      tool_input: { url: 'https://example.com/' },
+      tool_response: { content: [{ type: 'text', text: TAB_CONTEXT_RESPONSE }] },
+    });
+    const recorded = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
+    const label = 'record-browser-tab-url.mjs :: 응답의 탭 목록을 전부 기록한다';
+    const ok =
+      recorded['2031789807']?.url === 'https://example.com/' &&
+      recorded['555']?.url === 'https://securities.miraeasset.com/main' &&
+      typeof recorded['555']?.at === 'number';
+    if (ok) {
+      console.log(`  PASS  ${label}`);
+    } else {
+      console.error(`  FAIL  ${label} — 실제: ${JSON.stringify(recorded)}`);
+      failures.push(label);
+    }
+  });
   // 절 참조 검사는 staged 목록과 대상 파일을 디스크에서 읽으므로 fixture 안에서 실행까지 끝낸다.
   // 케이스마다 stage 대상이 달라 스테이징을 매번 다시 잡는다.
   withSectionRefFixture((dir, stage) => {

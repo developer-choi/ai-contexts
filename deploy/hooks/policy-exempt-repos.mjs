@@ -10,7 +10,7 @@ import { normalizeCwd } from "./git-command-parser.mjs";
 // 면제 대상이 아닌 것: 파일 단위 커밋 강제(check-git-staging-policy·check-git-commit-policy).
 // 그건 브랜치 정책이 아니라 "내가 안 건드린 변경이 딸려 들어가는 것"을 막는 장치라,
 // 레포가 누구 것이든 같은 사고가 난다. 여기서 갈라주지 않는다.
-const POLICY_EXEMPT_REPOS = new Set(["backlog", "private-playground"]);
+const POLICY_EXEMPT_REPOS = new Set(["backlog", "private-playground", "finance-os"]);
 
 // cwd → 면제 여부. 한 명령에 같은 경로가 여러 번 나오므로 프로세스 안에서 재사용한다.
 const cache = new Map();

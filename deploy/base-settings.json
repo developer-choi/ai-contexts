@@ -145,6 +145,18 @@
       "msg": "Checking blind measure prompt..."
     },
     {
+      "file": "check-browser-write-policy.mjs",
+      "event": "PreToolUse",
+      "on": "browser-write",
+      "msg": "Checking browser write policy..."
+    },
+    {
+      "file": "record-browser-tab-url.mjs",
+      "event": "PostToolUse",
+      "on": "browser-track",
+      "msg": "Recording browser tab URL..."
+    },
+    {
       "file": "snapshot-precompact-transcript.mjs",
       "event": "PreCompact",
       "on": "manual",
