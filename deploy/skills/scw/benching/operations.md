@@ -1,6 +1,6 @@
 # Bench Operations
 
-ablation·기능 벤치를 주기적으로 운용할 때의 인프라·절차 가이드. 방법론은 [`rule-ablation-bench.md`](./rule-ablation-bench.md) 참조.
+ablation·기능 벤치를 주기적으로 운용할 때의 인프라·절차 가이드. 방법론은 [`kinds/rule-ablation.md`](kinds/rule-ablation.md) 참조.
 
 ## 환경 격리 — 워크트리 분리
 
@@ -253,3 +253,12 @@ Claude Code에서는 `bench-ablation.mjs` 실행에 승인 창이 걸려 있다(
 
 - team-agent 규칙으로 띄운 작업자는 현재 런타임의 종료 수단으로 정리한다. 종료 수단이 없으면 사용자 `/exit` 시 정리
 - 워크트리·backup 브랜치 teardown은 「벤치 산출물 정리」가 단일 출처다
+
+## 확인 방법
+
+"읽으라고 한 문서를 실제로 읽었는가"는 산출물만 봐서는 모른다. 각 CLI가 남기는 대화 기록에 도구 호출이 인자까지 남으므로, 그걸 열어 확인한다.
+
+- Claude Code — `~/.claude/projects/<인코딩된 경로>/<세션 id>.jsonl`
+- Antigravity — `~/.gemini/antigravity-cli/conversations/<대화 id>.db` (SQLite `steps` 테이블)
+
+스킬을 고친 뒤 같은 입력으로 양쪽을 돌려 이 기록을 대조하면, 고친 문장이 실제로 효과가 있었는지 판정된다.
