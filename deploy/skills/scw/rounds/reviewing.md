@@ -53,7 +53,7 @@
 | Tier | 기준 | 검증 요구 |
 |------|------|-----------|
 | 객관적 정리 | 사문(어디서도 참조 안 됨)·중복(다른 곳에 그대로 있음)·모순·버그 — **외부 사실로 증명 가능**한 것만 | 불필요 — 즉시 수정 |
-| 벤치 필수 | 위에 해당하지 않는 모든 의심 지점. "이 줄을 빼도 같은 동작" 같은 행동 예측은 전부 벤치로 보낸다 | [editing.md 「how 최소화 원칙」](editing.md#how-최소화-원칙) 비교 테스트 절차로 OLD vs NEW 검증. 대상이 `deploy/rules/` 등 지침/규칙 나열 문서면 추가로 [specialized/rule-ablation-bench.md](../specialized/rule-ablation-bench.md) 적용 |
+| 벤치 필수 | 위에 해당하지 않는 모든 의심 지점. "이 줄을 빼도 같은 동작" 같은 행동 예측은 전부 벤치로 보낸다 | [editing.md 「how 최소화 원칙」](editing.md#how-최소화-원칙) 비교 테스트 절차로 OLD vs NEW 검증. 대상이 `deploy/rules/` 등 지침/규칙 나열 문서면 추가로 [rule-ablation.md](../benching/kinds/rule-ablation.md) 적용 |
 
 판단 원칙: 의심되면 벤치 필수 쪽으로 분류한다. "이건 명백해 보인다"고 객관적 정리로 미루지 않는다. 분류 근거가 약하면 벤치로 보낸다.
 
