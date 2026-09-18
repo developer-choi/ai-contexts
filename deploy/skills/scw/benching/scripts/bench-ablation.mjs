@@ -491,10 +491,13 @@ async function main() {
   // 축 하나의 판정. 사람이 표를 눈으로 읽고 정하던 것을 여기서 찍는다
   // (benching/kinds/rule-ablation.md 「한 패스로 닫는다」).
   //
-  // 경계는 두 실측에 맞춘 값이다 — 차이가 반복의 1/3 이상이고 최소 2.
-  // 반복 3에서는 2이고, 2026-09-18 실측에서 반복 3 판정이 반복 9와 13/14 일치했다
-  // (어긋난 1축은 「안 갈림」으로 남긴 것이 반복 9에서 갈린 경우 — 대상을 남기는 쪽으로 틀린다).
-  // 같은 경계를 반복 9 데이터에 대면 14축이 손판정과 전부 일치한다.
+  // 경계는 그 절의 표가 정한다 — 차이가 반복의 2/3 이상이고 최소 2. 여기서 다른 수를 쓰면
+  // 표를 읽고 손으로 판정한 것과 이 출력이 어긋나고, 어긋난 줄 모르는 채로 갈라진다.
+  //
+  // 2026-09-18까지 이 자리가 1/3이었다. 반복 3에서는 양쪽 다 2라 같아서 안 드러났고,
+  // 반복 9에서 6 대 3으로 갈려 한 축의 판정이 뒤집힌 뒤에야 보였다. 그때 적혀 있던
+  // 「반복 9 데이터에 대면 손판정과 전부 일치」는 1/3 경계에서 잰 것이라 함께 지운다 —
+  // 2/3에서 같은 말이 서는지는 그 데이터가 없어져 다시 잴 수 없다.
   function verdictOf(row, names) {
     if (row.failed_total > 0) return '보류(재측정)';
     const cells = names.map((v) => row.variants[v]).filter((c) => c.n > 0);
@@ -502,7 +505,7 @@ async function main() {
     const n = Math.max(...cells.map((c) => c.n));
     const ratios = cells.map((c) => c.pass / c.n);
     const gap = Math.max(...cells.map((c) => c.pass)) - Math.min(...cells.map((c) => c.pass));
-    if (gap >= Math.max(2, Math.ceil(n / 3))) return '갈림';
+    if (gap >= Math.max(2, Math.ceil((n * 2) / 3))) return '갈림';
     // 차이가 0이어도 양 팔이 다 바닥이면 잰 것이 없다 — 「델타 없음」과 구분해야
     // 시나리오가 압박을 못 준 것이 규칙 불필요로 읽히지 않는다.
     if (gap === 0 && ratios.every((r) => r >= 2 / 3)) return '델타 없음';
