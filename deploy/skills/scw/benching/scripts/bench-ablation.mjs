@@ -531,7 +531,11 @@ async function main() {
   const inheritance = [];
   const permissionBlocked = [];
   const missingFile = [];
+  // 실패를 run 단위로 팔마다 센다. 축 단위로 세면 축이 많은 시나리오가 같은 run을 여러 번
+  // 세어 쏠림이 부풀려진다. 한 팔에만 실패가 몰리면 그 팔의 셀만 비어 델타가 통째로 가짜가 된다.
+  const failedRuns = Object.fromEntries(variantNames.map((v) => [v, 0]));
   for (const { job, result } of runs) {
+    if (result.axes.some((a) => a.failed)) failedRuns[job.variant] += 1;
     if (PERMISSION_REFUSAL.test(result.response ?? '')) {
       permissionBlocked.push({ scenario: job.scenario.id, variant: job.variant, excerpt: result.response.slice(0, 120) });
     }
@@ -567,6 +571,7 @@ async function main() {
     grader_model: args['grader-model'],
     reps: args.reps,
     failed_total: failedTotal,
+    failed_runs_by_variant: failedRuns,
     table,
     inheritance_flags: inheritance,
     permission_blocked: permissionBlocked,
@@ -590,6 +595,16 @@ async function main() {
   }
   lines.push('');
   lines.push(`실행 실패: ${failedTotal}건` + (failedTotal > 0 ? ' — 실패가 있는 행은 판정하지 않는다' : ''));
+  // 실패가 한 팔에만 몰리면 그 팔의 셀만 비어 표 전체가 못 쓰는 델타가 된다. 사람이 「실행 실패
+  // N건」만 보고 넘기던 자리라 기계가 판정한다 — 실패 0인 팔과 실패 있는 팔이 함께 있으면 쏠림이다.
+  const hitArms = variantNames.filter((v) => failedRuns[v] > 0);
+  if (hitArms.length > 0 && hitArms.length < variantNames.length) {
+    const spread = variantNames.map((v) => `${v}=${failedRuns[v]}`).join(', ');
+    lines.push(`실패가 팔에 쏠렸다: ${spread} — 이 표의 델타는 못 쓴다. `
+      + `실패한 팔만 안 잰 것이라 남은 팔과의 차이가 팔의 차이로 둔갑한다. `
+      + `대상을 받는 팔이 긴 답을 써서 call당 타임아웃을 혼자 넘는 것이 첫 용의자다 — `
+      + `--timeout을 올리고 같은 명령을 --resume으로 다시 쳐서 죽은 run만 다시 쏜다.`);
+  }
   lines.push(`환경상속 의심: ${inheritance.length}건`
     + inheritance.map((f) => `\n  - ${f.scenario}: ${f.signatures.join(', ')}`).join(''));
   if (permissionBlocked.length > 0) {
