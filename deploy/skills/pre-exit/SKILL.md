@@ -2,7 +2,7 @@
 disable-model-invocation: true
 name: pre-exit
 description: 세션을 마무리한다. 문제 리스트업, 규칙화+사례 축적, 미커밋 확인, 커밋 정리를 수행한다.
-argument-hint: "[보강 회고: workflow | digest | write-refine | routine | refresh-prompts | recruitment (무인자 시 자동 감지) / 오답노트: error-notebook]"
+argument-hint: "[보강 회고: workflow | digest | write-refine | routine | recruitment (무인자 시 자동 감지) / 오답노트: error-notebook]"
 ---
 
 # 세션 마무리
@@ -23,7 +23,6 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | ref
 | `digest` 인자, 또는 본 세션 `/digest` 호출·digest OFF 직후, 또는 `knowledge/**` 신규·수정 존재 | [augmentations/digest.md](augmentations/digest.md) |
 | `write-refine` 인자, 또는 본 세션 `/write-refine` 호출 | [augmentations/write-refine.md](augmentations/write-refine.md) |
 | `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-*` 스킬 호출 | [augmentations/routine.md](augmentations/routine.md) |
-| `refresh-prompts` 인자, 또는 본 세션 `refresh-prompts` 회차 진행, 또는 `backlog` 레포 `refresh-prompts/state.json` 변경 존재 | [augmentations/refresh-prompts.md](augmentations/refresh-prompts.md) |
 | `recruitment` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/recruitment-application`·`/recruitment-motivation` 호출 | [augmentations/recruitment.md](augmentations/recruitment.md) |
 
 감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포 경로>`가 낸다. 대화 쪽 조건(그 스킬을 이 세션에서 불렀는가)은 세션만 아는 사실이라 그대로 판단한다.

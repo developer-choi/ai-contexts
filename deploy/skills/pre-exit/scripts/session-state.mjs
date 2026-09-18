@@ -9,7 +9,7 @@
 //   snapshots — 스냅샷을 *쓰는* 쪽은 코드인데(hooks/snapshot-precompact-transcript.mjs) 읽는
 //     진입점이 없어, 폴더 경로와 파일명 규약을 산문에서 읽어 손으로 글롭했다. 빗나가면
 //     "이 세션은 압축이 없었다"로 결론내고 넘어가 압축 구간의 사용자 교정이 통째로 유실된다.
-//   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**·refresh-prompts/state.json)을
+//   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**)을
 //     세션 변경 목록과 눈으로 대조했다. 놓치면 보강이 통째로 안 돌고, 안 돈 사실은 아무 데도 안 남는다.
 //   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. Step 3은 사용자 지시를
 //     기다리지 않으므로 사람 눈이 안 거친다. rebase 중 hunk가 빠져도 로그는 깔끔해 보이고,
@@ -30,7 +30,6 @@
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
 //   node <이 파일> read-usage --session <session_id> --from <판정 json>
-//   node <이 파일> read-usage --list
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
 
 import { execFileSync } from 'node:child_process';
@@ -48,7 +47,7 @@ const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
 const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
 
 // 읽고 안 쓴 문서의 누계. 기기를 넘어 쌓여야 신호가 차므로 백로그 레포에 둔다(같은 이유로
-// refresh-prompts·refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
+// refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
 // 환경변수는 실제 누계를 안 건드리고 사본으로 돌려보기 위한 것이다.
 const USAGE_FILE =
   process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
@@ -253,7 +252,6 @@ function collapseUnresolved(keys) {
 const AUGMENTATION_PATHS = [
   { key: 'workflow', re: /(^|\/)plan\/pr\d+\// },
   { key: 'digest', re: /(^|\/)knowledge\// },
-  { key: 'refresh-prompts', re: /refresh-prompts\/state\.json$/ },
 ];
 
 const [command, ...rest] = process.argv.slice(2);
@@ -583,20 +581,6 @@ const rowLine = ([key, v]) => `  ${v.unused}/${v.read}  ${key.replace('\t', ' �
 
 if (command === 'read-usage') {
   const cutoff = new Date(Date.now() - 30 * 86_400_000).toISOString().slice(0, 10);
-  if (rest.includes('--list')) {
-    // 누계 전체를 보는 쪽(refresh-prompts 스캔)용 — 더하지 않고 선을 넘은 것만 낸다.
-    if (!fs.existsSync(USAGE_FILE)) {
-      console.log(`${USAGE_FILE} 이 없다.`);
-      process.exit(0);
-    }
-    const state = JSON.parse(fs.readFileSync(USAGE_FILE, 'utf8'));
-    const ripe = ripeRows(state, cutoff);
-    if (!ripe) console.log('선이 안 정해졌다 — 누계 파일의 threshold에 { "read": N, "unusedRatio": R }를 적는다.');
-    // 아무것도 안 찍히면 명령이 돌았는지부터 헷갈린다.
-    else if (!ripe.length) console.log('선을 넘은 것 없음.');
-    else for (const row of ripe) console.log(rowLine(row));
-    process.exit(0);
-  }
   const from = optOf('from');
   const session = optOf('session');
   if (!from || !session) {
