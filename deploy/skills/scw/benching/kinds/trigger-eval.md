@@ -36,7 +36,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 인자 목록은 `--help`가 정본이다. 기본값을 그냥 쓰면 안 되는 것만 아래에 둔다.
 
-- `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
+- `--skill-path`: 실제 측정 대상. BEFORE/AFTER 비교는 이 경로의 SKILL.md를 고쳐가며 잰다.
 
 ## 결과 해석
 
@@ -44,13 +44,9 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 description 문제가 아니라 eval set 품질 문제다. 왜 어떤 description으로도 트리거되지 않는지는 skill-creator 「How skill triggering works」에 있다.
 
-## 안전 절차 — SKILL.md swap이 위험한 이유
+## 안전 절차 — 측정 직전 description 상태 확인
 
-bench-trigger.mjs는 측정 대상 SKILL.md를 **현 상태 그대로 측정**한다. description 변경 효과 비교(BEFORE/AFTER)를 하려면 SKILL.md를 일시 변경해야 하는데, **메인 워크트리의 SKILL.md를 swap하면 사용자의 다른 세션이 그 swap 상태로 실제 사용 영향**을 받는다.
-
-[CRITICAL] description 비교 측정은 **반드시 별도 워크트리**에서 수행한다. 그 워크트리 안의 SKILL.md만 고치고 `--skill-path`를 거기로 겨눠, 메인 워크트리의 실제 사용 환경은 건드리지 않는다.
-
-[CRITICAL] **측정 시작 직전 워크트리 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- local/skills/<name>/SKILL.md`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 워크트리 재생성.
+[CRITICAL] **측정 시작 직전 측정 대상의 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- <측정 대상 SKILL.md>`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 다시 잡는다.
 
 ## 자동 루프는 없다
 
@@ -64,7 +60,6 @@ bench-trigger.mjs는 측정만 감싼다. description 수정 → 재측정 → �
 |---|---|---|
 | mini test 부실 검증 | exit code 0 + JSON 출력만 보고 "동작"이라 판단. stderr WinError 무시 → 0/1 trigger를 "정상 0 trigger"로 해석 | stderr 끝까지 확인. WinError·Warning 텍스트 grep |
 | 라운드 무한 반복 | "0건 수렴까지" 룰 글자대로 따라 5+ 라운드 → LLM 비결정성에 묻힘, 시간 낭비 | 3~4 라운드에서 정체면 description 외 요인(scw 본문 구조, eval set 품질) 재검토 |
-| eval set 작성 시 노골적 인용 | description에 eval 쿼리 표현 그대로 박아넣음 (overfitting) → 측정 과정에선 통과해도 실제 사용성 X | 의도 표현으로 일반화. eval 쿼리는 표본일 뿐 |
 | Anthropic 표준 가정 무비판 신뢰 | "skill-creator 플러그인이 표준이라 동작할 것" → 6시간 후 broken 확인 | GitHub 이슈/PR 먼저 검색. 표준 도구도 broken 가능 |
 | non-trigger run이 cwd 오염 | 트리거 안 되는 액션형 쿼리는 `claude -p`가 본문 작업까지 수행 → repo 루트에 파일 생성·`git add`까지 함(early-kill은 트리거 시에만 발동). 측정 후 stray 산출물 잔존 | 글로벌 스킬 측정은 빈 scratch 디렉토리에서 실행(`find_project_root`가 cwd로 fallback). 로컬 스킬은 in-repo 불가피하니 측정 직후 `git status`로 stray 파일·staging 점검·정리 필수 |
 | 산문으로 자동 트리거 차단 시도 | description에 "자동 트리거하지 않는다"를 붙여도 도메인 의미 매칭(bait)이 남으면 강매칭 쿼리에서 누설(실측 0.30). bait를 걷어 0.00까지 내렸으나 이는 문장으로 확률을 누르는 우회였다 | frontmatter `disable-model-invocation: true`를 켠다. 모델 호출을 하네스가 거부하고 description은 모델 컨텍스트에서 빠지므로 누설 자체가 성립하지 않는다 |

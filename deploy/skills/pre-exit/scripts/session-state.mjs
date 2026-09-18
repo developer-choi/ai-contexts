@@ -1,7 +1,8 @@
 #!/usr/bin/env node
-// 세션 마감 전에 훑어야 할 상태 넷 — 사용자 발화 전수, 압축 스냅샷, 보강 매칭 근거, squash 전후 동일성.
+// 세션 마감 전에 훑어야 할 상태들 — 사용자 발화 전수, 압축 스냅샷, 보강 매칭 근거,
+// squash 전후 동일성, 회고 표의 빈칸, 읽고 안 쓴 문서, 시간과 지시 순서.
 //
-// 넷 다 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
+// 전부 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
 //
 //   user-turns — 「사용자 지적을 빠짐없이 회수한다」. 세는 일을 산문이 부탁하면 세는 척해도 아무도 못
 //     막는다. 실측(2026-09-03 이에이트 세션): 첫 회고 목록 7건, 실제 13건. 압축 스냅샷과 달리
@@ -16,6 +17,9 @@
 //     잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다. 트리 해시 둘을 맞대면 끝날 일이다.
 //   retro-table — 「빈칸이 하나라도 있으면 산출물 실패다」. 빠뜨린 쪽이 자기가 빠뜨린 것을 세는
 //     구조라 산문으로는 아무도 못 막는다. user-turns가 낸 번호가 정답지고 표가 채점 대상이다.
+//   timeline — 「무엇이 오래 걸렸나 / 지시가 어떤 순서로 왔나」. 둘 다 세션이 닫히면 사라지는데,
+//     체감으로 되짚으면 인상에 남은 한 자리만 올라온다. 실측(2026-09-18 세션): 내가 돈 70분 중
+//     38분이 한 턴이었고 그 안의 도구 하나가 12분 40초를 멈춰 있었다 — 그 수치는 기록에만 있다.
 //   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
 //     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
@@ -31,6 +35,7 @@
 //   node <이 파일> read-files --session <session_id>
 //   node <이 파일> read-usage --session <session_id> --from <판정 json>
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
+//   node <이 파일> timeline --session <session_id> [--notes <요약 json>] [--clip <자를 글자수>] [--html]
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -367,6 +372,221 @@ if (command === 'user-turns') {
   if (interrupts) {
     console.log(`[중단] 사용자가 응답을 끊은 횟수 ${interrupts}회 — 내용이 없어 번호를 안 붙였다. 끊긴 자리에서 무엇을 하다 끊겼는지는 회고가 본다.`);
   }
+  process.exit(0);
+}
+
+// ---------------------------------------------------------------- timeline
+
+// 표에서 눈에 띄게 만들 선들. 전부 "이 값을 넘으면 사유를 적는다"는 표시일 뿐이라,
+// 넘지 않은 줄도 표에는 그대로 남는다 — 거르면 순서를 보는 쪽이 못 쓴다.
+const SLOW_MS = 3 * 60_000; // 이 이상 걸린 턴은 강조한다
+const LONG_GAP_MS = 90_000; // 도구 하나가 이만큼 멈춰 있었으면 사유로 적는다
+const MANY_TOOLS = 10;
+const TIMELINE_CLIP = 35;
+
+// 볼 것이 없는 세션을 스스로 거르는 선. 둘 다 작을 때만 거른다 — 발화 두 개짜리라도 총
+// 시간이 길면 시간 쪽 인사이트는 남고, 짧아도 발화가 많으면 순서 쪽이 남는다.
+const SKIP_TURNS = 5;
+const SKIP_MS = 10 * 60_000;
+
+const KST_OFFSET_MS = 9 * 3_600_000;
+
+function hhmm(at) {
+  return new Date(at + KST_OFFSET_MS).toISOString().slice(11, 16);
+}
+
+function durText(value) {
+  const s = Math.round(value / 1000);
+  if (s < 60) return `${s}초`;
+  const m = Math.floor(s / 60);
+  return s % 60 ? `${m}분 ${s % 60}초` : `${m}분`;
+}
+
+// 발화마다 "그 발화가 시킨 일이 언제 끝났나"와 "그 사이에 무엇이 시간을 먹었나"를 붙인다.
+// 구간은 발화 시각으로 가른다 — 큐에 올린 발화는 기록 순서가 시각과 어긋나므로 인덱스로
+// 가르면 그 구간이 통째로 앞 턴에 붙는다.
+function attachTiming(file, turns) {
+  const entries = [];
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (!entry.timestamp || entry.isSidechain) continue;
+    entries.push({ ...entry, ms: new Date(entry.timestamp).getTime() });
+  }
+  entries.sort((a, b) => a.ms - b.ms);
+
+  return turns.map((turn, i) => {
+    const start = new Date(turn.at).getTime();
+    const stop = turns[i + 1] ? new Date(turns[i + 1].at).getTime() : Infinity;
+    const seg = entries.filter((e) => e.ms >= start && e.ms < stop);
+    const lastReply = [...seg].reverse().find((e) => e.type === 'assistant');
+
+    const tools = seg.flatMap((e) =>
+      e.type === 'assistant' && Array.isArray(e.message?.content)
+        ? e.message.content.filter((c) => c.type === 'tool_use').map((c) => c.name)
+        : []);
+    let gap = 0;
+    for (let j = 1; j < seg.length; j += 1) gap = Math.max(gap, seg[j].ms - seg[j - 1].ms);
+
+    return {
+      ...turn,
+      at: start,
+      // 답이 없는 턴 = AI가 답하기 전에 이어서 친 발화. 재전송이 아니라 별개 지시라
+      // mergeResends가 안 합친 것이므로, 행은 남기고 걸린 시간만 비운다.
+      spent: lastReply ? lastReply.ms - start : null,
+      endedAt: lastReply ? lastReply.ms : start,
+      tools: tools.length,
+      gap,
+      denied: seg.filter((e) => e.toolDenialKind).length,
+      interrupted: seg.some((e) => /^\[Request interrupted by user/.test(rawUserText(e)?.trimStart() ?? '')),
+    };
+  });
+}
+
+function timelineTotals(rows) {
+  let mine = 0;
+  let yours = 0;
+  rows.forEach((row, i) => {
+    mine += row.spent ?? 0;
+    const next = rows[i + 1];
+    if (next) yours += Math.max(0, next.at - row.endedAt);
+  });
+  return { mine, yours, total: rows.at(-1).endedAt - rows[0].at };
+}
+
+function escapeHtml(text) {
+  return String(text).replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]);
+}
+
+// 시간을 먹은 자리는 기계가 안다. 그것이 왜 걸렸는지(무슨 벤치였나·왜 25번 읽었나)는 모른다 —
+// 그 줄은 회고가 표 아래 두 덩이에 적는다.
+function spentReason(row) {
+  const bits = [];
+  if (row.gap > LONG_GAP_MS) bits.push(`도구 하나가 ${durText(row.gap)} 멈춤`);
+  if (row.tools >= MANY_TOOLS) bits.push(`도구 ${row.tools}회`);
+  if (row.denied) bits.push(`거절한 도구 호출 ${row.denied}건`);
+  if (row.interrupted) bits.push('응답을 끊음');
+  return bits.join(' · ');
+}
+
+function renderTimeline(rows, notes, clipAt) {
+  const { mine, yours, total } = timelineTotals(rows);
+  const said = (row, i) => {
+    const note = notes.rows?.[String(i + 1)];
+    const head = row.text.length > clipAt ? `${escapeHtml(row.text.slice(0, clipAt))}…` : escapeHtml(row.text);
+    return `<span class="said">${head}</span>${note ? ` <span class="note">${escapeHtml(note)}</span>` : ''}`;
+  };
+  const body = rows.map((row, i) => `
+      <tr class="${(row.spent ?? 0) > SLOW_MS ? 'slow' : ''}">
+        <td class="t">${hhmm(row.at)}</td>
+        <td>${said(row, i)}${row.edits ? `<span class="tag">같은 발화 ×${row.edits + 1} 합침</span>` : ''}</td>
+        <td class="d">${row.spent === null ? '—' : durText(row.spent)}</td>
+        <td class="w">${escapeHtml(spentReason(row))}</td>
+      </tr>`).join('');
+  const list = (items) => (items ?? []).map((x) => `<li>${escapeHtml(x)}</li>`).join('');
+
+  return `<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>세션 회고 — 시간과 순서</title>
+<style>
+  :root {
+    --bg: #fbfaf8; --fg: #1f1d1a; --muted: #6b6560; --line: #e5e0d8;
+    --card: #fff; --slow: #fdf3e7; --accent: #b4551f;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #171614; --fg: #ebe7e1; --muted: #9a938b; --line: #302d29;
+    --card: #1f1e1b; --slow: #2c2317; --accent: #e08f52;
+  } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.6 "Pretendard", -apple-system, "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 900px; margin: 0 auto; padding: 40px 16px 80px; }
+  h1 { font-size: 22px; margin: 0 0 4px; letter-spacing: -.01em; }
+  .sub { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+  .totals { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px; }
+  .tot { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; flex: 1 1 180px; }
+  .tot b { display: block; font-size: 20px; font-weight: 650; letter-spacing: -.01em; }
+  .tot span { color: var(--muted); font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  th { text-align: left; font-size: 12px; color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: 0; }
+  tr.slow { background: var(--slow); }
+  td.t { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; width: 58px; }
+  td.d { font-variant-numeric: tabular-nums; white-space: nowrap; width: 92px; }
+  tr.slow td.d { color: var(--accent); font-weight: 650; }
+  td.w { color: var(--muted); font-size: 13px; width: 30%; }
+  .note { color: var(--muted); }
+  .tag { display: inline-block; margin-left: 6px; font-size: 11px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+  h2 { font-size: 15px; margin: 34px 0 8px; }
+  .insight { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 14px 18px; }
+  .insight ul { margin: 0; padding-left: 18px; }
+  .insight li + li { margin-top: 6px; }
+  @media (max-width: 620px) { td.w, th:nth-child(4) { display: none; } }
+</style></head>
+<body><main>
+  <h1>세션 회고 — 시간과 순서</h1>
+  <div class="sub">${escapeHtml(notes.title ?? '')} · 발화 ${rows.length}건</div>
+
+  <div class="totals">
+    <div class="tot"><b>${durText(total)}</b><span>세션 전체</span></div>
+    <div class="tot"><b>${durText(mine)}</b><span>내가 돈 시간</span></div>
+    <div class="tot"><b>${durText(yours)}</b><span>다음 지시를 쓰시던 시간</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th>시각</th><th>지시</th><th>걸린 시간</th><th>어디서 먹었나</th></tr></thead>
+    <tbody>${body}
+    </tbody>
+  </table>
+
+  <h2>왜 오래 걸렸나</h2>
+  <div class="insight"><ul>${list(notes.time)}</ul></div>
+
+  <h2>순서</h2>
+  <div class="insight"><ul>${list(notes.order)}</ul></div>
+</main></body></html>
+`;
+}
+
+if (command === 'timeline') {
+  const session = optOf('session');
+  const file = transcriptOrDie(session, 'timeline');
+  const { turns } = collectTurns(file);
+  if (!turns.length) {
+    console.log('발화가 없다 — 표로 만들 것이 없다.');
+    process.exit(0);
+  }
+
+  const rows = attachTiming(file, turns);
+  const { mine, yours, total } = timelineTotals(rows);
+  if (rows.length < SKIP_TURNS && total < SKIP_MS) {
+    console.log(`[시간·순서] 볼 것 없음 — 발화 ${rows.length}건, 총 ${durText(total)}. 이 단계를 건너뛴다.`);
+    process.exit(0);
+  }
+
+  const clipAt = Number(optOf('clip') ?? TIMELINE_CLIP);
+  const notesPath = optOf('notes');
+  const notes = notesPath ? JSON.parse(fs.readFileSync(notesPath, 'utf8')) : {};
+
+  if (process.argv.includes('--html')) {
+    process.stdout.write(renderTimeline(rows, notes, clipAt));
+    process.exit(0);
+  }
+
+  console.log(`[시간·순서] 발화 ${rows.length}건 — ${file}`);
+  console.log(`총 ${durText(total)} = 내가 돈 시간 ${durText(mine)} / 다음 지시를 쓰시던 시간 ${durText(yours)}`);
+  console.log(`${clipAt}자를 넘는 발화에는 요약을 붙인다 — --notes 로 넘길 json의 rows 키가 아래 번호다.\n`);
+  rows.forEach((row, i) => {
+    const reason = spentReason(row);
+    console.log(`${i + 1}. ${hhmm(row.at)}  ${row.spent === null ? '—' : durText(row.spent)}${reason ? `  (${reason})` : ''}`);
+    console.log(`   ${row.text.length > clipAt ? `${row.text.slice(0, clipAt)}… (총 ${row.text.length}자)` : row.text}`);
+  });
   process.exit(0);
 }
 

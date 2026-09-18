@@ -10,10 +10,6 @@
 
 판단 기준: "이 규칙을 위반했는지 코드만 보고 기계적으로 체크 가능한가?" → rules, 아니면 → principles.
 
-### personal vs universal 분류
-
-판단 기준: 회사 프로젝트에서도 그대로 적용되는가 → universal, 개인 프로젝트에서만 성립하는가 → personal.
-
 ### 하위 폴더·파일 배치
 
 폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md#폴더는-같은-주제의-파일을-모은다--그-주제를-무엇으로-잡을지가-먼저다)로 보고, 아래는 coding-standards 값이다.
