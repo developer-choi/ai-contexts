@@ -31,6 +31,7 @@ eval 실행 전, writer/critic 팀으로 assertions를 검증한다.
 
 1. **컨텍스트 충족**: 이 assertion을 pass하려면 에이전트가 무엇을 읽어야 하는가? eval setup에 포함됐는가?
 2. **스킬 규칙 매핑**: 스킬의 어떤 구체적 규칙이 이 assertion의 pass를 유도하는가? 매핑 불가면 제거.
-3. **차별성**: 스킬 없는 baseline sonnet이 이걸 pass할 수 있는가? Yes면 강화하거나 교체.
+
+스킬이 있든 없든 똑같이 통과하는 항목을 걸러내는 기준은 skill-creator가 결과 분석 단계에서 정한 것을 쓴다. 여기서는 실행 전에 미리 걸 뿐이다.
 
 합의될 때까지 라운드를 반복하고, 최종 assertions만 evals.json에 기록한다.

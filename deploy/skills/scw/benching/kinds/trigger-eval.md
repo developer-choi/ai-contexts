@@ -30,9 +30,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 입력 eval set
 
-최상위 배열에 `query`(사용자가 입력할 만한 문장 — 구체적·현실적, 백스토리 포함)와 `should_trigger`(불리언) 두 키를 가진 객체를 담는다.
-
-should-trigger 8~12개, should-not-trigger 8~12개 (near-miss 위주).
+쿼리를 어떻게 쓰고 양쪽을 몇 개씩 담는지는 skill-creator 「Description Optimization」의 eval 쿼리 생성 단계를 그대로 따른다. 파일 모양(키 이름·배열)도 같다.
 
 ## 호출
 
@@ -51,7 +49,7 @@ JSON 핵심 필드:
 - `results[].rate` — 쿼리별 trigger 비율 (M/N runs)
 - `summary.failed_total` — 실행 실패 총계. 실패한 런은 트리거를 못 잰 것이라 그 쿼리는 PASS/FAIL 대신 `보류(재측정)`로 찍힌다
 
-FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 claude가 자체 답변하므로 어떤 description으로도 trigger되지 않는다 — eval set 품질 문제이지 description 문제가 아니다 (skill-creator 본문: "Simple queries... won't trigger skills regardless of description quality").
+FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 description 문제가 아니라 eval set 품질 문제다. 왜 어떤 description으로도 트리거되지 않는지는 skill-creator 「How skill triggering works」에 있다.
 
 ## 안전 절차 — SKILL.md swap이 위험한 이유
 
