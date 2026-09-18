@@ -6,15 +6,15 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 [CRITICAL] 작업 시작 전 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. 같은 6시간 함정 재발 방지용이다.
 
-## 현재 상태 (2026-08-15 재확인)
+## 현재 상태 (2026-09-18 재확인)
 
-**skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**. Anthropic 공식 fix 없음. 모든 관련 이슈·PR OPEN 상태.
+**skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**. Anthropic 공식 fix 없음 — 재확인 시점에 로컬 사본과 업스트림 main의 `run_eval.py`가 blob 해시까지 같고(`e58c70be…`), 아래 문제가 전부 그 코드에 그대로 있다.
 
-알려진 3가지 별개 문제:
+알려진 별개 문제:
 
 | 문제 | 영향 | 출처 |
 |---|---|---|
-| `claude -p`가 `.claude/commands/` 로드 안 함 (architectural) | 모든 OS — 모든 should-trigger 쿼리 0% recall | [anthropics/skills#556](https://github.com/anthropics/skills/issues/556), [anthropics/claude-code#36570](https://github.com/anthropics/claude-code/issues/36570) |
+| `claude -p`가 `.claude/commands/` 로드 안 함 (architectural) | 모든 OS — 모든 should-trigger 쿼리 0% recall | [anthropics/skills#556](https://github.com/anthropics/skills/issues/556) OPEN. [anthropics/claude-code#36570](https://github.com/anthropics/claude-code/issues/36570)은 CLOSED지만 수정돼서가 아니라 봇이 방치로 닫은 것(`NOT_PLANNED`)이고 이후 잠겨 댓글도 못 단다 |
 | Parallel worker UUID 충돌 (`--num-workers 10` default) | 모든 OS — `--num-workers 1`은 100%, default는 11% | [PR #794 OPEN](https://github.com/anthropics/skills/pull/794) |
 | 윈도우 `select.select` pipe fd 비호환 (WinError 10038) | 윈도우만 — 모든 쿼리 실패 | 미보고 |
 
