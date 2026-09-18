@@ -20,6 +20,8 @@ skill-creator는 "realistic 하라"까지 말한다. ablation은 한 단계 더 
 - 일반 예시로 대체 금지. 규칙이 방어하려는 구체 상황이 아닌 프롬프트로 측정하면 결과는 "일반 문체·행동 경향"만 보여주고 **규칙의 효과는 측정하지 않는다**
 - **오라클 선존재 차단**: 시나리오의 정답(오라클)이 워커가 읽을 수 있는 환경(타겟 파일·cwd)에 이미 있으면 ZERO가 "읽고 확인"만으로 통과해 ablation 변별력을 잃는다. 정답이 환경에 박혀있지 않은(빈/오답) 타겟으로 시나리오를 구성한다(ssi-L68 실측: 타겟 SKILL.md에 정답 링크 선존재 → 측정 무효).
 
+측정 대상이 시스템 프롬프트가 아니라 워커가 열 파일이면, 팔별 변형본 폴더는 `{{skill_dir}}/benching/scripts/build-arms.mjs`가 만든다. 손으로 만들지 않는다.
+
 ## ZERO negative control + 환경 상속 탐지
 
 ablation 벤치는 반드시 ZERO(규칙 제거) variant를 포함한다. skill-creator의 without_skill baseline과 역할이 다르다:
