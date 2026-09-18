@@ -59,7 +59,7 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
 
   --eval-set <경로>      측정 명세 JSON (필수)
   --out <경로>           결과 JSON 출력 경로 (필수)
-  --reps <n>             시나리오×팔당 반복 수 (기본 7)
+  --reps <n>             시나리오×팔당 반복 수 (기본 3)
   --model <id>           측정 대상 생성 모델 (기본 claude-sonnet-4-6)
   --grader-model <id>    채점 모델 (기본 claude-sonnet-4-6)
   --workers <n>          동시 실행 상한 (기본 8)
@@ -380,7 +380,7 @@ async function main() {
   if (args.help || args.h) { process.stdout.write(USAGE); return; }
   if (!args['eval-set'] || !args.out) { process.stderr.write(USAGE); process.exitCode = 2; return; }
 
-  args.reps = Number(args.reps ?? 7);
+  args.reps = Number(args.reps ?? 3);
   args.model ??= 'claude-sonnet-4-6';
   args['grader-model'] ??= 'claude-sonnet-4-6';
   const workers = Number(args.workers ?? 8);
@@ -488,6 +488,28 @@ async function main() {
     return { job, result };
   });
 
+  // 축 하나의 판정. 사람이 표를 눈으로 읽고 정하던 것을 여기서 찍는다
+  // (benching/kinds/rule-ablation.md 「한 패스로 닫는다」).
+  //
+  // 경계는 두 실측에 맞춘 값이다 — 차이가 반복의 1/3 이상이고 최소 2.
+  // 반복 3에서는 2이고, 2026-09-18 실측에서 반복 3 판정이 반복 9와 13/14 일치했다
+  // (어긋난 1축은 「안 갈림」으로 남긴 것이 반복 9에서 갈린 경우 — 대상을 남기는 쪽으로 틀린다).
+  // 같은 경계를 반복 9 데이터에 대면 14축이 손판정과 전부 일치한다.
+  function verdictOf(row, names) {
+    if (row.failed_total > 0) return '보류(재측정)';
+    const cells = names.map((v) => row.variants[v]).filter((c) => c.n > 0);
+    if (cells.length < 2) return '-';
+    const n = Math.max(...cells.map((c) => c.n));
+    const ratios = cells.map((c) => c.pass / c.n);
+    const gap = Math.max(...cells.map((c) => c.pass)) - Math.min(...cells.map((c) => c.pass));
+    if (gap >= Math.max(2, Math.ceil(n / 3))) return '갈림';
+    // 차이가 0이어도 양 팔이 다 바닥이면 잰 것이 없다 — 「델타 없음」과 구분해야
+    // 시나리오가 압박을 못 준 것이 규칙 불필요로 읽히지 않는다.
+    if (gap === 0 && ratios.every((r) => r >= 2 / 3)) return '델타 없음';
+    if (gap === 0 && ratios.every((r) => r <= 1 / 3)) return '바닥(양 팔 다 실패)';
+    return '안 갈림';
+  }
+
   // 행 = 시나리오(단축) 또는 시나리오#축(다축). 다축은 축마다 독립 판정이므로 행을 나눈다.
   const table = {};
   for (const scenario of scenarios) {
@@ -535,6 +557,7 @@ async function main() {
   let failedTotal = 0;
   for (const row of Object.values(table)) {
     row.verdict_withheld = row.failed_total > 0;
+    row.verdict = verdictOf(row, variantNames);
     failedTotal += row.failed_total;
   }
 
@@ -563,8 +586,7 @@ async function main() {
     const cells = variantNames.map((v) => `${row.variants[v].pass}/${row.variants[v].n}`);
     // 실패한 run은 채점 결과가 비어 실제 0점과 같은 모양으로 찍힌다. 열이 없으면
     // 측정 안 된 구간이 "델타 없음"으로 읽히므로 실패 수와 보류 표시를 함께 낸다.
-    lines.push(`| ${rowId} | ${row.type} | ${cells.join(' | ')} | ${row.failed_total} | `
-      + `${row.verdict_withheld ? '보류(재측정)' : '-'} |`);
+    lines.push(`| ${rowId} | ${row.type} | ${cells.join(' | ')} | ${row.failed_total} | ${row.verdict} |`);
   }
   lines.push('');
   lines.push(`실행 실패: ${failedTotal}건` + (failedTotal > 0 ? ' — 실패가 있는 행은 판정하지 않는다' : ''));
