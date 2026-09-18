@@ -37,17 +37,10 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 인자 목록은 `--help`가 정본이다. 기본값을 그냥 쓰면 안 되는 것만 아래에 둔다.
 
 - `--skill-path`: 실제 측정 대상. **별도 워크트리 안의 `local/skills/<name>/`** 권장 (아래 「안전 절차」 참조).
-- 모델: sonnet (SCW 「Eval」 룰).
-
-반복·워커·타임아웃은 권장값이 곧 기본값이라 안 붙여도 된다. 예전엔 기본값이 달라 산문이 "매번 이걸 붙여라"로 그 차이를 메웠는데, 한 번 빠뜨리면 60초에서 끊겼다 — 트리거되는 쿼리는 본문 작업이 130초를 넘으므로 **정상 트리거가 미트리거로 찍혀 description이 나쁜 것으로 오판된다.**
 
 ## 결과 해석
 
-JSON 핵심 필드:
-- `summary.passed/total` — 통과 비율
-- `summary.should_trigger_triggered_rate`·`should_not_trigger_triggered_rate` — 두 집계 평균. 합격선 판정은 스크립트가 표 아래에 PASS/FAIL로 붙인다(눈으로 대조하면 0.65를 통과로 읽어도 아무 데서도 안 걸리고 그 description이 그대로 배포된다)
-- `results[].rate` — 쿼리별 trigger 비율 (M/N runs)
-- `summary.failed_total` — 실행 실패 총계. 실패한 런은 트리거를 못 잰 것이라 그 쿼리는 PASS/FAIL 대신 `보류(재측정)`로 찍힌다
+쿼리별 판정도 집계 합격선 판정도 스크립트가 표로 찍어 낸다. 실패한 런이 섞인 행은 판정 대신 보류로 찍히는 것까지 스크립트가 한다.
 
 FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 description 문제가 아니라 eval set 품질 문제다. 왜 어떤 description으로도 트리거되지 않는지는 skill-creator 「How skill triggering works」에 있다.
 
