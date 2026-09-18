@@ -497,6 +497,12 @@ function reportFile(target) {
   console.log(`  선       ${limitFor(rel)}B (닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B)`);
   console.log(`  닿는 곳  ${openers.length}`);
   for (const o of openers) console.log(`    ${direct.has(o) ? "직접  " : "거쳐서"} ${o}`);
+
+  // 이쪽이 가리키면서 저쪽도 이쪽을 가리키는 짝. 양쪽 다 링크가 성해서 링크 검사에 안 걸리고,
+  // 한 파일씩 읽으면 늘 말이 되므로 짝으로 놓고 세야만 드러난다. 그 짝이 필요한지는 사람이 본다.
+  const mutual = files.filter((g) => g.rel !== rel && direct.has(g.rel) && parents.get(g.rel).has(rel));
+  console.log(`  서로 가리킴  ${mutual.length}쌍`);
+  for (const g of mutual) console.log(`    ${g.rel}`);
   if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
   console.log(
     "한계: 이 레포 안의 CLAUDE.md·local/·deploy/ md가 링크나 .md 경로로 가리키는 것만 센다. " +
