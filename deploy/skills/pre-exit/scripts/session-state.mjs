@@ -65,6 +65,9 @@ const SOURCE_FILE =
 // 갈래 이름을 세션이 지어 붙이면 같은 갈래가 여러 줄로 갈려 눈금이 영영 안 찬다. 문서 누계에서
 // 실제로 그렇게 깨졌다 — 진입점 이름이 35가지로 흩어져 한 문서의 횟수가 9·3·1로 나뉘었다.
 // 목록은 PP `local/contexts/recruitment/conventions.md` 「회사 자료는 세 단으로…」 3단 표에서 온다.
+// 「법령·제도 원문」만 그 표 밖이다 — 제도 원문은 단 순위에 안 걸리는 별개 층이라 덤프에도
+// 제 절(`## 제도 원문`)로 적히고, 그러면 3단 라벨 대상에서 빠진다. 그래도 목록에 두는 것은
+// 그 규약이 서기 전 덤프가 남아 있는 동안과, 판 자료에 딸려 온 법령이 3단 절에 섞이는 회차 때문이다.
 const SOURCE_KINDS = [
   '인터뷰',
   '기사·보도자료',
@@ -408,6 +411,31 @@ if (command === 'user-turns') {
 
 // 표에서 눈에 띄게 만들 선들. 전부 "이 값을 넘으면 사유를 적는다"는 표시일 뿐이라,
 // 넘지 않은 줄도 표에는 그대로 남는다 — 거르면 순서를 보는 쪽이 못 쓴다.
+// 보강 감지의 「이 세션에서 그 스킬을 불렀는가」를 회상이 아니라 기록으로 답한다. 회고는 세션이
+// 길어진 뒤에 도는지라 앞머리가 요약으로 접혀 있고, 그러면 불렀다는 사실이 안 떠올라 보강이 통째로
+// 안 돈다 — 안 돌았다는 것도 아무 데도 안 남아서 다음 회차까지 모른다.
+if (command === 'commands') {
+  const session = optOf('session');
+  const file = transcriptOrDie(session, 'commands');
+  const { turns } = collectTurns(file);
+  const counts = new Map();
+  for (const { text } of turns) {
+    const name = text.match(/^(\/\S+)/)?.[1];
+    if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  if (!counts.size) {
+    console.log(`[이 세션이 부른 슬래시 명령] 없음 — ${file}`);
+    process.exit(0);
+  }
+  console.log(`[이 세션이 부른 슬래시 명령] ${counts.size}종 — ${file}`);
+  for (const [name, n] of [...counts].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))) {
+    console.log(`  ${name}${n > 1 ? `  ×${n}` : ''}`);
+  }
+  // 스킬이 자동 발동된 회차는 호출 기록이 안 생긴다. 목록에 없다고 그 스킬을 안 쓴 것은 아니다.
+  console.log('\n사용자가 슬래시로 부른 것만 남는다 — 자동 발동은 안 잡히므로, 이 목록은 「불렀다」의 증거이지 「안 불렀다」의 증거가 아니다.');
+  process.exit(0);
+}
+
 const SLOW_MS = 3 * 60_000; // 이 이상 걸린 턴은 강조한다
 const LONG_GAP_MS = 90_000; // 도구 하나가 이만큼 멈춰 있었으면 사유로 적는다
 const MANY_TOOLS = 10;
@@ -949,6 +977,10 @@ if (command === 'read-usage') {
 // 지원동기 회차가 3단에서 떠온 갈래의 누계. 회고가 내는 것은 절마다의 **갈래 라벨뿐**이고,
 // 쓰였는지 안 쓰였는지는 PP `site-usage.mjs --sections`가 낸 목록에서 읽는다 — 사람만 할 수 있는
 // 일(어느 갈래인가)과 기계가 아는 일(인용됐는가)을 섞으면, 기계가 아는 것을 사람이 틀리게 적는다.
+//
+// `--sections` 출력 모양(`sections[].title`·`cited`)에 기대므로, PP
+// `local/contexts/recruitment/scripts/site-usage.mjs`를 고치면 여기도 함께 본다. 레포가 갈려 결속
+// 등록부에 못 묶는다 — 양쪽 주석이 서로를 가리킨다.
 if (command === 'source-usage') {
   if (rest.includes('--kinds')) {
     console.log(`받는 갈래: ${SOURCE_KINDS.join(', ')}`);

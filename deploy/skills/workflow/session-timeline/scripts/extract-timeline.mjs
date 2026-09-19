@@ -107,8 +107,15 @@ function unwrapTaskNotification(text) {
 // 사용자가 친 것이 아닌데 `type=user`로 들어오고 `isMeta`도 안 붙는 것들. 런타임이 사용자 자리에
 // 끼워 넣는 주입이라 「사용자」로 찍히면 타임라인 위에서 도는 판정이 전부 오염된다. 마커가
 // **줄 첫머리**에 오는 것만 잡는다 — 본문 중간에 인용된 같은 글자에는 안 걸린다.
-// 짝꿍인 pre-exit `session-state.mjs`의 `INJECTED`와 같은 목록을 본다. 한쪽에서 새 꼴을
-// 발견하면 다른 쪽에도 넣는다 — 안 그러면 한쪽 산출물에만 주입이 발화로 샌다.
+// 짝꿍인 pre-exit `session-state.mjs`의 `INJECTED`와 짝이다. 한쪽에서 새 꼴을 발견하면 다른
+// 쪽에도 넣는다 — 안 그러면 한쪽 산출물에만 주입이 발화로 샌다.
+//
+// **다만 두 목록이 글자까지 같아야 하는 것은 아니다.** 저쪽에만 있는 셋은 이쪽에서 이 목록
+// 앞의 다른 분기가 이미 덮는다 — `<bash-stdout>`·`<bash-stderr>`는 `stripLocalCommandOutput`이,
+// `This session is being continued…`는 아래 `COMPACT_PREFIX`가 받는다(실측 2026-09-19, 최근
+// 120세션: 첫머리가 `<bash-std*>`인 비-meta user 엔트리 5건이 전부 산출물에 안 실렸다).
+// 여기 옮겨 적으면 중복이고, `COMPACT_PREFIX`는 순서상 죽은 코드가 된다. 목록 차이를 보고
+// 어긋남으로 판단하기 전에 그 꼴이 실제로 발화로 새는지 산출물에서 먼저 확인한다.
 const INJECTED = [
   { re: /^Another Claude session sent a message/, label: '다른 세션이 보낸 메시지' },
   { re: /^<teammate-message\b/, label: '팀메이트 메시지' },

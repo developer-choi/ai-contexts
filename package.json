@@ -20,7 +20,8 @@
     "verify:settings": "node scripts/settings/verify-settings-projection.mjs",
     "verify:skill-purpose": "node scripts/verify/verify-skill-purpose.mjs",
     "verify:skill-render": "node scripts/verify/verify-skill-render.mjs",
-    "verify:skill-script-paths": "node scripts/verify/verify-skill-script-paths.mjs"
+    "verify:skill-script-paths": "node scripts/verify/verify-skill-script-paths.mjs",
+    "verify:source-usage": "node scripts/verify/verify-source-usage.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",

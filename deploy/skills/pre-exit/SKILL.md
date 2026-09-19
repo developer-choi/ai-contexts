@@ -25,7 +25,9 @@ argument-hint: "[보강 회고: workflow | digest | write-refine | routine | rec
 | `routine` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/routine-*` 스킬 호출 | [augmentations/routine.md](augmentations/routine.md) |
 | `recruitment` 인자, 또는 cwd가 `private-playground`이고 세션에서 `/recruitment-application`·`/recruitment-motivation` 호출 | [augmentations/recruitment.md](augmentations/recruitment.md) |
 
-감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포 경로>`가 낸다. 대화 쪽 조건(그 스킬을 이 세션에서 불렀는가)은 세션만 아는 사실이라 그대로 판단한다.
+감지 조건 중 **파일로 갈리는 쪽**은 `node {{skill_dir}}/scripts/session-state.mjs changed --repo <레포 경로>`가, **대화 쪽(그 스킬을 이 세션에서 불렀는가)**은 `node {{skill_dir}}/scripts/session-state.mjs commands --session <session_id>`가 낸다. 기억으로 답하지 않는다 — 회고는 세션이 길어진 뒤에 도는지라 앞머리가 요약으로 접혀 있기도 하고, 안 떠올라 보강을 건너뛰면 건너뛰었다는 것도 아무 데도 안 남는다.
+
+**그 목록에 없다고 안 부른 것은 아니다.** 스킬이 자동 발동된 회차는 호출 기록이 안 생기므로, 목록이 비었으면 그때는 세션이 판단한다.
 
 자동 감지로 매칭된 경우 보강 실행 전 사용자 확인을 받는다. 인자가 명시되면 확인 없이 바로 실행한다.
 
