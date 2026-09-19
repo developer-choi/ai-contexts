@@ -57,6 +57,35 @@ const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
 const USAGE_FILE =
   process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
 
+// 지원동기 회차가 3단(막혔을 때만 여는 자리)에서 떠온 갈래의 누계. 위 문서 누계의 형제다 —
+// 저쪽은 이 세션이 연 프롬프트 문서를, 이쪽은 회사를 조사해 떠온 바깥 출처를 센다.
+const SOURCE_FILE =
+  process.env.SOURCE_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'source-usage.json');
+
+// 갈래 이름을 세션이 지어 붙이면 같은 갈래가 여러 줄로 갈려 눈금이 영영 안 찬다. 문서 누계에서
+// 실제로 그렇게 깨졌다 — 진입점 이름이 35가지로 흩어져 한 문서의 횟수가 9·3·1로 나뉘었다.
+// 목록은 PP `local/contexts/recruitment/conventions.md` 「회사 자료는 세 단으로…」 3단 표에서 온다.
+const SOURCE_KINDS = [
+  '인터뷰',
+  '기사·보도자료',
+  '대표 기고',
+  '앱스토어 설명·리뷰',
+  '커뮤니티 글',
+  '설문·통계',
+  '업계 실무 자료',
+  '법령·제도 원문',
+  '학술논문',
+];
+
+// 3단 절 중에는 자료가 아니라 메모인 것이 섞인다(「열게 된 조건」·「확인했으나 싣지 않은 자리」).
+// 눈금에 안 올리되 라벨을 붙이게 해서, 빠뜨린 절과 구분한다 — 빠뜨림은 곧 분모가 줄어드는 것이라
+// 조용히 넘기면 안 된다.
+const SOURCE_SKIP = '해당 없음';
+
+// 문서 쪽 30일과 다르다. 지원은 몰아서 돌아(11개 회차 중 9개가 2026-09-14~16 사흘에 몰렸다)
+// 30일 창이면 한 달 쉬는 사이 눈금이 통째로 빠져 0에서 다시 시작한다.
+const SOURCE_WINDOW_DAYS = 90;
+
 // CLI가 그 자리에서 돌린 명령의 출력·주의문이 user 엔트리에 섞여 들어온다. 발화 뒤에 붙는 일도
 // 있어 첫머리 검사로는 못 걷는다.
 const LOCAL_COMMAND_TAGS = /<local-command-(stdout|stderr|caveat)>[\s\S]*?<\/local-command-\1>/g;
@@ -789,13 +818,14 @@ const RECORDER = 'pre-exit';
 // 선은 누계 파일의 threshold가 갖는다. 선을 넘어도 마지막으로 열린 지 오래된 줄은 안 띄운다 —
 // 자리를 고치면 그 진입점이 그 문서를 안 물게 되어 눈금이 멈추는데, 멈춘 줄이 계속 뜨면 알람을
 // 끄려고 따로 손대야 한다. 다시 열리면 last가 갱신돼 도로 뜬다.
-function ripeRows(state, cutoff) {
-  const t = state.threshold;
-  if (!t) return null;
-  return Object.entries(state.docs ?? {})
-    .filter(([key, v]) => !key.startsWith(`${RECORDER}\t`) && v.read >= t.read && v.unused / v.read >= t.unusedRatio && v.last >= cutoff)
+function ripeRows(rows, threshold, cutoff, skip = () => false) {
+  if (!threshold) return null;
+  return rows
+    .filter(([key, v]) => !skip(key) && v.read >= threshold.read && v.unused / v.read >= threshold.unusedRatio && v.last >= cutoff)
     .sort((a, b) => b[1].unused / b[1].read - a[1].unused / a[1].read);
 }
+
+const ripeDocs = (state, cutoff) => ripeRows(Object.entries(state.docs ?? {}), state.threshold, cutoff, (key) => key.startsWith(`${RECORDER}\t`));
 
 const rowLine = ([key, v]) => `  ${v.unused}/${v.read}  ${key.replace('\t', ' → ')}`;
 
@@ -906,12 +936,153 @@ if (command === 'read-usage') {
   // 선을 넘은 줄 중 이번 세션이 연 것만 알린다. 그 문서를 왜 열었고 무엇에 쓰려 했는지는 이 세션과
   // 사용자가 지금 기억하고 있고, 누계만 받은 다른 세션은 그 이유를 다시 추적해야 한다. 이번 세션이
   // 안 연 줄까지 띄우면 매 회고가 같은 목록을 되풀이하게 된다.
-  const ripe = ripeRows(state, cutoff);
+  const ripe = ripeDocs(state, cutoff);
   const mine = (ripe ?? []).filter(([key]) => key in verdicts && verdicts[key] !== 'excluded');
   if (mine.length) {
     console.log(`\n[배치 의심] 이번 세션이 연 문서 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
     for (const row of mine) console.log(rowLine(row));
     console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 read-usage.md 「선을 넘은 것」.');
+  }
+  process.exit(0);
+}
+
+// 지원동기 회차가 3단에서 떠온 갈래의 누계. 회고가 내는 것은 절마다의 **갈래 라벨뿐**이고,
+// 쓰였는지 안 쓰였는지는 PP `site-usage.mjs --sections`가 낸 목록에서 읽는다 — 사람만 할 수 있는
+// 일(어느 갈래인가)과 기계가 아는 일(인용됐는가)을 섞으면, 기계가 아는 것을 사람이 틀리게 적는다.
+if (command === 'source-usage') {
+  if (rest.includes('--kinds')) {
+    console.log(`받는 갈래: ${SOURCE_KINDS.join(', ')}`);
+    console.log(`자료가 아닌 절(열게 된 조건·확인했으나 싣지 않은 자리 등)에는 「${SOURCE_SKIP}」을 붙인다 — 눈금에 안 오르되 빠뜨린 것과 구분된다.`);
+    process.exit(0);
+  }
+
+  const session = optOf('session');
+  const from = optOf('from');
+  const sectionsPath = optOf('sections');
+  const exclude = (optOf('exclude') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  if (!session) {
+    console.error('source-usage 에는 --session <session_id> 가 필요하다 — 없으면 같은 판정을 두 번 넣었을 때 가를 방법이 없다.');
+    process.exit(1);
+  }
+  if (!from && !exclude.length) {
+    console.error('source-usage 에는 --from <라벨 json> 이나 --exclude <갈래> 중 하나가 필요하다.');
+    console.error('라벨 json 형식: { "<site-usage --sections가 낸 절 제목>": "<갈래>" }');
+    process.exit(1);
+  }
+  // 분모(이번 회차가 3단에서 떠온 갈래 전부)를 기억으로 채우면 이 장치가 막으려던 일이 그대로 난다.
+  if (from && !sectionsPath) {
+    console.error('--from 을 줄 때는 --sections <site-usage --sections 출력> 도 줘야 한다 — 안 쓴 비율의 분모가 거기서 나온다.');
+    process.exit(1);
+  }
+
+  if (!fs.existsSync(SOURCE_FILE)) {
+    if (!fs.existsSync(path.dirname(SOURCE_FILE))) {
+      // 백로그 레포가 없는 기기에서는 조용히 넘어간다 — 기기 간 공유가 목적이라 레포 없이 만들면
+      // 다음 세션이 못 읽는다.
+      console.log(`[3단 갈래 누계] 누계를 둘 레포가 없어 건너뛴다 — ${SOURCE_FILE}`);
+      process.exit(0);
+    }
+    // 폴더가 있는데 파일이 없으면 만든다. 「없으면 no-op」만 두면 아무도 안 만들어 줘서 영영 안 돈다.
+    fs.writeFileSync(SOURCE_FILE, `${JSON.stringify({ kinds: {}, excluded: [], threshold: { read: 3, unusedRatio: 0.4 }, sessions: {} }, null, 2)}\n`);
+    console.log(`[3단 갈래 누계] 누계 파일을 새로 만들었다 — ${SOURCE_FILE}`);
+  }
+
+  let labels = {};
+  let rawLabels = '';
+  let sections = [];
+  if (from) {
+    try {
+      rawLabels = fs.readFileSync(from, 'utf8');
+      labels = JSON.parse(rawLabels);
+    } catch (error) {
+      console.error(`라벨 파일을 못 읽었다: ${error.message}`);
+      process.exit(1);
+    }
+    try {
+      sections = JSON.parse(fs.readFileSync(sectionsPath, 'utf8')).sections ?? [];
+    } catch (error) {
+      console.error(`절 목록을 못 읽었다: ${error.message}`);
+      process.exit(1);
+    }
+  }
+
+  const titles = new Map(sections.map((s) => [s.title, s]));
+  const allowed = new Set([...SOURCE_KINDS, SOURCE_SKIP]);
+  // 전부 검사한 뒤에 더한다. 한 줄씩 끊으면 고칠 것을 하나씩만 알게 된다.
+  const problems = [];
+  for (const [title, kind] of Object.entries(labels)) {
+    if (!allowed.has(kind)) problems.push(`모르는 갈래 ${JSON.stringify(kind)} (${title.slice(0, 60)})`);
+    if (!titles.has(title)) problems.push(`이 회차가 안 떠온 절 ${JSON.stringify(title.slice(0, 60))} — --sections 가 낸 제목을 그대로 옮긴다.`);
+    // JSON.parse는 같은 키를 조용히 덮어써서, 두 갈래에 달린 절이 한 갈래로만 세어진다.
+    const seen = rawLabels.split(JSON.stringify(title)).length - 1;
+    if (seen > 1) problems.push(`같은 절이 ${seen}번 들어왔다 ${JSON.stringify(title.slice(0, 60))}`);
+  }
+  // 라벨을 빠뜨리면 그 갈래의 분모가 조용히 줄어든다.
+  for (const sec of sections) {
+    if (/^##\s*3단/.test(sec.title) && !(sec.title in labels)) {
+      problems.push(`라벨이 안 붙은 3단 절 ${JSON.stringify(sec.title.slice(0, 60))} — 자료가 아니면 「${SOURCE_SKIP}」을 붙인다.`);
+    }
+  }
+  for (const kind of exclude) if (!SOURCE_KINDS.includes(kind)) problems.push(`모르는 갈래 ${JSON.stringify(kind)} (--exclude)`);
+  if (problems.length) {
+    for (const p of problems) console.error(p);
+    console.error(`\n받는 갈래: ${SOURCE_KINDS.join(', ')}, ${SOURCE_SKIP}`);
+    process.exit(1);
+  }
+
+  const state = JSON.parse(fs.readFileSync(SOURCE_FILE, 'utf8'));
+  state.kinds ??= {};
+  state.excluded ??= [];
+  state.sessions ??= {};
+  const today = new Date().toISOString().slice(0, 10);
+  const windowStart = new Date(Date.now() - SOURCE_WINDOW_DAYS * 86_400_000).toISOString().slice(0, 10);
+  for (const [id, day] of Object.entries(state.sessions)) if (day < windowStart) delete state.sessions[id];
+  const counted = Boolean(state.sessions[session]);
+
+  // 사용자가 「원래 가끔만 맞는 갈래」로 판정한 것은 다시 안 뜬다. 없으면 선을 넘은 갈래가 매 회차
+  // 같은 알람을 내고, 그게 이런 장치가 무뎌지는 가장 흔한 경로다.
+  for (const kind of exclude) {
+    if (!state.excluded.includes(kind)) state.excluded.push(kind);
+    delete state.kinds[kind];
+  }
+
+  // 갈래마다 한 눈금이다. 절 단위로 세면 한 회차에 절이 여럿인 갈래(법령 원문)가 분모를 독식한다.
+  const byKind = new Map();
+  for (const [title, kind] of Object.entries(labels)) {
+    if (kind === SOURCE_SKIP) continue;
+    if (!byKind.has(kind)) byKind.set(kind, []);
+    byKind.get(kind).push(titles.get(title));
+  }
+  let added = 0;
+  let skipped = 0;
+  for (const [kind, secs] of byKind) {
+    if (counted) continue;
+    if (state.excluded.includes(kind)) {
+      skipped += 1;
+      continue;
+    }
+    const row = (state.kinds[kind] ??= { read: 0, unused: 0, last: today });
+    row.read += 1;
+    // 하나라도 인용됐으면 그 갈래는 값을 했다 — 판정 문장 「없었으면 결과가 달라졌나」와 같은 방향이다.
+    if (secs.every((s) => !s.cited)) row.unused += 1;
+    row.last = today;
+    added += 1;
+  }
+  if (!counted && byKind.size) state.sessions[session] = today;
+  fs.writeFileSync(SOURCE_FILE, `${JSON.stringify(state, null, 2)}\n`);
+
+  const notes = [skipped ? `제외 목록에 있어 건너뜀 ${skipped}건` : null, exclude.length ? `제외 ${exclude.length}건` : null];
+  const head = counted ? '이 회차는 이미 더했다 — 제외만 반영했다' : `${added}건 반영`;
+  console.log(`[3단 갈래 누계] ${head}${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${SOURCE_FILE}`);
+
+  // 선을 넘은 갈래 중 이번 회차가 떠온 것만 알린다. 왜 팠고 무엇에 쓰려 했는지는 이 회차와 사용자가
+  // 지금 기억하고 있고, 누계만 받은 다른 회차는 그 이유를 다시 추적해야 한다.
+  const ripe = ripeRows(Object.entries(state.kinds), state.threshold, windowStart);
+  const mine = (ripe ?? []).filter(([kind]) => byKind.has(kind));
+  if (mine.length) {
+    console.log(`\n[3단 낭비 의심] 이번 회차가 떠온 갈래 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
+    for (const row of mine) console.log(rowLine(row));
+    console.log('회고 문제 목록에 올린다 — 무엇을 고르게 하는지는 augmentations/recruitment.md 「떠왔는데 안 쓴 절」.');
   }
   process.exit(0);
 }
