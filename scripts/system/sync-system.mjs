@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
+import { runVerifications } from '../lib/verify-runner.mjs';
 
 import {
   CATEGORIES,
@@ -36,21 +36,27 @@ import {
   verifySettings,
 } from '../lib/deploy-lib.mjs';
 
-async function main() {
-  ensureHooksReady();
-  ensureDeploySource();
+// 배포 전 fail-fast 게이트. 디스크에 쓰는 것은 verify-source-usage 하나뿐이고 그것도 자기
+// mkdtemp 폴더 안에서만 쓰므로, 겹쳐 돌려도 서로 간섭하지 않는다.
+const scriptsDir = path.join(import.meta.dirname, '..');
+const VERIFY_STEPS = [
   // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'settings', 'verify-settings-projection.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'settings', 'verify-settings-projection.mjs') },
   // 정책 hook은 구멍이 나도 조용하다(등록·실행은 정상, 특정 명령 형태만 통과). 배포 전에 판정을 고정한다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-hook-policies.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'verify', 'verify-hook-policies.mjs') },
   // 목적 없는 스킬이 배포되면 나중에 본문이 목적에서 벗어났는지 판정할 기준이 없다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'verify', 'verify-skill-purpose.mjs') },
   // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'verify', 'verify-skill-render.mjs') },
   // 실행 위치에 기대는 스크립트 호출이 배포되면, 그 스킬을 다른 레포에서 부른 순간 엉뚱한 폴더를 뒤진다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-script-paths.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'verify', 'verify-skill-script-paths.mjs') },
   // 잘못 세는 눈금은 그 자리에서 정상으로 보이고 몇 달 뒤 안 차는 것으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-source-usage.mjs')], { stdio: 'inherit' });
+  { file: path.join(scriptsDir, 'verify', 'verify-source-usage.mjs') },
+];
+
+async function main() {
+  ensureDeploySource();
+  await runVerifications(VERIFY_STEPS, ensureHooksReady);
 
   const targetArg = process.argv[2];
   const targetDir = resolveUserPath(targetArg || defaultClaudeDir());

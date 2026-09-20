@@ -8,11 +8,49 @@
 
 import childProcess from 'node:child_process';
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { promisify } from 'node:util';
 
 const hooksDir = path.join(import.meta.dirname, '..', '..', 'deploy', 'hooks');
+
+// 케이스마다 node를 새로 띄우는 검증이라 스폰 개수가 곧 실행시간이다(173건 × 45~105ms ≈ 18초).
+// 서로 독립인 케이스를 겹쳐 돌리되, 훅은 그대로 별도 프로세스로 띄운다 — 훅을 import해서
+// 부르면 빨라지지만 "실제 payload를 프로세스 경계로 흘린다"는 이 검증의 전제가 사라진다.
+const DEFAULT_CONCURRENCY = Math.min(12, Math.max(4, os.cpus().length - 1));
+// 실패가 떴을 때 병렬 탓인지 진짜 회귀인지 가르는 수단. 1로 두면 직렬로 재현된다.
+const CONCURRENCY = Number(process.env.VERIFY_HOOK_CONCURRENCY) || DEFAULT_CONCURRENCY;
+// 절 참조 훅은 케이스 하나가 git을 여러 번 더 스폰한다(rev-parse·diff·ls-files·파일마다 show).
+// 같은 한도를 주면 실제 프로세스가 몇 배로 불어나고, 포화로 git이 실패하면 그 훅은 fail-open이라
+// deny 기대가 조용히 pass로 뒤집힌다.
+const SECTION_REF_CONCURRENCY = Math.max(1, Math.min(6, CONCURRENCY));
+// 병렬 실행은 직렬에 없던 교착 모드가 생긴다. 게이트가 소리 없이 매달리는 것보다 FAIL이 낫다.
+const HOOK_TIMEOUT_MS = 60_000;
+
+const execFileAsync = promisify(childProcess.execFile);
+
+// fixture 준비용 git. 동기 실행(execSync)은 스레드를 통째로 멈춰 이미 떠 있는 훅들의 완료
+// 콜백까지 같이 세운다 — 준비 한 번이 곧 전 그룹의 정지 구간이 되므로 비동기로만 부른다.
+function runGit(args, cwd, env) {
+  return execFileAsync('git', args, {
+    cwd,
+    env: env ? { ...process.env, ...env } : process.env,
+    windowsHide: true,
+  });
+}
+
+const COMMIT_AS = ['-c', 'user.email=verify@local', '-c', 'user.name=verify'];
+
+function makeTempDir(prefix) {
+  return fsp.mkdtemp(path.join(os.tmpdir(), prefix));
+}
+
+// Windows에서는 방금까지 git.exe가 cwd로 잡고 있던 디렉토리가 바로 안 지워진다(EBUSY).
+function removeTempDir(dir) {
+  return fsp.rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+}
 
 // [hook 파일, 명령, 기대 판정, 설명]
 // 기대 판정: 'deny' | 'ask' | 'pass'(훅이 아무 결정도 내지 않음)
@@ -373,6 +411,169 @@ WRITE_CASES.push(
   ],
 );
 
+// 툴 프로토콜 잔재 태그. 정상 콘텐츠에 홀로 있을 수 없는 줄이라 차단이고, 그 태그를 *설명하는*
+// 문서는 막히면 안 된다 — 이 둘이 갈리는 지점이 「줄 전체가 태그인가」다.
+WRITE_CASES.push(
+  [
+    'check-artifact-tag-policy.mjs',
+    mdWrite('본문 마지막 문단.\n</content>\n'),
+    'deny',
+    'EOF에 홀로 남은 닫는 태그',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    mdWrite('<parameter name="target">\n본문.\n'),
+    'deny',
+    '속성이 붙은 여는 태그도 줄 전체면 잡는다',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    mdWrite('  </invoke>  \n본문.\n'),
+    'deny',
+    '앞뒤 공백이 붙은 antml 네임스페이스도 잡는다',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    { tool_name: 'Edit', tool_input: { file_path: 'C:/tmp/doc.md', new_string: '본문.\n</result>\n' } },
+    'deny',
+    'Edit으로 새로 넣는 잔재도 잡는다',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    mdWrite('`</content>` 는 도구 래퍼가 샌 흔적이다.\n'),
+    'pass',
+    '백틱으로 감싼 언급은 통과 — 아티팩트를 설명하는 문서가 막히면 안 된다',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    mdWrite('문장 중간에 </invoke> 가 나오는 경우는 잔재가 아니다.\n'),
+    'pass',
+    '줄 전체가 아니면 잡지 않는다',
+  ],
+  [
+    'check-artifact-tag-policy.mjs',
+    { tool_name: 'MultiEdit', tool_input: { file_path: 'C:/tmp/doc.md', new_string: '</content>\n' } },
+    'pass',
+    'MultiEdit은 edit 어댑터가 라우팅하지 않아 대상이 아니다',
+  ],
+);
+
+// 배포 산출물 직접 수정. ask라서 사용자가 승인하면 통과하는 자리이고, 오차단이 나면 워크트리
+// 작업이 통째로 막힌다 — 아래 worktree 케이스가 그 경계다.
+const homeDeploy = (...segs) => path.join(os.homedir(), ...segs);
+
+WRITE_CASES.push(
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('{}', homeDeploy('.claude', 'settings.json')),
+    'ask',
+    '홈 배포 루트 하위',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('{}', homeDeploy('.codex', 'hooks.json')),
+    'ask',
+    'codex 홈도 같다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 스킬\n', 'C:/repo/.agents/skills/a/SKILL.md'),
+    'ask',
+    '레포 안 .agents 세그먼트',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 스킬\n', 'C:/repo/.claude/skills/a/SKILL.md'),
+    'ask',
+    '.claude 다음이 skills면 산출물',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 규칙\n', 'C:/repo/AGENTS.md'),
+    'ask',
+    'CLAUDE.md가 원본이라 AGENTS.md는 위치 불문 산출물',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 규칙\n', 'C:/repo/GEMINI.md'),
+    'ask',
+    'GEMINI.md도 같다',
+  ],
+  // AC 워크트리는 `…/ai-contexts/.claude/worktrees/<name>/…` 라, `.claude`가 경로에 있다는
+  // 이유로 막으면 워크트리 작업 전체가 막힌다. 다음 세그먼트로 갈리는 것을 고정한다.
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 문서\n', homeDeploy('WebstormProjects', 'main', 'ai-contexts', '.claude', 'worktrees', 'wt', 'deploy', 'x.md')),
+    'pass',
+    '.claude 다음이 worktrees면 산출물이 아니다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 규칙\n', 'C:/repo/CLAUDE.md'),
+    'pass',
+    'CLAUDE.md는 원본이라 통과',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 문서\n', 'C:/repo/deploy/contexts/x.md'),
+    'pass',
+    '원본 경로는 통과',
+  ],
+);
+
+// 규칙 옆 예시. 차단이 아니라 알림이라 'context'가 기대값이고, 발동 범위가 안 좁혀져 있으면
+// 무관한 편집마다 뜬다 — 통과 케이스 쪽이 이 훅의 값어치를 지킨다.
+WRITE_CASES.push(
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('**before** — 옛 문장\n\n**after** — 새 문장\n', skillDoc),
+    'context',
+    'before/after 쌍',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('❌ 위반 (백로그 레포, 2026-08-14)\n', skillDoc),
+    'context',
+    '날짜가 붙은 위반 사례 블록',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('**2026-08-15 개정.** 그전에는 달랐다.\n', skillDoc),
+    'context',
+    '날짜로 여는 개정 이력',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('사용자 교정: 이렇게 쓰지 말 것.\n', skillDoc),
+    'context',
+    '사용자 발화를 되짚는 서술',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('## 규칙\n\n조건을 문장에 담고 사례는 적지 않는다.\n', skillDoc),
+    'pass',
+    '사건 서술이 없으면 조용하다',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('금지 예시다.\n\n```md\n**before** — 옛 문장\n```\n', skillDoc),
+    'pass',
+    '코드블록 안의 인용은 보지 않는다',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('**before** — 옛 문장\n', 'C:/tmp/docs/design.md'),
+    'pass',
+    '프롬프트·스킬 문서가 아니면 보지 않는다',
+  ],
+  [
+    'check-md-rule-example.mjs',
+    mdWrite('**before** — 옛 문장\n', 'C:/tmp/skills/a/note.txt'),
+    'pass',
+    '.md가 아니면 검사 대상이 아니다',
+  ],
+);
+
 // 레포 제외는 파일 경로 위쪽에 `.git`이 있어야 판정되므로 실제 폴더를 만들어 검증한다.
 const repoCases = (dir) => [
   [
@@ -401,15 +602,15 @@ const repoCases = (dir) => [
   ],
 ];
 
-function withRepoFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-repo-fixture-'));
+async function withRepoFixture(fn) {
+  const dir = await makeTempDir('hook-repo-fixture-');
   try {
     for (const name of ['backlog', 'other-repo']) {
       fs.mkdirSync(path.join(dir, name, '.git'), { recursive: true });
     }
-    return fn(dir);
+    return await fn(dir);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(dir);
   }
 }
 
@@ -444,13 +645,13 @@ const editCases = (dir) => [
   ],
 ];
 
-function withPackageFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-package-fixture-'));
+async function withPackageFixture(fn) {
+  const dir = await makeTempDir('hook-package-fixture-');
   try {
     fs.writeFileSync(path.join(dir, 'pkg.md'), PKG);
-    return fn(dir);
+    return await fn(dir);
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(dir);
   }
 }
 
@@ -460,6 +661,56 @@ const WAIT_CASES = [
   ['sleep 30', 'a1b2c3', true, '서브에이전트의 빈 대기는 턴을 끝내지 말라고 안내한다'],
   ['Start-Sleep -Seconds 60', 'a1b2c3', true, 'PowerShell 대기도 서브에이전트 안내'],
   ['until [ -f out.txt ]; do sleep 5; done', 'a1b2c3', null, '조건을 확인하는 루프는 서브에이전트에서도 통과'],
+];
+
+// 파일도 명령도 아닌 payload를 보는 hook들. 도구 이름과 인자 모양만으로 판정이 끝난다.
+// [hook 파일, payload, 기대 판정, 설명]
+const TOOL_CASES = [
+  // 팀 에이전트 shutdown 금지. message가 객체이고 type이 그것일 때만 걸린다.
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: { type: 'shutdown_request' } } },
+    'deny',
+    'shutdown_request 차단',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: '진행 상황 알려줘' } },
+    'pass',
+    '문자열 메시지는 통과',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: { type: 'text', text: 'x' } } },
+    'pass',
+    '다른 type의 객체 메시지는 통과',
+  ],
+
+  // 측정 에이전트에 기대가 새는 것을 막는다. 「측정 지시서」로 여는 프롬프트는 표만 담아야 한다.
+  [
+    'check-blind-measure-prompt.mjs',
+    { tool_name: 'Agent', tool_input: { prompt: '측정 지시서\n| 대상 | 입력 |\n| --- | --- |\n| a.md | x |' } },
+    'pass',
+    '표만 있으면 통과',
+  ],
+  [
+    'check-blind-measure-prompt.mjs',
+    { tool_name: 'Agent', tool_input: { prompt: '측정 지시서\n| 대상 | 입력 |\n문서는 A가 맞다고 주장한다.' } },
+    'deny',
+    '산문 한 줄이 곧 누출 경로다',
+  ],
+  [
+    'check-blind-measure-prompt.mjs',
+    { tool_name: 'Agent', tool_input: { prompt: '측정 지시서\n\n| 대상 | 입력 |\n\n| --- | --- |\n' } },
+    'pass',
+    '빈 줄은 산문으로 세지 않는다',
+  ],
+  [
+    'check-blind-measure-prompt.mjs',
+    { tool_name: 'Agent', tool_input: { prompt: '일반 조사 지시\n무엇이든 산문으로 적는다.' } },
+    'pass',
+    '첫 줄이 마커가 아니면 보지 않는다',
+  ],
 ];
 
 // --- 브라우저 쓰기 차단 ---
@@ -522,9 +773,17 @@ const BROWSER_CASES = [
 ];
 
 // 상태 파일을 임시 경로에 깔고 환경변수로 훅에 물린다(실제 기록을 건드리지 않는다).
-function withBrowserStateFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'browser-tab-state-'));
+//
+// 이 변수는 process.env에 심지 않고 스폰마다 넘긴다. 전역에 심으면 함께 도는 다른 그룹의 훅까지
+// 이 파일을 보게 되고, 반대로 넘기는 것을 빠뜨리면 훅이 사용자의 진짜 탭 기록을 읽어 판정한다.
+// 그래서 fn에 파일 경로가 아니라 env 객체를 넘긴다 — 빠뜨리면 사용처에서 바로 눈에 띈다.
+//
+// 받아 적는 쪽(record-browser-tab-url) 검증은 상태 파일을 통째로 덮어쓰므로 별도 파일을 준다.
+// 같은 파일을 쓰면 판정 케이스가 다 끝난 뒤에만 돌 수 있어 그룹 안에서 직렬 구간이 된다.
+async function withBrowserStateFixture(fn) {
+  const dir = await makeTempDir('browser-tab-state-');
   const file = path.join(dir, 'browser-tab-urls.json');
+  const recordFile = path.join(dir, 'recorded-tab-urls.json');
   const now = Date.now();
   fs.writeFileSync(
     file,
@@ -534,14 +793,15 @@ function withBrowserStateFixture(fn) {
       [STALE_TAB]: { url: BLOCKED_URL, at: now - 10 * 60 * 1000 },
     }),
   );
-  const prev = process.env.CLAUDE_BROWSER_TAB_URLS_FILE;
-  process.env.CLAUDE_BROWSER_TAB_URLS_FILE = file;
+  fs.writeFileSync(recordFile, '{}');
   try {
-    return fn(file);
+    return await fn({
+      caseEnv: { CLAUDE_BROWSER_TAB_URLS_FILE: file },
+      recordEnv: { CLAUDE_BROWSER_TAB_URLS_FILE: recordFile },
+      recordFile,
+    });
   } finally {
-    if (prev === undefined) delete process.env.CLAUDE_BROWSER_TAB_URLS_FILE;
-    else process.env.CLAUDE_BROWSER_TAB_URLS_FILE = prev;
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(dir);
   }
 }
 
@@ -557,46 +817,134 @@ const TAB_CONTEXT_RESPONSE = [
   '  • tabId 555: "미래에셋증권" ("https://securities.miraeasset.com/main")',
 ].join('\n');
 
-function runHook(file, command) {
-  return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } });
+function runHook(file, command, options) {
+  return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } }, options);
 }
 
-function runHookPayload(file, payload) {
-  const res = childProcess.spawnSync(process.execPath, [path.join(hooksDir, file)], {
-    input: JSON.stringify(payload),
-    encoding: 'utf8',
+function runHookPayload(file, payload, { env } = {}) {
+  return new Promise((resolve, reject) => {
+    const child = childProcess.spawn(process.execPath, [path.join(hooksDir, file)], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      shell: false,
+      windowsHide: true,
+      // 반드시 merge한다. 치환하면 PATH·SystemRoot·USERPROFILE이 사라져 훅 안의 git 호출이 전부
+      // 실패하는데, 그 실패를 삼키고 통과시키는 훅이 있어(check-md-section-refs) 증상이 FAIL이
+      // 아니라 '조용한 pass'로 나타난다.
+      env: env ? { ...process.env, ...env } : process.env,
+    });
+
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
+
+    // 청크 경계가 한글 UTF-8 3바이트를 가르면 판정 JSON이 깨진다 — 훅 사유는 전부 한글이고
+    // 길다. setEncoding은 StringDecoder를 물려 경계를 이어 붙인다.
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    // 두 스트림 다 비워야 한다. 파이프로 열어 놓고 안 읽으면 버퍼가 차는 순간 자식이 멈춰 close가
+    // 오지 않는다 — 병렬로 돌릴 때 실제로 걸린다.
+    child.stdout.on('data', (chunk) => { stdout += chunk; });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill();
+    }, HOOK_TIMEOUT_MS);
+
+    child.on('error', (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    // exit이 아니라 close다 — exit은 파이프가 비워지기 전에 오므로 판정 본문을 놓친다.
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      if (timedOut) {
+        resolve({ decision: `<시간 초과: ${HOOK_TIMEOUT_MS}ms>`, stderr });
+        return;
+      }
+      resolve({ ...decisionOf(stdout, code), stderr });
+    });
+
+    // 훅이 payload를 다 읽기 전에 끝나면 이 write가 EPIPE로 깨진다. spawnSync는 삼켜주던 것이라
+    // 그냥 두면 정상 판정에서도 예외가 난다.
+    child.stdin.on('error', () => {});
+    child.stdin.end(JSON.stringify(payload));
   });
-  if (res.error) throw res.error;
-  const out = (res.stdout || '').trim();
-  if (!out) return { decision: 'pass', stderr: res.stderr };
+}
+
+function decisionOf(stdout, code) {
+  // 훅이 죽어도 stdout이 비면 아래에서 'pass'가 되어 통과 기대 케이스와 구분되지 않는다.
+  // 절반 가까운 케이스가 pass 기대라 그대로 두면 아무 증상 없이 검증이 비어버린다.
+  if (code !== 0) return { decision: `<훅 비정상 종료: exit ${code}>` };
+
+  const out = stdout.trim();
+  if (!out) return { decision: 'pass' };
   let parsed;
   try {
     parsed = JSON.parse(out);
   } catch {
-    return { decision: `<파싱 불가: ${out.slice(0, 80)}>`, stderr: res.stderr };
+    // 앞뒤를 함께 보여준다 — 출력이 잘린 것인지 애초에 JSON이 아닌 것인지 여기서 갈린다.
+    return { decision: `<파싱 불가(${out.length}자): ${out.slice(0, 80)} … ${out.slice(-40)}>` };
   }
   const decided = parsed.hookSpecificOutput?.permissionDecision;
-  if (decided) return { decision: decided, reason: parsed.hookSpecificOutput.permissionDecisionReason || '', stderr: res.stderr };
+  if (decided) return { decision: decided, reason: parsed.hookSpecificOutput.permissionDecisionReason || '' };
   // 차단하지 않고 컨텍스트만 주입하는 hook은 permissionDecision을 내지 않는다. 그대로 두면
   // '조용히 통과'와 구분되지 않아 발동 여부를 검증할 수 없으므로 별도 판정으로 뽑는다.
-  if (parsed.hookSpecificOutput?.additionalContext) return { decision: 'context', stderr: res.stderr };
-  return { decision: 'pass', stderr: res.stderr };
+  if (parsed.hookSpecificOutput?.additionalContext) return { decision: 'context' };
+  return { decision: 'pass' };
+}
+
+// 케이스를 겹쳐 돌리되 결과는 입력 순서대로 담는다. 출력 줄과 순서가 직렬일 때와 같아야
+// 리팩토링 전후를 그대로 대조할 수 있다.
+async function runCases(cases, run, { concurrency = CONCURRENCY } = {}) {
+  const results = new Array(cases.length);
+  let cursor = 0;
+
+  const worker = async () => {
+    while (cursor < cases.length) {
+      const index = cursor;
+      cursor += 1;
+      results[index] = await run(cases[index], index);
+    }
+  };
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, cases.length) }, worker));
+  return toReport(results);
+}
+
+// 판정 하나를 결과 객체로. failLine은 사유 문구까지 보는 케이스처럼 FAIL 줄 형식이 다른 곳용이다.
+function judge(label, decision, expected, stderr, { ok = decision === expected, failLine } = {}) {
+  return { ok, label, decision, stderr, failLine };
+}
+
+function toReport(results) {
+  const lines = [];
+  const failures = [];
+  for (const { ok, label, decision, stderr, failLine } of results) {
+    if (ok) {
+      lines.push({ text: `  PASS  ${label}` });
+      continue;
+    }
+    lines.push({ text: failLine || `  FAIL  ${label} — 실제: ${decision}`, error: true });
+    if (stderr) lines.push({ text: `        stderr: ${stderr.trim().split('\n')[0]}`, error: true });
+    failures.push(label);
+  }
+  return { lines, failures };
 }
 
 // 미등록 파일 경고는 명령 문자열만으로 판정되지 않는다 — 실제 레포 상태를 봐야 한다.
 // tracked 하나, untracked 하나를 가진 임시 레포를 만들어 판정을 고정한다.
-function withUntrackedFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-policy-fixture-'));
-  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+async function withUntrackedFixture(fn) {
+  const dir = await makeTempDir('hook-policy-fixture-');
   try {
-    run('git init -q');
+    await runGit(['init', '-q'], dir);
     fs.writeFileSync(path.join(dir, 'tracked.txt'), 'a\n');
-    run('git add tracked.txt');
-    run('git -c user.email=verify@local -c user.name=verify commit -q -m init tracked.txt');
+    await runGit(['add', 'tracked.txt'], dir);
+    await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'tracked.txt'], dir);
     fs.writeFileSync(path.join(dir, 'new.txt'), 'b\n');
-    return fn(dir.replace(/\\/g, '/'));
+    return await fn(dir.replace(/\\/g, '/'));
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(dir);
   }
 }
 
@@ -610,24 +958,25 @@ const untrackedCases = (dir) => [
 // 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
 // `knowledge-archive`는 같은 재료를 detached HEAD로 떼어둔 것이다 — 머지 훅이 "폴더를 못 정한 경우"를
 // 차단하면서 detached HEAD를 오차단하지 않는지 가르려면 진짜 detached 레포가 필요하다.
-function withFreeRepoFixture(fn) {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-free-repo-'));
+async function withFreeRepoFixture(fn) {
+  const root = await makeTempDir('hook-free-repo-');
   try {
+    const names = ['backlog', 'ai-contexts', 'knowledge-archive'];
     const made = {};
-    for (const name of ['backlog', 'ai-contexts', 'knowledge-archive']) {
+    // 세 레포는 서로 독립이라 함께 세운다 — 순서대로 세우면 git 스폰 12번이 그대로 직렬이 된다.
+    await Promise.all(names.map(async (name) => {
       const dir = path.join(root, name);
       fs.mkdirSync(dir);
-      const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
-      run('git init -q -b main');
+      await runGit(['init', '-q', '-b', 'main'], dir);
       fs.writeFileSync(path.join(dir, 'a.txt'), 'a\n');
-      run('git add a.txt');
-      run('git -c user.email=verify@local -c user.name=verify commit -q -m init a.txt');
-      if (name === 'knowledge-archive') run('git checkout -q --detach HEAD');
+      await runGit(['add', 'a.txt'], dir);
+      await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'a.txt'], dir);
+      if (name === 'knowledge-archive') await runGit(['checkout', '-q', '--detach', 'HEAD'], dir);
       made[name] = dir.replace(/\\/g, '/');
-    }
-    return fn(made);
+    }));
+    return await fn(made);
   } finally {
-    fs.rmSync(root, { recursive: true, force: true });
+    await removeTempDir(root);
   }
 }
 
@@ -688,11 +1037,20 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
 // 여러 형태(정상·깨진 앵커, 옛 「」 표기, 코드블록 안 예시, 코드의 문자열 인용, 커맨드 호명)를
 // staged 상태로 만들어 고정한다.
 // 파일을 나눠 두는 이유: 한 파일에 섞으면 차단이 알림을 가려 알림 케이스를 못 잰다.
-function withSectionRefFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-section-ref-'));
-  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
+//
+// 케이스마다 스테이징이 다른데, 예전에는 한 index를 `git reset` 후 다시 채워 돌려썼다. 그래서
+// 케이스끼리 겹쳐 돌 수 없었다. 이제는 케이스마다 자기 index 파일을 준다(`GIT_INDEX_FILE`) —
+// 훅 안의 git 호출은 env를 물려받으므로 `git diff --cached`·`git ls-files`가 그 index를 본다.
+// 새 index 파일은 빈 상태라 reset도 필요 없다. 워킹트리는 공유해도 되는데, 이 갈래의 케이스는
+// 스테이징만 바꾸고 파일 내용은 안 건드리기 때문이다(내용을 바꾸는 역방향은 아래에서 따로 푼다).
+async function withSectionRefFixture(fn) {
+  const root = await makeTempDir('hook-section-ref-');
+  const dir = path.join(root, 'section-ref-repo');
+  const indexDir = path.join(root, 'index');
+  fs.mkdirSync(dir);
+  fs.mkdirSync(indexDir);
   try {
-    run('git init -q');
+    await runGit(['init', '-q'], dir);
     fs.writeFileSync(
       path.join(dir, 'target.md'),
       '# 대상\n\n## 메모·기록 도구 분리\n\n본문\n\n## 사전 준비: 브랜치 생성\n\n본문\n',
@@ -729,12 +1087,13 @@ function withSectionRefFixture(fn) {
     );
     // 세 조각이 다 모이지 않으면 예시용 경로와 구분이 안 되므로 보지 않는다.
     fs.writeFileSync(path.join(dir, 'quote-loose.md'), '`target.md`를 참고한다.\n\n```\n실재하지 않는 내용\n```\n');
-    return fn(dir.replace(/\\/g, '/'), (files) => {
-      run('git reset -q');
-      run(`git add ${files.join(' ')}`);
+    return await fn(dir.replace(/\\/g, '/'), async (files, slot) => {
+      const env = { GIT_INDEX_FILE: path.join(indexDir, `idx-${slot}`) };
+      await runGit(['add', ...files], dir, env);
+      return env;
     });
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(root);
   }
 }
 
@@ -763,28 +1122,36 @@ const sectionRefCases = [
 // 달라져 위 케이스가 통째로 함께 흔들린다.
 // 대상 문서 둘을 두는 이유: 앵커 링크로 부르는 쪽과 옛 「」 표기로만 부르는 쪽이 각각 혼자
 // 차단을 일으키는지 재야 하는데, 한 문서를 같이 가리키면 앞의 차단이 뒤를 가린다.
-function withSectionRefReverseFixture(fn) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'hook-section-ref-rev-'));
-  const run = (cmd) => childProcess.execSync(cmd, { cwd: dir, stdio: 'pipe' });
-  const write = (name, body) => fs.writeFileSync(path.join(dir, name), body);
+//
+// 이 갈래는 순방향과 달리 **워킹트리를 고친다**(`edit`가 문서의 헤딩을 바꾼다). 그래서 index만
+// 갈라서는 케이스끼리 격리되지 않는다 — 템플릿을 한 벌 세우고 케이스마다 통째로 복사한다.
+// 복사본 이름을 면제 레포 이름(backlog·ai-contexts·knowledge-archive)으로 짓지 않는다. 이 훅은
+// 레포 이름을 안 보지만, 나중에 같은 fixture에 다른 훅 케이스를 얹으면 이름으로 판정이 갈린다.
+async function withSectionRefReverseFixture(fn) {
+  const root = await makeTempDir('hook-section-ref-rev-');
+  const template = path.join(root, 'template');
+  fs.mkdirSync(template);
+  const write = (base) => (name, body) => fs.writeFileSync(path.join(base, name), body);
   try {
-    run('git init -q');
-    write('doc.md', '# 문서\n\n## 옛 이름\n\n본문\n\n## 그대로\n\n본문\n');
-    write('other.md', '# 다른 문서\n\n## 옛 절\n\n본문\n');
-    write('link.md', '[옛 이름](doc.md#옛-이름)를 따른다.\n');
-    write('note.md', '`other.md`의 「옛 절」을 따른다.\n');
+    const seed = write(template);
+    await runGit(['init', '-q'], template);
+    seed('doc.md', '# 문서\n\n## 옛 이름\n\n본문\n\n## 그대로\n\n본문\n');
+    seed('other.md', '# 다른 문서\n\n## 옛 절\n\n본문\n');
+    seed('link.md', '[옛 이름](doc.md#옛-이름)를 따른다.\n');
+    seed('note.md', '`other.md`의 「옛 절」을 따른다.\n');
     // 이 커밋이 깨뜨린 것이 아닌 기존 미해결. 발동이 안 좁혀져 있으면 무관한 커밋마다 뜬다.
-    write('stale.md', '[없는 절](doc.md#처음부터-없던-절)를 따른다.\n');
-    run('git add .');
-    run('git -c user.email=verify@local -c user.name=verify commit -q -m init');
-    return fn(dir.replace(/\\/g, '/'), (edit, files) => {
-      run('git reset -q');
-      run('git checkout -q -- .');
-      edit(write);
-      run(`git add ${files.join(' ')}`);
+    seed('stale.md', '[없는 절](doc.md#처음부터-없던-절)를 따른다.\n');
+    await runGit(['add', '.'], template);
+    await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init'], template);
+    return await fn(async (edit, files, slot) => {
+      const dir = path.join(root, `reverse-case-${slot}`);
+      await fsp.cp(template, dir, { recursive: true });
+      edit(write(dir));
+      await runGit(['add', ...files], dir);
+      return dir.replace(/\\/g, '/');
     });
   } finally {
-    fs.rmSync(dir, { recursive: true, force: true });
+    await removeTempDir(root);
   }
 }
 
@@ -815,149 +1182,172 @@ const sectionRefReverseCases = [
   ],
 ];
 
-function main() {
-  console.log('정책 hook 판정 검증 중...');
-  const failures = [];
-  // fixture 안에서 실행까지 끝낸다 — 케이스 목록만 만들어 나오면 임시 레포가 먼저 지워져
-  // 미등록 파일이 사라진 상태로 판정된다(레포 부재 → 조회 실패 → pass로 통과, 위양성 없이 조용히 무력화).
-  withUntrackedFixture((dir) => {
-    for (const [file, command, expected, note] of [...CASES, ...untrackedCases(dir)]) {
-      const { decision, stderr } = runHook(file, command);
-      const label = `${file} :: ${command} → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
-  });
-  // 레포 면제는 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
-  withFreeRepoFixture((repos) => {
-    for (const [file, command, expected, note] of freeRepoCases(repos)) {
-      const { decision, stderr } = runHook(file, command);
-      const label = `${file} :: ${command} → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
-  });
-  // 쓰기 시점 hook: Edit 케이스는 디스크 내용을 읽으므로 fixture 안에서 실행까지 끝낸다.
-  const runWriteCases = (cases) => {
-    for (const [file, payload, expected, note] of cases) {
-      const { decision, stderr } = runHookPayload(file, payload);
-      const label = `${file} :: ${payload.tool_name} ${payload.tool_input.file_path} → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
-  };
-  withPackageFixture((dir) => runWriteCases([...WRITE_CASES, ...editCases(dir)]));
-  // 레포 제외는 경로 위쪽의 `.git`으로 판정되므로 fixture 안에서 실행까지 끝낸다 — 폴더가
-  // 먼저 지워지면 레포를 못 찾아 제외가 안 걸린 채로 판정된다.
-  withRepoFixture((dir) => runWriteCases(repoCases(dir)));
-  // 브라우저 쓰기 차단은 상태 파일을 읽어 판정하므로 fixture(임시 상태 파일) 안에서 끝낸다.
-  withBrowserStateFixture((stateFile) => {
-    for (const [payload, expected, note] of BROWSER_CASES) {
-      const { decision, stderr } = runHookPayload(BROWSER_HOOK, payload);
-      const label = `${BROWSER_HOOK} :: ${payload.tool_name} → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
+// 쓰기 시점 hook: [파일, payload, 기대, 설명] 꼴을 공유하는 그룹들.
+const runWriteCases = (cases) => runCases(cases, async ([file, payload, expected, note]) => {
+  const { decision, stderr } = await runHookPayload(file, payload);
+  const label = `${file} :: ${payload.tool_name} ${payload.tool_input.file_path} → ${expected} (${note})`;
+  return judge(label, decision, expected, stderr);
+});
+
+// fixture 안에서 실행까지 끝낸다 — 케이스 목록만 만들어 나오면 임시 레포가 먼저 지워져
+// 미등록 파일이 사라진 상태로 판정된다(레포 부재 → 조회 실패 → pass로 통과, 위양성 없이 조용히 무력화).
+const untrackedGroup = () => withUntrackedFixture((dir) =>
+  runCases([...CASES, ...untrackedCases(dir)], async ([file, command, expected, note]) => {
+    const { decision, stderr } = await runHook(file, command);
+    return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
+  }));
+
+// 레포 면제는 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
+const freeRepoGroup = () => withFreeRepoFixture((repos) =>
+  runCases(freeRepoCases(repos), async ([file, command, expected, note]) => {
+    const { decision, stderr } = await runHook(file, command);
+    return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
+  }));
+
+// Edit 케이스는 디스크 내용을 읽으므로 fixture 안에서 실행까지 끝낸다.
+const packageGroup = () => withPackageFixture((dir) => runWriteCases([...WRITE_CASES, ...editCases(dir)]));
+
+// 레포 제외는 경로 위쪽의 `.git`으로 판정되므로 fixture 안에서 실행까지 끝낸다 — 폴더가
+// 먼저 지워지면 레포를 못 찾아 제외가 안 걸린 채로 판정된다.
+const repoGroup = () => withRepoFixture((dir) => runWriteCases(repoCases(dir)));
+
+// 브라우저 쓰기 차단은 상태 파일을 읽어 판정하므로 fixture(임시 상태 파일) 안에서 끝낸다.
+const browserGroup = () => withBrowserStateFixture(async ({ caseEnv, recordEnv, recordFile }) => {
+  const [cases, record] = await Promise.all([
+    runCases(BROWSER_CASES, async ([payload, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(BROWSER_HOOK, payload, { env: caseEnv });
+      return judge(`${BROWSER_HOOK} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
+    }),
     // 받아 적는 쪽: 응답 원문에서 목록의 탭을 전부 뽑아 기록하는지.
-    fs.writeFileSync(stateFile, '{}');
-    runHookPayload('record-browser-tab-url.mjs', {
-      tool_name: 'mcp__claude-in-chrome__navigate',
-      tool_input: { url: 'https://example.com/' },
-      tool_response: { content: [{ type: 'text', text: TAB_CONTEXT_RESPONSE }] },
+    (async () => {
+      await runHookPayload('record-browser-tab-url.mjs', {
+        tool_name: 'mcp__claude-in-chrome__navigate',
+        tool_input: { url: 'https://example.com/' },
+        tool_response: { content: [{ type: 'text', text: TAB_CONTEXT_RESPONSE }] },
+      }, { env: recordEnv });
+      const recorded = JSON.parse(fs.readFileSync(recordFile, 'utf8'));
+      const label = 'record-browser-tab-url.mjs :: 응답의 탭 목록을 전부 기록한다';
+      const ok =
+        recorded['2031789807']?.url === 'https://example.com/' &&
+        recorded['555']?.url === 'https://securities.miraeasset.com/main' &&
+        typeof recorded['555']?.at === 'number';
+      return toReport([{ ok, label, failLine: `  FAIL  ${label} — 실제: ${JSON.stringify(recorded)}` }]);
+    })(),
+  ]);
+  return mergeReports([cases, record]);
+});
+
+// 절 참조 검사는 staged 목록과 대상 파일을 디스크에서 읽으므로 fixture 안에서 실행까지 끝낸다.
+// 케이스마다 stage 대상이 달라 자기 index를 받아 간다.
+const sectionRefGroup = () => withSectionRefFixture((dir, stage) =>
+  runCases(sectionRefCases, async ([files, expected, note], slot) => {
+    // 준비와 실행은 케이스 안에서 순서를 지킨다 — 같은 index를 둘이 동시에 만지면 안 된다.
+    const env = await stage(files, slot);
+    const { decision, stderr } = await runHookPayload('check-md-section-refs.mjs', {
+      tool_name: 'Bash',
+      tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
+      cwd: dir,
+    }, { env });
+    const label = `check-md-section-refs.mjs :: [${files.join(', ')}] → ${expected} (${note})`;
+    return judge(label, decision, expected, stderr);
+  }, { concurrency: SECTION_REF_CONCURRENCY }));
+
+// 역방향은 커밋 전 판본을 `git show`로 읽으므로 이력이 있는 fixture 안에서 끝낸다.
+const sectionRefReverseGroup = () => withSectionRefReverseFixture((prepare) =>
+  runCases(sectionRefReverseCases, async ([edit, files, expected, note], slot) => {
+    const dir = await prepare(edit, files, slot);
+    const { decision, stderr } = await runHookPayload('check-md-section-refs.mjs', {
+      tool_name: 'Bash',
+      tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
+      cwd: dir,
     });
-    const recorded = JSON.parse(fs.readFileSync(stateFile, 'utf8'));
-    const label = 'record-browser-tab-url.mjs :: 응답의 탭 목록을 전부 기록한다';
-    const ok =
-      recorded['2031789807']?.url === 'https://example.com/' &&
-      recorded['555']?.url === 'https://securities.miraeasset.com/main' &&
-      typeof recorded['555']?.at === 'number';
-    if (ok) {
-      console.log(`  PASS  ${label}`);
-    } else {
-      console.error(`  FAIL  ${label} — 실제: ${JSON.stringify(recorded)}`);
-      failures.push(label);
-    }
+    const label = `check-md-section-refs.mjs :: [${files.join(', ')}] 역방향 → ${expected} (${note})`;
+    return judge(label, decision, expected, stderr);
+  }, { concurrency: SECTION_REF_CONCURRENCY }));
+
+// 대기용 빈 명령은 둘 다 막지만 안내가 반대다 — 메인은 턴을 끝내라, 서브에이전트는 끝내지 마라.
+// 판정만 보면 안내가 뒤바뀌어도 통과하므로 사유 문구까지 고정한다.
+const waitGroup = () => runCases(WAIT_CASES, async ([command, agentId, expectSubagentMsg, note]) => {
+  const payload = { tool_name: 'Bash', tool_input: { command }, ...(agentId ? { agent_id: agentId } : {}) };
+  const { decision, reason = '', stderr } = await runHookPayload('check-shell-policy.mjs', payload);
+  const expected = expectSubagentMsg === null ? 'pass' : 'deny';
+  const msgOk = expectSubagentMsg === null || reason.includes('서브에이전트는 턴을 끝내지 마세요') === expectSubagentMsg;
+  const label = `check-shell-policy.mjs :: ${command}${agentId ? ' [서브에이전트]' : ''} → ${expected} (${note})`;
+  return judge(label, decision, expected, stderr, {
+    ok: decision === expected && msgOk,
+    failLine: `  FAIL  ${label} — 실제: ${decision} / 사유: ${reason.slice(0, 60)}`,
   });
-  // 절 참조 검사는 staged 목록과 대상 파일을 디스크에서 읽으므로 fixture 안에서 실행까지 끝낸다.
-  // 케이스마다 stage 대상이 달라 스테이징을 매번 다시 잡는다.
-  withSectionRefFixture((dir, stage) => {
-    for (const [files, expected, note] of sectionRefCases) {
-      stage(files);
-      const { decision, stderr } = runHookPayload('check-md-section-refs.mjs', {
-        tool_name: 'Bash',
-        tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
-        cwd: dir,
-      });
-      const label = `check-md-section-refs.mjs :: [${files.join(', ')}] → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
-  });
-  // 역방향은 커밋 전 판본을 `git show`로 읽으므로 이력이 있는 fixture 안에서 끝낸다.
-  withSectionRefReverseFixture((dir, prepare) => {
-    for (const [edit, files, expected, note] of sectionRefReverseCases) {
-      prepare(edit, files);
-      const { decision, stderr } = runHookPayload('check-md-section-refs.mjs', {
-        tool_name: 'Bash',
-        tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
-        cwd: dir,
-      });
-      const label = `check-md-section-refs.mjs :: [${files.join(', ')}] 역방향 → ${expected} (${note})`;
-      if (decision === expected) {
-        console.log(`  PASS  ${label}`);
-      } else {
-        console.error(`  FAIL  ${label} — 실제: ${decision}`);
-        if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-        failures.push(label);
-      }
-    }
-  });
-  // 대기용 빈 명령은 둘 다 막지만 안내가 반대다 — 메인은 턴을 끝내라, 서브에이전트는 끝내지 마라.
-  // 판정만 보면 안내가 뒤바뀌어도 통과하므로 사유 문구까지 고정한다.
-  for (const [command, agentId, expectSubagentMsg, note] of WAIT_CASES) {
-    const payload = { tool_name: 'Bash', tool_input: { command }, ...(agentId ? { agent_id: agentId } : {}) };
-    const { decision, reason = '', stderr } = runHookPayload('check-shell-policy.mjs', payload);
-    const expected = expectSubagentMsg === null ? 'pass' : 'deny';
-    const msgOk = expectSubagentMsg === null || reason.includes('서브에이전트는 턴을 끝내지 마세요') === expectSubagentMsg;
-    const label = `check-shell-policy.mjs :: ${command}${agentId ? ' [서브에이전트]' : ''} → ${expected} (${note})`;
-    if (decision === expected && msgOk) {
-      console.log(`  PASS  ${label}`);
-    } else {
-      console.error(`  FAIL  ${label} — 실제: ${decision} / 사유: ${reason.slice(0, 60)}`);
-      if (stderr) console.error(`        stderr: ${stderr.trim().split('\n')[0]}`);
-      failures.push(label);
+});
+
+async function runGroupsInSequence(groups) {
+  const settled = [];
+  for (const group of groups) {
+    try {
+      settled.push({ status: 'fulfilled', value: await group() });
+    } catch (reason) {
+      settled.push({ status: 'rejected', reason });
     }
   }
-  if (failures.length) {
-    console.error(`정책 hook 판정 검증 실패: ${failures.length}건`);
+  return settled;
+}
+
+// 파일 경로가 없는 payload라 쓰기 그룹의 라벨 형식을 못 쓴다 — 도구 이름으로 가른다.
+const toolGroup = () => runCases(TOOL_CASES, async ([file, payload, expected, note]) => {
+  const { decision, stderr } = await runHookPayload(file, payload);
+  return judge(`${file} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
+});
+
+function mergeReports(reports) {
+  return {
+    lines: reports.flatMap((report) => report.lines),
+    failures: reports.flatMap((report) => report.failures),
+  };
+}
+
+async function main() {
+  console.log('정책 hook 판정 검증 중...');
+
+  const groups = [
+    untrackedGroup,
+    freeRepoGroup,
+    packageGroup,
+    repoGroup,
+    browserGroup,
+    sectionRefGroup,
+    sectionRefReverseGroup,
+    waitGroup,
+    toolGroup,
+  ];
+
+  // 그룹은 각자 자기 임시 폴더만 쓰므로 함께 돌린다. allSettled인 이유는 한 그룹이 터졌을 때
+  // 형제 그룹이 아직 훅을 돌리는 중에 상위가 정리·종료로 넘어가면 임시 폴더 삭제가 깨지기 때문이다.
+  // 한도를 1로 준 것은 직렬 재현을 보겠다는 뜻이므로 그룹 겹치기도 함께 끈다.
+  const settled = CONCURRENCY === 1
+    ? await runGroupsInSequence(groups)
+    : await Promise.allSettled(groups.map((group) => group()));
+
+  const errors = settled.filter((result) => result.status === 'rejected').map((result) => result.reason);
+  const report = mergeReports(settled.filter((result) => result.status === 'fulfilled').map((result) => result.value));
+
+  for (const { text, error } of report.lines) {
+    if (error) console.error(text);
+    else console.log(text);
+  }
+
+  for (const error of errors) {
+    console.error(`  ERROR ${error instanceof Error ? error.message : String(error)}`);
+  }
+
+  if (report.failures.length || errors.length) {
+    console.error(`정책 hook 판정 검증 실패: ${report.failures.length + errors.length}건`);
     process.exit(1);
   }
   console.log('정책 hook 판정 정상');
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.stack || error.message : String(error));
+    process.exit(1);
+  });
+}

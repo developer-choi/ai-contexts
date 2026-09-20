@@ -37,13 +37,22 @@ function git(repoPath, args, { allowFail = false } = {}) {
 
 // git 2.54 미만은 hook.<별칭>.command 를 **조용히 무시한다** — 훅이 통째로 사라져도 아무 표시가
 // 없으므로, 등록 전에 여기서 시끄럽게 끊는다. 이걸 빼면 이번에 없앤 무음 실패가 그대로 재발한다.
+// 한 프로세스 안에서는 git 버전이 바뀔 수 없다. 기억해 두지 않으면 배선을 거는 이벤트마다
+// `git --version` 을 새로 띄워, 검사 한 번이 스폰 여러 개가 된다.
+let gitVersionChecked = false;
+
 function assertGitSupportsConfigHooks() {
+  if (gitVersionChecked) return;
+
   const raw = spawnSync('git', ['--version'], { encoding: 'utf8' }).stdout || '';
   const matched = raw.match(/(\d+)\.(\d+)/);
   if (!matched) throw new Error(`git 버전을 읽지 못했습니다: ${raw.trim()}`);
 
   const [major, minor] = [Number(matched[1]), Number(matched[2])];
-  if (major > MIN_GIT.major || (major === MIN_GIT.major && minor >= MIN_GIT.minor)) return;
+  if (major > MIN_GIT.major || (major === MIN_GIT.major && minor >= MIN_GIT.minor)) {
+    gitVersionChecked = true;
+    return;
+  }
 
   throw new Error(
     [
@@ -67,13 +76,33 @@ function globalGit(args, { allowFail = false, env } = {}) {
   return result.status === 0 ? result.stdout.trim() : '';
 }
 
+// 우리가 건 전역 훅 등록을 한 번에 읽어 온다.
+//
+// 이벤트 하나를 확인하는 데 `--get` 이 두 번(command·event) 든다. 이벤트 목록만큼 곱하면 읽기만
+// 하는 확인이 git 스폰 열댓 개가 되어, sync 시작마다 0.4초를 먹었다. 조회는 한 번이면 된다.
+function readGlobalHookConfig({ env } = {}) {
+  const raw = globalGit(['config', '--global', '--get-regexp', `^hook\\.${GLOBAL_PREFIX}-`], {
+    allowFail: true, // 하나도 안 걸려 있으면 git 이 1로 끝낸다 — 그것도 정상 상태다
+    env,
+  });
+
+  const registered = new Map();
+  for (const line of raw.split('\n')) {
+    // `키 값` 한 줄. 값(훅 명령)에 공백이 들어가므로 첫 공백에서만 가른다.
+    const separator = line.indexOf(' ');
+    if (separator === -1) continue;
+    registered.set(line.slice(0, separator), line.slice(separator + 1));
+  }
+  return registered;
+}
+
 // 전역 훅 하나를 등록한다(멱등). 반환값은 실제로 설정을 바꿨는지 여부다.
-function registerGlobalHook(alias, event, command, { env } = {}) {
+function registerGlobalHook(alias, event, command, { env, registered } = {}) {
   assertGitSupportsConfigHooks();
 
   const commandKey = `hook.${GLOBAL_PREFIX}-${alias}.command`;
   const eventKey = `hook.${GLOBAL_PREFIX}-${alias}.event`;
-  if (globalHookRegistered(alias, event, command, { env })) return false;
+  if (globalHookRegistered(alias, event, command, { env, registered })) return false;
 
   globalGit(['config', '--global', commandKey, command], { env });
   globalGit(['config', '--global', eventKey, event], { env });
@@ -84,16 +113,12 @@ function unregisterGlobalHook(alias, { env } = {}) {
   globalGit(['config', '--global', '--remove-section', `hook.${GLOBAL_PREFIX}-${alias}`], { allowFail: true, env });
 }
 
-function globalHookRegistered(alias, event, command, { env } = {}) {
-  const currentCommand = globalGit(['config', '--global', '--get', `hook.${GLOBAL_PREFIX}-${alias}.command`], {
-    allowFail: true,
-    env,
-  });
-  const currentEvent = globalGit(['config', '--global', '--get', `hook.${GLOBAL_PREFIX}-${alias}.event`], {
-    allowFail: true,
-    env,
-  });
-  return currentCommand === command && currentEvent === event;
+// `registered`를 주면 그 스냅샷으로 판정한다. 여러 이벤트를 연달아 볼 때 조회를 한 번으로 줄이는
+// 자리다 — 이벤트마다 키가 달라, 중간에 등록이 끼어도 다른 이벤트의 판정은 흔들리지 않는다.
+function globalHookRegistered(alias, event, command, { env, registered } = {}) {
+  const config = registered || readGlobalHookConfig({ env });
+  return config.get(`hook.${GLOBAL_PREFIX}-${alias}.command`) === command
+    && config.get(`hook.${GLOBAL_PREFIX}-${alias}.event`) === event;
 }
 
 function repoHookAlias(event) {
@@ -114,8 +139,9 @@ function repoHookCommand(event) {
 
 // `.githooks/` 배선 전체를 전역에 건다(멱등). 반환: 실제로 등록을 바꾼 이벤트 목록.
 function registerRepoHookWiring({ env } = {}) {
+  const registered = readGlobalHookConfig({ env });
   return HOOK_EVENTS.filter((event) =>
-    registerGlobalHook(repoHookAlias(event), event, repoHookCommand(event), { env }),
+    registerGlobalHook(repoHookAlias(event), event, repoHookCommand(event), { env, registered }),
   );
 }
 
@@ -125,8 +151,9 @@ function unregisterRepoHookWiring({ env } = {}) {
 
 // 배선이 빠짐없이 걸려 있는지 읽기만 한다(검증용). 반환: 안 걸린 이벤트 목록.
 function missingRepoHookWiring({ env } = {}) {
+  const registered = readGlobalHookConfig({ env });
   return HOOK_EVENTS.filter(
-    (event) => !globalHookRegistered(repoHookAlias(event), event, repoHookCommand(event), { env }),
+    (event) => !globalHookRegistered(repoHookAlias(event), event, repoHookCommand(event), { env, registered }),
   );
 }
 

@@ -8,22 +8,25 @@
 // settings/hooks는 전역 sync:system과 동일한 메커니즘(부분키 머지·생성 계약 fail-fast·배포
 // 후 대조)을 repo-local로 적용한다. 산출물은 gitignore된다.
 import path from 'node:path';
-import childProcess from 'node:child_process';
 
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
+import { runVerifications } from '../lib/verify-runner.mjs';
 import { repoDir } from '../lib/deploy-lib.mjs';
 import { syncLocalSkills } from './sync-local-skills.mjs';
 import { hasLocalSettings, listLocalRepos, projectRepoLocalSettings } from './local-deploy-lib.mjs';
 
-async function main() {
-  ensureHooksReady();
-
+// 배포 전 fail-fast 게이트. 전부 읽기 전용이라 겹쳐 돌린다.
+const VERIFY_STEPS = [
   // 생성 계약이 깨지면 배포 전에 중단(fail-fast).
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, 'verify-local-system.mjs')], { stdio: 'inherit' });
+  { file: path.join(import.meta.dirname, 'verify-local-system.mjs') },
   // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs')], { stdio: 'inherit' });
+  { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs') },
   // 목적 검사는 AC 안에서만 돌고 있었다. 남의 레포 local/skills도 같은 규칙을 받으므로 여기서 함께 본다.
-  childProcess.execFileSync(process.execPath, [path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs'), '--local'], { stdio: 'inherit' });
+  { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs'), args: ['--local'] },
+];
+
+async function main() {
+  await runVerifications(VERIFY_STEPS, ensureHooksReady);
 
   // 1) 로컬 스킬 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
   console.log('');
