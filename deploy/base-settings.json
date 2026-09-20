@@ -133,6 +133,12 @@
       "msg": "Checking git merge policy..."
     },
     {
+      "file": "check-git-worktree-policy.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking worktree location policy..."
+    },
+    {
       "file": "check-team-message-policy.mjs",
       "event": "PreToolUse",
       "on": "message",

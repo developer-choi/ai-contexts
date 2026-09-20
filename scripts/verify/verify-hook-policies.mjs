@@ -1032,6 +1032,72 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
   ],
 ];
 
+// 워크트리 위치 정책(`check-git-worktree-policy.mjs`)은 `--git-common-dir`로 메인 레포 루트를 구하므로
+// 진짜 git 레포가 있어야 판정이 선다. 가짜 경로로 등록하면 전부 fail-open→pass가 되어 검증이 조용히
+// 무력화된다. 면제 fixture(`withFreeRepoFixture`)에 얹지 않는 이유는 그쪽 이름이 면제 의미론(free·gated)에
+// 고정돼 있고 이 훅에는 면제 개념이 아예 없기 때문이다.
+//
+// cwd로 쓸 워크트리는 **관리 위치 밖**(`detached-wt`)에 둔다. 관리 위치 안에 두면 "fixture가 이 정책을
+// 미리 지켜야 케이스가 성립한다"는 순환처럼 보이고, 밖에 두면 오히려 훅의 핵심(워크트리가 어디 있든
+// 메인 루트 기준으로 판정)을 더 강하게 고정한다. 이 워크트리는 검증 스크립트가 `runGit`으로 직접 만들어
+// 훅을 거치지 않는다.
+//
+// `sibling`·`managed`는 실제로 만들지 않는다 — 훅은 대상 경로의 실존 여부를 안 보고 문자열 비교만 한다.
+async function withWorktreePolicyFixture(fn) {
+  const root = await makeTempDir('hook-worktree-policy-');
+  const main = path.join(root, 'main-repo');
+  const wtOutside = path.join(root, 'detached-wt');
+  try {
+    fs.mkdirSync(main);
+    await runGit(['init', '-q', '-b', 'main'], main);
+    fs.writeFileSync(path.join(main, 'a.txt'), 'a\n');
+    await runGit(['add', 'a.txt'], main);
+    await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'a.txt'], main);
+    await runGit(['worktree', 'add', '-q', wtOutside, '-b', 'wt-branch'], main);
+    const posix = (value) => value.replace(/\\/g, '/');
+    return await fn({
+      main: posix(main),
+      managed: posix(path.join(main, '.claude', 'worktrees')),
+      sibling: posix(path.join(root, 'sibling')),
+      wtOutside: posix(wtOutside),
+      nonGit: posix(root),
+    });
+  } finally {
+    await removeTempDir(root);
+  }
+}
+
+// [hook 파일, 명령, 기대 판정, 설명, (선택) payload.cwd]
+const worktreePolicyCases = ({ main, managed, sibling, wtOutside, nonGit }) => [
+  // --- 위치 판정 ---
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree add ${sibling}/feature -b feature`, 'deny', '형제 경로는 관리 위치 밖이라 차단'],
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree add ${managed}/feature -b feature`, 'pass', '관리 위치 밑은 통과'],
+
+  // --- cwd를 어디서 구하든 같은 판정 ---
+  ['check-git-worktree-policy.mjs', `cd ${main} && git worktree add ${sibling}/feature -b feature`, 'deny', 'cd로 옮겨도 형제 경로를 잡는다'],
+  ['check-git-worktree-policy.mjs', 'git worktree add ../feature -b feature', 'deny', 'git -C도 cd도 없으면 payload.cwd로 판정한다', 'MAIN'],
+  ['check-git-worktree-policy.mjs', `git status && git -C ${main} worktree add ${sibling}/feature -b feature`, 'deny', 'chain 뒷단의 위반도 잡는다'],
+
+  // --- 워크트리 안에서 실행해도 메인 루트 기준 ---
+  // 이 fixture 워크트리 자체가 관리 위치 밖에 있다. 그래도 그 안에서 부른 add의 기대 경로는
+  // 워크트리가 아니라 메인의 `.claude/worktrees`여야 한다.
+  ['check-git-worktree-policy.mjs', `git -C ${wtOutside} worktree add ${sibling}/second -b second`, 'deny', '워크트리 안에서도 메인 기준으로 판정한다'],
+  ['check-git-worktree-policy.mjs', `git -C ${wtOutside} worktree add ${managed}/second -b second`, 'pass', '워크트리 안에서도 메인의 관리 위치는 통과'],
+
+  // --- 옵션 값이 대상 경로로 오인되지 않는다 ---
+  // `-b`/`-B`의 값을 positional로 세면 브랜치명이 심사 대상이 되어 판정이 통째로 뒤집힌다.
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree add -b ${sibling}/notabranch ${managed}/feature2`, 'pass', '-b 값이 밖이어도 대상이 관리 위치면 통과'],
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree add -B ${managed}/notabranch ${sibling}/feature3`, 'deny', '-B 값이 안이어도 대상이 밖이면 차단'],
+
+  // --- add가 아닌 서브커맨드는 안 본다 ---
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree list`, 'pass', 'list는 관여하지 않는다'],
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree remove ${sibling}/feature`, 'pass', 'remove는 관여하지 않는다'],
+  ['check-git-worktree-policy.mjs', `git -C ${main} worktree add -b feature`, 'pass', '경로 없는 add는 git이 거부하므로 관여하지 않는다'],
+
+  // --- 비-git 디렉토리는 fail-open ---
+  ['check-git-worktree-policy.mjs', `git -C ${nonGit} worktree add ${nonGit}/x -b x`, 'pass', '비-git 디렉토리는 git 자신이 거부한다'],
+];
+
 // 절 참조 검사(`check-md-section-refs.mjs`)는 staged 파일과 그것이 가리키는 대상을 둘 다
 // 디스크에서 읽는다 — 명령 문자열만으로는 판정이 안 선다. 대상 문서 하나와, 그것을 가리키는
 // 여러 형태(정상·깨진 앵커, 옛 「」 표기, 코드블록 안 예시, 코드의 문자열 인용, 커맨드 호명)를
@@ -1204,6 +1270,17 @@ const freeRepoGroup = () => withFreeRepoFixture((repos) =>
     return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
   }));
 
+// 워크트리 위치는 임시 레포의 `--git-common-dir`로 판정되므로 fixture 안에서 실행까지 끝낸다 —
+// 폴더가 먼저 지워지면 메인 루트를 못 찾아 fail-open으로 흘러 전부 조용히 pass가 된다.
+const worktreePolicyGroup = () => withWorktreePolicyFixture((paths) =>
+  runCases(worktreePolicyCases(paths), async ([file, command, expected, note, cwdKey]) => {
+    const payload = { tool_name: 'Bash', tool_input: { command } };
+    // cwdKey가 있는 케이스만 payload.cwd를 채운다 — 훅의 `getCwd(payload)` 갈래를 재는 케이스다.
+    if (cwdKey === 'MAIN') payload.cwd = paths.main;
+    const { decision, stderr } = await runHookPayload(file, payload);
+    return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
+  }));
+
 // Edit 케이스는 디스크 내용을 읽으므로 fixture 안에서 실행까지 끝낸다.
 const packageGroup = () => withPackageFixture((dir) => runWriteCases([...WRITE_CASES, ...editCases(dir)]));
 
@@ -1310,6 +1387,7 @@ async function main() {
   const groups = [
     untrackedGroup,
     freeRepoGroup,
+    worktreePolicyGroup,
     packageGroup,
     repoGroup,
     browserGroup,
