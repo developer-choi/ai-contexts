@@ -1,20 +1,11 @@
 <!-- deploy-anchor -->
 이 파일은 `C:\Users\forwo\.claude\skills\pre-exit\augmentations`에 있다. 본문의 상대 경로는 이 경로를 기준으로 푼다.
 
-# /pre-exit recruitment 보강
+# recruitment 세션 보강
 
 `private-playground` 서류지원·지원동기 세션의 추가 회고. **밖에서 떠온 원문 중 안 쓰인 것**과 **뒤에서 다시 판 조사**를 보고, 다음 회차에 무엇을 더 떠오고 무엇을 안 떠올지 정한다. pre-exit 본 절차와 **함께** 수행한다 (대체 X, 추가 ○).
 
 [읽었는데 안 쓴 문서 쌓기](../read-usage.md)와 대상이 다르다 — 그쪽은 이 세션이 연 **프롬프트 문서**이고, 여기는 회사를 조사해 **파일로 떠온 외부 원문**이다. 누계를 쌓아 선을 넘을 때 띄우는 구조는 양쪽이 같고, 선 판정과 알림 코드도 공유한다.
-
-## 트리거 조건
-
-다음 중 하나라도 해당하면 본 보강을 실행한다:
-
-- `/pre-exit recruitment` 명시 호출
-- 무인자 `/pre-exit`에서 자동 감지: cwd가 `private-playground`이고, 세션에서 `/recruitment-application`·`/recruitment-motivation` 호출 사실을 회상 가능
-
-자동 감지 시, 보강 실행 전 사용자 확인을 받는다.
 
 ## 회고 대상
 

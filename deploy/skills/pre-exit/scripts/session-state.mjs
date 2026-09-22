@@ -12,7 +12,10 @@
 //     "이 세션은 압축이 없었다"로 결론내고 넘어가 압축 구간의 사용자 교정이 통째로 유실된다.
 //   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**)을
 //     세션 변경 목록과 눈으로 대조했다. 놓치면 보강이 통째로 안 돌고, 안 돈 사실은 아무 데도 안 남는다.
-//   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. Step 3은 사용자 지시를
+//   menu — 「이번 세션에 해당하는 회고 항목」. changed와 달리 파일·대화·cwd 조건을 한 번에 돌려
+//     골라 받을 목록까지 낸다. 세션이 기억으로 목록을 만들면 안 떠오른 항목이 조용히 빠지고,
+//     빠졌다는 것도 아무 데도 안 남는다 — 회고가 길어진 뒤에 도는 절차라 특히 그렇다.
+//   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. 「커밋 정리」는 사용자 지시를
 //     기다리지 않으므로 사람 눈이 안 거친다. rebase 중 hunk가 빠져도 로그는 깔끔해 보이고,
 //     잃은 변경은 다음 세션에 "왜 이게 없지"로 나타난다. 트리 해시 둘을 맞대면 끝날 일이다.
 //   retro-table — 「빈칸이 하나라도 있으면 산출물 실패다」. 빠뜨린 쪽이 자기가 빠뜨린 것을 세는
@@ -24,11 +27,12 @@
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
 //     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
 //
-// 판단은 안 한다 — 어느 보강을 돌릴지(대화 쪽 조건은 세션만 안다), 어느 커밋이 한 작업인지,
-// 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
+// 판단은 안 한다 — 어느 커밋이 한 작업인지, 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
+// menu는 예외다: 「이 세션에 해당하는가」까지 낸다. 다만 무엇을 돌릴지는 사용자가 고른다.
 //
 // 사용:
 //   node <이 파일> user-turns --session <session_id>
+//   node <이 파일> menu --session <session_id> --repo <레포 경로> [--cwd <세션 cwd>]
 //   node <이 파일> snapshots --session <session_id>
 //   node <이 파일> changed --repo <레포 경로> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
@@ -286,10 +290,28 @@ function collapseUnresolved(keys) {
 }
 
 // 보강 매칭 조건 중 **파일로 판정되는 것만**. 대화 쪽 조건(그 스킬을 불렀는가)은 세션만 안다.
-const AUGMENTATION_PATHS = [
-  { key: 'workflow', re: /(^|\/)plan\/pr\d+\// },
-  { key: 'digest', re: /(^|\/)knowledge\// },
+// 회고 항목 레지스트리 — 「이번 세션에 해당하는가」의 정본. 라벨과 상세 파일은 SKILL.md
+// 「회고 항목」 표가 갖는다. 여기 라벨을 다시 적으면 표와 두 벌이 되고, 어긋나도 드러나는 자리가
+// 없다 — 그래서 여기는 key와 감지 조건만 갖는다.
+//
+//   always — 조건 없이 돈다          off — 기본 꺼짐. 사용자가 켤 때만
+//   timeline — 시간·순서 표의 자체 판정(SKIP_TURNS·SKIP_MS)을 쓴다
+//   file·slash — 둘 중 하나만 맞아도 해당    cwd — 있으면 먼저 통과해야 하는 관문
+// 순서는 SKILL.md 「회고 항목」 표와 같다 — 그 표의 순서가 실행 순서라, 메뉴를 다른 순서로 내면
+// 고르는 쪽이 무엇이 무엇에 흘러 들어가는지 못 본다.
+const RETRO_ITEMS = [
+  { key: 'timeline', when: 'timeline' },
+  { key: 'workflow', file: /(^|\/)plan\/pr\d+\//, slash: [/^\/workflow$/] },
+  { key: 'digest', file: /(^|\/)knowledge\//, slash: [/^\/digest$/] },
+  { key: 'write-refine', slash: [/^\/write-refine$/] },
+  { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
+  { key: 'recruitment', slash: [/^\/recruitment-(application|motivation)$/], cwd: 'private-playground' },
+  { key: 'step-1', when: 'always' },
+  { key: 'error-notebook', when: 'off' },
 ];
+
+// changed가 쓰는 파일 쪽 절반. 레지스트리에서 뽑아 쓴다 — 두 벌로 두면 한쪽만 늘어난다.
+const AUGMENTATION_PATHS = RETRO_ITEMS.filter(({ file }) => file).map(({ key, file }) => ({ key, re: file }));
 
 const [command, ...rest] = process.argv.slice(2);
 const optOf = (name) => {
@@ -644,6 +666,83 @@ if (command === 'timeline') {
     console.log(`${i + 1}. ${hhmm(row.at)}  ${row.spent === null ? '—' : durText(row.spent)}${reason ? `  (${reason})` : ''}`);
     console.log(`   ${row.text.length > clipAt ? `${row.text.slice(0, clipAt)}… (총 ${row.text.length}자)` : row.text}`);
   });
+  process.exit(0);
+}
+
+// 시간·순서 표의 판정(SKIP_TURNS·SKIP_MS)을 쓰므로 timeline 블록 뒤에 둔다.
+if (command === 'menu') {
+  const session = optOf('session');
+  const repo = optOf('repo') ?? process.cwd();
+  const cwd = (optOf('cwd') ?? process.cwd()).replaceAll('\\', '/');
+
+  // 파일 쪽 재료. 작업 트리의 미커밋 변경을 본다 — changed와 같은 기준이다.
+  const out = git(repo, ['status', '--porcelain=v1', '--untracked-files=all']);
+  const changedFiles = out.error
+    ? null
+    : out.split('\n').filter(Boolean).map((l) => l.slice(3).replaceAll('\\', '/'));
+
+  // 대화 쪽 재료. transcript가 없으면(세션 id가 틀렸거나 이 CLI가 Claude Code 형식으로 안 남긴다)
+  // 없는 채로 낸다 — 여기서 죽으면 파일·cwd로 걸리는 항목까지 함께 못 내게 된다.
+  const file = session ? findTranscript(session) : null;
+  let slashes = null;
+  let timelineLine = 'timeline  미확인  transcript 없음 — 이 항목은 세션이 판단한다';
+  if (file) {
+    const { turns } = collectTurns(file);
+    slashes = turns.map(({ text }) => text.match(/^(\/\S+)/)?.[1]).filter(Boolean);
+    const rows = attachTiming(file, turns);
+    const { total } = timelineTotals(rows);
+    const thin = rows.length < SKIP_TURNS && total < SKIP_MS;
+    timelineLine = `timeline  ${thin ? '해당없음' : '해당'}  발화 ${rows.length}건, 총 ${durText(total)}`;
+  }
+
+  const lines = [];
+  for (const item of RETRO_ITEMS) {
+    if (item.when === 'timeline') {
+      lines.push(timelineLine);
+      continue;
+    }
+    if (item.when === 'always') {
+      lines.push(`${item.key}  항상`);
+      continue;
+    }
+    if (item.when === 'off') {
+      lines.push(`${item.key}  기본 꺼짐  사용자가 켤 때만`);
+      continue;
+    }
+    if (item.cwd && !cwd.includes(item.cwd)) {
+      lines.push(`${item.key}  해당없음  cwd가 ${item.cwd} 아님`);
+      continue;
+    }
+    const hitFile = item.file && changedFiles?.filter((f) => item.file.test(f));
+    const hitSlash = item.slash && slashes?.filter((s) => item.slash.some((re) => re.test(s)));
+    const why = [];
+    if (hitFile?.length) why.push(`변경 ${hitFile.slice(0, 3).join(', ')}`);
+    if (hitSlash?.length) why.push(`호출 ${[...new Set(hitSlash)].join(', ')}`);
+    if (why.length) {
+      lines.push(`${item.key}  해당  ${why.join(' / ')}`);
+      continue;
+    }
+    // 재료가 아예 없었으면 「해당없음」이 아니라 「미확인」이다. 둘을 같은 말로 내면 못 본 것이
+    // 안 걸린 것으로 보고된다.
+    const missing = [];
+    if (item.file && changedFiles === null) missing.push(`git 실패(${out.error})`);
+    if (item.slash && slashes === null) missing.push('transcript 없음');
+    if (!missing.length) {
+      lines.push(`${item.key}  해당없음`);
+      continue;
+    }
+    // 못 본 절반과 보고 안 걸린 절반을 함께 적는다. 「미확인」만 적으면 세션이 처음부터 다시 봐야
+    // 하고, 그러면 기억으로 답하는 자리로 되돌아간다.
+    const checked = [];
+    if (item.file && changedFiles !== null) checked.push('변경 파일에는 안 걸림');
+    if (item.slash && slashes !== null) checked.push('슬래시 호출에는 안 걸림');
+    lines.push(`${item.key}  미확인  ${missing.join(', ')}${checked.length ? ` (${checked.join(', ')})` : ''}`);
+  }
+
+  console.log('[이번 세션에 해당하는 회고 항목]');
+  for (const line of lines) console.log(`  ${line}`);
+  console.log('\n라벨과 상세 파일은 SKILL.md 「회고 항목」 표에서 읽는다 — 여기는 해당 여부만 낸다.');
+  console.log('슬래시 호출은 사용자가 직접 부른 것만 남는다. 자동 발동은 안 잡히므로 「해당없음」은 안 불렀다는 증거가 아니다.');
   process.exit(0);
 }
 
