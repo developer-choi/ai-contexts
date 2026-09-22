@@ -10,6 +10,9 @@
 //   snapshots — 스냅샷을 *쓰는* 쪽은 코드인데(hooks/snapshot-precompact-transcript.mjs) 읽는
 //     진입점이 없어, 폴더 경로와 파일명 규약을 산문에서 읽어 손으로 글롭했다. 빗나가면
 //     "이 세션은 압축이 없었다"로 결론내고 넘어가 압축 구간의 사용자 교정이 통째로 유실된다.
+//   tasks — 세션 도중 "이건 회고 때 보자"로 적어둔 task. 적을 때는 회고에서 볼 생각이었는데 회고는
+//     대화 끝에서 돌아 그 대목이 요약에 접혀 있고, 그러면 사용자가 매번 말로 다시 꺼내야 한다.
+//     description까지 봐야 재료가 나오므로 한 번에 덤프한다 — 목록만 받으면 항목 수만큼 더 물어야 한다.
 //   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**)을
 //     세션 변경 목록과 눈으로 대조했다. 놓치면 보강이 통째로 안 돌고, 안 돈 사실은 아무 데도 안 남는다.
 //   menu — 「이번 세션에 해당하는 회고 항목」. changed와 달리 파일·대화·cwd 조건을 한 번에 돌려
@@ -34,6 +37,7 @@
 //   node <이 파일> user-turns --session <session_id>
 //   node <이 파일> menu --session <session_id> --repo <레포 경로> [--cwd <세션 cwd>]
 //   node <이 파일> snapshots --session <session_id>
+//   node <이 파일> tasks --session <session_id>
 //   node <이 파일> changed --repo <레포 경로> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
@@ -54,6 +58,9 @@ const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
 // 라이브 transcript. 폴더명은 cwd를 인코딩한 것이지만 세션이 옮겨 다니면 어긋나므로, 인코딩을
 // 흉내내지 않고 세션 id로 된 파일을 찾는다(실측 8000여 폴더에서 0.2초 미만).
 const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
+
+// task 저장소. 폴더명은 세션 id의 앞 8자다 — transcript와 달리 id 전체로는 안 찾아진다.
+const TASK_ROOT = path.join(os.homedir(), '.claude', 'tasks');
 
 // 읽고 안 쓴 문서의 누계. 기기를 넘어 쌓여야 신호가 차므로 백로그 레포에 둔다(같은 이유로
 // refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
@@ -768,6 +775,37 @@ if (command === 'snapshots') {
   }
   console.log(`[압축 스냅샷] ${hits.length}건 (최신순). 가장 위를 Read해 압축 이전 구간의 교정을 회수한다:`);
   hits.forEach(({ f }, i) => console.log(`  ${i === 0 ? '→' : ' '} ${path.join(SNAPSHOT_DIR, f)}`));
+  process.exit(0);
+}
+
+if (command === 'tasks') {
+  const session = optOf('session');
+  if (!session) {
+    console.error('tasks 에는 --session <session_id> 가 필요합니다.');
+    process.exit(1);
+  }
+  const dir = path.join(TASK_ROOT, `session-${session.slice(0, 8)}`);
+  const files = fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
+    : [];
+  if (!files.length) {
+    console.log('이 세션의 task 없음 — 회수할 것이 없다.');
+    process.exit(0);
+  }
+  console.log(`[이 세션의 task] ${files.length}건. 회고 재료가 아닌 것(작업 추적용)은 세션이 거른다.\n`);
+  for (const f of files) {
+    let task;
+    try {
+      task = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+    } catch (e) {
+      // 한 건이 깨져도 나머지는 낸다. 조용히 건너뛰면 그 건이 없었던 것이 된다.
+      console.log(`#${path.basename(f, '.json')} [읽기 실패] ${`${e.message}`.split('\n')[0]}\n`);
+      continue;
+    }
+    console.log(`#${task.id ?? path.basename(f, '.json')} (${task.status ?? '상태없음'}) ${task.subject ?? ''}`);
+    if (task.description) console.log(`${task.description}\n`);
+    else console.log('');
+  }
   process.exit(0);
 }
 
