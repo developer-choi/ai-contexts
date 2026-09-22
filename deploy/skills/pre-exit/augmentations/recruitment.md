@@ -44,6 +44,13 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 셋째가 없으면 선을 넘은 갈래가 매 회차 같은 알람을 내고, 그게 이런 장치가 무뎌지는 가장 흔한 경로다.
 
+#### 공고 원문 — 절 종류
+
+`site-usage.mjs`가 함께 내는 공고 원문(`-posting.md`) 쪽 미사용도 **절 종류**로 올린다. 종류가 보이면 사용자에게 둘 중 하나를 고르게 한다.
+
+- **안 옮긴다** — PP `local/contexts/recruitment/application/flow/step1.md` 공고 원문 저장의 「옮기지 않는 것」에 행을 더한다. 근무조건 줄이 섞여 들어오는 종류면 그 줄은 남긴다고 함께 적는다 — 결격 점검이 공고 원문 전체에서 근무조건 낱말을 찾는다
+- **그대로 둔다** — 아무것도 안 고친다
+
 ### 뒤에서 다시 판 조사
 
 지원동기 세션의 최종 보고에 「서류 단계 조사가 못 대서 다시 판 자리」 줄이 있으면(없으면 이 절은 건너뛴다) 그 자리마다 판정한다.
@@ -59,11 +66,12 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 - 지원동기 문장의 표현·오글거림 — 그 판정은 회차 안에서 이미 끝났고, 낱말은 오글 코퍼스가 받는다
 - 회차 자체의 기록 — 무슨 일이 있었는지는 남기지 않는다(PP `application/motivation/flow/finish.md` 4.11). 여기서 남기는 것은 규칙 변경 제안뿐이다
-- 공고 원문의 모집요강·접수기간·복리후생 절 — 서류지원 요건 점검이 읽고도 인용을 안 남기는 자리라, 사용률 스크립트에 안 쓰인 것으로 잡혀도 빼지 않는다
+- 공고 원문의 모집요강·접수기간·전형 절차 절, 복지 절에 섞인 근무 시간·요일·형태 줄, 공식 영문 회사명 절 — 서류지원 요건 점검·결격 점검·회사명 확정이 읽고도 인용을 안 남기는 자리라, 사용률 스크립트에 안 쓰인 것으로 잡혀도 빼지 않는다
 
 ## 반영 위치
 
 - 안 떠올 종류 → PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED` (+ 지난 덤프에 돌려 확인)
+- 안 옮길 공고 절 종류 → PP `local/contexts/recruitment/application/flow/step1.md` 「옮기지 않는 것」
 - 3단 갈래 눈금 → 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다)
 - 새로 여는 자리 → PP `recruitment-company-analysis` SKILL.md 「입력 자료 수집」
 - 그 밖의 절차 문제 → 「문제 리스트업 + 규칙화」의 문제 목록
