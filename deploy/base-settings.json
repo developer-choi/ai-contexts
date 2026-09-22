@@ -151,6 +151,12 @@
       "msg": "Checking blind measure prompt..."
     },
     {
+      "file": "check-company-analysis-agent.mjs",
+      "event": "PreToolUse",
+      "on": "agent",
+      "msg": "Checking company-analysis agent call..."
+    },
+    {
       "file": "check-agent-stop-policy.mjs",
       "event": "PreToolUse",
       "on": "taskstop",

@@ -112,6 +112,11 @@ function main() {
   check(browserTrack?.event === 'PostToolUse' && browserTrack?.matcher === 'mcp__claude-in-chrome__.*',
     'claude: record-browser-tab-url이 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');
 
+  // 회사 분석 훅은 Agent 매처에 걸려야 검사할 입력(prompt·name)을 본다. 매처가 어긋나면 훅이
+  // 등록된 모습 그대로 한 번도 발동하지 않는다.
+  check(claudePre.some((h) => h.matcher === 'Agent' && h.file === 'check-company-analysis-agent.mjs'),
+    'claude: check-company-analysis-agent가 Agent 매처로 등록됨');
+
   // 에이전트 종료 훅은 조건 없이 deny다. codex 어댑터가 PreToolUse를 '*'로 뭉치므로 거기 실리면
   // codex의 모든 도구 호출이 막힌다 — 매처가 TaskStop으로 좁혀졌는지와 codex에 안 실렸는지를
   // 함께 고정한다. 둘 중 하나만 보면 나머지 한쪽으로 같은 사고가 다시 난다.
