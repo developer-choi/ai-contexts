@@ -151,6 +151,12 @@
       "msg": "Checking blind measure prompt..."
     },
     {
+      "file": "check-agent-stop-policy.mjs",
+      "event": "PreToolUse",
+      "on": "taskstop",
+      "msg": "Checking agent stop policy..."
+    },
+    {
       "file": "check-browser-write-policy.mjs",
       "event": "PreToolUse",
       "on": "browser-write",

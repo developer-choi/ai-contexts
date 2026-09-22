@@ -112,6 +112,14 @@ function main() {
   check(browserTrack?.event === 'PostToolUse' && browserTrack?.matcher === 'mcp__claude-in-chrome__.*',
     'claude: record-browser-tab-url이 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');
 
+  // 에이전트 종료 훅은 조건 없이 deny다. codex 어댑터가 PreToolUse를 '*'로 뭉치므로 거기 실리면
+  // codex의 모든 도구 호출이 막힌다 — 매처가 TaskStop으로 좁혀졌는지와 codex에 안 실렸는지를
+  // 함께 고정한다. 둘 중 하나만 보면 나머지 한쪽으로 같은 사고가 다시 난다.
+  check(claudePre.some((h) => h.matcher === 'TaskStop' && h.file === 'check-agent-stop-policy.mjs'),
+    'claude: check-agent-stop-policy가 TaskStop 매처로 등록됨');
+  check(!codex.some((h) => h.file === 'check-agent-stop-policy.mjs'),
+    'codex: 무조건 deny인 에이전트 종료 훅 미등록');
+
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
   check(claudeCompact.some((h) => h.matcher === 'manual' && h.file === 'snapshot-precompact-transcript.mjs')
