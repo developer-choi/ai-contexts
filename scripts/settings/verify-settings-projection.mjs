@@ -152,6 +152,12 @@ function main() {
     'codex: EnterWorktree 전용 hook 미등록');
   check(!codex.some((h) => h.event === 'PreCompact'),
     'codex: PreCompact hook 미등록');
+  // read(on)는 claude에서 Read 매처로만 걸리고, codex에선 매처 없는 그룹으로 새어 모든 PostToolUse에
+  // 걸리지 않도록 빠져야 한다.
+  check(claude.some((h) => h.event === 'PostToolUse' && h.matcher === 'Read' && h.file === 'surface-skill-creator.mjs'),
+    'claude: surface-skill-creator가 PostToolUse Read 매처로 등록됨');
+  check(!codex.some((h) => h.file === 'surface-skill-creator.mjs'),
+    'codex: Read 매처 훅 미등록(codex 읽기 도구 이름 미실측)');
   check(!codex.some((h) => h.file === 'check-browser-write-policy.mjs' || h.file === 'record-browser-tab-url.mjs'),
     'codex: claude-in-chrome 훅 미등록(codex엔 그 도구가 없음)');
   // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이

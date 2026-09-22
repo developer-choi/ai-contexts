@@ -13,6 +13,12 @@
       "msg": "Installing worktree dependencies..."
     },
     {
+      "file": "surface-skill-creator.mjs",
+      "event": "PostToolUse",
+      "on": "read",
+      "msg": "Checking skill-creator for scw bench..."
+    },
+    {
       "file": "post-enterworktree-install.mjs",
       "event": "PostToolUse",
       "on": "enterworktree",

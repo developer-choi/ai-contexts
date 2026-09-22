@@ -1374,6 +1374,38 @@ const toolGroup = () => runCases(TOOL_CASES, async ([file, payload, expected, no
   return judge(`${file} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
 });
 
+// skill-creator 알림은 대화 기록 파일을 읽어 「이미 불렀는가」를 가르므로, 기록 두 벌(부른 것·안 부른 것)을
+// 임시 폴더에 만들어 두고 그 안에서 실행까지 끝낸다. 부른 기록은 플러그인 접두가 붙은 이름으로 둔다 —
+// 이름 전체 일치로 판정하면 이 형태를 놓친다.
+const SKILL_CREATOR_HOOK = 'surface-skill-creator.mjs';
+const skillCreatorGroup = async () => {
+  const dir = await makeTempDir('hook-skill-creator-');
+  try {
+    const loaded = path.join(dir, 'loaded.jsonl');
+    const fresh = path.join(dir, 'fresh.jsonl');
+    const toolUse = (name, input) => JSON.stringify({ message: { role: 'assistant', content: [{ type: 'tool_use', name, input }] } });
+    fs.writeFileSync(loaded, `${toolUse('Skill', { skill: 'anthropic-skills:skill-creator' })}\n`);
+    // 본문에 이름만 나오고 Skill 호출은 없는 기록 — 읽은 문서에 이름이 적혀 있는 것은 부른 것이 아니다
+    fs.writeFileSync(fresh, `${toolUse('Read', { file_path: 'C:/x/skill-creator/SKILL.md' })}\n`);
+    const read = (file, transcript) => ({ tool_name: 'Read', tool_input: { file_path: file }, transcript_path: transcript });
+    const bench = 'C:/Users/u/.claude/skills/scw/benching/SKILL.md';
+    const cases = [
+      [read(bench, fresh), 'context', '안 부른 세션이 벤치 문서를 열면 알린다'],
+      [read('C:/repo/deploy/skills/scw/benching/SKILL.md', fresh), 'context', '원본 경로로 열어도 알린다'],
+      [read(bench, loaded), 'pass', '이미 부른 세션은 조용하다'],
+      [read(bench, path.join(dir, 'none.jsonl')), 'context', '기록을 못 읽으면 알리는 쪽으로 기운다'],
+      [read('C:/Users/u/.claude/skills/scw/SKILL.md', fresh), 'pass', 'scw 본문만 연 것은 벤치 회차가 아니다'],
+      [{ tool_name: 'Edit', tool_input: { file_path: bench }, transcript_path: fresh }, 'pass', 'Read가 아니면 조용하다'],
+    ];
+    return await runCases(cases, async ([payload, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(SKILL_CREATOR_HOOK, payload);
+      return judge(`${SKILL_CREATOR_HOOK} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
+    });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 function mergeReports(reports) {
   return {
     lines: reports.flatMap((report) => report.lines),
@@ -1395,6 +1427,7 @@ async function main() {
     sectionRefReverseGroup,
     waitGroup,
     toolGroup,
+    skillCreatorGroup,
   ];
 
   // 그룹은 각자 자기 임시 폴더만 쓰므로 함께 돌린다. allSettled인 이유는 한 그룹이 터졌을 때
