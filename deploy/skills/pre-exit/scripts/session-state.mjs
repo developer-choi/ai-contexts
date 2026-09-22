@@ -1106,7 +1106,7 @@ if (command === 'read-usage') {
   if (mine.length) {
     console.log(`\n[배치 의심] 이번 세션이 연 문서 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
     for (const row of mine) console.log(rowLine(row));
-    console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 read-usage.md 「선을 넘은 것」.');
+    console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 [선을 넘은 것](read-usage.md#4-선을-넘은-것).');
   }
   process.exit(0);
 }
@@ -1251,7 +1251,7 @@ if (command === 'source-usage') {
   if (mine.length) {
     console.log(`\n[3단 낭비 의심] 이번 회차가 떠온 갈래 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
     for (const row of mine) console.log(rowLine(row));
-    console.log('회고 문제 목록에 올린다 — 무엇을 고르게 하는지는 augmentations/recruitment.md 「떠왔는데 안 쓴 절」.');
+    console.log('회고 문제 목록에 올린다 — 무엇을 고르게 하는지는 [떠왔는데 안 쓴 절](augmentations/recruitment.md#떠왔는데-안-쓴-절).');
   }
   process.exit(0);
 }
