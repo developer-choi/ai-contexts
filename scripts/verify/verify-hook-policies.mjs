@@ -996,22 +996,23 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
 
   // 경로를 셸 변수로 넘기면 훅은 셸 확장 전 원문(`$V`)을 받는다. 예전엔 그 폴더에서 브랜치를 못 읽고
   // fail-open으로 흘러 머지 판정이 통째로 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현).
-  // 폴더를 못 정하면 통과시키지 않는다 — 면제 레포도 예외가 아니다(면제 판정 자체가 서지 않는다).
+  // 같은 명령 안의 단순 대입은 파서가 풀어 실제 폴더로 판정한다 — 면제 밖은 막고, 면제 레포는 통과.
   [
     'check-git-merge-policy.mjs',
     `V="${gated}"; git -C "$V" merge feature`,
     'deny',
     '셸 변수 경로여도 머지 판정을 건너뛰지 않는다',
   ],
+  ['check-git-merge-policy.mjs', `V="${free}"; git -C "$V" merge feature`, 'pass', '같은 명령에서 대입한 변수 경로는 풀어서 면제 판정'],
+  ['check-git-push-policy.mjs', `P=${free}; git -C $P push origin main`, 'pass', '변수 경로 면제 레포는 보호 브랜치 push도 통과'],
+  ['check-git-push-policy.mjs', `$P = '${free}'; git -C $P push origin main`, 'pass', 'PowerShell 대입도 풀어서 면제 판정'],
+  ['check-git-push-policy.mjs', `P=${gated}; git -C \${P} push origin main`, 'ask', '변수 경로여도 면제 밖은 push 승인 유지'],
+  // 풀 수 없는 변수(미정의·명령 치환)는 폴더를 못 정한 것으로 남는다 — 면제 레포도 예외가 아니다.
+  ['check-git-merge-policy.mjs', `git -C "$UNSET_V" merge feature`, 'deny', '미정의 변수 경로는 면제되지 않는다'],
+  ['check-git-merge-policy.mjs', `V=$(echo ${free}); git -C "$V" merge feature`, 'deny', '명령 치환 값은 풀지 않아 면제되지 않는다'],
   [
     'check-git-merge-policy.mjs',
-    `V="${free}"; git -C "$V" merge feature`,
-    'deny',
-    '면제 레포도 폴더를 못 정하면 통과시키지 않는다',
-  ],
-  [
-    'check-git-merge-policy.mjs',
-    `V="${gated}"; git -C "$V" rebase --continue`,
+    `git -C "$UNSET_V" rebase --continue`,
     'pass',
     '진행 중 작업 복구는 폴더를 못 정해도 통과',
   ],

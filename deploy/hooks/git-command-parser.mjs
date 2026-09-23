@@ -13,16 +13,48 @@ import path from "node:path";
 // 형태는 파이프로 이미 분리되므로 실사용에서 손실이 없다.
 export function findGitInvocations(command, subcommand) {
   const out = [];
+  const vars = new Map();
   for (const seg of splitSegments(command)) {
     const tokens = tokenize(seg);
+    if (recordAssignment(tokens, vars)) continue;
     for (let i = 0; i < tokens.length; i += 1) {
       if (tokens[i] !== "git") continue;
       const parsed = parseGitInvocation(tokens, i + 1);
-      if (parsed && parsed.subcommand === subcommand) out.push({ args: parsed.args, cwd: parsed.cwd });
+      if (parsed && parsed.subcommand === subcommand) {
+        out.push({ args: parsed.args, cwd: parsed.cwd && expandVars(parsed.cwd, vars) });
+      }
       break;
     }
   }
   return out;
+}
+
+// 훅은 셸 확장 전 원문을 받으므로 `P=<경로>; git -C $P ...`의 cwd가 글자 그대로 `$P`다.
+// 같은 명령 안의 단순 대입만 기억해 두었다가 풀어 준다 — 경로를 못 정하면 면제 판정이 서지 않아
+// 면제 레포도 보호 브랜치 확인이 뜬다. 값에 `$`·백틱이 섞인 대입(`$(...)` 등)은 기억하지 않아
+// 원문으로 남고, 그 경우 판정은 예전처럼 "폴더를 못 정함" 쪽으로 간다.
+// 세그먼트가 대입만으로 이뤄졌을 때만 기록한다 — `V=x cmd`는 cmd 한 번의 환경변수라 뒤로 이어지지 않는다.
+function recordAssignment(tokens, vars) {
+  const body = tokens[0] === "export" ? tokens.slice(1) : tokens;
+  if (body.length === 0) return false;
+  // PowerShell: `$P = 'path'` → ["$P", "=", "path"]
+  if (body.length === 3 && body[1] === "=" && /^\$[A-Za-z_]\w*$/.test(body[0])) {
+    return setVar(vars, body[0].slice(1), body[2]);
+  }
+  const pairs = body.map((t) => t.match(/^([A-Za-z_]\w*)=(.*)$/s));
+  if (pairs.some((m) => !m)) return false;
+  for (const [, name, value] of pairs) setVar(vars, name, value);
+  return true;
+}
+
+function setVar(vars, name, value) {
+  if (/[$`]/.test(value)) vars.delete(name);
+  else vars.set(name, value);
+  return true;
+}
+
+function expandVars(value, vars) {
+  return value.replace(/\$\{([A-Za-z_]\w*)\}|\$([A-Za-z_]\w*)/g, (m, braced, bare) => vars.get(braced ?? bare) ?? m);
 }
 
 // git 토큰 다음 위치부터 전역 옵션을 흘려보내고 { subcommand, args, cwd }를 만든다.
