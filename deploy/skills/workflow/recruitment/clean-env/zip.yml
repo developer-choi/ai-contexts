@@ -1,0 +1,19 @@
+# 임시 레포에 submission.zip과 함께 .github/workflows/clean-install.yml로 얹는다
+name: clean-install
+on: push
+jobs:
+  clean-install:
+    runs-on: ubuntu-latest
+    env: { PORT: 3000 }              # 과제 README에 명시 포트가 있으면 그 값
+    defaults: { run: { working-directory: app } }
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir -p app && unzip -q submission.zip -d app
+        working-directory: .
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }   # 과제 README에 명시 버전이 있으면 그 값
+      - run: '[ -z "$ENV_LOCAL" ] || printf "%s" "$ENV_LOCAL" > .env.local'
+        env: { ENV_LOCAL: '${{ secrets.ENV_LOCAL }}' }
+      - run: npm ci
+      - run: npm run build
+      - run: npx --yes start-server-and-test start http://localhost:$PORT "curl -fsS http://localhost:$PORT"

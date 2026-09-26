@@ -114,14 +114,19 @@ PR 분할 안내·최종 제출 QA체크리스트·어필·회고 양식은 완�
 | 사례 | 절차 |
 |------|------|
 | zip 제출 | node_modules 등 제외하고 압축, 파일명 규칙 확인, 메일 발송 |
-| GitHub 제출 | Private 확인, .env.local 미포함 확인, collaborator 초대, 배포 |
+| GitHub 제출 | Private 확인, .env.local 미포함 확인, [클린 환경 실행 확인](#클린-환경-실행-확인) 통과 → collaborator 초대, 배포 |
 | 혼합 | 위 사항 조합 |
 
 공통 점검:
 - `node {{skill_dir}}/recruitment/scripts/check-submission.mjs submission <레포>` — 환경변수 파일·`plan/` 혼입. **유출은 제출된 뒤에야 성립하고 우리 화면에는 아무 표시도 안 나므로** 눈으로 훑지 않는다
 - 빌드(`npm run build` 등) 실행하여 에러 없이 완료되는지 확인
+- [클린 환경 실행 확인](#클린-환경-실행-확인) 통과 — 작업 폴더 빌드 통과만으로 제출하지 않는다
 - README.md의 이미지·링크는 `check-submission.mjs pr-body <README.md> --check-urls`로 확인
 - 과제가 AI 세션 대화 내역 제출을 요구하면 [session-timeline/SKILL.md](../session-timeline/SKILL.md)로 대화록을 만들어 제출물에 넣는다
+
+### 클린 환경 실행 확인
+
+작업 폴더에는 `node_modules/`·미커밋 파일·`.env.local`이 그대로 있어, 빠뜨린 것이 있어도 빌드가 통과한다. 리뷰어가 받는 것만 든 빈 머신(GitHub Actions)에서 설치→빌드→실행→홈페이지 응답까지 돌려, 빨간불이면 제출하지 않고 실패 로그로 빠진 것을 사용자에게 보고한다. 절차는 [clean-env/procedure.md](clean-env/procedure.md).
 
 ### 제출 메일 작성
 
