@@ -1,6 +1,6 @@
 // 다른 문서의 절·커맨드를 가리키는 인용이 실제로 그 대상에 닿는지 커밋 시점에 본다.
 //
-// 다섯 검사를 한 훅에 담되 세기가 다르다:
+// 여섯 검사를 한 훅에 담되 세기가 다르다:
 //   [차단] 앵커 링크 `[절 이름](경로.md#앵커)`의 앵커가 대상 파일에 없으면 거부한다.
 //     앵커 문자열과 대상 파일 헤딩을 대조할 뿐이라 판단이 0이다.
 //   [차단] 코드가 문자열로 든 절 인용 `content-format §3 '빈 섹션 금지'`이 안 닿으면 거부한다.
@@ -19,6 +19,14 @@
 //   [차단] 위 넷과 **반대 방향** — 이 커밋이 헤딩을 개명한 md를 가리키던 인용이 안 닿게 됐으면
 //     거부한다. 위 넷은 스테이지된 파일에서 나가는 링크만 보므로, 개명한 쪽만 커밋하면
 //     끊긴 인용을 아무도 안 본다. 발동·세기의 근거는 아래 「역방향」 절에 적었다.
+//   [알림] 바로 위 검사를 **다른 레포**의 인용까지 넓힌 것 — `~/WebstormProjects` 아래 레포가
+//     이 파일의 절을 레포 이름 + 경로나 절대 경로로 부르고 있었으면 알린다. 발동 조건은 위와 같다.
+//     차단이 아닌 이유: 그 인용은 다른 레포라 **이 커밋에 함께 담아 고칠 수 없다** — 막으면 다른
+//     레포를 먼저 고쳐 커밋하는 순서를 강요하고, 그 레포가 다른 세션의 작업 중일 수도 있다. 오탐도
+//     근거가 얇다: 붙이기 전 전수 실측(`--scan-cross`, 2026-09-26, 레포 36개)에서 레포를 넘는 절
+//     인용은 9건, 안 풀림 0건·엉뚱한 파일로 풀림 0건이었지만 9건 전부 AC → backlog 한 쌍이다.
+//     비용은 발동할 때만 든다 — 레포마다 `git grep`을 띄워 +1.1초(0.36 → 1.46초), 절을 안 잃은
+//     커밋은 그대로다. 근거는 아래 「레포 밖 역방향」 절.
 //
 // 백틱 안의 레포 상대 경로는 보지 않는다. 링크 형태(`[글자](경로)`)는 scripts/check-links.mjs가
 // 이미 전수로 보고, 백틱 형태는 남의 레포 경로를 그대로 적는 자리가 많아(AC 스킬 본문이 소비
@@ -40,7 +48,7 @@
 // 검사 범위는 이 커밋이 건드린 md·코드 파일 전체다(contexts/rules-as-code-authoring.md
 // 「검사 범위 — 고친 줄이 아니라 건드린 파일」). 변경분만 보면 규칙 이전의 위반이
 // 그 줄을 건드릴 때까지 남고, 매번 전체를 훑으면 규칙 수만큼 비용이 곱해진다.
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -113,6 +121,49 @@ const FENCE_QUOTE_LEAD = /`([^`\s]+\.\w+)`[^`\n]*[「【]([^」】\n]+)[」】][
 let docIndexCache = null;
 let commandCache = null;
 
+// 레포 밖 인용의 두 꼴(「레포 밖 역방향」 절). 둘 다 **어느 파일인지가 글자로 드러난** 것만 본다 —
+// 「」만 있는 줄은 강조와 못 가르고, 경로만 있는 줄은 인용한 쪽 레포 안으로 풀려 버린다.
+//   `backlog 레포 \`CLAUDE.md\`의 「절」`   — 레포 이름 + 레포 상대 경로
+//   `~/WebstormProjects/main/<레포>/x.md 「절」` — 절대·`~` 경로
+// 「」가 `·`·`,`·`와`로 이어지면 전부 본다. 이 검사를 낳은 인용이 `「기존 파일·디렉토리 우선」·「우선순위」`
+// 꼴이었고, 사라진 쪽이 **둘째** 절이었다.
+const SECTION_RUN = /\s*(?:의|에|에서|가|이|는|은)?\s*((?:[「【][^」】\n]+[」】]\s*(?:·|,|와|과|및)?\s*)+)/u.source;
+const REPO_PROSE_REF = new RegExp(
+  /(?<![\w-])([A-Za-z][\w-]*|백로그)\s*레포(?:의)?\s*(?:`([^`\n]+?\.md)`|([\w./-]+\.md))/u.source + SECTION_RUN,
+  "gu",
+);
+const PATH_PROSE_REF = new RegExp(
+  // 앞 글자 제한: 상대 경로 한가운데의 `/`나 URL의 `//`에서 절대 경로가 시작된 것으로 읽지 않게 한다.
+  /(?<![\w./\\~:-])`?((?:~|[A-Za-z]:)?[\\/][^\s`「」()]+?\.md)`?/u.source + SECTION_RUN,
+  "gu",
+);
+
+// 산문이 레포를 부르는 약어 → 폴더 이름. `deploy/rules/global.md` 「프로젝트 약어」의 사본이다 —
+// 배포돼 나가는 훅이라 그 md를 읽을 수 없어 짝꿍(`meta/coupling.json`)으로 묶었다. 이 표가 낡으면
+// 그 약어로 부른 인용을 **못 볼 뿐** 엉뚱한 레포로 풀지는 않는다 — 재현율만 떨어지고 오탐은 안 생긴다.
+const REPO_ALIASES = {
+  ac: "ai-contexts",
+  dp: "dsa-playground",
+  ka: "knowledge-archive",
+  mp: "monorepo-playground",
+  pfm: "plan-for-myself",
+  dc: "developer-choi",
+  pp: "private-playground",
+  tp: "test-playground",
+  ap: "assignment-playground",
+  백로그: "backlog",
+};
+
+// 레포 밖을 훑을 때 `git grep`에 넘기는 파일 꼴. 레포 안 검사와 같은 확장자를 본다.
+const SCANNED_GLOBS = ["*.md", ...[...CODE_EXTENSIONS].map((ext) => `*${ext}`)];
+
+// 전수 실측 모드: `node check-md-section-refs.mjs --scan-cross [워크스페이스]`.
+// 레포를 넘는 인용 전부를 대상의 **지금** 앵커로 풀어, 레포 밖 역방향이 볼 모집단과 그 오탐을 센다.
+if (process.argv.includes("--scan-cross")) {
+  runScanCross(process.argv[process.argv.indexOf("--scan-cross") + 1] || workspaceRoot());
+  process.exit(0);
+}
+
 // 전수 실측 모드: `node check-md-section-refs.mjs --scan <레포경로>`.
 // 검사를 켜기 전에 그 레포 전체에서 몇 건이 걸리는지 세는 자리다. 훅 경로와 **같은 수집
 // 함수**를 쓴다 — 재려고 따로 짠 스크립트는 훅과 갈라져, 잰 숫자가 훅의 행동을 안 말해준다.
@@ -136,11 +187,12 @@ const found = inspect(root, staged);
 
 const lost = lostAnchors(root, staged);
 found.reverse = lost.size ? collectReverse(root, staged, lost) : [];
+({ hits: found.cross, blind: found.crossBlind } = lost.size ? await collectCrossRepo(root, lost) : { hits: [], blind: null });
 
 if (found.broken.length || found.codeRefs.length || found.quotes.length || found.reverse.length) {
   deny(formatBroken(found));
 }
-if (found.legacy.length || found.commands.length) {
+if (found.legacy.length || found.commands.length || found.cross.length || found.crossBlind) {
   addContext(formatSoft(found), "PreToolUse");
 }
 process.exit(0);
@@ -149,7 +201,7 @@ process.exit(0);
 
 // 훅과 실측이 함께 쓰는 몸통. 파일 목록을 받아 네 갈래로 나눠 담는다.
 function inspect(root, files) {
-  const found = { broken: [], legacy: [], codeRefs: [], commands: [], quotes: [], reverse: [] };
+  const found = { broken: [], legacy: [], codeRefs: [], commands: [], quotes: [], reverse: [], cross: [] };
   for (const rel of files) {
     const abs = path.join(root, rel);
     let src;
@@ -186,7 +238,7 @@ function collectBrokenAnchors(rel, abs, src, out) {
     // 외부 URL은 대상이 이 레포에 없는 것이 정상이다. 안 거르면 GitHub·공식문서의 `.md#앵커`
     // 링크를 로컬 파일로 착각해 "대상 파일이 없습니다"로 차단한다 — 전수 실측에서 backlog가
     // 그 이유로 세 파일에서 막혀 있었다(네이버 로그인 문서·css-modules·dnd 예제 링크).
-    if (/^[a-z][\w+.-]*:\/\//i.test(href) || href.startsWith("//")) continue;
+    if (isExternal(href)) continue;
     const target = path.resolve(path.dirname(abs), href);
     if (!isFile(target)) {
       out.push({ rel, line: m.line, target, text, href, anchor: rawAnchor, why: "대상 파일이 없습니다", near: [] });
@@ -236,7 +288,7 @@ function collectLegacyRefs(root, rel, abs, src, out) {
     // 「A > B」는 중첩 헤딩 경로다(상위 절 > 하위 절). 마디마다 대조하고, 링크로는 마지막
     // 마디를 쓴다 — 앵커는 헤딩 하나만 가리킬 수 있어 실제로 뛸 곳이 그쪽이다.
     const segments = section.split(">").map((s) => s.trim()).filter(Boolean);
-    const leaf = segments[segments.length - 1] ?? section;
+    const leaf = leafOf(section);
     const resolved = segments.length > 0 && segments.every((s) => loose.has(slug(s)));
     // 앵커는 앞머리 별칭이 아니라 **전체 헤딩**의 슬러그여야 실제로 뛴다. 표시 글자는
     // 원래 부르던 이름을 그대로 두고, 주소만 전체 이름으로 채운 제안을 낸다.
@@ -348,6 +400,163 @@ function collectReverse(root, staged, lost) {
     if (!it.suggestion && brokenByRename(it, it.leaf)) hits.push({ ...it, quote: `${it.href} 「${it.section}」` });
   }
   return hits;
+}
+
+// ── 레포 밖 역방향 ────────────────────────────────────────────────────────────
+
+// 위 역방향의 모집단은 이 레포의 `git ls-files`라, **다른 레포**가 이 파일의 절을 이름으로 부르던
+// 인용은 원리상 안 보였다 — AC 스킬이 backlog 규격 파일의 절을 이름으로 부르는 자리가 그렇게 끊긴
+// 채 남았었다. 그래서 발동은 위와 같이 좁힌 채(이 커밋이 절을 잃었을 때만) 모집단만
+// 워크스페이스(`~/WebstormProjects` 아래 git 레포)로 넓힌다.
+//
+// 링크(`../backlog/CLAUDE.md#절`)는 경로를 그대로 풀어 따라가지만, 레포를 넘는 절 인용은 거의 다
+// 산문이다(2026-09-26 워크스페이스 실측: 레포를 넘는 md 링크 28건 중 `#앵커`가 달린 것 0건).
+// 산문의 `CLAUDE.md`는 링크처럼 풀면 **인용한 쪽** 레포의 파일이 되므로, 앞에 붙은 레포 이름을
+// 글자로 읽어 가른다 — 그래서 두 꼴을 함께 본다.
+//
+// 비교는 절대 경로가 아니라 **(메인 체크아웃, 레포 상대 경로)** 로 한다. 워크트리에서 커밋해도
+// 다른 레포의 인용은 메인 체크아웃 경로를 가리킨다.
+//
+// 모든 파일을 읽지 않고 `git grep -l`로 잃은 파일 이름이 든 파일만 먼저 추린다. 워크스페이스에는
+// 추적 파일 19,091개짜리 레포(`simplified-nextjs`)가 있어, 전량을 읽으면 커밋이 눈에 띄게 선다.
+// 그 `git grep`도 레포 36개를 차례로 부르면 2.7초라(2026-09-26 실측) 한꺼번에 띄운다.
+async function collectCrossRepo(root, lost) {
+  const self = mainCheckout(root);
+  if (!self) return { hits: [], blind: null };
+  const selfName = path.basename(self).toLowerCase();
+  const goneByRel = new Map();
+  for (const [abs, gone] of lost) goneByRel.set(relKey(path.relative(root, abs)), { gone, abs });
+  const names = [...new Set([...goneByRel.keys()].map((rel) => path.posix.basename(rel)))];
+  const grepArgs = ["grep", "-l", "-I", "-i", "-F", ...names.flatMap((n) => ["-e", n]), "--", ...SCANNED_GLOBS];
+  const found = workspaceRepos(workspaceRoot());
+  // 훑은 목록에 자기 레포조차 없으면 "인용 없음"이 아니라 워크스페이스를 못 찾은 것이다. 그대로 두면
+  // 레포 배치가 바뀐 기기에서 이 검사는 빈 집합을 훑으며 매 커밋 조용히 통과한다.
+  if (!found.some((repo) => samePath(repo, self))) return { blind: workspaceRoot(), hits: [] };
+  const repos = found.filter((repo) => !samePath(repo, self)); // 같은 레포는 위 역방향이 본다
+  const listed = await Promise.all(repos.map((repo) => gitAsync(grepArgs, repo)));
+  const hits = [];
+  for (const [i, repo] of repos.entries()) {
+    for (const rel of listed[i].split("\n").filter(Boolean)) {
+      for (const ref of crossRefsIn(repo, rel)) {
+        const key = ref.repo ? (ref.repo === selfName ? relKey(ref.rel) : null) : relUnder(self, ref.target);
+        const entry = key && goneByRel.get(key);
+        if (!entry) continue;
+        for (const section of ref.sections) {
+          const leaf = leafOf(section);
+          if (!sectionResolves(leaf, entry.gone)) continue;
+          hits.push({
+            repo: path.basename(repo),
+            rel,
+            line: ref.line,
+            quote: ref.quote,
+            section,
+            near: nearest(leaf, anchorsOf(entry.abs).exact),
+          });
+        }
+      }
+    }
+  }
+  return { hits, blind: null };
+}
+
+// 한 파일에서 레포를 넘는 절 인용을 뽑는다. 훅과 `--scan-cross`가 같이 쓴다.
+// 돌려주는 것: 대상이 레포 이름으로 적혔으면 `{ repo, rel }`, 경로로 적혔으면 `{ target }`(절대 경로).
+function crossRefsIn(repo, rel) {
+  const abs = path.join(repo, rel);
+  let src;
+  try {
+    src = fs.readFileSync(abs, "utf8");
+  } catch {
+    return [];
+  }
+  const fences = path.extname(rel).toLowerCase() === ".md";
+  const refs = [];
+  for (const m of matchesOutsideCode(src, ANCHOR_LINK, { fences })) {
+    const [quote, , href, anchor] = m.match;
+    if (isExternal(href)) continue;
+    const target = path.resolve(path.dirname(abs), expandHome(href));
+    if (relUnder(repo, target) != null) continue; // 레포 안 링크는 순방향·역방향이 이미 본다
+    refs.push({ line: m.line, target, sections: [decodeAnchor(anchor)], quote });
+  }
+  for (const m of matchesOutsideCode(src, REPO_PROSE_REF, { fences })) {
+    const [quote, name, ticked, bare, run] = m.match;
+    const repoName = REPO_ALIASES[name.toLowerCase()] ?? name.toLowerCase();
+    if (repoName === path.basename(repo).toLowerCase()) continue; // 자기 레포를 이름으로 부른 것
+    refs.push({ line: m.line, repo: repoName, rel: ticked || bare, sections: sectionsOf(run), quote: quote.trim() });
+  }
+  for (const m of matchesOutsideCode(src, PATH_PROSE_REF, { fences })) {
+    const [quote, raw, run] = m.match;
+    if (!/^(~|[A-Za-z]:)/.test(raw)) continue; // `/x.md`는 URL 경로·레포 루트 표기와 안 갈린다
+    const target = path.resolve(expandHome(raw));
+    if (relUnder(repo, target) != null) continue;
+    refs.push({ line: m.line, target, sections: sectionsOf(run), quote: quote.trim() });
+  }
+  return refs;
+}
+
+// 이 워크트리가 딸린 메인 체크아웃. 워크트리가 아니면 자기 자신이다.
+function mainCheckout(root) {
+  const common = git(["rev-parse", "--path-format=absolute", "--git-common-dir"], root);
+  return common ? path.dirname(path.resolve(common)) : null;
+}
+
+// 테스트는 env로 임시 워크스페이스를 준다. 실제 기기에서 레포는 전부 이 폴더 아래 있다.
+function workspaceRoot() {
+  if (process.env.SECTION_REFS_WORKSPACE) return process.env.SECTION_REFS_WORKSPACE;
+  return path.join(process.env.USERPROFILE || process.env.HOME || "", "WebstormProjects");
+}
+
+// 깊이 3까지(`main/backlog`·`recruitment/<회사>`) `.git`이 있는 폴더. 점 폴더는 내려가지 않는다 —
+// 워크트리가 `<레포>/.claude/worktrees/` 밑에 살아, 같은 레포가 여러 벌 잡힌다.
+function workspaceRepos(base, depth = 3) {
+  const repos = [];
+  const walk = (dir, left) => {
+    if (fs.existsSync(path.join(dir, ".git"))) return void repos.push(dir);
+    if (!left) return;
+    let entries = [];
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return; // 폴더가 없는 기기 — 있는 것만 본다
+    }
+    for (const e of entries) {
+      if (e.isDirectory() && !e.name.startsWith(".") && e.name !== "node_modules") walk(path.join(dir, e.name), left - 1);
+    }
+  };
+  walk(base, depth);
+  return repos;
+}
+
+// `target`이 `repo` 안이면 레포 상대 경로 키, 밖이면 null.
+function relUnder(repo, target) {
+  const rel = path.relative(repo, target);
+  return rel && !rel.startsWith("..") && !path.isAbsolute(rel) ? relKey(rel) : null;
+}
+
+function relKey(rel) {
+  return rel.split(path.sep).join("/").replace(/^\.?\//, "").toLowerCase();
+}
+
+function samePath(a, b) {
+  return path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
+}
+
+function isExternal(href) {
+  return /^[a-z][\w+.-]*:\/\//i.test(href) || href.startsWith("//");
+}
+
+function expandHome(p) {
+  return p.startsWith("~/") ? path.join(process.env.USERPROFILE || process.env.HOME || "", p.slice(2)) : p;
+}
+
+function sectionsOf(run) {
+  return [...run.matchAll(/[「【]([^」】\n]+)[」】]/g)].map((m) => m[1]);
+}
+
+// 「A > B」는 중첩 헤딩 경로다. 앵커로 닿는 것은 마지막 마디다.
+function leafOf(section) {
+  const segments = section.split(">").map((s) => s.trim()).filter(Boolean);
+  return segments[segments.length - 1] ?? section;
 }
 
 // ── 대상 찾기 ─────────────────────────────────────────────────────────────────
@@ -635,7 +844,7 @@ function formatBroken(found) {
   if (found.reverse.length) {
     lines.push("  → `←` 표시가 붙은 파일은 이 커밋에 없습니다. 고친 뒤 함께 스테이지하세요.");
   }
-  const soft = found.legacy.length + found.commands.length;
+  const soft = found.legacy.length + found.commands.length + found.cross.length + (found.crossBlind ? 1 : 0);
   if (soft) {
     lines.push("", `  (알림 대상도 ${soft}건 있습니다. 그건 차단 대상이 아닙니다.)`);
   }
@@ -687,6 +896,34 @@ function formatSoft(found) {
       "  · 지금 안 고쳐도 커밋은 통과합니다.",
     );
   }
+  if (found.cross.length) {
+    if (lines.length) lines.push("");
+    lines.push(
+      `[레포 밖 인용] 이 커밋이 지우거나 개명한 절을 다른 레포가 이름으로 부르고 있습니다 (${found.cross.length}건).`,
+      "",
+    );
+    for (const it of found.cross) {
+      lines.push(`  ${it.repo}:${it.rel}:${it.line}  「${it.section}」`);
+      lines.push(`    ${it.quote}`);
+      for (const n of it.near) lines.push(`      이름이 비슷한 절: 「${n}」  ← 새 이름인 것 같습니다`);
+    }
+    lines.push(
+      "",
+      "  · 그 파일은 다른 레포라 이 커밋에 담을 수 없습니다. 그 레포에서 인용을 따로 고치세요.",
+      "  · 절이 통째로 사라졌으면 인용만 고치지 말고, 가리키던 문장이 아직 유효한지 보세요.",
+      "  · 알림이라 커밋은 통과합니다. 지금 안 고치면 이 커밋 뒤로는 아무도 다시 알려주지 않습니다.",
+    );
+  }
+  if (found.crossBlind) {
+    if (lines.length) lines.push("");
+    lines.push(
+      `[레포 밖 인용] 이 커밋이 절을 지우거나 개명했는데, 워크스페이스(${found.crossBlind})에서 이 레포를 못 찾아`,
+      "  다른 레포가 그 절을 부르는지 보지 못했습니다. 인용이 없다는 뜻이 아닙니다.",
+      "",
+      "  · 레포가 그 폴더 밖(깊이 3 초과 포함)에 있으면, 다른 레포에서 잃은 절 이름을 직접 찾아보세요.",
+      "  · 레포 배치를 옮긴 것이면 훅의 workspaceRoot()를 새 위치로 맞추세요.",
+    );
+  }
   return lines.join("\n");
 }
 
@@ -711,6 +948,13 @@ function git(args, dir) {
   } catch {
     return "";
   }
+}
+
+// 실패(매치 없음은 git grep이 1로 끝난다)는 빈 결과로 본다 — `git()`과 같은 규칙이다.
+function gitAsync(args, dir) {
+  return new Promise((resolve) => {
+    execFile("git", args, { cwd: dir, maxBuffer: 64 * 1024 * 1024 }, (err, stdout) => resolve(err ? "" : stdout.trim()));
+  });
 }
 
 function isFile(p) {
@@ -751,6 +995,58 @@ function runScan(dir) {
     console.log(`\n${label}: ${items.length}건`);
     for (const it of items) console.log(`  ${render(it)}`);
   }
+}
+
+// 레포 밖 실측: 워크스페이스의 모든 레포에서 레포를 넘는 절 인용을 뽑아 대상의 지금 앵커로 푼다.
+// 안 풀린 줄이 곧 레포 밖 역방향이 차단이었다면 막았을 후보다 — 참(이미 끊긴 인용)과 오탐(파서가
+// 잘못 읽은 줄)을 사람이 가른다. 레포 이름이 이 기기의 폴더로 안 풀리는 줄은 따로 센다.
+function runScanCross(base) {
+  const repos = workspaceRepos(base);
+  const byName = new Map();
+  for (const repo of repos) {
+    const key = path.basename(repo).toLowerCase();
+    byName.set(key, byName.has(key) ? null : repo); // 같은 이름이 둘이면 못 가른다
+  }
+  // 풀린 줄도 낸다 — 오탐은 "안 풀렸는데 인용이 아니다"뿐 아니라 "풀렸는데 엉뚱한 파일로 풀렸다"로도
+  // 나오고, 뒤쪽은 안 풀린 목록만 봐서는 안 보인다.
+  const resolved = [];
+  const unresolved = [];
+  const unknownRepo = [];
+  for (const repo of repos) {
+    // 세 꼴 모두 `.md`를 글자로 품는다 — 그게 없는 파일은 읽을 필요가 없다.
+    const listed = git(["grep", "-l", "-I", "-F", "-e", ".md", "--", ...SCANNED_GLOBS], repo);
+    for (const rel of (listed || "").split("\n").filter(Boolean)) {
+      for (const ref of crossRefsIn(repo, rel)) {
+        const where = `${path.basename(repo)}:${rel}:${ref.line}`;
+        let target = ref.target;
+        if (ref.repo) {
+          const home = byName.get(ref.repo);
+          if (!home) {
+            unknownRepo.push(`${where}  ${ref.quote}`);
+            continue;
+          }
+          target = path.join(home, ref.rel);
+        }
+        for (const section of ref.sections) {
+          const why = !isFile(target)
+            ? "대상 파일 없음"
+            : sectionResolves(leafOf(section), anchorsOf(target).loose)
+              ? null
+              : "대상에 그 절 없음";
+          const line = `${where}  「${section}」 → ${path.relative(base, target)}`;
+          if (why) unresolved.push(`${line} — ${why}`);
+          else resolved.push(line);
+        }
+      }
+    }
+  }
+  console.log(`${base}  (레포 ${repos.length}개)`);
+  console.log(`\n레포를 넘는 절 인용 — 안 풀림: ${unresolved.length}건`);
+  for (const line of unresolved) console.log(`  ${line}`);
+  console.log(`\n레포를 넘는 절 인용 — 풀림: ${resolved.length}건`);
+  for (const line of resolved) console.log(`  ${line}`);
+  console.log(`\n레포 이름이 이 기기의 폴더로 안 풀림: ${unknownRepo.length}건`);
+  for (const line of unknownRepo) console.log(`  ${line}`);
 }
 
 // 코드블록 밖에서만 정규식을 돌리고 줄번호를 함께 낸다. 코드블록 안의 예시 링크까지 보면

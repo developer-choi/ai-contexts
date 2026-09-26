@@ -890,7 +890,9 @@ function decisionOf(stdout, code) {
   if (decided) return { decision: decided, reason: parsed.hookSpecificOutput.permissionDecisionReason || '' };
   // 차단하지 않고 컨텍스트만 주입하는 hook은 permissionDecision을 내지 않는다. 그대로 두면
   // '조용히 통과'와 구분되지 않아 발동 여부를 검증할 수 없으므로 별도 판정으로 뽑는다.
-  if (parsed.hookSpecificOutput?.additionalContext) return { decision: 'context' };
+  if (parsed.hookSpecificOutput?.additionalContext) {
+    return { decision: 'context', reason: parsed.hookSpecificOutput.additionalContext };
+  }
   return { decision: 'pass' };
 }
 
@@ -1249,6 +1251,79 @@ const sectionRefReverseCases = [
   ],
 ];
 
+// 레포 밖 역방향: 다른 레포가 이 파일의 절을 부르던 인용. 훅이 워크스페이스를 훑으므로 임시
+// 워크스페이스(`SECTION_REFS_WORKSPACE`)에 커밋하는 레포 `alpha`와 인용하는 레포 `beta`를 나란히 둔다.
+// 케이스가 alpha의 워킹트리를 고치므로 위 역방향처럼 템플릿을 케이스마다 통째로 복사한다.
+// 레포 이름은 면제 레포 이름을 피한다(위 fixture와 같은 이유).
+async function withCrossRepoFixture(fn) {
+  const root = await makeTempDir('hook-section-ref-cross-');
+  const template = path.join(root, 'template');
+  const write = (base) => (name, body) => fs.writeFileSync(path.join(base, name), body);
+  try {
+    for (const [repo, files] of [
+      ['alpha', { 'doc.md': '# 문서\n\n## 옛 이름\n\n본문\n\n## 그대로\n\n본문\n\n## 안 불리는 절\n\n본문\n' }],
+      ['beta', {
+        // 「」가 이어진 꼴에서 **둘째** 절이 사라지는 것 — 이 검사를 낳은 인용이 이 모양이었다.
+        'prose.md': 'alpha 레포 `doc.md`의 「그대로」·「옛 이름」을 따른다.\n',
+        'link.md': '[옛 이름](../alpha/doc.md#옛-이름)을 따른다.\n',
+        // 어느 파일인지 글자로 안 드러나거나 다른 레포를 부르면 인용으로 보지 않는다.
+        'strong.md': '「옛 이름」은 강조일 뿐이다.\n',
+        'other-repo.md': 'gamma 레포 `doc.md` 「옛 이름」을 따른다.\n',
+      }],
+    ]) {
+      const dir = path.join(template, repo);
+      fs.mkdirSync(dir, { recursive: true });
+      await runGit(['init', '-q'], dir);
+      for (const [name, body] of Object.entries(files)) write(dir)(name, body);
+      await runGit(['add', '.'], dir);
+      await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init'], dir);
+    }
+    return await fn(async ({ edit, dropBeta, worktree, elsewhere }, slot) => {
+      const workspace = path.join(root, `cross-case-${slot}`);
+      await fsp.cp(template, workspace, { recursive: true });
+      if (dropBeta) fs.rmSync(path.join(workspace, 'beta'), { recursive: true, force: true });
+      // 워크트리 커밋: 다른 레포의 인용은 메인 체크아웃 경로를 가리키므로 그쪽으로 대조해야 잡힌다.
+      let dir = path.join(workspace, 'alpha');
+      if (worktree) {
+        await runGit(['worktree', 'add', '-q', '--detach', '.claude/worktrees/w'], dir);
+        dir = path.join(dir, '.claude', 'worktrees', 'w');
+      }
+      edit(write(dir));
+      await runGit(['add', 'doc.md'], dir);
+      return { dir: dir.replace(/\\/g, '/'), workspace: elsewhere ? path.join(workspace, 'beta') : workspace };
+    });
+  } finally {
+    await removeTempDir(root);
+  }
+}
+
+const RENAMED = '# 문서\n\n## 새 이름\n\n본문\n\n## 그대로\n\n본문\n\n## 안 불리는 절\n\n본문\n';
+const crossRepoCases = [
+  [{ edit: (w) => w('doc.md', RENAMED) }, 'context', ['beta:prose.md:1', 'beta:link.md:1', '(2건)'], '다른 레포의 산문·링크 인용이 개명된 절을 가리키면 알린다'],
+  [
+    { edit: (w) => w('doc.md', '# 문서\n\n## 그대로\n\n본문\n\n## 안 불리는 절\n\n본문\n') },
+    'context',
+    ['beta:prose.md:1', '(2건)'],
+    '절을 통째로 지워도 알린다',
+  ],
+  [{ edit: (w) => w('doc.md', RENAMED), worktree: true }, 'context', ['beta:prose.md:1', '(2건)'], '워크트리에서 커밋해도 메인 체크아웃 기준으로 잡는다'],
+  [
+    { edit: (w) => w('doc.md', '# 문서\n\n## 옛 이름\n\n고친 본문\n\n## 그대로\n\n본문\n\n## 안 불리는 절\n\n본문\n') },
+    'pass',
+    [],
+    '헤딩이 그대로면 다른 레포를 안 본다',
+  ],
+  [
+    { edit: (w) => w('doc.md', '# 문서\n\n## 옛 이름\n\n본문\n\n## 그대로\n\n본문\n\n## 새로 지은 절\n\n본문\n') },
+    'pass',
+    [],
+    '다른 레포가 안 부르던 절의 개명은 걸리지 않는다',
+  ],
+  [{ edit: (w) => w('doc.md', RENAMED), dropBeta: true }, 'pass', [], '인용하던 레포가 이 기기에 없으면 조용히 넘어간다'],
+  // 워크스페이스에서 자기 레포조차 못 찾으면 인용 없음이 아니라 못 본 것이다 — 조용히 통과시키지 않는다.
+  [{ edit: (w) => w('doc.md', RENAMED), elsewhere: true }, 'context', ['못 찾아'], '워크스페이스가 이 레포를 못 품으면 못 봤다고 알린다'],
+];
+
 // 쓰기 시점 hook: [파일, payload, 기대, 설명] 꼴을 공유하는 그룹들.
 const runWriteCases = (cases) => runCases(cases, async ([file, payload, expected, note]) => {
   const { decision, stderr } = await runHookPayload(file, payload);
@@ -1334,13 +1409,35 @@ const sectionRefGroup = () => withSectionRefFixture((dir, stage) =>
 const sectionRefReverseGroup = () => withSectionRefReverseFixture((prepare) =>
   runCases(sectionRefReverseCases, async ([edit, files, expected, note], slot) => {
     const dir = await prepare(edit, files, slot);
+    // 레포 밖 역방향이 실제 `~/WebstormProjects`를 훑지 않게 케이스 복사본이 모인 임시 폴더를
+    // 워크스페이스로 준다 — 이 그룹은 같은 레포만 재고, 기기 디스크에 따라 판정이 흔들리면 안 된다.
+    // 없는 폴더를 주면 "워크스페이스를 못 찾음" 알림이 떠 pass 케이스가 깨진다.
     const { decision, stderr } = await runHookPayload('check-md-section-refs.mjs', {
       tool_name: 'Bash',
       tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
       cwd: dir,
-    });
+    }, { env: { SECTION_REFS_WORKSPACE: path.dirname(dir) } });
     const label = `check-md-section-refs.mjs :: [${files.join(', ')}] 역방향 → ${expected} (${note})`;
     return judge(label, decision, expected, stderr);
+  }, { concurrency: SECTION_REF_CONCURRENCY }));
+
+// 레포 밖 역방향은 임시 워크스페이스를 env로 받아 그 안에서 끝낸다. 알림 판정만 보면 엉뚱한 인용을
+// 잡아도 통과하므로 알림 본문에 인용한 쪽 레포·파일·줄이 찍히는지까지 본다.
+const crossRepoGroup = () => withCrossRepoFixture((prepare) =>
+  runCases(crossRepoCases, async ([setup, expected, mustInclude, note], slot) => {
+    const { dir, workspace } = await prepare(setup, slot);
+    const { decision, reason = '', stderr } = await runHookPayload('check-md-section-refs.mjs', {
+      tool_name: 'Bash',
+      tool_input: { command: `git -C ${dir} commit -m "x" doc.md` },
+      cwd: dir,
+    }, { env: { SECTION_REFS_WORKSPACE: workspace } });
+    const missing = mustInclude.filter((s) => !reason.includes(s));
+    const stray = ['strong.md', 'other-repo.md'].filter((s) => reason.includes(s));
+    const label = `check-md-section-refs.mjs :: 레포 밖 역방향 → ${expected} (${note})`;
+    return judge(label, decision, expected, stderr, {
+      ok: decision === expected && !missing.length && !stray.length,
+      failLine: `  FAIL  ${label} — 실제: ${decision}${missing.length ? `, 빠짐: ${missing.join(', ')}` : ''}${stray.length ? `, 잘못 잡음: ${stray.join(', ')}` : ''}`,
+    });
   }, { concurrency: SECTION_REF_CONCURRENCY }));
 
 // 대기용 빈 명령은 둘 다 막지만 안내가 반대다 — 메인은 턴을 끝내라, 서브에이전트는 끝내지 마라.
@@ -1426,6 +1523,7 @@ async function main() {
     browserGroup,
     sectionRefGroup,
     sectionRefReverseGroup,
+    crossRepoGroup,
     waitGroup,
     toolGroup,
     skillCreatorGroup,
