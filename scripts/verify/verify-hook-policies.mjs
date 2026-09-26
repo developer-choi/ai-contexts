@@ -14,6 +14,13 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
 
+import { repoLocalEnvVars } from '../lib/git-env.mjs';
+
+// `GIT_DIR` 등이 걸린 채로 돌면 판정이 환경 탓으로도 실패한다(lib/git-env.mjs). pre-push 게이트가 이미
+// 걷어 넘기지만, 게이트를 거치지 않고 직접 불려도 안전해야 하므로 여기서도 걷는다. 모든 스폰이
+// process.env를 물려받으므로 시작할 때 한 번이면 된다.
+for (const name of repoLocalEnvVars()) delete process.env[name];
+
 const hooksDir = path.join(import.meta.dirname, '..', '..', 'deploy', 'hooks');
 
 // 케이스마다 node를 새로 띄우는 검증이라 스폰 개수가 곧 실행시간이다(173건 × 45~105ms ≈ 18초).
