@@ -1743,6 +1743,81 @@ const skillCreatorGroup = async () => {
   }
 };
 
+// 응답 언어 훅은 마지막 응답과 대화 기록의 마지막 사용자 발화를 함께 보므로, 발화 두 벌(한국어·영어)을
+// 기록 파일로 만들어 두고 그 안에서 끝낸다. 영어 보고는 실제로 샌 보고의 한 토막이다.
+const LANG_HOOK = 'check-response-language.mjs';
+const responseLanguageGroup = async () => {
+  const dir = await makeTempDir('hook-response-language-');
+  try {
+    const userLine = (text) => JSON.stringify({ type: 'user', message: { role: 'user', content: text } });
+    const transcript = (name, ...texts) => {
+      const file = path.join(dir, name);
+      // 도구 결과도 type:user로 쌓인다 — 이걸 사용자 발화로 읽으면 영어 로그가 면제 사유가 된다.
+      const toolResult = JSON.stringify({ type: 'user', message: { role: 'user', content: [{ type: 'tool_result', content: 'Error: permission denied while reading the configuration file from disk' }] } });
+      fs.writeFileSync(file, `${texts.map(userLine).join('\n')}\n${toolResult}\n`);
+      return file;
+    };
+    const ko = transcript('ko.jsonl', '리뷰 반영하고 결과 알려줘');
+    const en = transcript('en.jsonl', 'Answer in English please.');
+    // 한국어 질문에 영어 로그를 붙여 넣은 턴 — 비율로 재면 영어 발화로 오판해 면제된다.
+    const koWithLog = transcript('ko-log.jsonl', `이 에러 왜 나?\n${'TypeError: Cannot read properties of undefined (reading map) at render (App.tsx:12:5)\n'.repeat(5)}`);
+    // 인터럽트 줄이 마지막 발화로 잡히면 바로 앞의 영어 질문을 가린다.
+    const enThenInterrupt = transcript('en-interrupt.jsonl', 'Answer in English please.', '[Request interrupted by user]');
+    // 따옴표로 원문을 실은 조사 보고 — 인용을 산문으로 세면 한국어 보고가 막힌다.
+    const quoted = [
+      '공식 문서가 이렇게 적고 있어서 이 방식으로 갑니다.',
+      '',
+      '- 원문: "Use additionalContext when the hook is working as designed and giving Claude guidance, such as run the test suite before finishing"',
+      '- 원문: "It keeps the conversation going through the same loop protections as decision block"',
+    ].join('\n');
+    const english = [
+      'Reflected all the review findings, and I checked what the lock-SHA item actually is.',
+      '',
+      '## Remaining steps',
+      '1. Commit to `refactor/refresh-projects-diet` in the worktree, then merge into master and push. I will do this once you approve.',
+      '2. Register the lock-SHA backlog item. I will do this if you want it.',
+    ].join('\n');
+    const korean = [
+      '정리까지 끝났습니다.',
+      '',
+      '```bash',
+      'git -C C:/x log --oneline -3',
+      'node scripts/refresh-projects-scan.mjs --worktrees --skill local/skills/refresh-projects/SKILL.md',
+      '```',
+      '',
+      '- 두 커밋(`b645c112`, `a2bb98e2`)이 origin/master에 들어갔습니다.',
+    ].join('\n');
+    const stop = (message, transcriptPath, active = false) =>
+      ({ hook_event_name: 'Stop', last_assistant_message: message, stop_hook_active: active, transcript_path: transcriptPath });
+    // 되돌림은 hookSpecificOutput.additionalContext로 나가므로 판정은 'context'다.
+    const cases = [
+      [stop(english, ko), 'context', '한국어로 물었는데 영어 보고'],
+      [stop(korean, ko), 'pass', '코드블록이 절반인 한국어 보고'],
+      [stop(quoted, ko), 'pass', '따옴표로 원문을 실은 한국어 보고'],
+      [stop(english, ko, true), 'pass', '어느 Stop 훅이든 이어가는 중이면 반복하지 않는다'],
+      [stop(english, en), 'pass', '사용자가 짧게 영어로 물었다'],
+      [stop(english, koWithLog), 'context', '한국어 질문에 영어 로그를 붙였다'],
+      [stop(english, enThenInterrupt), 'pass', '인터럽트 줄은 사용자 발화가 아니다'],
+      [stop('Done.', ko), 'pass', '판정할 산문이 없는 짧은 응답'],
+      [stop(english, path.join(dir, 'none.jsonl')), 'context', '기록을 못 읽으면 되돌리는 쪽으로 기운다'],
+    ];
+    const lang = await runCases(cases, async ([payload, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(LANG_HOOK, payload);
+      return judge(`${LANG_HOOK} :: Stop → ${expected} (${note})`, decision, expected, stderr);
+    });
+    // 필드 이름이 바뀌면 훅이 영영 꺼진다. 통과는 하되 stderr로 소리를 내는지 본다.
+    const missing = await (async () => {
+      const { decision, stderr } = await runHookPayload(LANG_HOOK, { hook_event_name: 'Stop', stop_hook_active: false, transcript_path: ko });
+      const label = `${LANG_HOOK} :: Stop → pass + 경고 (last_assistant_message 없음)`;
+      const ok = decision === 'pass' && /last_assistant_message/.test(stderr);
+      return toReport([{ ok, label, failLine: `  FAIL  ${label} — 실제: ${decision}, stderr: ${stderr.trim() || '(없음)'}` }]);
+    })();
+    return mergeReports([lang, missing]);
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 서브에이전트 상태는 기록 파일의 마지막 줄과 수정 시각으로 갈리므로, 세션마다 가짜 subagents/ 폴더를
 // 만들고 utimes로 시각을 과거로 돌린다. 감시기는 끄고(SUBAGENT_WATCH_DISABLE), 상태 파일이 실제 임시
 // 폴더에 새지 않게 TEMP·TMP를 픽스처 폴더로 돌린다(os.tmpdir()이 이 둘을 따른다).
@@ -1880,6 +1955,7 @@ async function main() {
     subagentAskGroup,
     toolGroup,
     skillCreatorGroup,
+    responseLanguageGroup,
     subagentGroup,
   ];
 

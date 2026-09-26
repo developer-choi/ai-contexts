@@ -143,6 +143,12 @@ function main() {
     && claudeCompact.some((h) => h.matcher === 'auto' && h.file === 'snapshot-precompact-transcript.mjs'),
     'claude: PreCompact가 manual·auto 매처로 등록됨');
 
+  // 응답 언어 훅은 matcher 없는 Stop으로 걸려야 턴마다 불린다. codex에선 Stop 훅 동작을 실측하지 못해 뺀다.
+  const langStop = claude.find((h) => h.file === 'check-response-language.mjs');
+  check(langStop?.event === 'Stop' && langStop?.matcher === null,
+    'claude: check-response-language가 matcher 없는 Stop으로 등록됨');
+  check(!codex.some((h) => h.event === 'Stop'), 'codex: Stop hook 미등록');
+
   // codex: UserPromptSubmit 없음, PreToolUse 전부 단일 '*'
   check(!codex.some((h) => h.event === 'UserPromptSubmit'), 'codex: UserPromptSubmit 없음');
   const codexPre = codex.filter((h) => h.event === 'PreToolUse');
@@ -155,6 +161,7 @@ function main() {
     .filter((h) =>
       h.event === 'UserPromptSubmit' ||
       h.event === 'PreCompact' ||
+      h.event === 'Stop' ||
       h.on === 'enterworktree' ||
       CLAUDE_ONLY_ALIASES.has(h.on))
     .map((h) => h.file);

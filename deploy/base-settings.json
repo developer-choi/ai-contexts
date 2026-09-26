@@ -209,6 +209,11 @@
       "event": "PreCompact",
       "on": "auto",
       "msg": "Snapshotting transcript before compaction..."
+    },
+    {
+      "file": "check-response-language.mjs",
+      "event": "Stop",
+      "msg": "Checking response language..."
     }
   ]
 }
