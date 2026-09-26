@@ -11,7 +11,7 @@
 
 수단을 설계하기 전에, 문제가 난 도구의 공식 설정·기능과 그 동작이 문서상 의도인지부터 확인한다.
 
-문서와 다른 버그를 우리 수단으로 막았으면 땜빵이다 — 땜빵 목록(backlog 레포의 `projects/backlog/active/workarounds/버그-땜빵-목록을-두고-업스트림-수정을-추적한다.md`)에 올린다.
+문서와 다른 버그를 우리 수단으로 막았으면 땜빵이다 — 땜빵 목록(backlog 레포의 `archives/upstream-bugs/`, 형식은 그 레포 `archives/CLAUDE.md`)에 올린다.
 
 ## 강제 사다리
 
