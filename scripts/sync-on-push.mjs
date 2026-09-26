@@ -6,6 +6,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { withoutRepoLocalEnv } from "./lib/git-env.mjs";
 
 const ZERO = /^0+$/; // delete 시 local sha가 전부 0
 const repoRoot = path.resolve(import.meta.dirname, "..");
@@ -32,10 +33,18 @@ function main() {
     ["sync:system", path.join("scripts", "system", "sync-system.mjs")],
     ["sync:local-system", path.join("scripts", "local-system", "sync-local-system.mjs")],
   ];
+  // 자식 git이 훅을 부른 저장소에 묶이지 않게 한다(lib/git-env.mjs).
+  let env;
+  try {
+    env = withoutRepoLocalEnv();
+  } catch (err) {
+    console.error(`pre-push: git 환경변수 목록을 못 읽었다(${err.message}) — push를 중단합니다 (긴급 우회: git push --no-verify).`);
+    process.exit(1);
+  }
   for (const [name, rel] of steps) {
     console.log(`pre-push: master 푸시 — ${name} 실행`);
     try {
-      execFileSync(process.execPath, [path.join(repoRoot, rel)], { cwd: repoRoot, stdio: "inherit" });
+      execFileSync(process.execPath, [path.join(repoRoot, rel)], { cwd: repoRoot, stdio: "inherit", env });
     } catch {
       console.error(`pre-push: ${name} 실패 — push를 중단합니다. sync를 고친 뒤 다시 push하세요 (긴급 우회: git push --no-verify).`);
       process.exit(1);
