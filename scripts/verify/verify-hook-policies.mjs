@@ -1157,6 +1157,49 @@ const freeRepoCases = (repos) => {
     '서브에이전트의 보호 브랜치 머지는 승인 창 대신 거부',
     { agentId: 'zz-probe', reasonIncludes: ['메인에 보고', 'feature'] },
   ],
+  // 승인 창에는 명령과 설명만 보이므로, 설명이 여러 줄 요약이 아니면 승인 창 대신 돌려보낸다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '한 줄 설명의 승인 등급 머지는 요약을 요구하며 돌려보낸다',
+    { description: 'feature를 main에 머지', reasonIncludes: ['description', '요약'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '설명이 없어도 돌려보낸다',
+    { description: '', reasonIncludes: ['요약'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '빈 줄은 세지 않는다 — 내용 있는 줄 3줄이면 돌려보낸다',
+    { description: '무엇: feature\n\n왜: 시험\n\n확인: 통과', reasonIncludes: ['4줄'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'ask',
+    '내용 있는 줄 4줄이면 승인 창',
+    { description: '무엇: feature\n왜: 시험\n확인: 통과\n되돌리기: revert' },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'ask',
+    'description 필드가 없는 페이로드(codex)는 요구하지 않고 승인 창',
+    { description: null },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '서브에이전트는 요약이 없어도 메인에 넘기라는 사유로 거부',
+    { agentId: 'zz-probe', description: '', reasonIncludes: ['메인에 보고'] },
+  ],
   ['check-git-merge-policy.mjs', `git -C ${gated} rebase feature`, 'deny', '승인 등급은 보호 브랜치 위 rebase 차단 유지'],
   [
     'check-git-merge-policy.mjs',
@@ -1565,11 +1608,14 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
 // 레포 등급은 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
 // 다섯째 칸(선택): agentId를 주면 서브에이전트 페이로드로 돌리고, reasonIncludes의 낱말이 사유에 다 있어야 통과.
 // sessionCwd를 주면 세션 폴더(페이로드 cwd)로 싣는다 — 명령이 옮겨 간 폴더와 세션 폴더의 등급이 다를 때를 잰다.
+// description을 안 주면 여러 줄 요약을 싣는다 — 승인 창 머지는 요약 없는 설명을 돌려보내기 때문이다.
+// description: null이면 키째 뺀다(필드가 없는 codex 페이로드).
+const MERGE_SUMMARY = '무엇: feature 브랜치\n왜: 시험\n확인: 테스트 통과\n되돌리기: revert';
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
-  runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [], sessionCwd } = {}]) => {
+  runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [], sessionCwd, description = MERGE_SUMMARY } = {}]) => {
     const payload = {
       tool_name: 'Bash',
-      tool_input: { command },
+      tool_input: { command, ...(description === null ? {} : { description }) },
       ...(agentId ? { agent_id: agentId } : {}),
       ...(sessionCwd ? { cwd: sessionCwd } : {}),
     };

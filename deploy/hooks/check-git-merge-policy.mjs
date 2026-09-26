@@ -42,6 +42,26 @@ const MERGE_PR_ONLY = ({ repo, branch, source }) =>
 const MERGE_ASK = ({ repo, branch, source }) =>
   `${repo || "(레포 이름 미확인)"}의 ${branch} 보호 브랜치에 ${source}을(를) 머지합니다.`;
 
+// 승인 창에는 명령과 도구 호출 설명(description)만 보인다. 한 줄 설명으로는 사용자가 무엇을 들이는지
+// 판단할 근거가 없어, 한 번 거절하고 사유를 되물은 뒤에야 승인했다(2026-09-26 AC 938561b0). 설명이 짧으면
+// 승인 창을 띄우지 않고 돌려보낸다. 양식은 정하지 않는다 — 무엇이 필요한지는 세션이 안다.
+// 줄 수는 대리 지표다. 내용은 보지 않아 커밋 목록 네 줄로도 통과한다 — 막는 것은 한 줄짜리 설명뿐이다.
+// 4는 무엇·왜·확인·되돌리기를 한 줄씩만 적어도 닿는 최소치다.
+const MIN_SUMMARY_LINES = 4;
+const MERGE_NEEDS_SUMMARY =
+  "승인 창에는 명령과 이 호출의 설명(description)만 보여, 지금 설명으로는 사용자가 이 머지를 판단할 근거가 없습니다. " +
+  `이 브랜치에서 한 일을 사용자가 읽기 좋게 줄을 나눠(비어 있지 않은 줄 ${MIN_SUMMARY_LINES}줄 이상) 요약해 description에 싣고 같은 명령을 다시 내세요 — ` +
+  "무엇을 왜 바꿨는지, 어떻게 확인했는지처럼 머지를 정하는 데 필요한 것을 담습니다.";
+// description 필드가 있는 호출에만 요구한다. 이 훅은 codex에도 실리는데 거기엔 이 필드가 없어,
+// 요구하면 따를 방법이 없는 거부가 된다. 필드가 없으면 예전처럼 승인 창으로 간다.
+const DESCRIBED_TOOLS = new Set(["Bash", "PowerShell"]);
+const lacksSummary = (payload) => {
+  const input = payload.tool_input ?? {};
+  if (!DESCRIBED_TOOLS.has(payload.tool_name) || !("description" in input)) return false;
+  const d = typeof input.description === "string" ? input.description : "";
+  return d.split("\n").filter((l) => l.trim()).length < MIN_SUMMARY_LINES;
+};
+
 // 판정 불가로 차단할 때의 안내. MERGE_MSG·MERGE_ASK와 분리한다 — 그 둘은 보호 브랜치를 건드린다고 판정된
 // 뒤의 안내이고, 여기서 걸린 명령은 아직 그걸 모르는 상태라 "경로를 통째로 적어 다시 실행하라"가 답이다.
 const UNRESOLVED_CWD_MSG = (cwd) =>
@@ -112,6 +132,8 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
   }
 }
 
+// 서브에이전트는 ask()가 어차피 거부하고 메인에 넘기므로 요약을 요구하지 않는다.
+if (merges.length > 0 && !payload.agent_id && lacksSummary(payload)) deny(MERGE_NEEDS_SUMMARY);
 if (merges.length > 0) ask(merges.map(MERGE_ASK).join(" / "));
 
 process.exit(0);
