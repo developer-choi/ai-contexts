@@ -174,11 +174,25 @@ if (process.argv.includes("--scan")) {
 
 const payload = readPayload();
 const command = getCommand(payload);
-if (findGitInvocations(command, "commit").length === 0) process.exit(0);
+const commits = findGitInvocations(command, "commit");
+if (commits.length === 0) process.exit(0);
 
-const cwd = normalizeCwd(getCwd(payload)) || process.cwd();
+// 커밋 대상 레포는 세션 폴더가 아니라 `git -C <경로>`가 정한다. 세션 폴더만 보면 다른 레포를
+// `-C`로 커밋할 때 세션 쪽 레포의 스테이지를 훑어 여섯 검사가 통째로 엉뚱한 곳을 본다 —
+// `cd && git`이 막힌 환경이라 다른 레포 커밋은 전부 이 꼴이다. 상대 `-C`는 세션 폴더 기준으로
+// 푼다. 한 명령에 커밋이 여럿이면 첫 커밋만 본다.
+const sessionCwd = normalizeCwd(getCwd(payload)) || process.cwd();
+const dashC = normalizeCwd(commits[0].cwd);
+const cwd = dashC ? path.resolve(sessionCwd, dashC) : sessionCwd;
 const root = repoRoot(cwd);
-if (!root) process.exit(0);
+if (!root) {
+  // `-C`를 줬는데 레포로 안 풀리면(미전개 `$변수` 등) 조용히 넘기지 않는다 — 검사가 안 돈 것이다.
+  if (dashC) {
+    addContext(`[절 인용 검사] 커밋 대상 \`${commits[0].cwd}\`을 git 레포로 풀지 못해 절 인용 검사를 건너뛰었습니다. ` +
+      "경로를 절대 경로로 적어 다시 커밋하면 검사가 돕니다.", "PreToolUse");
+  }
+  process.exit(0);
+}
 
 const staged = stagedPaths(root);
 if (!staged.length) process.exit(0);

@@ -1249,6 +1249,29 @@ const sectionRefReverseCases = [
     'pass',
     '아무도 안 가리키던 절의 개명은 걸리지 않는다',
   ],
+  // 세션 폴더가 커밋 대상이 아닌 꼴. 다른 레포 커밋은 `git -C`로만 하는 환경이라 실사용의 대부분이
+  // 이쪽인데, 위 케이스는 전부 payload cwd = 커밋 대상이라 이 어긋남을 못 재현했다.
+  [
+    (write) => write('doc.md', '# 문서\n\n## 새 이름\n\n본문\n\n## 그대로\n\n본문\n'),
+    ['doc.md'],
+    'deny',
+    '세션 폴더가 다른 곳이어도 `git -C <절대 경로>`가 가리키는 레포를 본다',
+    'absolute',
+  ],
+  [
+    (write) => write('doc.md', '# 문서\n\n## 새 이름\n\n본문\n\n## 그대로\n\n본문\n'),
+    ['doc.md'],
+    'deny',
+    '상대 `-C`는 세션 폴더 기준으로 푼다',
+    'relative',
+  ],
+  [
+    (write) => write('doc.md', '# 문서\n\n## 새 이름\n\n본문\n\n## 그대로\n\n본문\n'),
+    ['doc.md'],
+    'context',
+    '`-C`가 레포로 안 풀리면 조용히 넘기지 않고 건너뛰었다고 알린다',
+    'unresolved',
+  ],
 ];
 
 // 레포 밖 역방향: 다른 레포가 이 파일의 절을 부르던 인용. 훅이 워크스페이스를 훑으므로 임시
@@ -1417,16 +1440,22 @@ const sectionRefGroup = () => withSectionRefFixture((dir, stage) =>
 
 // 역방향은 커밋 전 판본을 `git show`로 읽으므로 이력이 있는 fixture 안에서 끝낸다.
 const sectionRefReverseGroup = () => withSectionRefReverseFixture((prepare) =>
-  runCases(sectionRefReverseCases, async ([edit, files, expected, note], slot) => {
+  runCases(sectionRefReverseCases, async ([edit, files, expected, note, dashC], slot) => {
     const dir = await prepare(edit, files, slot);
+    // `-C` 케이스는 세션 폴더를 레포가 아닌 상위 임시 폴더로 둔다 — 세션 폴더만 보는 훅이면 거기서
+    // 레포를 못 찾아 pass로 새므로 차단 기대가 깨진다. 안 풀리는 `-C`는 세션 폴더를 커밋 대상
+    // 레포로 둔다 — 세션 폴더로 되돌아가 검사하는 훅이면 알림이 아니라 차단이 나온다.
+    const parent = path.dirname(dir);
+    const target = { absolute: dir, relative: path.basename(dir), unresolved: '$UNSET_REPO' }[dashC] ?? dir;
+    const cwd = dashC && dashC !== 'unresolved' ? parent : dir;
     // 레포 밖 역방향이 실제 `~/WebstormProjects`를 훑지 않게 케이스 복사본이 모인 임시 폴더를
     // 워크스페이스로 준다 — 이 그룹은 같은 레포만 재고, 기기 디스크에 따라 판정이 흔들리면 안 된다.
     // 없는 폴더를 주면 "워크스페이스를 못 찾음" 알림이 떠 pass 케이스가 깨진다.
     const { decision, stderr } = await runHookPayload('check-md-section-refs.mjs', {
       tool_name: 'Bash',
-      tool_input: { command: `git -C ${dir} commit -m "x" ${files.join(' ')}` },
-      cwd: dir,
-    }, { env: { SECTION_REFS_WORKSPACE: path.dirname(dir) } });
+      tool_input: { command: `git -C ${target} commit -m "x" ${files.join(' ')}` },
+      cwd,
+    }, { env: { SECTION_REFS_WORKSPACE: parent } });
     const label = `check-md-section-refs.mjs :: [${files.join(', ')}] 역방향 → ${expected} (${note})`;
     return judge(label, decision, expected, stderr);
   }, { concurrency: SECTION_REF_CONCURRENCY }));
