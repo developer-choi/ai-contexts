@@ -46,7 +46,8 @@ export function deny(reason) {
 // 프롬프트가 뜨지 않는다. 괄호형("Bash(*)"·"Bash(git:*)")은 흡수하지 않으므로 ask가 정상 발동한다
 // (2026-08-05 실측). allowlist를 손볼 때 이 형태를 깨뜨리지 말 것.
 //
-// 서브에이전트(agent_id)의 승인 창은 사용자 화면에 뜨지 않아, ask를 내면 결과 없이 무기한 멈춘다.
+// 땜빵(anthropics/claude-code#69482): 서브에이전트(agent_id)의 승인 창이 사용자 화면에 뜨지 않아,
+// ask를 내면 결과 없이 무기한 멈춘다. 공식 문서는 메인에 뜬다고 적는다 — 고쳐지면 이 분기를 걷는다.
 export function ask(reason) {
   if (lastPayload?.agent_id) {
     deny(

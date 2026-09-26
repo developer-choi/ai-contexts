@@ -83,12 +83,17 @@ function describe(a) {
 function describeShells(agents, sessionId) {
   const lines = leftoverShells(agents, sessionId).map((s) => {
     const cmd = s.command.replace(/\s+/g, " ").slice(0, 120);
-    const kill = s.pids ? s.pids.map(killCommand).join(" ; ") : "PID 조회 실패 — 앞 명령이 명령줄에 든 프로세스를 찾아 트리째 끝낸다";
+    // PowerShell 셸은 명령이 명령줄에 없어, PID를 못 가렸으면 메인도 명령으로 찾을 수 없다.
+    const unknown =
+      s.tool === "PowerShell"
+        ? "어느 셸인지 못 가렸다 — 끝내지 말고 사용자에게 알린다"
+        : "PID 조회 실패 — 앞 명령이 명령줄에 든 프로세스를 찾아 트리째 끝낸다";
+    const kill = s.pids ? s.pids.map(killCommand).join(" ; ") : unknown;
     return `- ${s.agent}: ${cmd} → ${kill}`;
   });
   if (!lines.length) return "";
   return (
-    `\n[쉬는 서브에이전트가 남긴 셸 — 도구 타임아웃으로 백그라운드에 옮겨진 셸은 에이전트가 끝나도 안 끝난다]\n` +
+    `\n[쉬는 서브에이전트가 남긴 셸 — 턴 뒤에도 도는 것은 설계지만, 에이전트를 종료해도 트리가 안 죽는다]\n` +
     `${lines.join("\n")}\n` +
     `그 에이전트의 결과를 이미 받았거나 더 쓰지 않으면, 사용자에게 묻지 말고 이번 턴에 위 명령으로 끝낸다.`
   );

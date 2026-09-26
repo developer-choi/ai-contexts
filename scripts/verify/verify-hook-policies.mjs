@@ -1861,6 +1861,7 @@ const SUBAGENT_HOOK = 'surface-subagent-status.mjs';
 const subagentGroup = async () => {
   const root = await makeTempDir('hook-subagent-');
   let orphan;
+  const psOrphans = [];
   try {
     const env = { SUBAGENT_WATCH_DISABLE: '1', TEMP: root, TMP: root, TMPDIR: root };
     const assistant = (content) => JSON.stringify({ type: 'assistant', message: { role: 'assistant', content } });
@@ -1901,12 +1902,12 @@ const subagentGroup = async () => {
     const marker = `setTimeout(()=>{},120000)//zzorphan-${process.pid}`;
     const spawnedAt = Date.now();
     orphan = childProcess.spawn(process.execPath, ['-e', marker], { stdio: 'ignore', windowsHide: true });
-    const bgShell = (id, command, { exited, idleMinutes, recordedAt = spawnedAt }) => {
+    const bgShell = (id, command, { exited, idleMinutes, recordedAt = spawnedAt, tool = 'Bash' }) => {
       const output = path.join(root, `${id}.output`);
       fs.writeFileSync(output, exited ? '\n[exited with code 0]\n' : '');
       const at = (ms) => new Date(recordedAt + ms).toISOString();
       return session(id, [
-        JSON.stringify({ type: 'assistant', timestamp: at(-1000), message: { role: 'assistant', content: [bash('b1', command, { timeout: 10000 })] } }),
+        JSON.stringify({ type: 'assistant', timestamp: at(-1000), message: { role: 'assistant', content: [{ ...bash('b1', command, { timeout: 10000 }), name: tool }] } }),
         JSON.stringify({ type: 'user', timestamp: at(1000), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'b1', content: `Command did not complete within its 10s timeout and was moved to the background (ID: bz${id}). Output is being written to: ${output}. You will be notified when it completes.` }] } }),
         assistant([{ type: 'text', text: 'done' }]),
       ], { minutesAgo: idleMinutes });
@@ -1960,9 +1961,33 @@ const subagentGroup = async () => {
         && !(shellSecond.reason ?? '').includes('남긴 셸'),
       failLine: `  FAIL  ${shellLabel} — 첫째: ${(shellFirst.reason ?? '').slice(-160)} / 둘째: ${(shellSecond.reason ?? '').slice(-80)}`,
     })]);
-    return mergeReports([report, sendReport, shellReport]);
+
+    // PowerShell 도구는 명령을 명령줄에 안 싣고 런처 환경변수 이름만 싣는다 — 그 모양의 프로세스를 띄운다.
+    // 런처의 부모는 이 스크립트라, 훅의 조상 중 런처를 둔 가장 가까운 것이 된다. 첫 런처는 둘째 판정 전에
+    // 끝낸다 — 살려 두면 첫 판정에 걸린 시간에 따라 둘째 판정의 창에 들어오기도 하고 안 들어오기도 한다.
+    const psSpawn = () => {
+      const at = Date.now();
+      const child = childProcess.spawn(process.execPath, ['-e', `setTimeout(()=>{},120000)//CLAUDE_CODE_SHELL_LAUNCHER_SCRIPT zzps-${process.pid}`], { stdio: 'ignore', windowsHide: true });
+      psOrphans.push(child);
+      return { child, at };
+    };
+    const psCommand = '& python.exe -c "import time; time.sleep(1800)"';
+    const psA = psSpawn();
+    const psOne = await runHookPayload(SUBAGENT_HOOK, prompt(bgShell('psone', psCommand, { exited: false, idleMinutes: 15, recordedAt: psA.at, tool: 'PowerShell' })), { env });
+    psA.child.kill();
+    const psB = psSpawn();
+    psSpawn();
+    const psTwo = await runHookPayload(SUBAGENT_HOOK, prompt(bgShell('pstwo', psCommand, { exited: false, idleMinutes: 15, recordedAt: psB.at, tool: 'PowerShell' })), { env });
+    const psLabel = `${SUBAGENT_HOOK} :: PowerShell 셸 → 그 시각 런처로 PID를 찾고, 런처가 둘이면 끝내지 않고 알리게 한다`;
+    const psReport = toReport([judge(psLabel, `${psOne.decision}/${psTwo.decision}`, 'context/context', psOne.stderr || psTwo.stderr, {
+      ok: (psOne.reason ?? '').includes(`taskkill /T /F /PID ${psA.child.pid}`)
+        && (psTwo.reason ?? '').includes('끝내지 말고 사용자에게 알린다') && !(psTwo.reason ?? '').includes('taskkill'),
+      failLine: `  FAIL  ${psLabel} — 하나: ${(psOne.reason ?? '').slice(-160)} / 둘: ${(psTwo.reason ?? '').slice(-160)}`,
+    })]);
+    return mergeReports([report, sendReport, shellReport, psReport]);
   } finally {
     orphan?.kill();
+    for (const c of psOrphans) c.kill();
     await removeTempDir(root);
   }
 };
