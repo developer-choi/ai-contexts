@@ -120,8 +120,8 @@ const CASES = [
   // git 상태를 조회하지 않고 판정이 끝나는 케이스만 고른다(검증이 실행 환경에 의존하지 않게).
   ['check-git-push-policy.mjs', 'git push --no-verify', 'deny', 'push --no-verify 금지'],
   ['check-git-push-policy.mjs', 'git reset --soft HEAD~1 && git push --force', 'deny', 'rewrite+force push chain 금지'],
-  ['check-git-push-policy.mjs', 'git push origin main', 'ask', '보호 브랜치 push는 승인 창을 띄운다'],
-  ['check-git-push-policy.mjs', 'git -C ~/repo push origin develop', 'ask', 'git -C가 껴도 보호 브랜치 push를 잡는다'],
+  // 보호 브랜치 push는 레포 등급과 원격 상태(첫 push)를 봐야 판정되므로 여기 두지 않는다 — 등급 fixture
+  // (`freeRepoCases`)가 보호 브랜치 넷 × 등급 셋으로 잰다.
   ['check-git-merge-policy.mjs', 'git -C ~/repo branch -f master', 'deny', '보호 브랜치 포인터 강제 이동'],
   ['check-git-merge-policy.mjs', 'git rebase --abort', 'pass', '진행 중 작업 중단은 허용'],
   // 폴더가 실존하면 브랜치 조회 실패는 그대로 fail-open이다(비-git 디렉터리·detached HEAD 오차단 방지).
@@ -955,17 +955,23 @@ const untrackedCases = (dir) => [
   ['check-git-commit-policy.mjs', `git -C ${dir} commit tracked.txt -m "x"`, 'pass', '미등록 파일이 없는 경로는 조용하다'],
 ];
 
-// 레포 면제(`policy-exempt-repos.mjs`)는 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가
-// 있어야 판정된다. 면제 이름(`backlog`)과 아닌 이름(`ai-contexts`)을 나란히 만들어, 같은 명령이
-// 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
+// 레포 등급(`repo-tiers.mjs`)은 `--git-common-dir`로 레포 이름을 구하므로 진짜 git 레포가 있어야
+// 판정된다. 등급마다 이름을 하나씩 만들어 — FREE `backlog`, 승인 `ai-contexts`, PR 전용 `some-client` —
+// 같은 명령이 레포에 따라 갈리는지를 고정한다. 보호 브랜치로 체크아웃된 상태여야 하므로 커밋까지 만든다.
 // `knowledge-archive`는 같은 재료를 detached HEAD로 떼어둔 것이다 — 머지 훅이 "폴더를 못 정한 경우"를
 // 차단하면서 detached HEAD를 오차단하지 않는지 가르려면 진짜 detached 레포가 필요하다.
+// `client-fresh`·`client-seeded`는 bare 원격을 단 PR 전용 레포다 — 원격에 master가 없으면(첫 push)
+// 통과, 있으면 차단인지 가른다. 케이스가 병렬로 돌아 한 레포에서 순서를 만들 수 없어 둘로 나눴다.
+// 머지 훅은 현재 브랜치로 보호 여부를 보므로, 보호 브랜치 넷을 다 재려고 등급마다 master·develop·release
+// 워크트리를 더 뜬다(main은 레포 자신). 워크트리도 `--git-common-dir`로 원본 이름을 받는다.
+const PROTECTED_BRANCHES = ['master', 'main', 'develop', 'release'];
+
 async function withFreeRepoFixture(fn) {
   const root = await makeTempDir('hook-free-repo-');
   try {
-    const names = ['backlog', 'ai-contexts', 'knowledge-archive'];
+    const names = ['backlog', 'ai-contexts', 'knowledge-archive', 'some-client', 'client-fresh', 'client-seeded'];
     const made = {};
-    // 세 레포는 서로 독립이라 함께 세운다 — 순서대로 세우면 git 스폰 12번이 그대로 직렬이 된다.
+    // 레포는 서로 독립이라 함께 세운다 — 순서대로 세우면 git 스폰이 그대로 직렬이 된다.
     await Promise.all(names.map(async (name) => {
       const dir = path.join(root, name);
       fs.mkdirSync(dir);
@@ -974,28 +980,137 @@ async function withFreeRepoFixture(fn) {
       await runGit(['add', 'a.txt'], dir);
       await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'a.txt'], dir);
       if (name === 'knowledge-archive') await runGit(['checkout', '-q', '--detach', 'HEAD'], dir);
+      if (name === 'client-fresh' || name === 'client-seeded') {
+        const bare = path.join(root, `${name}-origin.git`);
+        await runGit(['init', '-q', '--bare', bare], root);
+        await runGit(['remote', 'add', 'origin', bare], dir);
+        if (name === 'client-seeded') await runGit(['push', '-q', 'origin', 'main:master'], dir);
+      }
+      if (['backlog', 'ai-contexts', 'some-client'].includes(name)) {
+        made[`${name}@main`] = dir.replace(/\\/g, '/');
+        for (const branch of PROTECTED_BRANCHES.filter((b) => b !== 'main')) {
+          const wt = path.join(root, `${name}-wt-${branch}`);
+          await runGit(['worktree', 'add', '-q', '-b', branch, wt], dir);
+          made[`${name}@${branch}`] = wt.replace(/\\/g, '/');
+        }
+      }
       made[name] = dir.replace(/\\/g, '/');
     }));
+    const notRepo = path.join(root, 'not-a-repo');
+    fs.mkdirSync(notRepo);
+    made['not-a-repo'] = notRepo.replace(/\\/g, '/');
     return await fn(made);
   } finally {
     await removeTempDir(root);
   }
 }
 
-const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive': detached }) => [
-  // 면제 레포 — 세 정책이 통째로 걷힌다.
-  ['check-git-merge-policy.mjs', `git -C ${free} merge feature`, 'pass', '면제 레포는 보호 브랜치 머지도 통과'],
-  ['check-git-merge-policy.mjs', `git -C ${free} cherry-pick abc123`, 'pass', '면제 레포는 체리픽도 통과'],
-  ['check-git-merge-policy.mjs', `git -C ${free} branch -f main abc123`, 'pass', '면제 레포는 포인터 강제 이동도 통과'],
-  ['check-git-push-policy.mjs', `git -C ${free} push origin main`, 'pass', '면제 레포는 보호 브랜치 push도 통과'],
-  ['check-git-reset-policy.mjs', `git -C ${free} reset --hard`, 'pass', '면제 레포는 reset --hard도 통과'],
+// 등급마다 보호 브랜치 넷에 같은 push·merge를 돌린다. push는 refspec으로 대상을 정하므로 레포 자신에서,
+// merge는 대상이 현재 브랜치라 그 브랜치의 워크트리에서 낸다.
+const tierBranchCases = (repos) => PROTECTED_BRANCHES.flatMap((b) => [
+  ['check-git-push-policy.mjs', `git -C ${repos.backlog} push origin unit/x:${b}`, 'pass', `FREE는 ${b} push 통과`],
+  ['check-git-merge-policy.mjs', `git -C ${repos[`backlog@${b}`]} merge feature`, 'pass', `FREE는 ${b} merge 통과`],
+  [
+    'check-git-push-policy.mjs',
+    `git -C ${repos['ai-contexts']} push origin unit/x:${b}`,
+    'deny',
+    `승인 등급은 ${b} push 차단`,
+    { reasonIncludes: ['ai-contexts', `${b} 보호 브랜치`, 'unit/x', '사용자가 합니다'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${repos[`ai-contexts@${b}`]} merge feature`,
+    'ask',
+    `승인 등급은 ${b} merge 승인 창`,
+    { reasonIncludes: ['ai-contexts', `${b} 보호 브랜치`, 'feature'] },
+  ],
+  [
+    'check-git-push-policy.mjs',
+    `git -C ${repos['some-client']} push origin unit/x:${b}`,
+    'deny',
+    `PR 전용은 ${b} push 차단`,
+    { reasonIncludes: ['some-client', `${b} 보호 브랜치`, 'unit/x', 'PR'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${repos[`some-client@${b}`]} merge feature`,
+    'deny',
+    `PR 전용은 ${b} merge 차단`,
+    { reasonIncludes: ['some-client', `${b} 보호 브랜치`, 'feature', 'PR'] },
+  ],
+]);
 
-  // 면제 아닌 레포 — 머지만 승인 창, 나머지는 차단 유지. 승인 창 사유에 레포·대상 브랜치·들어갈 브랜치가 보여야 한다.
+const freeRepoCases = (repos) => {
+  const { backlog: free, 'ai-contexts': gated, 'knowledge-archive': detached, 'some-client': prOnly } = repos;
+  return [
+  ...tierBranchCases(repos),
+
+  // FREE 레포 — 세 정책이 통째로 걷힌다.
+  ['check-git-merge-policy.mjs', `git -C ${free} merge feature`, 'pass', 'FREE 레포는 보호 브랜치 머지도 통과'],
+  ['check-git-merge-policy.mjs', `git -C ${free} cherry-pick abc123`, 'pass', 'FREE 레포는 체리픽도 통과'],
+  ['check-git-merge-policy.mjs', `git -C ${free} branch -f main abc123`, 'pass', 'FREE 레포는 포인터 강제 이동도 통과'],
+  ['check-git-push-policy.mjs', `git -C ${free} push origin main`, 'pass', 'FREE 레포는 보호 브랜치 push도 통과'],
+  ['check-git-reset-policy.mjs', `git -C ${free} reset --hard`, 'pass', 'FREE 레포는 reset --hard도 통과'],
+  ['check-git-push-policy.mjs', `cd ${free} && gh pr merge 3 --squash`, 'pass', 'FREE 레포는 gh pr merge도 통과'],
+
+  // 승인·PR 전용 — 작업 브랜치 push는 통과, 보호 브랜치 push는 refspec 모양과 무관하게 차단.
+  ['check-git-push-policy.mjs', `git -C ${gated} push origin unit/x`, 'pass', '승인 등급도 작업 브랜치 push는 통과'],
+  ['check-git-push-policy.mjs', `git -C ${prOnly} push -u origin unit/x`, 'pass', 'PR 전용도 작업 브랜치 push는 통과'],
+  ['check-git-push-policy.mjs', `git -C ${gated} push`, 'deny', 'refspec 없으면 현재 브랜치(main)가 대상이라 차단'],
+  [
+    'check-git-push-policy.mjs',
+    `git -C ${gated} push origin main`,
+    'deny',
+    '콜론 없는 refspec은 같은 이름의 로컬 브랜치가 들어간다',
+    { reasonIncludes: ['main 보호 브랜치에 main을(를)'] },
+  ],
+  ['check-git-push-policy.mjs', `git -C ${gated} push -o ci.skip origin unit/x:master`, 'deny', '-o의 값을 원격 이름으로 읽지 않는다'],
+  ['check-git-push-policy.mjs', `git -C ${gated} push origin +unit/x:master`, 'deny', '강제 표시 +가 붙어도 보호 브랜치로 읽는다'],
+  ['check-git-push-policy.mjs', `git -C ${prOnly} push origin +master`, 'deny', '콜론 없는 refspec의 +도 벗긴다'],
+  ['check-git-push-policy.mjs', `git -C ${gated} push --all origin`, 'deny', '--all은 보호 브랜치까지 함께 민다'],
+
+  // 첫 push 예외 — 원격에 그 브랜치가 없을 때만. 빈 레포에는 PR을 받을 base가 없다.
+  ['check-git-push-policy.mjs', `git -C ${repos['client-fresh']} push -u origin master`, 'pass', 'PR 전용이어도 원격에 master가 없으면 첫 push 통과'],
+  ['check-git-push-policy.mjs', `git -C ${repos['client-seeded']} push -u origin master`, 'deny', '원격에 master가 있으면 같은 명령도 차단'],
+  ['check-git-push-policy.mjs', `git -C ${repos['client-seeded']} push origin unit/x:release`, 'deny', '원격에 다른 브랜치가 있으면 없는 보호 브랜치를 새로 만들지 못한다'],
+  ['check-git-push-policy.mjs', `git -C ${prOnly} push -u origin master`, 'deny', '원격을 조회 못 하면 첫 push로 보지 않는다'],
+
+  // gh로 원격 PR 머지 — push와 같이 친다.
+  ['check-git-push-policy.mjs', `cd ${gated} && gh pr merge 3 --squash`, 'deny', '승인 등급은 gh pr merge 차단', { reasonIncludes: ['ai-contexts', 'gh'] }],
+  ['check-git-push-policy.mjs', `cd ${prOnly} && gh pr merge 3`, 'deny', 'PR 전용은 gh pr merge 차단', { reasonIncludes: ['some-client'] }],
+  ['check-git-push-policy.mjs', `gh pr merge 3 -R developer-choi/ai-contexts`, 'deny', '-R로 레포를 적으면 그 이름으로 판정'],
+  [
+    'check-git-push-policy.mjs',
+    `cd ${free} && gh pr merge https://github.com/developer-choi/ai-contexts/pull/3 --squash`,
+    'deny',
+    'PR 링크를 넘기면 작업 폴더가 아니라 링크의 레포로 판정',
+  ],
+  ['check-git-push-policy.mjs', `cd ${gated} && gh pr merge 3 --repo developer-choi/backlog`, 'pass', '-R이 FREE 레포면 작업 폴더와 무관하게 통과'],
+  ['check-git-push-policy.mjs', `gh api -X PUT repos/developer-choi/some-client/pulls/3/merge`, 'deny', 'gh api로 머지 엔드포인트를 불러도 차단'],
+  ['check-git-push-policy.mjs', `cd ${gated} && gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'`, 'deny', 'GraphQL mergePullRequest도 차단'],
+  ['check-git-push-policy.mjs', `cd ${gated} && gh pr view 3`, 'pass', 'PR 조회는 막지 않는다'],
+  [
+    'check-git-push-policy.mjs',
+    `cd ${repos['not-a-repo']} && gh pr merge 3`,
+    'deny',
+    '레포를 못 정하면 PR 전용으로 본다',
+    { reasonIncludes: ['레포 이름 미확인'] },
+  ],
+
+  // 한 명령에 승인 대상(merge)과 차단 대상(push)이 섞이면 push 훅이 차단한다 — 훅 사이에서는 deny가 ask를 이긴다.
+  ['check-git-push-policy.mjs', `git -C ${gated} merge feature && git -C ${gated} push origin main`, 'deny', 'merge 승인 대상과 섞인 push도 차단'],
+
+  // reset은 승인·PR 전용 모두 --soft만.
+  ['check-git-reset-policy.mjs', `git -C ${prOnly} reset --hard`, 'deny', 'PR 전용은 reset --hard 차단'],
+  ['check-git-reset-policy.mjs', `git -C ${gated} reset --soft HEAD~1`, 'pass', '승인 등급도 reset --soft는 통과'],
+  ['check-git-reset-policy.mjs', `git -C ${prOnly} reset --soft HEAD~1`, 'pass', 'PR 전용도 reset --soft는 통과'],
+
+  // 승인 등급 — 머지만 승인 창, 나머지는 차단 유지. 승인 창 사유에 레포·대상 브랜치·들어갈 브랜치가 보여야 한다.
   [
     'check-git-merge-policy.mjs',
     `git -C ${gated} merge feature`,
     'ask',
-    '면제 밖 보호 브랜치 머지는 승인 창',
+    '승인 등급 보호 브랜치 머지는 승인 창',
     { reasonIncludes: ['ai-contexts', 'main', 'feature'] },
   ],
   [
@@ -1005,7 +1120,7 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
     '서브에이전트의 보호 브랜치 머지는 승인 창 대신 거부',
     { agentId: 'zz-probe', reasonIncludes: ['메인에 보고', 'feature'] },
   ],
-  ['check-git-merge-policy.mjs', `git -C ${gated} rebase feature`, 'deny', '면제 밖은 보호 브랜치 위 rebase 차단 유지'],
+  ['check-git-merge-policy.mjs', `git -C ${gated} rebase feature`, 'deny', '승인 등급은 보호 브랜치 위 rebase 차단 유지'],
   [
     'check-git-merge-policy.mjs',
     `git -C ${gated} merge feature && git -C ${gated} rebase feature`,
@@ -1040,24 +1155,23 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
     '머지가 둘이면 승인 창 하나에 둘 다 적는다',
     { reasonIncludes: ['feature', 'hotfix'] },
   ],
-  ['check-git-merge-policy.mjs', `git -C ${gated} branch -f main abc123`, 'deny', '면제 밖은 포인터 강제 이동 차단 유지'],
-  ['check-git-push-policy.mjs', `git -C ${gated} push origin main`, 'ask', '면제 밖은 보호 브랜치 push 승인 유지'],
-  ['check-git-reset-policy.mjs', `git -C ${gated} reset --hard`, 'deny', '면제 밖은 reset --hard 차단 유지'],
+  ['check-git-merge-policy.mjs', `git -C ${gated} branch -f main abc123`, 'deny', '승인 등급은 포인터 강제 이동 차단 유지'],
+  ['check-git-reset-policy.mjs', `git -C ${gated} reset --hard`, 'deny', '승인 등급은 reset --hard 차단 유지'],
 
   // 경로를 셸 변수로 넘기면 훅은 셸 확장 전 원문(`$V`)을 받는다. 예전엔 그 폴더에서 브랜치를 못 읽고
   // fail-open으로 흘러 머지 판정이 통째로 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현).
-  // 같은 명령 안의 단순 대입은 파서가 풀어 실제 폴더로 판정한다 — 면제 밖은 승인 창, 면제 레포는 통과.
+  // 같은 명령 안의 단순 대입은 파서가 풀어 실제 폴더로 판정한다 — 승인 등급은 승인 창, FREE 레포는 통과.
   [
     'check-git-merge-policy.mjs',
     `V="${gated}"; git -C "$V" merge feature`,
     'ask',
     '셸 변수 경로여도 머지 판정을 건너뛰지 않는다',
   ],
-  ['check-git-merge-policy.mjs', `V="${free}"; git -C "$V" merge feature`, 'pass', '같은 명령에서 대입한 변수 경로는 풀어서 면제 판정'],
-  ['check-git-push-policy.mjs', `P=${free}; git -C $P push origin main`, 'pass', '변수 경로 면제 레포는 보호 브랜치 push도 통과'],
-  ['check-git-push-policy.mjs', `$P = '${free}'; git -C $P push origin main`, 'pass', 'PowerShell 대입도 풀어서 면제 판정'],
-  ['check-git-push-policy.mjs', `P=${gated}; git -C \${P} push origin main`, 'ask', '변수 경로여도 면제 밖은 push 승인 유지'],
-  // 풀 수 없는 변수(미정의·명령 치환)는 폴더를 못 정한 것으로 남는다 — 면제 레포도 예외가 아니다.
+  ['check-git-merge-policy.mjs', `V="${free}"; git -C "$V" merge feature`, 'pass', '같은 명령에서 대입한 변수 경로는 풀어서 등급 판정'],
+  ['check-git-push-policy.mjs', `P=${free}; git -C $P push origin main`, 'pass', '변수 경로 FREE 레포는 보호 브랜치 push도 통과'],
+  ['check-git-push-policy.mjs', `$P = '${free}'; git -C $P push origin main`, 'pass', 'PowerShell 대입도 풀어서 등급 판정'],
+  ['check-git-push-policy.mjs', `P=${gated}; git -C \${P} push origin main`, 'deny', '변수 경로여도 승인 등급은 push 차단'],
+  // 풀 수 없는 변수(미정의·명령 치환)는 폴더를 못 정한 것으로 남는다 — FREE 레포도 예외가 아니다.
   ['check-git-merge-policy.mjs', `git -C "$UNSET_V" merge feature`, 'deny', '미정의 변수 경로는 면제되지 않는다'],
   ['check-git-merge-policy.mjs', `V=$(echo ${free}); git -C "$V" merge feature`, 'deny', '명령 치환 값은 풀지 않아 면제되지 않는다'],
   [
@@ -1074,19 +1188,20 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
     'detached HEAD는 보호 브랜치가 아니라 그대로 통과',
   ],
 
-  // 한 명령이 두 레포를 섞어 부르면 정책을 유지한다 — 면제 레포에 얹혀 검사가 꺼지지 않게.
+  // 한 명령이 두 레포를 섞어 부르면 정책을 유지한다 — FREE 레포에 얹혀 검사가 꺼지지 않게.
   [
     'check-git-reset-policy.mjs',
     `git -C ${free} reset --hard && git -C ${gated} reset --hard`,
     'deny',
-    '면제 레포와 섞이면 면제되지 않는다',
+    'FREE 레포와 섞이면 면제되지 않는다',
   ],
-];
+  ];
+};
 
 // 워크트리 위치 정책(`check-git-worktree-policy.mjs`)은 `--git-common-dir`로 메인 레포 루트를 구하므로
 // 진짜 git 레포가 있어야 판정이 선다. 가짜 경로로 등록하면 전부 fail-open→pass가 되어 검증이 조용히
-// 무력화된다. 면제 fixture(`withFreeRepoFixture`)에 얹지 않는 이유는 그쪽 이름이 면제 의미론(free·gated)에
-// 고정돼 있고 이 훅에는 면제 개념이 아예 없기 때문이다.
+// 무력화된다. 등급 fixture(`withFreeRepoFixture`)에 얹지 않는 이유는 그쪽 이름이 등급 의미론(free·gated)에
+// 고정돼 있고 이 훅에는 등급 개념이 아예 없기 때문이다.
 //
 // cwd로 쓸 워크트리는 **관리 위치 밖**(`detached-wt`)에 둔다. 관리 위치 안에 두면 "fixture가 이 정책을
 // 미리 지켜야 케이스가 성립한다"는 순환처럼 보이고, 밖에 두면 오히려 훅의 핵심(워크트리가 어디 있든
@@ -1242,7 +1357,7 @@ const sectionRefCases = [
 //
 // 이 갈래는 순방향과 달리 **워킹트리를 고친다**(`edit`가 문서의 헤딩을 바꾼다). 그래서 index만
 // 갈라서는 케이스끼리 격리되지 않는다 — 템플릿을 한 벌 세우고 케이스마다 통째로 복사한다.
-// 복사본 이름을 면제 레포 이름(backlog·ai-contexts·knowledge-archive)으로 짓지 않는다. 이 훅은
+// 복사본 이름을 등급 fixture의 레포 이름(backlog·ai-contexts·knowledge-archive 등)으로 짓지 않는다. 이 훅은
 // 레포 이름을 안 보지만, 나중에 같은 fixture에 다른 훅 케이스를 얹으면 이름으로 판정이 갈린다.
 async function withSectionRefReverseFixture(fn) {
   const root = await makeTempDir('hook-section-ref-rev-');
@@ -1325,7 +1440,7 @@ const sectionRefReverseCases = [
 // 레포 밖 역방향: 다른 레포가 이 파일의 절을 부르던 인용. 훅이 워크스페이스를 훑으므로 임시
 // 워크스페이스(`SECTION_REFS_WORKSPACE`)에 커밋하는 레포 `alpha`와 인용하는 레포 `beta`를 나란히 둔다.
 // 케이스가 alpha의 워킹트리를 고치므로 위 역방향처럼 템플릿을 케이스마다 통째로 복사한다.
-// 레포 이름은 면제 레포 이름을 피한다(위 fixture와 같은 이유).
+// 레포 이름은 등급 fixture의 레포 이름을 피한다(위 fixture와 같은 이유).
 async function withCrossRepoFixture(fn) {
   const root = await makeTempDir('hook-section-ref-cross-');
   const template = path.join(root, 'template');
@@ -1410,7 +1525,7 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
     return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
   }));
 
-// 레포 면제는 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
+// 레포 등급은 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
 // 다섯째 칸(선택): agentId를 주면 서브에이전트 페이로드로 돌리고, reasonIncludes의 낱말이 사유에 다 있어야 통과.
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
   runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [] } = {}]) => {

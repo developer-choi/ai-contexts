@@ -243,7 +243,7 @@ function referenceGraph(files) {
 
 // 워크트리는 폴더명이 원본과 달라 `--show-toplevel`로는 같은 레포로 안 갈린다.
 // `--git-common-dir`은 링크된 워크트리에서도 원본의 `.git`을 가리키므로 그것으로 이름을 구한다
-// (policy-exempt-repos.mjs가 같은 이유로 같은 방식을 쓴다).
+// (repo-tiers.mjs가 같은 이유로 같은 방식을 쓴다).
 function repoName() {
   try {
     const common = execFileSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {

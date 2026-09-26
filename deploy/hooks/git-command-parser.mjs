@@ -29,9 +29,46 @@ export function findGitInvocations(command, subcommand) {
   return out;
 }
 
+// 원격 PR을 머지하는 gh 호출을 { repo }로 돌려준다. 원격 보호 브랜치를 바로 바꾸므로 훅은 이것을
+// 로컬 merge가 아니라 push와 같이 친다. 잡는 형태:
+//   gh pr merge …                               — repo는 `-R`/`--repo owner/name`의 name, PR을 URL로 주면
+//                                                  그 URL의 name, 둘 다 없으면 null
+//   gh api …/pulls/<n>/merge                    — repo는 `repos/owner/name/…`의 name, `{repo}` 자리표시면 null
+//   gh api graphql … mergePullRequest …         — repo는 null
+// repo가 null이면 훅이 작업 폴더로 레포를 정한다.
+export function findGhPrMerges(command) {
+  const out = [];
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
+    if (at < 0) continue;
+    const args = tokens.slice(at + 1);
+    const words = args.filter((t) => !t.startsWith("-"));
+    if (words[0] === "pr" && words[1] === "merge") {
+      const i = args.findIndex((t) => t === "-R" || t === "--repo");
+      const inline = args.find((t) => t.startsWith("--repo="));
+      const spec = inline ? inline.slice("--repo=".length) : i >= 0 ? args[i + 1] : null;
+      // 사용자가 붙여 준 PR 링크를 그대로 넘기는 형태 — gh는 작업 폴더가 아니라 링크의 레포를 머지한다.
+      const url = words[2] && words[2].match(/github\.com\/[^/]+\/([^/]+)\/pull\//);
+      out.push({ repo: spec ? spec.split("/").pop() : url ? url[1] : null });
+      continue;
+    }
+    if (words[0] !== "api") continue;
+    const rest = args.slice(args.indexOf("api") + 1);
+    const endpoint = rest.find((t) => /(?:^|\/)pulls\/[^/]+\/merge\/?$/.test(t));
+    if (endpoint) {
+      const m = endpoint.match(/(?:^|\/)repos\/[^/]+\/([^/]+)\/pulls\//);
+      out.push({ repo: m && !/^\{.*\}$/.test(m[1]) ? m[1] : null });
+      continue;
+    }
+    if (rest.some((t) => /mergePullRequest/.test(t))) out.push({ repo: null });
+  }
+  return out;
+}
+
 // 훅은 셸 확장 전 원문을 받으므로 `P=<경로>; git -C $P ...`의 cwd가 글자 그대로 `$P`다.
-// 같은 명령 안의 단순 대입만 기억해 두었다가 풀어 준다 — 경로를 못 정하면 면제 판정이 서지 않아
-// 면제 레포도 보호 브랜치 확인이 뜬다. 값에 `$`·백틱이 섞인 대입(`$(...)` 등)은 기억하지 않아
+// 같은 명령 안의 단순 대입만 기억해 두었다가 풀어 준다 — 경로를 못 정하면 등급 판정이 서지 않아
+// FREE 레포도 보호 브랜치에서 막힌다. 값에 `$`·백틱이 섞인 대입(`$(...)` 등)은 기억하지 않아
 // 원문으로 남고, 그 경우 판정은 예전처럼 "폴더를 못 정함" 쪽으로 간다.
 // 세그먼트가 대입만으로 이뤄졌을 때만 기록한다 — `V=x cmd`는 cmd 한 번의 환경변수라 뒤로 이어지지 않는다.
 function recordAssignment(tokens, vars) {

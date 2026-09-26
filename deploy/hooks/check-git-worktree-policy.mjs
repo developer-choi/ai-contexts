@@ -11,8 +11,8 @@ import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 // 도구 이름을 넣어도, PreToolUse hook이 allow를 줘도(다시 safetyCheck를 만나 전체 파이프라인으로 되돌아간다)
 // 안 걷히고 bypassPermissions 모드에서만 통과한다. 그래서 위치를 창구 하나로 모으는 쪽에서 막는다.
 //
-// 레포 단위 면제를 두지 않는다 — policy-exempt-repos.mjs는 브랜치 정책(merge·push·reset)을 걷는 목록이고,
-// 거기 올라 있는 레포들이야말로 워크트리를 형제 경로에 쌓아 온 곳이다.
+// 레포 등급으로 면제하지 않는다 — repo-tiers.mjs는 브랜치 정책(merge·push·reset)의 강도를 가르는 목록이고,
+// 거기 FREE로 올라 있는 레포들이야말로 워크트리를 형제 경로에 쌓아 온 곳이다.
 const payload = readPayload();
 const cmd = getCommand(payload);
 if (typeof cmd !== "string" || !/\bworktree\b/.test(cmd)) process.exit(0);
