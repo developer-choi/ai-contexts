@@ -48,12 +48,15 @@ function parseArgs(argv) {
     else if (argv[i] === '--todo') args.todo = argv[++i];
     else if (argv[i] === '--paths') args.paths = argv[++i];
     else if (argv[i] === '--marker') args.marker = argv[++i];
+    else args.unknown ??= argv[i];
   }
   return args;
 }
 
+// 모르는 인자는 끊는다 — 흘려보내면 옛 플래그 이름으로 부른 쪽이 고아 점검을 조용히 건너뛴다.
 const args = parseArgs(process.argv.slice(2));
-if (!args.base && !args.paths) {
+if (args.unknown || (!args.base && !args.paths)) {
+  if (args.unknown) console.error(`모르는 인자: ${args.unknown}`);
   console.error('사용: node <이 파일> (--base <기준 ref> | --paths <경로,경로>) [--todo <todo.md 경로>] [--marker USER_REVIEW]');
   process.exit(1);
 }
