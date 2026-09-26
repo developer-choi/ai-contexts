@@ -143,6 +143,18 @@ const CASES = [
   // --- chain ---
   ['check-git-staging-policy.mjs', 'git status && git -C ~/repo add -A', 'deny', 'chain 뒷단의 위반도 잡는다'],
 
+  // --- 폴더 이동 + git (사유는 check-shell-policy.mjs의 해당 룰 주석) ---
+  ['check-shell-policy.mjs', 'cd C:/x && git status', 'deny', 'cd 뒤 git 금지'],
+  ['check-shell-policy.mjs', 'pushd C:/x && git push origin main', 'deny', 'pushd도 폴더 이동이다'],
+  ['check-shell-policy.mjs', 'Set-Location C:/x; git push origin main', 'deny', 'Set-Location도 폴더 이동이다'],
+  ['check-shell-policy.mjs', 'set-location -LiteralPath "C:/x y"; git status', 'deny', '대소문자를 가리지 않는다'],
+  ['check-shell-policy.mjs', 'Set-Location C:/x\ngit push origin main', 'deny', '줄바꿈으로 나눈 git도 잡는다'],
+  ['check-shell-policy.mjs', 'Set-Location C:/x; & git push origin main', 'deny', 'PowerShell 호출 연산자 뒤 git도 잡는다'],
+  ['check-shell-policy.mjs', 'cd - && git push origin main', 'deny', '대상 없는 폴더 이동도 폴더 이동이다'],
+  ['check-shell-policy.mjs', 'cd && git status', 'deny', '인자 없는 cd도 폴더 이동이다'],
+  ['check-shell-policy.mjs', 'Set-Location C:/x; npm test', 'pass', 'git이 없으면 폴더 이동은 통과'],
+  ['check-shell-policy.mjs', 'git commit a.md -m "Set-Location; git 금지 추가"', 'pass', '메시지 안의 인용은 폴더 이동이 아니다'],
+
   // --- git -C 경로의 홈 약어 (사유는 check-shell-policy.mjs의 해당 룰 주석) ---
   ['check-shell-policy.mjs', 'git -C ~/repo status', 'deny', '~ 경로를 잡는다'],
   ['check-shell-policy.mjs', 'git -C $HOME/repo status', 'deny', '$HOME도 같은 표기다'],
@@ -1112,6 +1124,24 @@ const freeRepoCases = (repos) => {
   ['check-git-reset-policy.mjs', `git -C ${gated} reset --soft HEAD~1`, 'pass', '승인 등급도 reset --soft는 통과'],
   ['check-git-reset-policy.mjs', `git -C ${prOnly} reset --soft HEAD~1`, 'pass', 'PR 전용도 reset --soft는 통과'],
 
+  // 폴더를 옮긴 뒤의 git — 호출마다 그 시점의 폴더로 판정한다(사유는 git-command-parser.mjs의 trackFolder 주석).
+  ['check-git-push-policy.mjs', `pushd ${gated} && git push origin unit/x:master`, 'deny', 'pushd로 옮긴 승인 레포의 보호 브랜치 push 차단', { sessionCwd: free }],
+  ['check-git-push-policy.mjs', `Set-Location ${gated}; git push origin unit/x:master`, 'deny', 'Set-Location으로 옮겨도 차단', { sessionCwd: free }],
+  ['check-git-push-policy.mjs', `Set-Location -Path "${prOnly}"; git push origin unit/x:master`, 'deny', '-Path·따옴표로 넘겨도 차단', { sessionCwd: free }],
+  ['check-git-push-policy.mjs', `sl ${gated}; git push origin unit/x:master`, 'deny', 'sl 별칭도 차단', { sessionCwd: free }],
+  ['check-git-push-policy.mjs', `pushd ${gated} && gh pr merge 3 --squash`, 'deny', 'pushd 뒤 gh pr merge도 옮긴 레포로 판정', { sessionCwd: free }],
+  ['check-git-reset-policy.mjs', `pushd ${prOnly} && git reset --hard`, 'deny', 'pushd로 옮긴 PR 전용 레포의 reset --hard 차단', { sessionCwd: free }],
+  ['check-git-reset-policy.mjs', `Set-Location ${gated}; git reset --hard`, 'deny', 'Set-Location으로 옮긴 승인 레포의 reset --hard 차단', { sessionCwd: free }],
+  ['check-git-merge-policy.mjs', `Set-Location ${prOnly}; git merge feature`, 'deny', '머지 훅도 Set-Location을 읽는다', { sessionCwd: free }],
+  ['check-git-push-policy.mjs', 'cd ../ai-contexts && git push origin unit/x:master', 'deny', '상대 경로는 세션 폴더 기준으로 푼다', { sessionCwd: free }],
+  // git 뒤의 이동·되돌아온 이동은 그 git의 폴더가 아니다 — 명령 전체에서 폴더 하나만 뽑으면 FREE 면제를 탄다.
+  ['check-git-push-policy.mjs', `git push origin unit/x:master\nSet-Location ${free}`, 'deny', 'git 뒤의 이동은 그 git의 폴더가 아니다', { sessionCwd: gated }],
+  ['check-git-push-policy.mjs', `pushd ${free}\npopd\ngit push origin unit/x:master`, 'deny', 'popd로 돌아온 뒤의 git은 세션 폴더', { sessionCwd: gated }],
+  ['check-git-reset-policy.mjs', `git reset --hard; Set-Location ${free}`, 'deny', 'reset 뒤의 이동도 면제 근거가 아니다', { sessionCwd: gated }],
+  ['check-git-reset-policy.mjs', 'cd - && git reset --hard', 'deny', '옮긴 폴더를 못 정하면 면제하지 않는다', { sessionCwd: free }],  // 반대 방향 — 과차단이 없는지. 승인 레포 세션에서 FREE 레포로 옮기면 면제된다.
+  ['check-git-push-policy.mjs', `Set-Location ${free}; git push origin unit/x:main`, 'pass', 'FREE 레포로 옮긴 push는 통과', { sessionCwd: gated }],
+  ['check-git-reset-policy.mjs', `pushd ${free} && git reset --hard`, 'pass', 'FREE 레포로 옮긴 reset --hard는 통과', { sessionCwd: gated }],
+
   // 승인 등급 — 머지만 승인 창, 나머지는 차단 유지. 승인 창 사유에 레포·대상 브랜치·들어갈 브랜치가 보여야 한다.
   [
     'check-git-merge-policy.mjs',
@@ -1534,11 +1564,17 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
 
 // 레포 등급은 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
 // 다섯째 칸(선택): agentId를 주면 서브에이전트 페이로드로 돌리고, reasonIncludes의 낱말이 사유에 다 있어야 통과.
+// sessionCwd를 주면 세션 폴더(페이로드 cwd)로 싣는다 — 명령이 옮겨 간 폴더와 세션 폴더의 등급이 다를 때를 잰다.
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
-  runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [] } = {}]) => {
-    const payload = { tool_name: 'Bash', tool_input: { command }, ...(agentId ? { agent_id: agentId } : {}) };
+  runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [], sessionCwd } = {}]) => {
+    const payload = {
+      tool_name: 'Bash',
+      tool_input: { command },
+      ...(agentId ? { agent_id: agentId } : {}),
+      ...(sessionCwd ? { cwd: sessionCwd } : {}),
+    };
     const { decision, reason = '', stderr } = await runHookPayload(file, payload);
-    const label = `${file} :: ${command}${agentId ? ' [서브에이전트]' : ''} → ${expected} (${note})`;
+    const label = `${file} :: ${command}${agentId ? ' [서브에이전트]' : ''}${sessionCwd ? ` [세션 ${sessionCwd}]` : ''} → ${expected} (${note})`;
     const missing = reasonIncludes.filter((word) => !reason.includes(word));
     return judge(label, decision, expected, stderr, {
       ok: decision === expected && missing.length === 0,

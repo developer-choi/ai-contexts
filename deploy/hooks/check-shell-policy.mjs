@@ -1,4 +1,4 @@
-import { parseGitInvocation, splitSegments, tokenize } from "./git-command-parser.mjs";
+import { hasFolderMove, hasGitCall, parseGitInvocation, splitSegments, tokenize } from "./git-command-parser.mjs";
 import { deny, getCommand, getToolName, readPayload } from "./hook-utils.mjs";
 
 const payload = readPayload();
@@ -10,11 +10,10 @@ if (/(?:^|&&|\|\||[;|]|\$\(|`)\s*npx\b/.test(cmd)) {
 }
 
 // cd <dir> && git: 대상 폴더의 .git/hooks 실행 위험 → Claude Code가 무조건 권한 프롬프트(allowlist·hook allow로 우회 불가).
-// git -C <path>로 강제 교정.
-const hasCdSub = /(?:^|&&|\|\||;|\|)\s*cd\s/.test(cmd);
-const hasGitSub = /(?:^|&&|\|\||;|\|)\s*git\s/.test(cmd);
-if (hasCdSub && hasGitSub) {
-  deny("cd && git 금지 — 다른 디렉터리의 git은 'git -C <path> <cmd>' 형태로 실행하세요. cd로 이동 후 git을 돌리면 대상 폴더의 .git/hooks가 실행될 수 있어 Claude Code가 무조건 권한 프롬프트를 띄웁니다(allowlist·hook allow로 우회 불가).");
+// git -C <path>로 강제 교정. cd만이 아니라 pushd·Set-Location 등 폴더 이동 전반을 본다 — 빠지면 git 정책 훅이
+// 옮긴 폴더가 아니라 세션 폴더로 등급을 판정해 보호 브랜치 push·reset이 새어 나간다.
+if (hasFolderMove(cmd) && hasGitCall(cmd)) {
+  deny("cd && git 금지(pushd·Set-Location 등 폴더 이동 포함) — 다른 디렉터리의 git은 'git -C <path> <cmd>' 형태로 실행하세요. 폴더를 옮긴 뒤 git을 돌리면 대상 폴더의 .git/hooks가 실행될 수 있어 Claude Code가 무조건 권한 프롬프트를 띄웁니다(allowlist·hook allow로 우회 불가).");
 }
 
 // git -C 뒤의 ~ / $HOME: 셸이 실행 시점에 펼치는 표기라 Claude Code가 실행 전에 대상 폴더를 확정하지

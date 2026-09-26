@@ -8,20 +8,24 @@ import path from "node:path";
 // "글자 모양"이 아니라 "실행되는 git 호출"이 되도록, 체인을 세그먼트로 쪼개고
 // 토큰화한 뒤 전역 옵션(-C/-c/--git-dir 등)을 건너뛰고 서브커맨드를 찾는다.
 
-// 명령 안의 git 호출 중 지정한 서브커맨드인 것들을 { args, cwd }로 돌려준다.
+// 명령 안의 git 호출 중 지정한 서브커맨드인 것들을 { args, cwd, moveCwd }로 돌려준다.
+// cwd는 `git -C` 값, moveCwd는 그 호출 앞에서 폴더 이동으로 옮겨 간 폴더다(없으면 null) —
+// 둘을 합친 실행 폴더는 invocationCwd가 정한다.
 // 세그먼트당 첫 git 호출만 본다 — `git a | git b`처럼 한 세그먼트에 둘을 넣는
 // 형태는 파이프로 이미 분리되므로 실사용에서 손실이 없다.
 export function findGitInvocations(command, subcommand) {
   const out = [];
   const vars = new Map();
+  const folder = { current: null, stack: [] };
   for (const seg of splitSegments(command)) {
     const tokens = tokenize(seg);
     if (recordAssignment(tokens, vars)) continue;
+    trackFolder(tokens, folder);
     for (let i = 0; i < tokens.length; i += 1) {
       if (tokens[i] !== "git") continue;
       const parsed = parseGitInvocation(tokens, i + 1);
       if (parsed && parsed.subcommand === subcommand) {
-        out.push({ args: parsed.args, cwd: parsed.cwd && expandVars(parsed.cwd, vars) });
+        out.push({ args: parsed.args, cwd: parsed.cwd && expandVars(parsed.cwd, vars), moveCwd: folder.current });
       }
       break;
     }
@@ -35,11 +39,14 @@ export function findGitInvocations(command, subcommand) {
 //                                                  그 URL의 name, 둘 다 없으면 null
 //   gh api …/pulls/<n>/merge                    — repo는 `repos/owner/name/…`의 name, `{repo}` 자리표시면 null
 //   gh api graphql … mergePullRequest …         — repo는 null
-// repo가 null이면 훅이 작업 폴더로 레포를 정한다.
+// repo가 null이면 훅이 작업 폴더로 레포를 정한다. moveCwd는 findGitInvocations와 같다.
 export function findGhPrMerges(command) {
   const out = [];
+  const folder = { current: null, stack: [] };
   for (const seg of splitSegments(command)) {
     const tokens = tokenize(seg);
+    trackFolder(tokens, folder);
+    const moveCwd = folder.current;
     const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
     if (at < 0) continue;
     const args = tokens.slice(at + 1);
@@ -50,7 +57,7 @@ export function findGhPrMerges(command) {
       const spec = inline ? inline.slice("--repo=".length) : i >= 0 ? args[i + 1] : null;
       // 사용자가 붙여 준 PR 링크를 그대로 넘기는 형태 — gh는 작업 폴더가 아니라 링크의 레포를 머지한다.
       const url = words[2] && words[2].match(/github\.com\/[^/]+\/([^/]+)\/pull\//);
-      out.push({ repo: spec ? spec.split("/").pop() : url ? url[1] : null });
+      out.push({ repo: spec ? spec.split("/").pop() : url ? url[1] : null, moveCwd });
       continue;
     }
     if (words[0] !== "api") continue;
@@ -58,12 +65,79 @@ export function findGhPrMerges(command) {
     const endpoint = rest.find((t) => /(?:^|\/)pulls\/[^/]+\/merge\/?$/.test(t));
     if (endpoint) {
       const m = endpoint.match(/(?:^|\/)repos\/[^/]+\/([^/]+)\/pulls\//);
-      out.push({ repo: m && !/^\{.*\}$/.test(m[1]) ? m[1] : null });
+      out.push({ repo: m && !/^\{.*\}$/.test(m[1]) ? m[1] : null, moveCwd });
       continue;
     }
-    if (rest.some((t) => /mergePullRequest/.test(t))) out.push({ repo: null });
+    if (rest.some((t) => /mergePullRequest/.test(t))) out.push({ repo: null, moveCwd });
   }
   return out;
+}
+
+// 폴더를 옮기는 명령. 셸마다 이름이 달라 `cd`만 보면 `pushd <레포> && git push`·
+// `Set-Location <레포>; git push`가 세션 폴더 기준으로 판정돼 등급 정책을 빠져나간다(2026-09-26 실측).
+// PowerShell 명령·별칭은 대소문자를 가리지 않는다.
+const FOLDER_SET = new Set(["cd", "chdir", "set-location", "sl"]);
+const FOLDER_PUSH = new Set(["pushd", "push-location"]);
+const FOLDER_POP = new Set(["popd", "pop-location"]);
+
+// 옮겨 간 폴더를 글자로 정할 수 없을 때(`cd`·`cd -`·빈 스택의 `popd`) 쓰는 값. 실존하지 않는 경로라
+// 등급 판정은 FREE로 새지 않고, 브랜치 조회는 실패해 막는 쪽으로 간다.
+export const UNKNOWN_FOLDER = "<옮긴 폴더 미확인>";
+
+// 명령에 폴더 이동이 하나라도 있는가.
+export function hasFolderMove(command) {
+  return splitSegments(command).some((seg) => folderMoveKind(tokenize(seg)) !== null);
+}
+
+// 명령에 git 호출이 하나라도 있는가. 세그먼트 안 어디든 `git` 토큰이면 센다 — findGitInvocations와 같은 기준이라
+// 줄바꿈으로 나눈 명령과 PowerShell 호출 연산자(`& git`)도 잡는다.
+export function hasGitCall(command) {
+  return splitSegments(command).some((seg) => tokenize(seg).includes("git"));
+}
+
+function folderMoveKind(tokens) {
+  const name = tokens[0]?.toLowerCase();
+  if (FOLDER_SET.has(name)) return "set";
+  if (FOLDER_PUSH.has(name)) return "push";
+  if (FOLDER_POP.has(name)) return "pop";
+  return null;
+}
+
+// 세그먼트를 앞에서부터 실행한다고 보고, 각 세그먼트가 도는 폴더를 따라간다. null은 옮기지 않았다(세션 폴더)는 뜻.
+// 명령 전체에서 폴더 하나만 뽑으면 git 뒤의 `Set-Location <FREE 레포>`나 `pushd …; popd` 뒤의 git이
+// 엉뚱한 폴더로 판정돼 FREE 면제를 탄다. 상대 경로는 앞 폴더에 이어 붙이고, 세션 폴더 기준 풀이는 훅이 한다.
+function trackFolder(tokens, state) {
+  const kind = folderMoveKind(tokens);
+  if (kind === null) return;
+  if (kind === "pop") {
+    state.current = state.stack.length ? state.stack.pop() : UNKNOWN_FOLDER;
+    return;
+  }
+  const target = tokens.slice(1).find((t) => !t.startsWith("-"));
+  const next = !target ? UNKNOWN_FOLDER : joinFolder(state.current, target);
+  if (kind === "push") state.stack.push(state.current);
+  state.current = next;
+}
+
+function joinFolder(current, target) {
+  const t = normalizeCwd(target);
+  if (path.isAbsolute(t)) return t;
+  if (current === UNKNOWN_FOLDER) return UNKNOWN_FOLDER;
+  return current ? path.join(current, t) : t;
+}
+
+// 호출이 실제로 도는 폴더. `git -C`가 있으면 그것을(상대면 옮긴 폴더 기준), 없으면 옮긴 폴더를,
+// 둘 다 없으면 null(세션 폴더)이다. 상대 경로는 세션 폴더 기준으로 푼다 — 셸이 거기서 출발한다.
+export function invocationCwd(inv, sessionCwd) {
+  const moved = inv.moveCwd == null ? null : resolveFrom(sessionCwd, inv.moveCwd);
+  const dashC = normalizeCwd(inv.cwd);
+  if (dashC) return moved && moved !== UNKNOWN_FOLDER && !path.isAbsolute(dashC) ? path.resolve(moved, dashC) : dashC;
+  return moved;
+}
+
+function resolveFrom(base, folder) {
+  if (folder === UNKNOWN_FOLDER || path.isAbsolute(folder) || !base) return folder;
+  return path.resolve(base, folder);
 }
 
 // 훅은 셸 확장 전 원문을 받으므로 `P=<경로>; git -C $P ...`의 cwd가 글자 그대로 `$P`다.

@@ -1,7 +1,7 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { allInFreeRepos, originRepoName, repoTier } from "./repo-tiers.mjs";
-import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
+import { findGitInvocations, invocationCwd } from "./git-command-parser.mjs";
 import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // 보호 브랜치(master/main/develop/release)로의 머지·포인터 이동을 AI가 사용자 결정 없이 못 하게 한다.
@@ -49,14 +49,15 @@ const UNRESOLVED_CWD_MSG = (cwd) =>
   "훅은 셸 확장 전 원문을 받아 보호 브랜치 머지 판정을 돌리지 못하므로 차단합니다. " +
   '경로를 통째로 적어 다시 실행하세요 (예: `git -C "<레포 절대경로>" merge --ff-only <branch>`).';
 
-const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
-const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));
+// 호출마다 실제로 도는 폴더(git -C → 폴더 이동 → 세션 폴더 순)를 cwd에 담아 둔다.
+const sessionCwd = getCwd(payload);
+const invocations = (sub) => findGitInvocations(cmd, sub).map((inv) => ({ ...inv, cwd: invocationCwd(inv, sessionCwd) }));
 
 // FREE 등급 레포(repo-tiers.mjs)에서는 이 정책을 통째로 걷는다. 이 훅이 보는 호출을 다 모아
 // 한 번에 판정한다 — 아래 두 갈래(정적 매칭·HEAD 기반)가 같은 기준으로 갈려야 한다.
 const GATED_SUBCOMMANDS = ["branch", "checkout", "switch", "merge", "pull", "rebase", "cherry-pick"];
-const gated = GATED_SUBCOMMANDS.flatMap((sub) => findGitInvocations(cmd, sub));
-if (allInFreeRepos(gated, cdCwd || getCwd(payload))) process.exit(0);
+const gated = GATED_SUBCOMMANDS.flatMap(invocations);
+if (allInFreeRepos(gated, sessionCwd)) process.exit(0);
 
 // --- 1. 정적 매칭: 포인터를 보호 브랜치로 강제 이동/재설정하는 명령 ---
 // branch -f <protected> [start] — 첫 positional(이동 대상 브랜치명)만 본다.
@@ -80,9 +81,9 @@ const CONTROL = /^--(abort|continue|skip|quit|edit-todo)$/; // 진행 중 작업
 // 대상(`merge feature && git rebase …`)이 승인 창 한 번에 묻혀 함께 실행되지 않게 한다.
 const merges = [];
 for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
-  for (const inv of findGitInvocations(cmd, sub)) {
+  for (const inv of invocations(sub)) {
     if (inv.args.some((t) => CONTROL.test(t))) continue;
-    const invCwd = normalizeCwd(inv.cwd) || cdCwd;
+    const invCwd = inv.cwd;
     // 폴더를 못 정하면 통과시키지 않는다(repo-tiers.mjs의 판정 불가 처리와 같은 방향).
     // 훅은 셸이 변수를 풀기 전의 명령 원문을 받으므로 `K=<path>; git -C "$K" merge`의 cwd는 `$K`라는
     // 글자 그대로 들어오고, 그 폴더에서 브랜치를 못 읽어 아래 fail-open으로 흘러 판정이 통째로

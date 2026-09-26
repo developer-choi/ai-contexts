@@ -1,5 +1,5 @@
 import { allInFreeRepos } from "./repo-tiers.mjs";
-import { findGitInvocations } from "./git-command-parser.mjs";
+import { findGitInvocations, invocationCwd } from "./git-command-parser.mjs";
 import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // git reset --hard / --mixed 금지. --soft만 허용한다. AI는 무조건 차단하고, 정말 필요하면
@@ -14,9 +14,11 @@ const payload = readPayload();
 const cmd = getCommand(payload);
 if (typeof cmd !== "string" || !/\breset\b/.test(cmd)) process.exit(0);
 
-const resets = findGitInvocations(cmd, "reset");
+// 등급은 호출마다 실제로 도는 폴더(git -C → 폴더 이동 → 세션 폴더 순)로 본다.
+const sessionCwd = getCwd(payload);
+const resets = findGitInvocations(cmd, "reset").map((inv) => ({ ...inv, cwd: invocationCwd(inv, sessionCwd) }));
 // FREE 등급 레포(repo-tiers.mjs)에서는 이 정책을 통째로 걷는다. 승인·PR 전용 등급은 똑같이 --soft만.
-if (allInFreeRepos(resets, getCwd(payload))) process.exit(0);
+if (allInFreeRepos(resets, sessionCwd)) process.exit(0);
 
 const hard = resets.some((inv) => inv.args.includes("--hard"));
 const mixed = resets.some((inv) => inv.args.includes("--mixed"));

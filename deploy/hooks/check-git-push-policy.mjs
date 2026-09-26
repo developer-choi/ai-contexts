@@ -3,7 +3,7 @@ import { allInFreeRepos, originRepoName, repoTier, tierOfRepoName } from "./repo
 import {
   findGhPrMerges,
   findGitInvocations,
-  normalizeCwd,
+  invocationCwd,
   parseGitInvocation,
   splitSegments,
   tokenize,
@@ -22,18 +22,16 @@ const payload = readPayload();
 const cmd = getCommand(payload);
 if (typeof cmd !== "string") process.exit(0);
 
-const pushInvocations = findGitInvocations(cmd, "push");
+// 호출마다 실제로 도는 폴더(git -C → 폴더 이동 → 세션 폴더 순)를 cwd에 담아 둔다.
+const sessionCwd = getCwd(payload);
+const pushInvocations = findGitInvocations(cmd, "push").map((inv) => ({ ...inv, cwd: invocationCwd(inv, sessionCwd) }));
 const ghMerges = findGhPrMerges(cmd);
 if (pushInvocations.length === 0 && ghMerges.length === 0) process.exit(0);
 
-const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
-let cdCwd = cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]);
-cdCwd = normalizeCwd(cdCwd);
-
 // gh로 PR을 머지하는 호출. `-R owner/name`이나 API 경로에 레포가 적혀 있으면 그 이름으로, 없으면 gh가
 // 실제로 보는 작업 폴더로 등급을 정한다.
-for (const { repo } of ghMerges) {
-  const where = cdCwd || getCwd(payload);
+for (const { repo, moveCwd } of ghMerges) {
+  const where = invocationCwd({ moveCwd }, sessionCwd) || sessionCwd;
   const name = repo ?? originRepoName(where);
   const tier = repo ? tierOfRepoName(repo) : repoTier(where);
   if (tier !== "free") {
@@ -47,7 +45,7 @@ if (pushInvocations.length === 0) process.exit(0);
 
 // FREE 등급 레포에서는 이 정책을 통째로 걷는다. chain 검사보다 먼저 본다 —
 // 뒤에 두면 FREE 레포의 `reset && push --force`가 여기서 먼저 막힌다.
-if (allInFreeRepos(pushInvocations, getCwd(payload))) process.exit(0);
+if (allInFreeRepos(pushInvocations, sessionCwd)) process.exit(0);
 
 // chained 우회 차단: 같은 명령에 history rewrite와 force push가 함께 들어오면, PreToolUse 훅은
 // rewrite 실행 전 상태로 1회만 검사하므로 push 시점의 실제 diff를 못 본다 (reset && push --force 패턴).
@@ -68,8 +66,7 @@ for (const inv of pushInvocations) {
     deny("--no-verify 금지. pre-push hook을 우회하지 마세요.");
   }
 
-  // git -C <path>가 우선. 없으면 cd 추출 cwd로 fallback.
-  const invCwd = normalizeCwd(inv.cwd) || cdCwd;
+  const invCwd = inv.cwd;
   const gitOpts = invCwd ? { encoding: "utf8", cwd: invCwd } : { encoding: "utf8" };
   const gitOptsQuiet = { ...gitOpts, stdio: "pipe" };
   const tier = repoTier(invCwd || getCwd(payload));

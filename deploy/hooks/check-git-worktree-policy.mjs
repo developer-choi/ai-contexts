@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import path from "node:path";
-import { findGitInvocations, normalizeCwd, partitionArgs } from "./git-command-parser.mjs";
+import { findGitInvocations, invocationCwd, partitionArgs } from "./git-command-parser.mjs";
 import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // 워크트리를 `<메인레포>/.claude/worktrees/` 밖에 만들지 못하게 막는다.
@@ -31,16 +31,13 @@ const MSG = (target, expected) =>
 // `git worktree add`에서 다음 토큰을 값으로 먹는 플래그. 값을 positional로 세면 브랜치명이 경로로 오인된다.
 const VALUED = new Set(["-b", "-B", "--reason"]);
 
-const cdMatch = cmd.match(/(?:^|[;&|])\s*cd\s+(?:"([^"]+)"|'([^']+)'|([^\s;&|]+))/);
-const cdCwd = normalizeCwd(cdMatch && (cdMatch[1] || cdMatch[2] || cdMatch[3]));
-
 for (const inv of findGitInvocations(cmd, "worktree")) {
   if (inv.args[0] !== "add") continue;
   const { positionals } = partitionArgs(inv.args.slice(1), VALUED);
   const target = positionals[0];
   if (!target) continue; // 경로 없는 `worktree add`는 git이 거부한다
 
-  const runCwd = normalizeCwd(inv.cwd) || cdCwd || getCwd(payload);
+  const runCwd = invocationCwd(inv, getCwd(payload)) || getCwd(payload);
   const mainRoot = findMainRoot(runCwd);
   // fail-open: git 레포가 아니면 git 자신이 거부하므로 훅이 더 할 일이 없다.
   if (!mainRoot) continue;
