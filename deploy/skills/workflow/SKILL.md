@@ -81,13 +81,6 @@ argument-hint: <세션 이름> <채용|실무|개인>
 - 하위 스킬은 워크플로우 세션의 절차(step 또는 step 없는 세션 본문) 안에서만 호출된다 (독립 호출 없음). 예: MARKUP은 step 없이 본문(markup/)에서 impl-review-loop를 호출
 - MARKUP·WRITING·FINALIZE는 step 번호가 없는 세션 — 본문은 [conventions/session/markup/index.md](conventions/session/markup/index.md)(모드 공통) + 모드 파일([figma.md](conventions/session/markup/figma.md)·[personal.md](conventions/session/markup/personal.md)) / [conventions/session/writing.md](conventions/session/writing.md)(WRITING_IDEATOR·WRITING_REFINER 2절) / [conventions/session/finalize.md](conventions/session/finalize.md) 단일 출처
 
-## 시작 전 준비
-
-- `template/context-setup.md` 양식으로 레포지토리 Context 수집
-  - **실무 프로젝트**: 필수
-  - **개인 프로젝트**: 필수
-  - **채용 과제 등**: 생략 가능
-
 ## /plan/ 폴더 구조
 
 폴더 트리·라이프사이클 규칙(persistent/retained/consumable 동작)·consumable 자가 정리 안내문 양식·피그마 URL·캡처 캐싱 룰은 [conventions/plan-folder.md](conventions/plan-folder.md) 참조.
