@@ -181,6 +181,12 @@
       "msg": "Recording browser tab URL..."
     },
     {
+      "file": "hint-browser-disconnect.mjs",
+      "event": "PostToolUse",
+      "on": "browser-track",
+      "msg": "Checking browser connection..."
+    },
+    {
       "file": "snapshot-precompact-transcript.mjs",
       "event": "PreCompact",
       "on": "manual",

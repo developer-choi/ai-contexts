@@ -111,6 +111,10 @@ function main() {
   const browserTrack = claude.find((h) => h.file === 'record-browser-tab-url.mjs');
   check(browserTrack?.event === 'PostToolUse' && browserTrack?.matcher === 'mcp__claude-in-chrome__.*',
     'claude: record-browser-tab-url이 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');
+  // 연결 끊김 에러는 정상 응답으로 온다. PostToolUseFailure로 옮기면 한 번도 안 불린다.
+  const browserHint = claude.find((h) => h.file === 'hint-browser-disconnect.mjs');
+  check(browserHint?.event === 'PostToolUse' && browserHint?.matcher === 'mcp__claude-in-chrome__.*',
+    'claude: hint-browser-disconnect가 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');
 
   // 회사 분석 훅은 Agent 매처에 걸려야 검사할 입력(prompt·name)을 본다. 매처가 어긋나면 훅이
   // 등록된 모습 그대로 한 번도 발동하지 않는다.
@@ -158,7 +162,7 @@ function main() {
     'claude: surface-skill-creator가 PostToolUse Read 매처로 등록됨');
   check(!codex.some((h) => h.file === 'surface-skill-creator.mjs'),
     'codex: Read 매처 훅 미등록(codex 읽기 도구 이름 미실측)');
-  check(!codex.some((h) => h.file === 'check-browser-write-policy.mjs' || h.file === 'record-browser-tab-url.mjs'),
+  check(!codex.some((h) => ['check-browser-write-policy.mjs', 'record-browser-tab-url.mjs', 'hint-browser-disconnect.mjs'].includes(h.file)),
     'codex: claude-in-chrome 훅 미등록(codex엔 그 도구가 없음)');
   // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이
   // codex에선 '*' 한 그룹으로 접혀야 하므로, check-git-push-policy는 정확히 1번만 등록된다.

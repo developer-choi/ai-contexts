@@ -1387,7 +1387,17 @@ const browserGroup = () => withBrowserStateFixture(async ({ caseEnv, recordEnv, 
       return toReport([{ ok, label, failLine: `  FAIL  ${label} — 실제: ${JSON.stringify(recorded)}` }]);
     })(),
   ]);
-  return mergeReports([cases, record]);
+  // 연결 끊김 안내: 끊김 응답에만 컨텍스트를 붙이고, 정상 응답·다른 도구에는 조용하다.
+  const disconnected = 'Browser extension is not connected. Please ensure the Claude browser extension is installed and running';
+  const hint = await runCases([
+    [{ tool_name: 'mcp__claude-in-chrome__tabs_context_mcp', tool_input: {}, tool_response: [{ type: 'text', text: disconnected }] }, 'context', '끊김 응답'],
+    [{ tool_name: 'mcp__claude-in-chrome__navigate', tool_input: {}, tool_response: { content: [{ type: 'text', text: TAB_CONTEXT_RESPONSE }] } }, 'pass', '정상 응답'],
+    [{ tool_name: 'Bash', tool_input: { command: 'echo' }, tool_response: disconnected }, 'pass', '크롬 도구 아님'],
+  ], async ([payload, expected, note]) => {
+    const { decision, stderr } = await runHookPayload('hint-browser-disconnect.mjs', payload);
+    return judge(`hint-browser-disconnect.mjs :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
+  });
+  return mergeReports([cases, record, hint]);
 });
 
 // 절 참조 검사는 staged 목록과 대상 파일을 디스크에서 읽으므로 fixture 안에서 실행까지 끝낸다.
