@@ -69,7 +69,7 @@ function inScope(rel, exclude) {
 
 // 스캔 한 벌. 검사·등재·해제가 같은 계산을 쓴다 — 두 벌이 되면 선 해석이 갈린다.
 function measure(config) {
-  const entries = indexedMd(config.exclude); // [{ sha, rel }]
+  const entries = effectiveMd(config.exclude); // [{ sha, rel }]
   const sizes = objectSizes(entries.map((e) => e.sha));
   const bodies = objectBodies(entries.map((e) => e.sha));
   const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
@@ -257,6 +257,72 @@ function repoName() {
 
 function hookHome() {
   return path.join(process.env.HOME || process.env.USERPROFILE || "~", ".ai-contexts");
+}
+
+// 잴 내용 한 벌. 이 브랜치가 고친 파일은 인덱스(= 이번 커밋 이후의 내용)로, 안 건드린 파일은
+// 기본 브랜치 끝의 내용으로 잰다.
+//
+// 왜 인덱스만 보지 않는가: 워크트리는 만든 시점의 기본 브랜치에 멈춰 있어, 그사이 다른 세션이
+// 기본 브랜치에서 줄인 파일을 옛 크기로 잰다. 실측: refresh-projects SKILL.md를 다이어트(26767B → 8225B)해
+// 등재에서 걷은 뒤, 그보다 먼저 만든 워크트리의 커밋이 26767B로 「선을 새로 넘었다」를 냈다. 알림 이력도
+// 레포 이름 단위로 워크트리끼리 같이 쓰므로, 옛 기준으로 잰 값이 그 이력까지 덮는다.
+// 기본 브랜치를 못 찾거나(원격도 main·master도 없음) 갈라진 지점이 없으면 인덱스만 본다.
+function effectiveMd(exclude) {
+  const indexed = indexedMd(exclude);
+  const tip = defaultTip();
+  const fork = tip && gitOut(["merge-base", "HEAD", tip]);
+  if (!fork) return indexed;
+
+  const forkBlobs = treeMd(fork, exclude);
+  const tipBlobs = treeMd(tip, exclude);
+  const entries = [];
+  for (const e of indexed) {
+    // 갈라진 지점과 내용이 다르면 이 브랜치가 고친 것이라 이번 커밋의 크기가 사실이다.
+    if (forkBlobs.get(e.rel) !== e.sha) entries.push(e);
+    // 안 건드렸으면 기본 브랜치 쪽이 사실이다. 거기서 지워졌으면 이 브랜치 몫이 아니라 뺀다.
+    else if (tipBlobs.has(e.rel)) entries.push({ rel: e.rel, sha: tipBlobs.get(e.rel) });
+  }
+  // 갈라진 뒤 기본 브랜치에 새로 생긴 파일. 갈라진 지점에 있었는데 인덱스에 없으면 이 브랜치가 지운 것이다.
+  const inIndex = new Set(indexed.map((e) => e.rel));
+  for (const [rel, sha] of tipBlobs) if (!inIndex.has(rel) && !forkBlobs.has(rel)) entries.push({ rel, sha });
+  return entries;
+}
+
+// 머지가 들어가는 쪽. 승인 등급 레포는 로컬 기본 브랜치가 origin보다 앞서 있으므로(push는 사람이 한다)
+// 로컬 브랜치를 먼저 보고, 로컬에 없을 때만 원격 참조를 쓴다.
+function defaultTip() {
+  const remote = gitOut(["symbolic-ref", "--quiet", "--short", "refs/remotes/origin/HEAD"]); // origin/main
+  const names = [...(remote ? [remote.replace(/^origin\//, "")] : []), "main", "master"];
+  for (const name of names) {
+    if (gitOut(["rev-parse", "--verify", "--quiet", `refs/heads/${name}^{commit}`])) return `refs/heads/${name}`;
+  }
+  return remote ? `refs/remotes/${remote}` : null;
+}
+
+// 커밋 하나의 검사 대상 md → blob sha.
+function treeMd(commit, exclude) {
+  const out = execFileSync("git", ["ls-tree", "-r", "-z", "--full-tree", commit], {
+    encoding: "utf8",
+    maxBuffer: 1024 * 1024 * 64,
+  });
+  const blobs = new Map();
+  for (const line of out.split("\0")) {
+    const tab = line.indexOf("\t");
+    if (tab === -1) continue;
+    const [, type, sha] = line.slice(0, tab).split(" ");
+    const rel = line.slice(tab + 1);
+    if (type === "blob" && inScope(rel, exclude)) blobs.set(rel, sha);
+  }
+  return blobs;
+}
+
+// 실패를 null로 받는 git 호출. 기본 브랜치·갈라진 지점이 없는 레포(첫 커밋 전 등)가 정상 경로라 던지지 않는다.
+function gitOut(args) {
+  try {
+    return execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim() || null;
+  } catch {
+    return null;
+  }
 }
 
 // 인덱스(= 이번 커밋 이후의 내용)를 본다. 작업 트리를 읽으면 아직 스테이징 안 한 편집까지 세어,
@@ -487,13 +553,16 @@ function reportFile(target) {
   const { files, parents, ancestors, limitFor } = measure({ exclude });
   const f = files.find((x) => x.rel === rel);
   if (!f) {
-    console.log(`${rel} — git 인덱스에 없다. 인덱스에 올라간 내용만 재므로 git add 뒤에 다시 부른다.`);
+    console.log(
+      `${rel} — 잴 내용에 없다. git 인덱스에 안 올라갔으면 git add 뒤에 다시 부른다. ` +
+        "이 브랜치가 안 건드린 파일이면 기본 브랜치에서 지워진 것이다.",
+    );
     return;
   }
 
   const direct = parents.get(rel);
   const openers = [...ancestors.get(rel)].sort();
-  console.log(`${rel} (레포 "${repo}", git 인덱스 기준)`);
+  console.log(`${rel} (레포 "${repo}", 이 브랜치가 고친 파일은 git 인덱스, 안 건드린 파일은 기본 브랜치 끝 기준)`);
   console.log(`  크기     ${f.size}B`);
   console.log(`  선       ${limitFor(rel)}B (닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B)`);
   console.log(`  닿는 곳  ${openers.length}`);
