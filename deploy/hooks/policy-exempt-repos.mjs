@@ -15,30 +15,33 @@ const POLICY_EXEMPT_REPOS = new Set(["backlog", "private-playground", "finance-o
 // cwd → 면제 여부. 한 명령에 같은 경로가 여러 번 나오므로 프로세스 안에서 재사용한다.
 const cache = new Map();
 
-// 워크트리는 폴더명이 `<레포>-<식별>`이라 폴더명만 보면 원본 레포와 안 갈린다.
-// `--git-common-dir`은 링크된 워크트리에서도 원본의 `.git`을 가리키므로 그것으로 이름을 구한다.
 export function isPolicyExemptRepo(cwd) {
   const key = cwd || "";
   if (cache.has(key)) return cache.get(key);
 
-  let exempt = false;
+  // 레포를 못 정하면(빈 이름) 면제하지 않는다 — 어디인지 모르는 곳에서 정책이 풀리는 쪽이 더 나쁘다.
+  const exempt = POLICY_EXEMPT_REPOS.has(originRepoName(key));
+
+  cache.set(key, exempt);
+  return exempt;
+}
+
+// cwd가 속한 원본 레포 이름. 레포가 아니거나 git 조회가 실패하면 빈 문자열.
+// 워크트리는 폴더명이 `<레포>-<식별>`이라 폴더명만 보면 원본 레포와 안 갈린다.
+// `--git-common-dir`은 링크된 워크트리에서도 원본의 `.git`을 가리키므로 그것으로 이름을 구한다.
+export function originRepoName(cwd) {
   try {
     const commonDir = execSync("git rev-parse --path-format=absolute --git-common-dir", {
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
-      ...(key ? { cwd: key } : {}),
+      ...(cwd ? { cwd } : {}),
     })
       .toString()
       .trim();
-    const name = commonDir.replace(/\\/g, "/").replace(/\/\.git\/?$/, "").split("/").pop();
-    exempt = POLICY_EXEMPT_REPOS.has(name);
+    return commonDir.replace(/\\/g, "/").replace(/\/\.git\/?$/, "").split("/").pop();
   } catch {
-    // 레포를 못 정하면 면제하지 않는다 — 어디인지 모르는 곳에서 정책이 풀리는 쪽이 더 나쁘다.
-    exempt = false;
+    return "";
   }
-
-  cache.set(key, exempt);
-  return exempt;
 }
 
 // 훅이 보는 git 호출이 **전부** 면제 레포를 향할 때만 참. 한 명령이 여러 레포를 섞어 부르면

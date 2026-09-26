@@ -990,19 +990,67 @@ const freeRepoCases = ({ backlog: free, 'ai-contexts': gated, 'knowledge-archive
   ['check-git-push-policy.mjs', `git -C ${free} push origin main`, 'pass', '면제 레포는 보호 브랜치 push도 통과'],
   ['check-git-reset-policy.mjs', `git -C ${free} reset --hard`, 'pass', '면제 레포는 reset --hard도 통과'],
 
-  // 면제 아닌 레포 — 기존 판정 그대로.
-  ['check-git-merge-policy.mjs', `git -C ${gated} merge feature`, 'deny', '면제 밖은 보호 브랜치 머지 차단 유지'],
+  // 면제 아닌 레포 — 머지만 승인 창, 나머지는 차단 유지. 승인 창 사유에 레포·대상 브랜치·들어갈 브랜치가 보여야 한다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'ask',
+    '면제 밖 보호 브랜치 머지는 승인 창',
+    { reasonIncludes: ['ai-contexts', 'main', 'feature'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '서브에이전트의 보호 브랜치 머지는 승인 창 대신 거부',
+    { agentId: 'zz-probe', reasonIncludes: ['메인에 보고', 'feature'] },
+  ],
+  ['check-git-merge-policy.mjs', `git -C ${gated} rebase feature`, 'deny', '면제 밖은 보호 브랜치 위 rebase 차단 유지'],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature && git -C ${gated} rebase feature`,
+    'deny',
+    '머지와 차단 대상이 섞이면 차단이 이긴다',
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} rebase feature && git -C ${gated} merge feature`,
+    'deny',
+    '차단 대상이 앞에 와도 차단이 이긴다',
+  ],
+  // 사유의 "들어갈 브랜치"는 값을 받는 옵션의 값을 브랜치로 읽지 않아야 한다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge -m wip --strategy ort feature`,
+    'ask',
+    '옵션 값은 들어갈 브랜치로 적지 않는다',
+    { reasonIncludes: ['main 보호 브랜치에 feature을'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge`,
+    'ask',
+    '인자 없는 머지는 upstream으로 적는다',
+    { reasonIncludes: ['upstream'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature && git -C ${gated} merge hotfix`,
+    'ask',
+    '머지가 둘이면 승인 창 하나에 둘 다 적는다',
+    { reasonIncludes: ['feature', 'hotfix'] },
+  ],
   ['check-git-merge-policy.mjs', `git -C ${gated} branch -f main abc123`, 'deny', '면제 밖은 포인터 강제 이동 차단 유지'],
   ['check-git-push-policy.mjs', `git -C ${gated} push origin main`, 'ask', '면제 밖은 보호 브랜치 push 승인 유지'],
   ['check-git-reset-policy.mjs', `git -C ${gated} reset --hard`, 'deny', '면제 밖은 reset --hard 차단 유지'],
 
   // 경로를 셸 변수로 넘기면 훅은 셸 확장 전 원문(`$V`)을 받는다. 예전엔 그 폴더에서 브랜치를 못 읽고
   // fail-open으로 흘러 머지 판정이 통째로 사라졌다 (2026-08-29 KA `main` 무단 머지 사고, 08-30 재현).
-  // 같은 명령 안의 단순 대입은 파서가 풀어 실제 폴더로 판정한다 — 면제 밖은 막고, 면제 레포는 통과.
+  // 같은 명령 안의 단순 대입은 파서가 풀어 실제 폴더로 판정한다 — 면제 밖은 승인 창, 면제 레포는 통과.
   [
     'check-git-merge-policy.mjs',
     `V="${gated}"; git -C "$V" merge feature`,
-    'deny',
+    'ask',
     '셸 변수 경로여도 머지 판정을 건너뛰지 않는다',
   ],
   ['check-git-merge-policy.mjs', `V="${free}"; git -C "$V" merge feature`, 'pass', '같은 명령에서 대입한 변수 경로는 풀어서 면제 판정'],
@@ -1363,10 +1411,17 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
   }));
 
 // 레포 면제는 임시 레포의 이름으로 판정되므로 fixture 안에서 실행까지 끝낸다.
+// 다섯째 칸(선택): agentId를 주면 서브에이전트 페이로드로 돌리고, reasonIncludes의 낱말이 사유에 다 있어야 통과.
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
-  runCases(freeRepoCases(repos), async ([file, command, expected, note]) => {
-    const { decision, stderr } = await runHook(file, command);
-    return judge(`${file} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
+  runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [] } = {}]) => {
+    const payload = { tool_name: 'Bash', tool_input: { command }, ...(agentId ? { agent_id: agentId } : {}) };
+    const { decision, reason = '', stderr } = await runHookPayload(file, payload);
+    const label = `${file} :: ${command}${agentId ? ' [서브에이전트]' : ''} → ${expected} (${note})`;
+    const missing = reasonIncludes.filter((word) => !reason.includes(word));
+    return judge(label, decision, expected, stderr, {
+      ok: decision === expected && missing.length === 0,
+      failLine: `  FAIL  ${label} — 판정: ${decision} / 사유에 없는 낱말: ${missing.join(', ') || '없음'} / 사유: ${reason.slice(0, 120)}`,
+    });
   }));
 
 // 워크트리 위치는 임시 레포의 `--git-common-dir`로 판정되므로 fixture 안에서 실행까지 끝낸다 —

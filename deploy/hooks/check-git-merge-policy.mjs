@@ -1,17 +1,19 @@
 import { execSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { allInPolicyExemptRepos } from "./policy-exempt-repos.mjs";
+import { allInPolicyExemptRepos, originRepoName } from "./policy-exempt-repos.mjs";
 import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
-import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
-// 보호 브랜치(master/main/develop/release)로의 머지·포인터 이동을 AI가 직접 못 하게 막는다.
-// 머지 결정은 사용자 몫이라 hook은 AI 도구 호출만 게이트한다(사용자 터미널 명령엔 영향 없음).
-// 두 갈래로 차단한다:
-//   1. 정적 매칭 — 보호 브랜치명이 인자에 직접 노출: branch -f/--force, checkout -B, switch -C.
+// 보호 브랜치(master/main/develop/release)로의 머지·포인터 이동을 AI가 사용자 결정 없이 못 하게 한다.
+// hook은 AI 도구 호출만 게이트한다(사용자 터미널 명령엔 영향 없음).
+// 두 갈래로 판정한다:
+//   1. 정적 매칭 — 보호 브랜치명이 인자에 직접 노출: branch -f/--force, checkout -B, switch -C. 차단.
 //   2. HEAD 기반 — 타깃이 현재 체크아웃 브랜치라 인자에 안 나옴: merge/pull/rebase/cherry-pick.
 //      이 경우만 `git rev-parse --abbrev-ref HEAD`로 현재 브랜치를 읽어 보호 여부를 판정한다.
-//      예외: `merge --ff-only`로 현재 보호 브랜치를 자기 upstream에 따라잡는 동기화(origin/main→main)는 허용한다(isUpstreamCatchUp).
-//      결정이 끝난 원격 커밋을 로컬에 맞추는 ff라 사용자 결정이 아니다. feature→master 같은 통합 ff는 그대로 차단.
+//      merge는 승인 창(ask)으로 사용자 결정을 받는다 — 사용자가 터미널에서 손으로 치던 것을 승인 한 번으로
+//      줄이되, 결정 주체는 그대로 사용자다. pull/rebase/cherry-pick은 차단 유지.
+//      예외: `merge --ff-only`로 현재 보호 브랜치를 자기 upstream에 따라잡는 동기화(origin/main→main)는 묻지 않고 허용한다(isUpstreamCatchUp).
+//      결정이 끝난 원격 커밋을 로컬에 맞추는 ff라 사용자 결정이 아니다.
 // push(refspec→보호 브랜치)는 check-git-push-policy.mjs가 이미 담당하므로 여기서 중복 처리하지 않는다
 // (한 명령에 deny가 두 번 뜨는 것을 막는다). reset 포인터 이동은 check-git-reset-policy.mjs 담당.
 const payload = readPayload();
@@ -23,14 +25,20 @@ const PROTECTED = /^(master|main|develop|release)$/;
 // 면제 안내를 첫 문장에 두는 이유: check-md-hook-restatement가 이 메시지를 md 작성 화면에
 // 주입할 때 160자에서 자른다. 뒤에 두면 잘려나가, 면제 레포에서 md를 쓰는 AI가 "여기도 막힌다"로
 // 읽는다 (2026-08-29 PP 세션 실측: 주입 2회, AI가 면제 레포에서 머지를 사용자에게 떠넘김).
+// 머지는 MERGE_ASK가 다루므로 이 문구는 pull·rebase·cherry-pick·포인터 이동만 다룬다. 마지막 문장은
+// 여기 걸린 AI가 실은 작업 브랜치를 통합하려던 것일 때 갈 길이다.
 const MERGE_MSG =
-  "보호 브랜치(master/main/develop/release)로의 머지·포인터 이동은 사용자 결정 사항입니다 — 단 git 정책 면제 레포(policy-exempt-repos.mjs의 POLICY_EXEMPT_REPOS)는 면제되어 AI가 직접 머지합니다. " +
-  "면제 아닌 레포에서는 AI가 직접 실행하지 말고(merge/pull/rebase/cherry-pick, branch -f, checkout -B, switch -C), " +
-  "머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 실행할 명령을 사용자에게 안내하세요 (예: `git merge --ff-only <branch>`). " +
-  "지금 따르는 스킬·절차가 면제 아닌 레포에서 직접 머지하라고 지시하고 있다면, 이참에 그 절차를 '사용자에게 머지를 안내'하는 수준으로 고쳐 두세요 (전수 수정 불필요 — 마주칠 때마다 점진 이관).";
+  "보호 브랜치(master/main/develop/release) 위의 pull·rebase·cherry-pick·포인터 강제 이동은 사용자 결정 사항입니다 — 단 git 정책 면제 레포(policy-exempt-repos.mjs)는 면제되어 AI가 직접 실행합니다. " +
+  "면제 아닌 레포에서는 AI가 직접 실행하지 말고(pull/rebase/cherry-pick, branch -f, checkout -B, switch -C) 실행할 명령을 사용자에게 안내하세요. " +
+  "작업 브랜치를 보호 브랜치에 넣는 것은 이 명령들 대신 머지 직전까지(워크트리 커밋·rebase) 끝낸 뒤 `git -C <레포 절대경로> merge --ff-only <branch>`를 내면 승인 창이 뜹니다(서브에이전트는 메인에 요청).";
 
-// 판정 불가로 차단할 때의 안내. MERGE_MSG와 분리한다 — 여기서 걸린 명령은 보호 브랜치를 건드리는지
-// 아직 모르는 상태라, "사용자에게 머지를 안내하라"가 아니라 "경로를 통째로 적어 다시 실행하라"가 답이다.
+// 보호 브랜치 머지의 승인 창 사유. 명령 원문만으로는 `git -C <경로>`가 어느 레포인지 한눈에 안 읽히므로
+// 레포 이름·대상 브랜치·들어갈 브랜치를 문장으로 풀어 적는다.
+const MERGE_ASK = ({ repo, branch, source }) =>
+  `${repo || "(레포 이름 미확인)"}의 ${branch} 보호 브랜치에 ${source}을(를) 머지합니다.`;
+
+// 판정 불가로 차단할 때의 안내. MERGE_MSG·MERGE_ASK와 분리한다 — 그 둘은 보호 브랜치를 건드린다고 판정된
+// 뒤의 안내이고, 여기서 걸린 명령은 아직 그걸 모르는 상태라 "경로를 통째로 적어 다시 실행하라"가 답이다.
 const UNRESOLVED_CWD_MSG = (cwd) =>
   `훅이 판정할 작업 폴더를 찾지 못했습니다 (cwd=${cwd}). 경로를 셸 변수로 넘기면(\`K=<path>; git -C "$K" merge …\`) ` +
   "훅은 셸 확장 전 원문을 받아 보호 브랜치 머지 판정을 돌리지 못하므로 차단합니다. " +
@@ -63,6 +71,9 @@ for (const inv of findGitInvocations(cmd, "switch")) {
 
 // --- 2. HEAD 기반: 타깃이 현재 브랜치인 명령 ---
 const CONTROL = /^--(abort|continue|skip|quit|edit-todo)$/; // 진행 중 작업 복구/중단은 허용
+// 승인 창은 모든 호출을 다 본 뒤에 띄운다 — ask()는 그 자리에서 종료하므로, 같은 명령 뒤쪽의 차단
+// 대상(`merge feature && git rebase …`)이 승인 창 한 번에 묻혀 함께 실행되지 않게 한다.
+const merges = [];
 for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
   for (const inv of findGitInvocations(cmd, sub)) {
     if (inv.args.some((t) => CONTROL.test(t))) continue;
@@ -85,9 +96,15 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
     if (!PROTECTED.test(branch)) continue;
     // 예외: 현재 보호 브랜치를 자기 upstream으로 따라잡는 `merge --ff-only`만 허용(동기화이지 결정이 아님).
     if (sub === "merge" && isUpstreamCatchUp(inv, gitOpts)) continue;
+    if (sub === "merge") {
+      merges.push({ repo: originRepoName(gitOpts.cwd), branch, source: mergeSources(inv.args) });
+      continue;
+    }
     deny(MERGE_MSG);
   }
 }
+
+if (merges.length > 0) ask(merges.map(MERGE_ASK).join(" / "));
 
 process.exit(0);
 
@@ -112,6 +129,18 @@ function isUpstreamCatchUp(inv, gitOpts) {
   if (positionals.length > 1) return false;
   const ref = stripRef(positionals[0]);
   return ref === upstream || ref === "@{u}" || ref === "@{upstream}";
+}
+
+// 머지로 들어갈 브랜치(들). 값을 받는 옵션의 값은 건너뛴다 — `-m "msg" feature`의 msg를 브랜치로 적지 않게.
+// 인자가 없으면 git이 upstream을 머지한다.
+function mergeSources(args) {
+  const VALUED = new Set(["-m", "-F", "-s", "-X", "--file", "--strategy", "--strategy-option", "--cleanup", "--into-name"]);
+  const out = [];
+  for (let i = 0; i < args.length; i += 1) {
+    if (VALUED.has(args[i])) i += 1;
+    else if (!args[i].startsWith("-")) out.push(args[i]);
+  }
+  return out.length > 0 ? out.join(", ") : "upstream";
 }
 
 function flagValues(args, ...flags) {
