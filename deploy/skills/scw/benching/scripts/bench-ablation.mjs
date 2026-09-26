@@ -4,7 +4,7 @@
 // 왜 API가 아니라 CLI를 모는가:
 // 측정 대상 규칙은 `~/.claude/rules/*.md`에 살고, 보통의 `claude -p`와 모든 서브에이전트가
 // 그걸 자동 로드한다 — 그래서 기본 상태로는 규칙 없는 ZERO 팔이 성립하지 않는다
-// (benching/kinds/rule-ablation.md 「상속 경로」).
+// ([상속 경로](benching/kinds/rule-ablation.md#상속-경로-구체-메커니즘)).
 //
 // 격리 방식 (사용 전 실측으로 확인됨):
 // - `--setting-sources ""`가 배포된 설정·메모리 원천(사용자·프로젝트 규칙, CLAUDE.md)을 통째로 뗀다.
@@ -565,7 +565,7 @@ async function main() {
   const runs = jobs.filter((job) => job.done).map((job) => ({ job, result: job.done }));
 
   // 축 하나의 판정. 사람이 표를 눈으로 읽고 정하던 것을 여기서 찍는다
-  // (benching/kinds/rule-ablation.md 「한 패스로 닫는다」).
+  // ([한 패스로 닫는다](benching/kinds/rule-ablation.md#한-패스로-닫는다--안-갈린-것은-다시-재지-않는다)).
   //
   // 경계는 그 절의 표가 정한다 — 차이가 반복의 2/3 이상이고 최소 2. 여기서 다른 수를 쓰면
   // 표를 읽고 손으로 판정한 것과 이 출력이 어긋나고, 어긋난 줄 모르는 채로 갈라진다.
