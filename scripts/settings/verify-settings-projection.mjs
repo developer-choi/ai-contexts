@@ -63,6 +63,14 @@ function main() {
       imported.add(m[1]);
     }
   }
+  // ask()는 readPayload()가 기억해 둔 페이로드로 서브에이전트를 가른다. stdin을 직접 파싱하는 훅이
+  // ask()를 부르면 서브에이전트에게도 승인 창이 나간다.
+  const askWithoutPayload = hookFiles.filter((f) => {
+    const m = fs.readFileSync(path.join(hooksDir, f), 'utf8').match(/import\s*\{([^}]*)\}\s*from\s*['"]\.\/hook-utils\.mjs['"]/);
+    return m && /\bask\b/.test(m[1]) && !/\breadPayload\b/.test(m[1]);
+  });
+  check(askWithoutPayload.length === 0,
+    `ask()를 부르는 훅은 readPayload()로 페이로드를 읽음 (어긋남: ${askWithoutPayload.join(', ') || '없음'})`);
   const hookBodies = hookFiles.filter((f) => !imported.has(f));
   const registered = new Set(baseFiles);
   const orphans = hookBodies.filter((f) => !registered.has(f));
@@ -174,6 +182,15 @@ function main() {
   // codex에선 '*' 한 그룹으로 접혀야 하므로, check-git-push-policy는 정확히 1번만 등록된다.
   check(codex.filter((h) => h.file === 'check-git-push-policy.mjs').length === 1,
     'codex: check-git-push-policy 중복 없이 1회 등록됨');
+
+  // permissions.ask는 호출자를 가르지 못해 서브에이전트에게도 승인 창을 낸다. 서브에이전트를 가르는
+  // 훅의 ask()(hook-utils.mjs)로 옮긴다.
+  const deployDir = path.join(import.meta.dirname, '..', '..', 'deploy');
+  for (const f of fs.readdirSync(deployDir).filter((n) => n.endsWith('settings.json'))) {
+    const asks = JSON.parse(fs.readFileSync(path.join(deployDir, f), 'utf8')).permissions?.ask ?? [];
+    check(asks.length === 0,
+      `${f}: permissions.ask 없음${asks.length ? ` (${asks.join(', ')}) — ask 규칙은 서브에이전트를 멈추게 한다. 훅의 ask()로 옮겨라` : ''}`);
+  }
 
   if (failures.length) {
     console.error(`settings 생성 계약 검증 실패: ${failures.length}건`);

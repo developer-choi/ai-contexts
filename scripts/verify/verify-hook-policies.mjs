@@ -1493,6 +1493,29 @@ const waitGroup = () => runCases(WAIT_CASES, async ([command, agentId, expectSub
   });
 });
 
+// ask를 기대하는 케이스를 서브에이전트 페이로드로 한 번 더 돌려 deny로 바뀌는지 본다. 사유에는 원래
+// ask 사유가 그대로 남아야 한다 — 무엇이 막혔는지 모르면 메인에 보고할 거리가 없다.
+// CASES·WRITE_CASES·미등록 파일 케이스의 ask를 모은다. 다른 배열의 ask는 여기에 안 들어온다.
+const subagentAskGroup = () => withUntrackedFixture((dir) => {
+  const asks = [
+    ...[...CASES, ...untrackedCases(dir)]
+      .map(([file, command, expected, note]) => [file, { tool_name: 'Bash', tool_input: { command } }, expected, note]),
+    ...WRITE_CASES,
+  ].filter(([, , expected]) => expected === 'ask');
+  return runCases(asks, async ([file, payload, , note]) => {
+    const main = await runHookPayload(file, payload);
+    const sub = await runHookPayload(file, { ...payload, agent_id: 'zz-probe' });
+    const target = payload.tool_input.command ?? payload.tool_input.file_path;
+    const label = `${file} :: ${target} [서브에이전트] → deny (${note})`;
+    const ok = main.decision === 'ask' && sub.decision === 'deny'
+      && sub.reason.includes(main.reason) && sub.reason.includes('메인에 보고');
+    return judge(label, sub.decision, 'deny', sub.stderr || main.stderr, {
+      ok,
+      failLine: `  FAIL  ${label} — 메인: ${main.decision} / 서브: ${sub.decision} / 사유: ${(sub.reason || '').slice(0, 80)}`,
+    });
+  });
+});
+
 async function runGroupsInSequence(groups) {
   const settled = [];
   for (const group of groups) {
@@ -1640,6 +1663,7 @@ async function main() {
     sectionRefReverseGroup,
     crossRepoGroup,
     waitGroup,
+    subagentAskGroup,
     toolGroup,
     skillCreatorGroup,
     subagentGroup,

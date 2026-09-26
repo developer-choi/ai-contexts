@@ -1,8 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
+// ask()가 호출자를 가르려고 기억해 둔다. 훅마다 페이로드를 넘기게 하면 빠뜨린 훅에서 조용히 ask가 남는다.
+let lastPayload = null;
+
 export function readPayload() {
-  return JSON.parse(fs.readFileSync(0, "utf8"));
+  lastPayload = JSON.parse(fs.readFileSync(0, "utf8"));
+  return lastPayload;
 }
 
 export function getCommand(payload) {
@@ -41,7 +45,15 @@ export function deny(reason) {
 // 주의: allowlist에 괄호 없는 도구 이름("Bash")이 있으면 이 ask는 "이미 승인됨"으로 흡수되어 권한
 // 프롬프트가 뜨지 않는다. 괄호형("Bash(*)"·"Bash(git:*)")은 흡수하지 않으므로 ask가 정상 발동한다
 // (2026-08-05 실측). allowlist를 손볼 때 이 형태를 깨뜨리지 말 것.
+//
+// 서브에이전트(agent_id)의 승인 창은 사용자 화면에 뜨지 않아, ask를 내면 결과 없이 무기한 멈춘다.
 export function ask(reason) {
+  if (lastPayload?.agent_id) {
+    deny(
+      "서브에이전트에는 승인 창이 전달되지 않아 거부했습니다. 다른 방법으로 우회하지 말고, " +
+        `이 사유를 메인에 보고해 메인이 실행하게 하세요. 원래 사유: ${reason}`,
+    );
+  }
   decide("ask", reason);
 }
 
