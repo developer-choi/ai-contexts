@@ -1,6 +1,7 @@
 {
   "model": "opus[1m]",
   "effortLevel": "medium",
+  "language": "korean",
   "autoMemoryEnabled": false,
   "remoteControlAtStartup": false,
   "env": {
