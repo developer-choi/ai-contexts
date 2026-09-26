@@ -2,7 +2,7 @@
 
 > **이 단계의 목표: 작업의 문제/목표를 정의한다** (도메인/비즈니스 관점, 코드 분석 아님)
 
-BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디자인. "무한스크롤이 필요하다"까지가 BG다. 그것을 Intersection Observer로 짤지 Scroll Event로 짤지 같은 **개발 방법론(HOW)** 은 PLAN/IMPL 소관이다. 산출물 깊이는 이 축으로 잡는다([output-depth.md](../template/output-depth.md)).
+BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디자인. "무한스크롤이 필요하다"까지가 BG다. 그것을 Intersection Observer로 짤지 Scroll Event로 짤지 같은 **개발 방법론(HOW)** 은 PLAN/IMPL 소관이다. 산출물 깊이는 이 축으로 잡는다([output-depth.md](../conventions/output-depth.md)).
 
 step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입수 단계, 1.2는 requirement-review 본체.
 
@@ -17,7 +17,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 ### 자료 수집 점검
 
-아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../template/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
+아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../conventions/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 (requirement-review/recruitment/guide.md 「입력 자료」 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 
@@ -63,7 +63,7 @@ step-1.1 종료 직후의 전환·세션경계·후속안내는 SKILL.md 「step
 
 `planning`·`design` ON/OFF를 물을 때, 리뷰 대상에 목업·시안이 없고 기존 구현 코드만 있으면(기존 동작 코드 개선형 과제 등) 그 사실을 함께 알리고 "코드를 기획·디자인 자료 대용으로 써서 체크리스트를 리뷰할까요?"로 묻는다. 켜면 각 guide.md의 "코드기반 모드" 절차로 진행한다.
 
-산출물을 작성할 때 깊이 기준은 [output-depth.md](../template/output-depth.md)를 따른다.
+산출물을 작성할 때 깊이 기준은 [output-depth.md](../conventions/output-depth.md)를 따른다.
 
 ### 중복 조기 발견
 
