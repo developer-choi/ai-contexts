@@ -85,11 +85,5 @@ force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 
 
 본 세션 종료 시 SKILL.md 「세션 spawn 안내 메커니즘」으로 후속을 안내한다.
 
-- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·채용담당자 리뷰·제출·자산 회수. 세션 자기 회고는 7-3에서 호출). 동일 모드 인자(`채용`) 유지.
-- **실무·개인** — 머지 안내(스택은 바텀업, 독립 브랜치는 순서 무관) + 아래 「세션 자기 회고 안내」. 머지는 사용자 실행.
-
-## 세션 자기 회고 안내 (실무·개인)
-
-커밋 최종화(replace + 메시지 최종화 + force-push 요청)가 끝난 사후 시점이므로, 후속 안내에 더해 **workflow를 타고 진행한 각 세션이 자기 자신을 회고**하도록 안내한다. 순회 개수는 사용자가 감당 가능한 만큼. 절차는 [session-retro/SKILL.md](../../session-retro/SKILL.md).
-
-안내만 한다 — 본 세션이 회고를 직접 수행하지 않는다(회고 주체는 각 대상 세션 자신).
+- **채용** — recruitment 마무리 안내([recruitment/SKILL.md](../../recruitment/SKILL.md) 진입: PR 게시·README·채용담당자 리뷰·제출·자산 회수). 동일 모드 인자(`채용`) 유지.
+- **실무·개인** — 머지 안내(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.
