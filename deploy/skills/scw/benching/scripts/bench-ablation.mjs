@@ -49,7 +49,7 @@
 // 안 세어지고 채점자가 그 한 줄을 성실히 분류한다 — 안 잰 구간이 Δ=0으로 찍힌다
 // (2026-09-02 rules-as-code 트리거 벤치 실측: 스모크 9 run 전멸, 우회하려 시나리오를 "문안만
 // 내라"로 바꿨더니 이번엔 그 지시가 압박이 되어 본 발사 90 call이 통째로 판정 보류).
-import { execFile } from 'node:child_process';
+import { execFile, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -63,7 +63,7 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --model <id>           측정 대상 생성 모델 (기본 claude-sonnet-4-6)
   --grader-model <id>    채점 모델 (기본 claude-sonnet-4-6)
   --workers <n>          동시 실행 상한 (기본 8)
-  --timeout <초>         call당 타임아웃 (기본 180)
+  --timeout <초>         call당 타임아웃 (기본 180). 타임아웃은 재시도하지 않는다
   --variants <a,b>       팔 필터
   --scenarios <a,b>      시나리오 필터
   --dump-dir <경로>      run별 원본 JSON 덤프 위치
@@ -71,10 +71,13 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --allow-over-cap       한 번의 발사 상한(100 call)을 의도적으로 넘길 때
   --resume               --dump-dir에 이미 성공한 run이 있으면 call 대신 그 파일을 쓴다.
                          죽은 발사를 같은 명령으로 다시 치면 죽은 run만 나간다
+  --no-smoke             본 발사 전 스모크(시나리오 x 팔마다 남은 첫 run, 동시성 상한까지 채움)를 건너뛴다.
+                         스모크에서 실행 실패가 한 건이라도 나면 본 발사 없이 종료 코드 1로 나간다
+  --max-fail-streak <n>  실행 실패가 연달아 n건이면 남은 run을 버리고 종료 코드 1로 나간다 (기본 3, 0이면 끔)
 `;
 
 function parseArgs(argv) {
-  const flags = new Set(['--verbose', '--allow-over-cap', '--resume', '--help', '-h']);
+  const flags = new Set(['--verbose', '--allow-over-cap', '--resume', '--no-smoke', '--help', '-h']);
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
@@ -120,9 +123,21 @@ const PERMISSION_REFUSAL = /권한(이|을)?\s*(필요|없|거부|허용)|permis
 // "파일은 못 여니 주어진 것만 보고 답해" 한 줄을 붙이자 90 run 중 26건이던 적중이 0건이 됐다).
 const MISSING_FILE = /(디렉터리|디렉토리|파일|경로)(이|가|을|를)?\s*(현재 작업 디렉터리에\s*)?(없|존재하지 않)|붙여넣어\s*주시(면|거나)|경로를\s*(직접\s*)?알려주시/;
 
+// 돌고 있는 `claude` 자식 프로세스. 발사를 중간에 끊을 때 이것들이 끝나기를 기다리지 않고 죽인다.
+const liveChildren = new Set();
+
+function killLiveChildren() {
+  for (const child of liveChildren) {
+    // 윈도우에서 shell 경유로 띄운 셔임은 child.kill()이 셸만 죽이고 `claude`를 남긴다 — 트리째 죽인다.
+    if (process.platform === 'win32') spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' });
+    else child.kill('SIGKILL');
+  }
+}
+
 function execFileAsync(file, args, options) {
   return new Promise((resolve) => {
-    execFile(file, args, options, (error, stdout, stderr) => {
+    const child = execFile(file, args, options, (error, stdout, stderr) => {
+      liveChildren.delete(child);
       if (error) {
         resolve({
           stdout: error.stdout ?? stdout ?? '',
@@ -134,6 +149,7 @@ function execFileAsync(file, args, options) {
       }
       resolve({ stdout: stdout ?? '', stderr: stderr ?? '', code: 0, killed: false });
     });
+    liveChildren.add(child);
   });
 }
 
@@ -189,8 +205,12 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = n
       throw new Error(`CLI가 프롬프트를 슬래시 명령으로 가로챘다: ${out.slice(0, 120)}`);
     }
     if (result.code === 0 && out) return out;
-    last = result.killed ? 'timeout' : `rc=${result.code} err=${(result.stderr || '').slice(0, 160)}`;
-    await sleep(2000 * (i + 1));
+    // 타임아웃은 다시 쏘지 않는다. 응답이 길어 시간을 넘긴 call은 다시 쏴도 같이 넘는데, 재시도하면
+    // run 하나가 실패로 세어지기까지 타임아웃의 세 배가 걸려 아래 조기 종료가 그만큼 늦는다
+    // (2026-09-26 다이어트 회차: --timeout 420에 12 run이 전부 타임아웃, 사용자가 물을 때까지 한 시간을 돌았다).
+    if (result.killed) throw new Error('claude -p 실패: timeout');
+    last = `rc=${result.code} err=${(result.stderr || '').slice(0, 160)}`;
+    if (i < tries - 1) await sleep(2000 * (i + 1));
   }
   throw new Error(`claude -p 실패: ${last}`);
 }
@@ -355,12 +375,16 @@ async function runOne(job, spec, args) {
   }
 }
 
-/** 동시 실행 상한을 건 Promise 풀. 완료 순서와 무관하게 입력 순서로 결과를 돌려준다. */
-async function pool(items, limit, worker) {
+/**
+ * 동시 실행 상한을 건 Promise 풀. 완료 순서와 무관하게 입력 순서로 결과를 돌려준다.
+ * `stopped()`가 참이 되면 새 항목을 집지 않는다.
+ */
+async function pool(items, limit, worker, stopped = () => false) {
   const results = new Array(items.length);
   let cursor = 0;
   const runners = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
     for (;;) {
+      if (stopped()) return;
       const index = cursor++;
       if (index >= items.length) return;
       results[index] = await worker(items[index], index);
@@ -466,11 +490,50 @@ async function main() {
   }
   if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
 
-  let done = 0;
-  const runs = await pool(jobs, workers, async (job) => {
-    if (job.done) return { job, result: job.done };
+  // 발사 도중 끊는 장치 둘. 백그라운드로 띄운 셸은 프로세스가 끝나야 알림이 오므로, 실패가 쌓이는데
+  // 끝까지 도는 하네스는 메인을 빈손으로 기다리게 한다 (2026-09-26 다이어트 회차: 24 run 중 한 시나리오
+  // 12 run이 전부 타임아웃인데 알림 없이 한 시간을 돌았다). 끊을 때는 도는 call을 기다리지 않고 죽인다.
+  //
+  // ① 스모크 — 시나리오 × 팔마다 남은 첫 run을 먼저 돌리고, 한 건이라도 실패하면 본 발사를 안 한다
+  //    ([스모크 — 전 케이스 1반복](benching/operations.md#스모크--전-케이스-1반복)). rep 0이 아니라 「남은 첫 run」인 것은
+  //    --resume 때문이다 — 원인을 고치고 다시 치는 자리라 스모크가 가장 필요한데, rep 0만 보면 비어 버린다.
+  //    칸 수가 동시성 상한보다 적으면 다음 run을 더 얹어 본 발사와 같은 동시성을 맞춘다 — 동시성을
+  //    올려야만 나는 실패가 있다. 스모크 run은 dump에 남고 본 발사가 그대로 쓰므로 call이 늘지 않는다.
+  // ② 연속 실패 — 완료 순서로 실행 실패가 연달아 쌓이면 남은 run을 버린다.
+  const smoke = !args['no-smoke'];
+  const streakLimit = Number(args['max-fail-streak'] ?? 3);
+  // 값이 틀려 NaN이 되면 조건이 늘 거짓이라 안전장치가 소리 없이 꺼진다. call을 쓰기 전에 끊는다.
+  if (!Number.isInteger(streakLimit) || streakLimit < 0) {
+    throw new Error(`--max-fail-streak는 0 이상의 정수다: ${args['max-fail-streak']}`);
+  }
+  const smokeJobs = [];
+  const seenCells = new Set();
+  for (const job of pending) {
+    const cell = `${job.scenario.id}\u0000${job.variant}`;
+    if (!seenCells.has(cell)) { seenCells.add(cell); smokeJobs.push(job); }
+  }
+  for (const job of pending) {
+    if (smokeJobs.length >= workers) break;
+    if (!smokeJobs.includes(job)) smokeJobs.push(job);
+  }
+  let abort = null;
+  let streak = [];
+  let finished = 0;
+  let wake;
+  const aborted = new Promise((resolve) => { wake = resolve; });
+  const stop = (reason) => {
+    if (abort) return;
+    abort = reason;
+    wake();
+  };
+
+  const fire = (phase) => async (job) => {
+    if (job.done) return;
     const result = await runOne(job, spec, args);
-    done += 1;
+    // 끊은 뒤에 죽은 자식이 돌려준 결과는 버린다 — 실패 run으로 dump에 남으면 안 잰 것이 기록된다.
+    if (abort) return;
+    job.done = result;
+    finished += 1;
     const file = dumpPath(job);
     if (file) {
       fs.writeFileSync(
@@ -483,10 +546,23 @@ async function main() {
       const marks = result.axes
         .map((a) => `${a.axis ? `${a.axis}=` : ''}${a.class}${a.passed ? '(PASS)' : ''}`)
         .join(' ');
-      process.stderr.write(`  [${done}/${pending.length}] ${job.scenario.id}/${job.variant} r${job.rep} ${marks}\n`);
+      process.stderr.write(`  [${finished}/${pending.length}] ${phase === 'smoke' ? '(스모크) ' : ''}`
+        + `${job.scenario.id}/${job.variant} r${job.rep} ${marks}\n`);
     }
-    return { job, result };
-  });
+
+    const failure = result.axes.find((a) => a.failed);
+    if (!failure) { streak = []; return; }
+    streak.push({ scenario: job.scenario.id, variant: job.variant, rep: job.rep, reason: failure.reason || failure.class });
+    if (phase === 'smoke') stop({ phase, failures: [...streak] });
+    else if (streakLimit > 0 && streak.length >= streakLimit) stop({ phase, failures: [...streak] });
+  };
+
+  const launch = (phase, list) => Promise.race([pool(list, workers, fire(phase), () => abort !== null), aborted]);
+  if (smoke) await launch('smoke', smokeJobs);
+  if (!abort) await launch('main', pending);
+  if (abort) killLiveChildren();
+
+  const runs = jobs.filter((job) => job.done).map((job) => ({ job, result: job.done }));
 
   // 축 하나의 판정. 사람이 표를 눈으로 읽고 정하던 것을 여기서 찍는다
   // (benching/kinds/rule-ablation.md 「한 패스로 닫는다」).
@@ -563,8 +639,10 @@ async function main() {
 
   let failedTotal = 0;
   for (const row of Object.values(table)) {
-    row.verdict_withheld = row.failed_total > 0;
-    row.verdict = verdictOf(row, variantNames);
+    // 중단된 발사는 칸마다 반복이 덜 찼다. 실패 없는 행도 판정을 찍으면 JSON을 읽는 쪽이
+    // 몇 run만 잰 칸을 「델타 없음」으로 받아 쓴다.
+    row.verdict_withheld = row.failed_total > 0 || abort !== null;
+    row.verdict = abort ? '보류(중단)' : verdictOf(row, variantNames);
     failedTotal += row.failed_total;
   }
 
@@ -579,6 +657,7 @@ async function main() {
     inheritance_flags: inheritance,
     permission_blocked: permissionBlocked,
     missing_file: missingFile,
+    ...(abort ? { aborted: abort, runs_done: runs.length, runs_total: jobs.length } : {}),
   }, null, 2), 'utf8');
 
   const rowIds = Object.keys(table);
@@ -601,7 +680,8 @@ async function main() {
   // 실패가 한 팔에만 몰리면 그 팔의 셀만 비어 표 전체가 못 쓰는 델타가 된다. 사람이 「실행 실패
   // N건」만 보고 넘기던 자리라 기계가 판정한다 — 실패 0인 팔과 실패 있는 팔이 함께 있으면 쏠림이다.
   const hitArms = variantNames.filter((v) => failedRuns[v] > 0);
-  if (hitArms.length > 0 && hitArms.length < variantNames.length) {
+  // 중단된 발사는 먼저 끝난 몇 run만 남아 쏠림처럼 보일 뿐이라 이 경고를 내지 않는다.
+  if (!abort && hitArms.length > 0 && hitArms.length < variantNames.length) {
     const spread = variantNames.map((v) => `${v}=${failedRuns[v]}`).join(', ');
     lines.push(`실패가 팔에 쏠렸다: ${spread} — 이 표의 델타는 못 쓴다. `
       + `실패한 팔만 안 잰 것이라 남은 팔과의 차이가 팔의 차이로 둔갑한다. `
@@ -621,7 +701,19 @@ async function main() {
       + `못 찾고 그 이야기로 응답을 열었다. 채점자가 그 첫머리를 분류하므로 이 run들은 안 잰 것이다. `
       + `시나리오에서 그 파일을 지우거나 "파일은 못 여니 주어진 것만 보고 답해"를 박고 다시 잰다 (${where})`);
   }
+  if (abort) {
+    const head = abort.phase === 'smoke'
+      ? '스모크 실패 — 본 발사를 하지 않았다'
+      : `실행 실패 ${abort.failures.length}건 연속 — 남은 run을 버렸다`;
+    lines.push('');
+    lines.push(`중단: ${head} (완료 ${runs.length}/${jobs.length} run, 위 표는 부분 결과)`);
+    for (const f of abort.failures) lines.push(`  - ${f.scenario}/${f.variant} r${f.rep}: ${f.reason}`);
+    lines.push('원인을 고친 뒤 같은 명령에 --resume을 붙여 다시 치면 성공한 run은 건너뛴다'
+      + (args['dump-dir'] ? '' : ' (--dump-dir가 없어 이번 결과는 이어받을 수 없다)') + '.');
+  }
   process.stdout.write(`${lines.join('\n')}\n`);
+  // 죽인 자식의 콜백과 멈춘 풀이 남아 있어도 기다리지 않는다.
+  if (abort) process.exit(1);
 }
 
 main().catch((error) => {
