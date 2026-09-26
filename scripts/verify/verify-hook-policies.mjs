@@ -1747,6 +1747,53 @@ const toolGroup = () => runCases(TOOL_CASES, async ([file, payload, expected, no
   return judge(`${file} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr);
 });
 
+// 채용 레포 판정은 폴더 이름으로만 가르므로 실제 폴더가 없어도 된다. 루트를 환경 변수로 옮겨
+// 사용자의 실제 채용 폴더와 무관하게 잰다.
+const RECRUITMENT_ROOT = path.join(os.tmpdir(), 'hook-recruitment-root');
+const RECRUITMENT_CASES = [
+  // [명령, 세션 폴더(루트 기준 상대, null이면 루트 밖), 기대 판정, 설명]
+  ['git commit a.txt -m "fix: plan/x 수정"', 'job', 'deny', '채용 레포 메시지의 plan/ 경로'],
+  ["git commit a.txt -F - <<'MSG'\nfeat: MP 원본 복사\nMSG", 'job', 'deny', 'heredoc 메시지의 약어도 잡는다'],
+  ['git commit plan/notes.md -m "docs: 노트"', 'job', 'deny', '커밋 경로의 plan/'],
+  ['git commit a.txt -m "feat: mp4 재생 추가"', 'job', 'pass', '소문자·단어 안의 글자는 약어가 아니다'],
+  ['git commit a.txt -m "fix: plan/x 수정"', null, 'pass', '채용 레포 밖은 검사하지 않는다'],
+  [`git -C "${path.join(RECRUITMENT_ROOT, 'job')}" commit a.txt -m "fix: plan/x 수정"`, null, 'deny', 'git -C로 채용 레포를 가리켜도 잡는다'],
+];
+const recruitmentGroup = () => runCases(RECRUITMENT_CASES, async ([command, sub, expected, note]) => {
+  const payload = {
+    tool_name: 'Bash',
+    tool_input: { command },
+    cwd: sub ? path.join(RECRUITMENT_ROOT, sub) : os.tmpdir(),
+  };
+  const { decision, stderr } = await runHookPayload('check-git-commit-policy.mjs', payload, {
+    env: { AI_CONTEXTS_RECRUITMENT_ROOT: RECRUITMENT_ROOT },
+  });
+  return judge(`check-git-commit-policy.mjs :: ${command} [${sub ? '채용' : '밖'}] → ${expected} (${note})`, decision, expected, stderr);
+});
+
+// 첫 그물(git 훅)의 판정 함수. 순수 함수라 git 없이 직접 부른다.
+const RECRUITMENT_GUARD_CASES = [
+  // [판정 함수, 입력, 기대 판정, 설명]
+  ['message', 'feat: add button', 'deny', '한글 없는 subject'],
+  ['message', 'feat: 버튼 추가\n\n# plan/ 주석은 git이 지운다', 'pass', '# 주석 줄은 보지 않는다'],
+  ['message', 'Merge branch x', 'pass', 'git이 만드는 Merge subject는 한국어 검사 예외'],
+  ['message', 'feat: MP원본 복사', 'deny', '한글이 붙은 약어도 잡는다'],
+  ['message', 'feat: mp4 재생 추가', 'pass', '소문자 약어는 통과'],
+  ['staged', { files: ['plan/notes.md'], diff: '' }, 'deny', '루트 plan/ 파일'],
+  ['staged', { files: ['src/features/plan/a.ts'], diff: '' }, 'pass', '루트가 아닌 plan/ 폴더는 과제 코드다'],
+  ['staged', { files: ['a.ts'], diff: '+++ b/a.ts\n+// see ai-contexts' }, 'deny', '추가된 줄의 긴 이름'],
+  ['staged', { files: ['a.ts'], diff: '+++ b/a.ts\n+fetch("/api/plan/1"); enum X { AC, MP }' }, 'pass', '코드 줄의 plan/·약어는 보지 않는다'],
+  ['staged', { files: ['a.ts'], diff: '+++ b/a.ts\n-// see ai-contexts' }, 'pass', '지운 줄은 보지 않는다'],
+];
+const recruitmentGuardGroup = async () => {
+  const { checkMessage, checkStaged } = await import(pathToFileURL(path.join(hooksDir, 'recruitment-commit-guard.mjs')).href);
+  return runCases(RECRUITMENT_GUARD_CASES, async ([kind, input, expected, note]) => {
+    const problems = kind === 'message' ? checkMessage(input) : checkStaged(input);
+    const decision = problems.length > 0 ? 'deny' : 'pass';
+    return judge(`recruitment-commit-guard.mjs :: ${kind} → ${expected} (${note})`, decision, expected, problems.join(' / '));
+  });
+};
+
 // skill-creator 알림은 대화 기록 파일을 읽어 「이미 불렀는가」를 가르므로, 기록 두 벌(부른 것·안 부른 것)을
 // 임시 폴더에 만들어 두고 그 안에서 실행까지 끝낸다. 부른 기록은 플러그인 접두가 붙은 이름으로 둔다 —
 // 이름 전체 일치로 판정하면 이 형태를 놓친다.
@@ -2015,6 +2062,8 @@ async function main() {
     waitGroup,
     subagentAskGroup,
     toolGroup,
+    recruitmentGroup,
+    recruitmentGuardGroup,
     skillCreatorGroup,
     responseLanguageGroup,
     subagentGroup,

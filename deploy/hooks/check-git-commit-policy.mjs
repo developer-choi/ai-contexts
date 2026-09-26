@@ -10,6 +10,7 @@ import {
   stripRedirections,
 } from "./git-command-parser.mjs";
 import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { findLeaks, isUnderRecruitment } from "./recruitment-commit-guard.mjs";
 
 // 커밋 명령 자체의 정책. staging 대상 지정(add/-a)은 check-git-staging-policy.mjs 담당.
 // 인접 정규식(`git\s+commit`)으로 보면 `git -C <path> commit`을 통째로 놓치므로 파서로 호출을 찾는다.
@@ -77,6 +78,19 @@ for (const inv of commits) {
   // `-n`도 글자 단위로 본다 — `-sn`·`-nm x`처럼 묶어 쓰면 정확 일치를 그대로 빠져나간다.
   if (options.includes("--no-verify") || options.some((t) => commitShortFlagChars(t).includes("n"))) {
     deny("--no-verify 금지. pre-commit hook을 우회하지 마세요.");
+  }
+
+  // 채용 레포 커밋의 두 번째 그물 — 첫 그물은 전역 git 훅(recruitment-commit-guard.mjs)이다.
+  // 메시지 통로가 여럿이라 메시지만 골라내지 않고 명령 전체를 본다. 메시지·경로 어디에 있든
+  // 채용 레포 커밋에 실려 나가면 안 되는 문자열이기 때문이다. 한국어 검사는 git 훅에만 둔다 —
+  // `--amend --no-edit`처럼 명령에 메시지가 안 실리는 형태를 오탐한다.
+  // `git -C sub`처럼 상대 경로면 세션 폴더 기준으로 푼다.
+  if (isUnderRecruitment(path.resolve(getCwd(payload) || ".", normalizeCwd(inv.cwd) || ""))) {
+    const leaks = findLeaks(cmd);
+    if (leaks.length > 0) {
+      const labels = [...new Set(leaks.flatMap(({ labels: found }) => found))].join(", ");
+      deny(`채용 레포 커밋에 로컬 맥락(${labels})이 들어 있습니다. 메시지와 경로에서 빼고 다시 커밋하세요.`);
+    }
   }
 
   // 메시지 없는 커밋은 에디터를 띄운다 — 비대화형 셸에서 멈추거나 빈 메시지로 끝난다.

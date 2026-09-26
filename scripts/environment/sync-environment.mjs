@@ -18,7 +18,7 @@ import {
   clearLegacyRepoHooks,
   localHooksPath,
 } from '../lib/git-hooks.mjs';
-import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest } from './precommit-hooks.mjs';
+import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest, precommitHookEvent } from './precommit-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -93,10 +93,18 @@ function syncPrecommitHook(state, hook) {
   // 오류는 스크립트가 스스로 삼키지만(항상 exit 0), 파일 자체가 없거나 node가 없으면 그 앞에서
   // non-zero로 죽어 커밋이 차단된다. 정탐률이 낮은 알림 때문에 전체 작업이 멈추면 안 되므로 셸
   // 수준에서도 통과시킨다. 실측: `|| true`가 없으면 스크립트 경로가 사라졌을 때 커밋이 실제로 거부된다.
-  const command = `node "${dest}" || true`;
-  const changed = registerGlobalHook(hook.alias, 'pre-commit', command);
+  //
+  // `blocking` 훅은 차단이 목적이라 `|| true`를 못 붙인다. 대신 채용 레포인지를 셸에서 먼저 가려,
+  // 사본이 사라지거나 node가 없을 때 막히는 범위를 채용 레포로 한정한다. `case`·`if`는 못 쓴다 —
+  // git이 명령 뒤에 `"$@"`를 붙여 `esac "$@"`가 되어 문법 오류로 죽는다. 이 형태면 `"$@"`가
+  // node 뒤에 붙어 메시지 파일 경로가 전달된다. 정확한 판정은 스크립트가 다시 한다.
+  const event = precommitHookEvent(hook);
+  const command = hook.blocking
+    ? `! (git rev-parse --show-toplevel | grep -q /recruitment/) || node "${dest}"`
+    : `node "${dest}" || true`;
+  const changed = registerGlobalHook(hook.alias, event, command);
   state[hook.stateKey] = true;
-  console.log(changed ? `전역 pre-commit 훅 등록: ${command}` : '전역 pre-commit 훅 이미 등록됨');
+  console.log(changed ? `전역 ${event} 훅 등록: ${command}` : `전역 ${event} 훅 이미 등록됨`);
 }
 
 // `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**에 건다(git-hooks.mjs). 레포별 등록이

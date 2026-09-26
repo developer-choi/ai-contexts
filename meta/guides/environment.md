@@ -42,6 +42,11 @@ npm run sync:environment
   - **두 레포 밖에서는 아무 일도 하지 않습니다.** 자기 레포가 그 둘 중 하나인지를 `--git-common-dir`로 구한 원본 경로로 판정하므로, 워크트리에서 커밋해도 같게 갈립니다.
   - **시리즈 문서(`step<N>`)만 봅니다.** 두 레포에 같은 이름 규칙으로 사는 것은 시리즈뿐이고, 주제 이름이 slug에 안 붙는 묶음까지 덮으려면 어느 쪽 규칙인지를 매번 판단해야 합니다. 판단이 남는 검사는 넓힐수록 오탐으로 무뎌지므로 규칙이 결정론인 범위에서 끊습니다.
   - **짝 레포를 못 찾으면 조용히 통과하지 않고 그 사실을 냅니다.** 레포가 옮겨가면 이 검사는 아무것도 못 보면서 매 커밋 성공하게 되고, 죽었다는 사실이 아무 데도 안 남습니다. 두 레포의 자리는 스크립트 상단 `REPOS`가 정본입니다.
+- `deploy/hooks/recruitment-commit-guard.mjs`를 `~/.ai-contexts/recruitment-commit-guard.mjs`로 복사하고, `--global` commit-msg·pre-commit 훅(`hook.ai-contexts-recruitment-guard-msg.*`·`hook.ai-contexts-recruitment-guard-staged.*`)으로 멱등하게 등록합니다. `~/WebstormProjects/recruitment/` 아래 채용과제 레포에서만 돌며, 로컬 전용 맥락이 커밋에 실리거나 한국어가 빠지면 **커밋을 막습니다** — 메시지에 `plan/`·`monorepo-playground`·`ai-contexts`·대문자 `MP`/`AC`가 있거나 subject에 한글이 없을 때, 새로 추가된 코드 줄에 긴 이름(`monorepo-playground`·`ai-contexts`)이 있을 때, 레포 루트 `plan/` 아래 파일이 staged 됐을 때입니다. 채용 담당자가 보는 이력이라 흔적 하나도 남으면 안 되고, 과제마다 손으로 넣던 commitlint 한국어 규칙이 과제 대부분에서 빠져 있었습니다.
+  - **채용 레포 안에는 아무것도 남기지 않습니다.** 연결은 `~/.gitconfig`의 설정 훅뿐이라, 레포가 husky로 `core.hooksPath`를 바꿔도 따로 돕니다.
+  - **다른 훅과 달리 `|| true`로 감싸지 않습니다.** 대신 등록 명령이 채용 레포인지를 셸에서 먼저 가려, 사본이 사라지거나 node가 없을 때 막히는 범위를 채용 레포로 한정합니다.
+  - 두 글자 약어와 `plan/`은 코드 줄에서 보지 않습니다. 과제 코드에 `/api/plan/1`·`enum { AC }`가 멀쩡히 나오고, 막히면 우회할 길이 없습니다.
+  - Claude Code가 하는 커밋은 `check-git-commit-policy.mjs`가 같은 판정 함수를 불러 한 번 더 막습니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거

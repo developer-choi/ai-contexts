@@ -40,13 +40,39 @@ export const PRECOMMIT_HOOKS = [
     label: '가이드-포스트 짝 검사 훅',
     stateKey: 'guidePostPairHookSetByAiContexts',
   },
+  // 채용 레포 커밋 검사. 한 파일을 두 이벤트에 건다 — 인자(메시지 파일)가 있으면 메시지를, 없으면
+  // staged 변경을 본다. 판정을 Claude 훅(check-git-commit-policy.mjs)도 import하므로 원본은
+  // deploy/hooks/에 있다. 위 훅들과 달리 알림이 아니라 차단이 목적이라 `blocking`이다.
+  {
+    alias: 'recruitment-guard-msg',
+    file: 'recruitment-commit-guard.mjs',
+    srcDir: 'deploy',
+    event: 'commit-msg',
+    blocking: true,
+    label: '채용 레포 커밋 메시지 검사 훅',
+    stateKey: 'recruitmentGuardMsgHookSetByAiContexts',
+  },
+  {
+    alias: 'recruitment-guard-staged',
+    file: 'recruitment-commit-guard.mjs',
+    srcDir: 'deploy',
+    blocking: true,
+    label: '채용 레포 staged 변경 검사 훅',
+    stateKey: 'recruitmentGuardStagedHookSetByAiContexts',
+  },
 ];
 
 const hooksDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'hooks');
+const deployHooksDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'deploy', 'hooks');
 const stateDir = path.join(os.homedir(), '.ai-contexts');
 
 export function precommitHookSrc(hook) {
-  return path.join(hooksDir, hook.file);
+  return path.join(hook.srcDir === 'deploy' ? deployHooksDir : hooksDir, hook.file);
+}
+
+// 이벤트를 안 적은 훅은 pre-commit이다.
+export function precommitHookEvent(hook) {
+  return hook.event ?? 'pre-commit';
 }
 
 export function precommitHookDest(hook) {
