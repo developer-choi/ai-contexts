@@ -1,6 +1,7 @@
 #!/usr/bin/env node
-// 전역 git pre-commit 훅. 프롬프트·스킬 md가 「주제의 축척은 크기가 정한다」(prompt-standards/
-// file-layout.md 「바탕 정의」)의 선을 넘었는지 커밋마다 전수로 재서 경고한다(차단하지 않는다).
+// 전역 git pre-commit 훅. 프롬프트·스킬 md가 「주제의 축척은 크기가 정한다」
+// ([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘었는지
+// 커밋마다 전수로 재서 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 //
 // 왜 전수인가: 크기는 이번 세션이 무엇을 건드렸는지와 무관한 사실이라, 고친 파일만 보면 아무도
