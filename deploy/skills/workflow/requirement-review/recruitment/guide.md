@@ -93,7 +93,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 - 기술 스택 (프레임워크, 주요 라이브러리)
 - 디자인 시스템 라이브러리
 - 폴더 구조
-- 사용자 직접 진행 항목 (프로젝트 초기화, 에디터 설정 등 AI가 대행할 수 없는 것)
+- 사용자 직접 진행 항목 (프로젝트 생성기 실행, 에디터 설정 등). 생성기 뒤의 레포 세우기는 BG가 한다 — 아래 「레포 세우기」
 
 기술 스택·디자인 시스템 라이브러리는 [code-map.md](../../../../contexts/code-map.md) 「패키지 선택 기준」으로 MP 실물(package.json 의존성 + best-practices 문서)을 확인해 **기본 선택지로 안건화하여 확정**한다. 스타일링·데이터 페칭·상태관리 같은 기초 스택은 MARKUP·이후 PR이 모두 의존하므로 BG에서 확정한다 (step-3은 PR별 패키지 참조, BG는 기초 스택 확정 — 같은 절차를 두 시점에서 사용).
 
@@ -103,6 +103,19 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 - MP `monorepo-playground/docs/best-practices/setup.md`(폴더 구조·셋업)의 DDD 기반 패턴(상황: 채용과제·사이드 프로젝트 → `docs/patterns/folder-structure/FolderStructure.md`)을 안건 기본값으로 제시한다.
 - **결정 주체는 모드별로 다르다**: 채용은 [foundation.md](../../conventions/session/foundation.md) 「folder-structure.md 결정 기준」이 최종 확정한다 — BG는 이 단계에서 "제안+확인"까지만 하고 못박지 않는다. 실무·개인은 FOUNDATION이 없으므로 BG가 확정한다.
+
+##### 레포 세우기
+
+스택을 확정한 직후 한다. FOUNDATION·PR_{N}_PLAN은 이것이 끝나야 진입한다(SKILL.md 「세션」 표) — PR 워크트리가 `master`의 초기 커밋에서 갈라지기 때문이다.
+
+1. 확정한 스택의 생성기 명령을 안내하고 사용자 실행을 기다린다. 생성기가 비어 있지 않은 폴더라고 물으면 "Ignore files and continue"를 고르라고 함께 적는다 — `plan/`이 이미 있어서, 지우는 쪽을 고르면 `plan/`이 사라진다
+2. 사용자가 끝냈다고 하면 이어서 한다. `.git`이 없으면 init → `.gitignore`에 node_modules·빌드 산출물·`.env`류가 있는지 점검해 빠진 것만 더한다 → 커밋이 없으면 `master`에 초기 커밋. `plan/`은 전역 gitignore가 가리므로 레포 `.gitignore`에 넣지 않는다. 생성기가 만든 소스 파일은 건드리지 않는다
+3. `developer-choi/{회사 slug}` 이름이 GitHub에 비었는지 본다. 이미 있으면(같은 회사 재지원) 멈추고 사용자에게 이름을 받는다
+4. private으로 만들어 origin으로 등록하고 `master`를 첫 push한다. `gh`의 `--push`는 쓰지 않는다 — push 정책 훅은 `git push`만 보므로 그 경로는 훅을 돌아간다
+5. 레포 URL과 `git remote -v` 출력을 보고한다
+6. step-1 「컨벤션 소스 수집」의 이름 스캔·인덱스 생성을 이어서 한다 — step-1.1에서는 레포가 없어 미뤄 둔 것이다
+
+`master` 직접 push는 이 첫 push 한 번뿐이다. 빈 레포에는 PR을 받을 base가 없어서다. 그 뒤 작업은 전부 PR 브랜치로 간다.
 
 #### 4. 페이지별 자료 정리 + 디자인 시스템 설계
 
