@@ -162,6 +162,12 @@ function main() {
     'claude: surface-skill-creator가 PostToolUse Read 매처로 등록됨');
   check(!codex.some((h) => h.file === 'surface-skill-creator.mjs'),
     'codex: Read 매처 훅 미등록(codex 읽기 도구 이름 미실측)');
+  // 서브에이전트 감시기는 Agent를 띄운 직후에도 살아 있어야 한다. codex에 실리면 매처 없는
+  // PostToolUse로 새어 모든 도구 호출마다 돈다.
+  check(claude.some((h) => h.event === 'PostToolUse' && h.matcher === 'Agent' && h.file === 'surface-subagent-status.mjs'),
+    'claude: surface-subagent-status가 PostToolUse Agent 매처로 등록됨');
+  check(!codex.some((h) => h.file === 'surface-subagent-status.mjs'),
+    'codex: 서브에이전트 상태 훅 미등록');
   check(!codex.some((h) => ['check-browser-write-policy.mjs', 'record-browser-tab-url.mjs', 'hint-browser-disconnect.mjs'].includes(h.file)),
     'codex: claude-in-chrome 훅 미등록(codex엔 그 도구가 없음)');
   // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이

@@ -31,6 +31,18 @@
       "msg": "Surfacing related backlog..."
     },
     {
+      "file": "surface-subagent-status.mjs",
+      "event": "UserPromptSubmit",
+      "on": "prompt",
+      "msg": "Checking background subagent status..."
+    },
+    {
+      "file": "surface-subagent-status.mjs",
+      "event": "PostToolUse",
+      "on": "agent-spawn",
+      "msg": "Starting subagent stall watcher..."
+    },
+    {
       "file": "surface-claude-md.mjs",
       "event": "PreToolUse",
       "on": "search-edit",

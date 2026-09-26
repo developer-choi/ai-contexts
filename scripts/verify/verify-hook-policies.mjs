@@ -1543,6 +1543,82 @@ const skillCreatorGroup = async () => {
   }
 };
 
+// 서브에이전트 상태는 기록 파일의 마지막 줄과 수정 시각으로 갈리므로, 세션마다 가짜 subagents/ 폴더를
+// 만들고 utimes로 시각을 과거로 돌린다. 감시기는 끄고(SUBAGENT_WATCH_DISABLE), 상태 파일이 실제 임시
+// 폴더에 새지 않게 TEMP·TMP를 픽스처 폴더로 돌린다(os.tmpdir()이 이 둘을 따른다).
+const SUBAGENT_HOOK = 'surface-subagent-status.mjs';
+const subagentGroup = async () => {
+  const root = await makeTempDir('hook-subagent-');
+  try {
+    const env = { SUBAGENT_WATCH_DISABLE: '1', TEMP: root, TMP: root, TMPDIR: root };
+    const assistant = (content) => JSON.stringify({ type: 'assistant', message: { role: 'assistant', content } });
+    const user = (content) => JSON.stringify({ type: 'user', message: { role: 'user', content } });
+    const bash = (id, command, extra = {}) => ({ type: 'tool_use', id, name: 'Bash', input: { command, ...extra } });
+    // 세션 하나 = 에이전트 하나. 한 세션에 섞으면 어느 줄이 어느 케이스 것인지 판정이 흐려진다.
+    const session = (id, lines, { minutesAgo, shape = 'background', noDir = false } = {}) => {
+      const transcript = path.join(root, `${id}.jsonl`);
+      fs.writeFileSync(transcript, '');
+      if (noDir) return { session_id: id, transcript_path: transcript };
+      const dir = path.join(root, id, 'subagents');
+      fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(path.join(dir, `agent-a${id}.meta.json`), JSON.stringify({ name: `rev-${id}`, requestShape: shape }));
+      const file = path.join(dir, `agent-a${id}.jsonl`);
+      fs.writeFileSync(file, `${lines.join('\n')}\n`);
+      const t = new Date(Date.now() - minutesAgo * 60 * 1000);
+      fs.utimesSync(file, t, t);
+      return { session_id: id, transcript_path: transcript };
+    };
+    const prompt = (s) => ({ hook_event_name: 'UserPromptSubmit', prompt: 'x', ...s });
+
+    const stuck = session('stuck', [assistant([bash('t1', 'ls "C:/x/scripts/"; wc -l a.mjs')])], { minutesAgo: 10 });
+    const working = session('working', [assistant([bash('t1', 'ls')]), user([{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }])], { minutesAgo: 0.3 });
+    const idle = session('idle', [assistant([{ type: 'text', text: '끝났다' }])], { minutesAgo: 15 });
+    const stale = session('stale', [assistant([{ type: 'text', text: '끝났다' }])], { minutesAgo: 45 });
+    const sent = session('sent', [
+      assistant([{ type: 'tool_use', id: 's1', name: 'SendMessage', input: { to: 'main', message: '리뷰 결과: 동의 5 보강 3' } }]),
+      user([{ type: 'tool_result', tool_use_id: 's1', content: 'success' }]),
+      assistant([{ type: 'text', text: '보냈다' }]),
+    ], { minutesAgo: 2 });
+    const foreground = session('fg', [assistant([bash('t1', 'ls')])], { minutesAgo: 10, shape: 'foreground' });
+    const longBash = session('long', [assistant([bash('t1', 'npm test', { timeout: 540000 })])], { minutesAgo: 7 });
+    const none = session('none', [], { noDir: true });
+
+    // [payload, 기대 판정, 주입에 들어 있어야 할 것, 없어야 할 것, 설명]
+    const cases = [
+      [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', '/tasks'], [], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + 사용자 종료 안내'],
+      [prompt(working), 'context', ['rev-working: 일하는 중'], ['멈춤'], '도구 결과가 막 돌아옴 → 일하는 중'],
+      [prompt(idle), 'context', ['rev-idle: 쉬는 중'], ['멈춤'], '텍스트 응답 15분 → 쉬는 중'],
+      [prompt(stale), 'context', ['30분 넘게 쉬는 에이전트 1개'], ['rev-stale'], '30분 넘게 쉬면 개수만'],
+      [prompt(foreground), 'pass', [], [], 'background가 아니면 제외'],
+      [prompt(longBash), 'context', ['rev-long: 일하는 중'], ['멈춤'], 'timeout 9분 Bash는 7분에 멈춤이 아니다'],
+      [prompt(none), 'pass', [], [], 'subagents/ 없음 → 조용'],
+      [{ ...stuck, hook_event_name: 'PostToolUse', tool_name: 'Agent' }, 'pass', [], [], 'PostToolUse는 감시기만 살리고 출력 없음'],
+    ];
+    const report = await runCases(cases, async ([payload, expected, must, mustNot, note]) => {
+      const { decision, reason = '', stderr } = await runHookPayload(SUBAGENT_HOOK, payload, { env });
+      const missing = must.filter((m) => !reason.includes(m));
+      const leaked = mustNot.filter((m) => reason.includes(m));
+      const label = `${SUBAGENT_HOOK} :: ${payload.session_id} → ${expected} (${note})`;
+      return judge(label, decision, expected, stderr, {
+        ok: decision === expected && !missing.length && !leaked.length,
+        failLine: `  FAIL  ${label} — 실제: ${decision}${missing.length ? `, 빠짐: ${missing.join('|')}` : ''}${leaked.length ? `, 새어 나옴: ${leaked.join('|')}` : ''}`,
+      });
+    });
+
+    // 같은 SendMessage는 한 번만 싣는다 — 순서가 걸리므로 풀 밖에서 차례로 돌린다.
+    const first = await runHookPayload(SUBAGENT_HOOK, prompt(sent), { env });
+    const second = await runHookPayload(SUBAGENT_HOOK, prompt(sent), { env });
+    const sendLabel = `${SUBAGENT_HOOK} :: sent → 본문을 한 번만 싣는다`;
+    const sendReport = toReport([judge(sendLabel, `${first.decision}/${second.decision}`, 'context/context', first.stderr || second.stderr, {
+      ok: (first.reason ?? '').includes('main: 리뷰 결과: 동의 5 보강 3') && !(second.reason ?? '').includes('리뷰 결과'),
+      failLine: `  FAIL  ${sendLabel} — 첫째: ${(first.reason ?? '').slice(-80)} / 둘째: ${(second.reason ?? '').slice(-80)}`,
+    })]);
+    return mergeReports([report, sendReport]);
+  } finally {
+    await removeTempDir(root);
+  }
+};
+
 function mergeReports(reports) {
   return {
     lines: reports.flatMap((report) => report.lines),
@@ -1566,6 +1642,7 @@ async function main() {
     waitGroup,
     toolGroup,
     skillCreatorGroup,
+    subagentGroup,
   ];
 
   // 그룹은 각자 자기 임시 폴더만 쓰므로 함께 돌린다. allSettled인 이유는 한 그룹이 터졌을 때
