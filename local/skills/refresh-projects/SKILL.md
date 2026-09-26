@@ -272,7 +272,7 @@ diff 기반 Phase와 별개로 **매 회차 무조건 수행한다**. 회차의 
 
 dispatch 위임 작업은 메인 워크트리에서 직접 수행하지 않는다. 사용자가 메인 워크트리에서 병행 작업할 수 있고, 메인의 modified·untracked 파일과 작업 커밋이 섞일 위험이 있다. dispatch md에 다음을 박아 새 세션이 별도 워크트리에서 작업하도록 강제한다.
 
-- 워크트리 경로: 메인 repo 옆에 `<repo>-<task>` 형태 (예: `ai-contexts-readme`)
+- 워크트리 경로: `<repo>/.claude/worktrees/<task>` (예: `ai-contexts/.claude/worktrees/readme`). 이 밖에 만들면 훅이 막는다
 - base: `origin/<base-branch>` (메인 repo의 로컬 미반영 커밋 회피 — fetch 선행)
 - AC 워크트리를 만들 때는 AC [meta/deploy-conventions.md](../../../meta/deploy-conventions.md) 「AC worktree hook 준비」를 따른다
 - 작업·커밋·푸시는 새 워크트리에서 수행. `-result.md`는 원본 위치(`<backlog>/refresh-projects/dispatch/`, `<backlog>`=`~/WebstormProjects/main/backlog`)에 작성
