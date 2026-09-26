@@ -61,7 +61,7 @@
 본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
 
 - ❌ `// TODO: PR4에서 X 추가`, `// TODO [PR4]: ...`
-- ✓ `project-md.mjs add-todo --pr {N}`으로 그 PR의 TODO에 등록
+- ✓ `todo-md.mjs add-todo --pr {N}`으로 그 PR의 TODO에 등록
 
 본 PR 외부 의존성(백엔드 합의·디자인 검수·인프라 등):
 
@@ -71,7 +71,7 @@
 
 ## file-level(blanket) eslint-disable 라이프사이클
 
-파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 등록한다 — `node {{skill_dir}}/scripts/project-md.mjs <project.md> add-todo --pr {N} --item "{파일}: disable 제거 + 규칙 준수 수정"`. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
+파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 등록한다 — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-todo --pr {N} --item "{파일}: disable 제거 + 규칙 준수 수정"`. 배정의 단일 출처(SSOT) — disable을 만드는 사람이 곧 어느 PR이 걷어낼지 함께 적는다.
 
 - 격리 마커에 **`미리팩토링 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). step-6 백스톱이 이 문자열로 고아를 찾으므로, 문구를 고쳐 쓰면 그 파일은 탐지에서 조용히 빠진다 — 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
 

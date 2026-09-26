@@ -14,7 +14,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - 브랜치명: `feature/{짧은-설명}` — 영문 슬러그(소문자 + 하이픈), 예: `feature/login-form`
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
-  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `project.md`의 「의존」 절 — 적는 기준은 [conventions/pr-split.md](../conventions/pr-split.md) 「의존 — 판단거리 노출」).
+  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [conventions/pr-split.md](../conventions/pr-split.md) 「의존 — 판단거리 노출」).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 앞 PR 위에 얹을 근거가 없다.
   - 앞 PR 위에 얹는 형태(스택)는 **의존이 있을 때의 형태이지 기본값이 아니다.** 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다 — 리뷰 diff에 앞 PR 커밋이 섞이고 불필요한 연쇄 rebase를 부른다.
 - 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다.

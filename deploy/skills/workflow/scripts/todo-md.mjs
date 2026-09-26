@@ -1,23 +1,23 @@
 #!/usr/bin/env node
-// `/plan/background/consumable/project.md`를 읽고 쓴다 — 워크플로우의 PR 인덱스.
+// `/plan/background/consumable/todo.md`를 읽고 쓴다 — 워크플로우의 PR 인덱스.
 //
-// 이 파일이 존재하는 이유: project.md는 세션 다섯 곳 이상에서 손으로 편집되고 세 곳에서
+// 이 파일이 존재하는 이유: todo.md는 세션 다섯 곳 이상에서 손으로 편집되고 세 곳에서
 // 조회된다. 절 이름·순서·번호·삽입 위치가 전부 산문으로만 정해져 있었고, 읽는 쪽(PLAN 진입,
 // FINALIZE 마지막 PR 판정)은 형식이 어긋나면 **아무것도 못 찾은 채 조용히 넘어간다** —
 // SKILL.md와 finalize.md가 각각 "PR 절이 없거나 비어 있으면 폴백"을 적어둔 것이 그 증거다.
 //
 // 조회 쪽도 마찬가지였다. 「누가 나에게 의존하는가」는 세 자리(step-4 base 판단, step-4 stub
 // 확정 시 게이트 해제 안내, step-6 의존 PR 게이트)에서 필요한데 부를 수단이 없어 매번
-// project.md 전문을 열어 역방향 그래프를 머리로 뒤집었다. 하나를 놓치면 그 PR이 출발
+// todo.md 전문을 열어 역방향 그래프를 머리로 뒤집었다. 하나를 놓치면 그 PR이 출발
 // 가능해진 줄 모른 채 대기하고, 대기 제거가 이 워크플로우의 존재 이유다.
 //
 // 판단은 안 한다 — 각 절에 무엇을 적을지(의존 문장·범위·TODO 내용)는 부르는 쪽이 정해 넘긴다.
 //
 // 사용:
-//   node <이 파일> <project.md> list
-//   node <이 파일> <project.md> add-pr --name "이름" [--dep "..."] [--scope "..."] [--ref "..."] [--todo "..."]
-//   node <이 파일> <project.md> dependents --pr N
-//   node <이 파일> <project.md> add-todo (--pr N | --unassigned) --item "..."
+//   node <이 파일> <todo.md> list
+//   node <이 파일> <todo.md> add-pr --name "이름" [--dep "..."] [--scope "..."] [--ref "..."] [--todo "..."]
+//   node <이 파일> <todo.md> dependents --pr N
+//   node <이 파일> <todo.md> add-todo (--pr N | --unassigned) --item "..."
 //
 // 반복 가능한 옵션(--dep·--scope·--ref·--todo)은 여러 번 줄 수 있다.
 
@@ -119,7 +119,7 @@ function duplicateSections(sections) {
 
 const args = parseArgs(process.argv.slice(2));
 if (!args.file || !args.command) {
-  console.error('사용: node <이 파일> <project.md> <list|add-pr|dependents|add-todo> [옵션]');
+  console.error('사용: node <이 파일> <todo.md> <list|add-pr|dependents|add-todo> [옵션]');
   process.exit(1);
 }
 

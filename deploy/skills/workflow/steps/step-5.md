@@ -99,7 +99,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 ## Step 5.4. 마무리
 
 - [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
-- **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가 (코드 안 TODO 일관 0건 — PR 이연·외부 의존성은 `project.md`·`overview.md`로 관리)
+- **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가 (코드 안 TODO 일관 0건 — PR 이연·외부 의존성은 `todo.md`·`overview.md`로 관리)
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)

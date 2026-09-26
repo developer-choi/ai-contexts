@@ -13,7 +13,7 @@
 
 ## PR 확정 기준 — "다른 문서를 더 안 봐도 확정 가능한가"
 
-step-1 진행 중 자료를 읽어나가며 `/plan/background/consumable/project.md`에 PR을 **하나씩 확정해 append**한다. 모든 PR이 정해질 때까지 기다리지 않는다.
+step-1 진행 중 자료를 읽어나가며 `/plan/background/consumable/todo.md`에 PR을 **하나씩 확정해 append**한다. 모든 PR이 정해질 때까지 기다리지 않는다.
 
 - **아직 안 읽은 자료가 이 PR의 경계를 바꿀 수 있으면** → 확정하지 않는다
 - **바꿀 수 없으면** → 확정하고 append. 그 PR은 곧바로 출발 후보가 된다
@@ -68,18 +68,18 @@ AI는 "판단"이 아니라 "**판단거리 노출**"만 한다: 각 PR이 선�
 
 ## 기획 점검 (TODO 식별)
 
-PR을 확정할 때마다 `project.md`의 미분류 절(PR 경계 확정 전에 쌓인 TODO) 중 그 PR에 속하는 항목을 해당 PR 절로 재배치한다 — 어느 항목이 그 PR에 속하는지가 판단이라 이 옮기기는 손으로 한다. 그 외 각 PR별로 사용자에게 사전 확인이 필요한 새 TODO가 있는지 추가로 확인한다(`add-todo`로 넣는다).
+PR을 확정할 때마다 `todo.md`의 미분류 절(PR 경계 확정 전에 쌓인 TODO) 중 그 PR에 속하는 항목을 해당 PR 절로 재배치한다 — 어느 항목이 그 PR에 속하는지가 판단이라 이 옮기기는 손으로 한다. 그 외 각 PR별로 사용자에게 사전 확인이 필요한 새 TODO가 있는지 추가로 확인한다(`add-todo`로 넣는다).
 
 `## 미분류` 절은 재배치 후에도 지우지 않는다 — 아직 확정 안 된 PR의 TODO가 계속 쌓이는 보관소다.
 
 ---
 
-## 산출물: `/plan/background/consumable/project.md`
+## 산출물: `/plan/background/consumable/todo.md`
 
 PR을 확정하면 이렇게 append한다.
 
 ```
-node {{skill_dir}}/scripts/project-md.mjs <project.md> add-pr --name "{이름}" --dep "PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}" --scope "..." --ref "..." --todo "..."
+node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-pr --name "{이름}" --dep "PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}" --scope "..." --ref "..." --todo "..."
 ```
 
 절 이름·순서·번호·삽입 자리·빈 절의 `- 없음`·`## 미분류` 보관소는 그 스크립트가 안다. 파일을 직접 열어 붙이지 않는다 — 읽는 쪽(PLAN 진입, FINALIZE 마지막 PR 판정, 의존 역방향 조회)은 형식이 어긋나면 아무것도 못 찾은 채 조용히 넘어간다.

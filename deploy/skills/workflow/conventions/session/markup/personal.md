@@ -2,7 +2,7 @@
 
 figma 대신 **사용자가 워크플로우 전에 만든 마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 디자인 진실 원천인 모드(step-1.1에서 `retained/mockup/`에 수집). figma 자리를 시안이 대체한다. 공통 절차는 [index.md](index.md), 본 파일은 개인 모드 고유 부분만 담는다.
 
-커버리지 원천·공통 컴포넌트 판정([index.md](index.md) 「공통 컴포넌트 확정」)의 직독 대상은 **마크업 시안 전 페이지**다 — project.md·page.md를 되읽지 않는다.
+커버리지 원천·공통 컴포넌트 판정([index.md](index.md) 「공통 컴포넌트 확정」)의 직독 대상은 **마크업 시안 전 페이지**다 — todo.md·page.md를 되읽지 않는다.
 
 ## 재료
 

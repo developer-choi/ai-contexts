@@ -14,7 +14,7 @@
 //
 // 사용:
 //   node <이 파일> --base <기준 ref>                     → 금지 주석 잔존 점검 (PR diff)
-//   node <이 파일> --base <기준 ref> --project <project.md>  → 미배정 blanket disable 고아까지
+//   node <이 파일> --base <기준 ref> --todo <todo.md 경로>  → 미배정 blanket disable 고아까지
 //   node <이 파일> --paths <경로,경로> --marker USER_REVIEW  → IMPL 시작 게이트 (구현 대상 경로)
 //   node <이 파일> --paths <경로,경로>                     → 종료 게이트 (TODO 전부 0건)
 //
@@ -45,7 +45,7 @@ function parseArgs(argv) {
   const args = {};
   for (let i = 0; i < argv.length; i += 1) {
     if (argv[i] === '--base') args.base = argv[++i];
-    else if (argv[i] === '--project') args.project = argv[++i];
+    else if (argv[i] === '--todo') args.todo = argv[++i];
     else if (argv[i] === '--paths') args.paths = argv[++i];
     else if (argv[i] === '--marker') args.marker = argv[++i];
   }
@@ -54,7 +54,7 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 if (!args.base && !args.paths) {
-  console.error('사용: node <이 파일> (--base <기준 ref> | --paths <경로,경로>) [--project <project.md>] [--marker USER_REVIEW]');
+  console.error('사용: node <이 파일> (--base <기준 ref> | --paths <경로,경로>) [--todo <todo.md 경로>] [--marker USER_REVIEW]');
   process.exit(1);
 }
 
@@ -117,16 +117,16 @@ console.log(`\n[소멸 버킷을 인용한 AI_IMPL] ${ephemeral.length}건 — c
 for (const l of ephemeral) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
 if (ephemeral.length) problems.push('AI_IMPL 출처가 영속 파일이 아니다 — 소비되면 출처를 잃는다');
 
-if (args.project) {
+if (args.todo) {
   // 격리 마커가 붙은 blanket disable 파일만 본다. 모든 blanket disable을 훑으면 생성 파일 등이 오탐된다.
   const isolated = [...new Set(added.filter((l) => l.text.includes(ISOLATION_MARKER)).map((l) => l.file))];
-  const registered = fs.existsSync(args.project) ? fs.readFileSync(args.project, 'utf8') : '';
+  const registered = fs.existsSync(args.todo) ? fs.readFileSync(args.todo, 'utf8') : '';
   const orphans = isolated.filter((f) => !registered.includes(f));
 
   console.log(`\n[미배정 blanket disable] 격리 ${isolated.length}건 중 고아 ${orphans.length}건`);
   for (const f of orphans) console.log(`  ${f}`);
   if (orphans.length) {
-    problems.push('어느 PR에도 배정 안 된 격리 파일이 있다 — 사용자가 배정할 PR을 정해 project.md에 등록한다');
+    problems.push('어느 PR에도 배정 안 된 격리 파일이 있다 — 사용자가 배정할 PR을 정해 todo.md에 등록한다');
   }
 }
 

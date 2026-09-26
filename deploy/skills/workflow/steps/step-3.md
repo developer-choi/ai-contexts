@@ -53,7 +53,7 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 - 범위 요약 (뭘 만드는지의 경계)
 - **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목). WRITING_IDEATOR가 초안 "Known issues / Follow-up" 절에 반영하고, WRITING_REFINER가 확정·소비
 
-**PR 이연 항목은 「열려있는 질문」이 아니라 `/plan/background/consumable/project.md`의 해당 PR 섹션에 적는다**. project.md가 PR 분할·TODO 인덱스이므로 이연 항목은 그 PR 항목의 TODO로 직접 들어가는 게 자연스럽다 — overview.md를 거치면 후속 PR이 본 PR의 overview를 다시 봐야 하는 모순이 생긴다.
+**PR 이연 항목은 「열려있는 질문」이 아니라 `/plan/background/consumable/todo.md`의 해당 PR 섹션에 적는다**. todo.md가 PR 분할·TODO 인덱스이므로 이연 항목은 그 PR 항목의 TODO로 직접 들어가는 게 자연스럽다 — overview.md를 거치면 후속 PR이 본 PR의 overview를 다시 봐야 하는 모순이 생긴다.
 
 외부 참조 자료 링크는 overview.md에 적지 않고 reference.md(아래)에 누적한다.
 
@@ -75,9 +75,9 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 
 본 step에서 초기 작성. 명세는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
 
-### [CRITICAL] project.md 현재 PR 절 소비
+### [CRITICAL] todo.md 현재 PR 절 소비
 
-`/plan/background/consumable/project.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. project.md는 순수 큐라 소비 후 처리는 [conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」를 따른다 — 제목·pointer를 남기지 않는다.
+`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. todo.md는 순수 큐라 소비 후 처리는 [conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」를 따른다 — 제목·pointer를 남기지 않는다.
 
 ### 의사결정 토론
 

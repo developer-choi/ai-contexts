@@ -2,7 +2,7 @@
 
 figma 원본이 디자인 진실 원천인 모드. 공통 절차는 [index.md](index.md), 본 파일은 figma 고유 부분만 담는다.
 
-커버리지 원천·공통 컴포넌트 판정([index.md](index.md) 「공통 컴포넌트 확정」)의 직독 대상은 **figma 전 페이지**다 — 누적된 figma URL·캡처를 훑어 반복 컴포넌트를 확정한다. project.md를 되읽지 않는다.
+커버리지 원천·공통 컴포넌트 판정([index.md](index.md) 「공통 컴포넌트 확정」)의 직독 대상은 **figma 전 페이지**다 — 누적된 figma URL·캡처를 훑어 반복 컴포넌트를 확정한다. todo.md를 되읽지 않는다.
 
 ## 재료
 

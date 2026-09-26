@@ -14,7 +14,15 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 
 단, **최초 진입은 반드시 `/workflow WRITING_IDEATOR <모드>` / `/workflow WRITING_REFINER <모드>`로 한다.** 이 문서(consumable 정리 등)가 세션에 로드되려면 최초 한 번은 이 문서를 거쳐야 한다. 최초 진입을 `/write-refine <path>` 직접 호출로 하면 이 문서가 그 세션에 전혀 로드되지 않아 정리가 누락된다(write-refine 스킬은 `/plan/`·consumable 구조를 모르는 범용 글쓰기 스킬).
 
-최초 진입 이후 같은 세션 안에서 개별 PR은 `/write-refine <path>`만 반복 호출해도 된다 — 이미 로드된 이 문서의 지시를 따르면 된다.
+최초 진입 이후 같은 세션 안에서 개별 PR은 `/write-refine <path>`만 반복 호출해도 된다 — 이미 로드된 이 문서의 지시를 따르면 된다. 아래 「PR 착수 시 todo.md 판정」도 그 지시라 PR마다 다시 거친다.
+
+## PR 착수 시 todo.md 판정
+
+PR 하나의 본문 작업을 시작할 때마다, 그 PR의 첫 `/write-init`·`/write-refine`을 부르기 전에 `/plan/background/consumable/todo.md`를 처음부터 끝까지 훑는다. 다른 세션이 과제 내내 항목을 더하므로 세션 진입 때 한 번으로 끝나지 않는다.
+
+- TODO 하위 절만 보지 않는다. 미분류 절, 다른 PR 절, 그 밖의 절에도 이 PR 본문이나 README로 갈 항목이 있다
+- 항목마다 이번 PR 몫인지 가르고, 몫이면 어느 산출물로 갈지(이 PR 본문의 어느 절 / README 재료)까지 정한다
+- 판정 결과를 사용자에게 보고하고 확인받은 뒤 쓰기 시작한다. 몫인 항목이 없으면 없다고 보고한다
 
 ## WRITING_IDEATOR — 초안 (각 PR step-3 종료 후)
 
@@ -25,8 +33,7 @@ WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장
 - `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다** — persistent라 어느 소비처도 삭제하지 않는다.
 - `pr{N}/persistent/decisions.md` — step-3 초기본. 토론이 없었으면 부재할 수 있다.
 - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
-
-(`project.md`의 해당 PR 절은 step-3 진행 중 overview로 소비·삭제되므로 IDEATOR 발동 시점엔 이미 없다. IDEATOR 입력이 아니다.)
+- `/plan/background/consumable/todo.md` — 위 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 step-3에서 overview로 소비돼 없을 수 있다.
 
 ### 절차
 
@@ -50,7 +57,7 @@ write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 �
 
 ### 입력
 
-- WRITING_IDEATOR 입력(overview·decisions·reference) +
+- WRITING_IDEATOR 입력(overview·decisions·reference·todo.md) +
 - `pr{N}/persistent/implementation.md`
 - 커밋 로그 (브랜치 유도는 위 「cwd」)
 - `decisions.md`의 step-6.6 갱신분
@@ -62,7 +69,7 @@ IDEATOR spawn은 사용자 재량이라, 사용자가 IDEATOR를 건너뛰고 RE
 
 ### 절차
 
-`/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고(「장기세션 재사용」대로 같은 REFINER 세션에서 이어 하며, 컨텍스트가 커졌으면 `/compact` 후 호출), 실제 구현·커밋과 어긋난 서술을 바로잡고 코드블록을 채워 확정한다. 본문에 담는 재료는 [write-init pr-body 템플릿](../../../write-init/templates/pr-body.md)을 따른다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 본문의 동작 설명 재료로 재활용한다.
+「PR 착수 시 todo.md 판정」을 거친 뒤 `/write-refine <pr-body 경로>`를 호출해 톤·구조·분량을 다듬고(「장기세션 재사용」대로 같은 REFINER 세션에서 이어 하며, 컨텍스트가 커졌으면 `/compact` 후 호출), 실제 구현·커밋과 어긋난 서술을 바로잡고 코드블록을 채워 확정한다. 본문에 담는 재료는 [write-init pr-body 템플릿](../../../write-init/templates/pr-body.md)을 따른다. `pr{N}/consumable/` 하위 동작 테스트 산출물은 본문의 동작 설명 재료로 재활용한다.
 
 ### 산출물 정리
 

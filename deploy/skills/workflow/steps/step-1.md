@@ -9,7 +9,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 - **Step 1.1 자료 받기**: 사용자에게서 자료를 받아 정리
 - **Step 1.2 requirement-review 본체**: 스킬 로드 + 중복 조기 발견 + 작업 익숙도 판별
 
-**PR 확정은 별도 step이 아니라 step-1 내내 굴러간다** — 자료를 읽어나가며 확정 가능한 PR부터 하나씩 `project.md`에 append한다 (아래 「PR 확정」). BG는 step-1로 끝난다; 일괄 PR 분할 단계는 없다.
+**PR 확정은 별도 step이 아니라 step-1 내내 굴러간다** — 자료를 읽어나가며 확정 가능한 PR부터 하나씩 `todo.md`에 append한다 (아래 「PR 확정」). BG는 step-1로 끝난다; 일괄 PR 분할 단계는 없다.
 
 ---
 
@@ -23,7 +23,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 **step-1.1은 자료의 단일 수집 지점 — 가진 것 중 가장 완성도 높은 원본(SSOT)을 여기서 받아 저장한다.** 원본의 형태는 모드마다 다르지만(채용=figma+과제요구사항, 실무=figma+기획서, 개인=마크업 시안+선택 spec.md), **시각 진실 원천을 step-1.1에 받아 retained에 보존한다**는 점은 모드 무관으로 같다. 사람이 만든 것이라 불완전할 수 있고, 빠진 부분은 step-1.2 리뷰에서 구멍으로 잡는다. figma 쓰는 모드(채용·실무)는 **사용 가능한 figma/시안을 여기서 전부** 받아 저장한다 (figma URL·캡처 → `retained/figma-url.md`·`retained/figma/`). 다운스트림(requirement-review·MARKUP)은 이 수집분을 *참조*하며 자료를 재요청하지 않는다 — 빠진 것이 있으면 그 갭만 콕 집어 보충한다. (UI는 생김새만이 아니라 상태·인터랙션까지 담아 부분적으로 명세 역할을 하므로, design·기획 자료를 분산 수집할 이유가 없다.)
 
-**개인 모드**도 step-1.1에서 원본을 받는다 — figma 대신, 사용자가 워크플로우 전에 아이디에이션으로 만든 **마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 시각 진실 원천이다(figma 자리를 대체). figma를 받는 것과 대칭이며 `retained/mockup/`에 저장해 보존한다. 화면에 안 담기는 동작(API 응답 형태·에러·로딩·엣지값 등)을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다 — 특례가 아니라 "자료를 더 받는 것"이다. step-1.2는 이 원본을 리뷰해 page.md/global.md(비시각 스펙)를 채우고 리뷰 중 나온 구멍은 project.md TODO로 남긴다 — "정의"가 아니라 "가져온 원본 리뷰"다. 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 수집한다.
+**개인 모드**도 step-1.1에서 원본을 받는다 — figma 대신, 사용자가 워크플로우 전에 아이디에이션으로 만든 **마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 시각 진실 원천이다(figma 자리를 대체). figma를 받는 것과 대칭이며 `retained/mockup/`에 저장해 보존한다. 화면에 안 담기는 동작(API 응답 형태·에러·로딩·엣지값 등)을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다 — 특례가 아니라 "자료를 더 받는 것"이다. step-1.2는 이 원본을 리뷰해 page.md/global.md(비시각 스펙)를 채우고 리뷰 중 나온 구멍은 todo.md TODO로 남긴다 — "정의"가 아니라 "가져온 원본 리뷰"다. 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 수집한다.
 
 ### 컨벤션 소스 수집 — 이름 스캔 선제안 + conventions-index.md
 
@@ -99,7 +99,7 @@ requirement-review 단계에서 디자인·컴포넌트 중복이 있으면 **�
 
 ## PR 확정 — step-1 내내
 
-자료를 읽어나가며 **확정 가능한 PR부터 하나씩** `/plan/background/consumable/project.md`에 append한다. 확정 기준·분할 원칙·의존 서술은 [conventions/pr-split.md](../conventions/pr-split.md)가 단일 출처다.
+자료를 읽어나가며 **확정 가능한 PR부터 하나씩** `/plan/background/consumable/todo.md`에 append한다. 확정 기준·분할 원칙·의존 서술은 [conventions/pr-split.md](../conventions/pr-split.md)가 단일 출처다.
 
 - 모든 PR이 정해질 때까지 기다리지 않는다. 확정된 PR은 곧바로 출발 후보가 된다.
 - 확정 기준은 "**다른 자료를 더 안 봐도 확정 가능한가**" — 안 읽은 자료가 그 PR의 경계를 바꿀 수 있으면 확정하지 않는다.

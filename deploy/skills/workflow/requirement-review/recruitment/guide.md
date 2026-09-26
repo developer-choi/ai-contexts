@@ -34,7 +34,7 @@ step-1.1이 `/plan/background/persistent/`에 저장한 원본 자료:
 
 - `/plan/background/retained/cross-analysis.md` — 추론한 평가 기준만 (프로젝트 라이프타임 내내 참조)
 - `/plan/background/retained/service-analysis.md` — 대상 서비스 분석 ([가이드](service-analysis.md))
-- `/plan/background/consumable/project.md` — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO (없으면 이 시점에 생성)
+- `/plan/background/consumable/todo.md` — 세부 스펙·교차 분석 발견·기술 결정 후보·모호한 부분·TODO (없으면 이 시점에 생성)
 
 ### 분석 과정
 
@@ -42,10 +42,10 @@ step-1.1이 `/plan/background/persistent/`에 저장한 원본 자료:
 
 #### 핵심 원칙: cross-analysis.md는 프로젝트 내내 남는 평가 기준만 담는다
 
-무엇을 어느 파일에 적는지는 [conventions/plan-folder.md](../../conventions/plan-folder.md) 폴더 트리의 `cross-analysis.md`·`project.md` 항목이 정한다. 여기서 덧붙일 것은 둘이다.
+무엇을 어느 파일에 적는지는 [conventions/plan-folder.md](../../conventions/plan-folder.md) 폴더 트리의 `cross-analysis.md`·`todo.md` 항목이 정한다. 여기서 덧붙일 것은 둘이다.
 
-- 나중에 옮길 셈으로 cross-analysis.md에 임시로 담아두지 않는다 — 사용자가 project.md를 직접 리뷰하므로, 옮길 내용은 처음부터 project.md에 쓴다.
-- project.md에 직접 기록하는 것은 항목 리스트까지다. 산문 서술은 SKILL.md 「project.md 산문·초기 셋업 CLI는 사용자가」를 따른다.
+- 나중에 옮길 셈으로 cross-analysis.md에 임시로 담아두지 않는다 — 사용자가 todo.md를 직접 리뷰하므로, 옮길 내용은 처음부터 todo.md에 쓴다.
+- todo.md에 직접 기록하는 것은 항목 리스트까지다. 산문 서술은 SKILL.md 「todo.md 산문·초기 셋업 CLI는 사용자가」를 따른다.
 
 #### 1. 공동 탐색 + 서비스 분석
 
@@ -72,13 +72,13 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 정독과 병렬 분석이 모두 끝나면 발견 사항을 공유한다.
 
-정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/project.md`에 직접 기록한다 — 없으면 이 시점에 생성한다(그 PR이 아직 확정 전이면 미분류 절에 담아두고, 해당 PR을 확정할 때 그 절로 재배치). 최소한 아래 관점은 점검한다:
+정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/todo.md`에 직접 기록한다 — 없으면 이 시점에 생성한다(그 PR이 아직 확정 전이면 미분류 절에 담아두고, 해당 PR을 확정할 때 그 절로 재배치). 최소한 아래 관점은 점검한다:
 - 완성도 (404 페이지, 파비콘, page.title, OG 태그, 실제 이미지·텍스트, 로딩/에러 상태)
 - UI/UX (뒤로가기, 취소 버튼, 푸터 링크, 빈 상태, 호버/포커스, 토스트 피드백)
 - 공고에서 강조하는 역량에 연결되는 어필 포인트
 - 페이지별 기술적·비기술적 강점 어필 포인트
 
-공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 `/plan/background/consumable/project.md`의 해당 PR(또는 미분류) 절에 참조 링크로 남긴다. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
+공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 `/plan/background/consumable/todo.md`의 해당 PR(또는 미분류) 절에 참조 링크로 남긴다. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
 
 #### 2. 평가 기준 추론
 
