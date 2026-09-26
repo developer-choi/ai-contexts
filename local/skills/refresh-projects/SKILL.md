@@ -1,7 +1,7 @@
 ---
 disable-model-invocation: true
 name: refresh-projects
-description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을 추적해 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화하고, 커밋에 안 나타나는 것(끊어진 링크·아무도 안 가리키는 문서·쌓인 백로그·남은 워크트리와 브랜치)도 같은 회차에서 전수로 턴다.
+description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을 추적해 Maintain(내부 정비) → Readme(대표 창구 갱신) → Deploy(파생 산출물 배포) 순으로 최신화하고, 커밋에 안 나타나는 것(끊어진 링크·아무도 안 가리키는 문서·쌓인 백로그·업스트림이 고친 땜빵·남은 워크트리와 브랜치)도 같은 회차에서 전수로 턴다.
 ---
 
 # Refresh Projects
@@ -11,7 +11,7 @@ description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을
 내 프로젝트들을 한 회차로 갱신한다. 갱신은 두 축이다.
 
 - **변경을 따라가는 축** — 지난 회차 이후 쌓인 작업과 그 영향 범위를 전수조사해 정비하고, 대표 창구를 갱신하고, 그 기간에 배운 것을 파생 프로젝트로 배포한다.
-- **변경과 무관하게 낡는 것을 터는 축** — 끊어진 링크, 아무도 안 가리키는 문서, 쌓인 백로그, 안 쓰는 워크트리·브랜치.
+- **변경과 무관하게 낡는 것을 터는 축** — 끊어진 링크, 아무도 안 가리키는 문서, 쌓인 백로그, 업스트림이 고친 땜빵, 안 쓰는 워크트리·브랜치.
 
 ## 프로젝트 레지스트리
 
@@ -51,7 +51,7 @@ description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을
 | 3 | 루트 README 전면 점검 질문 | [steps/readme.md](steps/readme.md#루트-readme-전면-점검-opt-in) | 매 회차 한 번. Phase 2 계획을 낼 때, 계획이 없는 회차면 Phase 1 뒤 |
 | 4 | Phase 3 Maintain | [아래](#phase-3-maintain--내부-정비) | 변경 있는 프로젝트가 있을 때 |
 | 5 | Phase 4 Readme·Deploy dispatch | [아래](#phase-4-병렬-dispatch--readme--deploy), [steps/readme.md](steps/readme.md), [steps/kq.md](steps/kq.md) | Phase 3 뒤. 변경이 없어도 README 깨진 링크가 있으면 readme만 |
-| 6 | 백로그 정비 · 백로그 반영 sweep | [steps/backlog-tidy.md](steps/backlog-tidy.md), [아래](#백로그-반영-sweep) | 매 회차. Phase 4 결과를 기다리는 동안, Phase 2~4를 건너뛰는 회차면 Phase 1 직후 |
+| 6 | 백로그 정비 · 백로그 반영 sweep · 업스트림 버그 점검 | [steps/backlog-tidy.md](steps/backlog-tidy.md), [아래](#백로그-반영-sweep), [steps/upstream-bugs.md](steps/upstream-bugs.md) | 매 회차. Phase 4 결과를 기다리는 동안, Phase 2~4를 건너뛰는 회차면 Phase 1 직후 |
 | 7 | state.json 업데이트 | [아래](#statejson-업데이트) | Phase 3·4 결과가 도착할 때마다 그 프로젝트분 |
 | 8 | dispatch 산출물 정리 | [dispatch.md](dispatch.md#위임-플로우) | 모든 결과를 반영한 뒤 |
 | 9 | 안 쓰는 워크트리·브랜치 정리 | [아래](#안-쓰는-워크트리브랜치-정리) | 매 회차 맨 끝 |
