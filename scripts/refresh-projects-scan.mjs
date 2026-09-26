@@ -139,7 +139,12 @@ for (const { abbr, dir } of registry) {
   }
   const entry = state[abbr];
   if (!entry) {
+    // 프로젝트를 새로 등록한 회차에만 필요한 판단이라 SKILL.md가 아니라 여기서 그때만 낸다.
     out.push(`  ${abbr}: state.json 엔트리 없음 — 역할별 초기 해시를 정해 넣는다`);
+    out.push("      Readme 지배(AC/MP 등): README.md 마지막 실내용 변경 커밋 — 포맷팅·리네이밍 같은 메타 커밋(style/chore)은 커밋 메시지로 걸러 뺀다");
+    out.push("      Deploy 원천(KA): KQ의 최근 「KA 변환」 커밋 시점 직전의 원천 HEAD");
+    out.push("      Deploy 자체(KQ): 자체 최근 변환 커밋");
+    out.push("      역할 불명확·Maintain·Deploy 스킬 모두 없음: 현재 HEAD");
     continue;
   }
   const head = git(dir, ["rev-parse", "HEAD"]);
@@ -147,7 +152,7 @@ for (const { abbr, dir } of registry) {
   const alive = git(dir, ["cat-file", "-e", `${entry.hash}^{commit}`]) !== null;
   const ancestor = alive && git(dir, ["merge-base", "--is-ancestor", entry.hash, "HEAD"]) !== null;
   if (!ancestor) {
-    out.push(`  ${abbr}: orphan 해시 ${entry.hash.slice(0, 8)} (${alive ? "실존하나 조상 아님" : "실존 안 함"}) — 직전 최신화 지점을 재탐색해 복구한다`);
+    out.push(`  ${abbr}: orphan 해시 ${entry.hash.slice(0, 8)} (${alive ? "실존하나 조상 아님" : "실존 안 함"}) — 팀 에이전트에게 직전 최신화 지점을 재탐색시켜 복구하고, 스캔을 다시 돌려 이 줄이 사라지는지 본다`);
     continue;
   }
   if (entry.hash === head) {
