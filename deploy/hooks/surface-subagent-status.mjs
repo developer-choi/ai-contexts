@@ -2,6 +2,7 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { readPayload, getSessionId, addContext } from "./hook-utils.mjs";
+import { killCommand, leftoverShells } from "./subagent-shells.mjs";
 import { readAgents, stuckNotice, subagentsDirOf, STALE_IDLE_MS, STATE_DIR } from "./subagent-status.mjs";
 import { watch } from "./subagent-watcher.mjs";
 
@@ -77,6 +78,22 @@ function describe(a) {
   return `- ${a.name}: 쉬는 중 (마지막 기록 ${a.minutes}분 전, 도구 호출 아님 — 보낼 것을 다 보냈거나 메시지를 기다린다)`;
 }
 
+// 쉬는 에이전트가 남긴 셸은 메인이 치운다. 그 에이전트의 결과를 받았는지, 더 쓸지는 메인만 안다 —
+// 기록에는 종료 여부가 안 남아 기계로는 "끝난 에이전트"와 "셸 결과를 기다리는 에이전트"를 못 가른다.
+function describeShells(agents, sessionId) {
+  const lines = leftoverShells(agents, sessionId).map((s) => {
+    const cmd = s.command.replace(/\s+/g, " ").slice(0, 120);
+    const kill = s.pids ? s.pids.map(killCommand).join(" ; ") : "PID 조회 실패 — 앞 명령이 명령줄에 든 프로세스를 찾아 트리째 끝낸다";
+    return `- ${s.agent}: ${cmd} → ${kill}`;
+  });
+  if (!lines.length) return "";
+  return (
+    `\n[쉬는 서브에이전트가 남긴 셸 — 도구 타임아웃으로 백그라운드에 옮겨진 셸은 에이전트가 끝나도 안 끝난다]\n` +
+    `${lines.join("\n")}\n` +
+    `그 에이전트의 결과를 이미 받았거나 더 쓰지 않으면, 사용자에게 묻지 말고 이번 턴에 위 명령으로 끝낸다.`
+  );
+}
+
 function surface() {
   const payload = readPayload();
   const sessionId = getSessionId(payload);
@@ -103,10 +120,17 @@ function surface() {
       sends.map((s) => `- ${s.agent} → ${s.to}: ${s.preview}`).join("\n")
     : "";
 
+  let shellBlock = "";
+  try {
+    shellBlock = describeShells(agents, sessionId);
+  } catch {
+    /* 셸 조회가 깨져도 상태 주입은 낸다 */
+  }
+
   if (!lines.length && !sendBlock) process.exit(0);
   addContext(
     `[서브에이전트 상태 — 기록 파일 기준, ListAgents의 running보다 이것을 믿는다]\n` +
-      `${lines.join("\n")}${sendBlock}\n` +
+      `${lines.join("\n")}${sendBlock}${shellBlock}\n` +
       `사용자가 에이전트 상태를 물으면 위 상태로 답한다. 멈춘 에이전트에게 SendMessage로 진행 상황을 묻지 않는다.`,
   );
 }

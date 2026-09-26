@@ -1572,6 +1572,7 @@ const skillCreatorGroup = async () => {
 const SUBAGENT_HOOK = 'surface-subagent-status.mjs';
 const subagentGroup = async () => {
   const root = await makeTempDir('hook-subagent-');
+  let orphan;
   try {
     const env = { SUBAGENT_WATCH_DISABLE: '1', TEMP: root, TMP: root, TMPDIR: root };
     const assistant = (content) => JSON.stringify({ type: 'assistant', message: { role: 'assistant', content } });
@@ -1606,6 +1607,28 @@ const subagentGroup = async () => {
     const longBash = session('long', [assistant([bash('t1', 'npm test', { timeout: 540000 })])], { minutesAgo: 7 });
     const none = session('none', [], { noDir: true });
 
+    // 백그라운드로 옮겨진 셸. 셸이 도는지는 출력 파일의 종료 표시로, PID는 실제 프로세스의 명령줄과
+    // 생성 시각으로 가르므로 명령줄에 표지가 든 node를 실제로 띄운다. 기록의 명령은 그 명령줄에 든
+    // 문자열이고, 기록 시각은 띄운 시각을 감싼다.
+    const marker = `setTimeout(()=>{},120000)//zzorphan-${process.pid}`;
+    const spawnedAt = Date.now();
+    orphan = childProcess.spawn(process.execPath, ['-e', marker], { stdio: 'ignore', windowsHide: true });
+    const bgShell = (id, command, { exited, idleMinutes, recordedAt = spawnedAt }) => {
+      const output = path.join(root, `${id}.output`);
+      fs.writeFileSync(output, exited ? '\n[exited with code 0]\n' : '');
+      const at = (ms) => new Date(recordedAt + ms).toISOString();
+      return session(id, [
+        JSON.stringify({ type: 'assistant', timestamp: at(-1000), message: { role: 'assistant', content: [bash('b1', command, { timeout: 10000 })] } }),
+        JSON.stringify({ type: 'user', timestamp: at(1000), message: { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'b1', content: `Command did not complete within its 10s timeout and was moved to the background (ID: bz${id}). Output is being written to: ${output}. You will be notified when it completes.` }] } }),
+        assistant([{ type: 'text', text: 'done' }]),
+      ], { minutesAgo: idleMinutes });
+    };
+    const shellLeft = bgShell('shell', marker, { exited: false, idleMinutes: 15 });
+    const shellStale = bgShell('shellstale', marker, { exited: false, idleMinutes: 45 });
+    const shellDone = bgShell('shelldone', marker, { exited: true, idleMinutes: 15 });
+    const shellFresh = bgShell('shellfresh', marker, { exited: false, idleMinutes: 2 });
+    const shellGone = bgShell('shellgone', 'zz-no-such-process-anywhere', { exited: false, idleMinutes: 15 });
+    const shellOld = bgShell('shellold', marker, { exited: false, idleMinutes: 15, recordedAt: spawnedAt - 10 * 60 * 1000 });
     // [payload, 기대 판정, 주입에 들어 있어야 할 것, 없어야 할 것, 설명]
     const cases = [
       [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', '/tasks'], [], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + 사용자 종료 안내'],
@@ -1616,7 +1639,11 @@ const subagentGroup = async () => {
       [prompt(longBash), 'context', ['rev-long: 일하는 중'], ['멈춤'], 'timeout 9분 Bash는 7분에 멈춤이 아니다'],
       [prompt(none), 'pass', [], [], 'subagents/ 없음 → 조용'],
       [{ ...stuck, hook_event_name: 'PostToolUse', tool_name: 'Agent' }, 'pass', [], [], 'PostToolUse는 감시기만 살리고 출력 없음'],
-    ];
+      [prompt(shellStale), 'context', ['남긴 셸', `PID ${orphan.pid}`], [], '30분 넘게 쉬어 개수만 세는 에이전트의 셸도 싣는다'],
+      [prompt(shellDone), 'context', ['rev-shelldone: 쉬는 중'], ['남긴 셸'], '출력 파일에 종료 표시가 있으면 끝난 셸'],
+      [prompt(shellFresh), 'context', ['rev-shellfresh: 쉬는 중'], ['남긴 셸'], '쉰 지 5분이 안 됐으면 셸 결과를 기다리는 중일 수 있다'],
+      [prompt(shellGone), 'context', ['rev-shellgone: 쉬는 중'], ['남긴 셸'], '종료 표시가 없어도 프로세스가 없으면 알리지 않는다'],
+      [prompt(shellOld), 'context', ['rev-shellold: 쉬는 중'], ['남긴 셸'], '명령이 같아도 그 도구 호출 때 생긴 프로세스가 아니면 잡지 않는다'],    ];
     const report = await runCases(cases, async ([payload, expected, must, mustNot, note]) => {
       const { decision, reason = '', stderr } = await runHookPayload(SUBAGENT_HOOK, payload, { env });
       const missing = must.filter((m) => !reason.includes(m));
@@ -1636,8 +1663,18 @@ const subagentGroup = async () => {
       ok: (first.reason ?? '').includes('main: 리뷰 결과: 동의 5 보강 3') && !(second.reason ?? '').includes('리뷰 결과'),
       failLine: `  FAIL  ${sendLabel} — 첫째: ${(first.reason ?? '').slice(-80)} / 둘째: ${(second.reason ?? '').slice(-80)}`,
     })]);
-    return mergeReports([report, sendReport]);
+    // 남은 셸도 한 번만 싣는다(30분 뒤 다시 싣는 것은 시각을 못 돌려 여기서 안 본다).
+    const shellFirst = await runHookPayload(SUBAGENT_HOOK, prompt(shellLeft), { env });
+    const shellSecond = await runHookPayload(SUBAGENT_HOOK, prompt(shellLeft), { env });
+    const shellLabel = `${SUBAGENT_HOOK} :: shell → 남은 셸을 PID와 끝낼 명령으로 한 번만 싣는다`;
+    const shellReport = toReport([judge(shellLabel, `${shellFirst.decision}/${shellSecond.decision}`, 'context/context', shellFirst.stderr || shellSecond.stderr, {
+      ok: ['남긴 셸', `taskkill /T /F /PID ${orphan.pid}`, '사용자에게 묻지 말고'].every((m) => (shellFirst.reason ?? '').includes(m))
+        && !(shellSecond.reason ?? '').includes('남긴 셸'),
+      failLine: `  FAIL  ${shellLabel} — 첫째: ${(shellFirst.reason ?? '').slice(-160)} / 둘째: ${(shellSecond.reason ?? '').slice(-80)}`,
+    })]);
+    return mergeReports([report, sendReport, shellReport]);
   } finally {
+    orphan?.kill();
     await removeTempDir(root);
   }
 };
