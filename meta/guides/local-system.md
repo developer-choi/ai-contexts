@@ -28,7 +28,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다. 소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
 
 - `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
-- 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책). 단 **Stop 이벤트는 claude 전용**(codex엔 Stop 런타임 없음)이라 codex 투영에서 제외되며, codex hook이 하나도 없는 레포(Stop-only, 예: KA)는 `.codex/` 산출물을 만들지 않습니다.
+- 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책). 단 **Stop 이벤트는 claude에만 싣습니다** — codex에서 Stop 훅 동작을 실측하지 못해 codex 투영에서 빠지며, codex hook이 하나도 없는 레포(Stop-only, 예: KA)는 `.codex/` 산출물을 만들지 않습니다.
 - `local/hooks/*.mjs` → `.claude/hooks/`(+codex hook이 있으면 `.codex/hooks/`)로 복사.
 - codex 프로젝트-로컬 훅은 trusted여야 발화합니다. 배포 시 best-effort로 trust를 시도하고, 실패하면 codex 세션에서 `/hooks`로 `.codex/hooks.json`을 수동 신뢰하세요.
 
