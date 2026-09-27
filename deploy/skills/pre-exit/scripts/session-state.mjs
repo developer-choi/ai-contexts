@@ -301,7 +301,7 @@ function collapseUnresolved(keys) {
 // 「회고 항목」 표가 갖는다. 여기 라벨을 다시 적으면 표와 두 벌이 되고, 어긋나도 드러나는 자리가
 // 없다 — 그래서 여기는 key와 감지 조건만 갖는다.
 //
-//   always — 조건 없이 돈다          off — 기본 꺼짐. 사용자가 켤 때만
+//   always — 조건 없이 메뉴에 오른다
 //   timeline — 시간·순서 표의 자체 판정(SKIP_TURNS·SKIP_MS)을 쓴다
 //   file·slash — 둘 중 하나만 맞아도 해당    cwd — 있으면 먼저 통과해야 하는 관문
 // 순서는 SKILL.md 「회고 항목」 표와 같다 — 그 표의 순서가 실행 순서라, 메뉴를 다른 순서로 내면
@@ -314,7 +314,7 @@ const RETRO_ITEMS = [
   { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
   { key: 'recruitment', slash: [/^\/recruitment-(application|motivation)$/], cwd: 'private-playground' },
   { key: 'step-1', when: 'always' },
-  { key: 'error-notebook', when: 'off' },
+  { key: 'error-notebook', when: 'always' },
 ];
 
 // changed가 쓰는 파일 쪽 절반. 레지스트리에서 뽑아 쓴다 — 두 벌로 두면 한쪽만 늘어난다.
@@ -710,10 +710,6 @@ if (command === 'menu') {
     }
     if (item.when === 'always') {
       lines.push(`${item.key}  항상`);
-      continue;
-    }
-    if (item.when === 'off') {
-      lines.push(`${item.key}  기본 꺼짐  사용자가 켤 때만`);
       continue;
     }
     if (item.cwd && !cwd.includes(item.cwd)) {
