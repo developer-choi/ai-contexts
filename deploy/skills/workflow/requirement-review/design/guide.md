@@ -2,7 +2,7 @@
 
 기획서 리뷰(planning)의 산출물(page.md, global.md)이 이미 있으면 보완하고, 없으면 디자인 시안을 기반으로 신규 생성한다.
 
-**개인 모드**는 사용자가 미리 만든 마크업 시안(`background/retained/mockup/`)이 디자인 원본이다 — step-1.1에서 받는다. 별도 figma가 없을 뿐 시각 원본은 있다. 이 시안을 참조해 의도·구조를 page.md/global.md에 반영하고 사용자 확인을 받는다. 시각 충실도는 MARKUP의 시안 대조 + 사용자 시각 확인이 담당하므로([conventions/session/markup/personal.md](../../conventions/session/markup/personal.md)) 본 단계는 비시각 의도·구조 정의에 집중한다.
+**개인 모드**는 사용자가 미리 만든 마크업 시안(`background/retained/mockup/`)이 디자인 원본이다 — step-1.1에서 받는다. 이 시안을 참조해 의도·구조를 page.md/global.md에 반영하고 사용자 확인을 받는다. 시각 충실도는 MARKUP의 시안 대조 + 사용자 시각 확인이 담당하므로([conventions/session/markup/personal.md](../../conventions/session/markup/personal.md)) 본 단계는 비시각 의도·구조 정의에 집중한다.
 
 **코드기반 모드**는 시안이 없고 기존 구현 코드가 있는 경우다 — planning의 코드기반 모드와 짝을 이룬다. 디자인 시안을 분석하는 대신 기존 코드의 실제 스타일·레이아웃·인터랙션을 읽어 디자인 체크리스트에 대입한다. 디자인↔기획서 불일치 대조 대신, 코드에서 읽어낸 현재 동작을 page.md/global.md에 반영하고 사용자 확인을 받는다.
 
@@ -19,20 +19,18 @@
 
 ### 입력 자료
 
-페이지 단위의 디자인 시안 자료. 예: 캡처 이미지, 피그마 링크, 문서 파일
+페이지 단위의 디자인 시안 자료.
 
 ### 체크리스트
 
 `checklist/` 하위의 디자인 체크리스트를 적용합니다.
 
-페이지 유형(폼, 리스트, 상세, 순차 플로우 등)을 식별하고, 해당하는 `../page-type/` 체크리스트를 추가 적용합니다.
+페이지 유형을 식별하고, 해당하는 `../page-type/` 체크리스트를 추가 적용합니다.
 
 ### 산출물
 
-기존 산출물이 있으면 보완하고, 없으면 신규 생성합니다.
-
 - `/plan/background/consumable/global.md` — 디자인 관련 공통 컴포넌트, TODO
-- `page.md` — 디자인 분석 결과. 저장 위치는 [planning/guide.md](../planning/guide.md) 「산출물」의 page.md 규칙과 같다 (PR 확정 전후로 자리가 다르다)
+- `page.md` — 디자인 분석 결과. 저장 위치는 [planning/guide.md](../planning/guide.md) 「산출물」의 page.md 규칙과 같다
 
 ### 분석 과정
 
@@ -46,7 +44,7 @@
 
 #### 공통화 검토
 
-직전 페이지와 겹치는 컴포넌트나 UI 패턴이 있으면, 2개 이상의 페이지에서 사용되는지 먼저 확인합니다. 2개 이상이면 사용자에게 알리고 global.md 공통 컴포넌트로 올릴지 검토합니다. 단일 페이지에서만 쓰이면 그 페이지 page.md의 구현 컴포넌트 목록에 기록합니다. 여러 페이지가 공유하는 레이아웃이 식별되면 사용자에게 layout.md를 생성할지 확인합니다.
+[planning/guide.md](../planning/guide.md) 「공통화 검토」와 같다.
 
 #### 종합
 

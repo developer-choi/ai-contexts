@@ -7,7 +7,7 @@
 #### recruitment와 함께 실행되는 경우
 
 - `/plan/background/` 하위 자료(과제요구사항, cross-analysis, 디자인 시안 등)를 기반으로 페이지별로 분석한다.
-- 맥락 수집 질문 중 서비스 설명·기능 요약·신규 여부는 recruitment 단계에서 확인되었으므로 생략한다.
+- 맥락 수집 질문 중 서비스 설명·기능 요약·신규 여부는 생략한다 (recruitment 단계에서 확인됨).
 - checklist/overview.md의 "목적/배경 파악"은 과제의 기능 범위와 구현 목표로 대체하여 읽는다.
 - 입력 자료: 별도 기획서가 없으면 과제요구사항과 UI 목업이 기획서 역할을 한다. recruitment 1단계에서 식별한 페이지 목록을 루프 대상으로 사용한다.
 
@@ -15,18 +15,18 @@
 
 리뷰 시작 전, 사용자에게 맥락을 질문합니다. 사용자가 이미 설명했다면 해당 항목은 생략합니다.
 
-- 이 서비스가 무엇을 하는 서비스인지 (예: 외국어 화상 수업 플랫폼, 이커머스 등)
+- 이 서비스가 무엇을 하는 서비스인지
 - 이번에 리뷰할 기능이 무엇인지 (한 줄 요약)
 - 신규 서비스/기능인지, 기존 기능 개선인지
 - 알아두어야 할 배경이나 제약사항이 있는지
 
 #### 산출물 생성
 
-[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/consumable/global.md`에, page.md 템플릿을 `/plan/background/consumable/page-{페이지명}.md`에 생성합니다 (PR 확정 전이라 아직 `pr{N}` 폴더가 없기 때문입니다). 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
+[output-template.md](./output-template.md)의 global.md 템플릿을 `/plan/background/consumable/global.md`에, page.md 템플릿을 `/plan/background/consumable/page-{페이지명}.md`에 생성합니다. 이 시점에서는 빈 템플릿으로 생성하고, 자료를 받은 후 초안을 채웁니다.
 
 ### 입력 자료
 
-페이지 단위의 기획서 자료. 예: 캡처 이미지, 피그마 링크, 문서 파일
+페이지 단위의 기획서 자료.
 
 ### 체크리스트
 
@@ -36,8 +36,8 @@
 
 ### 산출물
 
-- `/plan/background/consumable/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트, TODO 목록
-- `page.md` — **생성**. 페이지별 분석 결과. **그 페이지를 담을 PR이 확정되기 전에는 `/plan/background/consumable/page-{페이지명}.md`에 둔다** (어느 PR에 속할지 아직 모르므로). PR이 확정되면 `pr{N}/consumable/page.md`로 옮긴다 — 번호 부여가 확정 시점이라 폴더 번호와 PR 번호가 어긋나지 않는다 ([conventions/pr-split.md](../../conventions/pr-split.md))
+- `/plan/background/consumable/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트
+- `page.md` — **생성**. 페이지별 분석 결과. PR 확정 전에는 `/plan/background/consumable/page-{페이지명}.md`, 확정 후 `pr{N}/consumable/page.md` ([conventions/plan-folder.md](../../conventions/plan-folder.md))
 - `/plan/background/consumable/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
 
 ### 분석 과정
@@ -46,9 +46,9 @@
 
 page.md는 준비 방식 슬롯에서 생성해둔 것을 씁니다 (위치는 「산출물」). 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
 
-**개인 모드**도 step-1.1에서 원본을 받습니다 — 사용자가 미리 만든 마크업 시안(`background/retained/mockup/`)과, 있으면 `background/retained/spec.md`입니다. 이 시안·spec.md를 참조해 page.md 초안(비시각 스펙: 동작·API·메타)을 작성하고 사용자 공동 승인을 받습니다. 시안은 화면(시각)만 담으므로, 리뷰 중 시안·spec.md에도 없던 구멍(엣지값·에러 처리 등)이 나오면 todo.md TODO로 남깁니다(저자가 나중에 보완). 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 figma"가 아니라 "받은 마크업 시안 + spec.md"입니다.
+**개인 모드**는 step-1.1이 받은 마크업 시안(`retained/mockup/`)·`retained/spec.md`(있으면)를 참조해 page.md 초안(비시각 스펙: 동작·API·메타)을 작성하고 사용자 공동 승인을 받습니다. 리뷰 중 시안·spec.md에도 없던 구멍(엣지값·에러 처리 등)이 나오면 todo.md TODO로 남깁니다(저자가 나중에 보완). 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 figma"가 아니라 "받은 마크업 시안 + spec.md"입니다.
 
-**코드기반 모드**는 목업·기획서가 없고 기존 구현 코드가 있는 경우입니다(기존 동작 코드 개선형 채용과제 등) — step-1.2에서 planning·design ON/OFF를 묻는 사용자 확인 질문에서 사용자가 이 모드를 확인한 경우에 적용합니다. 자료를 받아 분석하는 대신, 대상 코드를 읽고 기획 체크리스트를 코드에 대입하여 역산합니다(코드 리딩이 자료 참조를 대체). 이후 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 자료"가 아니라 "코드에서 읽어낸 현재 동작"입니다.
+**코드기반 모드**는 목업·기획서가 없고 기존 구현 코드가 있는 경우입니다(기존 동작 코드 개선형 채용과제 등) — step-1.2에서 planning·design ON/OFF를 묻는 사용자 확인 질문에서 사용자가 이 모드를 확인한 경우에 적용합니다. 자료를 받아 분석하는 대신, 대상 코드를 읽고 기획 체크리스트를 코드에 대입하여 역산합니다. 이후 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 자료"가 아니라 "코드에서 읽어낸 현재 동작"입니다.
 
 - 현재 리뷰 대상과 관련 없어 보이는 자료가 있으면 사용자에게 알립니다.
 
@@ -59,18 +59,10 @@ AI가 자료와 체크리스트를 기반으로 page.md 초안을 작성합니�
 1. 템플릿의 각 섹션을 자료에서 파악한 내용으로 채웁니다. 확신이 없는 항목은 `[?]`로 표기합니다.
 2. 기획서에서 모호하거나 빠진 정의를 짚습니다.
 3. 엣지케이스를 선제시합니다.
-4. UX 개선 제안 (해당 시에만): 더 나은 대안이 있을 때 선택지를 제시합니다. 단정하지 않고 장단점을 함께 설명합니다.
+4. UX 개선 제안 (해당 시에만): 더 나은 대안이 있을 때 선택지를 제시합니다.
 5. 채팅에서 발견한 모호점·`[?]` 항목·엣지케이스를 구체적으로 나열합니다. **여기서 멈춥니다. 사용자 응답을 기다립니다.**
 
 > **Figma 데이터 기록 범위**: [conventions/artifact/markup-spec.md](../../conventions/artifact/markup-spec.md) 「기록 시점 — Background 단계 보류」 참조.
-
-#### 논의
-
-SKILL.md 「페이지 단위 루프 > 논의」 절을 따릅니다.
-
-#### 확정
-
-SKILL.md 「페이지 단위 루프 > 확정」 절을 따릅니다.
 
 #### 공통화 검토
 
