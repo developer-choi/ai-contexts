@@ -26,7 +26,7 @@
       global.md         ← step-1 requirement-review (planning) 산출물. step-4 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). step-1 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
-      figma-component-mapping.md ← step-5 Lead 산출물 (실무 한정). 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
+      figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
       design-system.md  ← recruitment 4단계 산출물 (채용 한정). step-3·step-4 PRESET_COMPONENTS 입력 재료
   pr{N}/
     persistent/
@@ -47,7 +47,7 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 
 ## 라이프사이클 규칙
 
-- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움. 파일별 예외 없이 균일하게 "안 지움" — 폴더명이 곧 라이프사이클 계약.
+- **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움.
 - **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
 - **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
 
@@ -55,16 +55,15 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 
 ## consumable/ 산출물 자가 정리 안내문
 
-`consumable/` 하위 산출물은 상단에 자가 정리 안내문을 박는다 — `node {{skill_dir}}/scripts/plan-folder.mjs notice <파일>`. 메인이 본문 룰을 따로 떠올리지 않아도 산출물 자체가 자기 정리 책임을 알린다. **안 박아도 파일은 정상으로 보이므로**, 나중에 그 파일을 소비하는 step이 「이건 큐인가 보존인가」를 모른 채 남겨둔다.
+`consumable/` 하위 산출물은 상단에 자가 정리 안내문을 박는다 — `node {{skill_dir}}/scripts/plan-folder.mjs notice <파일>`.
 
-`node {{skill_dir}}/scripts/plan-folder.mjs left /plan`이 남은 consumable과 안내문 누락분을 함께 낸다. 남아 있는 것이 곧 잘못은 아니다 — 아직 안 소비된 것일 수도, 소비하고 안 지운 것일 수도 있어 그 판정은 사람 몫이다.
-
+`node {{skill_dir}}/scripts/plan-folder.mjs left /plan`이 남은 consumable과 안내문 누락분을 함께 낸다. 남은 것이 소비 전인지 소비 후 안 지운 것인지는 사람이 가른다.
 
 ## 소비→삭제 메커니즘 SSOT — 소비처 step은 "소비"만 선언
 
 소비→삭제의 **메커니즘**(삭제 여부·granularity=절 단위·제목 보존 안 함·파일 삭제 조건)은 위 「라이프사이클 규칙」 + 「consumable/ 산출물 자가 정리 안내문」 두 곳에만 산다. 각 소비처 step은 **"소비" 선언만** 한다 — 삭제·절 단위·제목 보존 같은 동작 스펙을 재진술하지 않는다.
 
-- **제목·포인터를 남기지 않는다**: consumable은 순수 큐라 소비한 절을 통째 삭제하고, 모든 절이 비면 파일을 삭제한다. "제목만 남긴다"·"pointer skeleton" 같은 과보존은 절이 안 비어 파일 삭제가 영영 발동 안 하므로 금지.
+- 소비한 절은 제목·포인터도 남기지 않는다.
 
 ## 피그마 URL·캡처 캐싱
 

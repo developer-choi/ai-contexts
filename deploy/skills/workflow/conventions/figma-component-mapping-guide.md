@@ -2,10 +2,6 @@
 
 > 피그마 MCP가 제공하지 않는 variant props(styleType, size 등)를 디자인시스템 원본 소스에서 역추론하여 매칭표를 만든다.
 
-## 왜 필요한가
-
-피그마 MCP(`get_design_context`)는 React+Tailwind 참조 코드를 반환하지만, 컴포넌트 variant 속성(`styleType=neutralPrimary`, `size=medium` 등)은 포함하지 않는다. CSS 토큰만으로는 props를 정확히 결정할 수 없어 오매핑이 반복된다.
-
 ## 생성 절차
 
 Markup Implementer spawn 직전에 Lead가 수행한다.

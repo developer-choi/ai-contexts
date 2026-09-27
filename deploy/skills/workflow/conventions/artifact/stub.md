@@ -1,6 +1,6 @@
 # Stub 코드 컨벤션
 
-PR 골조 코드(stub)의 정의·범위·양식·라이프사이클 단일 출처. 생성·보존·비판적 검토·정리 단계 모두 본 컨벤션 참조.
+PR 골조 코드(stub)의 정의·범위·양식·라이프사이클 단일 출처.
 
 ## 정의·범위
 
@@ -14,7 +14,7 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 **마크업 예외 (재정의)**: 마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
 
 - **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — step-4 전면 stub 대상이 아니다.
-- **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../session/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출**한다 — 다운스트림 PR이 그 시그니처에 기대어 병렬화하기 위함. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), step-4 stub 공표 후엔 다운스트림 계약이라 freeze.
+- **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../session/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 step-4 stub으로 노출**한다. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), step-4 stub 공표 후엔 다운스트림 계약이라 freeze.
 
 PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. step-4의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
@@ -98,7 +98,7 @@ export type UserListResponse = {
 
 - stub 커밋이 base 위에 쌓여 있음. 사용자 리뷰까지 보존
 - Lead가 stub 파일들을 탐색·분류해서 Implementer에게 컨텍스트 주입. Implementer가 직접 탐색 X
-- stub→IMPL 변환 diff를 사용자가 리뷰할 수 있어야 함 → 보존 단계 안에서 squash 금지
+- 보존 단계 안에서 squash 금지
 
 ### 비판적 검토
 
@@ -106,7 +106,7 @@ export type UserListResponse = {
 
 ### 정리
 
-사용자 리뷰·동작 테스트 통과 후 stub 커밋을 정리한다 (history를 다시 쓰는 작업).
+사용자 리뷰·동작 테스트 통과 후 stub 커밋을 정리한다.
 
 케이스 분기:
 
@@ -118,6 +118,5 @@ stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본�
 
 stub 생성 단계에서 사용자가 검토 후 본문까지 채워 사실상 단일 IMPL 커밋. soft reset으로 풀어 슬라이스별 재분할.
 
-stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 재분할 대상에서 빼 사라지게 둔다 — 의도된 정리.
+stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 재분할 대상에서 빼 사라지게 둔다.
 
-정리 완료 후 사용자에게 force-push를 요청한다.
