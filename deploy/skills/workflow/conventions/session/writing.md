@@ -82,4 +82,4 @@ write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 �
 
 ## 전역 최종화·머지는 FINALIZE 담당
 
-메시지 최종화·오배치 커밋 재배치·머지 안내는 WRITING이 아니라 **전 PR IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다 ([finalize.md](finalize.md)).
+메시지 최종화·오배치 커밋 재배치·머지 안내는 WRITING이 아니라 **전 PR IMPL 완료 후 FINALIZE 세션**에서 1회 수행한다.

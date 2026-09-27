@@ -22,4 +22,4 @@
 
 - **모드**: 채용 | 실무 | 개인
 - **시각 원본 위치**: 이 프로젝트 시각 원본이 저장된 `retained/` 경로
-- **대조 절차문서**: 이 모드의 markup 절차문서 경로 (매핑은 [../session/markup/index.md](../session/markup/index.md))
+- **대조 절차문서**: 이 모드의 markup 절차문서 경로

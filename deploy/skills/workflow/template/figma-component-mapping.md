@@ -2,8 +2,6 @@
 
 > 피그마 CSS 토큰 → 디자인시스템 컴포넌트 props 매핑.
 
-작성 절차는 [conventions/figma-component-mapping-guide.md](../conventions/figma-component-mapping-guide.md) 참조.
-
 ---
 
 ## [컴포넌트명]
