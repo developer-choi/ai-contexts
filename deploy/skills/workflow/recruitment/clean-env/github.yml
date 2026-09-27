@@ -1,14 +1,14 @@
-# 제출 레포의 임시 브랜치에 .github/workflows/clean-install.yml로 얹는다
+# clean-env-check.mjs가 제출 레포의 임시 브랜치에 .github/workflows/clean-install.yml로 얹는다
 name: clean-install
 on: push
 jobs:
   clean-install:
     runs-on: ubuntu-latest
-    env: { PORT: 3000 }              # 과제 README에 명시 포트가 있으면 그 값
+    env: { PORT: 3000 }              # clean-env-check.mjs --port가 이 리터럴을 치환한다
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: 24 }   # 과제 README에 명시 버전이 있으면 그 값
+        with: { node-version: 24 }   # clean-env-check.mjs --node가 이 리터럴을 치환한다
       - run: '[ -z "$ENV_LOCAL" ] || printf "%s" "$ENV_LOCAL" > .env.local'
         env: { ENV_LOCAL: '${{ secrets.ENV_LOCAL }}' }
       - run: npm ci

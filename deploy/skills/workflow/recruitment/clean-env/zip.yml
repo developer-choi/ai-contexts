@@ -1,17 +1,22 @@
-# 임시 레포에 submission.zip과 함께 .github/workflows/clean-install.yml로 얹는다
+# clean-env-check.mjs가 임시 레포에 submission.zip과 함께 .github/workflows/clean-install.yml로 얹는다
 name: clean-install
 on: push
 jobs:
   clean-install:
     runs-on: ubuntu-latest
-    env: { PORT: 3000 }              # 과제 README에 명시 포트가 있으면 그 값
+    env: { PORT: 3000 }              # clean-env-check.mjs --port가 이 리터럴을 치환한다
     defaults: { run: { working-directory: app } }
     steps:
       - uses: actions/checkout@v4
-      - run: mkdir -p app && unzip -q submission.zip -d app
+      # zip 최상위가 폴더 하나로 감싸져 있으면 그 안을 app으로 끌어올린다(macOS zip의 __MACOSX는 빼고 센다)
+      - run: |
+          mkdir -p app && unzip -q submission.zip -d app && rm -rf app/__MACOSX
+          if [ ! -f app/package.json ] && [ "$(ls -A app | wc -l)" = 1 ] && [ -d app/"$(ls -A app)" ]; then
+            inner=app/"$(ls -A app)"; mv "$inner" wrapped && rmdir app && mv wrapped app
+          fi
         working-directory: .
       - uses: actions/setup-node@v4
-        with: { node-version: 24 }   # 과제 README에 명시 버전이 있으면 그 값
+        with: { node-version: 24 }   # clean-env-check.mjs --node가 이 리터럴을 치환한다
       - run: '[ -z "$ENV_LOCAL" ] || printf "%s" "$ENV_LOCAL" > .env.local'
         env: { ENV_LOCAL: '${{ secrets.ENV_LOCAL }}' }
       - run: npm ci
