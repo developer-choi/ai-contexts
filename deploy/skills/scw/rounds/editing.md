@@ -14,7 +14,6 @@
 
 - 검증은 skill-creator 절차 또는 [설계 토론](creating.md#설계-토론-capture-intent-보강) 팀으로 대안 수단과 비교해 수행한다.
 - 더 효과적인 수단이 있으면 그것을 역제안한다.
-- 프롬프트로 박기 전 더 강한 강제 메커니즘 우선 검토는 [`rules-as-code.md`](../../../contexts/rules-as-code.md)를 따른다.
 
 ## 번들 스크립트
 

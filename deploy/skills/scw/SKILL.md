@@ -41,7 +41,8 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 | 조건 | 부르는 기준 |
 |---|---|
-| 대상 문서의 산문을 쓰거나 고치거나 훑을 때(조건 없음) | [본문에 무엇을 남기나](../../contexts/prompt-standards/what-to-keep.md) · [문장 다듬기](../../contexts/prompt-standards/wording.md) · [정본과 참조](../../contexts/prompt-standards/sources-and-links.md) · [rules-as-code.md](../../contexts/rules-as-code.md) |
+| 대상 문서의 산문을 쓰거나 고치거나 훑을 때(조건 없음) | [본문에 무엇을 남기나](../../contexts/prompt-standards/what-to-keep.md) · [문장 다듬기](../../contexts/prompt-standards/wording.md) · [정본과 참조](../../contexts/prompt-standards/sources-and-links.md) · [정본이 코드에 있으면 산문은 옮겨 적지 않는다](../../contexts/rules-as-code.md#정본이-코드에-있으면-산문은-옮겨-적지-않는다) · [낡을 수 있는데 아무도 못 잡는 내용은 두지 않는다](../../contexts/rules-as-code.md#낡을-수-있는데-아무도-못-잡는-내용은-두지-않는다) |
+| 대상 문서에 규칙·금지·절차 문장을 넣거나, 산문을 검사·스크립트로 옮길 때 | [코드로 표현 가능한 것은 코드로](../../contexts/rules-as-code.md) |
 | 고치기 회차: 대상 문서 크기가 선을 넘을 때. 훑기·다이어트 회차: 매번 | [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md) |
 | 대상이 SKILL.md·흐름 라우터이거나 에이전트를 띄우는 구조일 때 | [스킬 짜임](../../contexts/prompt-standards/skill-structure.md) |
 | 대상이 스킬이거나 스킬이 읽는 문서일 때 | [여러 CLI 호환](../../contexts/prompt-standards/cross-cli.md) |
