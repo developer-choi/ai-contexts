@@ -6,8 +6,9 @@ import { normalizeCwd } from "./git-command-parser.mjs";
 //   "free"           — 사용자가 자기 것만 담아 자유롭게 쓰는 곳. 머지·푸시·reset 정책을 통째로 걷는다.
 //   "approval-gated" — 사용자 레포지만 결과물이 남는 곳. 보호 브랜치 머지는 승인 창, push는 차단 —
 //                      로컬 머지는 되돌릴 수 있지만 push는 밖으로 나가므로 사용자가 리뷰한 뒤 직접 민다.
-//   "pr-only"        — 위 두 목록 밖 전부(실무·채용 과제 등). 보호 브랜치 머지·push 모두 차단,
+//   "pr-only"        — 위 두 목록 밖 전부(실무·채용 과제·포트폴리오 등). 보호 브랜치 머지·push 모두 차단,
 //                      작업 브랜치 push와 PR만 된다. 채용 레포는 PR 이력이 평가 대상이다.
+//                      plan-for-myself는 사용자 레포지만 포트폴리오로 PR 이력을 보여 주므로 여기 둔다.
 //
 // 가르는 축은 소유가 아니라 어느 목록에 올랐는지다. 모르는 레포를 가장 엄한 쪽으로 두려고
 // PR 전용은 목록 없이 기본값이다 — 새 레포를 목록에 안 올리면 막히는 쪽으로 틀린다.
@@ -21,7 +22,6 @@ const APPROVAL_GATED_REPOS = new Set([
   "dsa-playground",
   "knowledge-archive",
   "monorepo-playground",
-  "plan-for-myself",
   "developer-choi",
 ]);
 
