@@ -32,8 +32,8 @@ argument-hint: <세션 이름> <채용|실무|개인>
 | **PR_{N}_PLAN** | **`todo.md`에 이 PR 절이 확정됨** + (채용) BG 「레포 세우기」 완료 + 의존 PR이 있는 경우에 한해 (그 PR이 stub 만든 경우 그 PR.step-4 stub, 안 만든 경우 그 PR.step-6 IMPL 완료 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수 있다. `todo.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / **가벼운 PR은 step-4에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | step-3 종료 → WRITING_IDEATOR (PR 본문 초안, step-4 진입 전 같은 세션 도중 안내) / step-4 stub 만든 경우 → PR_{N}_IMPL spawn / stub 없이 실행 이연(무거운 non-stub) → PR_{N}_IMPL spawn / stub 없이 그 자리 실행·커밋 완결(가벼운 PR) → IMPL 세션 없이 WRITING_REFINER **(단 step-5·6 수행 후 — step-4 「종료 시퀀스」 가벼운 PR 분기)** / step-4 stub 확정 시 → **본 PR의 시그니처만 필요한 PR의 출발 게이트 해제 안내** (`todo.md`의 의존 항목에서 찾는다. 세션을 새로 띄우라는 spawn 안내가 아니라 게이트가 풀렸다는 안내 — PLAN spawn 자체는 BG의 PR 확정이 유일 트리거) | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 | **Opus** |
 | **PR_{N}_IMPL** | PR_{N}_PLAN.step-4 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (의존 PR이 stub 만든 경우) 그 stub 시그니처 확정 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | step-6 끝 후(IMPL 세션 종료) → WRITING_REFINER / 마지막 IMPL이면(전 PR IMPL step-6 완료) → FINALIZE (fan-in) | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus |
 | **WRITING_IDEATOR** | PR_{N}_PLAN.step-3 종료 (초안 트리거) | `pr{N}/persistent/overview.md` + `pr{N}/persistent/decisions.md` (step-3 초기본, 토론 없으면 부재 가능) + `pr{N}/persistent/reference.md` + `background/consumable/todo.md` (PR 착수 시 판정 대상 — writing.md) | `pr{N}/consumable/pr-body.md` **초안**(배경·문제·접근·근거; 상세 코드블록 제외) — overview는 persistent라 **읽기만**, 어느 소비처도 삭제하지 않음 | 후속 spawn 없음 (REFINER는 IMPL·step-6 후 별도 트리거). per-PR·유연 타이밍 | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조** | **Opus** |
-| **WRITING_REFINER** | PR_{N}_IMPL.step-6 종료 (가벼운 PR은 PLAN이 step-5·6 수행 후) | WRITING_IDEATOR 입력 + `implementation.md` + 커밋 로그 + `decisions.md` 갱신분(step-6.6) + `pr{N}/consumable/` 잔여(review.md·user-test-cases.md). **pr-body 초안 부재 시 IDEATOR의 초안 만들기 선행**(write-init 앞 준비 단계 포함) | `pr{N}/consumable/pr-body.md` **확정** → PR 본문 복사·게시·삭제 / overview.md는 persistent라 읽기만(큐레이션), 삭제 안 함 / 잔여 consumable 소비·정리 / `pr{N}/persistent/`는 제외 (영구 보존) | 후속 spawn 없음 (per-PR·유연 타이밍 — IMPL 직후 또는 나중에 몰아서. 머지·최종화는 FINALIZE 담당) | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조**. 커밋 로그 조회 시 pr{N}→브랜치는 `git worktree list` + FOUNDATION 명명규칙(실무·개인은 worktree list 직접) | **Opus** |
-| **FINALIZE** | 전 PR의 IMPL(step-6) 완료 (fan-in) | 전 PR 커밋 히스토리 + WRITING 잔여 산출물 | 재배치·메시지 최종화된 히스토리 + force-push 요청 (폴더 산출물 없음) | 채용 → recruitment 마무리 안내 (동일 `채용` 인자) / 실무·개인 → 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관) | 다중 브랜치, 단계별 cwd ([conventions/session/finalize.md](conventions/session/finalize.md) 「cwd」) | **Opus** |
+| **WRITING_REFINER** | PR_{N}_IMPL.step-6 종료 (가벼운 PR은 PLAN이 step-5·6 수행 후) | WRITING_IDEATOR 입력 + `implementation.md` + 커밋 로그 + `decisions.md` 갱신분(step-6.6) + `pr{N}/consumable/` 잔여(review.md·user-test-cases.md). **pr-body 초안 부재 시 IDEATOR의 초안 만들기 선행**(write-init 앞 준비 단계 포함) | `pr{N}/consumable/pr-body.md` **확정** → PR 본문 복사·게시·삭제 / overview.md는 persistent라 읽기만(큐레이션), 삭제 안 함 / 자기 PR의 `pr{N}/consumable/` 잔여 소비·정리 (`/plan/` 전체 잔존 점검은 FINALIZE) / `pr{N}/persistent/`는 제외 (영구 보존) | 후속 spawn 없음 (per-PR·유연 타이밍 — IMPL 직후 또는 나중에 몰아서. 머지·최종화는 FINALIZE 담당) | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조**. 커밋 로그 조회 시 pr{N}→브랜치는 `git worktree list` + FOUNDATION 명명규칙(실무·개인은 worktree list 직접) | **Opus** |
+| **FINALIZE** | 전 PR의 IMPL(step-6) 완료 (fan-in) | 전 PR 커밋 히스토리 + WRITING 잔여 산출물 | 재배치·메시지 최종화된 히스토리 + force-push 요청 (폴더 산출물 없음) | 채용 → 같은 세션이 recruitment 1번부터 이어서 수행 (「채용과제 마무리」) / 실무·개인 → 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관) | 다중 브랜치, 단계별 cwd ([conventions/session/finalize.md](conventions/session/finalize.md) 「cwd」) | **Opus** |
 
 (6) 권장 모델은 **세션 구동 모델**(사용자가 `/workflow`로 띄우는 본 세션)이다. MARKUP·IMPL이 내부에서 spawn하는 reviewer 서브에이전트는 impl-review-loop의 모델 분할을 따른다.
 
@@ -58,6 +58,8 @@ PLAN(step-4)은 구현을 수행하는 세션이며, 가벼운 PR은 그 자리�
 - **모아뒀다 한꺼번에 안내하지 않는다.**
 
 **fan-in 후속 (FINALIZE)**: PR_{N}_IMPL이 step-6을 끝낼 때 방금 끝낸 PR이 마지막 IMPL인지 판정(「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준)하고, 마지막일 때만 WRITING_REFINER 안내에 더해 FINALIZE 진입도 안내한다.
+
+**세션 경계 지키기**: 세션 종료 보고에서 남은 단계를 나열할 때는 항목마다 담당 세션을 붙인다. 종료한 세션에서 사용자가 다른 세션 몫을 지시하면 바로 받지 않고, 어느 세션 몫인지 한 번 짚은 뒤 사용자가 고르게 한다.
 
 분기점 LLM 절차:
 0. (BG, 자료 받기 종료 분기점 제외) 안내 전 사용자 리뷰 — `node {{skill_dir}}/scripts/review-ledger.mjs pending --plan /plan`을 돌려 나온 것이 없으면 1로 간다. 나왔으면 이번 분기점까지 정한 핵심을 요약한 뒤 나온 파일을 하나씩 보여주며 리뷰받는다 — 요약은 리뷰의 머리말이지 대신이 아니고, 리뷰 뒤 바뀐 파일은 스크립트가 낸 바뀐 줄만 보여준다. 사용자가 확인한 파일은 `mark --plan /plan <파일...>`로 기록하고, 리뷰 중 고친 파일은 다시 `pending`에 뜨므로 바뀐 줄을 확인받는다. `pending`이 비어야 1로 간다
@@ -117,9 +119,9 @@ PR 1~N 본문을 연속 작성하는 상시 2세션. 본문은 [conventions/sess
 
 **마지막 PR(=마지막 IMPL) 판별**: `todo.md`를 읽어 IMPL이 아직 안 끝난 PR이 남았는지 본다. 남아 있지 않으면 방금 끝낸 IMPL이 마지막이다. `todo.md`에 PR 절이 없거나 비어 있으면 브랜치·PR 목록을 폴백 원천으로 쓴다. `pr{N}` 디렉토리 존재는 보조 신호일 뿐이고, **번호는 확정 순서라 완료 순서가 아니므로 "가장 높은 번호"로 판정하지 않는다**.
 
-### 채용과제 마무리 (FINALIZE 종료 후, 채용과제만)
+### 채용과제 마무리 (FINALIZE 본문 후 같은 세션, 채용과제만)
 
-FINALIZE가 전 PR을 머지 직전 상태로 정리한 뒤 채용 모드에서 recruitment 마무리를 안내한다. 사용자가 `/refresh-projects` 등으로 README 갱신 + GitHub PR 작성 완료 직후, [recruitment](recruitment/SKILL.md)의 「4-1. 산출물 문서 채용담당자 시점 리뷰」 트리거 (사용자 발화 트리거 — 메인 에이전트 자동 호출 아님).
+채용 모드에서는 FINALIZE 세션이 자기 본문을 마친 뒤 새 세션을 띄우지 않고 [recruitment](recruitment/SKILL.md)를 1번부터 이어서 수행한다. 7번(자산 회수)은 컨텍스트가 커졌으면 사용자가 새 세션으로 옮겨도 된다.
 
 ## step 경계 (전환·세션경계·후속)
 
