@@ -9,7 +9,6 @@
       공고.md           ← BG.step-1.1 산출 (채용만)
       메일.md           ← (채용만)
       과제요구사항.md   ← (채용만)
-      requirement-review-retrospect.md ← requirement-review/retrospect.md 산출물
     retained/
       folder-structure.md ← FOUNDATION 산출 (채용만)
       tech-constraints.md ← BG.step-1 산출

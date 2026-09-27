@@ -20,6 +20,6 @@
 
 제안마다 어느 파일을 고칠지 지목한다 — 해당 모드의 `checklist/`(planning·design)·[planning/output-template.md](./planning/output-template.md)·SKILL.md 중 하나.
 
-## 4. 기록
+## 4. 보고·등재
 
-위 1~3단계의 결과를 `/plan/background/persistent/requirement-review-retrospect.md`에 기록한다 (파일이 없으면 생성).
+위 1~3단계의 결과를 파일로 남기지 않고 사용자에게 보고한다. 사용자가 고른 개선 제안만 `/backlog`로 AC 백로그 항목에 등재한다.
