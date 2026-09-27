@@ -42,10 +42,6 @@
 2. 디자인과 기획서 간 불일치가 있으면 사용자에게 알립니다.
 3. 초안과 발견한 문제를 사용자에게 제시합니다.
 
-#### 공통화 검토
-
-[planning/guide.md](../planning/guide.md) 「공통화 검토」와 같다.
-
 #### 종합
 
-design 단독(planning 꺼짐)이면 design 관점의 종합만 수행한다: global.md 공통 컴포넌트 정리, 페이지 간 디자인 패턴 일관성 점검.
+design 단독(planning 꺼짐)이면 design 관점의 종합만 수행한다: 공통화 검토([planning/guide.md](../planning/guide.md) 「종합」 2번), 페이지 간 디자인 패턴 일관성 점검.
