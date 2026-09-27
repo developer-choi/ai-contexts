@@ -45,15 +45,13 @@ step-3 진행 중에 overview.md가 비대해도 무방 — 작업 캔버스 시
 
 PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — 상세 스펙·구체적 기술 키워드(라이브러리명, px값, 토큰명 등)·코드 블록(zod 스키마 본문, JSX, SCSS, 함수 시그니처 외 본문)은 넣지 않는다.
 
-persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_REFINER를 포함한 다독자가 읽고(read) PR 본문으로 큐레이션할 뿐, 원본은 PR·프로젝트 종료 후에도 회고 기록으로 보존된다.
-
 본문 항목:
 
 - 이 PR의 목표
 - 범위 요약 (뭘 만드는지의 경계)
-- **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목). WRITING_IDEATOR가 초안 "Known issues / Follow-up" 절에 반영하고, WRITING_REFINER가 확정·소비
+- **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목)
 
-**PR 이연 항목은 「열려있는 질문」이 아니라 `/plan/background/consumable/todo.md`의 해당 PR 섹션에 적는다**. todo.md가 PR 분할·TODO 인덱스이므로 이연 항목은 그 PR 항목의 TODO로 직접 들어가는 게 자연스럽다 — overview.md를 거치면 후속 PR이 본 PR의 overview를 다시 봐야 하는 모순이 생긴다.
+**PR 이연 항목은 「열려있는 질문」이 아니라 `/plan/background/consumable/todo.md`의 해당 PR 섹션에 TODO로 적는다**.
 
 외부 참조 자료 링크는 overview.md에 적지 않고 reference.md(아래)에 누적한다.
 
@@ -66,10 +64,6 @@ persistent라 소비·삭제 대상이 아니다 — WRITING_IDEATOR·WRITING_RE
 | `reference.md` | 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스 | 코드 없음 |
 | `markup.md` | **Figma 원본 링크 인덱스(사용자 입력)** + 토큰 매핑표·매칭표 (figma 없는 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
 | `implementation.md` | **구현 계획** ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 신설 시그니처·함수명 OK (rename류 기존 식별자 전사 X — grep 일괄치환 지시로) |
-
-「열려있는 질문」 절의 역할:
-- step-5에서 코드 안 `TODO` 마커는 본 PR 안에서 모두 해소되어야 하므로, 본 PR이 처리 못 하는 외부 의존성은 본 절에서 관리
-- overview.md는 persistent라 소비처가 반영해도 원본은 그대로 보존
 
 ### 산출물: `/plan/pr{N}/persistent/reference.md`
 

@@ -30,7 +30,7 @@ PR 하나의 본문 작업을 시작할 때마다, 그 PR의 첫 `/write-init`·
 
 ### 입력
 
-- `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**.
+- `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**. 「열려있는 질문」은 초안의 "Known issues / Follow-up" 절에 반영한다.
 - `pr{N}/persistent/decisions.md` — step-3 초기본. 토론이 없었으면 부재할 수 있다.
 - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
 - `/plan/background/consumable/todo.md` — 위 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 step-3에서 overview로 소비돼 없을 수 있다.

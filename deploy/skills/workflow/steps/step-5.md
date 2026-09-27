@@ -24,7 +24,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 [CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
-step-5는 로직 구현자와 리뷰어로 팀을 구성한다 — 마크업은 MARKUP 세션에서 디자인 진실 원천 0건으로 검증 완료된 코드(모드별 진실검사는 [modes.md](../conventions/modes.md) 매트릭스)를 가져오므로 본 step은 로직 전용이다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
+step-5는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자와 리뷰어로 팀을 구성한다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합
@@ -63,18 +63,18 @@ IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventi
 
 ### Step 5.2.2. gotchas
 
-- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 추가하는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. 설정을 몰아서 커밋하고 수정을 나중에 하면 안 된다 — 리뷰어가 도구별 영향을 diff로 확인할 수 있어야 한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
+- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 추가하는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
 - **커밋 분할 기준선: PLAN 계획** — `pr{N}/persistent/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
-- **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 한 커밋에 섞이면 step-6 사용자 리뷰 시 diff 가독성이 급락. 더 세분화는 아래 「독립 설명 테스트」가 판단.
-- **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면(예: vitest 세팅 — "테스트 인프라 구축") 별도 커밋. 불가능하면(예: 이 컴포넌트 전용 토큰 — 컴포넌트 없이 의미 없음) 현재 커밋에 포함한다.
+- **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
+- **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.
 - 새 파일/모듈을 만들기 전에 프로젝트에 같은 역할의 코드가 이미 있는지 확인한다. 기존 API, 타입, 컴포넌트를 재사용할 수 있으면 새로 만들지 않는다.
 
 ### Step 5.2.3. IMPL 중 디자인·기획 변경 감지
 
-IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(stub·it.todo, 마크업의 figma 자료)을 그대로 두고 진행하지 않는다. 변경분을 명시 처리하지 않으면 이후 GAP Analysis·검증 라운드에서도 잡히지 않는다.
+IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(stub·it.todo, 마크업의 figma 자료)을 그대로 두고 진행하지 않는다.
 
 - **디자인 변경** — 마크업의 진실 원천이 바뀐 것이다. 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령하고 — figma를 쓰는 모드면 [conventions/plan-folder.md](../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 절차로 — 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다(figma 없는 모드는 `markup.md`가 없어 이 단계 없음).
-- **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다(이 step 서두의 "계획에 문제가 있으면 보고" 원칙). AI 단독으로 stub·it.todo를 뒤집지 않는다 — SKILL.md 「입력 산출물 비판적 검토」의 결정 위임 형태. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
+- **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다. AI 단독으로 stub·it.todo를 뒤집지 않는다. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
 
 ---
 
@@ -92,19 +92,17 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 해당 슬라이스의 리뷰 파이프라인이 0건으로 통과하면 그 슬라이스 사이클은 종료한다. **이 시점에는 squash하지 않는다.** 다음 슬라이스의 구현 커밋을 직전 리뷰 수정 커밋들 위에 이어 쌓는다.
 
-정리 시점은 step-5 안이 아니라 step-6 사용자 리뷰 완료 후 (stub→IMPL diff 리뷰 가능해야 함). 케이스 분기 사유·절차는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「라이프사이클 > 정리」 참조.
-
 ---
 
 ## Step 5.4. 마무리
 
 - [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
-- **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가 (코드 안 TODO 일관 0건 — PR 이연·외부 의존성은 `todo.md`·`overview.md`로 관리)
+- **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
   - **`it.todo` 커버리지 (전체 todo 수 / 구현된 it 수)**
   - 수정 사항 (있는 경우)
-- 사용자가 step-6에서 코드 리뷰 수행 (커밋 정리 전이라 stub→IMPL diff 추적 가능)
+- 사용자가 step-6에서 코드 리뷰 수행
 
 > [CRITICAL] 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](step-6.md)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — step-5는 세션 경계가 아니며 후속 안내는 step-6에서 낸다.)

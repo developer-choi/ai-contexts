@@ -34,8 +34,8 @@
 
 둘을 함께 본다.
 
-- **금지 주석 잔존** — 걸리면 step-5 Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다: 판단이 1도 없는 대조에 판단하는 도구를 쓰면 "0건"이라는 답을 확인할 방법이 사라지고, 놓친 마커는 머지된 코드에 남아 나중에 드러난다.
-- **미배정 blanket disable 고아** — 생성 시 등록([conventions/artifact/comments.md](../conventions/artifact/comments.md) 「file-level(blanket) eslint-disable 라이프사이클」)을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. **배정이 아니라 표면화가 목적이다** — step-6은 PR 구현 후라 여기서 끌어와 제거하지 못한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 `todo-md.mjs add-todo`로 등록한다.
+- **금지 주석 잔존** — 걸리면 step-5 Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다.
+- **미배정 blanket disable 고아** — 생성 시 등록([conventions/artifact/comments.md](../conventions/artifact/comments.md) 「file-level(blanket) eslint-disable 라이프사이클」)을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 `todo-md.mjs add-todo`로 등록한다.
 
 ---
 
@@ -55,9 +55,9 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 ## Step 6.3. 사용자 리뷰 대기
 
-AI 리뷰(Step 6.2 code-review) + 모든 수정 완료 후, **사용자가 직접 코드 리뷰**한다. 이 시점까지 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존되어 있어야 사용자가 stub→IMPL diff를 추적하며 리뷰 가능.
+AI 리뷰(Step 6.2 code-review) + 모든 수정 완료 후, **사용자가 직접 코드 리뷰**한다. 이 시점까지 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존되어 있어야 한다.
 
-이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — Step 6.5 1회차 정리 후 재리뷰는 비용이 크므로, 모르는 코드는 여기서 모두 짚어 정리 전 단계에서 해소한다.
+이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — 모르는 코드는 Step 6.5 정리 전에 여기서 모두 짚어 해소한다.
 
 Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
@@ -92,12 +92,11 @@ Lead는 변경분을 훑어 TC 추출 → 파일 작성 후 사용자에게 경�
 
 UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 띄운 김에 렌더 결과를 `pr{N}/retained/markup.md` 「Figma 원본 링크 인덱스」 URL로 **사용자가 직접 시각 대조**한다.
 
-- 마크업 구현·리뷰는 사용자가 보지 못한 자동 리뷰 루프에서 0건 수렴했으므로, 사용자가 figma 원본을 마주하는 첫 지점이 여기다. 자동 루프가 figma 원본을 잘못 fetch해 멀쩡한 마크업을 어긋난 상태로 수렴시켰을 수 있어, 사람이 진실 원천을 재확인하는 게이트가 필요하다.
 - 검증 기준은 figma 원본: [conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md) 「검증 기준 — figma 원본 직접 fetch」 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
 - 반려분은 구현 단계 Implementer 흐름으로 수정 → 다시 6.2부터 진행.
 - 승인 게이트이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
-- **figma 없는 모드**: figma·markup.md가 없어 시각 진실 원천이 다르다([modes.md](../conventions/modes.md) 매트릭스). 사용자가 MARKUP에서 이미 그 원본 대조·시각 확인을 거쳤으므로 "처음 마주하는 지점"은 아니고, 본 게이트는 *조립된 PR 렌더(로직·실데이터 반영)*를 그 시각 원본과 사용자 눈으로 재확인하는 승인 게이트로 동작한다. 검증 기준이 figma 원본이 아니라는 점만 다르고, 승인/반려·반려분 수정 흐름은 동일하다.
+- **figma 없는 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려·반려분 수정 흐름은 같다.
 
 ---
 
@@ -105,7 +104,7 @@ UI 컴포넌트 PR이면, 위 동작 테스트로 사용자가 이미 화면을 
 
 사용자 리뷰·동작 테스트 통과 후 WRITING_REFINER(PR 본문 확정) 진입 전, stub 커밋을 drop하고 슬라이스별로 커밋을 재정렬한다.
 
-이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 본 PR에서 끝났다고 판단되는 정리도 후속 PR 작업 중 예전 PR의 잘못이 발견되어 다시 손봐야 하는 케이스가 잦으므로, 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다 ([conventions/session/finalize.md](../conventions/session/finalize.md)).
+이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다 ([conventions/session/finalize.md](../conventions/session/finalize.md)).
 
 ### Step 6.5.1. 케이스 분기
 
@@ -173,7 +172,7 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ## IMPL 종료 고유 판단
 
-step-6 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 시그니처는 step-6 사용자 리뷰까지 바뀔 수 있어 후속·의존 PR 안내를 step-5가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
+step-6 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속·의존 PR 안내는 step-5가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
 
-- **본 PR에 의존하는 PR의 진입 가능 안내** — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> dependents --pr {N}`으로 찾는다. 손으로 역방향을 뒤집다 하나를 놓치면 그 PR이 출발 가능해진 줄 모른 채 대기하고, 그 대기를 없애는 것이 이 워크플로우의 존재 이유다. 그런 PR이 있으면 각각의 step-3 진입 가능을 사용자에게 안내한다. 본 PR이 stub을 만들었다면 그 PR들은 이미 step-4 stub 시점에 출발했으므로 여기서 중복 안내하지 않는다. **세션을 새로 띄우라는 안내가 아니라 출발 게이트가 풀렸다는 안내다** — PLAN spawn 자체는 BG가 PR 확정 시점에 이미 안내했다.
+- **본 PR에 의존하는 PR의 진입 가능 안내** — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> dependents --pr {N}`으로 찾는다(손으로 역방향을 뒤집지 않는다). 그런 PR이 있으면 각각의 step-3 진입 가능을 사용자에게 안내한다. 본 PR이 stub을 만들었다면 그 PR들은 이미 step-4 stub 시점에 출발했으므로 여기서 중복 안내하지 않는다. **세션을 새로 띄우라는 안내가 아니라 출발 게이트가 풀렸다는 안내다** — PLAN spawn 자체는 BG가 PR 확정 시점에 이미 안내했다.
 - **마지막 IMPL 판정** — SKILL.md 「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준을 적용한다. 판정 결과(마지막이면 fan-in 후속으로 FINALIZE가 후속 명단에 더해진다)는 「세션 spawn 안내 메커니즘」 「fan-in 후속」이 반영한다.
