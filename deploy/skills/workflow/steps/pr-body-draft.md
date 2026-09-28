@@ -1,8 +1,27 @@
-# WRITING_IDEATOR — PR 본문 초안 (각 PR plan 종료 후)
+---
+step: pr-body-draft
+session: WRITING_IDEATOR
+scope: project
+entry: PR_{N}_PLAN의 plan 종료 (초안 트리거)
+model: Opus
+next: []
+---
+
+# pr-body-draft: PR 본문 초안
 
 이 세션은 **step 번호가 없는 상시 세션**이다. PR별 세션이 아니라 PR 1~N 본문을 IDEATOR→REFINER 2단계로 연속 작성한다. 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
 
 계획만으로 쓸 수 있는 PR 본문의 배경·문제·접근·근거를 미리 초안한다. 상세 코드블록은 REFINER 몫이다.
+
+## 입력·산출물·작업 위치
+
+- **입력**:
+  - `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**. 「열려있는 질문」은 초안의 "Known issues / Follow-up" 절에 반영한다.
+  - `pr{N}/persistent/decisions.md` — plan 초기본. 토론이 없었으면 부재할 수 있다.
+  - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
+  - `/plan/background/consumable/todo.md` — 아래 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 plan에서 overview로 소비돼 없을 수 있다.
+- **산출물**: `pr{N}/consumable/pr-body.md` **초안** (배경·문제·접근·근거; 상세 코드블록 제외)
+- **작업 위치**: main repo `/plan/` — 코드 워크트리 무관 (아래 「cwd」)
 
 ## cwd — 코드 워크트리 무관
 
@@ -23,13 +42,6 @@ PR 하나의 본문 작업을 시작할 때마다, 그 PR의 첫 `/write-init`·
 - TODO 하위 절만 보지 않는다. 미분류 절, 다른 PR 절, 그 밖의 절에도 이 PR 본문이나 README로 갈 항목이 있다
 - 항목마다 이번 PR 몫인지 가르고, 몫이면 어느 산출물로 갈지(이 PR 본문의 어느 절 / README 재료)까지 정한다
 - 판정 결과를 사용자에게 보고하고 확인받은 뒤 쓰기 시작한다. 몫인 항목이 없으면 없다고 보고한다
-
-## 입력
-
-- `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**. 「열려있는 질문」은 초안의 "Known issues / Follow-up" 절에 반영한다.
-- `pr{N}/persistent/decisions.md` — plan 초기본. 토론이 없었으면 부재할 수 있다.
-- `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
-- `/plan/background/consumable/todo.md` — 위 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 plan에서 overview로 소비돼 없을 수 있다.
 
 ## 절차
 

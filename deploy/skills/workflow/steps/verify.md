@@ -1,6 +1,26 @@
-# Step 6: 최종 점검
+---
+step: verify
+session: PR_{N}_IMPL
+next:
+  - to: pr-body-final
+  - to: finalize
+    when: 마지막 IMPL
+  - to: plan
+    notice: gate
+    when: 이 PR에 의존하는 PR이 있을 때
+---
+
+# verify: 최종 점검
 
 모든 기능 구현 및 커밋 완료 후, **PR 생성 직전** 코드 품질을 최종 점검하는 단계입니다.
+
+---
+
+## 입력·산출물·작업 위치
+
+- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`(주석 게이트·의존 PR 조회) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+- **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md / `pr{N}/persistent/decisions.md` 갱신 / 1회차 정리·재정렬된 커밋 + force-push 요청
+- **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
 ---
 

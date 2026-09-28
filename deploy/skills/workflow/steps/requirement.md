@@ -1,4 +1,19 @@
-# Step 1: 배경 파악 및 문제 정의
+---
+step: requirement
+session: BG
+scope: project
+entry: >-
+  `/workflow BG <모드>` 호출 (유일 루트)
+model: Opus
+next:
+  - to: markup
+    on: 1.1 종료
+    when: 실무·개인
+  - to: plan
+    on: PR 확정
+---
+
+# requirement: 배경 파악 및 문제 정의
 
 > **이 단계의 목표: 작업의 문제/목표를 정의한다** (도메인/비즈니스 관점, 코드 분석 아님)
 
@@ -10,6 +25,19 @@ requirement는 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자�
 - **Step 1.2 requirement-review 본체**: 스킬 로드 + 중복 조기 발견 + 작업 익숙도 판별
 
 **PR 확정은 별도 step이 아니라 requirement 내내 굴러간다** — 자료를 읽어나가며 확정 가능한 PR부터 하나씩 `todo.md`에 append한다 (아래 「PR 확정」). BG는 requirement로 끝난다; 일괄 PR 분할 단계는 없다.
+
+---
+
+## 입력·산출물·작업 위치
+
+- **입력**: 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안)
+- **산출물**:
+  - `background/persistent/`: 공고·메일·과제요구사항 (채용만)
+  - `background/retained/`: 시각 원본(figma 쓰는 모드는 figma-url.md·figma/, 개인 모드는 mockup/ + 선택 spec.md)·design-root.md·conventions-index.md·tech-constraints.md
+  - `background/consumable/`: todo.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동)
+  - (낯선 작업이면) 학습 인수인계 문서
+  - (채용) 작업 레포 — private 원격 + `master` 초기 커밋
+- **작업 위치**: main repo `/plan/background/`. 작업 레포는 아직 없을 수 있다 — 채용은 BG가 [레포 세우기](../requirement-review/recruitment/guide.md#레포-세우기)로 세우고, 실무·개인은 사용자가 세운다
 
 ---
 
@@ -93,7 +121,7 @@ requirement-review 단계에서 디자인·컴포넌트 중복이 있으면 **�
 
 ---
 
-## PR 확정 — step-1 내내
+## PR 확정 — requirement 내내
 
 자료를 읽어나가며 **확정 가능한 PR부터 하나씩** `/plan/background/consumable/todo.md`에 append한다. 확정 기준·분할 원칙·의존 서술은 [conventions/pr-split.md](../conventions/pr-split.md)가 단일 출처다.
 

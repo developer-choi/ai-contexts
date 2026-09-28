@@ -1,10 +1,31 @@
-# Step 3: 과제 정의
+---
+step: plan
+session: PR_{N}_PLAN
+scope: per-pr
+entry: >-
+  `todo.md`에 이 PR 절이 확정됨 + (채용) BG 「레포 세우기」 완료 + 의존 PR이 있는 경우에 한해
+  (그 PR이 stub 만든 경우 그 PR의 realize-plan stub, 안 만든 경우 그 PR의 IMPL 완료 — 의존 PR은
+  직전 번호가 아닐 수 있고 여럿일 수 있다. `todo.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면
+  확정 즉시 진입 가능. 학습 인수인계 후 진입 대기 적용 (`todo.md` 이 PR 절의 종류가 FOUNDATION이면 제외)
+model: Opus
+next:
+  - to: realize-plan
+  - to: pr-body-draft
+---
+
+# plan: 과제 정의
 
 > **이 단계의 목표: 과제를 정의하고 기술 전략을 수립한다**
 
 > **Plan mode 필수**. AI가 제시한 과제는 사용자 승인을 거쳐야 하며, 승인된 과제만 구현 단계에서 구현한다 (실행 또는 stub 분해).
 
 ---
+
+### 입력·산출물·작업 위치
+
+- **입력**: `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
+- **산출물**: `pr{N}/persistent/`: overview.md, decisions.md, reference.md
+- **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — [realize-plan 「사전 준비」](realize-plan.md#사전-준비-브랜치워크트리-생성)가 만든다
 
 ### 컨벤션 사전 참조
 
@@ -22,7 +43,7 @@ overview.md 작성 전에 아래를 읽고 기술 전략에 반영한다:
 
 이 단계는 "무엇을 구현할지"를 결정한다. "어떻게 구현할지"는 구현 단계에서 다룬다.
 
-#### step-3 작업 흐름 — overview.md를 단일 캔버스로
+#### plan 작업 흐름 — overview.md를 단일 캔버스로
 
 plan 진행 중에는 overview.md가 **단일 작업 캔버스** 역할을 한다. 결정·근거·트레이드오프·기술 선택·외부 자료 링크 등을 일단 overview.md에 모두 적어 사용자가 한 화면에서 검토할 수 있게 한다.
 

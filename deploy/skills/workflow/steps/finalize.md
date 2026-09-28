@@ -1,6 +1,21 @@
-# FINALIZE (전 PR 최종화)
+---
+step: finalize
+session: FINALIZE
+scope: project
+entry: 전 PR의 IMPL(verify) 완료 (fan-in)
+model: Opus
+next: []
+---
+
+# finalize: 전 PR 최종화
 
 모든 PR의 IMPL이 끝난 뒤 **1회**, 전 PR 커밋 히스토리를 머지 직전 상태로 정리하는 세션. step 번호 없는 세션(MARKUP과 동렬).
+
+## 입력·산출물·작업 위치
+
+- **입력**: 전 PR 커밋 히스토리(각 PR 브랜치의 base..tip) + PR·브랜치 목록(머지 여부) + `background/consumable/todo.md` + `/plan/` 전체의 잔존 consumable(WRITING 잔여 포함)
+- **산출물**: 재배치·메시지 최종화된 히스토리 + 재작성 전 백업 브랜치 + force-push 요청 / 잔존 consumable은 사용자 판단에 따라 삭제 또는 이관 (새 폴더 산출물 없음)
+- **작업 위치**: 다중 브랜치, 단계별 cwd ([cwd](#cwd))
 
 ## 진입 실측
 

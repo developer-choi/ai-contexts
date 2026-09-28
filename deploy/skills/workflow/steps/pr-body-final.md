@@ -1,20 +1,32 @@
-# WRITING_REFINER — PR 본문 확정 (각 PR verify 종료 후)
+---
+step: pr-body-final
+session: WRITING_REFINER
+scope: project
+entry: PR_{N}_IMPL의 verify 종료
+model: Opus
+next: []
+---
+
+# pr-body-final: PR 본문 확정
 
 구현·커밋이 완료된 뒤 IDEATOR 초안([pr-body-draft.md](pr-body-draft.md))을 실제 산출물과 정합시켜 확정하고, consumable을 정리한다.
+
+## 입력·산출물·작업 위치
+
+- **입력**:
+  - WRITING_IDEATOR 입력([입력](pr-body-draft.md#입력산출물작업-위치): overview·decisions·reference·todo.md) +
+  - `pr{N}/persistent/implementation.md`
+  - 커밋 로그 (브랜치 유도는 아래 「cwd」)
+  - `decisions.md`의 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화) 갱신분
+  - `pr{N}/consumable/` 잔여 산출물
+- **산출물**: `pr{N}/consumable/pr-body.md` **확정** → PR 본문 복사·게시·삭제 / 자기 PR의 `pr{N}/consumable/` 잔여 소비·정리 (`pr{N}/persistent/`는 제외)
+- **작업 위치**: main repo `/plan/` — 코드 워크트리 무관 (아래 「cwd」)
 
 ## cwd
 
 코드 워크트리 무관 규칙은 [cwd — 코드 워크트리 무관](pr-body-draft.md#cwd--코드-워크트리-무관)을 따른다.
 
 REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 워크트리 목록과 FOUNDATION 명명규칙으로 유도한다.
-
-## 입력
-
-- WRITING_IDEATOR 입력([입력](pr-body-draft.md#입력): overview·decisions·reference·todo.md) +
-- `pr{N}/persistent/implementation.md`
-- 커밋 로그 (브랜치 유도는 위 「cwd」)
-- `decisions.md`의 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화) 갱신분
-- `pr{N}/consumable/` 잔여 산출물
 
 ## fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
 

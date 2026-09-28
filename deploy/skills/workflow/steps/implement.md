@@ -1,10 +1,30 @@
-# Step 5: 구현
+---
+step: implement
+session: PR_{N}_IMPL
+scope: per-pr
+entry: >-
+  PR_{N}_PLAN의 realize-plan 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수)
+  + (의존 PR이 stub 만든 경우) 그 stub 시그니처 확정 (필수)
+model: Sonnet — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus
+next:
+  - to: verify
+---
+
+# implement: 구현
 
 > **이 단계의 목표: 팀을 spawn하고 PLAN이 세운 구현 계획대로 코드를 작성한다**
 
 Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드를 작성한다. 커밋마다 리뷰 파이프라인을 수행한다.
 
 `/plan/pr{N}/`의 산출물(stub 코드 + 잔존 md)은 초안이다. 구현 시 계획을 비판적으로 검토하고, 더 나은 방법이 있거나 계획에 문제가 있으면 사용자에게 보고한다.
+
+---
+
+## 입력·산출물·작업 위치
+
+- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/persistent/implementation.md`·`reference.md` + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
+- **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
+- **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 
 ---
 

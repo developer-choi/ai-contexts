@@ -1,8 +1,25 @@
-# MARKUP
+---
+step: markup
+session: MARKUP
+scope: project
+entry: >-
+  (채용) FOUNDATION PR의 realize-plan이 markup 워크트리 최소 셋팅을 마친 뒤 / (실무·개인) BG의
+  requirement 「자료 받기」 후, `/workflow MARKUP <모드>` 호출
+model: Sonnet (figma URL 기준) / Opus (캡처-only·개인)
+next: []
+---
+
+# markup: 전 페이지 마크업 생성·검증
 
 전 페이지 markup 생성·검증. PR에 안 들어감 (PR_{N}_IMPL이 페이지 단위로 검증된 코드를 그대로 가져감).
 
 모드 무관 공통 절차는 본 파일에 둔다. **디자인 진실 원천·재료·검사 방법은 모드 파일에 둔다** — figma 쓰는 모드(채용·실무)는 [figma.md](figma.md), figma 대신 사용자가 미리 만든 마크업 시안을 쓰는 모드(개인)는 [personal.md](personal.md). 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
+
+## 입력·산출물·작업 위치
+
+- **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`
+- **산출물**: markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`) + 공통 컴포넌트 확정·독립 산출 (PR 확정이 소비하는 단방향 입력)
+- **작업 위치**: markup 워크트리. 포트 3000 점유
 
 ## 세션 종료 조건
 
