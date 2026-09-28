@@ -685,26 +685,6 @@ const WAIT_CASES = [
 // 파일도 명령도 아닌 payload를 보는 hook들. 도구 이름과 인자 모양만으로 판정이 끝난다.
 // [hook 파일, payload, 기대 판정, 설명]
 const TOOL_CASES = [
-  // 팀 에이전트 shutdown 금지. message가 객체이고 type이 그것일 때만 걸린다.
-  [
-    'check-team-message-policy.mjs',
-    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: { type: 'shutdown_request' } } },
-    'deny',
-    'shutdown_request 차단',
-  ],
-  [
-    'check-team-message-policy.mjs',
-    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: '진행 상황 알려줘' } },
-    'pass',
-    '문자열 메시지는 통과',
-  ],
-  [
-    'check-team-message-policy.mjs',
-    { tool_name: 'SendMessage', tool_input: { to: 'a1b2c3', message: { type: 'text', text: 'x' } } },
-    'pass',
-    '다른 type의 객체 메시지는 통과',
-  ],
-
   // 측정 에이전트에 기대가 새는 것을 막는다. 「측정 지시서」로 여는 프롬프트는 표만 담아야 한다.
   [
     'check-blind-measure-prompt.mjs',
@@ -2013,7 +1993,7 @@ const subagentGroup = async () => {
     const shellOld = bgShell('shellold', marker, { exited: false, idleMinutes: 15, recordedAt: spawnedAt - 10 * 60 * 1000 });
     // [payload, 기대 판정, 주입에 들어 있어야 할 것, 없어야 할 것, 설명]
     const cases = [
-      [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', '/tasks'], [], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + 사용자 종료 안내'],
+      [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', 'TaskStop'], [], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + 종료 후 재기동 안내'],
       [prompt(working), 'context', ['rev-working: 일하는 중'], ['멈춤'], '도구 결과가 막 돌아옴 → 일하는 중'],
       [prompt(idle), 'context', ['rev-idle: 쉬는 중'], ['멈춤'], '텍스트 응답 15분 → 쉬는 중'],
       [prompt(stale), 'context', ['30분 넘게 쉬는 에이전트 1개'], ['rev-stale'], '30분 넘게 쉬면 개수만'],

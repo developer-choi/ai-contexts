@@ -83,11 +83,11 @@ function main() {
   check(buildHooks(base.hooks, 'claude').PostToolUse !== undefined
     && JSON.stringify(buildHooks(base.hooks, 'claude')).includes("'.claude','hooks'"), 'claude: command dir 토큰 .claude');
 
-  // claude: UserPromptSubmit 존재(매처 없는 그룹), PreToolUse는 Bash/SendMessage 분리
+  // claude: UserPromptSubmit 존재(매처 없는 그룹), PreToolUse는 Bash/Agent 분리
   check(claude.some((h) => h.event === 'UserPromptSubmit' && h.matcher === null), 'claude: UserPromptSubmit(매처 없음) 존재');
   const claudePre = claude.filter((h) => h.event === 'PreToolUse');
-  check(claudePre.some((h) => h.matcher === 'Bash') && claudePre.some((h) => h.matcher === 'SendMessage'),
-    'claude: PreToolUse가 Bash/SendMessage로 분리됨');
+  check(claudePre.some((h) => h.matcher === 'Bash') && claudePre.some((h) => h.matcher === 'Agent'),
+    'claude: PreToolUse가 Bash/Agent로 분리됨');
 
   // search-edit(on) 항목은 배열 매처 fan-out으로 탐색·쓰기 네 도구 전부에 등록된다
   // (쓰기는 백스톱 — Write/Edit으로는 폴더 CLAUDE.md가 자동 로드되지 않는다)
@@ -128,14 +128,6 @@ function main() {
   // 등록된 모습 그대로 한 번도 발동하지 않는다.
   check(claudePre.some((h) => h.matcher === 'Agent' && h.file === 'check-company-analysis-agent.mjs'),
     'claude: check-company-analysis-agent가 Agent 매처로 등록됨');
-
-  // 에이전트 종료 훅은 조건 없이 deny다. codex 어댑터가 PreToolUse를 '*'로 뭉치므로 거기 실리면
-  // codex의 모든 도구 호출이 막힌다 — 매처가 TaskStop으로 좁혀졌는지와 codex에 안 실렸는지를
-  // 함께 고정한다. 둘 중 하나만 보면 나머지 한쪽으로 같은 사고가 다시 난다.
-  check(claudePre.some((h) => h.matcher === 'TaskStop' && h.file === 'check-agent-stop-policy.mjs'),
-    'claude: check-agent-stop-policy가 TaskStop 매처로 등록됨');
-  check(!codex.some((h) => h.file === 'check-agent-stop-policy.mjs'),
-    'codex: 무조건 deny인 에이전트 종료 훅 미등록');
 
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
