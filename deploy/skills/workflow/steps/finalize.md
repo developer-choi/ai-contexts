@@ -9,7 +9,7 @@ next: []
 
 # finalize: 전 PR 최종화
 
-모든 PR의 IMPL이 끝난 뒤 **1회**, 전 PR 커밋 히스토리를 머지 직전 상태로 정리하는 세션. step 번호 없는 세션(MARKUP과 동렬).
+모든 PR의 IMPL이 끝난 뒤 **1회**, 전 PR 커밋 히스토리를 머지 직전 상태로 정리하는 세션. WRITING(PR 본문)은 본 세션의 선행이 아니다 (「WRITING·머지 관계」).
 
 ## 입력·산출물·작업 위치
 
@@ -33,12 +33,6 @@ next: []
 커밋 소속은 접두사가 아니라 **브랜치**(각 PR 브랜치의 base..tip 범위)로 식별한다.
 
 **브랜치 형태는 PR마다 다르다.** 앞 PR에 의존하는 PR은 그 브랜치 위에 얹혀 있고(스택), 독립인 PR은 기본 브랜치에서 각자 뻗어 있다 (base 결정은 [사전 준비](realize-plan.md#사전-준비-브랜치워크트리-생성) — 사용자 확인 사항).
-
-## 진입 조건 (fan-in)
-
-- **모든 PR의 IMPL(verify) 완료**.
-- 마지막 IMPL 판정 기준은 SKILL.md 「작업 진행 순서 > FINALIZE」가 소유한다(단일 소스 — 번호가 아니라 `todo.md` 미완 PR 잔여로 판정). 마지막 IMPL 세션이 verify 종료 시 본 세션(FINALIZE) 진입을 안내한다.
-- WRITING(PR 본문)은 본 세션의 선행이 아니다 (「WRITING·머지 관계」).
 
 ## cwd
 
@@ -99,5 +93,5 @@ force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 
 
 본문을 마치면 모드별로 갈린다.
 
-- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·자산 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다.
+- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·자산 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다. 7번(자산 회수)은 컨텍스트가 커졌으면 사용자가 새 세션으로 옮겨도 된다.
 - **실무·개인** — SKILL.md 「세션 spawn 안내 메커니즘」으로 머지를 안내하고 세션을 끝낸다(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.

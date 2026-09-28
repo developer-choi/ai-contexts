@@ -120,6 +120,8 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 ## 5. realize-plan 커밋 (stub 또는 실행)
 
+이 절의 커밋이 모두 끝난 시점(종료 시퀀스 전)이 「realize-plan 커밋」 사건이다.
+
 ### LLM 분석 + 사용자 제안 (PR 번호 무관)
 
 1. **LLM이 PR 작업 분석** — 아래 조건으로 "코드/stub로 갈 것"을 가른다 (하나라도 해당하면 코드로):

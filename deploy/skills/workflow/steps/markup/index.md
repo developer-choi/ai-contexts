@@ -17,8 +17,7 @@ next:
 
 전 페이지 markup 생성·검증. PR에 안 들어감 (PR_{N}_IMPL이 페이지 단위로 검증된 코드를 그대로 가져감). MARKUP은 페이지·요소를 새로 만들거나 고치는 임시 작업만 한다 — 폰트·폴더·설정 같은 본 코드는 PR 몫이다.
 
-모드 무관 공통 절차는 본 파일에 둔다. **디자인 진실 원천·재료·검사 방법은 모드 파일에 둔다** — figma 쓰는 모드(채용·실무)는 [figma.md](figma.md), figma 대신 사용자가 미리 만든 마크업 시안을 쓰는 모드(개인)는 [personal.md](personal.md). 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
-
+모드 무관 공통 절차는 본 파일에 둔다. **디자인 진실 원천·재료·검사 방법은 모드 파일에 둔다** — figma 쓰는 모드(채용·실무)는 [figma.md](figma.md), figma 대신 사용자가 미리 만든 마크업 시안을 쓰는 모드(개인)는 [personal.md](personal.md).
 ## 입력·산출물·작업 위치
 
 - **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`

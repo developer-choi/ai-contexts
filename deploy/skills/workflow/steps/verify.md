@@ -197,8 +197,6 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ---
 
-## IMPL 종료 고유 판단
+## IMPL 종료
 
-verify 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속 안내는 implement가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
-
-- **마지막 IMPL 판정** — SKILL.md 「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준을 적용한다. 판정 결과(마지막이면 fan-in 후속으로 FINALIZE가 후속 명단에 더해진다)는 「세션 spawn 안내 메커니즘」 「fan-in 후속」이 반영한다.
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「세션 spawn 안내 메커니즘」 — 마지막 IMPL 판정은 그 「fan-in 후속」).
