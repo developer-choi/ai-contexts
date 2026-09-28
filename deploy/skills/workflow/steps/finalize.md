@@ -93,5 +93,5 @@ force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 
 
 본문을 마치면 모드별로 갈린다.
 
-- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·자산 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다. 7번(자산 회수)은 컨텍스트가 커졌으면 사용자가 새 세션으로 옮겨도 된다.
+- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·제출 뒤 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다. 제출 뒤 회수([recruitment/after-submission.md](../recruitment/after-submission.md))는 컨텍스트가 커졌으면 새 세션으로 옮겨도 된다고 제출을 마친 시점에 안내하고, 옮기면 그 파일 경로를 새 세션에 넘기게 한다. 이때 `/pre-exit`는 본 세션은 제출을 마친 시점에, 새 세션은 회수를 마친 시점에 안내한다.
 - **실무·개인** — SKILL.md 「세션 spawn 안내 메커니즘」으로 머지를 안내하고 세션을 끝낸다(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.
