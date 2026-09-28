@@ -12,7 +12,7 @@
 
 ## 구조 규칙
 
-포맷·구조·톤 규칙은 [resume-guide.md](../../../contexts/writing-guide/resume-guide.md)를 따른다 (4줄 블록, 링크 본문 X, 수치는 성과에 모으기, 방법 vs 성과 분리, plain-text 렌더링, 명사형·한다체 톤).
+포맷·구조·톤 규칙은 [resume-guide.md](../../../contexts/writing-guide/resume-guide.md)를 따른다 (4줄 블록, 링크 본문 X, 수치는 성과에 모으기, 방법 vs 성과 분리, 명사형·한다체 톤). 렌더링은 [package-format.md](../../../contexts/writing-guide/package-format.md)의 `rendering_env` 항목을 따른다 (이력서 입력 필드는 plain-text 기본).
 
 ## 시안 다양화 연결
 
