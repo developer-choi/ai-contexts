@@ -12,11 +12,11 @@
 
 ### 하위 폴더·파일 배치
 
-폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md#폴더는-같은-주제의-파일을-모은다--그-주제를-무엇으로-잡을지가-먼저다)로 보고, 아래는 coding-standards 값이다.
+폴더·파일을 가르는 선과 이름은 [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md)로 보고, 아래는 coding-standards 값이다.
 
-- **폴더명**: 기술 스택 또는 도메인인지 (`react/`, `typescript/`, `testing/` 등)
+- **폴더명**: 기술 스택을 먼저 진다(`react/`, `typescript/`, `markup/`). 스택에 매이지 않는 판단만 도메인 폴더(`quality/`)로 간다
 - **파일명**: 빈칸에는 판단 주제와 기술 단위를 친다 (`component-split`, `error-handling`, `tanstack-query` 등)
-- **내용과 폴더 주제 일치**: 예) React 컴포넌트 분리 기준이 `quality/`에 있으면 안 됨
+- **내용과 폴더가 진 기준 일치**: 예) React 컴포넌트 분리 기준이 `quality/`에 있으면 안 됨
 
 ## 태그 검증
 
