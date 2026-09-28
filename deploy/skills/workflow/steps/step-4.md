@@ -107,7 +107,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
-3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — IMPL 분리 없이 step-4에서 완결)
+3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 step-4에서 끝내고, step-5·6은 IMPL 세션이 돈다)
 
 **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다.**
 
@@ -132,7 +132,7 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
 산출물 작성 완료 + 사용자 OK 발화 직후, 후속 세션 spawn 안내·보고 출력 전에 아래 단계를 **순서대로 모두** 수행한다.
 
-**가벼운 PR 분기 (stub 없이 그 자리 실행·커밋 완결 — IMPL 세션 생략)**: IMPL 세션이 없으므로 step-5·6 수행 주체가 PLAN 자신이다. 아래 종료 단계로 넘어가기 전에 step-5로 진입해 step-5→6을 진행한다. "IMPL 세션 없음"을 "step-5·6 스킵"으로 확장하지 않는다. (stub을 만들어 IMPL로 분해한 PR은 5·6을 PR_{N}_IMPL 세션이 수행하므로 본 분기 N‑A.)
+가벼운 PR이라 구현을 이 자리에서 끝냈어도 이 세션에서 step-5·6으로 넘어가지 않는다. 아래 종료 단계를 마치면 PR 무게와 상관없이 PR_{N}_IMPL을 안내한다 — 리뷰·사용자 테스트·커밋 정리는 IMPL의 step-6이 돈다.
 
 ### 1. 산출물 리뷰 (Reviewer 팀 에이전트 spawn)
 
