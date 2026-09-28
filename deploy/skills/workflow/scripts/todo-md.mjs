@@ -15,13 +15,15 @@
 //
 // 사용:
 //   node <이 파일> <todo.md> list
-//   node <이 파일> <todo.md> add-pr --name "이름" [--dep "..."] [--scope "..."] [--ref "..."] [--todo "..."]
+//   node <이 파일> <todo.md> add-pr --name "이름" [--type 종류] [--dep "..."] [--scope "..."] [--ref "..."] [--todo "..."]
 //   node <이 파일> <todo.md> dependents --pr N
 //   node <이 파일> <todo.md> add-todo (--pr N | --unassigned) --item "..."
 //
 // 반복 가능한 옵션(--dep·--scope·--ref·--todo)은 여러 번 줄 수 있다.
 
 import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 // 네 하위 절은 이 순서로 고정이다. 「어떤 절도 비워두거나 지우지 않는다」이므로 빈 절엔 `- 없음`이 들어간다.
 const SUBS = [
@@ -33,6 +35,22 @@ const SUBS = [
 const UNASSIGNED = '미분류';
 // 「의존」 항목은 `- PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}` 꼴이다. 번호가 역방향 조회의 키다.
 const DEP_REF = /^-\s*PR\s*(\d+)\./;
+// PR 종류(예: FOUNDATION)는 첫 하위 절 앞 `종류: {값}` 한 줄이다. 종류별 문서를 더 읽을지는 이름이 아니라 이 줄로 가른다 — 이름은 식별자가 아니다.
+// 종류 없는 PR은 줄을 쓰지 않는다.
+const TYPE_LINE = /^종류:\s*(\S.*)$/;
+// 종류 목록의 정본은 conventions/pr-types/ 폴더다 — 파일 이름을 대문자로 쓴 것이 종류 값이다.
+// 오타·소문자 값은 줄은 써져도 어느 step도 알아보지 못해 조용히 빠지므로, 여기 없는 값은 거부한다.
+const PR_TYPES_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '../conventions/pr-types');
+const knownTypes = () =>
+  fs.readdirSync(PR_TYPES_DIR).filter((f) => f.endsWith('.md')).map((f) => path.basename(f, '.md').toUpperCase());
+
+// 종류 줄은 첫 하위 절 앞에서만 찾는다. 두 줄 이상이면 어느 쪽이 맞는지 모르니 전부 돌려주고 부르는 쪽이 거부한다.
+function typeLines(body) {
+  const end = body.findIndex((l) => /^###\s/.test(l));
+  return (end === -1 ? body : body.slice(0, end))
+    .map((l) => l.trim().match(TYPE_LINE)?.[1].trim())
+    .filter(Boolean);
+}
 
 function parseArgs(argv) {
   const args = { dep: [], scope: [], ref: [], todo: [] };
@@ -40,6 +58,7 @@ function parseArgs(argv) {
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
     if (a === '--name') args.name = argv[++i];
+    else if (a === '--type') args.type = argv[++i] ?? '';
     else if (a === '--pr') args.pr = Number(argv[++i]);
     else if (a === '--item') args.item = argv[++i];
     else if (a === '--unassigned') args.unassigned = true;
@@ -142,7 +161,12 @@ if (args.command === 'list') {
   }
   for (const s of prSections) {
     const deps = subsectionLines(s.body, '의존').filter((l) => l.trim().startsWith('-'));
-    console.log(`${s.title}`);
+    const types = typeLines(s.body);
+    if (types.length > 1) {
+      console.error(`${s.title} 절에 종류 줄이 ${types.length}개 있어 거부한다 (${types.join(', ')}). 한 줄만 남기고 다시 실행한다.`);
+      process.exit(1);
+    }
+    console.log(types.length ? `${s.title} [종류: ${types[0]}]` : `${s.title}`);
     deps.forEach((d) => console.log(`    ${d.trim()}`));
   }
   process.exit(0);
@@ -171,9 +195,16 @@ if (args.command === 'add-pr') {
     console.error('add-pr 에는 --name 이 필요합니다.');
     process.exit(1);
   }
+  if (args.type !== undefined) {
+    const known = knownTypes();
+    if (!args.type || args.type.startsWith('--') || !known.includes(args.type)) {
+      console.error(`모르는 PR 종류: '${args.type ?? ''}' — conventions/pr-types/에 있는 종류만 준다 (${known.join(', ')}).`);
+      process.exit(1);
+    }
+  }
   // 번호는 확정 순서다. 진행 순서도 의존 순서도 아니라 늘 다음 번호를 준다.
   const next = prSections.reduce((max, s) => Math.max(max, prNumberOf(s.title)), 0) + 1;
-  const body = [];
+  const body = args.type ? ['', `종류: ${args.type}`] : [];
   for (const [title, key] of SUBS) {
     const items = args[key].length ? args[key] : ['없음'];
     body.push('', `### ${title}`, '', ...items.map((i) => `- ${i}`));

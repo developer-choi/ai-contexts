@@ -19,7 +19,7 @@ next: []
 
 - **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`
 - **산출물**: markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`) + 공통 컴포넌트 확정·독립 산출 (PR 확정이 소비하는 단방향 입력)
-- **작업 위치**: markup 워크트리. 포트 3000 점유
+- **작업 위치**: markup 워크트리(프로젝트 루트의 형제 디렉토리 `{메인 디렉토리}-markup`). 포트 3000 점유
 
 ## 세션 종료 조건
 

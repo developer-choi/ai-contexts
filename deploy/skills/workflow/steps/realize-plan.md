@@ -1,10 +1,37 @@
-# Step 4: 구현 (실행 또는 stub 분해)
+---
+step: realize-plan
+session: PR_{N}_PLAN
+next:
+  - to: implement
+  - to: plan
+    notice: gate
+    on: stub 확정
+    when: 이 PR의 시그니처만 필요한 PR이 있을 때
+  - to: markup
+    on: markup 워크트리 최소 셋팅 완료
+    when: FOUNDATION PR
+---
+
+# realize-plan: 구현 (실행 또는 stub 분해)
 
 > **Plan mode 필수**. [과제 정의 단계](plan.md)에서 승인된 과제에 대해서만 진행한다.
 
 이 단계는 [과제 정의 단계](plan.md)에서 승인된 과제를 **구현한다**. 기본은 실행이다 — 코드로 표현 가능한 작업은 그 자리에서 실행·커밋한다. 무겁거나(한 세션에 다 못 끝냄) 후속 PR이 시그니처에 의존해 병렬화가 필요한 부분만 stub으로 분해해 본체를 다음 IMPL 세션으로 넘긴다.
 
 overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 인덱스)를 입력으로 쓰며, [과제 정의 단계](plan.md)의 기술 결정·근거를 반복하지 않는다. 무거워서 IMPL로 분해하는 경우 stub 코드 + 잔존 md가 그 핸드오프 산출물이 된다.
+
+이 PR의 종류(overview.md의 `종류:` 줄)가 FOUNDATION이면 [conventions/pr-types/foundation.md](../conventions/pr-types/foundation.md)도 읽는다.
+
+---
+
+## 입력·산출물·작업 위치
+
+- **입력**: plan 산출물 `pr{N}/persistent/`의 overview.md·decisions.md·reference.md + `/plan/pr{N}/`·`/plan/background/`의 잔여 산출물(아래 [잔여 산출물 소비](#1-잔여-산출물-소비)에서 소비)
+- **산출물**:
+  - 코드 변경 + 커밋 — stub 커밋(무겁거나 후속 PR이 시그니처에 의존하는 PR) 또는 그 자리 실행·커밋(가벼운 PR)
+  - `pr{N}/persistent/`: implementation.md, reference.md 누적
+  - `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
+- **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(이름 `{메인 디렉토리}-pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
 
 ---
 
@@ -16,7 +43,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
   - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
-- 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다.
+- 워크트리는 프로젝트 루트의 형제 디렉토리에 `{메인 디렉토리}-pr{N}` 이름으로 생성한다.
 
 이후 이 단계의 모든 작업(구현 실행 또는 stub 파일 생성·커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
 

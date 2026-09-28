@@ -11,6 +11,8 @@ next: []
 
 구현·커밋이 완료된 뒤 IDEATOR 초안([pr-body-draft.md](pr-body-draft.md))을 실제 산출물과 정합시켜 확정하고, consumable을 정리한다.
 
+이 세션도 **step 번호가 없는 상시 세션**이며, 진입 트리거·후속 안내는 SKILL.md 「세션」 표 + 「세션 spawn 안내 메커니즘」이 단일 소스다.
+
 ## 입력·산출물·작업 위치
 
 - **입력**:
@@ -26,7 +28,7 @@ next: []
 
 코드 워크트리 무관 규칙은 [cwd — 코드 워크트리 무관](pr-body-draft.md#cwd--코드-워크트리-무관)을 따른다.
 
-REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 워크트리 목록과 FOUNDATION 명명규칙으로 유도한다.
+REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 워크트리 목록과 [PR 워크트리 명명규칙](realize-plan.md#사전-준비-브랜치워크트리-생성)으로 유도한다.
 
 ## fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
 

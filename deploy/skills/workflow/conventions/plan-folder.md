@@ -10,7 +10,7 @@
       메일.md           ← (채용만)
       과제요구사항.md   ← (채용만)
     retained/
-      folder-structure.md ← FOUNDATION 산출 (채용만)
+      folder-structure.md ← FOUNDATION PR 산출 (채용만)
       tech-constraints.md ← BG의 requirement 산출
       conventions-index.md ← requirement 「자료 받기」 수집 (레포 미확보 시 레포 확보 시점 세션이 생성)
       figma-url.md      ← requirement 「자료 받기」 수집 (figma 쓰는 모드)

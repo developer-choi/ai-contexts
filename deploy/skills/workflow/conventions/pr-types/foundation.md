@@ -1,37 +1,30 @@
-# FOUNDATION (채용 한정)
+# FOUNDATION PR (채용 한정)
 
-채용 과제의 **프로젝트 베이스를 세우는 PR**(`PRESET_FOUNDATION` — 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션)을 수행하는 세션. MARKUP을 띄울 최소 환경도 함께 만든다.
+채용 과제의 **프로젝트 베이스를 세우는 PR**(`PRESET_FOUNDATION` — 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션)으로, PR 종류는 FOUNDATION이다. MARKUP을 띄울 최소 환경도 함께 만든다.
 
-빌드·린트·포맷·tsconfig 등 static checking 도구 설정(`PRESET_SETUP`)은 **이 세션이 아니라 별개 PR**이며 정상 PLAN/IMPL 도미노가 처리한다. 두 PR은 별도 브랜치라 서로 출발이 막히지 않는다 (실제 진행 순서는 BG·사용자 판단 — [../pr-split.md](../pr-split.md)).
+빌드·린트·포맷·tsconfig 등 static checking 도구 설정은 이 PR 몫이 아니다 — [PRESET_SETUP 정식 구축 항목](../pr-split.md#preset_setup-정식-구축-항목).
 
 ## 절차 — 표준 step을 탄다
 
-**이 세션 전용 절차를 따로 두지 않는다.** plan·realize-plan·implement·verify를 읽고 **필요한 절차는 수행, 불필요한 절차는 건너뛰어 기존 순서대로** 진행한다. 브랜치·워크트리 생성도 [realize-plan 「사전 준비」](../../steps/realize-plan.md#사전-준비-브랜치워크트리-생성)가 담당한다.
+**이 PR 전용 절차를 따로 두지 않는다.** 표준 step에서 **필요한 절차는 수행, 불필요한 절차는 건너뛰어 기존 순서대로** 진행한다.
 
-아래는 이 세션 고유의 **입력·제약**이다.
+아래는 이 PR 고유의 **입력·제약**이다.
 
 ## 산출 내용
 
 - **폴더 구조 마이그레이션** + `background/retained/folder-structure.md` 작성 (디렉토리 골격 + 폴더 마이그레이션 항목). 후속 PR이 참조한다.
 - **코딩 스탠다드 마이그레이션** — `/code-review --mode only-standards` 호출 → coding-standards 이슈만 받아 기존 코드 수정
-- **markup 워크트리 분기 + 최소 셋팅** (vite/next + scss/tailwind 마크업 가능 최소만, PR 안 감) + 루트 layout 폰트 셋업 — 이 PR의 산출물이 아니라 **MARKUP에게 넘길 준비물**이다. 갖춰지는 시점이 MARKUP spawn 트리거이며, 트리거는 SKILL.md 「세션」 표가 단일 소스다
+- **markup 워크트리 분기 + 최소 셋팅** (vite/next + scss/tailwind 마크업 가능 최소만, PR 안 감) + 루트 layout 폰트 셋업 — 이 PR의 산출물이 아니라 **MARKUP에게 넘길 준비물**이다. 최소 셋팅은 stub·TODO로 넘기지 않고 이 PR 안에서 바로 끝낸다 — MARKUP이 이것을 기다린다. 갖춰지는 시점이 MARKUP spawn 트리거이며, 트리거는 SKILL.md 「세션」 표가 단일 소스다
 
 **folder-structure.md 결정 기준**: 폴더 구조는 사용자 확인 전에 임의로 정해 스캐폴딩하지 않는다 — 항상 사용자에게 확인받는다. BG의 [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기) 자료(요구사항·우대사항)로 추천은 곁들이되(채용공고 우대사항의 FSD 등은 지원자에게 바라는 역량이지 이 과제를 그 구조로 구현하라는 지시가 아니다), FSD든 DDD든 사용자 확정 없이 진행하지 않는다. 사용자가 이미 구조를 지정했으면 재질문하지 않는다. DDD로 지정되면 트리 작성 전 MP `monorepo-playground/docs/patterns/folder-structure/FolderStructure.md`를 읽고 그 패턴(디렉토리 골격·네이밍·배럴 유무)을 따른다.
 
 **베이스라인에 기존 구조가 있어도 확인은 면제되지 않는다**: 마이그레이션 착수 전 먼저 MP `docs/best-practices/setup.md`(폴더 구조·셋업)를 Read해 후보 패턴을 파악하고, 기존 구조와 후보를 나란히 사용자에게 제시해 유지할지 다른 구조로 마이그레이션할지 확정받는다. 확인 없이 기존 구조를 그대로 `folder-structure.md`에 문서화하지 않는다.
 
-**루트 layout 폰트 셋업 기준** (채용 한정): 폰트는 이 세션이 확정한다. 시안에 지정 폰트가 있으면 그 폰트로, 없으면 `Noto Sans KR`을 기본값으로 둔다 — folder-structure와 같이 사용자 확인 후 확정한다. 시안 정독을 기다리지 않는다.
+**루트 layout 폰트 셋업 기준** (채용 한정): 폰트는 이 PR이 확정한다. 시안에 지정 폰트가 있으면 그 폰트로, 없으면 `Noto Sans KR`을 기본값으로 둔다 — folder-structure와 같이 사용자 확인 후 확정한다. 시안 정독을 기다리지 않는다.
 
 **진입 전 베이스라인 확인 필수**: 착수 전 「회사 제공 베이스라인 커밋」 절을 먼저 적용한다.
 
 **컨벤션 소스 스캔 (이연분)**: `background/retained/conventions-index.md`가 없으면(레포를 세운 뒤 BG가 스캔을 건너뛴 경우), 폴더 마이그레이션 착수 전에 [requirement 「컨벤션 소스 수집」](../../steps/requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)의 이름 스캔·인덱스 생성을 수행한다
-
-## 워크트리 명명
-
-- **PR 워크트리**: `{메인 디렉토리}-pr{N}`
-- **그 외 목적**: `{메인 디렉토리}-{purpose}`
-
-이 세션도 자기 PR 워크트리를 쓰므로 PR 워크트리 규칙을 따른다 — 다른 PR의 워크트리로 이동하지 않는다.
 
 ## 회사 제공 베이스라인 커밋
 
@@ -49,21 +42,3 @@
 ## brand-new clone 케이스
 
 회사 제공 베이스라인이 보일러플레이트(Initial commit)뿐이면 마이그레이션할 기존 자산이 없다. 이 경우 폴더 골격은 스캐폴딩으로 세우고(사용자 확인은 동일 적용), 코딩 스탠다드 마이그레이션은 대상이 없으므로 생략한다.
-
-## PRESET_SETUP 정식 구축 항목
-
-도구 세팅은 이 세션이 아니라 별개 PR(`PRESET_SETUP`)의 몫이다. **본 목록을 베이스로 후보를 도출한다**:
-
-- 린트 (ESLint 룰·플러그인)
-- 포맷 (Prettier + ignore)
-- **커밋 컨벤션 강제** (commitlint + **commit-msg** 훅)
-- **pre-commit 훅** (lint-staged)
-- **훅 배선·배포** (git 설정 훅 + `prepare`가 부르는 레포 내 등록 스크립트 — `monorepo-playground/templates/recruitment/README.md`)
-- tsconfig 강화
-- 빌드·스타일링 (vite/next + scss/tailwind)
-- 환경 일관성 (.editorconfig·.nvmrc 등)
-
-**실무·개인**: 이 세션 자체가 없다 (실무는 기존 정식 환경 그대로, 개인 신규 프로젝트면 첫 PR에서 셋업).
-
-위 항목 중 일부는 폴더 구조가 잡혀야 값이 정해진다. PRESET_SETUP PR이 이 세션과 별도 브랜치로 동시에 출발해도 그 부분은 폴더 확정을 기다리게 된다 — **출발이 병렬이라고 완주까지 병렬은 아니다.** BG가 자료를 읽고 따져 사용자에게 제안한다 ([순서 우려는 사용자에게 제안한다](../../steps/requirement.md#순서-우려는-사용자에게-제안한다)).
-

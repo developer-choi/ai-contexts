@@ -30,12 +30,29 @@ requirement 진행 중 자료를 읽어나가며 `/plan/background/consumable/to
 
 | 프리셋 | 경계 |
 |----|------|
-| PRESET_FOUNDATION (프로젝트 베이스) | 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션. FOUNDATION 세션이 자기 브랜치에서 완결한다 |
+| PRESET_FOUNDATION (프로젝트 베이스) | 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션 |
 | PRESET_SETUP (프로젝트 세팅) | 빌드·린트·포맷 등 static checking 도구와 설정. 런타임 코드 없음 |
 | PRESET_INFRA (공통 인프라) | 런타임 의존성 설치 + Provider·API 클라이언트 등 앱 인프라 구성 |
 | PRESET_COMPONENTS (공통 컴포넌트) | MARKUP이 「공통 컴포넌트 확정」으로 산출한 범용(도메인 안 묻은) 재사용 UI 컴포넌트. 공통성 판정(2군데 이상)은 MARKUP이 하고 여기서는 그 산출을 소비한다(단방향) — 공통성을 재판정하지 않는다 |
 
 순서·경계가 실제 의존과 맞지 않으면 사용자가 override한다 (「의존 — 판단거리 노출」).
+
+### PRESET_SETUP 정식 구축 항목
+
+도구 세팅은 FOUNDATION PR이 아니라 별개 PR(`PRESET_SETUP`)의 몫이다. **본 목록을 베이스로 후보를 도출한다**:
+
+- 린트 (ESLint 룰·플러그인)
+- 포맷 (Prettier + ignore)
+- **커밋 컨벤션 강제** (commitlint + **commit-msg** 훅)
+- **pre-commit 훅** (lint-staged)
+- **훅 배선·배포** (git 설정 훅 + `prepare`가 부르는 레포 내 등록 스크립트 — `monorepo-playground/templates/recruitment/README.md`)
+- tsconfig 강화
+- 빌드·스타일링 (vite/next + scss/tailwind)
+- 환경 일관성 (.editorconfig·.nvmrc 등)
+
+**실무·개인**: 실무는 기존 정식 환경을 그대로 쓰고, 개인 신규 프로젝트면 첫 PR에서 셋업한다.
+
+위 항목 중 일부는 폴더 구조가 잡혀야 값이 정해진다. PRESET_SETUP PR이 FOUNDATION PR과 별도 브랜치로 동시에 출발해도 그 부분은 폴더 확정을 기다리게 된다 — **출발이 병렬이라고 완주까지 병렬은 아니다.** BG가 자료를 읽고 따져 사용자에게 제안한다 ([순서 우려는 사용자에게 제안한다](../steps/requirement.md#순서-우려는-사용자에게-제안한다)).
 
 ---
 
@@ -77,8 +94,10 @@ PR을 확정할 때마다 `todo.md`의 미분류 절(PR 경계 확정 전에 쌓
 PR을 확정하면 이렇게 append한다.
 
 ```
-node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-pr --name "{이름}" --dep "PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}" --scope "..." --ref "..." --todo "..."
+node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-pr --name "{이름}" [--type {종류}] --dep "PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}" --scope "..." --ref "..." --todo "..."
 ```
+
+`--type`은 종류별 문서를 따로 읽는 PR에만 준다. `PRESET_FOUNDATION` PR을 확정하면 `--type FOUNDATION`을 준다. 뒤 세션은 PR 이름이 아니라 이 종류 줄로 FOUNDATION PR인지 가른다.
 
 절 이름·순서·번호·삽입 자리·빈 절의 `- 없음`·`## 미분류` 보관소는 그 스크립트가 안다. 파일을 직접 열어 붙이지 않는다.
 
