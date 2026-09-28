@@ -24,35 +24,11 @@ requirement 진행 중 자료를 읽어나가며 `/plan/background/consumable/to
 
 ---
 
-## 채용과제: 기본 PR 구조 (가설)
+## PR 종류
 
-채용과제는 아래를 **기본 가설**로 잡는다. 구체적 항목은 각 PR의 plan에서 정의한다.
-
-| 프리셋 | 경계 |
-|----|------|
-| PRESET_FOUNDATION (프로젝트 베이스) | 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션 |
-| PRESET_SETUP (프로젝트 세팅) | 빌드·린트·포맷 등 static checking 도구와 설정. 런타임 코드 없음 |
-| PRESET_INFRA (공통 인프라) | 런타임 의존성 설치 + Provider·API 클라이언트 등 앱 인프라 구성 |
-| PRESET_COMPONENTS (공통 컴포넌트) | MARKUP이 「공통 컴포넌트 확정」으로 산출한 범용(도메인 안 묻은) 재사용 UI 컴포넌트. 공통성 판정(2군데 이상)은 MARKUP이 하고 여기서는 그 산출을 소비한다(단방향) — 공통성을 재판정하지 않는다 |
+PR 종류의 정본은 [pr-types/](pr-types/)다 — 파일 하나가 종류 하나이고, 첫 줄에 경계와 적용 모드가 있다. 채용이면 바탕 PR을 이 종류로 나누고(기본 가설 — 구체 항목은 각 PR의 plan에서 정한다), 모드 무관 종류는 해당하면 붙인다. 어느 종류에도 안 맞는 PR은 종류 없이 둔다. COMPONENTS는 경계가 정의로 정해져 있어 BG가 초반에 확정한다. 페이지 PR이 COMPONENTS PR을 의존으로 적을지는 BG가 사용자와 함께 판단한다(이미 있는 컴포넌트로 되는지 등을 본다).
 
 순서·경계가 실제 의존과 맞지 않으면 사용자가 override한다 (「의존 — 판단거리 노출」).
-
-### PRESET_SETUP 정식 구축 항목
-
-도구 세팅은 FOUNDATION PR이 아니라 별개 PR(`PRESET_SETUP`)의 몫이다. **본 목록을 베이스로 후보를 도출한다**:
-
-- 린트 (ESLint 룰·플러그인)
-- 포맷 (Prettier + ignore)
-- **커밋 컨벤션 강제** (commitlint + **commit-msg** 훅)
-- **pre-commit 훅** (lint-staged)
-- **훅 배선·배포** (git 설정 훅 + `prepare`가 부르는 레포 내 등록 스크립트 — `monorepo-playground/templates/recruitment/README.md`)
-- tsconfig 강화
-- 빌드·스타일링 (vite/next + scss/tailwind)
-- 환경 일관성 (.editorconfig·.nvmrc 등)
-
-**실무·개인**: 실무는 기존 정식 환경을 그대로 쓰고, 개인 신규 프로젝트면 첫 PR에서 셋업한다.
-
-위 항목 중 일부는 폴더 구조가 잡혀야 값이 정해진다. 그러면 PRESET_SETUP PR은 FOUNDATION PR에 의존한다(폴더 이동을 담은 FOUNDATION의 realize-plan 커밋). BG가 자료를 읽고 따져 사용자에게 제안한다 ([순서 우려는 사용자에게 제안한다](../steps/requirement.md#순서-우려는-사용자에게-제안한다)).
 
 ---
 
@@ -96,7 +72,7 @@ PR을 확정하면 이렇게 append한다.
 node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-pr --name "{이름}" [--type {종류}] --dep "PR {번호}. {이름} — {무엇이 있으면 착수 가능한지}" --scope "..." --ref "..." --todo "..."
 ```
 
-`--type`은 종류별 문서를 따로 읽는 PR에만 준다. `PRESET_FOUNDATION` PR을 확정하면 `--type FOUNDATION`을 준다. 뒤 세션은 PR 이름이 아니라 이 종류 줄로 FOUNDATION PR인지 가른다.
+`--type`은 「PR 종류」에 해당하는 PR에만 준다(값 = `pr-types/` 파일 이름을 대문자로). 뒤 세션은 PR 이름이 아니라 이 종류 줄로 종류를 가른다. 종류는 plan이 이 PR 절을 소비하기 전에만 고칠 수 있다.
 
 절 이름·순서·번호·삽입 자리·빈 절의 `- 없음`·`## 미분류` 보관소는 그 스크립트가 안다. 파일을 직접 열어 붙이지 않는다.
 
@@ -106,7 +82,7 @@ node {{skill_dir}}/scripts/todo-md.mjs <todo.md> add-pr --name "{이름}" [--typ
 
 **번호는 확정 순서다.** 스크립트가 다음 번호를 준다 — 진행 순서도, 의존 순서도 뜻하지 않는다. 폴더·세션·워크트리 이름이 이 번호를 쓰므로 한번 준 번호는 바꾸지 않는다.
 
-**이름은 사람이 읽는 보조다.** 식별자가 아니라서 나중에 바꿔도 폴더·세션 이름에 영향이 없다. 프리셋 PR은 프리셋 이름(「채용과제: 기본 PR 구조」 표), 페이지 PR은 페이지명을 그대로 쓴다.
+**이름은 사람이 읽는 보조다.** 식별자가 아니라서 나중에 바꿔도 폴더·세션 이름에 영향이 없다. 페이지 PR은 페이지명을 그대로 쓴다.
 
 ---
 

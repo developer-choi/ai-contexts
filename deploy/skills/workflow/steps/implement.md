@@ -4,6 +4,7 @@ session: PR_{N}_IMPL
 scope: per-pr
 entry: >-
   PR_{N}_PLAN의 realize-plan 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수)
+  + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료 (필수)
 model: Sonnet — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus
 next:
   - to: verify
@@ -16,8 +17,6 @@ next:
 Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드를 작성한다. 커밋마다 리뷰 파이프라인을 수행한다.
 
 `/plan/pr{N}/`의 산출물(stub 코드 + 잔존 md)은 초안이다. 구현 시 계획을 비판적으로 검토하고, 더 나은 방법이 있거나 계획에 문제가 있으면 사용자에게 보고한다.
-
-`pr{N}/persistent/overview.md`의 PR 종류가 FOUNDATION이면 [conventions/pr-types/foundation.md](../conventions/pr-types/foundation.md)도 읽는다.
 
 ---
 
@@ -86,7 +85,7 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 
 ### Step 5.2.2. gotchas
 
-- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 추가하는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
+- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
 - **커밋 분할 기준선: PLAN 계획** — `pr{N}/persistent/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
 - **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
 - **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.

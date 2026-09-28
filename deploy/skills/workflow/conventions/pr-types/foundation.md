@@ -1,8 +1,10 @@
-# FOUNDATION PR (채용 한정)
+# FOUNDATION PR
 
-채용 과제의 **프로젝트 베이스를 세우는 PR**(`PRESET_FOUNDATION` — 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션)으로, PR 종류는 FOUNDATION이다. MARKUP을 띄울 최소 환경도 함께 만든다.
+경계: 코드 스타일 기준을 세우는 첫 PR. 적용 모드: 채용 = 폴더 구조 마이그레이션 + 코딩 스탠다드 마이그레이션 / 개인 신규 프로젝트 = 첫 셋업([SETUP 정식 구축 항목](setup.md#정식-구축-항목)을 후보로) / 실무·개인 기존 레포 = 없음. 채용에서는 MARKUP을 띄울 최소 환경도 함께 만든다.
 
-빌드·린트·포맷·tsconfig 등 static checking 도구 설정은 이 PR 몫이 아니다 — [PRESET_SETUP 정식 구축 항목](../pr-split.md#preset_setup-정식-구축-항목).
+채용에서 빌드·린트·포맷·tsconfig 등 static checking 도구 설정은 이 PR 몫이 아니다 — [SETUP](setup.md).
+
+아래 「산출 내용」부터는 채용 마이그레이션 기준이다.
 
 ## 절차 — 표준 step을 탄다
 

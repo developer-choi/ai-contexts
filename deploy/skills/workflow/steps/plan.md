@@ -5,8 +5,8 @@ scope: per-pr
 entry: >-
   `todo.md`에 이 PR 절이 확정됨 + (채용) BG 「레포 세우기」 완료 + 의존 PR이 있는 경우에 한해
   그 PR의 realize-plan 커밋 완료(stub 또는 실행 결과 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수
-  있다. `todo.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면
-  확정 즉시 진입 가능. 학습 인수인계 후 진입 대기 적용 (`todo.md` 이 PR 절의 종류가 FOUNDATION이면 제외)
+  있다. `todo.md` 해당 PR 절의 의존 항목이 출처) + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료.
+  의존이 없으면 확정 즉시 진입 가능. 학습 인수인계 후 진입 대기 적용 (`todo.md` 이 PR 절의 종류가 FOUNDATION이면 제외)
 model: Opus
 next:
   - to: realize-plan
@@ -18,8 +18,6 @@ next:
 > **이 단계의 목표: 과제를 정의하고 기술 전략을 수립한다**
 
 > **Plan mode 필수**. AI가 제시한 과제는 사용자 승인을 거쳐야 하며, 승인된 과제만 구현 단계에서 구현한다 (실행 또는 stub 분해).
-
-`todo.md` 이 PR 절의 종류가 FOUNDATION이면 [conventions/pr-types/foundation.md](../conventions/pr-types/foundation.md)도 읽는다.
 
 ---
 

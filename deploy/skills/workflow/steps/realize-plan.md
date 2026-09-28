@@ -22,8 +22,6 @@ next:
 
 overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 인덱스)를 입력으로 쓰며, [과제 정의 단계](plan.md)의 기술 결정·근거를 반복하지 않는다. 무거워서 IMPL로 분해하는 경우 stub 코드 + 잔존 md가 그 핸드오프 산출물이 된다.
 
-이 PR의 종류(overview.md의 `종류:` 줄)가 FOUNDATION이면 [conventions/pr-types/foundation.md](../conventions/pr-types/foundation.md)도 읽는다.
-
 ---
 
 ## 입력·산출물·작업 위치
@@ -101,7 +99,7 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 
 ### 기존 린트/coding-standards 오류 확인 (채용과제)
 
-채용과제에서 앞단의 린트 설정 PR은 다른 PR 범위 파일의 오류를 파일 단위로 린트 제외 처리하고 넘어간다. overview.md 또는 PR 분할에서 파악된 파일 목록을 기준으로, 해당 파일에 기존 린트/coding-standards 오류가 남아있는지 점검한다. 오류가 있으면 `implementation.md`에 포함하여, 해당 파일의 기능 변경 커밋보다 앞에 린트 정리 커밋을 별도로 배치하도록 계획한다.
+채용과제에서 앞단의 SETUP 종류 PR은 다른 PR 범위 파일의 오류를 파일 단위로 린트 제외 처리하고 넘어간다. overview.md 또는 PR 분할에서 파악된 파일 목록을 기준으로, 해당 파일에 기존 린트/coding-standards 오류가 남아있는지 점검한다. 오류가 있으면 `implementation.md`에 포함하여, 해당 파일의 기능 변경 커밋보다 앞에 린트 정리 커밋을 별도로 배치하도록 계획한다.
 
 ---
 
@@ -139,7 +137,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
 3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무거운 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 realize-plan에서 끝낸다)
 
-**"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다.**
+**"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다** — deps·설정·`it.todo`도 조건 2에 의해 stub 대상이다.
 
 ### stub 커밋 작성
 
@@ -207,7 +205,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 산출물 리뷰와 별개로 직접 수행한다 (리뷰 결과와 무관, 매번 수행). [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트)의 **PLAN 시점 매칭**(decisions 행동 결정 → `it.todo`, implementation.md 「행동 결정 커버리지」 표 산출)을 적용한다. 표 미산출·미완(면제 없는 빈 행)이면 종료 불가. 게이트 결과(커버리지 표)는 보고에 포함.
 
-stub 없는 PR이라도 decisions에 **행동 결정이 있으면** 그 결정은 대응 `it.todo`(→stub)를 요구한다 — "외부 시그니처 없음"을 "행동 결정 없음"으로 확장하지 않는다. 행동 결정이 실제 0건인 순수 인프라 PR만 `it.todo` 0건 → 면제로 분류하고 면제 사유를 명시한다.
+stub 없는 PR이라도 decisions에 **행동 결정이 있으면** 그 결정은 대응 `it.todo`(→stub)를 요구한다 — "외부 시그니처 없음"을 "행동 결정 없음"으로 확장하지 않는다. 행동 결정이 실제 0건인 PR만 `it.todo` 0건 → 면제로 분류하고 면제 사유를 명시한다.
 
 ### 3. 부정 명시 메아리 자가 점검
 
