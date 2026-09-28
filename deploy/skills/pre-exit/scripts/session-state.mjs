@@ -68,22 +68,23 @@ const TASK_ROOT = path.join(os.homedir(), '.claude', 'tasks');
 const USAGE_FILE =
   process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
 
-// 지원동기 회차가 3단(막혔을 때만 여는 자리)에서 떠온 갈래의 누계. 위 문서 누계의 형제다 —
+// 지원동기 회차가 4단(회사 밖 글 — 3단에서도 못 찾았을 때 여는 자리)에서 떠온 갈래의 누계. 위 문서 누계의 형제다 —
 // 저쪽은 이 세션이 연 프롬프트 문서를, 이쪽은 회사를 조사해 떠온 바깥 출처를 센다.
 const SOURCE_FILE =
   process.env.SOURCE_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'source-usage.json');
 
 // 갈래 이름을 세션이 지어 붙이면 같은 갈래가 여러 줄로 갈려 눈금이 영영 안 찬다. 문서 누계에서
 // 실제로 그렇게 깨졌다 — 진입점 이름이 35가지로 흩어져 한 문서의 횟수가 9·3·1로 나뉘었다.
-// 목록은 PP `local/contexts/recruitment/conventions.md` 「회사 자료는 세 단으로…」 3단 표에서 온다.
-// 「법령·제도 원문」만 그 표 밖이다 — 제도 원문은 단 순위에 안 걸리는 별개 층이라 덤프에도
-// 제 절(`## 제도 원문`)로 적히고, 그러면 3단 라벨 대상에서 빠진다. 그래도 목록에 두는 것은
-// 그 규약이 서기 전 덤프가 남아 있는 동안과, 판 자료에 딸려 온 법령이 3단 절에 섞이는 회차 때문이다.
+// 목록은 PP `local/contexts/recruitment/conventions.md` 「회사 자료는 네 단 사다리와 조건 자료로…」 사다리 표의
+// 4단(회사 밖 글) 줄에서 온다. 3단(고객 안내·앱 설명)은 회사가 직접 쓴 글이라 여기 없다.
+// 「법령·제도 원문」만 그 줄 밖이다 — 제도 원문은 사다리와 따로 도는 조건 자료라, 조건이 맞아 연 것은
+// 제 절(`## 제도 원문`)로 적혀 4단 라벨 대상에서 빠진다. 그래도 목록에 두는 것은 조건 밖에서
+// 「못 찾은 것」(사실 검수 `block` 등)으로 판 법령이 4단 절로 들어오는 회차 때문이다.
 const SOURCE_KINDS = [
   '인터뷰',
   '기사·보도자료',
   '대표 기고',
-  '앱스토어 설명·리뷰',
+  '앱 리뷰',
   '커뮤니티 글',
   '설문·통계',
   '업계 실무 자료',
@@ -91,7 +92,7 @@ const SOURCE_KINDS = [
   '학술논문',
 ];
 
-// 3단 절 중에는 자료가 아니라 메모인 것이 섞인다(「열게 된 조건」·「확인했으나 싣지 않은 자리」).
+// 4단 절 중에는 자료가 아니라 메모인 것이 섞인다(「열게 된 조건」·「확인했으나 싣지 않은 자리」).
 // 눈금에 안 올리되 라벨을 붙이게 해서, 빠뜨린 절과 구분한다 — 빠뜨림은 곧 분모가 줄어드는 것이라
 // 조용히 넘기면 안 된다.
 const SOURCE_SKIP = '해당 없음';
@@ -1107,7 +1108,7 @@ if (command === 'read-usage') {
   process.exit(0);
 }
 
-// 지원동기 회차가 3단에서 떠온 갈래의 누계. 회고가 내는 것은 절마다의 **갈래 라벨뿐**이고,
+// 지원동기 회차가 4단에서 떠온 갈래의 누계. 회고가 내는 것은 절마다의 **갈래 라벨뿐**이고,
 // 쓰였는지 안 쓰였는지는 PP `site-usage.mjs --sections`가 낸 목록에서 읽는다 — 사람만 할 수 있는
 // 일(어느 갈래인가)과 기계가 아는 일(인용됐는가)을 섞으면, 기계가 아는 것을 사람이 틀리게 적는다.
 //
@@ -1134,7 +1135,7 @@ if (command === 'source-usage') {
     console.error('라벨 json 형식: { "<site-usage --sections가 낸 절 제목>": "<갈래>" }');
     process.exit(1);
   }
-  // 분모(이번 회차가 3단에서 떠온 갈래 전부)를 기억으로 채우면 이 장치가 막으려던 일이 그대로 난다.
+  // 분모(이번 회차가 4단에서 떠온 갈래 전부)를 기억으로 채우면 이 장치가 막으려던 일이 그대로 난다.
   if (from && !sectionsPath) {
     console.error('--from 을 줄 때는 --sections <site-usage --sections 출력> 도 줘야 한다 — 안 쓴 비율의 분모가 거기서 나온다.');
     process.exit(1);
@@ -1144,12 +1145,12 @@ if (command === 'source-usage') {
     if (!fs.existsSync(path.dirname(SOURCE_FILE))) {
       // 백로그 레포가 없는 기기에서는 조용히 넘어간다 — 기기 간 공유가 목적이라 레포 없이 만들면
       // 다음 세션이 못 읽는다.
-      console.log(`[3단 갈래 누계] 누계를 둘 레포가 없어 건너뛴다 — ${SOURCE_FILE}`);
+      console.log(`[4단 갈래 누계] 누계를 둘 레포가 없어 건너뛴다 — ${SOURCE_FILE}`);
       process.exit(0);
     }
     // 폴더가 있는데 파일이 없으면 만든다. 「없으면 no-op」만 두면 아무도 안 만들어 줘서 영영 안 돈다.
     fs.writeFileSync(SOURCE_FILE, `${JSON.stringify({ kinds: {}, excluded: [], threshold: { read: 3, unusedRatio: 0.4 }, sessions: {} }, null, 2)}\n`);
-    console.log(`[3단 갈래 누계] 누계 파일을 새로 만들었다 — ${SOURCE_FILE}`);
+    console.log(`[4단 갈래 누계] 누계 파일을 새로 만들었다 — ${SOURCE_FILE}`);
   }
 
   let labels = {};
@@ -1184,8 +1185,8 @@ if (command === 'source-usage') {
   }
   // 라벨을 빠뜨리면 그 갈래의 분모가 조용히 줄어든다.
   for (const sec of sections) {
-    if (/^##\s*3단/.test(sec.title) && !(sec.title in labels)) {
-      problems.push(`라벨이 안 붙은 3단 절 ${JSON.stringify(sec.title.slice(0, 60))} — 자료가 아니면 「${SOURCE_SKIP}」을 붙인다.`);
+    if (/^##\s*4단/.test(sec.title) && !(sec.title in labels)) {
+      problems.push(`라벨이 안 붙은 4단 절 ${JSON.stringify(sec.title.slice(0, 60))} — 자료가 아니면 「${SOURCE_SKIP}」을 붙인다.`);
     }
   }
   for (const kind of exclude) if (!SOURCE_KINDS.includes(kind)) problems.push(`모르는 갈래 ${JSON.stringify(kind)} (--exclude)`);
@@ -1238,14 +1239,14 @@ if (command === 'source-usage') {
 
   const notes = [skipped ? `제외 목록에 있어 건너뜀 ${skipped}건` : null, exclude.length ? `제외 ${exclude.length}건` : null];
   const head = counted ? '이 회차는 이미 더했다 — 제외만 반영했다' : `${added}건 반영`;
-  console.log(`[3단 갈래 누계] ${head}${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${SOURCE_FILE}`);
+  console.log(`[4단 갈래 누계] ${head}${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${SOURCE_FILE}`);
 
   // 선을 넘은 갈래 중 이번 회차가 떠온 것만 알린다. 왜 팠고 무엇에 쓰려 했는지는 이 회차와 사용자가
   // 지금 기억하고 있고, 누계만 받은 다른 회차는 그 이유를 다시 추적해야 한다.
   const ripe = ripeRows(Object.entries(state.kinds), state.threshold, windowStart);
   const mine = (ripe ?? []).filter(([kind]) => byKind.has(kind));
   if (mine.length) {
-    console.log(`\n[3단 낭비 의심] 이번 회차가 떠온 갈래 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
+    console.log(`\n[4단 낭비 의심] 이번 회차가 떠온 갈래 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
     for (const row of mine) console.log(rowLine(row));
     console.log('회고 문제 목록에 올린다 — 무엇을 고르게 하는지는 [떠왔는데 안 쓴 절](augmentations/recruitment.md#떠왔는데-안-쓴-절).');
   }

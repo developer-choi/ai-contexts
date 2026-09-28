@@ -17,9 +17,9 @@ const THRESHOLD = { read: 3, unusedRatio: 0.4 };
 const today = new Date().toISOString().slice(0, 10);
 const daysAgo = (n) => new Date(Date.now() - n * 86_400_000).toISOString().slice(0, 10);
 
-/** 절 하나. 제목 앞에 `## 3단 — `이 붙어야 라벨 필수 검사에 걸린다. */
-const sec = (title, cited) => ({ file: 'x-site.md', title: `## 3단 — ${title}`, lines: 10, cited });
-const label = (pairs) => Object.fromEntries(pairs.map(([t, kind]) => [`## 3단 — ${t}`, kind]));
+/** 절 하나. 제목 앞에 `## 4단 — `이 붙어야 라벨 필수 검사에 걸린다. */
+const sec = (title, cited) => ({ file: 'x-site.md', title: `## 4단 — ${title}`, lines: 10, cited });
+const label = (pairs) => Object.fromEntries(pairs.map(([t, kind]) => [`## 4단 — ${t}`, kind]));
 
 // 각 케이스: 씨앗 상태 → 인자 → 기대 exit code·상태·출력
 const CASES = [
@@ -57,7 +57,23 @@ const CASES = [
     note: '라벨을 빠뜨리면 거부한다 — 빠뜨림은 곧 그 갈래의 분모가 줄어드는 것이다',
     sections: [sec('A', false), sec('B', false)],
     labels: label([['A', '인터뷰']]),
-    expect: { code: 1, unchanged: true, stderr: '라벨이 안 붙은 3단 절' },
+    expect: { code: 1, unchanged: true, stderr: '라벨이 안 붙은 4단 절' },
+  },
+  {
+    note: '3단 절(고객 안내·앱 설명)은 회사가 직접 쓴 글이라 라벨 없이 지나가고 눈금에 안 오른다',
+    sections: [
+      { file: 'x-site.md', title: '## 고객 안내 — https://a.com/faq', lines: 10, cited: false },
+      { file: 'x-site.md', title: '## 앱 설명 — https://play.google.com/store/apps/details?id=a', lines: 10, cited: false },
+      sec('A', true),
+    ],
+    labels: label([['A', '인터뷰']]),
+    expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 0 } } },
+  },
+  {
+    note: '옛 갈래 이름 「앱스토어 설명·리뷰」는 거부한다 — 앱 설명은 3단으로 옮겨 4단 갈래는 「앱 리뷰」다',
+    sections: [sec('A', false)],
+    labels: label([['A', '앱스토어 설명·리뷰']]),
+    expect: { code: 1, unchanged: true, stderr: '모르는 갈래' },
   },
   {
     note: '이 회차가 안 떠온 절은 거부한다',
@@ -68,7 +84,7 @@ const CASES = [
   {
     note: '같은 절이 두 번 들어오면 거부한다 — JSON은 뒤엣것으로 조용히 덮는다',
     sections: [sec('A', false)],
-    rawLabels: '{ "## 3단 — A": "인터뷰", "## 3단 — A": "학술논문" }',
+    rawLabels: '{ "## 4단 — A": "인터뷰", "## 4단 — A": "학술논문" }',
     expect: { code: 1, unchanged: true, stderr: '같은 절이' },
   },
   {
@@ -76,21 +92,21 @@ const CASES = [
     seed: { 학술논문: { read: 2, unused: 2, last: today } },
     sections: [sec('A', false)],
     labels: label([['A', '학술논문']]),
-    expect: { code: 0, kinds: { 학술논문: { read: 3, unused: 3 } }, stdout: '[3단 낭비 의심]' },
+    expect: { code: 0, kinds: { 학술논문: { read: 3, unused: 3 } }, stdout: '[4단 낭비 의심]' },
   },
   {
     note: '횟수가 차도 비율이 선 아래면 안 알린다',
     seed: { '업계 실무 자료': { read: 5, unused: 1, last: today } },
     sections: [sec('A', true)],
     labels: label([['A', '업계 실무 자료']]),
-    expect: { code: 0, kinds: { '업계 실무 자료': { read: 6, unused: 1 } }, noStdout: '[3단 낭비 의심]' },
+    expect: { code: 0, kinds: { '업계 실무 자료': { read: 6, unused: 1 } }, noStdout: '[4단 낭비 의심]' },
   },
   {
     note: '비율이 높아도 횟수가 모자라면 안 알린다 — 한 회차는 그 회사가 특수했는지 모른다',
     seed: { 학술논문: { read: 1, unused: 1, last: today } },
     sections: [sec('A', false)],
     labels: label([['A', '학술논문']]),
-    expect: { code: 0, kinds: { 학술논문: { read: 2, unused: 2 } }, noStdout: '[3단 낭비 의심]' },
+    expect: { code: 0, kinds: { 학술논문: { read: 2, unused: 2 } }, noStdout: '[4단 낭비 의심]' },
   },
   {
     note: '이번 회차가 안 떠온 갈래는 선을 넘었어도 안 뜬다',
@@ -104,7 +120,7 @@ const CASES = [
     seed: { 학술논문: { read: 5, unused: 5, last: daysAgo(200) } },
     sections: [sec('A', true)],
     labels: label([['A', '설문·통계']]),
-    expect: { code: 0, noStdout: '[3단 낭비 의심]' },
+    expect: { code: 0, noStdout: '[4단 낭비 의심]' },
   },
   {
     note: '같은 회차를 두 번 넣어도 눈금이 안 는다',
@@ -204,10 +220,10 @@ function main() {
     fs.rmSync(dir, { recursive: true, force: true });
   }
   if (failures.length) {
-    console.error(`3단 갈래 누계 판정 검증 실패: ${failures.length}건`);
+    console.error(`4단 갈래 누계 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
   }
-  console.log('3단 갈래 누계 판정 정상');
+  console.log('4단 갈래 누계 판정 정상');
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();

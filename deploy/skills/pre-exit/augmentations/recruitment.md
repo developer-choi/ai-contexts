@@ -19,16 +19,16 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 **한 회차에 안 쓰였다는 것만으로는 안 떠올 이유가 못 된다.** 회사마다 재료가 있는 자리가 다르다 — 2026-09-16 다섯 회차에서 FAQ는 arkain의 주 재료였고 ggi에선 통째로 버려졌다. 그래서 올릴 것은 **페이지 한 개가 아니라 종류**이고, 그 종류가 회차를 가리지 않고 거듭 안 쓰였을 때만이다.
 
-#### 1·2단 — 페이지 종류
+#### 1~3단 — 페이지 종류
 
 종류가 보이면 사용자에게 둘 중 하나를 고르게 한다.
 
 - **안 떠온다** — PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED`에 행을 더한다. 더하기 전에 지난 회차 덤프에 돌려, 인용된 절이 걸리는지 본다(그 파일 첫 주석의 FAQ 사례가 그렇게 잡혔다)
 - **그대로 둔다** — 아무것도 안 고친다. 다음 회차 회고가 같은 종류를 다시 만나면 그때 판단이 한 번 더 쌓인다
 
-#### 3단 — 갈래를 누계에 쌓는다
+#### 4단 — 갈래를 누계에 쌓는다
 
-3단(막혔을 때만 여는 자리)은 한 회차의 판정으로 안 닫힌다. 회사마다 막히는 자리가 달라 늘 "이번 회사가 특수했나"로 끝나므로, 갈래로 접어 **거듭 안 쓰이는지를 회차 너머로 센다.**
+4단(회사 밖 글 — 3단에서도 못 찾았을 때 여는 자리)은 한 회차의 판정으로 안 닫힌다. 회사마다 막히는 자리가 달라 늘 "이번 회사가 특수했나"로 끝나므로, 갈래로 접어 **거듭 안 쓰이는지를 회차 너머로 센다.**
 
 `session-state.mjs`의 `source-usage`가 그 자리다. 회고가 내는 것은 **절마다의 갈래 라벨뿐**이고, 인용 여부는 `site-usage.mjs`가 기계로 낸 목록에서 읽는다 — 사람만 아는 것(어느 갈래인가)과 기계가 아는 것(인용됐는가)을 섞으면, 기계가 아는 것을 사람이 틀리게 적는다.
 
@@ -56,7 +56,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 지원동기 세션의 최종 보고에 「서류 단계 조사가 못 대서 다시 판 자리」 줄이 있으면(없으면 이 절은 건너뛴다) 그 자리마다 판정한다.
 
 - **그 회사만의 사정인가, 판을 가리지 않는 자리인가.** 앞이면 아무것도 안 고친다. 뒤면 PP `local/skills/recruitment-company-analysis/SKILL.md` 「입력 자료 수집」이 여는 자리 목록에 그 자리를 올릴지 제안한다
-- 3단(업계·법령·기사)을 뒤늦게 연 회차는 **여는 조건이 늦게 난 것인지, 1·2단을 덜 판 것인지** 가른다. 뒤면 고칠 자리는 3단 조건이 아니라 회사 자기 진술을 찾는 순서다
+- 4단(업계 실무 자료·기사·인터뷰)을 뒤늦게 연 회차는 **「못 찾은 것」이 늦게 난 것인지, 1~3단을 덜 판 것인지** 가른다. 뒤면 고칠 자리는 「못 찾은 것」이 아니라 회사가 직접 쓴 글을 찾는 순서다
 
 ### 재료가 없어서 난 반려
 
@@ -72,7 +72,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 - 안 떠올 종류 → PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED` (+ 지난 덤프에 돌려 확인)
 - 안 옮길 공고 절 종류 → PP `local/contexts/recruitment/application/flow/step1.md` 「옮기지 않는 것」
-- 3단 갈래 눈금 → 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다)
+- 4단 갈래 눈금 → 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다)
 - 새로 여는 자리 → PP `recruitment-company-analysis` SKILL.md 「입력 자료 수집」
 - 그 밖의 절차 문제 → 「문제 리스트업 + 규칙화」의 문제 목록
 - 한 세션에서 못 정할 것 → 백로그 `projects/private-playground/active/recruitment/`
