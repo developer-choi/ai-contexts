@@ -10,7 +10,7 @@
 
 ## 산출물 정의의 옵션 인식 유발 문구
 
-[약한 어휘는 지우고 강조 라벨은 붙이지 않는다](../../../contexts/prompt-standards/wording.md#약한-어휘는-지우고-강조-라벨은-붙이지-않는다)로 본다. 적용 대상: step-4 산출물 정의 표 등.
+[realize-plan 「파생 산출물」 표](../../workflow/steps/realize-plan.md#3-파생-산출물) 등에서 쓸지 말지 고를 수 있게 읽히는 낱말이 보이면 디폴트(작성 필수/금지)를 명시하도록 보강 제안한다. `옵션` 같은 명사형도 대상이다. 원칙은 [약한 어휘는 지우고 강조 라벨은 붙이지 않는다](../../../contexts/prompt-standards/wording.md#약한-어휘는-지우고-강조-라벨은-붙이지-않는다)를 따른다.
 
 ## 산출물 라이프사이클
 
@@ -48,11 +48,11 @@
 
 ## realize-plan vs implement 코드 작성 경계
 
-realize-plan(stub)과 implement(IMPL) 모두 코드를 작성하므로 경계가 흐려진다. 항목별 경계를 직접 명시.
+realize-plan(실행 또는 stub)과 implement(IMPL) 모두 코드를 작성하므로 경계가 흐려진다. 항목별 경계를 직접 명시.
 
-### 모든 파일·함수·컴포넌트 stub 필수
+### stub으로 넘기는 부분은 내부까지 stub
 
-PR에서 만들 **모든 파일·함수·컴포넌트는 realize-plan에서 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
+[realize-plan](../../workflow/steps/realize-plan.md)은 실행이 기본이고, 무겁거나 후속 PR이 시그니처에 의존하는 부분만 stub으로 분해한다. stub으로 넘기는 부분은 **그 안의 파일·함수·컴포넌트를 모두 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
 
 두 가치:
 - **구조 가시화**: PR이 가져온 마크업을 로직 컨테이너로 감싸고 hook을 호출하면, 그 컨테이너·hook도 stub으로 만들어 로직 구조를 한눈에 파악. IMPL은 본문만 채움
@@ -85,7 +85,7 @@ PR에서 만들 **모든 파일·함수·컴포넌트는 realize-plan에서 stub
 
 ### 엄격도
 
-- **필수 (위반 카운트)**: 모든 로직 파일·함수·컴포넌트 stub 생성, 외부 공개 시그니처 안정성
+- **필수 (위반 카운트)**: stub으로 넘기는 부분의 로직 파일·함수·컴포넌트 stub 생성, 외부 공개 시그니처 안정성
 - **방향 가이드 (후보 식별 → 사용자 보고)**: 함수 본문이 짧으면 직접 / 길면 한글 명세 — 분량 경계는 case by case
 
 ## 의존성 그래프 점검
@@ -154,7 +154,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 사례
 
-implement에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, plan, realize-plan markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
+implement에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, plan 단계 본문, realize-plan의 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
 
 ### 점검
 
