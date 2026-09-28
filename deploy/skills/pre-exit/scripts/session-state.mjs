@@ -1122,14 +1122,9 @@ if (command === 'source-usage') {
     process.exit(0);
   }
 
-  const session = optOf('session');
   const from = optOf('from');
   const sectionsPath = optOf('sections');
   const exclude = (optOf('exclude') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-  if (!session) {
-    console.error('source-usage 에는 --session <session_id> 가 필요하다 — 없으면 같은 판정을 두 번 넣었을 때 가를 방법이 없다.');
-    process.exit(1);
-  }
   if (!from && !exclude.length) {
     console.error('source-usage 에는 --from <라벨 json> 이나 --exclude <갈래> 중 하나가 필요하다.');
     console.error('라벨 json 형식: { "<site-usage --sections가 낸 절 제목>": "<갈래>" }');
@@ -1149,13 +1144,14 @@ if (command === 'source-usage') {
       process.exit(0);
     }
     // 폴더가 있는데 파일이 없으면 만든다. 「없으면 no-op」만 두면 아무도 안 만들어 줘서 영영 안 돈다.
-    fs.writeFileSync(SOURCE_FILE, `${JSON.stringify({ kinds: {}, excluded: [], threshold: { read: 3, unusedRatio: 0.4 }, sessions: {} }, null, 2)}\n`);
+    fs.writeFileSync(SOURCE_FILE, `${JSON.stringify({ kinds: {}, excluded: [], threshold: { read: 3, unusedRatio: 0.4 }, rounds: {} }, null, 2)}\n`);
     console.log(`[4단 갈래 누계] 누계 파일을 새로 만들었다 — ${SOURCE_FILE}`);
   }
 
   let labels = {};
   let rawLabels = '';
   let sections = [];
+  let roundKey = null;
   if (from) {
     try {
       rawLabels = fs.readFileSync(from, 'utf8');
@@ -1164,12 +1160,19 @@ if (command === 'source-usage') {
       console.error(`라벨 파일을 못 읽었다: ${error.message}`);
       process.exit(1);
     }
+    let dump;
     try {
-      sections = JSON.parse(fs.readFileSync(sectionsPath, 'utf8')).sections ?? [];
+      dump = JSON.parse(fs.readFileSync(sectionsPath, 'utf8'));
     } catch (error) {
       console.error(`절 목록을 못 읽었다: ${error.message}`);
       process.exit(1);
     }
+    sections = dump.sections ?? [];
+    if (!dump.slug || !dump.date) {
+      console.error('절 목록에 slug·date가 없다 — site-usage --sections 출력을 그대로 넘긴다. 회차를 가를 키가 거기서 나온다.');
+      process.exit(1);
+    }
+    roundKey = `${dump.date}/${dump.slug}`;
   }
 
   const titles = new Map(sections.map((s) => [s.title, s]));
@@ -1199,11 +1202,15 @@ if (command === 'source-usage') {
   const state = JSON.parse(fs.readFileSync(SOURCE_FILE, 'utf8'));
   state.kinds ??= {};
   state.excluded ??= [];
-  state.sessions ??= {};
+  state.rounds ??= {};
   const today = new Date().toISOString().slice(0, 10);
   const windowStart = new Date(Date.now() - SOURCE_WINDOW_DAYS * 86_400_000).toISOString().slice(0, 10);
-  for (const [id, day] of Object.entries(state.sessions)) if (day < windowStart) delete state.sessions[id];
-  const counted = Boolean(state.sessions[session]);
+  for (const [key, round] of Object.entries(state.rounds)) if (round.day < windowStart) delete state.rounds[key];
+  // 한 회사 회차를 서류 세션과 지원동기 세션이 같은 덤프로 따로 돌린다. 세션 단위로 막으면 같은 회차가
+  // 두 번 세어져 눈금이 실제보다 빨리 찬다 — 커넥트웨이브 하나로 기사·보도자료가 2/3이 아니라 3/4가 됐다.
+  // 그래서 덤프(날짜/슬러그) 단위로 갈래마다 쓰였는지를 기억해 둔다.
+  const prior = roundKey ? state.rounds[roundKey] : undefined;
+  const seen = prior?.kinds ?? {};
 
   // 사용자가 「원래 가끔만 맞는 갈래」로 판정한 것은 다시 안 뜬다. 없으면 선을 넘은 갈래가 매 회차
   // 같은 알람을 내고, 그게 이런 장치가 무뎌지는 가장 흔한 경로다.
@@ -1220,25 +1227,38 @@ if (command === 'source-usage') {
     byKind.get(kind).push(titles.get(title));
   }
   let added = 0;
+  let revised = 0;
   let skipped = 0;
   for (const [kind, secs] of byKind) {
-    if (counted) continue;
     if (state.excluded.includes(kind)) {
       skipped += 1;
       continue;
     }
-    const row = (state.kinds[kind] ??= { read: 0, unused: 0, last: today });
-    row.read += 1;
     // 하나라도 인용됐으면 그 갈래는 값을 했다 — 판정 문장 「없었으면 결과가 달라졌나」와 같은 방향이다.
-    if (secs.every((s) => !s.cited)) row.unused += 1;
-    row.last = today;
-    added += 1;
+    const used = secs.some((s) => s.cited);
+    if (!(kind in seen)) {
+      const row = (state.kinds[kind] ??= { read: 0, unused: 0, last: today });
+      row.read += 1;
+      if (!used) row.unused += 1;
+      row.last = today;
+      added += 1;
+    } else if (!seen[kind] && used && state.kinds[kind]?.unused > 0) {
+      // 앞 세션에서 안 쓰인 갈래를 뒤 세션이 썼다. 회차 단위로는 쓴 것이라 안 쓴 눈금을 되돌린다.
+      state.kinds[kind].unused -= 1;
+      state.kinds[kind].last = today;
+      revised += 1;
+    }
+    seen[kind] = Boolean(seen[kind]) || used;
   }
-  if (!counted && byKind.size) state.sessions[session] = today;
+  if (roundKey && (added || revised)) state.rounds[roundKey] = { day: today, kinds: seen };
   fs.writeFileSync(SOURCE_FILE, `${JSON.stringify(state, null, 2)}\n`);
 
-  const notes = [skipped ? `제외 목록에 있어 건너뜀 ${skipped}건` : null, exclude.length ? `제외 ${exclude.length}건` : null];
-  const head = counted ? '이 회차는 이미 더했다 — 제외만 반영했다' : `${added}건 반영`;
+  const notes = [
+    revised ? `앞 세션에서 안 쓴 갈래를 쓴 것으로 고침 ${revised}건` : null,
+    skipped ? `제외 목록에 있어 건너뜀 ${skipped}건` : null,
+    exclude.length ? `제외 ${exclude.length}건` : null,
+  ];
+  const head = prior && !added ? '이 회차는 이미 더했다' : `${added}건 반영`;
   console.log(`[4단 갈래 누계] ${head}${notes.filter(Boolean).map((n) => `, ${n}`).join('')} — ${SOURCE_FILE}`);
 
   // 선을 넘은 갈래 중 이번 회차가 떠온 것만 알린다. 왜 팠고 무엇에 쓰려 했는지는 이 회차와 사용자가

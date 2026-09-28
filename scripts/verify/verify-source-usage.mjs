@@ -123,13 +123,41 @@ const CASES = [
     expect: { code: 0, noStdout: '[4단 낭비 의심]' },
   },
   {
-    note: '같은 회차를 두 번 넣어도 눈금이 안 는다',
+    note: '같은 회사 회차를 다른 세션이 또 넣어도 눈금이 안 는다 — 서류·지원동기 세션이 같은 덤프를 돌린다',
     seed: { 인터뷰: { read: 1, unused: 1, last: today } },
-    sessions: { 'sess-dup': today },
-    session: 'sess-dup',
+    rounds: { [`${today}/x`]: { day: today, kinds: { 인터뷰: false } } },
     sections: [sec('A', false)],
     labels: label([['A', '인터뷰']]),
-    expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 1 } } },
+    expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 1 } }, stdout: '이미 더했다' },
+  },
+  {
+    note: '센 회차는 갈래마다 쓰였는지와 함께 남는다 — 안 남으면 다음 세션이 같은 회차를 또 센다',
+    sections: [sec('A', true), sec('B', false)],
+    labels: label([['A', '인터뷰'], ['B', '학술논문']]),
+    expect: { code: 0, round: { 인터뷰: true, 학술논문: false } },
+  },
+  {
+    note: '절 목록에 slug·date가 없으면 거부한다 — 회차를 가를 키가 거기서 나온다',
+    dump: {},
+    sections: [sec('A', false)],
+    labels: label([['A', '인터뷰']]),
+    expect: { code: 1, unchanged: true, stderr: 'slug·date' },
+  },
+  {
+    note: '다른 회사 회차는 따로 센다',
+    seed: { 인터뷰: { read: 1, unused: 1, last: today } },
+    rounds: { [`${today}/other`]: { day: today, kinds: { 인터뷰: false } } },
+    sections: [sec('A', false)],
+    labels: label([['A', '인터뷰']]),
+    expect: { code: 0, kinds: { 인터뷰: { read: 2, unused: 2 } } },
+  },
+  {
+    note: '같은 회차 앞 세션이 안 쓴 갈래를 뒤 세션이 쓰면 안 쓴 눈금만 되돌리고, 앞 세션에 없던 갈래는 더한다',
+    seed: { 인터뷰: { read: 1, unused: 1, last: today } },
+    rounds: { [`${today}/x`]: { day: today, kinds: { 인터뷰: false } } },
+    sections: [sec('A', true), sec('B', false)],
+    labels: label([['A', '인터뷰'], ['B', '학술논문']]),
+    expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 0 }, 학술논문: { read: 1, unused: 1 } }, stdout: '쓴 것으로 고침 1건' },
   },
   {
     note: '제외한 갈래는 눈금에서 지워지고 다시 안 쌓인다',
@@ -154,13 +182,13 @@ function runCase(dir, index, c) {
     kinds: c.seed ?? {},
     excluded: [],
     threshold: THRESHOLD,
-    sessions: c.sessions ?? {},
+    rounds: c.rounds ?? {},
   };
   fs.writeFileSync(statePath, `${JSON.stringify(before, null, 2)}\n`);
-  const args = ['source-usage', '--session', c.session ?? `sess-${index}`];
+  const args = ['source-usage'];
   if (!c.omitSections) {
     const secPath = path.join(dir, `sections-${index}.json`);
-    fs.writeFileSync(secPath, JSON.stringify({ slug: 'x', date: today, sections: c.sections }));
+    fs.writeFileSync(secPath, JSON.stringify({ ...(c.dump ?? { slug: 'x', date: today }), sections: c.sections }));
     args.push('--sections', secPath);
   }
   if (c.labels || c.rawLabels) {
@@ -191,6 +219,9 @@ function check(c, r) {
     else if (got.read !== want.read || got.unused !== want.unused) {
       bad.push(`${kind} ${got.unused}/${got.read} (기대 ${want.unused}/${want.read})`);
     }
+  }
+  if (e.round && JSON.stringify(r.after.rounds?.[`${today}/x`]?.kinds) !== JSON.stringify(e.round)) {
+    bad.push(`회차 기록 ${JSON.stringify(r.after.rounds)} (기대 ${JSON.stringify(e.round)})`);
   }
   for (const kind of e.absent ?? []) if (r.after.kinds?.[kind]) bad.push(`${kind}이 눈금에 올랐다`);
   for (const kind of e.excluded ?? []) if (!r.after.excluded?.includes(kind)) bad.push(`${kind}이 제외 목록에 없다`);
