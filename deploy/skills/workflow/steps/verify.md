@@ -131,7 +131,7 @@ UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더
 
 사용자 리뷰·동작 테스트 통과 후 WRITING_REFINER(PR 본문 확정) 진입 전, stub 커밋을 drop하고 슬라이스별로 커밋을 재정렬한다.
 
-이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다 ([steps/finalize.md](finalize.md)).
+이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다.
 
 ### Step 6.5.1. 케이스 분기
 

@@ -25,7 +25,7 @@ next:
 
 - **입력**: `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
 - **산출물**: `pr{N}/persistent/`: overview.md, decisions.md, reference.md
-- **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — [realize-plan 「사전 준비」](realize-plan.md#사전-준비-브랜치워크트리-생성)가 만든다
+- **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — realize-plan이 만든다
 
 ### 컨벤션 사전 참조
 

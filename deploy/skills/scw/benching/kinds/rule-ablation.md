@@ -1,6 +1,6 @@
 # Rule Ablation Bench 특화 체크리스트
 
-`deploy/rules/`, `deploy/contexts/coding-standards/` 등 **지침/규칙 문서**의 ablation 벤치 시 추가 점검 항목. 일반 스킬 eval은 skill-creator와 scw [benching/SKILL.md](../SKILL.md)로 충분하지만, "이 규칙을 없애도 되는가"를 묻는 ablation은 고유 함정이 있어 이 문서로 보완한다.
+`deploy/rules/`, `deploy/contexts/coding-standards/` 등 **지침/규칙 문서**의 ablation 벤치 시 추가 점검 항목. 일반 스킬 eval은 skill-creator와 벤치 공통 절차로 충분하지만, "이 규칙을 없애도 되는가"를 묻는 ablation은 고유 함정이 있어 이 문서로 보완한다.
 
 ## 진입 조건
 
@@ -24,7 +24,7 @@ skill-creator는 "realistic 하라"까지 말한다. ablation은 한 단계 더 
 
 ## ZERO negative control + 환경 상속 탐지
 
-ablation 벤치는 반드시 ZERO(규칙 제거) variant를 포함한다. skill-creator의 without_skill baseline과 역할이 다르다:
+ablation 벤치는 ZERO(규칙 제거) variant를 포함한다. skill-creator의 without_skill baseline과 역할이 다르다:
 - skill-creator: "스킬 없으면 실패하는가" — 스킬의 필요성
 - ablation: "규칙 없어도 동일 행동인가" — 규칙의 고유 가치
 

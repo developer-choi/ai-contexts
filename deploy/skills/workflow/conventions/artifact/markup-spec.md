@@ -20,6 +20,6 @@ markup.md 상단에 필수. **컴포넌트 종류별 × 상태별로 figma 원�
 
 ## 검증 기준 — figma 원본 직접 fetch
 
-MARKUP의 Figma Reviewer는 `background/retained/figma-url.md`의 URL로, [verify 「Figma 시각 대조」](../../steps/verify.md#step-641-figma-시각-대조--승인-게이트-ui-컴포넌트-pr-한정) 사용자(PR 시각 대조)는 「Figma 원본 링크 인덱스」 절의 URL로 figma 원본을 직접 fetch해 코드와 대조한다. 매칭표는 검증 기준 아님 (SKILL.md 「검증 기준 = 진실 원천」).
+Figma Reviewer는 `background/retained/figma-url.md`의 URL로, PR 시각 대조를 하는 사용자는 「Figma 원본 링크 인덱스」 절의 URL로 figma 원본을 직접 fetch해 코드와 대조한다. 매칭표는 검증 기준 아님 (SKILL.md 「검증 기준 = 진실 원천」).
 
 figma 부모 노드를 코드와 대조할 때, 코드 쪽에서 별도 파일로 분리된 자식 컴포넌트(`import`)는 그 파일을 직접 열어 figma의 인라인 마크업과 끝까지 대조한다.

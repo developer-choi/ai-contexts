@@ -45,7 +45,7 @@ requirement는 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자�
 
 ### 자료 수집 점검
 
-아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../conventions/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
+아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업(외부에서 시안·기획서·Figma 자료를 받는 케이스)이면 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../conventions/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 ([입력 자료](../requirement-review/recruitment/guide.md#입력-자료) 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 
@@ -147,4 +147,4 @@ requirement-review 단계에서 디자인·컴포넌트 중복이 있으면 **�
 
 **PR 진행 순서는 BG가 정하지 않는다 — 판단은 사용자 몫이다.** BG는 자료와 레포를 읽고 **그때그때 따져서**, 걸리는 게 보이면 **이유를 붙여 제안**한다. 사용자가 그 제안을 보고 정한다.
 
-전 페이지를 훑어야 나오는 판정에 걸리는 PR도 같은 방식으로 제안한다 — 예를 들어 공통 컴포넌트 판정은 MARKUP이 전 페이지를 본 뒤에 나오므로([steps/markup/index.md](markup/index.md)), 어떤 컴포넌트를 COMPONENTS PR에 넣을지가 그 판정에 걸린 PR을 MARKUP 진행 중에 확정·출발시키려 하면 그 사실을 먼저 알린다.
+전 페이지를 훑어야 나오는 판정에 걸리는 PR도 같은 방식으로 제안한다 — 예를 들어 공통 컴포넌트 판정은 MARKUP이 전 페이지를 본 뒤에 나오므로, 어떤 컴포넌트를 COMPONENTS PR에 넣을지가 그 판정에 걸린 PR을 MARKUP 진행 중에 확정·출발시키려 하면 그 사실을 먼저 알린다.
