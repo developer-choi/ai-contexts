@@ -22,7 +22,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 ## Step 5.1. 팀 Spawn
 
-[CRITICAL] [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
+[team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
 step-5는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자와 리뷰어로 팀을 구성한다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
 
@@ -82,7 +82,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md) 엔진을 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조). 두 축의 순서·병렬은 엔진이 A 메커니즘으로 정하므로 호출자가 지시하지 않는다.
 
-> [CRITICAL] **엔진 호출 전 우회 게이트.** 직접 Reviewer를 spawn하기 전에, 엔진 생략이 허용되는지 [impl-review-loop SKILL.md 「우회」](../impl-review-loop/SKILL.md) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 직접 Reviewer spawn 허용, 하나라도 거짓이면 엔진 호출 강제. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
+> **엔진 호출 전 우회 게이트.** 직접 Reviewer를 spawn하기 전에, 엔진 생략이 허용되는지 [impl-review-loop SKILL.md 「우회」](../impl-review-loop/SKILL.md) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 직접 Reviewer spawn 허용, 하나라도 거짓이면 엔진 호출 강제. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
 
 | 구현자 | 진실검사 A (메커니즘) | 규칙검사 B | 증분 단위 |
 |---|---|---|---|
@@ -105,4 +105,4 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
   - 수정 사항 (있는 경우)
 - 사용자가 step-6에서 코드 리뷰 수행
 
-> [CRITICAL] 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](step-6.md)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — step-5는 세션 경계가 아니며 후속 안내는 step-6에서 낸다.)
+> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](step-6.md)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — step-5는 세션 경계가 아니며 후속 안내는 step-6에서 낸다.)

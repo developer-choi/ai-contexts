@@ -53,7 +53,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
    - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
 3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 「누적 원칙」 참조.
 
-### [CRITICAL] 컨벤션 1차 소스 직접 grep 의무
+### 컨벤션 1차 소스 직접 grep 의무
 
 stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관련 컨벤션 1차 소스를 **직접 grep**한 후 결과를 stub 주석 `[Convention]` 블록에 인용한다. "안다고 가정"·"이전 세션 기억"·"이전 PR에서 본 패턴"에 의존하지 않는다. 결정·도구 호출·stub 파일 작성 전에 grep 결과를 받는다.
 
@@ -119,7 +119,7 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 - stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 
-#### [CRITICAL] 포맷팅·prettier 영역 한정
+#### 포맷팅·prettier 영역 한정
 
 **프로젝트 전역 포맷팅 금지.** 본 PR 영역만 한정 적용한다.
 
@@ -134,9 +134,9 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
 **가벼운 PR 분기 (stub 없이 그 자리 실행·커밋 완결 — IMPL 세션 생략)**: IMPL 세션이 없으므로 step-5·6 수행 주체가 PLAN 자신이다. 아래 종료 단계로 넘어가기 전에 step-5로 진입해 step-5→6을 진행한다. "IMPL 세션 없음"을 "step-5·6 스킵"으로 확장하지 않는다. (stub을 만들어 IMPL로 분해한 PR은 5·6을 PR_{N}_IMPL 세션이 수행하므로 본 분기 N‑A.)
 
-### 1. 산출물 리뷰 (Reviewer 팀 에이전트 spawn) [CRITICAL]
+### 1. 산출물 리뷰 (Reviewer 팀 에이전트 spawn)
 
-파생이 끝나면 리뷰어 팀 에이전트를 spawn한다. [CRITICAL] [team-agent](../../../contexts/team-agent.md) 규칙을 따른다.
+파생이 끝나면 리뷰어 팀 에이전트를 spawn한다. [team-agent](../../../contexts/team-agent.md) 규칙을 따른다.
 
 ```
 Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
