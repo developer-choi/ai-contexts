@@ -25,13 +25,12 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 | 없던 스킬을 새로 만든다 | [rounds/creating.md](rounds/creating.md) + [rounds/editing.md](rounds/editing.md) |
 | 기존 문서에 규칙을 넣거나 빼거나 고쳐 쓴다 | [rounds/editing.md](rounds/editing.md) |
 | 의심 지점을 훑어 개선한다 | [rounds/reviewing.md](rounds/reviewing.md) + [rounds/editing.md](rounds/editing.md) |
+| 「문서 무게」가 걸린 문서를 줄인다 | [rounds/diet.md](rounds/diet.md) |
 | 벤치·eval을 돌려 규칙의 효과를 잰다 | [benching/SKILL.md](benching/SKILL.md) |
 
 ## 문서 무게
 
-[본문에 무엇을 남기나](../../contexts/prompt-standards/what-to-keep.md)로 대상 문서를 한 줄씩 훑어 줄 단위 후보도 모은다.
-
-프롬프트·스킬 md를 고치러 들어오면 손대기 전에 `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`로 대상 문서의 바이트 크기와 그 문서를 여는 다른 md를 잰다. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값을 [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md)로 판정하고, 걸리면 [줄일 후보를 갈래 가리지 않고 전량 모아](rounds/diet.md#후보를-전량-모아-대가별로-낸다) 후보마다 크기와 잃는 것을 함께 적어 낸다. 무엇을 줄일지는 사용자가 고르고, 고른 것이 그 회차의 범위다.
+프롬프트·스킬 md를 고치러 들어오면 손대기 전에 `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`로 대상 문서의 바이트 크기와 그 문서를 여는 다른 md를 잰다. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값을 [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md)로 판정하고, 걸리면 [다이어트 회차](rounds/diet.md#역할을-나눠-돈다)로 넘어간다.
 
 고르기 전에 되묻지 않는다. 후보마다 얼마가 갈리는지 재본 뒤 그 결과와 권장안을 함께 낸다.
 
@@ -39,12 +38,14 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 프롬프트·스킬 md를 쓰거나 고치거나 훑을 때 아래 표대로 기준 파일을 불러 적용한다. 회차 문서에는 "이 기준을 읽어라" 줄을 두지 않는다.
 
+다이어트 회차의 메인은 「다이어트 회차: 매번」이 적힌 행만 부르고, 나머지 행은 판정·검수 에이전트가 부른다.
+
 | 조건 | 부르는 기준 |
 |---|---|
-| 대상 문서의 산문을 쓰거나 고치거나 훑을 때(조건 없음) | [본문에 무엇을 남기나](../../contexts/prompt-standards/what-to-keep.md) · [문장 다듬기](../../contexts/prompt-standards/wording.md) · [정본과 참조](../../contexts/prompt-standards/sources-and-links.md) · [정본이 코드에 있으면 산문은 옮겨 적지 않는다](../../contexts/rules-as-code.md#정본이-코드에-있으면-산문은-옮겨-적지-않는다) · [낡을 수 있는데 아무도 못 잡는 내용은 두지 않는다](../../contexts/rules-as-code.md#낡을-수-있는데-아무도-못-잡는-내용은-두지-않는다) |
+| 대상 문서의 산문을 쓰거나 고치거나 훑을 때 | [본문에 무엇을 남기나](../../contexts/prompt-standards/what-to-keep.md) · [문장 다듬기](../../contexts/prompt-standards/wording.md) · [정본과 참조](../../contexts/prompt-standards/sources-and-links.md) · [정본이 코드에 있으면 산문은 옮겨 적지 않는다](../../contexts/rules-as-code.md#정본이-코드에-있으면-산문은-옮겨-적지-않는다) · [낡을 수 있는데 아무도 못 잡는 내용은 두지 않는다](../../contexts/rules-as-code.md#낡을-수-있는데-아무도-못-잡는-내용은-두지-않는다) |
 | 대상 문서에 규칙·금지·절차 문장을 넣거나, 산문을 검사·스크립트로 옮길 때 | [코드로 표현 가능한 것은 코드로](../../contexts/rules-as-code.md) |
 | 고치기 회차: 대상 문서 크기가 선을 넘을 때. 훑기·다이어트 회차: 매번 | [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md) |
-| 대상이 SKILL.md·흐름 라우터이거나 에이전트를 띄우는 구조일 때 | [스킬 짜임](../../contexts/prompt-standards/skill-structure.md) |
+| 대상이 SKILL.md·흐름 라우터이거나 에이전트를 띄우는 구조일 때. 다이어트 회차: 매번 | [스킬 짜임](../../contexts/prompt-standards/skill-structure.md) |
 | 대상이 스킬이거나 스킬이 읽는 문서일 때 | [여러 CLI 호환](../../contexts/prompt-standards/cross-cli.md) |
 | 대상 경로별 | 아래 [targets/ 파일](#targets-파일) |
 
