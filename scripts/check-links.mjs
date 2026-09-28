@@ -18,6 +18,10 @@
 // 없다"라면 고아는 "가리키는 사람이 없다"다. 로드되지 않는 문서는 낡아도 아무도 모르고
 // 정비 회차에서만 발견된다. 판정은 보고만 하고 exit code를 바꾸지 않는다 — 아래 「도달
 // 판정」이 휴리스틱이라 오탐이 커밋을 막으면 안 된다.
+//
+// 서로 호명하는 md 쌍도 보고한다(A→B이면 B는 A를 호명하지 않는다는 단방향 cross-ref 원칙).
+// 링크만 세면 백틱 경로(`SKILL.md`)로 되부르는 쌍을 놓쳐서 백틱 경로도 참조로 센다.
+// 고아와 같은 이유로 보고만 한다.
 
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -81,8 +85,8 @@ function maskInlineCode(line) {
   return line.replace(INLINE_CODE_RE, (matched) => " ".repeat(matched.length));
 }
 
-function extractLinks(text) {
-  const out = [];
+// 코드펜스 밖 줄마다 fn(line, 줄번호)를 부른다.
+function forEachProseLine(text, fn) {
   const lines = text.split(/\r?\n/);
   let inFence = false;
   let fence = "";
@@ -99,12 +103,45 @@ function extractLinks(text) {
       }
       continue;
     }
-    if (inFence) continue;
-    for (const m of maskInlineCode(line).matchAll(LINK_RE)) {
-      out.push({ target: m[1], line: i + 1 });
-    }
+    if (!inFence) fn(line, i + 1);
   }
+}
+
+function extractLinks(text) {
+  const out = [];
+  forEachProseLine(text, (line, n) => {
+    for (const m of maskInlineCode(line).matchAll(LINK_RE)) out.push({ target: m[1], line: n });
+  });
   return out;
+}
+
+// 인라인 코드 전체가 md 경로 하나인 것(`SKILL.md`, `conventions/modes.md#절`)을 뽑는다.
+// 자리표시자({{…}}·<…>)나 공백이 섞인 명령·홈/절대 경로는 이 레포 파일로 못 박을 수 없어 뺀다.
+const CODE_MD_PATH_RE = /^(?:\.{1,2}\/)*[^\s`{}<>*~:]+\.md(?:#\S*)?$/;
+
+function extractCodePaths(text) {
+  const out = [];
+  forEachProseLine(text, (line, n) => {
+    for (const m of line.matchAll(INLINE_CODE_RE)) {
+      const span = m[2].trim();
+      if (CODE_MD_PATH_RE.test(span) && !span.startsWith("/")) out.push({ target: span.split("#")[0], line: n });
+    }
+  });
+  return out;
+}
+
+// 백틱 경로 → 레포 상대 md 경로(없으면 null). 오탐을 줄이려 실재하는 md에만 붙인다.
+//   - 폴더가 붙은 경로: 적은 파일의 폴더 기준 → 레포 루트 기준 순으로 시도.
+//   - 파일명만: 적은 파일의 폴더에서 루트 쪽으로 올라가며 처음 만나는 같은 이름.
+//     (`conventions/modes.md`의 `SKILL.md`는 한 칸 위 스킬 루트의 SKILL.md다.)
+function resolveCodePath(fromRel, p, mdSet) {
+  const hit = (c) => (mdSet.has(c) ? c : null);
+  const dir = path.posix.dirname(fromRel);
+  if (p.includes("/")) return hit(path.posix.join(dir, p)) ?? hit(path.posix.normalize(p));
+  for (let d = dir; ; d = path.posix.dirname(d)) {
+    const found = hit(path.posix.join(d, p));
+    if (found || d === ".") return found;
+  }
 }
 
 // 헤딩 텍스트 → GitHub 슬러그. 인라인 마크다운(링크·코드·강조) 제거 후
@@ -225,10 +262,19 @@ function scan(repoRoots) {
   const broken = []; // { repoRoot, file, line, target, category, reason, readme }
   const external = []; // { repoRoot, file, line, url }
   const orphans = []; // { repoRoot, file }
+  const mutual = []; // { repoRoot, a, aLine, b, bLine }
 
   for (const root of repos) {
-    orphans.push(...findOrphans(root, listFiles(root)));
-    for (const rel of listMd(root)) {
+    const mds = listMd(root);
+    const mdSet = new Set(mds);
+    const refs = new Map(); // md → Map(참조한 md → { line, how }) — 먼저 잡힌 것 하나
+    const linkedDirs = new Set(); // 마크다운 링크가 폴더째 가리키는 디렉토리
+    const addRef = (from, to, line, how) => {
+      if (to === from || !mdSet.has(to)) return;
+      if (!refs.has(from)) refs.set(from, new Map());
+      if (!refs.get(from).has(to)) refs.get(from).set(to, { line, how });
+    };
+    for (const rel of mds) {
       const abs = path.join(root, rel);
       let text;
       try {
@@ -239,6 +285,12 @@ function scan(repoRoots) {
       const readme = isReadme(rel);
       for (const { target, line } of extractLinks(text)) {
         const c = classify(target, slugMap);
+        if (c.kind === "in-repo") {
+          const to = toPosix(path.relative(root, path.resolve(path.dirname(abs), c.filePath)));
+          addRef(rel, to, line, "링크");
+          if (fs.existsSync(path.join(root, to)) && fs.statSync(path.join(root, to)).isDirectory()) linkedDirs.add(to);
+        }
+        if (c.kind === "myrepo-url" && c.repoRoot === root) addRef(rel, path.posix.normalize(c.filePath), line, "링크");
         const rec = { repoRoot: root, file: rel, line, target, readme };
         if (c.kind === "ignore") continue;
         if (c.kind === "external") {
@@ -275,9 +327,21 @@ function scan(repoRoots) {
           continue;
         }
       }
+      // 링크를 먼저 세고 백틱은 그 뒤에 — 같은 대상이면 확실한 쪽(링크)이 보고에 남는다.
+      for (const { target, line } of extractCodePaths(text)) {
+        const to = resolveCodePath(rel, target, mdSet);
+        if (to) addRef(rel, to, line, target.includes("/") ? "백틱 경로" : "백틱 파일명");
+      }
+    }
+    orphans.push(...findOrphans(root, listFiles(root), linkedDirs));
+    for (const [a, outs] of refs) {
+      for (const [b, ab] of outs) {
+        const ba = refs.get(b)?.get(a);
+        if (ba && a < b) mutual.push({ repoRoot: root, a, aLine: ab.line, aHow: ab.how, b, bLine: ba.line, bHow: ba.how });
+      }
     }
   }
-  return { broken, external, orphans, repos };
+  return { broken, external, orphans, mutual, repos };
 }
 
 // ── 고아 md 검출 ────────────────────────────────────────────
@@ -296,7 +360,11 @@ const ENTRY_BASENAMES = new Set([
 // 호명되지 않으면, 그 디렉토리는 통째로 읽히는 바구니로 본다. 거꾸로 형제 중 하나라도
 // 개별 호명되는 디렉토리는 파일 단위로 불리는 자리이므로, 거기서 혼자 안 불리는 파일은
 // 진짜 고아다.
-function findOrphans(root, files) {
+//
+// 마크다운 링크가 폴더를 가리키면(`[pr-types/](pr-types/)`) 그 폴더 직속 md는 도달 가능하다.
+// 링크를 따라가면 목록이 나오고 거기서 고르는 자리라, 형제 몇이 개별 호명돼 바구니 판정이
+// 꺼져도 나머지를 고아로 보지 않는다.
+function findOrphans(root, files, linkedDirs = new Set()) {
   const corpus = [];
   for (const f of files) {
     try {
@@ -358,7 +426,7 @@ function findOrphans(root, files) {
   const orphans = [];
   for (const md of mds) {
     if (ENTRY_BASENAMES.has(path.posix.basename(md).toLowerCase())) continue;
-    if (named.get(md)) continue;
+    if (named.get(md) || linkedDirs.has(path.posix.dirname(md))) continue;
     // 자기 디렉토리부터 위로 올라가며 바구니를 만나면 도달 가능
     let dir = path.posix.dirname(md);
     let reachable = false;
@@ -376,7 +444,7 @@ function shortFile(rec) {
   return `${toPosix(path.basename(rec.repoRoot))}/${rec.file}:${rec.line}`;
 }
 
-function report({ broken, external, orphans = [] }) {
+function report({ broken, external, orphans = [], mutual = [] }) {
   const readmeBroken = broken.filter((b) => b.readme);
   const otherBroken = broken.filter((b) => !b.readme);
 
@@ -401,6 +469,15 @@ function report({ broken, external, orphans = [] }) {
     console.log("  (통째로 Glob되는 폴더는 걸러냈으나 휴리스틱이라 오탐 가능. 실패로 치지 않는다.)");
   }
 
+  if (mutual.length) {
+    console.log(`\n서로 호명하는 md 쌍 — 단방향 cross-ref 위반 후보 (${mutual.length})`);
+    for (const m of mutual) {
+      const repo = toPosix(path.basename(m.repoRoot));
+      console.log(`  ${repo}/${m.a}:${m.aLine} → ${m.b}  [${m.aHow}]\n  ${repo}/${m.b}:${m.bLine} → ${m.a}  [${m.bHow}]`);
+    }
+    console.log("  ([백틱 파일명]은 가까운 상위 폴더의 같은 이름으로 해석해 오탐 가능 — `SKILL.md` 같은 일반명사. 실패로 치지 않는다.)");
+  }
+
   if (!broken.length && !external.length) console.log("\n깨진 링크·미확인 외부 URL 없음.");
   else if (!broken.length) console.log("\n깨진 in-repo/내레포 링크 없음 (외부 pile은 사용자 확인 대상).");
 }
@@ -413,7 +490,7 @@ function main(argv) {
   if (asJson) {
     console.log(
       JSON.stringify(
-        { broken: result.broken, external: result.external, orphans: result.orphans },
+        { broken: result.broken, external: result.external, orphans: result.orphans, mutual: result.mutual },
         null,
         2,
       ),

@@ -63,6 +63,16 @@ function setupFixture() {
   for (const n of ["one", "two", "three"]) {
     fs.writeFileSync(path.join(TMP, "bucket", `${n}.md`), `# ${n}\n`);
   }
+  // 양방향 참조: SKILL.md가 링크로, modes.md가 백틱 파일명으로 서로 부른다(한 칸 위 해석).
+  // one-way.md는 SKILL.md만 부르므로 쌍이 아니다.
+  fs.mkdirSync(path.join(TMP, "skill", "conventions"), { recursive: true });
+  fs.writeFileSync(path.join(TMP, "skill", "SKILL.md"), "[modes](conventions/modes.md)\n");
+  fs.writeFileSync(path.join(TMP, "skill", "conventions", "modes.md"), "`SKILL.md`의 절을 따른다\n");
+  fs.writeFileSync(path.join(TMP, "skill", "one-way.md"), "[스킬](SKILL.md)\n");
+  // 폴더 링크: types/는 넷 중 셋이 개별 호명돼 바구니가 아니지만, 폴더째 링크돼 w.md도 도달 가능.
+  fs.mkdirSync(path.join(TMP, "types"), { recursive: true });
+  for (const n of ["x", "y", "z", "w"]) fs.writeFileSync(path.join(TMP, "types", `${n}.md`), `# ${n}\n`);
+  fs.writeFileSync(path.join(TMP, "types-index.md"), "[types/](types/) 중 types/x.md, types/y.md, types/z.md\n");
   execFileSync("git", ["init", "-q", TMP], { stdio: "pipe" });
   git(["remote", "add", "origin", "https://github.com/developer-choi/fixture-repo.git"], TMP);
   git(["add", "-A"], TMP);
@@ -100,7 +110,7 @@ check("headingSlugs: 코드펜스 안 # 무시", () => {
 
 // ── 통합: scan 픽스처 3케이스 ──
 setupFixture();
-const { broken, external, orphans } = scan([TMP]);
+const { broken, external, orphans, mutual } = scan([TMP]);
 const orphanFiles = orphans.map((o) => o.file);
 
 check("케이스1 — in-repo 앵커 깨짐 검출", () =>
@@ -159,6 +169,18 @@ check("고아 — 긴 이름의 꼬리로 걸린 것은 호명이 아님 (checke
 );
 check("고아 검출은 exit code를 바꾸지 않음 (broken에 안 섞임)", () =>
   assert.ok(!broken.some((b) => b.file === "docs/stray.md")),
+);
+check("고아 아님 — 폴더째 링크된 폴더의 직속 md", () =>
+  assert.ok(!orphanFiles.includes("types/w.md"), orphanFiles.join(",")),
+);
+
+// ── 양방향 참조 ──
+const pairs = mutual.map((m) => `${m.a}<>${m.b}`);
+check("양방향 — 링크 ↔ 백틱 파일명(상위 폴더 해석) 쌍 검출", () =>
+  assert.ok(pairs.includes("skill/SKILL.md<>skill/conventions/modes.md"), pairs.join(",")),
+);
+check("양방향 아님 — 한쪽만 부르는 참조", () =>
+  assert.ok(!pairs.some((p) => p.includes("one-way.md")), pairs.join(",")),
 );
 
 fs.rmSync(TMP, { recursive: true, force: true });
