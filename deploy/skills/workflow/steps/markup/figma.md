@@ -12,13 +12,17 @@ figma 원본이 디자인 진실 원천인 모드. 본 파일은 figma 고유 �
 
 ## (채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리
 
-진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다 — 워크트리에 이미 있는 **스타터 코드**(컴포넌트·스타일·폴더 구조)를 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다 ([requirement-review/recruitment/guide.md](../../requirement-review/recruitment/guide.md)와 같은 원칙).
+시각 진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다. 워크트리에 이미 있는 코드는 아래처럼 갈라 다룬다:
+
+- **FOUNDATION PR 뒤의 코드**(폴더 구조·코딩 스탠다드·폰트) — 코드 스타일 기준이다. 따른다
+- **회사 제공 부분 마크업** — 베이스다. 재작성하지 않고 남은 화면만 채운다. 회사 제공인지는 커밋 author로 가른다(회사 author = 제공, 과제 진행 계정 = 내 작업). "진입 시점 기존 커밋 = 회사 제공"으로 추정하지 않는다
+- **그 밖의 보일러플레이트**(스타터 컴포넌트·스타일) — 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다 ([requirement-review/recruitment/guide.md](../../requirement-review/recruitment/guide.md)와 같은 원칙)
 
 **디자인시스템 컴포넌트가 필요하면 MP `packages/design-system`의 컴포넌트를 복사해 온다.**
 
 가져올 때는 **이 스펙에 필요한 만큼만 차감**한다. 통째 오버포트(쓰지 않는 variant·prop까지 들이기)는 금지, 차감 복사는 권장. 시각 토큰은 캡처가 진실 원천이므로 캡처에 맞게 restyle한다.
 
-Markup Implementer 투입 전, **스타일링 라이브러리를 사용자에게 질문**한다. 기본값은 **scss**다 — Tailwind를 기본으로 가정하지 않는다. 워크트리에 이미 Tailwind로 작성된 스타터 코드가 있어도 그것만으로 결정된 사실로 보지 않는다. 답변을 「Markup Implementer 필수 지침」에 반영한다.
+Markup Implementer 투입 전, BG가 확정한 스타일링 라이브러리(`background/retained/tech-constraints.md` 등)가 없을 때만 **스타일링 라이브러리를 사용자에게 질문**한다. 기본값은 **scss**다 — Tailwind를 기본으로 가정하지 않는다. 워크트리에 이미 Tailwind로 작성된 스타터 코드가 있어도 그것만으로 결정된 사실로 보지 않는다. 답변을 「Markup Implementer 필수 지침」에 반영한다.
 
 ## 진실검사 A — figma 원본 직접 fetch
 

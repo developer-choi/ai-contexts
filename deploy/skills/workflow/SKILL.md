@@ -26,10 +26,10 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 | 세션 | (1) 진입 조건 | (2) 입력 컨텍스트 | (3) 출력 산출물 + 라이프사이클 폴더 | (4) 후속 트리거 | (5) 컨텍스트 처리 | (6) 권장 모델 |
 |---|---|---|---|---|---|---|
-| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md·conventions-index.md / `background/consumable/`: todo.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동) / (채용) 작업 레포 — private 원격 + `master` 초기 커밋 | (실무·개인) [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기) 후 → MARKUP, 동일 `<모드>` 인자 / **PR을 확정할 때마다 → 그 PR의 PR_{N}_PLAN**, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토. 후속 안내 전 사용자 리뷰 (「세션 spawn 안내 메커니즘」) | **Opus** |
-| **MARKUP** | (채용) FOUNDATION PR의 PR_{N}_PLAN이 realize-plan에서 markup 워크트리 최소 셋팅을 마친 뒤 / (실무·개인) BG의 [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기) 후, `/workflow MARKUP <모드>` 호출 | (채용·실무) [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기)에서 수집한 figma·시안 자료 / (개인) requirement 「자료 받기」에서 수집한 마크업 시안(`retained/mockup/`) — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + **공통 컴포넌트 확정·독립 산출**(전 페이지 직독, 2군데 이상=공통 → COMPONENTS 종류 PR이 소비하는 단방향 입력) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) `background/retained/mockup/`(+선택 `retained/spec.md`) | 「공통 컴포넌트 확정」 완료 시 → **COMPONENTS PR의 출발 게이트 해제 안내** (spawn 안내 아님). 그 밖의 후속 spawn 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) |
-| **PR_{N}_PLAN** | **`todo.md`에 이 PR 절이 확정됨** + (채용) BG 「레포 세우기」 완료 + 의존 PR이 있는 경우에 한해 그 PR의 realize-plan 커밋 완료(stub 또는 실행 결과 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수 있다. `todo.md` 해당 PR 절의 의존 항목이 출처) + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료. 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / (채용, FOUNDATION PR) `background/retained/folder-structure.md` / **가벼운 PR은 realize-plan에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | plan 종료 → WRITING_IDEATOR (PR 본문 초안, realize-plan 진입 전 같은 세션 도중 안내) / realize-plan 종료 → PR_{N}_IMPL spawn / realize-plan 커밋 완료 시 → **본 PR에 의존하는 PR의 출발 게이트 해제 안내** (`todo.md`의 의존 항목에서 찾는다. `소비됨:` 표식이 있는 PR은 이미 출발했으므로 뺀다. 세션을 새로 띄우라는 spawn 안내가 아니라 게이트가 풀렸다는 안내 — PLAN spawn 자체는 BG의 PR 확정이 유일 트리거) / (채용, FOUNDATION PR) realize-plan에서 markup 워크트리 최소 셋팅 완료 시 → MARKUP (`/workflow MARKUP 채용`) | PR_{N} 워크트리 (채용, FOUNDATION PR은 + markup 워크트리). 학습 인수인계 후 진입 대기 적용 (FOUNDATION PR 제외) | **Opus** |
-| **PR_{N}_IMPL** | PR_{N}_PLAN의 realize-plan 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | verify 끝 후(IMPL 세션 종료) → WRITING_REFINER / 마지막 IMPL이면(전 PR IMPL verify 완료) → FINALIZE (fan-in) | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus |
+| **BG** | `/workflow BG <모드>` 호출 (유일 루트) | 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안) | `background/persistent/`: 공고·메일·과제요구사항 (채용만) / `background/retained/`: tech-constraints.md·conventions-index.md / `background/consumable/`: todo.md·page-{페이지명}.md (페이지별 분석 — PR 확정 시 `pr{N}/consumable/page.md`로 이동) / (채용) 작업 레포 — private 원격 + `master` 초기 커밋 | (FOUNDATION PR 없음) [requirement 「레포 확보」](steps/requirement.md#레포-확보) 시 → MARKUP, 동일 `<모드>` 인자 / **PR을 확정할 때마다 → 그 PR의 PR_{N}_PLAN**, 동일 `<모드>` 인자 | 컨텍스트 격리. 세션 종료 시 산출물 자가 검토. 후속 안내 전 사용자 리뷰 (「세션 spawn 안내 메커니즘」) | **Opus** |
+| **MARKUP** | BG의 [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기) 종료 + 코드 스타일 기준이 섬 — FOUNDATION PR이 있으면 그 PR의 verify 종료, 없으면 BG의 [「레포 확보」](steps/requirement.md#레포-확보). `/workflow MARKUP <모드>` 호출 | (채용·실무) [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기)에서 수집한 figma·시안 자료 / (개인) requirement 「자료 받기」에서 수집한 마크업 시안(`retained/mockup/`) — 페이지·섹션·위젯·컴포넌트 단위 | **markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`)** (메인 산출물) + **공통 컴포넌트 확정·독립 산출**(전 페이지 직독, 2군데 이상=공통 → COMPONENTS 종류 PR이 소비하는 단방향 입력) + 입력: (채용·실무) `background/retained/figma-url.md`·`figma/` / (개인) `background/retained/mockup/`(+선택 `retained/spec.md`) | 「공통 컴포넌트 확정」 완료 시 → **COMPONENTS PR의 출발 게이트 해제 안내** (확정 0건이면 COMPONENTS PR에 기대는 PR까지. spawn 안내 아님). 그 밖의 후속 spawn 없음 (PR_{N}_IMPL이 페이지 단위 마크업 코드를 그대로 가져감) | 마크업 워크트리. **포트 3000 점유** | **Sonnet** (figma URL 기준) / **Opus** (캡처-only·개인) |
+| **PR_{N}_PLAN** | **`todo.md`에 이 PR 절이 확정됨** + BG 「레포 확보」 + 의존 PR이 있는 경우에 한해 그 PR의 realize-plan 커밋 완료(stub 또는 실행 결과 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수 있다. `todo.md` 해당 PR 절의 의존 항목이 출처) + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료. 의존이 없으면 확정 즉시 진입 가능 | `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR) | `pr{N}/persistent/`: decisions.md, reference.md, **implementation.md**, overview.md / `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, 개인 제외) / (채용, FOUNDATION PR) `background/retained/folder-structure.md` / **가벼운 PR은 realize-plan에서 코드 변경 + 커밋을 직접 산출**(문서만 내는 세션 아님) | plan 종료 → WRITING_IDEATOR (PR 본문 초안, realize-plan 진입 전 같은 세션 도중 안내) / realize-plan 종료 → PR_{N}_IMPL spawn / realize-plan 커밋 완료 시 → **본 PR에 의존하는 PR의 출발 게이트 해제 안내** (`todo.md`의 의존 항목에서 찾는다. `소비됨:` 표식이 있는 PR은 이미 출발했으므로 뺀다. 세션을 새로 띄우라는 spawn 안내가 아니라 게이트가 풀렸다는 안내 — PLAN spawn 자체는 BG의 PR 확정이 유일 트리거) | PR_{N} 워크트리. 학습 인수인계 후 진입 대기 적용 (채용 FOUNDATION PR 제외) | **Opus** |
+| **PR_{N}_IMPL** | PR_{N}_PLAN의 realize-plan 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수) + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료 (필수) | implementation.md, markup.md, MARKUP 페이지 코드, decisions·reference | 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import) / `pr{N}/consumable/`: review.md, user-test-cases.md | verify 끝 후(IMPL 세션 종료) → WRITING_REFINER / (종류 FOUNDATION) verify 끝 후 → MARKUP / 마지막 IMPL이면(전 PR IMPL verify 완료) → FINALIZE (fan-in) | PR_{N} 워크트리. 본 PR 하나에 집중 | **Sonnet** — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus |
 | **WRITING_IDEATOR** | PR_{N}_PLAN의 plan 종료 (초안 트리거) | `pr{N}/persistent/overview.md` + `pr{N}/persistent/decisions.md` (plan 초기본, 토론 없으면 부재 가능) + `pr{N}/persistent/reference.md` + `background/consumable/todo.md` (PR 착수 시 판정 대상 — pr-body-draft.md) | `pr{N}/consumable/pr-body.md` **초안**(배경·문제·접근·근거; 상세 코드블록 제외) — overview는 persistent라 **읽기만**, 어느 소비처도 삭제하지 않음 | 후속 spawn 없음 (REFINER는 IMPL·verify 후 별도 트리거). per-PR·유연 타이밍 | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조** | **Opus** |
 | **WRITING_REFINER** | PR_{N}_IMPL의 verify 종료 | WRITING_IDEATOR 입력 + `implementation.md` + 커밋 로그 + `decisions.md` 갱신분([verify 「decisions.md 최신화」](steps/verify.md#step-66-decisionsmd-최신화)) + `pr{N}/consumable/` 잔여(review.md·user-test-cases.md). **pr-body 초안 부재 시 IDEATOR의 초안 만들기 선행**(write-init 앞 준비 단계 포함) | `pr{N}/consumable/pr-body.md` **확정** → PR 본문 복사·게시·삭제 / overview.md는 persistent라 읽기만(큐레이션), 삭제 안 함 / 자기 PR의 `pr{N}/consumable/` 잔여 소비·정리 (`/plan/` 전체 잔존 점검은 FINALIZE) / `pr{N}/persistent/`는 제외 (영구 보존) | 후속 spawn 없음 (per-PR·유연 타이밍 — IMPL 직후 또는 나중에 몰아서. 머지·최종화는 FINALIZE 담당) | **코드 워크트리 무관 — main repo `/plan/` 절대경로 참조**. 커밋 로그 조회 시 pr{N}→브랜치는 `git worktree list` + [PR 워크트리 명명규칙](steps/realize-plan.md#사전-준비-브랜치워크트리-생성) | **Opus** |
 | **FINALIZE** | 전 PR의 IMPL(verify) 완료 (fan-in) | 전 PR 커밋 히스토리 + WRITING 잔여 산출물 | 재배치·메시지 최종화된 히스토리 + force-push 요청 (폴더 산출물 없음) | 채용 → 같은 세션이 recruitment 1번부터 이어서 수행 (「채용과제 마무리」) / 실무·개인 → 머지 안내 (스택은 바텀업, 독립 브랜치는 순서 무관) | 다중 브랜치, 단계별 cwd ([cwd](steps/finalize.md#cwd)) | **Opus** |
@@ -49,7 +49,7 @@ PLAN(realize-plan)은 구현을 수행하는 세션이며, 가벼운 PR은 그 �
 **분기점 시점 인식**: 자기 세션의 표 (4) 컬럼에 적힌 트리거가 분기점이다. 두 종류가 있다.
 
 - **step 종료형** — "step-X 후" 같은 트리거. 그 step이 세션의 끝이거나 분기점이다.
-- **사건 발생형** — "PR을 확정할 때마다" 같은 트리거. **세션 한복판에서 여러 번 발동한다.** BG의 PR 확정이 여기 해당한다.
+- **사건 발생형** — "PR을 확정할 때마다" 같은 트리거. **세션 한복판에서 여러 번 발동한다.** BG의 PR 확정과 레포 확보가 여기 해당한다.
 
 어느 쪽이든 트리거 즉시 본 절차를 발동한다 — 분석할 자료가 남아 있어도 다음 step·분석성 출력·산출물 작성을 본 절차 전에 시작하지 않는다.
 
@@ -61,7 +61,7 @@ PLAN(realize-plan)은 구현을 수행하는 세션이며, 가벼운 PR은 그 �
 **세션 경계 지키기**: 세션 종료 보고에서 남은 단계를 나열할 때는 항목마다 담당 세션을 붙인다. 종료한 세션에서 사용자가 다른 세션 몫을 지시하면 바로 받지 않고, 어느 세션 몫인지 한 번 짚은 뒤 사용자가 고르게 한다.
 
 분기점 LLM 절차:
-0. (BG, 자료 받기 종료 분기점 제외) 안내 전 사용자 리뷰 — `node {{skill_dir}}/scripts/review-ledger.mjs pending --plan /plan`을 돌려 나온 것이 없으면 1로 간다. 나왔으면 이번 분기점까지 정한 핵심을 요약한 뒤 나온 파일을 하나씩 보여주며 리뷰받는다 — 요약은 리뷰의 머리말이지 대신이 아니고, 리뷰 뒤 바뀐 파일은 스크립트가 낸 바뀐 줄만 보여준다. 사용자가 확인한 파일은 `mark --plan /plan <파일...>`로 기록하고, 리뷰 중 고친 파일은 다시 `pending`에 뜨므로 바뀐 줄을 확인받는다. `pending`이 비어야 1로 간다
+0. (BG가 MARKUP만 안내하는 레포 확보 분기점 제외) 안내 전 사용자 리뷰 — `node {{skill_dir}}/scripts/review-ledger.mjs pending --plan /plan`을 돌려 나온 것이 없으면 1로 간다. 나왔으면 이번 분기점까지 정한 핵심을 요약한 뒤 나온 파일을 하나씩 보여주며 리뷰받는다 — 요약은 리뷰의 머리말이지 대신이 아니고, 리뷰 뒤 바뀐 파일은 스크립트가 낸 바뀐 줄만 보여준다. 사용자가 확인한 파일은 `mark --plan /plan <파일...>`로 기록하고, 리뷰 중 고친 파일은 다시 `pending`에 뜨므로 바뀐 줄을 확인받는다. `pending`이 비어야 1로 간다
 1. 후속 명단 추출 — 자기 행 (4)에서 이번 트리거의 후속을 뽑는다. 이 세션의 앞선 분기점에서 조건 미충족으로 뺀 후속이 있으면 그것도 넣는다
 2. 조건 판정 — 각 후속의 조건은 **그 후속 행의 (1) 진입 조건**에서 분해한다. 자기 행 (4)는 명단만 정하고 조건의 출처가 아니다
    - 자기 세션이 끝낸 step·자기 spawn 사실로 충족되는 항목 → ✓
@@ -128,10 +128,10 @@ PR 1~N 본문을 연속 작성하는 상시 2세션. 본문은 IDEATOR가 [steps
 
 | step | 세션 내 위치 | 종료 직후 전환 | 세션 경계 |
 |---|---|---|---|
-| [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기) | BG 분기점 (실무·개인) | (실무·개인) 후속 안내 메커니즘 발동(분석 전) → [requirement 「requirement-review 본체」](steps/requirement.md#step-12-requirement-review-본체) / (채용) → requirement 「requirement-review 본체」 | 분기점 (세션 계속) |
+| [requirement 「자료 받기」](steps/requirement.md#step-11-자료-받기) | BG 중간 (레포 확보가 이 시점이면 분기점) | (FOUNDATION PR 없음 + [「레포 확보」](steps/requirement.md#레포-확보)가 이 시점) 후속 안내 메커니즘 발동(분석 전) → [requirement 「requirement-review 본체」](steps/requirement.md#step-12-requirement-review-본체) / 그 밖 → requirement 「requirement-review 본체」 | 분기점 (세션 계속) |
 | [requirement 「requirement-review 본체」](steps/requirement.md#step-12-requirement-review-본체) | BG 마지막 | 후속 안내 메커니즘 발동 | BG 세션 종료 |
 | plan | PLAN 중간 | → realize-plan (WRITING_IDEATOR 초안 트리거는 메커니즘 소관) | 아니오 |
-| realize-plan | PLAN 마지막 | PR_{N}_IMPL로 메커니즘 (FOUNDATION PR의 MARKUP 안내는 셋팅 완료 시점 — 메커니즘 소관) | PLAN 세션 종료 |
+| realize-plan | PLAN 마지막 | PR_{N}_IMPL로 메커니즘 | PLAN 세션 종료 |
 | implement | IMPL 중간 | → verify | 아니오 |
 | verify | IMPL 마지막 | 후속 안내 메커니즘 발동 | IMPL 세션 종료 |
 
@@ -250,7 +250,7 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(plan·realize-
 
 - **todo.md의 산문 서술** — 프로젝트 설명·설계 결정 서술처럼 이어 쓰는 글은 사용자가 쓴다. AI는 넣을 항목·방향을 후보로 제시하고 기다린다. **완성문을 지어놓고 "이대로 갈까요"로 승인받는 방식도 대상이다**.
 - **프로젝트 생성기** (`yarn create vite` 류) — 실행할 명령을 안내하고 사용자 실행을 기다린다.
-- **레포 세우기** (`git init`·gitignore·초기 커밋) — 실무·개인 모드는 명령을 안내하고 사용자 실행을 기다린다. 채용 모드는 원격까지 BG가 한다. 절차: [레포 세우기](requirement-review/recruitment/guide.md#레포-세우기)
+- **레포 세우기** (`git init`·gitignore·초기 커밋) — 실무·개인 모드는 명령을 안내하고 사용자 실행을 기다린다. 채용 모드는 원격까지 BG가 한다([채용 절차](requirement-review/recruitment/guide.md#레포-세우기)). 시점은 모드마다 [requirement 「레포 확보」](steps/requirement.md#레포-확보)
 
 경계:
 
@@ -266,4 +266,4 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(plan·realize-
 
 - [requirement 「작업 익숙도 판별」](steps/requirement.md#작업-익숙도-판별)에서 인수인계 문서가 작성되었으면, **PR_{N}_PLAN 진입 안내** 시 **"사용자가 인수인계 문서 학습을 완료한 뒤 진입하라"** 는 조건을 함께 안내한다.
 - 학습 완료 여부를 사용자에게 확인하지 않은 채 PR_{N}_PLAN 진입을 단정적으로 권하지 않는다.
-- `todo.md` 이 PR 절의 종류가 FOUNDATION이면 이 대기 조건을 붙이지 않는다.
+- (채용) `todo.md` 이 PR 절의 종류가 FOUNDATION이면 이 대기 조건을 붙이지 않는다.

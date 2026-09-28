@@ -5,6 +5,8 @@ next:
   - to: pr-body-final
   - to: finalize
     when: 마지막 IMPL
+  - to: markup
+    when: 종류 FOUNDATION
 ---
 
 # verify: 최종 점검

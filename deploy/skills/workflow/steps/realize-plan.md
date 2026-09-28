@@ -7,9 +7,6 @@ next:
     notice: gate
     on: realize-plan 커밋 완료
     when: 이 PR에 의존하는 PR이 있을 때
-  - to: markup
-    on: markup 워크트리 최소 셋팅 완료
-    when: FOUNDATION PR
 ---
 
 # realize-plan: 구현 (실행 또는 stub 분해)

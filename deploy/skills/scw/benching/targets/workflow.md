@@ -24,4 +24,4 @@ workflow 스킬 벤치의 단위·오라클·fixture 대입값.
 ## AP fixture
 
 - 채용과제 입력 원본(요구사항·시안 등)은 AC backlog 보관 — 벤치 시 참조.
-- 병렬 런은 **독립 .git 슬롯(클론)** 으로. workflow가 내부에서 워크트리·브랜치를 만들어(FOUNDATION PR의 PR 워크트리·markup 워크트리, PR별 브랜치) 한 `.git` 공유 시 런끼리 브랜치 네임스페이스가 충돌하기 때문.
+- 병렬 런은 **독립 .git 슬롯(클론)** 으로. workflow가 내부에서 워크트리·브랜치를 만들어(PR별 브랜치·PR 워크트리, MARKUP의 markup 워크트리) 한 `.git` 공유 시 런끼리 브랜치 네임스페이스가 충돌하기 때문.
