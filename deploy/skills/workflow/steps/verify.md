@@ -15,7 +15,7 @@ next:
 
 ## 입력·산출물·작업 위치
 
-- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
 - **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md / `pr{N}/persistent/decisions.md` 갱신 / 1회차 정리·재정렬된 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
@@ -39,6 +39,8 @@ next:
   - 테스트 커버리지 (추가된 코드 테스트)
   - 글로벌 룰 「내 작업 외 변경은 커밋하지 않는다」 위반 가능성
 
+`pr{N}/persistent/overview.md` `## TODO`에 남은 항목도 계획·커밋과 대조해 보고한다 — implement 시작 뒤에 도착한 항목이 여기서 잡힌다.
+
 보고 기준: 차이가 있을 때만 기재. 차이가 없으면 섹션 생략.
 
 ---
@@ -47,12 +49,12 @@ next:
 
 > **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
-`node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --todo /plan/background/consumable/todo.md`
+`node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan /plan`
 
 둘을 함께 본다.
 
 - **금지 주석 잔존** — 걸리면 implement Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다.
-- **미배정 blanket disable 고아** — 생성 시 등록([file-level(blanket) eslint-disable 라이프사이클](../conventions/artifact/comments.md#file-levelblanket-eslint-disable-라이프사이클))을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 `todo-md.mjs add-todo`로 등록한다.
+- **미배정 blanket disable 고아** — 생성 시 등록([file-level(blanket) eslint-disable 라이프사이클](../conventions/artifact/comments.md#file-levelblanket-eslint-disable-라이프사이클))을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 [PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)에 등록한다.
 
 ---
 

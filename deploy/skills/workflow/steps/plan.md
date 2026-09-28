@@ -56,7 +56,7 @@ plan 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분배�
 | 의사결정 근거·트레이드오프·거부 대안·발화 흐름 | `pr{N}/persistent/decisions.md` |
 | 외부 자료 링크·회사·프로젝트 컨벤션·베스트프랙티스 경로 | `pr{N}/persistent/reference.md` |
 | 기술 선택 결과 (채택안) | `pr{N}/persistent/decisions.md` 채택안 절 — overview에 안 남김 |
-| 의도(목표·범위·열려있는 질문) + (있으면) PR 종류 | `pr{N}/persistent/overview.md`에 남김 |
+| 의도(목표·범위·열려있는 질문) + (있으면) PR 종류 + 이 PR 몫 TODO | `pr{N}/persistent/overview.md`에 남김 |
 
 분배 완료 시점부터 overview.md는 의도만 가진 단순 산출물이 된다. realize-plan부터 다른 step은 분배 완료 상태를 가정한다.
 
@@ -68,12 +68,13 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 본문 항목:
 
-- PR 종류 — `todo.md` 이 PR 절에 `종류:` 줄이 있을 때만, 그 줄 그대로. 절이 지워진 뒤 뒤 단계는 여기서 종류를 본다
+- PR 종류 — `todo.md` 이 PR 절에 `종류:` 줄이 있을 때만, 그 줄 그대로. 절이 소비된 뒤 뒤 단계는 여기서 종류를 본다
 - 이 PR의 목표
 - 범위 요약 (뭘 만드는지의 경계)
 - **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목)
+- `## TODO` — 고정 헤딩. `todo.md` 이 PR 절의 TODO를 옮겨 오고, 소비 뒤에 생기는 이 PR 몫 TODO도 여기 쌓인다. 없으면 `- 없음`
 
-**PR 이연 항목은 「열려있는 질문」이 아니라 `/plan/background/consumable/todo.md`의 해당 PR 섹션에 TODO로 적는다**.
+**PR 이연 항목은 「열려있는 질문」이 아니라 그 PR의 TODO로 적는다** ([PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)).
 
 외부 참조 자료 링크는 overview.md에 적지 않고 reference.md(아래)에 누적한다.
 
@@ -81,7 +82,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 | 산출물 | 책임 | 코드 블록 |
 |---|---|---|
-| `overview.md` | **의도만** — (있으면) PR 종류·목표·범위·열려있는 질문. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
+| `overview.md` | **의도만** — (있으면) PR 종류·목표·범위·열려있는 질문 + 이 PR 몫 TODO. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
 | `decisions.md` | **기록 대상 결정의 근거** + 의사결정 흐름 (사용자 발화 단계 + 거부/채택 사유) | 사용자 발화 인용은 그대로. 코드는 시그니처 수준만 |
 | `reference.md` | 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스 | 코드 없음 |
 | `markup.md` | **Figma 원본 링크 인덱스(사용자 입력)** + 토큰 매핑표·매칭표 (figma 없는 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
@@ -93,7 +94,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 ### todo.md 현재 PR 절 소비
 
-`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. todo.md는 순수 큐라 소비 후 처리는 [소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)를 따른다 — 제목·pointer를 남기지 않는다.
+`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO는 overview `## TODO`로 이관) 후 사용자에게 안내. 소비 후 처리는 [라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)의 `todo.md` 예외를 따른다.
 ### 의사결정 토론
 
 overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자에게 안내한다. 자동으로 토론에 진입하지 않으며, 사용자의 명시적 허가가 있을 때에만 진행한다.

@@ -19,7 +19,7 @@ next: []
   - `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**. 「열려있는 질문」은 초안의 "Known issues / Follow-up" 절에 반영한다.
   - `pr{N}/persistent/decisions.md` — plan 초기본. 토론이 없었으면 부재할 수 있다.
   - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
-  - `/plan/background/consumable/todo.md` — 아래 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 plan에서 overview로 소비돼 없을 수 있다.
+  - `/plan/background/consumable/todo.md` — 아래 「PR 착수 시 todo.md 판정」 대상. plan이 소비한 PR 절은 헤딩·「의존」만 남고, 그 PR 몫 TODO는 `pr{N}/persistent/overview.md`의 `## TODO`에 있다.
 - **산출물**: `pr{N}/consumable/pr-body.md` **초안** (배경·문제·접근·근거; 상세 코드블록 제외)
 - **작업 위치**: main repo `/plan/` — 코드 워크트리 무관 (아래 「cwd」)
 

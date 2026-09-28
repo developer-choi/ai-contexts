@@ -21,7 +21,7 @@
       cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
     consumable/
-      todo.md        ← requirement의 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
+      todo.md        ← requirement의 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관 (절 단위 큐 — 소비된 절은 헤딩·「의존」이 남는다, 아래 「라이프사이클 규칙」). 확정 전 TODO는 미분류 절에 쌓인다
       global.md         ← requirement의 requirement-review (planning) 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
       layout.md         ← requirement의 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). requirement 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
@@ -49,6 +49,7 @@ realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`
 - **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움.
 - **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
 - **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
+  - **`todo.md`는 예외** — PR 인덱스를 겸한다. PR 절을 소비하면 `## PR N. 이름` 헤딩과 `### 의존`은 남기고 나머지 본문만 지운 뒤, 헤딩 밑에 `소비됨: pr{N}/persistent/overview.md`를 단다. 모든 절이 비어도 파일은 지우지 않는다 — FINALIZE 잔존 점검에서만 지운다.
 
 `persistent/`·`retained/` 하위는 WRITING_REFINER 「산출물 정리」의 정리 대상이 아니다 (REFINER는 consumable만 소비·정리).
 
@@ -62,7 +63,7 @@ realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`
 
 소비→삭제의 **메커니즘**(삭제 여부·granularity=절 단위·제목 보존 안 함·파일 삭제 조건)은 위 「라이프사이클 규칙」 + 「consumable/ 산출물 자가 정리 안내문」 두 곳에만 산다. 각 소비처 step은 **"소비" 선언만** 한다 — 삭제·절 단위·제목 보존 같은 동작 스펙을 재진술하지 않는다.
 
-- 소비한 절은 제목·포인터도 남기지 않는다.
+- 소비한 절은 제목·포인터도 남기지 않는다 (`todo.md`의 PR 절은 위 예외).
 
 ## 피그마 URL·캡처 캐싱
 

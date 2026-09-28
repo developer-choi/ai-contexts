@@ -77,7 +77,7 @@ Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차 + 프로젝�
 
 ### Step 5.2.0. IMPL 시작 게이트 — TODO 잔존 검사
 
-implement 진입 직후 본 PR 영역에서 [IMPL 시작 게이트](../conventions/artifact/comments.md#impl-시작-게이트-구현-진입-시)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가.
+implement 진입 직후 본 PR 영역에서 [IMPL 시작 게이트](../conventions/artifact/comments.md#impl-시작-게이트-구현-진입-시)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가. `pr{N}/persistent/overview.md`의 `## TODO`도 읽는다 — plan 뒤에 다른 PR이 이 PR 몫으로 넣은 항목이 거기 있다.
 
 ### Step 5.2.1. TODO 주석 처리
 

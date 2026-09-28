@@ -17,7 +17,7 @@
 //
 // 사용:
 //   node <이 파일> notice              → 안내문 블록을 표준출력으로 (파일 앞에 붙인다)
-//   node <이 파일> notice <파일>        → 그 파일 맨 앞에 붙인다 (이미 있으면 안 건드린다)
+//   node <이 파일> notice <파일>        → 그 파일 맨 앞에 붙인다 (이미 있으면 안 건드린다. todo.md는 전용 안내문)
 //   node <이 파일> left <plan 루트>     → 남은 consumable 파일과 안내문 누락분
 
 import fs from 'node:fs';
@@ -31,7 +31,18 @@ const NOTICE = `> 이 파일은 큐 모델로 운영됩니다.
 > **단순 읽기·참조 조회는 소비 아님** — 사용자 질문 응답을 위해 잠시 본 케이스 등은 삭제 금지
 `;
 
+// todo.md는 PR 인덱스를 겸해 절을 통째로 지우지 않는다 — 소비된 PR 절도 헤딩과 「의존」이 남아
+// 번호 매기기·의존 조회·마지막 PR 판정의 근거가 된다. 그래서 안내문이 따로다. MARKER는 같게 둔다.
+const TODO_NOTICE = `> 이 파일은 큐 모델로 운영됩니다.
+> PR 절을 **소비**한 step은 \`## PR N. 이름\` 헤딩과 \`### 의존\`만 남기고 나머지를 지운 뒤, 헤딩 밑에 \`소비됨: pr{N}/persistent/overview.md\`를 단다.
+> 모든 절이 비어도 파일은 지우지 않는다 — FINALIZE 잔존 점검에서만 지운다.
+>
+> **소비** = 그 절의 내용을 다른 산출물(overview·stub·PR 본문·코드 등)로 이관·녹임
+> **단순 읽기·참조 조회는 소비 아님** — 사용자 질문 응답을 위해 잠시 본 케이스 등은 삭제 금지
+`;
+
 const MARKER = '이 파일은 큐 모델로 운영됩니다.';
+const noticeFor = (file) => (file && path.basename(file) === 'todo.md' ? TODO_NOTICE : NOTICE);
 
 const [command, target] = process.argv.slice(2);
 if (!command) {
@@ -58,7 +69,7 @@ if (command === 'notice') {
     console.log(`이미 붙어 있다: ${target}`);
     process.exit(0);
   }
-  fs.writeFileSync(target, `${NOTICE}\n${body}`, 'utf8');
+  fs.writeFileSync(target, `${noticeFor(target)}\n${body}`, 'utf8');
   console.log(`안내문을 붙였다: ${target}`);
   process.exit(0);
 }
