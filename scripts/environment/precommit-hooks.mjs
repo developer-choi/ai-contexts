@@ -20,6 +20,12 @@ export const PRECOMMIT_HOOKS = [
     stateKey: 'countHardcodingHookSetByAiContexts',
   },
   {
+    alias: 'wording',
+    file: 'check-wording.mjs',
+    label: '낱말 검사 훅',
+    stateKey: 'wordingHookSetByAiContexts',
+  },
+  {
     alias: 'coupling-patterns',
     file: 'check-coupling-patterns.mjs',
     label: '짝꿍 등록부 검사 훅',

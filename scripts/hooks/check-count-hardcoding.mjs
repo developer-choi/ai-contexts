@@ -17,6 +17,8 @@
 // 끼우자 「pre-exit 본 절차(Step 1~3)」로 적힌 파일 다섯이 한꺼번에 낡았고, 사용자가 커밋을
 // 보고 짚어서야 「본 절차」로 걷혔다. 처방이 달라 보고 문구만 가른다.
 import { execFileSync } from "node:child_process";
+import path from "node:path";
+import fs from "node:fs";
 
 // 프롬프트 문서만 본다 — 일반 문서까지 걸면 소음이 된다.
 const PROMPT_DOC = /\/(skills|rules|contexts|meta\/guides)\//;
@@ -73,22 +75,27 @@ function main() {
     }
   }
 
-  if (counts.length === 0 && steps.length === 0) return;
+  printAll("이 커밋이 건드린 프롬프트 md", counts, steps, true);
+}
 
+const COUNT_ADVICE = [
+  "판단: 이 개수가 늘거나 줄 목록을 가리키면 일반화한다 (예: `5문항` → `자가검증 문항`, `3개 단계` → `각 단계`).",
+  "      앞서 열거된 집합을 가리키면 위치 참조로 (`세 영역` → `위 영역들`).",
+  "      설계상 고정된 쌍·닫힌 열거(바로 뒤에 전부 나열됨)면 그대로 둔다.",
+];
+
+const STEP_ADVICE = [
+  "판단: 다른 파일의 단계를 가리키면 역할 이름으로 바꾼다 (예: `pre-exit Step 1~3` → `pre-exit 본 절차`).",
+  "      번호는 그쪽에 단계가 끼면 조용히 낡는데, 가리키는 쪽 파일을 아무도 안 열어 안 드러난다.",
+  "      같은 파일이 자기 단계를 부르는 것이면 그대로 둔다.",
+];
+
+function printAll(where, counts, steps, inCommit) {
   if (counts.length > 0) {
-    printReports("[개수 하드코딩 의심] 이 커밋이 건드린 프롬프트 md에서 구체적 개수가 감지됐다:", counts, [
-      "판단: 이 개수가 늘거나 줄 목록을 가리키면 일반화한다 (예: `5문항` → `자가검증 문항`, `3개 단계` → `각 단계`).",
-      "      앞서 열거된 집합을 가리키면 위치 참조로 (`세 영역` → `위 영역들`).",
-      "      설계상 고정된 쌍·닫힌 열거(바로 뒤에 전부 나열됨)면 그대로 둔다.",
-    ]);
+    printReports(`[개수 하드코딩 의심] ${where}에서 구체적 개수가 감지됐다:`, counts, COUNT_ADVICE, inCommit);
   }
-
   if (steps.length > 0) {
-    printReports("[스텝 번호 호명 의심] 이 커밋이 건드린 프롬프트 md에서 단계 번호 범위가 감지됐다:", steps, [
-      "판단: 다른 파일의 단계를 가리키면 역할 이름으로 바꾼다 (예: `pre-exit Step 1~3` → `pre-exit 본 절차`).",
-      "      번호는 그쪽에 단계가 끼면 조용히 낡는데, 가리키는 쪽 파일을 아무도 안 열어 안 드러난다.",
-      "      같은 파일이 자기 단계를 부르는 것이면 그대로 둔다.",
-    ]);
+    printReports(`[스텝 번호 호명 의심] ${where}에서 단계 번호 범위가 감지됐다:`, steps, STEP_ADVICE, inCommit);
   }
 }
 
@@ -96,7 +103,8 @@ function main() {
 // 되넘긴다 — 2026-09-02 PP 지원동기 커밋에서 이 훅이 28건을 냈는데, 「손대는 김에」를 읽은
 // 세션이 그대로 "별도로 다룰지 정해주세요"로 보고를 닫았고 사용자가 "겸사겸사 같이 수정해"로
 // 다시 시켰다. 그대로 둘 줄이 대부분이더라도 판정 자체는 그 자리에서 끝나야 한다.
-function printReports(heading, reports, advice) {
+// `--report`로 물을 때는 커밋이 없으므로 이 안내를 빼고 판단 기준만 낸다.
+function printReports(heading, reports, advice, inCommit) {
   console.log(heading);
   for (const { file, lineNo, line, hits } of reports.slice(0, MAX_REPORTS)) {
     console.log(`  ${file}:${lineNo}: ${line}  (${hits.join(", ")})`);
@@ -105,21 +113,38 @@ function printReports(heading, reports, advice) {
     console.log(`  ... 그 밖에 ${reports.length - MAX_REPORTS}건 더`);
   }
   console.log("");
-  console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다.");
-  console.log('      "따로 다룰까요"로 사용자에게 넘기지 않는다. 줄마다 아래로 판정해 고칠 것은 고치고,');
-  console.log("      그대로 둘 것은 둔 뒤 몇 건을 어떤 사유로 뒀는지만 보고에 한 줄로 적는다.");
+  if (inCommit) {
+    console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다.");
+    console.log('      "따로 다룰까요"로 사용자에게 넘기지 않는다. 줄마다 아래로 판정해 고칠 것은 고치고,');
+    console.log("      그대로 둘 것은 둔 뒤 몇 건을 어떤 사유로 뒀는지만 보고에 한 줄로 적는다.");
+  }
   for (const line of advice) console.log(line);
   console.log("");
 }
 
-// 삭제(D)는 제외한다 — 사라진 파일에 경고할 자리가 없다.
+// 삭제(D)는 제외한다 — 사라진 파일에 경고할 자리가 없다. 내용 변경 없이 이름만 바뀐 파일(R100)도
+// 뺀다 — 재구성처럼 대량 이동하는 커밋에서 경고가 쏟아지고, "함께 정리한다"는 지시가 이동만
+// 담아야 하는 커밋과 부딪힌다. 내용도 바뀐 rename(R100 미만)은 검사한다.
 function stagedMarkdownFiles() {
   const out = execFileSync(
     "git",
-    ["diff", "--cached", "--name-only", "--diff-filter=ACMR", "-z", "--", "*.md"],
+    ["diff", "--cached", "--name-status", "-M", "--diff-filter=ACMR", "-z", "--", "*.md"],
     { encoding: "utf8", maxBuffer: 1024 * 1024 * 32 }
   );
-  return out.split("\0").filter(Boolean);
+  const fields = out.split("\0").filter(Boolean);
+  const files = [];
+  for (let i = 0; i < fields.length; ) {
+    const status = fields[i];
+    // R·C는 옛 경로와 새 경로 두 칸이 따라온다.
+    if (status.startsWith("R") || status.startsWith("C")) {
+      if (status !== "R100") files.push(fields[i + 2]);
+      i += 3;
+    } else {
+      files.push(fields[i + 1]);
+      i += 2;
+    }
+  }
+  return files;
 }
 
 // 작업 트리가 아니라 스테이징된 내용을 본다 — 커밋될 것이 판정 대상이다.
@@ -198,10 +223,40 @@ function detectInFile(file, content) {
   return found;
 }
 
+// 파일 하나를 지목해 묻는다. 커밋 없이 문서를 훑는 회차는 훅이 안 뜨는데 판정 기준은 이 스크립트의
+// 메시지에만 있어서, 이 출구가 없으면 대조할 재료가 없다. 작업 트리의 내용을 보고, 프롬프트 문서
+// 범위 밖이어도 지목한 파일이면 본다 — 부른 쪽이 이미 대상을 골랐다.
+function reportFile(target) {
+  if (!target) {
+    console.error("사용법: check-count-hardcoding.mjs --report <md 경로>");
+    process.exitCode = 1;
+    return;
+  }
+  const abs = path.resolve(target);
+  if (!fs.existsSync(abs)) {
+    console.error(`파일이 없다: ${abs}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const found = detectInFile(target, fs.readFileSync(abs, "utf8"));
+  const counts = found.filter((r) => r.kind === "count");
+  const steps = found.filter((r) => r.kind === "step");
+  printAll(target, counts, steps, false);
+  if (found.length === 0) console.log(`${target} — 적중 없음.`);
+  console.log(
+    "한계: 명사 없이 단독으로 쓰인 수량어, 범위가 아닌 단일 단계 번호(`Step 2`), 가리키는 문서 이름이 " +
+      "다른 줄에 있는 번호 호명은 안 잡히므로 스스로 살핀다.",
+  );
+}
+
 try {
-  main();
+  const reportAt = process.argv.indexOf("--report");
+  if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
+  else main();
 } catch (error) {
   console.error(`[개수 하드코딩 훅 내부 오류, 건너뜀] ${error.message}`);
 }
-// 정탐률이 낮은 알림이라 사람의 커밋을 막으면 안 된다 — 항상 통과시킨다.
-process.exit(0);
+// 정탐률이 낮은 알림이라 사람의 커밋을 막으면 안 된다 — 검사(main)는 늘 0이다.
+// 사람이 부른 `--report`가 파일을 못 찾았을 때만 그 실패가 그대로 나간다.
+process.exit(process.exitCode ?? 0);

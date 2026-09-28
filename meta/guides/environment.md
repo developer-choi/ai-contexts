@@ -20,8 +20,12 @@ npm run sync:environment
 - `scripts/hooks/check-count-hardcoding.mjs`를 `~/.ai-contexts/check-count-hardcoding.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-count-hardcode.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md(`/skills/`·`/rules/`·`/contexts/`·`meta/guides/`·`CLAUDE|AGENTS|GEMINI.md`)를 통째로 훑어 개수 하드코딩(글로벌 룰 「구체적인 개수를 본문에 하드코딩하지 않는다」)을 감지해 경고합니다 — 어느 레포·어느 도구로 커밋하든 발동하지만 커밋을 막지는 않습니다.
   - 스텝 번호 범위 호명(`Step 1~3`)도 같은 훅이 별도 문구로 경고합니다. 지는 불변식이 같기 때문입니다 — 문서 구조에 묶인 숫자가 구조가 바뀔 때 조용히 낡습니다. 번호 매긴 단계를 헤딩으로 정의하는 파일은 자기 목차를 부르는 것이라 이 검사에서 제외합니다.
   - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
+  - 내용 변경 없이 이름만 바뀐 파일(git이 `R100`으로 보고하는 것)은 건드린 파일로 치지 않습니다. 재구성처럼 대량 이동하는 커밋에서 경고가 쏟아지고, "함께 정리한다"는 안내가 이동만 담아야 하는 커밋과 부딪히기 때문입니다. 내용도 바뀐 rename은 검사합니다.
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
+- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md에서 「문장 다듬기」(`deploy/contexts/prompt-standards/wording.md`)가 금하는 낱말 — 강조 라벨·약한 어휘·군더더기 — 을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.
+  - 검사 범위·제외(건드린 파일 전체, `R100` 제외, backlog 데이터 제외, `|| true`)는 바로 위 개수 하드코딩 훅과 같습니다.
+  - 낱말 목록과 처방은 스크립트가 정본입니다. 문자열만으로 정탐이 대부분인 낱말만 켭니다 — 정상 조건문·명사로 더 많이 쓰이는 낱말(`필요하면`·`옵션` 등)은 뺍니다.
 - `scripts/hooks/check-coupling-patterns.mjs`를 `~/.ai-contexts/check-coupling-patterns.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-coupling-patterns.*`)으로 멱등하게 등록합니다. 커밋하는 레포에 `meta/coupling.json`이 있으면 등록된 짝꿍 패턴 **하나하나**가 실물 파일을 가리키는지 확인해 경고합니다 — 커밋을 막지는 않습니다.
   - 왜 필요한가: 짝꿍을 띄우는 편집 시점 훅(`surface-coupling`)은 「편집 중인 파일이 어느 묶음에 드는가」만 봅니다. 묶음 쪽 패턴이 낡아 아무 파일도 안 가리키게 되면 그 훅에서는 「이 파일은 짝꿍이 아니다」와 똑같은 모양이 되어, 짝꿍 대조가 통째로 꺼진 상태가 매 편집마다 통과처럼 보입니다([대상 0개는 통과가 아니라 고장이다](../../deploy/contexts/rules-as-code-authoring.md#대상-0개는-통과가-아니라-고장이다)).
   - 등록부를 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돕니다. 패턴이 죽는 계기는 등록부를 고칠 때가 아니라 다른 파일이 옮겨갈 때라, 등록부를 건드린 커밋만 보면 죽은 뒤 아무도 등록부를 안 여는 동안 계속 안 잡힙니다.
