@@ -23,7 +23,7 @@
 ### 제외
 
 - **출처값 그대로 채택**: 1차 소스(공식 문서·MP 베스트프랙티스 등)의 기본값·권장값을 비교 없이 채택 → reference.md 출처 경로로 충분
-- **자명한 절차 결과**: 안 할 이유가 없어 결과가 정해진 것 (예: 단일 후보뿐인 라이브러리 채택) → implementation.md 계획에 자연 반영, 별도 기재 불요. 단 stub 유무는 여기 해당하지 않는다 — [realize-plan 「stub 커밋」](../../steps/realize-plan.md#5-stub-커밋) 판정 소관이라 plan에서 stub 없음으로 단정하지 않는다.
+- **자명한 절차 결과**: 안 할 이유가 없어 결과가 정해진 것 (예: 단일 후보뿐인 라이브러리 채택) → implementation.md 계획에 자연 반영, 별도 기재 불요. 단 stub 유무는 여기 해당하지 않는다 — [realize-plan 「realize-plan 커밋」](../../steps/realize-plan.md#5-realize-plan-커밋-stub-또는-실행) 판정 소관이라 plan에서 stub 없음으로 단정하지 않는다.
 - **non-issue 확인 (걱정거리 해소)**: "우려했으나 확인해보니 문제 없음"으로 닫힌 항목은 결정이 아니다 (채택한 대안도 기각한 대안도 없음) → 적지 않는다. 필요하면 implementation.md 메모로.
 - **PR 분할·범위 변경**: 그 PR의 TODO로 적는다 ([PR 몫 TODO 등록처](../pr-split.md#pr-몫-todo-등록처))
 - **단순 합의**: 트레이드오프 없이 사용자가 그냥 동의 (선택지가 사실상 하나)

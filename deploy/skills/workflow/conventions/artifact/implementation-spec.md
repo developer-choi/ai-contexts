@@ -8,7 +8,7 @@
 
 코드·다른 절차에 이미 있는 것은 담지 않는다.
 
-정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 ([realize-plan 「stub 커밋」](../../steps/realize-plan.md#5-stub-커밋) 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭한다.
+정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 ([realize-plan 「realize-plan 커밋」](../../steps/realize-plan.md#5-realize-plan-커밋-stub-또는-실행) 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭한다.
 
 implement(구현)·[verify 「Gap Analysis」](../../steps/verify.md#step-61-gap-analysis-계획--실제-차이-검사)·WRITING_REFINER(PR body 확정)에서 소비.
 

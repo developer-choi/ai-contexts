@@ -5,7 +5,7 @@ next:
   - to: implement
   - to: plan
     notice: gate
-    on: realize-plan 커밋 완료
+    on: realize-plan 커밋
     when: 이 PR에 의존하는 PR이 있을 때
 ---
 
@@ -118,7 +118,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 ---
 
-## 5. stub 커밋
+## 5. realize-plan 커밋 (stub 또는 실행)
 
 ### LLM 분석 + 사용자 제안 (PR 번호 무관)
 

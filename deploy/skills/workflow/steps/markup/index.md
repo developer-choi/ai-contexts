@@ -4,7 +4,7 @@ session: MARKUP
 scope: project
 entry: >-
   BG의 requirement 「자료 받기」 종료 + 코드 스타일 기준이 섬 — FOUNDATION PR이 있으면 그 PR의 verify 종료,
-  없으면 BG의 「레포 확보」. `/workflow MARKUP <모드>` 호출
+  없으면 BG의 「레포 확보」
 model: Sonnet (figma URL 기준) / Opus (캡처-only·개인)
 next:
   - to: plan
