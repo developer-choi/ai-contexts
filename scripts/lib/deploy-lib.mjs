@@ -319,8 +319,8 @@ function contextsDirForSkill(skillDir) {
   return path.resolve(skillDir, '..', '..', 'contexts');
 }
 
-// 여러 스킬이 함께 쓰는 contexts 스크립트를 부를 때 쓴다. `{{skill_dir}}`은 자기 폴더 안만
-// 가리킬 수 있어 이 경우를 못 덮는다.
+// 여러 스킬이 함께 쓰는 contexts 스크립트를 부를 때 쓴다. `{{skill_dir}}`은 자기 폴더와 형제 스킬
+// 폴더만 가리킬 수 있어 이 경우를 못 덮는다.
 function withSkillContextsPath(content, contextsDir) {
   return content
     .split(`${CONTEXTS_TOKEN}/`).join(`${contextsDir}${path.sep}`)
