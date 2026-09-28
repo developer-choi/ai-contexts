@@ -575,9 +575,230 @@ function reportFile(target) {
   );
 }
 
+// --- 세션 적재 재료 --------------------------------------------------------
+//
+// 파일 크기만으로는 그 문서를 따르는 세션이 무엇을 언제까지 짊어지는지 안 보인다
+// ([머무는 시간이 비용이다](../../deploy/contexts/prompt-standards/file-layout.md#한-세션-안에서도-머무는-시간이-비용이다)). 아래 둘은 그 표를 채울 재료만 낸다 —
+// 어느 절이 어느 시점에 쓰이는지, 링크가 읽으라는 지시인지 참고인지는 사람이 가른다.
+// 링크를 기계로 따라가면 안 읽히는 참고 링크까지 세고, 산문으로만 부르는 두 단계 적재는 놓친다.
+// 둘 다 디스크의 파일을 읽는다 — 옛 커밋을 풀어놓은 폴더에도 돌리려는 것이다.
+
+function readTarget(target, usage) {
+  if (!target) {
+    console.error(`사용법: check-md-size.mjs ${usage} <md 경로>`);
+    process.exitCode = 1;
+    return null;
+  }
+  const abs = path.resolve(target);
+  if (!fs.existsSync(abs)) {
+    console.error(`파일이 없다: ${abs}`);
+    process.exitCode = 1;
+    return null;
+  }
+  return { abs, lines: fs.readFileSync(abs, "utf8").split("\n") };
+}
+
+// 닫는 `#` 줄은 앞에 공백이 있어야 닫는 표시다 — `## C#`의 `#`은 제목의 일부다.
+const HEADING_RE = /^(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/;
+// 마지막 조각은 개행 뒤의 빈 꼬리라 개행을 더하지 않는다. 더하면 파일 크기보다 1바이트 커진다.
+const lineBytes = (lines, i) => Buffer.byteLength(i < lines.length - 1 ? lines[i] + "\n" : lines[i], "utf8");
+
+// 줄마다 코드 펜스·frontmatter 안인지 낸다. 그 안의 `#`은 헤딩이 아니다.
+// 펜스는 같은 기호가 여는 것보다 짧지 않게 와야 닫힌다 — 4백틱 안의 3백틱 예시가 펜스를 닫지 않게.
+function fencedOf(lines) {
+  const inside = new Array(lines.length).fill(false);
+  let i = 0;
+  if (lines[0]?.trim() === "---") {
+    const end = lines.findIndex((l, k) => k > 0 && l.trim() === "---");
+    if (end !== -1) for (; i <= end; i++) inside[i] = true;
+  }
+  let open = null; // { ch, len }
+  for (; i < lines.length; i++) {
+    const m = /^\s*(`{3,}|~{3,})/.exec(lines[i]);
+    if (open) {
+      inside[i] = true;
+      if (m && m[1][0] === open.ch && m[1].length >= open.len && lines[i].trim() === m[1]) open = null;
+    } else if (m) {
+      inside[i] = true;
+      open = { ch: m[1][0], len: m[1].length };
+    }
+  }
+  return inside;
+}
+
+function headingsOf(lines, fenced) {
+  return lines.map((line, i) => {
+    if (fenced[i]) return null;
+    const m = HEADING_RE.exec(line);
+    return m ? { level: m[1].length, title: m[2] } : null;
+  });
+}
+
+// 절마다 제 몫(다음 헤딩 직전까지)과 하위 절 포함 크기를 낸다. 메인이 본문을 통째로 들지 않고
+// 이 목차만으로 「절 × 여는 주체 × 시점 × 체류」 표의 행을 세우게 하려는 것이다.
+function sectionsReport(t) {
+  const heads = headingsOf(t.lines, fencedOf(t.lines));
+  const sections = [{ line: 0, level: 0, title: "(첫 헤딩 앞)", own: 0 }];
+  t.lines.forEach((line, i) => {
+    if (heads[i]) sections.push({ line: i + 1, level: heads[i].level, title: heads[i].title, own: 0 });
+    sections[sections.length - 1].own += lineBytes(t.lines, i);
+  });
+  const total = sections.reduce((sum, s) => sum + s.own, 0);
+  console.log(`${t.abs} — ${total}B, 절 ${sections.length - 1}개 (제 몫 = 다음 헤딩 직전까지, 하위 포함 = 같은 급 이상 헤딩 직전까지)`);
+  sections.forEach((s, i) => {
+    if (i === 0 && s.own === 0) return;
+    let sub = s.own;
+    for (let j = i + 1; j < sections.length && sections[j].level > s.level && s.level > 0; j++) sub += sections[j].own;
+    const indent = "  ".repeat(Math.max(s.level - 1, 0));
+    const where = s.line ? `L${s.line}` : "L1";
+    console.log(`  ${where.padEnd(6)} ${String(s.own).padStart(6)}B  하위 포함 ${String(sub).padStart(6)}B  ${indent}${s.title}`);
+  });
+}
+
+// 여는 지시로 보이는 낱말. 붙으면 「지시?」로 표시할 뿐 판정은 사람 몫이다 — 「참고」는 일부러 뺐다.
+const DIRECTIVE_RE = /연다|열고|열어|열기|\bRead\b|읽는다|읽고|읽어|읽힌|로드|실행|적용|호출|부른다|불러/;
+// `/스킬명` 호출. 뒤에 `/`가 이어지면 URL·경로 조각이라 뺀다.
+const SKILL_RE = /(?:^|[\s`'"(])\/([a-z][a-z0-9-]*)(?=[`'")\s,.:]|$)/g;
+const SKILL_DIRS = [".claude/skills", "local/skills", "deploy/skills"];
+
+// 레포 루트. `.git`이 없는 폴더(옛 커밋을 풀어놓은 곳)는 스킬·문서 폴더(`local/`·`deploy/`)가
+// 있는 가장 가까운 위 폴더를 루트로 친다(`.claude/`는 홈 폴더에도 있어 뺀다). 못 찾으면 null이고, 그때는 대상 파일의 폴더 밖으로 안 나간다 —
+// 드라이브 끝까지 올라가면 트리 밖의 같은 이름 파일이 옛 트리의 것처럼 크기를 달고 나온다.
+function repoRootOf(dir) {
+  for (let d = dir; ; d = path.dirname(d)) {
+    if (fs.existsSync(path.join(d, ".git"))) return d;
+    if (path.dirname(d) === d) break;
+  }
+  for (let d = dir; ; d = path.dirname(d)) {
+    // 이름을 글자 그대로 대조한다 — Windows의 existsSync는 대소문자를 안 가려 `AppData/Local`도 잡는다.
+    if (entriesOf(d).some((n) => n === "local" || n === "deploy")) return d;
+    if (path.dirname(d) === d) return null;
+  }
+}
+
+function entriesOf(dir) {
+  try {
+    return fs.readdirSync(dir);
+  } catch {
+    return [];
+  }
+}
+
+function sizeOf(abs) {
+  try {
+    const stat = fs.statSync(abs);
+    return stat.isFile() ? stat.size : null;
+  } catch {
+    return null;
+  }
+}
+
+// 이 md가 여는 문서 후보를 줄마다 낸다. 스킬은 같은 레포의 스킬 폴더를 먼저, 없으면 설치본을 본다 —
+// 설치본은 지금 크기라 옛 트리를 잴 때는 「설치본」 표시를 보고 가른다.
+// 못 푼 스킬 이름은 안 낸다 — `/compact` 같은 내장 명령과 경로 조각이 대부분이라 잡음만 된다.
+function traceReport(t) {
+  const dir = path.dirname(t.abs);
+  const root = repoRootOf(dir);
+  const home = process.env.HOME || process.env.USERPROFILE || "";
+
+  // 레포 루트 기준으로 적힌 경로(`local/contexts/…`)도 있어 루트까지 거슬러 본다.
+  const bases = [];
+  for (let d = dir; ; d = path.dirname(d)) {
+    bases.push(d);
+    if (!root || d === root || path.dirname(d) === d) break;
+  }
+  const resolveMd = (ref) => {
+    const clean = ref.split("#")[0].trim();
+    if (/^[a-z]+:\/\//i.test(clean)) return null; // URL은 세션이 여는 문서가 아니다
+    for (const base of bases) {
+      const abs = path.resolve(base, clean);
+      const size = sizeOf(abs);
+      if (size !== null) return { shown: path.relative(dir, abs).replace(/\\/g, "/"), size };
+    }
+    return { shown: clean, size: null };
+  };
+  const resolveSkill = (name) => {
+    const cands = [
+      ...(root ? SKILL_DIRS.map((p) => [path.join(root, p), ""]) : []),
+      [path.join(home, ".claude", "skills"), " (설치본)"],
+    ];
+    for (const [base, note] of cands) {
+      const abs = path.join(base, name, "SKILL.md");
+      const size = sizeOf(abs);
+      if (size !== null) return { shown: `/${name} → ${abs.replace(/\\/g, "/")}${note}`, size };
+    }
+    return null;
+  };
+
+  const fenced = fencedOf(t.lines);
+  const heads = headingsOf(t.lines, fenced);
+  let section = "(첫 헤딩 앞)";
+  const rows = [];
+  t.lines.forEach((line, i) => {
+    if (heads[i]) section = heads[i].title;
+    const seen = new Set();
+    // 코드 블록 안의 경로도 명령으로 여는 것일 수 있어 빼지 않고 표시만 단다.
+    const kind = (k) => (fenced[i] ? `${k}(코드 블록)` : k);
+    const add = (k, hit) => {
+      if (!hit || seen.has(hit.shown)) return;
+      seen.add(hit.shown);
+      rows.push({ line: i + 1, section, kind: kind(k), directive: DIRECTIVE_RE.test(line), ...hit });
+    };
+    for (const [re, kind] of [[LINK_RE, "링크"], [PATH_RE, "경로"]]) {
+      re.lastIndex = 0;
+      let m;
+      while ((m = re.exec(line))) add(kind, resolveMd(m[1]));
+    }
+    SKILL_RE.lastIndex = 0;
+    let m;
+    while ((m = SKILL_RE.exec(line))) add("스킬", resolveSkill(m[1]));
+  });
+
+  const fmt = (size) => (size === null ? "해석 못 함" : `${size}B`);
+  console.log(`${t.abs} — 여는 문서 후보 ${rows.length}건 (「지시?」 = 그 줄에 읽기·실행 낱말이 있다. 참고 링크인지는 사람이 가른다)`);
+  if (!root) console.log("  (레포 루트를 못 찾아 대상 파일의 폴더 기준으로만 풀었다)");
+  for (const r of rows) {
+    console.log(`  L${String(r.line).padEnd(5)} ${r.kind} ${r.directive ? "지시?" : "     "} [${r.section}] ${r.shown} — ${fmt(r.size)}`);
+  }
+  // 같은 문서가 여러 절에서 불리면 그 문서가 실리는 시점은 처음 부르는 절이다.
+  const byTarget = new Map();
+  for (const r of rows) {
+    if (!byTarget.has(r.shown)) byTarget.set(r.shown, { ...r, count: 0, directives: 0 });
+    const e = byTarget.get(r.shown);
+    e.count += 1;
+    if (r.directive) e.directives += 1;
+  }
+  console.log("대상별 (처음 나오는 줄 순):");
+  for (const e of byTarget.values()) {
+    console.log(`  ${fmt(e.size).padStart(10)}  ${e.count}회(지시? ${e.directives})  처음 L${e.line} [${e.section}]  ${e.shown}`);
+  }
+  console.log(
+    "한계: 확장자 없이 이름으로만 부르는 문서, 열린 문서가 다시 여는 문서는 안 나온다 — 지시로 여는 문서에 --trace를 다시 돌려 따라간다.",
+  );
+}
+
+// 플래그 뒤 인자가 다른 플래그면 값이 생략된 것이다 — `--sections --trace x.md`처럼 한 파일에
+// 여럿을 붙여 쓰면 첫 번째 플래그 아닌 인자를 함께 쓴다. 플래그가 없으면 undefined.
+function argOf(flag) {
+  const at = process.argv.indexOf(flag);
+  if (at === -1) return undefined;
+  const next = process.argv[at + 1];
+  if (next !== undefined && !next.startsWith("--")) return next;
+  return process.argv.slice(2).find((a) => !a.startsWith("--")) ?? null;
+}
+
 try {
-  const reportAt = process.argv.indexOf("--report");
-  if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
+  const sections = argOf("--sections");
+  const trace = argOf("--trace");
+  const report = argOf("--report");
+  if (sections !== undefined || trace !== undefined) {
+    // 파일을 먼저 읽는다 — `--report`가 잰 파일의 폴더로 chdir해 뒤의 상대경로가 어긋난다.
+    const s = sections !== undefined ? readTarget(sections, "--sections") : null;
+    const t = trace !== undefined ? readTarget(trace, "--trace") : null;
+    if (report !== undefined) reportFile(report);
+    if (s) sectionsReport(s);
+    if (t) traceReport(t);
+  } else if (report !== undefined) reportFile(report);
   else if (process.argv.includes("--write-baseline")) writeBaseline();
   else if (process.argv.includes("--settle")) settleBaseline();
   else main();
@@ -585,6 +806,6 @@ try {
   console.error(`[문서 크기 훅 내부 오류, 건너뜀] ${error.message}`);
 }
 // 문서가 큰 것이 사람의 커밋을 막을 일은 아니다 — 검사(main)는 exitCode를 안 세우므로 늘 0이다.
-// 사람이 부른 `--write-baseline`·`--settle`이 설정을 못 열었을 때, `--report`가 잴 파일을 못 찾았을 때만
+// 사람이 부른 `--write-baseline`·`--settle`이 설정을 못 열었을 때, `--report`·`--sections`·`--trace`가 잴 파일을 못 찾았을 때만
 // 그 실패가 그대로 나간다.
 process.exit(process.exitCode ?? 0);
