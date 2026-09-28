@@ -11,7 +11,9 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 1. **PR이 만들 모든 파일·함수·컴포넌트는 stub 필수** — 외부 공개 여부 무관. 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`
 2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 결정·코드 표현 가능 → 별도 narrative가 아닌 stub 코드. 코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
 
-**마크업 예외 (재정의)**: 마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
+### 마크업 예외 (재정의)
+
+마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
 
 - **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — realize-plan 전면 stub 대상이 아니다.
 - **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../../steps/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.

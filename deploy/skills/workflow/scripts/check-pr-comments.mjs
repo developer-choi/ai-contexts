@@ -2,11 +2,11 @@
 // PR diff의 주석 게이트 — 금지 주석 잔존과 미배정 blanket disable 고아를 함께 본다.
 //
 // 이 파일이 존재하는 이유: 두 점검 다 정규식인데 산문이 **서브에이전트에게** 시키고 있었다.
-// step-6.1.5는 "sonnet 리뷰어를 spawn해 금지 주석이 잔존하는지 재점검"이라 적혀 있는데,
+// 당시 step-6.1.5(지금 verify 「주석 게이트」)는 "sonnet 리뷰어를 spawn해 금지 주석이 잔존하는지 재점검"이라 적혀 있는데,
 // 리뷰어가 "0건"이라고 말하면 그걸로 끝난다 — 확인할 방법이 없고, 놓친 마커는 머지된 코드에
 // 남아 나중에 드러난다. 판단이 1도 없는 대조에 판단하는 도구를 쓰면 그 결과도 판단이 된다.
 //
-// 고아 점검(step-6.1.6)은 「마커 문구는 comments.md가 단일 출처」라고 적혀 있었지만 정작
+// 고아 점검(당시 step-6.1.6, 지금 같은 게이트에 합쳐짐)은 「마커 문구는 comments.md가 단일 출처」라고 적혀 있었지만 정작
 // 그쪽은 문구를 *예시*로만 들고 있었다("추적 가능한 고정 문구를 남긴다 (예: …)"). 고정이
 // 아니면 탐지가 설 수 없으므로 여기서 문구를 못박고, comments.md가 이 파일을 가리킨다.
 //
@@ -112,7 +112,7 @@ const forbidden = added.filter((l) => gate.some((re) => re.test(l.text)));
 console.log(`[${label}] ${forbidden.length}건`);
 for (const l of forbidden) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
 if (forbidden.length) {
-  problems.push(args.marker ? `${label} — IMPL을 중단하고 사용자에게 보고한다` : '금지 주석이 남아 있다 — step-5 Implementer 흐름으로 해소한다');
+  problems.push(args.marker ? `${label} — IMPL을 중단하고 사용자에게 보고한다` : '금지 주석이 남아 있다 — implement의 Implementer 흐름으로 해소한다');
 }
 
 const ephemeral = added.filter((l) => AI_IMPL_LINE.test(l.text) && EPHEMERAL_SOURCE.test(l.text));

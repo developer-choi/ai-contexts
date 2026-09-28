@@ -25,9 +25,9 @@ const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
-// ── artifacts: step-1.1 종료 게이트 ──────────────────────────────────────────
+// ── artifacts: requirement 1.1 종료 게이트 ──────────────────────────────────────────
 // 「원본 저장 + 시각 원본 + design-root + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
-// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 step-1.2는 그대로 굴러가고, MARKUP이
+// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement 1.2는 그대로 굴러가고, MARKUP이
 // 진입 문서를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
@@ -49,7 +49,7 @@ function artifacts() {
     required.push({ label: 'figma 캡처', p: path.join(bg, 'retained', 'figma'), dir: true });
   }
 
-  console.log(`[step-1.1 종료 게이트] 모드: ${mode}`);
+  console.log(`[requirement 1.1 종료 게이트] 모드: ${mode}`);
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);
