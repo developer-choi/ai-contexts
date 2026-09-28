@@ -762,7 +762,7 @@ function cutTail(text) {
   return cut === -1 ? text : text.slice(0, cut);
 }
 
-// 헤딩 끝에 붙은 마커(`## 진입 실측 [CRITICAL]`). 앞머리 괄호와 같은 이유로 뗀다 —
+// 헤딩 끝에 붙은 대괄호 마커(`## 절 이름 [X]` → 「절 이름」). 앞머리 괄호와 같은 이유로 뗀다 —
 // 마커는 세기를 표시할 뿐 이름의 일부가 아니라, 부르는 쪽은 이름만 부른다.
 function dropMarker(text) {
   return text.replace(/\s*\[[^\]]*\]\s*$/u, "").trim();
