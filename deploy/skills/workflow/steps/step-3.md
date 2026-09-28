@@ -69,7 +69,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 본 step에서 초기 작성. 명세는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
 
-### [CRITICAL] todo.md 현재 PR 절 소비
+### todo.md 현재 PR 절 소비
 
 `/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. todo.md는 순수 큐라 소비 후 처리는 [conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」를 따른다 — 제목·pointer를 남기지 않는다.
 
@@ -95,6 +95,6 @@ overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자�
 - 핵심 기술 선택과 그 이유
 - 주요 trade-off나 열려있는 질문 (있는 경우)
 
-### [CRITICAL] 산출물 파일 존재 확인
+### 산출물 파일 존재 확인
 
 보고 전에 산출물 파일이 실제로 생성되었는지 확인한다 (`/plan/pr{N}/persistent/overview.md` 필수, `/plan/pr{N}/persistent/reference.md` 필수, `/plan/pr{N}/persistent/decisions.md`는 토론했거나 사용자 명시 결정이 있는 경우). 구두 보고만으로 완료 처리하지 않는다.
