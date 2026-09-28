@@ -85,7 +85,7 @@ Phase 3~4까지 완료된 프로젝트의 `hash`와 `refreshedAt`을 **그 회�
 
 ### 대조
 
-각 항목의 반영 여부는 backlog 레포 `projects/CLAUDE.md`의 「항목 반영 여부 판정」으로 가른다.
+각 항목의 반영 여부는 backlog 레포 `item-processing.md`의 「항목 반영 여부 판정」으로 가른다.
 
 ### 마무리
 
