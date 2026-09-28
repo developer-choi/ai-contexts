@@ -98,7 +98,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 **폴더 구조 결정 기준**: AI가 단독으로 정하거나, 「작업 익숙도 판별」 등 다른 절차에 전제로 끼워 넣지 않는다.
 
 - MP `monorepo-playground/docs/best-practices/setup.md`(폴더 구조·셋업)의 DDD 기반 패턴(상황: 채용과제·사이드 프로젝트 → `docs/patterns/folder-structure/FolderStructure.md`)을 안건 기본값으로 제시한다.
-- 최종 확정은 [foundation.md](../../conventions/session/foundation.md) 「folder-structure.md 결정 기준」이 한다 — BG는 이 단계에서 "제안+확인"까지만 하고 못박지 않는다.
+- 최종 확정은 [foundation.md](../../conventions/pr-types/foundation.md) 「folder-structure.md 결정 기준」이 한다 — BG는 이 단계에서 "제안+확인"까지만 하고 못박지 않는다.
 
 ##### 레포 세우기
 

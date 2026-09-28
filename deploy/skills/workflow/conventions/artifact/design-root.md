@@ -10,7 +10,7 @@
 
 ## 스코프 규칙 — 포인터만, 절차 복붙 금지
 
-이 파일엔 **원본 위치 + "어느 절차문서를 봐라"만** 적는다. 대조를 실제로 어떻게 하는지(진실검사 절차 본문)는 [../session/markup/figma.md](../session/markup/figma.md)·[../session/markup/personal.md](../session/markup/personal.md)에 두고 여기 복붙하지 않는다.
+이 파일엔 **원본 위치 + "어느 절차문서를 봐라"만** 적는다. 대조를 실제로 어떻게 하는지(진실검사 절차 본문)는 [../../steps/markup/figma.md](../../steps/markup/figma.md)·[../../steps/markup/personal.md](../../steps/markup/personal.md)에 두고 여기 복붙하지 않는다.
 
 **한 층뿐.** design-root.md → 모드 절차문서(figma.md/personal.md)를 가리킨다.
 

@@ -17,7 +17,7 @@
 
 커밋 소속은 접두사가 아니라 **브랜치**(각 PR 브랜치의 base..tip 범위)로 식별한다.
 
-**브랜치 형태는 PR마다 다르다.** 앞 PR에 의존하는 PR은 그 브랜치 위에 얹혀 있고(스택), 독립인 PR은 기본 브랜치에서 각자 뻗어 있다 (base 결정은 [steps/step-4.md](../../steps/step-4.md) 「사전 준비」 — 사용자 확인 사항).
+**브랜치 형태는 PR마다 다르다.** 앞 PR에 의존하는 PR은 그 브랜치 위에 얹혀 있고(스택), 독립인 PR은 기본 브랜치에서 각자 뻗어 있다 (base 결정은 [steps/realize-plan.md](realize-plan.md) 「사전 준비」 — 사용자 확인 사항).
 
 ## 진입 조건 (fan-in)
 
@@ -45,7 +45,7 @@
 
 ### 메시지 최종화 — 슬라이스·도메인 재작성 + 톤 정리
 
-전 커밋의 메시지를 슬라이스·도메인 기준으로 재작성하고, **외부 독자(채용담당자·리뷰어·팀원) 친화 톤으로 정리**한다. net-diff 불변(코스메틱). 톤 가이드는 [commits.md](../commits.md) 「커밋 메시지 톤 — 외부 독자 친화」 참조.
+전 커밋의 메시지를 슬라이스·도메인 기준으로 재작성하고, **외부 독자(채용담당자·리뷰어·팀원) 친화 톤으로 정리**한다. net-diff 불변(코스메틱). 톤 가이드는 [commits.md](../conventions/commits.md) 「커밋 메시지 톤 — 외부 독자 친화」 참조.
 
 - 슬라이스 분할·stub drop은 각 PR의 step-6.5(1회차 정리)에서 이미 끝났으므로, 본 세션은 메시지 정리에 집중한다.
 - 커밋 메시지와 함께 `todo.md` 등 외부 노출 가능 메모도 톤 스캔한다.
@@ -60,7 +60,7 @@ replace·메시지 최종화 완료 후 사용자에게 force-push를 요청한�
 
 ### consumable 잔존 점검
 
-force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 훑어 잔존 consumable이 있는지 확인한다 ([남은 consumable 조회](../plan-folder.md#consumable-산출물-자가-정리-안내문)).
+force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 훑어 잔존 consumable이 있는지 확인한다 ([남은 consumable 조회](../conventions/plan-folder.md#consumable-산출물-자가-정리-안내문)).
 
 - 잔존 파일이 있으면 절마다 같은 내용이 이미 다른 파일에 있는지 먼저 검색한다. 검색 방법은 [writing.md](writing.md) 「산출물 정리」와 같다.
 - 경로 목록에 절마다 검색 결과(무엇으로 찾았는지, 없음 / 어느 파일에 있고 판본 차이는 무엇인지)를 붙여 사용자에게 제시하고 **"이 중 교훈으로 남길 게 있는지"** 묻는다.
@@ -84,5 +84,5 @@ force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 
 
 본문을 마치면 모드별로 갈린다.
 
-- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·자산 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다.
+- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·자산 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다.
 - **실무·개인** — SKILL.md 「세션 spawn 안내 메커니즘」으로 머지를 안내하고 세션을 끝낸다(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.

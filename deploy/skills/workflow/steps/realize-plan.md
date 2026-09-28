@@ -1,10 +1,10 @@
 # Step 4: 구현 (실행 또는 stub 분해)
 
-> **Plan mode 필수**. [과제 정의 단계](step-3.md)에서 승인된 과제에 대해서만 진행한다.
+> **Plan mode 필수**. [과제 정의 단계](plan.md)에서 승인된 과제에 대해서만 진행한다.
 
-이 단계는 [과제 정의 단계](step-3.md)에서 승인된 과제를 **구현한다**. 기본은 실행이다 — 코드로 표현 가능한 작업은 그 자리에서 실행·커밋한다. 무겁거나(한 세션에 다 못 끝냄) 후속 PR이 시그니처에 의존해 병렬화가 필요한 부분만 stub으로 분해해 본체를 다음 IMPL 세션으로 넘긴다.
+이 단계는 [과제 정의 단계](plan.md)에서 승인된 과제를 **구현한다**. 기본은 실행이다 — 코드로 표현 가능한 작업은 그 자리에서 실행·커밋한다. 무겁거나(한 세션에 다 못 끝냄) 후속 PR이 시그니처에 의존해 병렬화가 필요한 부분만 stub으로 분해해 본체를 다음 IMPL 세션으로 넘긴다.
 
-overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 인덱스)를 입력으로 쓰며, [과제 정의 단계](step-3.md)의 기술 결정·근거를 반복하지 않는다. 무거워서 IMPL로 분해하는 경우 stub 코드 + 잔존 md가 그 핸드오프 산출물이 된다.
+overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 인덱스)를 입력으로 쓰며, [과제 정의 단계](plan.md)의 기술 결정·근거를 반복하지 않는다. 무거워서 IMPL로 분해하는 경우 stub 코드 + 잔존 md가 그 핸드오프 산출물이 된다.
 
 ---
 
@@ -31,7 +31,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([conventions/plan-folder.md](../conventions/plan-folder.md) 「라이프사이클 규칙」·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **step-4의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」 참조(재수령은 [step-5.md](step-5.md)의 「IMPL 중 디자인·기획 변경 감지」). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
+**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **step-4의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」 참조(재수령은 [implement.md](implement.md)의 「IMPL 중 디자인·기획 변경 감지」). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
 
 ---
 
@@ -39,7 +39,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 직접 실행하든 stub으로 분해하든 착수 전에 구현 컨텍스트를 수집한다. IMPL로 분해하면 다음 IMPL 세션 Lead가 산출물에 적힌 경로로 팀에게 컨텍스트를 분배한다.
 
-[과제 정의 단계](step-3.md)의 「컨벤션 사전 참조」에서 파악한 컨벤션을 기반으로, 추가 컨텍스트를 사용자에게 질문하여 수집한다:
+[과제 정의 단계](plan.md)의 「컨벤션 사전 참조」에서 파악한 컨벤션을 기반으로, 추가 컨텍스트를 사용자에게 질문하여 수집한다:
 - 관련 컨벤션 경로 (거기서 확인한 것 외 추가분)
 - 참조할 기존 코드 경로 (유사 구현, 재사용할 컴포넌트 등)
 - 디자인 토큰 / 디자인시스템 경로 (피그마 연동 시)
@@ -115,7 +115,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
-- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([step-6](step-6.md) 「1회차 커밋 정리·재정렬」)
+- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([step-6](verify.md) 「1회차 커밋 정리·재정렬」)
 - stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 

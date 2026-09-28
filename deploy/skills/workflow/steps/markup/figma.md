@@ -12,7 +12,7 @@ figma 원본이 디자인 진실 원천인 모드. 본 파일은 figma 고유 �
 
 ## (채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리
 
-진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다 — 워크트리에 이미 있는 **스타터 코드**(컴포넌트·스타일·폴더 구조)를 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다 ([requirement-review/recruitment/guide.md](../../../requirement-review/recruitment/guide.md)와 같은 원칙).
+진실 원천은 스펙(과제요구사항 등)과 figma/캡처뿐이다 — 워크트리에 이미 있는 **스타터 코드**(컴포넌트·스타일·폴더 구조)를 진실 원천이나 참고 패턴으로 쓰지 않는다. 자유롭게 재작성·삭제한다 ([requirement-review/recruitment/guide.md](../../requirement-review/recruitment/guide.md)와 같은 원칙).
 
 **디자인시스템 컴포넌트가 필요하면 MP `packages/design-system`의 컴포넌트를 복사해 온다.**
 
@@ -22,7 +22,7 @@ Markup Implementer 투입 전, **스타일링 라이브러리를 사용자에게
 
 ## 진실검사 A — figma 원본 직접 fetch
 
-Figma Reviewer ↔ 구현자 대조 루프. 대조형(실행 오라클 없음). 검증 기준은 [markup-spec.md](../../artifact/markup-spec.md) 「검증 기준」.
+Figma Reviewer ↔ 구현자 대조 루프. 대조형(실행 오라클 없음). 검증 기준은 [markup-spec.md](../../conventions/artifact/markup-spec.md) 「검증 기준」.
 
 ## Markup Implementer 필수 지침
 
@@ -30,9 +30,9 @@ Figma Reviewer ↔ 구현자 대조 루프. 대조형(실행 오라클 없음). 
 
 1. **(실무) "피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"**
 2. **구현 후 피그마 자동 대조** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교
-3. **피그마 MCP 연결인 경우** — 아이콘·이미지 색은 [figma-color-tokens-guide.md](../../figma-color-tokens-guide.md)에 따라 노드 id로 `get_variable_defs`를 호출해 확정한다 (인라인 응답·styles 카탈로그 추론 금지)
+3. **피그마 MCP 연결인 경우** — 아이콘·이미지 색은 [figma-color-tokens-guide.md](../../conventions/figma-color-tokens-guide.md)에 따라 노드 id로 `get_variable_defs`를 호출해 확정한다 (인라인 응답·styles 카탈로그 추론 금지)
 4. **(채용)** 위 「스타터 코드·MP 재사용·스타일링 라이브러리」 절 전체 (확정된 스타일링 라이브러리 포함)
 
 ## 매칭표 생성 (실무 프로젝트만)
 
-실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer 주입 전에 [figma-component-mapping-guide.md](../../figma-component-mapping-guide.md)에 따라 매칭표를 생성하고 재료에 포함한다. 채용은 캡처를 기준으로 삼는다 — 본 절이 그 게이트의 단일 출처다.
+실무 프로젝트 + 피그마 MCP 연결인 경우, Markup Implementer 주입 전에 [figma-component-mapping-guide.md](../../conventions/figma-component-mapping-guide.md)에 따라 매칭표를 생성하고 재료에 포함한다. 채용은 캡처를 기준으로 삼는다 — 본 절이 그 게이트의 단일 출처다.

@@ -11,6 +11,6 @@
 
 ## 세션 절차 (모드별 상세)
 
-- **figma 쓰는 모드**: [session/markup/figma.md](session/markup/figma.md)
-- **figma 없는 모드**: [session/markup/personal.md](session/markup/personal.md)
+- **figma 쓰는 모드**: [../steps/markup/figma.md](../steps/markup/figma.md)
+- **figma 없는 모드**: [../steps/markup/personal.md](../steps/markup/personal.md)
 - **시각 원본 진입 문서 (모드 무관 단일 진입점)**: [artifact/design-root.md](artifact/design-root.md)
