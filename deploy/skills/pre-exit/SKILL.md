@@ -13,7 +13,7 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 
 ## 왜 필요한가
 
-회고에서 건진 것은 대화와 함께 사라지고 다음 세션은 아무것도 모르는 채 시작한다. 그래서 세션이 닫히기 전에, 남겨야 할 것을 골라 규칙과 사례가 사는 자리에 심는다.
+회고에서 건진 것은 대화와 함께 사라지고 다음 세션은 아무것도 모르는 채 시작한다. 그래서 세션이 닫히기 전에, 남겨야 할 것을 골라 규칙이 사는 자리에 심는다.
 
 ## 회고 항목
 
@@ -23,11 +23,11 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 |---|---|---|
 | 시간·순서 표 | 무엇이 오래 걸렸고 지시가 어떤 순서로 왔는지 한 표로 만들어 브라우저로 연다 | [timeline.md](timeline.md) |
 | workflow 보강 | 안 따라간 cross-ref와 첫 요청을 `plan/pr{N}/**` 산출물에 맞대 누락을 건진다 | [augmentations/workflow.md](augmentations/workflow.md) |
-| digest 보강 | 학습가치 keep/skip 판정이 번복된 자리를 모은다 | [augmentations/digest.md](augmentations/digest.md) |
+| digest 보강 | 저장·해설·버림 판정이 번복된 자리를 모은다 | [augmentations/digest.md](augmentations/digest.md) |
 | write-refine 보강 | 채점기를 돌리고 톤 교정 사례·놓친 결함·과교정을 회수한다 | [augmentations/write-refine.md](augmentations/write-refine.md) |
 | routine 보강 | 루틴 데이터를 스크립트 우회로 다뤘는지, 그날 루틴을 굴린 방식 자체가 어땠는지 본다 | [augmentations/routine.md](augmentations/routine.md) |
 | recruitment 보강 | 떠온 원문 중 안 쓰인 것과 뒤에서 다시 판 조사를 세어, 다음에 무엇을 떠올지 정한다 | [augmentations/recruitment.md](augmentations/recruitment.md) |
-| 문제 리스트업 + 규칙화 | 세션에서 문제만 추출해 규칙과 사례가 사는 자리에 심는다 | [step-1.md](step-1.md) |
+| 문제 리스트업 + 규칙화 | 세션에서 문제만 추출해 규칙이 사는 자리에 심는다 | [step-1.md](step-1.md) |
 | 오답노트 | 몰라서 물어본 질문을 모아 남긴다. 위 항목과 함께 부른다 | [error-notebook.md](error-notebook.md) |
 
 ## 무엇을 돌릴지 고른다
