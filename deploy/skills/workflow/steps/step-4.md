@@ -107,7 +107,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
-3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 step-4에서 끝내고, step-5·6은 IMPL 세션이 돈다)
+3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 step-4에서 끝낸다)
 
 **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다.**
 
