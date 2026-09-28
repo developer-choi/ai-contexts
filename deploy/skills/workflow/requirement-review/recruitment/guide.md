@@ -6,11 +6,11 @@
 
 ### 준비 방식
 
-자료는 step-1.1이 이미 받아둔 것을 쓴다 — 여기서 처음부터 다시 요청하지 않는다. 빠진 것이 있으면 그 갭만 콕 집어 보충한다. 원본 사이트 URL은 step-1.1 수집 목록에 없으면 이 시점에 요청한다.
+자료는 [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기)가 이미 받아둔 것을 쓴다 — 여기서 처음부터 다시 요청하지 않는다. 빠진 것이 있으면 그 갭만 콕 집어 보충한다. 원본 사이트 URL은 requirement 「자료 받기」 수집 목록에 없으면 이 시점에 요청한다.
 
 ### 입력 자료
 
-step-1.1이 `/plan/background/persistent/`에 저장한 원본 자료:
+[requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기)가 `/plan/background/persistent/`에 저장한 원본 자료:
 
 - `공고.md` — 채용공고 원본
 - `메일.md` — 채용 담당자가 보낸 메일 본문
@@ -66,7 +66,7 @@ step-1.1이 `/plan/background/persistent/`에 저장한 원본 자료:
 
 UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면, 사용자에게 design 플래그를 켤지 확인한다.
 
-목업/시안이 포함되어 있지 않은 경우에도 페이지별 분석을 그냥 건너뛰지 않는다 — step-1.2에서 planning·design ON/OFF를 묻는 사용자 확인 질문으로 코드기반 모드 fallback 여부를 정한다. 채택되면 위 UI 목업 분석 절차를 기존 코드 읽기로 대체해 동일하게 수행한다.
+목업/시안이 포함되어 있지 않은 경우에도 페이지별 분석을 그냥 건너뛰지 않는다 — [requirement 「requirement-review 본체」](../../steps/requirement.md#step-12-requirement-review-본체)에서 planning·design ON/OFF를 묻는 사용자 확인 질문으로 코드기반 모드 fallback 여부를 정한다. 채택되면 위 UI 목업 분석 절차를 기존 코드 읽기로 대체해 동일하게 수행한다.
 
 정독 중 공고·과제요구사항이 중시하는 역량을 파악하고, 그에 맞는 디테일 TODO를 서로 제안한다. `/plan/background/consumable/todo.md`에 직접 기록한다 — 없으면 이 시점에 생성한다(그 PR이 아직 확정 전이면 미분류 절에 담아두고, 해당 PR을 확정할 때 그 절로 재배치). 최소한 아래 관점은 점검한다:
 - 완성도 (404 페이지, 파비콘, page.title, OG 태그, 실제 이미지·텍스트, 로딩/에러 상태)
@@ -109,7 +109,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 3. `developer-choi/{회사 slug}` 이름이 GitHub에 비었는지 본다. 이미 있으면(같은 회사 재지원) 멈추고 사용자에게 이름을 받는다
 4. private으로 만들어 origin으로 등록하고 `master`를 첫 push한다. `gh`의 `--push`는 쓰지 않는다
 5. 레포 URL을 보고한다
-6. step-1 「컨벤션 소스 수집」의 이름 스캔·인덱스 생성을 이어서 한다
+6. [requirement 「컨벤션 소스 수집」](../../steps/requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)의 이름 스캔·인덱스 생성을 이어서 한다
 
 `master` 직접 push는 이 첫 push 한 번뿐이다. 그 뒤 작업은 전부 PR 브랜치로 간다.
 
@@ -117,7 +117,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 섹션 3에서 디자인 시스템 라이브러리가 결정된 후 진행한다.
 
-**페이지별 정리**: step-1.1이 모아둔 figma 자료를 페이지별로 정리하고, 빠진 페이지가 있으면 그것만 콕 집어 요청한다. 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
+**페이지별 정리**: [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기)가 모아둔 figma 자료를 페이지별로 정리하고, 빠진 페이지가 있으면 그것만 콕 집어 요청한다. 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
 
 **디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다.
 

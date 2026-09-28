@@ -14,7 +14,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - 브랜치명: `feature/{짧은-설명}` — 영문 슬러그(소문자 + 하이픈)
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
-  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [conventions/pr-split.md](../conventions/pr-split.md) 「의존 — 판단거리 노출」).
+  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
 - 워크트리는 프로젝트 루트의 형제 디렉토리에 생성한다.
 
@@ -29,9 +29,9 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 ## 1. 잔여 산출물 소비
 
-`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([conventions/plan-folder.md](../conventions/plan-folder.md) 「라이프사이클 규칙」·「소비→삭제 메커니즘 SSOT」).
+`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **step-4의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」 참조(재수령은 [implement.md](implement.md)의 「IMPL 중 디자인·기획 변경 감지」). step-4는 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
+**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「마크업 예외 (재정의)」 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)). realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
 
 ---
 
@@ -39,7 +39,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 직접 실행하든 stub으로 분해하든 착수 전에 구현 컨텍스트를 수집한다. IMPL로 분해하면 다음 IMPL 세션 Lead가 산출물에 적힌 경로로 팀에게 컨텍스트를 분배한다.
 
-[과제 정의 단계](plan.md)의 「컨벤션 사전 참조」에서 파악한 컨벤션을 기반으로, 추가 컨텍스트를 사용자에게 질문하여 수집한다:
+[과제 정의 단계의 컨벤션 사전 참조](plan.md#컨벤션-사전-참조)에서 파악한 컨벤션을 기반으로, 추가 컨텍스트를 사용자에게 질문하여 수집한다:
 - 관련 컨벤션 경로 (거기서 확인한 것 외 추가분)
 - 참조할 기존 코드 경로 (유사 구현, 재사용할 컴포넌트 등)
 - 디자인 토큰 / 디자인시스템 경로 (피그마 연동 시)
@@ -51,7 +51,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 1. coding-standards `rules/`·`principles/`를 Glob → 프로젝트 유형 판별(회사: `universal/`만, 개인: `universal/` + `personal/`) → 해당하는 파일 중 현재 구현에 관련된 것을 선별 (`file-folder-structure` 태그 포함, frontmatter로 확인)
 2. MP `docs/best-practices/*.md`에서 현재 구현에 매칭되는 패턴을 탐색한다 — 매칭되는 엔트리가 있으면 해당 산출물에 참조 패턴으로 기록한다
    - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
-3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 「누적 원칙」 참조.
+3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [누적 원칙](../conventions/artifact/reference-curation.md#누적-원칙) 참조.
 
 ### 컨벤션 1차 소스 직접 grep 의무
 
@@ -80,8 +80,8 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
-| stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「정의·범위」) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
-| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. step-6.4.1 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. figma 없는 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
+| stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [정의·범위](../conventions/artifact/stub.md#정의범위)) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
+| `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. [verify 「Figma 시각 대조」](verify.md#step-641-figma-시각-대조--승인-게이트-ui-컴포넌트-pr-한정) 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. figma 없는 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
 | `implementation.md` | `pr{N}/persistent/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
@@ -103,11 +103,11 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
    - **조건 2 (코드로 표현 가능한 모든 계획)**: 시그니처가 없어도 **파일로 표현 가능한 계획은 전부 코드/stub로** 만든다 — 의존성(`package.json` 추가 + 설치), 설정(`vite.config`·`tsconfig`·`eslint` 등), 테스트 의도(`*.test.tsx`의 `it.todo`).
    - **조건 3 (stub 불가 + 코드표현 가능)**: rename·파일/폴더 이동·설정 한 줄 치환처럼 **코드가 이미 있어 stub 대상이 없지만 편집이 100% 코드로 표현되는** 것:
      - trivial(실행하면 끝 — 순수 rename 등)이면 **문서·세션 핸드오프로 이연하지 말고 그 자리에서 실행·커밋**한다.
-     - 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. 각 매치의 before→after 쌍(식별자·경로·줄번호)은 어느 md에도 적지 않는다 — 개별 치환은 step-5가 파일 보고 수행한다.
+     - 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. 각 매치의 before→after 쌍(식별자·경로·줄번호)은 어느 md에도 적지 않는다 — 개별 치환은 implement가 파일 보고 수행한다.
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
-3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 step-4에서 끝낸다)
+3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 realize-plan에서 끝낸다)
 
 **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다.**
 
@@ -115,7 +115,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
-- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([step-6](verify.md) 「1회차 커밋 정리·재정렬」)
+- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([verify의 1회차 커밋 정리·재정렬](verify.md#step-65-1회차-커밋-정리재정렬))
 - stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 
@@ -132,7 +132,7 @@ stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
 산출물 작성 완료 + 사용자 OK 발화 직후, 후속 세션 spawn 안내·보고 출력 전에 아래 단계를 **순서대로 모두** 수행한다.
 
-가벼운 PR이라 구현을 이 자리에서 끝냈어도 이 세션에서 step-5·6으로 넘어가지 않는다. 아래 종료 단계를 마치면 PR 무게와 상관없이 PR_{N}_IMPL을 안내한다 — 리뷰·사용자 테스트·커밋 정리는 IMPL의 step-6이 돈다.
+가벼운 PR이라 구현을 이 자리에서 끝냈어도 이 세션에서 implement·verify로 넘어가지 않는다. 아래 종료 단계를 마치면 PR 무게와 상관없이 PR_{N}_IMPL을 안내한다 — 리뷰·사용자 테스트·커밋 정리는 IMPL의 verify가 돈다.
 
 ### 1. 산출물 리뷰 (Reviewer 팀 에이전트 spawn)
 
@@ -147,7 +147,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 **컨벤션 대조**
 - 각 산출물에 적힌 내용 기반으로 관련 코딩 컨벤션을 찾아 대조한다 (컴포넌트 설계가 있으면 컴포넌트 컨벤션, 테스트 계획이 있으면 테스트 컨벤션)
-- **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 (step-3 「산출물 분담」 표 참조)
+- **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 ([plan 「산출물: overview.md」](plan.md#산출물-planprnpersistentoverviewmd) 절의 산출물 분담 표 참조)
 - 프로젝트 유형(회사/개인)에 맞는 경로만 포함되었는지 확인한다
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
 - **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
@@ -175,7 +175,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 ### 2. 종료 게이트 (`it.todo` 매칭)
 
-산출물 리뷰와 별개로 직접 수행한다 (리뷰 결과와 무관, 매번 수행). [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트」의 **PLAN 시점 매칭**(decisions 행동 결정 → `it.todo`, implementation.md 「행동 결정 커버리지」 표 산출)을 적용한다. 표 미산출·미완(면제 없는 빈 행)이면 종료 불가. 게이트 결과(커버리지 표)는 보고에 포함.
+산출물 리뷰와 별개로 직접 수행한다 (리뷰 결과와 무관, 매번 수행). [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트)의 **PLAN 시점 매칭**(decisions 행동 결정 → `it.todo`, implementation.md 「행동 결정 커버리지」 표 산출)을 적용한다. 표 미산출·미완(면제 없는 빈 행)이면 종료 불가. 게이트 결과(커버리지 표)는 보고에 포함.
 
 stub 없는 PR이라도 decisions에 **행동 결정이 있으면** 그 결정은 대응 `it.todo`(→stub)를 요구한다 — "외부 시그니처 없음"을 "행동 결정 없음"으로 확장하지 않는다. 행동 결정이 실제 0건인 순수 인프라 PR만 `it.todo` 0건 → 면제로 분류하고 면제 사유를 명시한다.
 

@@ -24,11 +24,11 @@ overview.md 작성 전에 아래를 읽고 기술 전략에 반영한다:
 
 #### step-3 작업 흐름 — overview.md를 단일 캔버스로
 
-step-3 진행 중에는 overview.md가 **단일 작업 캔버스** 역할을 한다. 결정·근거·트레이드오프·기술 선택·외부 자료 링크 등을 일단 overview.md에 모두 적어 사용자가 한 화면에서 검토할 수 있게 한다.
+plan 진행 중에는 overview.md가 **단일 작업 캔버스** 역할을 한다. 결정·근거·트레이드오프·기술 선택·외부 자료 링크 등을 일단 overview.md에 모두 적어 사용자가 한 화면에서 검토할 수 있게 한다.
 
 **트레이드오프 작성 주체**: 각 결정의 trade-off(유리한 축 / 불리한 축)는 사용자가 직접 채운다. AI는 결정 후보를 나열하고 각 후보 옆에 비어 있는 trade-off 칸만 만들어 둔 뒤 "이 결정의 trade-off를 적어 주십시오"라고 질문하며, 임의로 trade-off를 채우지 않는다. 사용자가 채운 trade-off 위에서 AI는 빠진 축·과장된 축을 검증·보강한다.
 
-step-3 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분배한다:
+plan 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분배한다:
 
 | 갈래 | 분배 대상 |
 |---|---|
@@ -37,9 +37,9 @@ step-3 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분�
 | 기술 선택 결과 (채택안) | `pr{N}/persistent/decisions.md` 채택안 절 — overview에 안 남김 |
 | 의도(목표·범위·열려있는 질문) | `pr{N}/persistent/overview.md`에 남김 |
 
-분배 완료 시점부터 overview.md는 의도만 가진 단순 산출물이 된다. step-4부터 다른 step은 분배 완료 상태를 가정한다.
+분배 완료 시점부터 overview.md는 의도만 가진 단순 산출물이 된다. realize-plan부터 다른 step은 분배 완료 상태를 가정한다.
 
-step-3 진행 중에 overview.md가 비대해도 무방 — 작업 캔버스 시점이므로 짧은 코드 블록·근거 본문이 일시 공존. 분배 직전이 정리 시점.
+plan 진행 중에 overview.md가 비대해도 무방 — 작업 캔버스 시점이므로 짧은 코드 블록·근거 본문이 일시 공존. 분배 직전이 정리 시점.
 
 ### 산출물: `/plan/pr{N}/persistent/overview.md`
 
@@ -71,7 +71,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 ### todo.md 현재 PR 절 소비
 
-`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. todo.md는 순수 큐라 소비 후 처리는 [conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」를 따른다 — 제목·pointer를 남기지 않는다.
+`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO 포함 이관) 후 사용자에게 안내. todo.md는 순수 큐라 소비 후 처리는 [소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)를 따른다 — 제목·pointer를 남기지 않는다.
 
 ### 의사결정 토론
 

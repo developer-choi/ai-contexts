@@ -6,43 +6,43 @@
 /plan/
   background/
     persistent/
-      공고.md           ← BG.step-1.1 산출 (채용만)
+      공고.md           ← BG의 requirement 「자료 받기」 산출 (채용만)
       메일.md           ← (채용만)
       과제요구사항.md   ← (채용만)
     retained/
       folder-structure.md ← FOUNDATION 산출 (채용만)
-      tech-constraints.md ← BG.step-1 산출
-      conventions-index.md ← step-1.1 수집 (레포 미확보 시 레포 확보 시점 세션이 생성)
-      figma-url.md      ← step-1.1 수집 (figma 쓰는 모드)
-      figma/            ← step-1.1 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
-      mockup/           ← step-1.1 수집 (개인 모드)
-      spec.md           ← step-1.1 수집 (개인 모드, 선택 — 화면에 안 담기는 동작을 저자가 미리 아는 경우)
-      design-root.md    ← step-1.1 산출. 양식·규칙은 [conventions/artifact/design-root.md] 참조
-      cross-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
-      service-analysis.md ← step-1 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
+      tech-constraints.md ← BG의 requirement 산출
+      conventions-index.md ← requirement 「자료 받기」 수집 (레포 미확보 시 레포 확보 시점 세션이 생성)
+      figma-url.md      ← requirement 「자료 받기」 수집 (figma 쓰는 모드)
+      figma/            ← requirement 「자료 받기」 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
+      mockup/           ← requirement 「자료 받기」 수집 (개인 모드)
+      spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택 — 화면에 안 담기는 동작을 저자가 미리 아는 경우)
+      design-root.md    ← requirement 「자료 받기」 산출. 양식·규칙은 [conventions/artifact/design-root.md] 참조
+      cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
+      service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
     consumable/
-      todo.md        ← step-1 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). step-1 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 step-3에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
-      global.md         ← step-1 requirement-review (planning) 산출물. step-4 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
-      layout.md         ← step-1 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
-      page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). step-1 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
+      todo.md        ← requirement의 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관 (절 단위 큐). 확정 전 TODO는 미분류 절에 쌓인다
+      global.md         ← requirement의 requirement-review (planning) 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/planning/output-template.md] 참조
+      layout.md         ← requirement의 requirement-review (planning) 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
+      page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). requirement 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
       figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
-      design-system.md  ← recruitment 4단계 산출물 (채용 한정). step-3·step-4 PRESET_COMPONENTS 입력 재료
+      design-system.md  ← recruitment 4단계 산출물 (채용 한정). plan·realize-plan PRESET_COMPONENTS 입력 재료
   pr{N}/
     persistent/
-      decisions.md      ← step-3 산출물 + step-6.6 갱신
-      reference.md      ← step-3·4 누적
-      implementation.md ← step-4 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조
-      overview.md       ← step-3 산출물
-    retained/           ← step-6.5(커밋 정리·재정렬) 진입 시 일괄 폐기
-      markup.md         ← step-4 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 step-6.4.1 (figma 충실도 검증 자체는 MARKUP 담당)
+      decisions.md      ← plan 산출물 + verify 「decisions.md 최신화」 갱신
+      reference.md      ← plan·realize-plan 누적
+      implementation.md ← realize-plan 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조
+      overview.md       ← plan 산출물
+    retained/           ← verify 「1회차 커밋 정리·재정렬」 진입 시 일괄 폐기
+      markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 충실도 검증 자체는 MARKUP 담당)
     consumable/
-      page.md           ← step-1 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). step-4 「잔여 산출물 소비」에서 분배·소비
-      review.md         ← step-6 리뷰 결과. step-6 자체 소비
-      user-test-cases.md ← step-6.4 동작 테스트. WRITING_REFINER가 PR 본문의 동작 설명 재료로 재활용
-      pr-body.md        ← WRITING_IDEATOR가 초안 저작(잠정) → WRITING_REFINER가 확정·PR 본문 복사·게시. 게시 후 스윕 대상 — step-4 「잔여 산출물 소비」 스윕은 pr-body를 다루지 않는다(REFINER 전용)
+      page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
+      review.md         ← verify 리뷰 결과. verify 자체 소비
+      user-test-cases.md ← verify 「사용자 동작 테스트」. WRITING_REFINER가 PR 본문의 동작 설명 재료로 재활용
+      pr-body.md        ← WRITING_IDEATOR가 초안 저작(잠정) → WRITING_REFINER가 확정·PR 본문 복사·게시. 게시 후 스윕 대상 — realize-plan 「잔여 산출물 소비」 스윕은 pr-body를 다루지 않는다(REFINER 전용)
 ```
 
-step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
+realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
 
 ## 라이프사이클 규칙
 
@@ -70,6 +70,6 @@ step-4의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/..
 
 - 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
 
-캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (step-1.1에서 수집). 어느 단위 캡처든 같은 폴더에.
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 ([requirement 「자료 받기」](../steps/requirement.md#step-11-자료-받기)에서 수집). 어느 단위 캡처든 같은 폴더에.
 
-step-1(전체 페이지 URL) ~ step-5(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.
+requirement(전체 페이지 URL) ~ implement(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

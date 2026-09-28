@@ -7,13 +7,13 @@ BG 세션에서 작성하는 산출물(`/plan/background/consumable/todo.md` 등
 | 산출물 | 적는 것 | 적지 않는 것 |
 |---|---|---|
 | `cross-analysis.md` (retained, 채용 한정) | 추론한 평가 기준만 — 프로젝트 라이프타임 내내 참조. | 그 외 전부 — 원본 교차 분석 발견·라이브러리 선택·아키텍처 패턴 후보·가정은 `todo.md`에 직접. 구현 task 단위, 정확한 validation 규칙·메시지·글자수·문자 종류도 적지 않음 |
-| `pr{N}/persistent/overview.md` (step-3) | 의도만 — 목표·범위·열려있는 질문 | 기술 선택·근거(→ `decisions.md`). 함수·컴포넌트 명세, props·타입은 step-4 stub 코드로 직접 옮긴다 |
+| `pr{N}/persistent/overview.md` (plan) | 의도만 — 목표·범위·열려있는 질문 | 기술 선택·근거(→ `decisions.md`). 함수·컴포넌트 명세, props·타입은 realize-plan stub 코드로 직접 옮긴다 |
 
 ## 작성 전 자가 체크
 
 각 항목을 적기 전 스스로 묻는다:
 
-- **"이 항목이 PR PLAN 또는 IMPL 세션에서 결정해도 되는가?"** → YES면 BG에 넣지 않는다. validation 규칙·필드 명세 같은 정확 디테일, 함수 시그니처·props·타입은 PLAN(step-4 stub), 구현 코드는 IMPL.
+- **"이 항목이 PR PLAN 또는 IMPL 세션에서 결정해도 되는가?"** → YES면 BG에 넣지 않는다. validation 규칙·필드 명세 같은 정확 디테일, 함수 시그니처·props·타입은 PLAN(realize-plan stub), 구현 코드는 IMPL.
 
 ## BG 시안 정독 깊이
 

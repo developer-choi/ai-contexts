@@ -11,7 +11,7 @@ PR이 참조하는 외부 자료·컨벤션·베스트프랙티스 경로 인덱
 - 외부 자료 링크 (기획서, 디자인 시안 URL 등 — `background/retained/figma-url.md`에 누적되는 figma URL은 중복 회피)
 - 회사·프로젝트 컨벤션 경로 + 라인 범위 (본 PR 작업 관련 규칙)
 - AC 코딩 스탠다드 + MP 베스트프랙티스 맵 중 본 PR 매칭 패턴 경로
-- 개인·실무 모드: `conventions-index.md`에 등재된 외부 레퍼런스 레포(simplified) 중 본 PR 테스트·컴포넌트와 매칭되는 것 (등재는 step-1 「컨벤션 소스 수집」 단일 출처)
+- 개인·실무 모드: `conventions-index.md`에 등재된 외부 레퍼런스 레포(simplified) 중 본 PR 테스트·컴포넌트와 매칭되는 것 (등재는 [requirement 「컨벤션 소스 수집」](../../steps/requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd) 단일 출처)
 
 ## 누적 원칙
 
@@ -22,7 +22,7 @@ PR이 참조하는 외부 자료·컨벤션·베스트프랙티스 경로 인덱
 
 ## 소비처
 
-- step-4: 파생 산출물 작성 시 참조
-- step-5: Lead가 팀에게 컨텍스트 주입할 때 함께 전달 (Markup·Feature Implementer, Coding-Standards Reviewer, Advanced Reviewer)
-- step-6: code-review 입력에 포함
+- realize-plan: 파생 산출물 작성 시 참조
+- implement: Lead가 팀에게 컨텍스트 주입할 때 함께 전달 (Markup·Feature Implementer, Coding-Standards Reviewer, Advanced Reviewer)
+- verify: code-review 입력에 포함
 - 후속 PR / 미래 다른 프로젝트: 같은 컨벤션 환경이면 재참조

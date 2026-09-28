@@ -4,7 +4,7 @@
 
 모드의 정의·세션 진입 조건·도미노 배선은 `SKILL.md` 「세션」 표가 소유한다 — 본 문서는 **시각/진실검사 축만** 다룬다.
 
-| 모드 | 시각 진실 원천 | step-1.1 저장 위치 | `markup.md` (Figma 원본 링크 인덱스) | MARKUP 진실검사 |
+| 모드 | 시각 진실 원천 | [requirement 「자료 받기」](../steps/requirement.md#step-11-자료-받기) 저장 위치 | `markup.md` (Figma 원본 링크 인덱스) | MARKUP 진실검사 |
 |---|---|---|---|---|
 | 채용·실무 | figma | `retained/figma-url.md`·`retained/figma/` | ○ 생성 (UI 컴포넌트 PR) | figma 원본 직접 fetch·대조 |
 | 개인 | 마크업 시안 (형태 무관 — HTML/CSS·`.tsx`+`.scss` 등) | `retained/mockup/` (+선택 `retained/spec.md`) | ✗ 미생성 (figma 없어 「Figma 원본 링크 인덱스」 불성립) | 시안 대조 + 사용자 시각 확인 |

@@ -4,12 +4,12 @@
 
 BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디자인. "무한스크롤이 필요하다"까지가 BG다. 그것을 Intersection Observer로 짤지 Scroll Event로 짤지 같은 **개발 방법론(HOW)** 은 PLAN/IMPL 소관이다. 채용 모드에서 BG가 레포(git 메타·원격)를 세우는 것은 코드 작성이 아니다 — 소스는 사용자가 돌린 생성기가 만든다. 산출물 깊이는 이 축으로 잡는다([output-depth.md](../conventions/output-depth.md)).
 
-step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입수 단계, 1.2는 requirement-review 본체.
+requirement는 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입수 단계, 1.2는 requirement-review 본체.
 
 - **Step 1.1 자료 받기**: 사용자에게서 자료를 받아 정리
 - **Step 1.2 requirement-review 본체**: 스킬 로드 + 중복 조기 발견 + 작업 익숙도 판별
 
-**PR 확정은 별도 step이 아니라 step-1 내내 굴러간다** — 자료를 읽어나가며 확정 가능한 PR부터 하나씩 `todo.md`에 append한다 (아래 「PR 확정」). BG는 step-1로 끝난다; 일괄 PR 분할 단계는 없다.
+**PR 확정은 별도 step이 아니라 requirement 내내 굴러간다** — 자료를 읽어나가며 확정 가능한 PR부터 하나씩 `todo.md`에 append한다 (아래 「PR 확정」). BG는 requirement로 끝난다; 일괄 PR 분할 단계는 없다.
 
 ---
 
@@ -19,7 +19,7 @@ step-1은 BG 세션 안에서 두 sub-step으로 진행된다. 1.1은 자료 입
 
 아래 스킬 로드 표에서 `planning` 또는 `design` 플래그가 켜지는 작업, 즉 외부에서 시안·기획서·Figma 자료를 받는 케이스라면, 호출 전에 자료 수집 방식이 적절한지 점검한다. 상세는 [design-asset-collection.md](../conventions/design-asset-collection.md). 자료를 아직 받기 전이면 능동 안내한다.
 
-채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 (requirement-review/recruitment/guide.md 「입력 자료」 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
+채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 ([입력 자료](../requirement-review/recruitment/guide.md#입력-자료) 참조). 저장 시 시간 압박 표현 제외 (guide.md 「입력 자료 저장 시 제외 항목」).
 
 **step-1.1은 자료의 단일 수집 지점 — 가진 것 중 가장 완성도 높은 원본(SSOT)을 여기서 받아 저장한다.** 원본의 형태는 모드마다 다르지만(채용=figma+과제요구사항, 실무=figma+기획서, 개인=마크업 시안+선택 spec.md), **시각 진실 원천을 step-1.1에 받아 retained에 보존한다**는 점은 모드 무관으로 같다. 빠진 부분은 step-1.2 리뷰에서 구멍으로 잡는다. figma 쓰는 모드(채용·실무)는 **사용 가능한 figma/시안을 여기서 전부** 받아 저장한다 (figma URL·캡처 → `retained/figma-url.md`·`retained/figma/`). 다운스트림(requirement-review·MARKUP)은 이 수집분을 *참조*하며 자료를 재요청하지 않는다 — 빠진 것이 있으면 그 갭만 콕 집어 보충한다.
 

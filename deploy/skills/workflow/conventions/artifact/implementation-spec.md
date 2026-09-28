@@ -8,9 +8,9 @@
 
 코드·다른 절차에 이미 있는 것은 담지 않는다.
 
-정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 (step-4 「stub 커밋」 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭한다.
+정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다 ([realize-plan 「stub 커밋」](../../steps/realize-plan.md#5-stub-커밋) 조건 3). 커밋은 계획 상대 순번(`### N`)으로만 지칭한다.
 
-step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 소비.
+implement(구현)·[verify 「Gap Analysis」](../../steps/verify.md#step-61-gap-analysis-계획--실제-차이-검사)·WRITING_REFINER(PR body 확정)에서 소비.
 
 ## 양식
 
@@ -28,7 +28,7 @@ step-5(구현)·step-6.1(Gap Analysis)·WRITING_REFINER(PR body 확정)에서 �
   | 행동 결정 (decisions 출처) | 커버 `it.todo` | 면제 사유 |
   |---|---|---|
 
-- **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 step-4 종료 시퀀스의 코드-narrative 오배치 점검 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
+- **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 [realize-plan 「종료 시퀀스」](../../steps/realize-plan.md#종료-시퀀스-모두-필수-스킵-금지)의 코드-narrative 오배치 점검 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
 - 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
 - **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지** — `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md>`가 센다. 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 그대로 사람 몫이고, 기계가 하는 것은 채워진 표에 빈 행이 있는지뿐이다
 - 오라클은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다

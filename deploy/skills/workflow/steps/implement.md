@@ -14,11 +14,11 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 - 워크트리에는 stub 커밋이 이미 base 위에 쌓여 있다
 - 이 커밋 위에 구현 커밋을 쌓아나간다
-- 모든 슬라이스 사이클 종료 후에도 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존된 상태로 step-6에 진입한다. 커밋 정리·재정렬은 step-6 「1회차 커밋 정리·재정렬」에서 **AI 리뷰 + 사용자 리뷰 완료 후** 수행한다
+- 모든 슬라이스 사이클 종료 후에도 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존된 상태로 verify에 진입한다. 커밋 정리·재정렬은 [verify 「1회차 커밋 정리·재정렬」](verify.md#step-65-1회차-커밋-정리재정렬)에서 **AI 리뷰 + 사용자 리뷰 완료 후** 수행한다
 
 cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
 
-step-4에서 구현이 사실상 끝났으면 팀 spawn·구현·리뷰 파이프라인(5.1, 5.2.1~5.3)은 할 것이 없다고 판단하고 넘긴다. 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트는 그대로 돈 뒤 [step-6](verify.md)으로 간다.
+realize-plan에서 구현이 사실상 끝났으면 팀 spawn·구현·리뷰 파이프라인(5.1, 5.2.1~5.3)은 할 것이 없다고 판단하고 넘긴다. 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트는 그대로 돈 뒤 [verify](verify.md)로 간다.
 
 ---
 
@@ -26,7 +26,7 @@ step-4에서 구현이 사실상 끝났으면 팀 spawn·구현·리뷰 파이�
 
 [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
-step-5는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자와 리뷰어로 팀을 구성한다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
+implement는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자와 리뷰어로 팀을 구성한다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합
@@ -37,7 +37,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 ### Step 5.1.1. Spawn 시 컨텍스트 주입
 
-에이전트는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위와 step-4 stub 파일들을 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 각 에이전트에게 전달한다.
+에이전트는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위와 realize-plan stub 파일들을 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 각 에이전트에게 전달한다.
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
@@ -57,11 +57,11 @@ Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차 + 프로젝�
 
 ### Step 5.2.0. IMPL 시작 게이트 — TODO 잔존 검사
 
-step-5 진입 직후 본 PR 영역에서 [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > IMPL 시작 게이트」를 실행한다. step-4에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가.
+implement 진입 직후 본 PR 영역에서 [IMPL 시작 게이트](../conventions/artifact/comments.md#impl-시작-게이트-구현-진입-시)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가.
 
 ### Step 5.2.1. TODO 주석 처리
 
-IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 처리」 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 PR 이연 마커 코드 안 금지 룰은 컨벤션이 단일 출처.
+IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#처리-구현-중) 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 PR 이연 마커 코드 안 금지 룰은 컨벤션이 단일 출처.
 
 ### Step 5.2.2. gotchas
 
@@ -75,7 +75,7 @@ IMPL 중 만나는 TODO 마커는 [conventions/artifact/comments.md](../conventi
 
 IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(stub·it.todo, 마크업의 figma 자료)을 그대로 두고 진행하지 않는다.
 
-- **디자인 변경** — 마크업의 진실 원천이 바뀐 것이다. 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령하고 — figma를 쓰는 모드면 [conventions/plan-folder.md](../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」 절차로 — 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다(figma 없는 모드는 `markup.md`가 없어 이 단계 없음).
+- **디자인 변경** — 마크업의 진실 원천이 바뀐 것이다. 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령하고 — figma를 쓰는 모드면 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱) 절차로 — 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다(figma 없는 모드는 `markup.md`가 없어 이 단계 없음).
 - **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다. AI 단독으로 stub·it.todo를 뒤집지 않는다. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
 
 ---
@@ -84,11 +84,11 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md) 엔진을 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조). 두 축의 순서·병렬은 엔진이 A 메커니즘으로 정하므로 호출자가 지시하지 않는다.
 
-> **엔진 호출 전 우회 게이트.** 직접 Reviewer를 spawn하기 전에, 엔진 생략이 허용되는지 [impl-review-loop SKILL.md 「우회」](../impl-review-loop/SKILL.md) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 직접 Reviewer spawn 허용, 하나라도 거짓이면 엔진 호출 강제. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
+> **엔진 호출 전 우회 게이트.** 직접 Reviewer를 spawn하기 전에, 엔진 생략이 허용되는지 [impl-review-loop의 우회](../impl-review-loop/SKILL.md#우회-호출자의-사전-점검--입력-아님) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 직접 Reviewer spawn 허용, 하나라도 거짓이면 엔진 호출 강제. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
 
 | 구현자 | 진실검사 A (메커니즘) | 규칙검사 B | 증분 단위 |
 |---|---|---|---|
-| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 오라클형(실행이 곧 판정). 종료 커버리지는 [implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트」 | Coding-Standards ×N + Advanced (로직 rules, Step 5.1.2 분할) | 로직 커밋 |
+| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 오라클형(실행이 곧 판정). 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | Coding-Standards ×N + Advanced (로직 rules, Step 5.1.2 분할) | 로직 커밋 |
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 
@@ -98,13 +98,13 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 ## Step 5.4. 마무리
 
-- [conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 「`it.todo` 매칭 게이트 > IMPL 종료 시점」 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
-- **TODO 잔존 점검** — [conventions/artifact/comments.md](../conventions/artifact/comments.md) 「라이프사이클 > 종료 게이트」 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
+- [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--ittodo--실제-it-케이스) 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
+- **TODO 잔존 점검** — [종료 게이트](../conventions/artifact/comments.md#종료-게이트-구현-마무리) 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
   - **`it.todo` 커버리지 (전체 todo 수 / 구현된 it 수)**
   - 수정 사항 (있는 경우)
-- 사용자가 step-6에서 코드 리뷰 수행
+- 사용자가 verify에서 코드 리뷰 수행
 
-> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](verify.md)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — step-5는 세션 경계가 아니며 후속 안내는 step-6에서 낸다.)
+> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](verify.md)에 진입한다. (전환·세션경계는 SKILL.md 「step 경계」 표 — implement는 세션 경계가 아니며 후속 안내는 verify에서 낸다.)

@@ -28,14 +28,14 @@
 
 ## Step 6.1.5. 주석 게이트 (안전망 + 백스톱)
 
-> **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "step-5 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
+> **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --todo /plan/background/consumable/todo.md`
 
 둘을 함께 본다.
 
-- **금지 주석 잔존** — 걸리면 step-5 Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다.
-- **미배정 blanket disable 고아** — 생성 시 등록([conventions/artifact/comments.md](../conventions/artifact/comments.md) 「file-level(blanket) eslint-disable 라이프사이클」)을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 `todo-md.mjs add-todo`로 등록한다.
+- **금지 주석 잔존** — 걸리면 implement Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다.
+- **미배정 blanket disable 고아** — 생성 시 등록([file-level(blanket) eslint-disable 라이프사이클](../conventions/artifact/comments.md#file-levelblanket-eslint-disable-라이프사이클))을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 `todo-md.mjs add-todo`로 등록한다.
 
 ---
 
@@ -49,7 +49,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 - code-review에 전달하는 입력: PR diff, coding-standards 목록, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
 - code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
-- 수정은 step-5의 Implementer 흐름이 수행한다 (마크업 수정이면 그 모드의 진실검사 기준 — [modes.md](../conventions/modes.md) 매트릭스)
+- 수정은 implement의 Implementer 흐름이 수행한다 (마크업 수정이면 그 모드의 진실검사 기준 — [modes.md](../conventions/modes.md) 매트릭스)
 
 ---
 
@@ -64,7 +64,7 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 - 현재 커밋 목록 (stub + IMPL + 리뷰 수정) 출력
 - 사용자 리뷰 통과 시 Step 6.4로 진행
 
-사용자가 추가 수정 요청하면 step-5의 Implementer가 처리 → 다시 Step 6.2 AI 리뷰 → Step 6.3 사용자 리뷰 반복.
+사용자가 추가 수정 요청하면 implement의 Implementer가 처리 → 다시 Step 6.2 AI 리뷰 → Step 6.3 사용자 리뷰 반복.
 
 ---
 
@@ -98,7 +98,7 @@ Lead는 변경분을 훑어 TC 추출 → 파일 작성 → AI 실행 항목을 
 
 UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더 결과를 `pr{N}/retained/markup.md` 「Figma 원본 링크 인덱스」 URL로 **사용자가 직접 시각 대조**한다.
 
-- 검증 기준은 figma 원본: [conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md) 「검증 기준 — figma 원본 직접 fetch」 적용 (수행 주체만 사람으로 바뀜).
+- 검증 기준은 figma 원본: [검증 기준 — figma 원본 직접 fetch](../conventions/artifact/markup-spec.md#검증-기준--figma-원본-직접-fetch) 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
 - 반려분은 구현 단계 Implementer 흐름으로 수정 → 다시 6.2부터 진행.
 - 승인 게이트이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
@@ -114,7 +114,7 @@ UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더
 
 ### Step 6.5.1. 케이스 분기
 
-stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식이 갈린다. 케이스별 명령·사유는 [conventions/artifact/stub.md](../conventions/artifact/stub.md) 「라이프사이클 > 정리」 참조.
+stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식이 갈린다. 케이스별 명령·사유는 [정리](../conventions/artifact/stub.md#정리) 참조.
 
 ### Step 6.5.2. 사용자에게 force-push 요청 안내
 
@@ -124,7 +124,7 @@ stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식
 
 ## Step 6.6. decisions.md 최신화
 
-구현·리뷰 과정에서 새로 발생하거나 step-3 작성 시점과 달라진 의사결정을 반영한다. 기준은 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 「갱신」 참조.
+구현·리뷰 과정에서 새로 발생하거나 plan 작성 시점과 달라진 의사결정을 반영한다. 기준은 [갱신](../conventions/artifact/decisions-lifecycle.md#갱신-구현리뷰-후) 참조.
 
 **6.5와 의존 없음 — 병렬 진행 가능.**
 
@@ -136,7 +136,7 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ### Step 6.7.1. decisions ↔ 코드 정합 점검 (1차)
 
-[conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 「정합 점검 게이트」 적용. SKILL.md 「자가 검토 필수」 일반 룰의 특정 갈래 — 검증 소스를 decisions.md, 검증 대상을 현재 코드로 고정. 코드 수정이 필요한 경우 step-5 Implementer 흐름으로 진입.
+[정합 점검 게이트](../conventions/artifact/decisions-lifecycle.md#정합-점검-게이트-decisions--코드) 적용. SKILL.md 「자가 검토 필수」 일반 룰의 특정 갈래 — 검증 소스를 decisions.md, 검증 대상을 현재 코드로 고정. 코드 수정이 필요한 경우 implement Implementer 흐름으로 진입.
 
 ### Step 6.7.2. 후임자 시각 예상 질문 (2차)
 
@@ -172,13 +172,13 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ## 산출물 정리
 
-리뷰 파이프라인이 완료되고 모든 이슈가 수정 커밋에 반영된 것을 확인한 뒤, `/plan/pr{N}/consumable/review.md`를 소비한다 (리뷰 결과가 수정 커밋으로 반영됨 = 소비). 소비 후 정리는 consumable 큐 모델을 따른다 ([conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
+리뷰 파이프라인이 완료되고 모든 이슈가 수정 커밋에 반영된 것을 확인한 뒤, `/plan/pr{N}/consumable/review.md`를 소비한다 (리뷰 결과가 수정 커밋으로 반영됨 = 소비). 소비 후 정리는 consumable 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
 
 ---
 
 ## IMPL 종료 고유 판단
 
-step-6 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속·의존 PR 안내는 step-5가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속·의존 PR 안내는 implement가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
 
-- **본 PR에 의존하는 PR의 진입 가능 안내** — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> dependents --pr {N}`으로 찾는다(손으로 역방향을 뒤집지 않는다). 그런 PR이 있으면 각각의 step-3 진입 가능을 사용자에게 안내한다. 본 PR이 stub을 만들었다면 그 PR들은 이미 step-4 stub 시점에 출발했으므로 여기서 중복 안내하지 않는다. **세션을 새로 띄우라는 안내가 아니라 출발 게이트가 풀렸다는 안내다** — PLAN spawn 자체는 BG가 PR 확정 시점에 이미 안내했다.
+- **본 PR에 의존하는 PR의 진입 가능 안내** — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> dependents --pr {N}`으로 찾는다(손으로 역방향을 뒤집지 않는다). 그런 PR이 있으면 각각의 plan 진입 가능을 사용자에게 안내한다. 본 PR이 stub을 만들었다면 그 PR들은 이미 realize-plan stub 시점에 출발했으므로 여기서 중복 안내하지 않는다. **세션을 새로 띄우라는 안내가 아니라 출발 게이트가 풀렸다는 안내다** — PLAN spawn 자체는 BG가 PR 확정 시점에 이미 안내했다.
 - **마지막 IMPL 판정** — SKILL.md 「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준을 적용한다. 판정 결과(마지막이면 fan-in 후속으로 FINALIZE가 후속 명단에 더해진다)는 「세션 spawn 안내 메커니즘」 「fan-in 후속」이 반영한다.

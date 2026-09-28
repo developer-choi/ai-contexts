@@ -46,13 +46,13 @@
 
 폴더가 정리 시점을 표현하므로 본문 규칙으로 "어느 step 직후 정리" 같은 정리 시점을 반복 명시하지 않는다. 그 대신 폴더 분류 자체의 적정성에 무게를 둔다.
 
-## step-4 vs step-5 코드 작성 경계
+## realize-plan vs implement 코드 작성 경계
 
-step-4(stub)와 step-5(IMPL) 모두 코드를 작성하므로 경계가 흐려진다. 항목별 경계를 직접 명시.
+realize-plan(stub)과 implement(IMPL) 모두 코드를 작성하므로 경계가 흐려진다. 항목별 경계를 직접 명시.
 
 ### 모든 파일·함수·컴포넌트 stub 필수
 
-PR에서 만들 **모든 파일·함수·컴포넌트는 step-4에서 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
+PR에서 만들 **모든 파일·함수·컴포넌트는 realize-plan에서 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
 
 두 가치:
 - **구조 가시화**: PR이 가져온 마크업을 로직 컨테이너로 감싸고 hook을 호출하면, 그 컨테이너·hook도 stub으로 만들어 로직 구조를 한눈에 파악. IMPL은 본문만 채움
@@ -60,7 +60,7 @@ PR에서 만들 **모든 파일·함수·컴포넌트는 step-4에서 stub으로
 
 ### 항목별 경계 매핑
 
-| 항목 | step-4 | step-5 |
+| 항목 | realize-plan | implement |
 |---|---|---|
 | 외부 공개 모듈 시그니처 (export 함수·컴포넌트·hook) | ○ 필수 | — |
 | 내부 함수·컴포넌트 시그니처 | ○ 필수 (시그니처 + throw) | — |
@@ -73,15 +73,15 @@ PR에서 만들 **모든 파일·함수·컴포넌트는 step-4에서 stub으로
 
 ### 점검 항목 (scw 리뷰)
 
-- step-4 stub에 함수 본문이 길게 박혀 있는지 — 한글 명세로 바꿔야 하는 후보
-- step-4에서 **내부 로직 함수·컴포넌트 stub이 누락**됐는지 — 로직 구조 가시화 깨짐 신호 (PR 안 호출 그래프·로직 컨테이너 트리가 stub에 드러나지 않음)
-- step-5에서 **외부 공개 시그니처가 변경**됐는지 — step-4 누락 신호 (후속 PR 의존 깨짐)
-- step-5에서 결정된 분기·매핑·상수가 새로 추가됐는지 — step-4 누락 또는 step-5에서 새 결정 발생
+- realize-plan stub에 함수 본문이 길게 박혀 있는지 — 한글 명세로 바꿔야 하는 후보
+- realize-plan에서 **내부 로직 함수·컴포넌트 stub이 누락**됐는지 — 로직 구조 가시화 깨짐 신호 (PR 안 호출 그래프·로직 컨테이너 트리가 stub에 드러나지 않음)
+- implement에서 **외부 공개 시그니처가 변경**됐는지 — realize-plan 누락 신호 (후속 PR 의존 깨짐)
+- implement에서 결정된 분기·매핑·상수가 새로 추가됐는지 — realize-plan 누락 또는 implement에서 새 결정 발생
 
 ### 사례
 
-- ❌ Bad: step-4에 외부 공개만 stub하고 내부 로직 컨테이너·hook 누락 — 구조 파악 불가
-- ❌ Bad: step-5에서 `add(a, b)` → `add(a, b, options)` 시그니처 변경 — step-4 누락. 후속 PR 의존 깨짐
+- ❌ Bad: realize-plan에 외부 공개만 stub하고 내부 로직 컨테이너·hook 누락 — 구조 파악 불가
+- ❌ Bad: implement에서 `add(a, b)` → `add(a, b, options)` 시그니처 변경 — realize-plan 누락. 후속 PR 의존 깨짐
 
 ### 엄격도
 
@@ -154,7 +154,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 사례
 
-step-5에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, step-3, step-4 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
+implement에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, plan, realize-plan markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
 
 ### 점검
 

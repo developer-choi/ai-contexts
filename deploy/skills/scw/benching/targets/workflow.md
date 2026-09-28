@@ -17,7 +17,7 @@ workflow 스킬 벤치의 단위·오라클·fixture 대입값.
 
 둘 다 workflow SKILL.md를 진실 원천으로 파생한다 — 별도 표를 두지 않는다 (drift 방지).
 
-- **오라클(채점)**: 각 step의 1차 입력에 직접 대조. 1차 입력 = 세션 표 (2) 입력 중 figma·요구사항 원본·컨벤션 1차 소스·사용자 발화 (AI 산출물 제외 — SKILL.md 「검증 기준 = 진실 원천」과 동일). 고정 rubric 없이 AI 판단. 예: step-5 구현은 implementation.md(AI 캐시)가 아니라 그 근거인 요구사항·컨벤션 1차 소스로 채점.
+- **오라클(채점)**: 각 step의 1차 입력에 직접 대조. 1차 입력 = 세션 표 (2) 입력 중 figma·요구사항 원본·컨벤션 1차 소스·사용자 발화 (AI 산출물 제외 — SKILL.md 「검증 기준 = 진실 원천」과 동일). 고정 rubric 없이 AI 판단. 예: implement 구현은 implementation.md(AI 캐시)가 아니라 그 근거인 요구사항·컨벤션 1차 소스로 채점.
 - **mock 입력**: 각 step이 먹는 입력은 세션 표 (2) + 직전 step이 "출력한다"고 적은 산출물 계약 기준으로 생성(기억 아닌 정의 기준). 폴더 구조는 workflow `conventions/plan-folder.md`.
 - **harvest 예외**: 산출물 → 다음 step 입력 정합(체이닝)을 볼 때만 실제 직전 step을 돌려 출력 수확.
 

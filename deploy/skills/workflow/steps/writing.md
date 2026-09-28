@@ -24,16 +24,16 @@ PR 하나의 본문 작업을 시작할 때마다, 그 PR의 첫 `/write-init`·
 - 항목마다 이번 PR 몫인지 가르고, 몫이면 어느 산출물로 갈지(이 PR 본문의 어느 절 / README 재료)까지 정한다
 - 판정 결과를 사용자에게 보고하고 확인받은 뒤 쓰기 시작한다. 몫인 항목이 없으면 없다고 보고한다
 
-## WRITING_IDEATOR — 초안 (각 PR step-3 종료 후)
+## WRITING_IDEATOR — 초안 (각 PR plan 종료 후)
 
 계획만으로 쓸 수 있는 PR 본문의 배경·문제·접근·근거를 미리 초안한다. 상세 코드블록은 REFINER 몫이다.
 
 ### 입력
 
 - `pr{N}/persistent/overview.md` — 목표·범위·열려있는 질문. **읽기만 한다**. 「열려있는 질문」은 초안의 "Known issues / Follow-up" 절에 반영한다.
-- `pr{N}/persistent/decisions.md` — step-3 초기본. 토론이 없었으면 부재할 수 있다.
+- `pr{N}/persistent/decisions.md` — plan 초기본. 토론이 없었으면 부재할 수 있다.
 - `pr{N}/persistent/reference.md` — 외부 자료 링크 + 컨벤션 경로 인덱스.
-- `/plan/background/consumable/todo.md` — 위 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 step-3에서 overview로 소비돼 없을 수 있다.
+- `/plan/background/consumable/todo.md` — 위 「PR 착수 시 todo.md 판정」 대상. 이 PR 절은 plan에서 overview로 소비돼 없을 수 있다.
 
 ### 절차
 
@@ -51,7 +51,7 @@ write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 �
 
 그다음 `/write-init pr-body`로 초안을 생성한다. overview·decisions·reference를 컨텍스트로 전달하되, 특정 파일명을 하드코딩하지 않고 `/plan/pr{N}/`을 탐색하여 존재하는 산출물을 동적으로 참조한다.
 
-## WRITING_REFINER — 확정 (각 PR step-6 종료 후)
+## WRITING_REFINER — 확정 (각 PR verify 종료 후)
 
 구현·커밋이 완료된 뒤 IDEATOR 초안을 실제 산출물과 정합시켜 확정하고, consumable을 정리한다.
 
@@ -60,7 +60,7 @@ write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 �
 - WRITING_IDEATOR 입력(overview·decisions·reference·todo.md) +
 - `pr{N}/persistent/implementation.md`
 - 커밋 로그 (브랜치 유도는 위 「cwd」)
-- `decisions.md`의 step-6.6 갱신분
+- `decisions.md`의 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화) 갱신분
 - `pr{N}/consumable/` 잔여 산출물
 
 ### fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
@@ -73,7 +73,7 @@ write-init을 부르기 전에 아래 준비를 먼저 끝낸다. 해당하는 �
 
 ### 산출물 정리
 
-확정된 `pr-body.md`를 PR 본문으로 복사·게시한 뒤 삭제한다. 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). consumable 소비 후 정리는 큐 모델을 따른다 ([../conventions/plan-folder.md](../conventions/plan-folder.md) 「소비→삭제 메커니즘 SSOT」).
+확정된 `pr-body.md`를 PR 본문으로 복사·게시한 뒤 삭제한다. 이어서 `/plan/pr{N}/consumable/`의 각 산출물 절을 PR 본문 및 코드와 대조하여 **소비**한다 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙). consumable 소비 후 정리는 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
 
 - **PR 본문·코드와 대조하고도 남은 절은, 지우거나 다른 곳으로 옮기기 전에 같은 내용이 이미 다른 파일에 있는지 검색한다.** 그 절의 핵심 사실·수치·판단을 낱말로 잡고 같은 사실을 가리키는 다른 표현(제품명과 엔진명, 한글과 영문)도 함께 넣어 `/plan/` 전체(그 파일 자신은 빼고)를 검색하고, `/plan/` 밖으로 옮기면 옮겨갈 곳도 검색한다. 검색에 걸린 곳이 같은 사실이 아니면 사본을 찾은 것으로 치지 않고 다른 낱말로 다시 찾는다. 있으면 판본 차이만 그곳에 옮긴 뒤 지운다. 없으면 `persistent/`나 사용자와 정한 곳으로 옮긴다. 다른 consumable 파일로는 옮기지 않는다.
 - **`/plan/pr{N}/persistent/` 하위는 정리 대상에서 제외** — 영구 보존 자료. 대조도 수행하지 않는다.

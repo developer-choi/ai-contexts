@@ -16,11 +16,11 @@
 - **도메인 묻음/안 묻음은 별개 축** — 공통성 판정과 무관하게 배치(어느 PR·폴더)를 가른다. 범용(도메인 안 묻음)은 공통 자리, 도메인 결합은 그 도메인 자리.
 - **seam**: 컴포넌트 경계·정체(무엇이 한 컴포넌트인가)는 MARKUP이 정한다. 파일 배치·경로·이름·조직은 PR_{N}이 정한다. 신뢰(그대로 가져오는) 대상은 **시각(CSS 수치 + HTML 구조)만**이고, 이름·배치 권한은 PR에 있다.
 
-## 자료 참조 (수집은 step-1.1)
+## 자료 참조 (수집은 requirement 「자료 받기」)
 
 각 컴포넌트의 디자인 디테일 원천(재료)과 그 참조 방식은 모드 파일이 정의한다. 이 프로젝트의 구체 원본 위치와 대조 절차문서는 진입 문서 `background/retained/design-root.md`가 가리킨다 ([../../conventions/artifact/design-root.md](../../conventions/artifact/design-root.md) 양식).
 
-개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 step-1 「컨벤션 소스 수집」이 단일 출처.
+개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 [requirement 「컨벤션 소스 수집」](../requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)이 단일 출처.
 
 참조 자료가 갖춰지면 markup 워크트리로 이동하여 「마크업 구현·검사」로 진입한다.
 
@@ -31,7 +31,7 @@
 | 인자 | 주입값 |
 |---|---|
 | 구현자 | Markup Implementer (sonnet) — 마크업 전용 (CSS·최소 props). 로직·테스트 작성 안 함 |
-| 재료 | 컴포넌트 목록, 디자인시스템 소스(MP `packages/design-system` 복사·차감), 기존 mixin/레이아웃 패턴 + 모드별 자료 (모드 파일 참조). **채용은 [figma.md](figma.md) 「스타터 코드·MP 재사용·스타일링 라이브러리」를 따름** |
+| 재료 | 컴포넌트 목록, 디자인시스템 소스(MP `packages/design-system` 복사·차감), 기존 mixin/레이아웃 패턴 + 모드별 자료 (모드 파일 참조). **채용은 [스타터 코드·MP 재사용·스타일링 라이브러리](figma.md#채용-전용-스타터-코드mp-재사용스타일링-라이브러리)를 따름** |
 | 진실검사 A | 모드 파일이 정의 — figma 대조([figma.md](figma.md)) / 시안 대조 + 사용자 시각 확인([personal.md](personal.md)). 종료 커버리지 = 디자인 진실 원천 전 페이지·전 컴포넌트 |
 | 규칙검사 B | 마크업 coding-standards (AC [code-map.md](../../../../contexts/code-map.md) 탐색 절차로 찾은 마크업 관련 rules). 계속 돌린다(집행 유지 — 가져올 때 변환 최소화용 best-effort). 단 신뢰·의존 대상은 아니다 — 이름·배치 권한은 PR |
 | 증분 단위 | 컴포넌트 |
