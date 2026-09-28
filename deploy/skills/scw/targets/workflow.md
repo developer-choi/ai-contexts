@@ -52,7 +52,7 @@ realize-plan(실행 또는 stub)과 implement(IMPL) 모두 코드를 작성하�
 
 ### stub으로 넘기는 부분은 내부까지 stub
 
-[realize-plan](../../workflow/steps/realize-plan.md)은 실행이 기본이고, 무겁거나 후속 PR이 시그니처에 의존하는 부분만 stub으로 분해한다. stub으로 넘기는 부분은 **그 안의 파일·함수·컴포넌트를 모두 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
+[realize-plan](../../workflow/steps/realize-plan.md)은 실행이 기본이고, 무거운 부분만 stub으로 분해한다. stub으로 넘기는 부분은 **그 안의 파일·함수·컴포넌트를 모두 stub으로 생성**한다. 외부 공개 여부 무관 — 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`로 stub.
 
 두 가치:
 - **구조 가시화**: PR이 가져온 마크업을 로직 컨테이너로 감싸고 hook을 호출하면, 그 컨테이너·hook도 stub으로 만들어 로직 구조를 한눈에 파악. IMPL은 본문만 채움

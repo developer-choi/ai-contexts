@@ -5,8 +5,8 @@ next:
   - to: implement
   - to: plan
     notice: gate
-    on: stub 확정
-    when: 이 PR의 시그니처만 필요한 PR이 있을 때
+    on: realize-plan 커밋 완료
+    when: 이 PR에 의존하는 PR이 있을 때
   - to: markup
     on: markup 워크트리 최소 셋팅 완료
     when: FOUNDATION PR
@@ -16,7 +16,9 @@ next:
 
 > **Plan mode 필수**. [과제 정의 단계](plan.md)에서 승인된 과제에 대해서만 진행한다.
 
-이 단계는 [과제 정의 단계](plan.md)에서 승인된 과제를 **구현한다**. 기본은 실행이다 — 코드로 표현 가능한 작업은 그 자리에서 실행·커밋한다. 무겁거나(한 세션에 다 못 끝냄) 후속 PR이 시그니처에 의존해 병렬화가 필요한 부분만 stub으로 분해해 본체를 다음 IMPL 세션으로 넘긴다.
+이 단계는 [과제 정의 단계](plan.md)에서 승인된 과제를 **구현한다**. 기본은 실행이다 — 코드로 표현 가능한 작업은 그 자리에서 실행·커밋한다. 무거운(한 세션에 다 못 끝냄) 부분만 stub으로 분해해 본체를 다음 IMPL 세션으로 넘긴다.
+
+이 PR에 의존하는 PR은 이 단계의 커밋(stub 또는 실행 결과)을 딛고 출발한다. 그래서 이 단계에서 커밋한 외부 공개 시그니처는 이후 바꾸지 않는다(freeze) — 바꿔야 하면 사용자에게 영향을 알리고 정한다.
 
 overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 인덱스)를 입력으로 쓰며, [과제 정의 단계](plan.md)의 기술 결정·근거를 반복하지 않는다. 무거워서 IMPL로 분해하는 경우 stub 코드 + 잔존 md가 그 핸드오프 산출물이 된다.
 
@@ -28,7 +30,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - **입력**: plan 산출물 `pr{N}/persistent/`의 overview.md·decisions.md·reference.md + `/plan/pr{N}/`·`/plan/background/`의 잔여 산출물(아래 [잔여 산출물 소비](#1-잔여-산출물-소비)에서 소비)
 - **산출물**:
-  - 코드 변경 + 커밋 — stub 커밋(무겁거나 후속 PR이 시그니처에 의존하는 PR) 또는 그 자리 실행·커밋(가벼운 PR)
+  - 코드 변경 + 커밋 — stub 커밋(무거운 PR) 또는 그 자리 실행·커밋(가벼운 PR)
   - `pr{N}/persistent/`: implementation.md, reference.md 누적
   - `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
 - **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(이름 `{메인 디렉토리}-pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
@@ -41,7 +43,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - 브랜치명: `feature/{짧은-설명}` — 영문 슬러그(소문자 + 하이픈)
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
-  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 stub 시그니처나 실제 산출물을 봐야 하는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
+  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
 - 워크트리는 프로젝트 루트의 형제 디렉토리에 `{메인 디렉토리}-pr{N}` 이름으로 생성한다.
 
@@ -130,11 +132,12 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
    - **조건 2 (코드로 표현 가능한 모든 계획)**: 시그니처가 없어도 **파일로 표현 가능한 계획은 전부 코드/stub로** 만든다 — 의존성(`package.json` 추가 + 설치), 설정(`vite.config`·`tsconfig`·`eslint` 등), 테스트 의도(`*.test.tsx`의 `it.todo`).
    - **조건 3 (stub 불가 + 코드표현 가능)**: rename·파일/폴더 이동·설정 한 줄 치환처럼 **코드가 이미 있어 stub 대상이 없지만 편집이 100% 코드로 표현되는** 것:
      - trivial(실행하면 끝 — 순수 rename 등)이면 **문서·세션 핸드오프로 이연하지 말고 그 자리에서 실행·커밋**한다.
-     - 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. 각 매치의 before→after 쌍(식별자·경로·줄번호)은 어느 md에도 적지 않는다 — 개별 치환은 implement가 파일 보고 수행한다.
+     - 이 PR에 의존하는 PR이 있으면 이연하지 않는다 — 뒤 PR이 이동·추출 결과를 딛는다.
+     - 그 밖에 실행을 이연해야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. 각 매치의 before→after 쌍(식별자·경로·줄번호)은 어느 md에도 적지 않는다 — 개별 치환은 implement가 파일 보고 수행한다.
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다. impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
-3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무겁거나 후속 PR이 시그니처에 의존하는 병렬 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 realize-plan에서 끝낸다)
+3. **사용자 동의·수정 후 진행** — 두 갈래: (a) stub 만들어 본체를 IMPL로 분해(무거운 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 realize-plan에서 끝낸다)
 
 **"인프라성(빌드·린트·포맷·패키지) PR이라 stub 불필요"는 잘못된 디폴트다** — 그런 PR도 deps·설정·`it.todo`가 조건 2에 의해 stub 대상이다. **"외부 시그니처 없음"을 "stub 없음"으로 확장하지 않는다.**
 

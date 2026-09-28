@@ -4,8 +4,8 @@ session: PR_{N}_PLAN
 scope: per-pr
 entry: >-
   `todo.md`에 이 PR 절이 확정됨 + (채용) BG 「레포 세우기」 완료 + 의존 PR이 있는 경우에 한해
-  (그 PR이 stub 만든 경우 그 PR의 realize-plan stub, 안 만든 경우 그 PR의 IMPL 완료 — 의존 PR은
-  직전 번호가 아닐 수 있고 여럿일 수 있다. `todo.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면
+  그 PR의 realize-plan 커밋 완료(stub 또는 실행 결과 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수
+  있다. `todo.md` 해당 PR 절의 의존 항목이 출처). 의존이 없으면
   확정 즉시 진입 가능. 학습 인수인계 후 진입 대기 적용 (`todo.md` 이 PR 절의 종류가 FOUNDATION이면 제외)
 model: Opus
 next:

@@ -5,9 +5,6 @@ next:
   - to: pr-body-final
   - to: finalize
     when: 마지막 IMPL
-  - to: plan
-    notice: gate
-    when: 이 PR에 의존하는 PR이 있을 때
 ---
 
 # verify: 최종 점검
@@ -18,7 +15,7 @@ next:
 
 ## 입력·산출물·작업 위치
 
-- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`(주석 게이트·의존 PR 조회) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
 - **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md / `pr{N}/persistent/decisions.md` 갱신 / 1회차 정리·재정렬된 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
@@ -138,7 +135,7 @@ stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식
 
 ### Step 6.5.2. 사용자에게 force-push 요청 안내
 
-재정렬 완료 후 사용자에게 force-push를 요청한다.
+재정렬 완료 후 사용자에게 force-push를 요청한다. 이 PR 브랜치의 커밋을 딛고 뻗은 다른 브랜치가 있으면 새 tip 위로 옮기도록 함께 요청한다 — 의존 PR은 이 PR의 realize-plan 커밋 위에서 뻗으므로 재정렬이 그 밑을 바꾼다.
 
 ---
 
@@ -198,7 +195,6 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ## IMPL 종료 고유 판단
 
-verify 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속·의존 PR 안내는 implement가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 전환·세션경계·후속안내는 SKILL.md 「step 경계」 표가 소유한다(종료 시 「세션 spawn 안내 메커니즘」 발동 — 후속 안내는 implement가 아닌 여기서 낸다). 아래는 그 표·메커니즘이 다루지 않는 IMPL 종료 고유 판단이다.
 
-- **본 PR에 의존하는 PR의 진입 가능 안내** — `node {{skill_dir}}/scripts/todo-md.mjs <todo.md> dependents --pr {N}`으로 찾는다(손으로 역방향을 뒤집지 않는다). 그런 PR이 있으면 각각의 plan 진입 가능을 사용자에게 안내한다. 본 PR이 stub을 만들었다면 그 PR들은 이미 realize-plan stub 시점에 출발했으므로 여기서 중복 안내하지 않는다. **세션을 새로 띄우라는 안내가 아니라 출발 게이트가 풀렸다는 안내다** — PLAN spawn 자체는 BG가 PR 확정 시점에 이미 안내했다.
 - **마지막 IMPL 판정** — SKILL.md 「작업 진행 순서 > FINALIZE」의 마지막 PR 판별 기준을 적용한다. 판정 결과(마지막이면 fan-in 후속으로 FINALIZE가 후속 명단에 더해진다)는 「세션 spawn 안내 메커니즘」 「fan-in 후속」이 반영한다.
