@@ -40,7 +40,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
 
-realize-plan에서 구현이 사실상 끝났으면 팀 spawn·구현·리뷰 파이프라인(5.1, 5.2.1~5.3)은 할 것이 없다고 판단하고 넘긴다. 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트는 그대로 돈 뒤 [verify](verify.md)로 간다.
+realize-plan에서 구현이 사실상 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다(5.2.2의 세팅 PR처럼 Feature Implementer만 spawn하지 않는다). 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
 
 ---
 
