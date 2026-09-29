@@ -13,7 +13,7 @@
 // 차단하면 그 정상 문서가 막힌다.
 //
 // 막는 목록을 이 파일에 적어두지 않고 매번 훅 소스에서 읽는 이유: 적어두면 사본이 되어 다른
-// 훅이 바뀔 때 여기만 낡는다 (rules-as-code.md 「정본이 코드에 있으면 산문은 옮겨 적지 않는다」).
+// 훅이 바뀔 때 여기만 낡는다.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
