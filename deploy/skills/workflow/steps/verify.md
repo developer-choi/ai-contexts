@@ -199,4 +199,4 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ## IMPL 종료
 
-verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「세션 spawn 안내 메커니즘」 — 마지막 IMPL 판정은 그 「fan-in 후속」).
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「후속 세션 spawn 안내 방법」).
