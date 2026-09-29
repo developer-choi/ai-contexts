@@ -30,7 +30,7 @@ Figma Reviewer ↔ 구현자 대조 루프. 대조형(실행 오라클 없음). 
 
 ## Markup Implementer 필수 지침
 
-엔진에 Markup Implementer를 주입할 때 반드시 함께 전달:
+엔진에 Markup Implementer를 주입할 때 함께 전달한다:
 
 1. **(실무) "피그마 참조 코드의 CSS 토큰을 매칭표와 대조하라"**
 2. **구현 후 피그마 자동 대조** — 피그마 다시 fetch해서 토큰/레이아웃/props 비교

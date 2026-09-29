@@ -8,7 +8,7 @@ entry: >-
 model: Sonnet (figma URL 기준) / Opus (캡처-only·개인)
 next:
   - to: plan
-    notice: gate
+    notice: go
     on: 공통 컴포넌트 확정
     when: COMPONENTS PR이 있을 때 (확정 0건이면 COMPONENTS PR에 기대는 PR까지)
 ---
@@ -22,7 +22,7 @@ next:
 
 - **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`
 - **산출물**: markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`) + 공통 컴포넌트 확정·독립 산출 (COMPONENTS 종류 PR이 소비하는 단방향 입력)
-- **작업 위치**: markup 워크트리(프로젝트 루트의 형제 디렉토리 `{메인 디렉토리}-markup`). 포트 3000 점유
+- **작업 위치**: markup 워크트리(`<레포>/.claude/worktrees/markup`). 포트 3000 점유
   - 진입 시 MARKUP이 만든다. base는 FOUNDATION PR 브랜치의 verify 종료 시점 tip이고, 그 PR이 이미 머지됐거나 FOUNDATION PR이 없으면 기본 브랜치다
   - 마크업을 띄울 최소 셋팅(빌드·스타일링 중 base에 없는 것만)은 stub·TODO로 넘기지 않고 진입 직후 끝낸다. PR에 안 간다
 
@@ -32,7 +32,7 @@ next:
 
 ## 공통 컴포넌트 확정
 
-공통 컴포넌트를 확정해 독립 마크업(단일 재사용 단위)으로 산출한다 — PR이 인라인하지 못하도록 반드시 추출한다. 이 산출은 COMPONENTS 종류 PR이 소비하는 단방향 입력이다.
+공통 컴포넌트를 확정해 독립 마크업(단일 재사용 단위)으로 산출한다 — PR이 인라인하지 못하도록 추출한다. 이 산출은 COMPONENTS 종류 PR이 소비하는 단방향 입력이다.
 
 - **판정 기준 = 2군데 이상 쓰이면 공통** (다른 페이지 2곳이든 한 페이지 내 2회든). 1군데인데 확실히 판단 안 서면 사용자에게 에스컬레이션.
 - **도메인 묻음/안 묻음은 별개 축** — 공통성 판정과 무관하게 배치(어느 PR·폴더)를 가른다. 범용(도메인 안 묻음)은 공통 자리, 도메인 결합은 그 도메인 자리.
@@ -44,7 +44,7 @@ next:
 
 개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 [requirement 「컨벤션 소스 수집」](../requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)이 단일 출처.
 
-참조 자료가 갖춰지면 markup 워크트리로 이동하여 「마크업 구현·검사」로 진입한다.
+참조 자료가 갖춰지면 `EnterWorktree`에 markup 워크트리 경로를 줘 들어가 「마크업 구현·검사」로 진입한다.
 
 ## 마크업 구현·검사
 

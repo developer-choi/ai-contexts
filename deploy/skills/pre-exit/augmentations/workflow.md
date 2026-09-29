@@ -12,13 +12,13 @@
 
 각 미탐색 링크를 Read해 룰·체크리스트·산출물 요구사항을 추출하고, 산출물(`plan/pr{N}/**`)·작업 결과에 대조한다. 반영 안 된 룰은 「문제 리스트업 + 규칙화」의 문제 목록에 추가한다.
 
-회상 누락 보완: 본 세션의 pre-compact 스냅샷이 있으면(검출은 step-1.md 「pre-compact 스냅샷 회수」), 그 transcript에서 Read한 `workflow/**/*.md` 항목을 추출해 보강한다.
+회상 누락 보완: 본 세션의 pre-compact 스냅샷이 있으면(검출은 [pre-compact 스냅샷 회수](../step-1.md#pre-compact-스냅샷-회수)), 그 transcript에서 Read한 `workflow/**/*.md` 항목을 추출해 보강한다.
 
 ### 첫 사용자 요청 vs 산출물 1:1 대조
 
 세션 첫 사용자 메시지(또는 명시적 요구사항 메시지)를 회상하고, 산출물(`plan/pr{N}/**`·코드·커밋)에서 각 요구사항 충족 여부를 체크한다. 대응 없는 항목은 「문제 리스트업 + 규칙화」의 문제 목록에 추가한다.
 
-회상이 압축으로 흐릿하면 pre-compact 스냅샷 transcript의 첫 사용자 항목으로 보강한다(검출은 step-1.md 「pre-compact 스냅샷 회수」).
+회상이 압축으로 흐릿하면 pre-compact 스냅샷 transcript의 첫 사용자 항목으로 보강한다(검출은 [pre-compact 스냅샷 회수](../step-1.md#pre-compact-스냅샷-회수)).
 
 ### 보고 vs 실제 변경 대조
 
@@ -35,7 +35,7 @@
 「미탐색 cross-ref 추적」이 '안 읽은 링크 문서'를 잡는다면, 본 절차는 **진입한 step.md 본문에 인라인으로 박힌 강제 절차의 *실행 여부***까지 본다. 특히 "판정·결론을 내리기 전에 읽어야 하는 단일 출처 문서"를 안 읽고 판정한 경우를 잡는다.
 
 절차:
-1. 본 세션에서 **진입한 step** 식별 (`node {{skill_dir}}/../workflow/scripts/steps.mjs start <세션>` 출력 「이 세션의 step」으로 자기 세션의 step 범위 확인). `<세션>`은 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`가 낸 `/workflow` 발화의 첫 인자다(인자가 없으면 `BG`). 그 발화가 없으면(자동 발동 등) `node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>`가 낸 `workflow/steps/` 파일들의 frontmatter `session:` 값을 쓰고, 값이 둘 이상이면 사용자에게 묻는다.
+1. 본 세션에서 **진입한 step** 식별 (`node {{skill_dir}}/../workflow/scripts/steps.mjs start <세션>` 출력 「이 세션의 step」으로 자기 세션의 step 범위 확인). `<세션>`은 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`가 낸 `/workflow` 발화의 첫 인자다. 그 발화가 없거나(자동 발동 등) 첫 인자가 workflow 세션 이름이 아니면 `node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>`가 낸 `workflow/steps/` 파일들의 frontmatter `session:` 값을 쓰고, 값이 둘 이상이면 사용자에게 묻는다.
 2. 각 step.md를 처음부터 끝까지 Read + step.md가 가리키는 **하위 문서**(`conventions/artifact/*`, `*-spec.md`, `stub.md` 등)도 전부 Read.
 3. step.md·하위 문서에서 강제 절차를 항목으로 추출 — "필수"·"~한다"·"~전에 …한다"(판정 전 선행 읽기) 형태. 예: Plan mode 진입, 컨벤션 1차 소스 직접 grep, stub 필요성 판정 전 `stub.md` 참조, 종료 시퀀스 각 항목.
 4. 각 절차를 세션에서 **실제 실행**했는지 대조 — 미실행분을 「문제 리스트업 + 규칙화」의 문제 목록에 추가.

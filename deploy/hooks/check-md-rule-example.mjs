@@ -74,7 +74,7 @@ addContext(
 );
 
 // 적지 않는 꼴 목록을 prompt-standards/what-to-keep.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
-// 훅만 낡는다 — rules-as-code.md 「정본이 코드에 있으면 산문은 옮겨 적지 않는다」의 반대 방향이다.
+// 훅만 낡는다.
 function guideExcerpt() {
   let src;
   try {

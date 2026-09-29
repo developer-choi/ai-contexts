@@ -4,7 +4,7 @@ session: PR_{N}_PLAN
 next:
   - to: implement
   - to: plan
-    notice: gate
+    notice: go
     on: realize-plan 커밋
     when: 이 PR에 의존하는 PR이 있을 때
 ---
@@ -28,7 +28,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
   - 코드 변경 + 커밋 — stub 커밋(무거운 PR) 또는 그 자리 실행·커밋(가벼운 PR)
   - `pr{N}/persistent/`: implementation.md, reference.md 누적
   - `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
-- **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(이름 `{메인 디렉토리}-pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
+- **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(`<레포>/.claude/worktrees/pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
 
 ---
 
@@ -38,16 +38,14 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - 브랜치명: `feature/{짧은-설명}` — 영문 슬러그(소문자 + 하이픈)
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
-  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
+  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `pr{N}/persistent/overview.md`의 「의존」 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
-- 워크트리는 프로젝트 루트의 형제 디렉토리에 `{메인 디렉토리}-pr{N}` 이름으로 생성한다.
+- 워크트리는 `<레포>/.claude/worktrees/pr{N}`에 만들고, `EnterWorktree`에 그 경로를 줘 세션을 옮긴다.
 
 이후 이 단계의 모든 작업(구현 실행 또는 stub 파일 생성·커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
 
 - **`.gitignore` 대상** — 복사·심볼릭 만들지 말고 **main repo 절대경로로 그대로 참조**한다. 다음 세션도 같은 절대경로로 참조하도록 진입 안내문에 경로를 명시한다
 - **그 외(추적 대상인데 base 브랜치에 미커밋)** — base 브랜치에 먼저 커밋해 워크트리에 반영하거나, 작업 시작 전에 워크트리로 가져온다
-
-cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
 
 ---
 
@@ -55,7 +53,7 @@ cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세�
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [stub.md 「마크업 예외 (재정의)」](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)). realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
+**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [마크업 예외 (재정의)](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)). realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
 
 ---
 
@@ -92,7 +90,7 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성과 중복되는 비표준 래퍼 prop을 만들기 전에 표준 속성을 직접 쓸 수 있는지 검토한다.**
 
 - 판단 기준: 도입하려는 prop이 사실상 표준 DOM 속성의 별칭인가?
-- 표준 속성 래퍼면 `ComponentProps<'element'>`를 extend해 해당 속성을 직접 노출(필요 시 필수 override)하는 쪽이 더 표준적이다.
+- 표준 속성 래퍼면 `ComponentProps<'element'>`를 extend해 해당 속성을 직접 노출(그 속성을 필수로 받아야 하면 필수로 override)하는 쪽이 더 표준적이다.
 
 ### 기존 린트/coding-standards 오류 확인 (채용과제)
 
@@ -206,17 +204,8 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 
 stub 없는 PR이라도 decisions에 **행동 결정이 있으면** 그 결정은 대응 `it.todo`(→stub)를 요구한다 — "외부 시그니처 없음"을 "행동 결정 없음"으로 확장하지 않는다. 행동 결정이 실제 0건인 PR만 `it.todo` 0건 → 면제로 분류하고 면제 사유를 명시한다.
 
-### 3. 부정 명시 메아리 자가 점검
-
-SKILL.md 「부정 명시 메아리 자가 점검」 절차를 산출물 전체에 발동한다. 사용자 부정 지시 메아리·근거 없는 자체 판단 0건 수렴까지 반복.
-
-### 4. 자가 검토
-
-SKILL.md 「자가 검토 필수」의 「세션 종료 시 셀프 리뷰」 적용 — 본 세션에서 만든 산출물을 검증 소스와 1:1 대조. 이슈 발견 시 수정 후 다음 단계 보고에 포함.
-
-### 5. 보고 내용
+### 3. 보고 내용
 
 - 파생된 산출물 핵심 요약
 - 산출물 리뷰 결과 (1단계)
 - 종료 게이트 결과 (2단계 — 행동 결정 커버리지 표)
-- 자가 검토 결과 (3·4단계 통과/이슈 발견 여부)

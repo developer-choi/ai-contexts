@@ -3,8 +3,6 @@ step: verify
 session: PR_{N}_IMPL
 next:
   - to: pr-body-final
-  - to: finalize
-    when: 마지막 IMPL
   - to: markup
     when: 종류 FOUNDATION
 ---
@@ -157,7 +155,7 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ### Step 6.7.1. decisions ↔ 코드 정합 점검 (1차)
 
-[정합 점검 게이트](../conventions/artifact/decisions-lifecycle.md#정합-점검-게이트-decisions--코드) 적용. SKILL.md 「자가 검토 필수」 일반 룰의 특정 갈래 — 검증 소스를 decisions.md, 검증 대상을 현재 코드로 고정. 코드 수정이 필요한 경우 implement Implementer 흐름으로 진입.
+[정합 점검 게이트](../conventions/artifact/decisions-lifecycle.md#정합-점검-게이트-decisions--코드) 적용. 코드 수정이 필요한 경우 implement Implementer 흐름으로 진입.
 
 ### Step 6.7.2. 후임자 시각 예상 질문 (2차)
 
@@ -199,4 +197,4 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 
 ## IMPL 종료
 
-verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「세션 spawn 안내 메커니즘」 — 마지막 IMPL 판정은 그 「fan-in 후속」).
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「후속 세션 안내」).

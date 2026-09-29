@@ -2,7 +2,7 @@
 step: finalize
 session: FINALIZE
 scope: project
-entry: 전 PR의 IMPL(verify) 완료 (fan-in)
+entry: 사용자가 전 PR의 IMPL(verify)이 끝났다고 판단해 띄운다
 model: Opus
 next: []
 ---
@@ -13,7 +13,7 @@ next: []
 
 ## 입력·산출물·작업 위치
 
-- **입력**: 전 PR 커밋 히스토리(각 PR 브랜치의 base..tip) + PR·브랜치 목록(머지 여부) + `background/consumable/todo.md` + `/plan/` 전체의 잔존 consumable(WRITING 잔여 포함)
+- **입력**: 전 PR 커밋 히스토리(각 PR 브랜치의 base..tip) + PR·브랜치 목록(머지 여부) + 계획한 PR 목록(`node {{skill_dir}}/scripts/steps.mjs pr list --plan /plan`) + `background/consumable/todo.md` + `/plan/` 전체의 잔존 consumable(WRITING 잔여 포함)
 - **산출물**: 재배치·메시지 최종화된 히스토리 + 재작성 전 백업 브랜치 + force-push 요청 / 잔존 consumable은 사용자 판단에 따라 삭제 또는 이관 (새 폴더 산출물 없음)
 - **작업 위치**: 다중 브랜치, 단계별 cwd ([cwd](#cwd))
 
@@ -24,11 +24,11 @@ next: []
 두 원천을 **모두** 읽고 함께 고려한다.
 
 - 이미 **머지된 PR**이 있는지 (「머지된 PR 처리」)
-- `todo.md`에 PR로 안 올라간 **미완료 작업**이 있는지
+- 계획한 PR 목록(`pr list`)에 있는데 PR로 안 올라간 **미완료 작업**이 있는지
 
-실측 결과를 (a) 머지 완료 (b) 미머지 (c) `todo.md`에만 있고 PR이 없는 미착수 로 갈라 **절차 시작 전에 사용자에게 보고**한다. 양쪽이 어긋나면(계획엔 있는데 PR이 없다 / PR은 있는데 계획에 없다) 그 어긋남 자체를 보고하고 진행 방향을 묻는다.
+실측 결과를 (a) 머지 완료 (b) 미머지 (c) 계획한 PR 목록에만 있고 PR이 없는 미착수 로 갈라 **절차 시작 전에 사용자에게 보고**한다. 양쪽이 어긋나면(계획엔 있는데 PR이 없다 / PR은 있는데 계획에 없다) 그 어긋남 자체를 보고하고 진행 방향을 묻는다.
 
-`todo.md`에 PR 절이 없거나 비어 있어도 절차는 멈추지 않는다 — PR·브랜치 목록이 폴백 원천이다. 반대로 `todo.md`가 지시하는 작업(replace 대상 등)은 **실행 전 현재 코드·히스토리와 대조**한다.
+계획한 PR 목록이 비어 있어도 절차는 멈추지 않는다 — PR·브랜치 목록이 폴백 원천이다. 반대로 `todo.md`가 지시하는 작업(replace 대상 등)은 **실행 전 현재 코드·히스토리와 대조**한다.
 
 커밋 소속은 접두사가 아니라 **브랜치**(각 PR 브랜치의 base..tip 범위)로 식별한다.
 
@@ -93,5 +93,5 @@ force-push 요청 후, `background/consumable/`을 포함한 `/plan/` 전체를 
 
 본문을 마치면 모드별로 갈린다.
 
-- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·제출 뒤 회수). recruitment를 마친 시점에 `/pre-exit` 호출을 안내한다. 제출 뒤 회수([recruitment/after-submission.md](../recruitment/after-submission.md))는 컨텍스트가 커졌으면 새 세션으로 옮겨도 된다고 제출을 마친 시점에 안내하고, 옮기면 그 파일 경로를 새 세션에 넘기게 한다. 이때 `/pre-exit`는 본 세션은 제출을 마친 시점에, 새 세션은 회수를 마친 시점에 안내한다.
-- **실무·개인** — SKILL.md 「세션 spawn 안내 메커니즘」으로 머지를 안내하고 세션을 끝낸다(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.
+- **채용** — 새 세션을 안내하지 않고 본 세션이 [recruitment/SKILL.md](../recruitment/SKILL.md)를 1번부터 이어서 수행한다(PR 게시·README·채용담당자 리뷰·제출·제출 뒤 회수). 제출 뒤 회수([recruitment/after-submission.md](../recruitment/after-submission.md))는 컨텍스트가 커졌으면 새 세션으로 옮겨도 된다고 제출을 마친 시점에 안내하고, 옮기면 그 파일 경로를 새 세션에 넘기게 한다.
+- **실무·개인** — 머지 순서를 안내하고 세션을 끝낸다(스택은 바텀업, 독립 브랜치는 순서 무관). 머지는 사용자 실행.
