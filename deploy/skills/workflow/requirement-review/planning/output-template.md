@@ -2,7 +2,7 @@
 
 AI가 초안을 채우고 사용자가 리뷰하는 명세 분석 양식. 산출물 저장 위치는 [conventions/plan-folder.md](../../conventions/plan-folder.md) 참조.
 
-`todo.md`의 PR 절 양식과 번호·이름·종류 기록 방법은 [../../conventions/pr-split.md](../../conventions/pr-split.md) 「산출물」이 단일 출처다.
+`todo.md`의 PR 절 양식과 번호·이름·종류 기록 방법은 [산출물](../../conventions/pr-split.md#산출물-planbackgroundconsumabletodomd)이 단일 출처다.
 
 ---
 

@@ -91,14 +91,14 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 - 폴더 구조
 - 사용자 직접 진행 항목 (프로젝트 생성기 실행, 에디터 설정 등). 생성기 뒤의 레포 세우기는 BG가 한다 — 아래 「레포 세우기」
 
-기술 스택·디자인 시스템 라이브러리는 [code-map.md](../../../../contexts/code-map.md) 「패키지 선택 기준」으로 MP 실물(package.json 의존성 + best-practices 문서)을 확인해 **기본 선택지로 안건화하여 확정**한다. 스타일링·데이터 페칭·상태관리 같은 기초 스택은 BG에서 확정한다.
+기술 스택·디자인 시스템 라이브러리는 [패키지 선택 기준](../../../../contexts/code-map.md#패키지-선택-기준)으로 MP 실물(package.json 의존성 + best-practices 문서)을 확인해 **기본 선택지로 안건화하여 확정**한다. 스타일링·데이터 페칭·상태관리 같은 기초 스택은 BG에서 확정한다.
 
 **결정 근거는 둘뿐이다 — 스택도 폴더 구조도 같다**: ① 과제요구사항의 강제 명시(오버라이드) → ② MP 기본 선택지. 기존 코드베이스의 현 상태와 채용공고 우대사항은 근거가 아니다. 공고 우대사항은 평가 기준 추론(#2)에만 쓴다. MP 기본 선택지와 다르면 안건으로 올려 확정한다.
 
 **폴더 구조 결정 기준**: AI가 단독으로 정하거나, 「작업 익숙도 판별」 등 다른 절차에 전제로 끼워 넣지 않는다.
 
 - MP `monorepo-playground/docs/best-practices/setup.md`(폴더 구조·셋업)의 DDD 기반 패턴(상황: 채용과제·사이드 프로젝트 → `docs/patterns/folder-structure/FolderStructure.md`)을 안건 기본값으로 제시한다.
-- 최종 확정은 [foundation.md](../../conventions/pr-types/foundation.md) 「folder-structure.md 결정 기준」이 한다 — BG는 이 단계에서 "제안+확인"까지만 하고 못박지 않는다.
+- 최종 확정은 [FOUNDATION 산출 내용](../../conventions/pr-types/foundation.md#산출-내용)의 folder-structure.md 결정 기준 줄이 한다 — BG는 이 단계에서 "제안+확인"까지만 하고 못박지 않는다.
 
 ##### 레포 세우기
 
@@ -117,7 +117,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 
 섹션 3에서 디자인 시스템 라이브러리가 결정된 후 진행한다.
 
-**페이지별 정리**: 「자료 받기」가 모아둔 figma 자료를 페이지별로 정리하고, 빠진 페이지가 있으면 그것만 콕 집어 요청한다. 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
+**페이지별 정리**: 「자료 받기」가 모아둔 figma 자료를 페이지별로 정리하고, 빠진 페이지가 있으면 그것만 콕 집어 요청한다. 자료의 저장 위치와 재요청 정책은 [피그마 URL·캡처 캐싱](../../conventions/plan-folder.md#피그마-url캡처-캐싱).
 
 **디자인 시스템 설계**: 전체 자료를 훑어 필요한 컴포넌트 종류와 각 컴포넌트의 props 요구사항을 설계하여 `/plan/background/consumable/design-system.md`에 저장한다.
 

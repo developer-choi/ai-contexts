@@ -154,7 +154,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 사례
 
-implement에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 `conventions/plan-folder.md` 「피그마 URL·캡처 캐싱」, MARKUP 절, plan 단계 본문, realize-plan의 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
+implement에 "IMPL 중 디자인 변경 감지 시 figma URL 받는 법" 박으려던 시도. figma URL 받는 절차는 [피그마 URL·캡처 캐싱](../../workflow/conventions/plan-folder.md#피그마-url캡처-캐싱), MARKUP 절, plan 단계 본문, realize-plan의 markup.md 양식 4곳에 이미 명세. 5번째 위치에 절차 본문 박지 않고 트리거(언제) + cross-reference(어디 절차 따름)만 박음.
 
 ### 점검
 

@@ -53,7 +53,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [stub.md 「마크업 예외 (재정의)」](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)). realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
+**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.** 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [마크업 예외 (재정의)](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)). realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스). PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
 
 ---
 
