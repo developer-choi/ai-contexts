@@ -4,7 +4,7 @@ session: PR_{N}_PLAN
 next:
   - to: implement
   - to: plan
-    notice: gate
+    notice: go
     on: realize-plan 커밋
     when: 이 PR에 의존하는 PR이 있을 때
 ---
@@ -38,7 +38,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 - 브랜치명: `feature/{짧은-설명}` — 영문 슬러그(소문자 + 하이픈)
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
-  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `todo.md`의 「의존」 절 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
+  - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `pr{N}/persistent/overview.md`의 「의존」 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
 - 워크트리는 프로젝트 루트의 형제 디렉토리에 `{메인 디렉토리}-pr{N}` 이름으로 생성한다.
 

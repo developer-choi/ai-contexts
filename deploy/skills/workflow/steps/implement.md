@@ -22,7 +22,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 입력·산출물·작업 위치
 
-- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/persistent/implementation.md`·`reference.md` + `pr{N}/persistent/overview.md`의 PR 종류(`종류:` 줄이 있을 때) + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
+- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/persistent/implementation.md`·`reference.md` + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 

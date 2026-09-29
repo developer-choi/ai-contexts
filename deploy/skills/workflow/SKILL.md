@@ -58,7 +58,7 @@ AI 산출물의 역할은 **Implementer 캐시·인덱스**로만 한정한다 �
 
 각 세션·step 진입 시점에 다음을 **순서대로** 수행한다. SKILL.md만 보고 자기 지식·기억으로 진행하지 않는다.
 
-1. **해당 step.md 전체를 즉시 Read** — 세션 진입이면 `node {{skill_dir}}/scripts/steps.mjs start <세션>`이 낸 첫 step 파일(cwd 이동 등으로 이어 받는 세션이면 그 세션의 step 목록에서 진행 중이던 step)을, 같은 세션의 다음 step이면 `next`가 낸 파일을 처음부터 끝까지 읽는다. 산출물 작성 시점에 부분 Read 하지 않는다. PR 종류가 있으면(plan은 `todo.md` 이 PR 절, realize-plan·implement는 `overview.md`의 `종류:` 줄) plan·realize-plan·implement는 [conventions/pr-types/](conventions/pr-types/)`<종류>.md`도 읽는다. 그 파일이 없으면 멈추고 사용자에게 알린다.
+1. **해당 step.md 전체를 즉시 Read** — 세션 진입이면 `node {{skill_dir}}/scripts/steps.mjs start <세션>`이 낸 첫 step 파일(cwd 이동 등으로 이어 받는 세션이면 그 세션의 step 목록에서 진행 중이던 step)을, 같은 세션의 다음 step이면 `next`가 낸 파일을 처음부터 끝까지 읽는다. 산출물 작성 시점에 부분 Read 하지 않는다. `start` 출력에 「읽을 종류 문서」가 있으면 plan·realize-plan·implement는 그 파일도 읽는다.
 2. **도입부 절차부터 실행** — step.md 도입부에 적힌 절차(Plan mode 진입 / 컨벤션 사전 참조 / 입력 산출물 탐색 / 사용자 질문 등)를 산출물 작성보다 먼저 실행한다.
 3. **사용자 질문 절은 건너뛰지 않는다** — step.md에 "사용자에게 X를 질문한다"는 절이 있으면 묻는다. "이미 알고 있다"·"입력 산출물에서 추정 가능"으로 자기 면제 금지.
 
@@ -164,7 +164,7 @@ step.md 도입부에 "**Plan mode 필수**" 표기가 있는 step(plan·realize-
 ### 학습 인수인계 후 세션 진입 대기 (PR_{N}_PLAN 한정)
 
 - [requirement 「작업 익숙도 판별」](steps/requirement.md#작업-익숙도-판별)에서 인수인계 문서가 작성되었으면, **PR_{N}_PLAN 진입 안내** 시 **"사용자가 인수인계 문서 학습을 완료한 뒤 진입하라"** 는 조건을 함께 안내한다.
-- (채용) `todo.md` 이 PR 절의 종류가 FOUNDATION이면 이 대기 조건을 붙이지 않는다.
+- (채용) 그 PR의 종류(`steps.mjs pr list --plan /plan`)가 FOUNDATION이면 이 대기 조건을 붙이지 않는다.
 
 ## 참조
 

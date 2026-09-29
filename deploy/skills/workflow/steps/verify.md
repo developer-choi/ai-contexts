@@ -3,8 +3,6 @@ step: verify
 session: PR_{N}_IMPL
 next:
   - to: pr-body-final
-  - to: finalize
-    when: 마지막 IMPL
   - to: markup
     when: 종류 FOUNDATION
 ---

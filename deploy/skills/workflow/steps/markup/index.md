@@ -8,7 +8,7 @@ entry: >-
 model: Sonnet (figma URL 기준) / Opus (캡처-only·개인)
 next:
   - to: plan
-    notice: gate
+    notice: go
     on: 공통 컴포넌트 확정
     when: COMPONENTS PR이 있을 때 (확정 0건이면 COMPONENTS PR에 기대는 PR까지)
 ---

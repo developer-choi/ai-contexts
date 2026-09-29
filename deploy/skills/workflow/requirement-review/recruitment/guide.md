@@ -74,7 +74,7 @@ UI 시안이 포함되어 있는데 design 플래그가 켜져 있지 않으면,
 - 공고에서 강조하는 역량에 연결되는 어필 포인트
 - 페이지별 기술적·비기술적 강점 어필 포인트
 
-공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 참조 링크로 남긴다 — `/plan/background/consumable/todo.md` 해당 PR 절의 「참고 자료」(plan이 소비했으면 `pr{N}/persistent/reference.md`), 확정 전이면 `## 미분류`. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
+공고가 중시하는 역량에 매칭되는 기존 베스트 프랙티스를 MP/DC에서 찾아 참조 링크로 남긴다 — `/plan/background/consumable/todo.md` 해당 PR 절의 「참고 자료」(plan이 소비해 절이 없으면 `pr{N}/persistent/reference.md`), 확정 전이면 `## 미분류`. MP/DC에 접근할 수 없으면 사용자에게 알리고 넘어간다.
 
 #### 2. 평가 기준 추론
 

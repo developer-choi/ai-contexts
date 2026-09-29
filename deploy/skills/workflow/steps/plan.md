@@ -3,10 +3,8 @@ step: plan
 session: PR_{N}_PLAN
 scope: per-pr
 entry: >-
-  `todo.md`에 이 PR 절이 확정됨 + BG 「레포 확보」 + 의존 PR이 있는 경우에 한해
-  그 PR의 realize-plan 커밋 완료(stub 또는 실행 결과 — 의존 PR은 직전 번호가 아닐 수 있고 여럿일 수
-  있다. `todo.md` 해당 PR 절의 의존 항목이 출처) + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료.
-  의존이 없으면 확정 즉시 진입 가능. 학습 인수인계 후 진입 대기 적용 (채용이고 `todo.md` 이 PR 절의 종류가 FOUNDATION이면 제외)
+  BG 「레포 확보」 + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료. 학습 인수인계 후 진입 대기 적용
+  (채용이고 이 PR의 종류가 FOUNDATION이면 제외). PR 확정과 의존 PR의 realize-plan 커밋은 스크립트가 판정한다
 model: Opus
 next:
   - to: realize-plan
@@ -68,8 +66,8 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 본문 항목:
 
-- PR 종류 — `todo.md` 이 PR 절에 `종류:` 줄이 있을 때만, 그 줄 그대로. 절이 소비된 뒤 뒤 단계는 여기서 종류를 본다
 - 이 PR의 목표
+- 의존 — `todo.md` 이 PR 절의 「의존」을 그대로 옮긴다(realize-plan이 base 브랜치 판단거리로 읽는다). 없으면 `- 없음`
 - 범위 요약 (뭘 만드는지의 경계)
 - **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목)
 - `## TODO` — 고정 헤딩. `todo.md` 이 PR 절의 TODO를 옮겨 오고, 소비 뒤에 생기는 이 PR 몫 TODO도 여기 쌓인다. 없으면 `- 없음`
@@ -82,7 +80,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 | 산출물 | 책임 | 코드 블록 |
 |---|---|---|
-| `overview.md` | **의도만** — (있으면) PR 종류·목표·범위·열려있는 질문 + 이 PR 몫 TODO. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
+| `overview.md` | **의도만** — 목표·의존·범위·열려있는 질문 + 이 PR 몫 TODO. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
 | `decisions.md` | **기록 대상 결정의 근거** + 의사결정 흐름 (사용자 발화 단계 + 거부/채택 사유) | 사용자 발화 인용은 그대로. 코드는 시그니처 수준만 |
 | `reference.md` | 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스 | 코드 없음 |
 | `markup.md` | **Figma 원본 링크 인덱스(사용자 입력)** + 토큰 매핑표·매칭표 (figma 없는 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
@@ -94,7 +92,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 ### todo.md 현재 PR 절 소비
 
-`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO는 overview `## TODO`로 이관) 후 사용자에게 안내. 소비 후 처리는 [라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)의 `todo.md` 예외를 따른다.
+`/plan/background/consumable/todo.md`가 존재하면 **현재 PR 절을 `/plan/pr{N}/persistent/overview.md`로 소비한다** (TODO는 overview `## TODO`로 이관) 후 사용자에게 안내. 소비 후 처리는 [라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)을 따른다.
 ### 의사결정 토론
 
 overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자에게 안내한다. 자동으로 토론에 진입하지 않으며, 사용자의 명시적 허가가 있을 때에만 진행한다.
