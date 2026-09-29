@@ -43,7 +43,7 @@
 무엇을 어느 파일에 적는지는 [conventions/plan-folder.md](../../conventions/plan-folder.md) 폴더 트리의 `cross-analysis.md`·`todo.md` 항목이 정한다. 여기서 덧붙일 것은 둘이다.
 
 - 나중에 옮길 셈으로 cross-analysis.md에 임시로 담아두지 않는다 — 옮길 내용은 처음부터 todo.md에 쓴다.
-- todo.md에 직접 기록하는 것은 항목 리스트까지다. 산문 서술은 워크플로우 SKILL.md 「todo.md 산문·초기 셋업 CLI는 사용자가」를 따른다.
+- todo.md에 직접 기록하는 것은 항목 리스트까지다. 프로젝트 설명·설계 결정 서술처럼 이어 쓰는 산문은 사용자가 쓴다. AI는 넣을 항목·방향을 후보로 내고 기다린다 — 완성문을 지어 승인받는 것도 AI가 쓰는 것이다.
 
 #### 1. 공동 탐색 + 서비스 분석
 

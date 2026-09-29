@@ -61,7 +61,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/persistent/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외) |
+| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/persistent/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
 | Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중), `pr{N}/persistent/reference.md` (회사·프로젝트 고유 컨벤션 — 리뷰어 자체 컨벤션 외 추가 검증 기준) |
 | Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, `pr{N}/persistent/reference.md`, stub `*.test.tsx`의 `it.todo` |
 
@@ -90,6 +90,7 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 - **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
 - **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.
 - 새 파일/모듈을 만들기 전에 프로젝트에 같은 역할의 코드가 이미 있는지 확인한다. 기존 API, 타입, 컴포넌트를 재사용할 수 있으면 새로 만들지 않는다.
+- 이미 있는 코드블록을 옮기거나 쪼개는 편집(컴포넌트 추출, 코드블록 분리, 공용 위치로 승격)은 경계를 정하는 것도 옮기는 것도 사용자가 한다. AI는 옮겨진 코드에 이름 후보를 낸다. 새 코드를 처음 쓰면서 나누는 것은 해당하지 않는다.
 - realize-plan이 커밋한 외부 공개 시그니처는 바꾸지 않는다 — 의존 PR이 그 커밋을 딛는다. 바꿔야 하면 사용자에게 영향을 알리고 정한다.
 
 ### Step 5.2.3. IMPL 중 디자인·기획 변경 감지
@@ -119,7 +120,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 ## Step 5.4. 마무리
 
-- [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--ittodo--실제-it-케이스) 적용 (대조 절차는 SKILL.md 「자가 검토 필수」 일반 규칙)
+- [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--ittodo--실제-it-케이스) 적용
 - **TODO 잔존 점검** — [종료 게이트](../conventions/artifact/comments.md#종료-게이트-구현-마무리) 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
