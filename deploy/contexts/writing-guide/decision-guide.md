@@ -1,6 +1,6 @@
 # decision-guide
 
-기술적 의사결정 문서(`type: decision`) 전용 작성·검토 규칙입니다. `write-init`에서 `type: decision`으로 입력받아 `write-refine`이 다듬을 때 함께 로드됩니다.
+기술적 의사결정 문서(`type: decision`) 전용 작성·검토 규칙입니다.
 
 여러 구현 방법을 비교하고 선택 근거를 남기는 문서입니다. 결론만 단독으로 읽어도 "왜 다른 방법이 탈락했는지" 파악되어야 합니다.
 

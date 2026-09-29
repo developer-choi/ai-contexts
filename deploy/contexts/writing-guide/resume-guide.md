@@ -1,6 +1,6 @@
 # resume-guide
 
-이력서·경력기술서 전용 작성·다듬기 규칙입니다. `write-init`에서 `type: resume-item`·`resume-intro`으로 입력받은 뒤 `write-refine`이 다듬을 때 함께 로드됩니다. 「포맷」·「시안 다양화 워크플로우」는 `resume-item` 전용이고 나머지 절은 둘 다에 걸립니다.
+이력서·경력기술서(`type: resume-intro`·`resume-item`) 전용 작성·다듬기 규칙입니다. 「포맷」·「시안 다양화 워크플로우」는 `resume-item` 전용이고 나머지 절은 둘 다에 걸립니다.
 
 ## 포맷 (resume-item)
 
