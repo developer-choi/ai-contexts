@@ -36,7 +36,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 - 이 커밋 위에 구현 커밋을 쌓아나간다
 - 모든 슬라이스 사이클 종료 후에도 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존된 상태로 verify에 진입한다. 커밋 정리·재정렬은 [verify 「1회차 커밋 정리·재정렬」](verify.md#step-65-1회차-커밋-정리재정렬)에서 **AI 리뷰 + 사용자 리뷰 완료 후** 수행한다
 
-cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
+세션이 워크트리 밖에서 시작했으면 `EnterWorktree`에 그 워크트리 경로를 줘 들어간다.
 
 realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다(5.2.2의 세팅 PR처럼 Feature Implementer만 spawn하지 않는다). 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
 

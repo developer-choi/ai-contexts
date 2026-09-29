@@ -28,7 +28,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
   - 코드 변경 + 커밋 — stub 커밋(무거운 PR) 또는 그 자리 실행·커밋(가벼운 PR)
   - `pr{N}/persistent/`: implementation.md, reference.md 누적
   - `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
-- **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(이름 `{메인 디렉토리}-pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
+- **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(`<레포>/.claude/worktrees/pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
 
 ---
 
@@ -40,14 +40,12 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 - **base 브랜치는 사용자 확인 사항이다.** 어느 커밋을 기준으로 브랜치·워크트리를 딸지 사용자에게 확인받고 뻗는다. AI는 판단거리만 제시한다:
   - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `pr{N}/persistent/overview.md`의 「의존」 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
-- 워크트리는 프로젝트 루트의 형제 디렉토리에 `{메인 디렉토리}-pr{N}` 이름으로 생성한다.
+- 워크트리는 `<레포>/.claude/worktrees/pr{N}`에 만들고, `EnterWorktree`에 그 경로를 줘 세션을 옮긴다.
 
 이후 이 단계의 모든 작업(구현 실행 또는 stub 파일 생성·커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
 
 - **`.gitignore` 대상** — 복사·심볼릭 만들지 말고 **main repo 절대경로로 그대로 참조**한다. 다음 세션도 같은 절대경로로 참조하도록 진입 안내문에 경로를 명시한다
 - **그 외(추적 대상인데 base 브랜치에 미커밋)** — base 브랜치에 먼저 커밋해 워크트리에 반영하거나, 작업 시작 전에 워크트리로 가져온다
-
-cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
 
 ---
 

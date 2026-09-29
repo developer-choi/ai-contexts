@@ -22,7 +22,7 @@ next:
 
 - **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`
 - **산출물**: markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`) + 공통 컴포넌트 확정·독립 산출 (COMPONENTS 종류 PR이 소비하는 단방향 입력)
-- **작업 위치**: markup 워크트리(프로젝트 루트의 형제 디렉토리 `{메인 디렉토리}-markup`). 포트 3000 점유
+- **작업 위치**: markup 워크트리(`<레포>/.claude/worktrees/markup`). 포트 3000 점유
   - 진입 시 MARKUP이 만든다. base는 FOUNDATION PR 브랜치의 verify 종료 시점 tip이고, 그 PR이 이미 머지됐거나 FOUNDATION PR이 없으면 기본 브랜치다
   - 마크업을 띄울 최소 셋팅(빌드·스타일링 중 base에 없는 것만)은 stub·TODO로 넘기지 않고 진입 직후 끝낸다. PR에 안 간다
 
@@ -44,7 +44,7 @@ next:
 
 개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 [requirement 「컨벤션 소스 수집」](../requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)이 단일 출처.
 
-참조 자료가 갖춰지면 markup 워크트리로 이동하여 「마크업 구현·검사」로 진입한다.
+참조 자료가 갖춰지면 `EnterWorktree`에 markup 워크트리 경로를 줘 들어가 「마크업 구현·검사」로 진입한다.
 
 ## 마크업 구현·검사
 
