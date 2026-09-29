@@ -44,7 +44,7 @@
 
 ### 출처 명시 의무 — `TODO [AI_IMPL]`
 
-마커는 출처를 반드시 동반. 시점 단독 표현 금지.
+마커에는 출처를 붙인다. 시점 단독 표현 금지.
 
 - ❌ `// TODO [AI_IMPL]: IMPL 시점 토큰`
 - ✓ `// TODO [AI_IMPL]: 설명 — plan/{prN}/markup.md "{절명}"` 또는 `docs/...:{line}` 또는 `_fsd/.../{file}:{line}`

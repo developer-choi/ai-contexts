@@ -3,8 +3,8 @@ step: implement
 session: PR_{N}_IMPL
 scope: per-pr
 entry: >-
-  PR_{N}_PLAN의 realize-plan 종료 (필수) + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드 (필수)
-  + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료 (필수)
+  PR_{N}_PLAN의 realize-plan 종료 + (페이지 코드 포함 PR이면) MARKUP의 해당 페이지 코드
+  + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료
 model: Sonnet — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus
 next:
   - to: verify
@@ -38,7 +38,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 cwd 이동이 필요하면 SKILL.md 「워크트리 cwd 이동은 사용자 세션으로」를 따른다.
 
-realize-plan에서 구현이 사실상 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다(5.2.2의 세팅 PR처럼 Feature Implementer만 spawn하지 않는다). 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
+realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다(5.2.2의 세팅 PR처럼 Feature Implementer만 spawn하지 않는다). 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
 
 ---
 

@@ -92,7 +92,7 @@ stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관
 stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성과 중복되는 비표준 래퍼 prop을 만들기 전에 표준 속성을 직접 쓸 수 있는지 검토한다.**
 
 - 판단 기준: 도입하려는 prop이 사실상 표준 DOM 속성의 별칭인가?
-- 표준 속성 래퍼면 `ComponentProps<'element'>`를 extend해 해당 속성을 직접 노출(필요 시 필수 override)하는 쪽이 더 표준적이다.
+- 표준 속성 래퍼면 `ComponentProps<'element'>`를 extend해 해당 속성을 직접 노출(그 속성을 필수로 받아야 하면 필수로 override)하는 쪽이 더 표준적이다.
 
 ### 기존 린트/coding-standards 오류 확인 (채용과제)
 
