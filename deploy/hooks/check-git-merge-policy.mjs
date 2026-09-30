@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { allInFreeRepos, originRepoName, repoTier } from "./repo-tiers.mjs";
 import { findGitInvocations, invocationCwd } from "./git-command-parser.mjs";
@@ -62,6 +62,22 @@ const lacksSummary = (payload) => {
   return d.split("\n").filter((l) => l.trim()).length < MIN_SUMMARY_LINES;
 };
 
+// 머지로 들어갈 커밋이 주제별로 정리됐는지 본 흔적을 description에 한 줄 요구한다. 작업 중 쌓인
+// 「앞 커밋 문구를 고치는 커밋」이 그대로 보호 브랜치에 들어간 적이 있다(2026-09-30 AC, 승인 창에서 사용자가 거절).
+// 정리가 됐는지는 훅이 판정하지 못한다 — 막는 것은 커밋 목록을 안 보고 머지를 내는 것까지다.
+// 그래서 돌려보낼 때 들어갈 커밋 목록을 훅이 직접 뽑아 보여 준다.
+const TIDY_LINE = /^\s*커밋 정리:/m;
+const lacksTidyLine = (payload) => {
+  const input = payload.tool_input ?? {};
+  if (!DESCRIBED_TOOLS.has(payload.tool_name) || !("description" in input)) return false;
+  return !TIDY_LINE.test(typeof input.description === "string" ? input.description : "");
+};
+const MERGE_NEEDS_TIDY = (lists) =>
+  "머지 전에 들어갈 커밋을 정리하고, description에 `커밋 정리:`로 시작하는 줄로 그 결과를 적어 같은 명령을 다시 내세요. " +
+  "기준 — 주제 하나에 커밋 하나, 앞 커밋을 고치는 커밋이 없을 것, 중간 시행착오가 이력에 안 보일 것. " +
+  "합쳤으면 무엇을 무엇으로 합쳤는지, 이미 정리돼 있으면 그렇다고 적습니다.\n" +
+  lists.join("\n");
+
 // 판정 불가로 차단할 때의 안내. MERGE_MSG·MERGE_ASK와 분리한다 — 그 둘은 보호 브랜치를 건드린다고 판정된
 // 뒤의 안내이고, 여기서 걸린 명령은 아직 그걸 모르는 상태라 "경로를 통째로 적어 다시 실행하라"가 답이다.
 const UNRESOLVED_CWD_MSG = (cwd) =>
@@ -123,7 +139,7 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
     // 예외: 현재 보호 브랜치를 자기 upstream으로 따라잡는 `merge --ff-only`만 허용(동기화이지 결정이 아님).
     if (sub === "merge" && isUpstreamCatchUp(inv, gitOpts)) continue;
     if (sub === "merge") {
-      const merge = { repo: originRepoName(gitOpts.cwd), branch, source: mergeSources(inv.args) };
+      const merge = { repo: originRepoName(gitOpts.cwd), branch, source: mergeSources(inv.args), gitOpts };
       if (repoTier(gitOpts.cwd) === "pr-only") deny(MERGE_PR_ONLY(merge));
       merges.push(merge);
       continue;
@@ -134,11 +150,25 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
 
 // 서브에이전트는 ask()가 어차피 거부하고 메인에 넘기므로 요약을 요구하지 않는다.
 if (merges.length > 0 && !payload.agent_id && lacksSummary(payload)) deny(MERGE_NEEDS_SUMMARY);
+if (merges.length > 0 && !payload.agent_id && lacksTidyLine(payload)) deny(MERGE_NEEDS_TIDY(merges.map(incomingCommits)));
 if (merges.length > 0) ask(merges.map(MERGE_ASK).join(" / "));
 
 process.exit(0);
 
 // --- helpers ---
+
+// 머지로 보호 브랜치에 새로 들어갈 커밋 목록(오래된 것부터). 못 읽으면 그렇다고 적는다 — 목록은 안내일 뿐이라 막을 이유가 아니다.
+function incomingCommits({ repo, branch, source, gitOpts }) {
+  const head = `${repo || "(레포 이름 미확인)"}의 ${branch}에 ${source}이(가) 들이는 커밋:`;
+  if (source === "upstream" || source.includes(",")) return `${head} (목록을 못 뽑았습니다 — \`git log --oneline ${branch}..<브랜치>\`로 직접 보세요)`;
+  try {
+    // 인자로 넘긴다 — source는 명령 원문에서 온 글자라 셸 문자열에 넣으면 그대로 해석된다.
+    const log = execFileSync("git", ["log", "--reverse", "--oneline", `${branch}..${source}`], gitOpts).toString().trim();
+    return `${head}\n${log || "(없음)"}`;
+  } catch {
+    return `${head} (목록을 못 뽑았습니다 — \`git log --oneline ${branch}..${source}\`로 직접 보세요)`;
+  }
+}
 function stripRef(value) {
   return value.replace(/^refs\/heads\//, "");
 }

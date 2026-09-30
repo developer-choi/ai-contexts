@@ -1074,6 +1074,14 @@ async function withFreeRepoFixture(fn) {
           made[`${name}@${branch}`] = wt.replace(/\\/g, '/');
         }
       }
+      // 머지를 돌려보낼 때 훅이 뽑는 「들어갈 커밋 목록」을 재려고 feature 브랜치에 커밋 하나를 둔다.
+      if (name === 'ai-contexts') {
+        await runGit(['checkout', '-q', '-b', 'feature'], dir);
+        fs.writeFileSync(path.join(dir, 'b.txt'), 'b\n');
+        await runGit(['add', 'b.txt'], dir);
+        await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'tidy-probe', 'b.txt'], dir);
+        await runGit(['checkout', '-q', 'main'], dir);
+      }
       made[name] = dir.replace(/\\/g, '/');
     }));
     const notRepo = path.join(root, 'not-a-repo');
@@ -1245,7 +1253,29 @@ const freeRepoCases = (repos) => {
     `git -C ${gated} merge feature`,
     'ask',
     '내용 있는 줄 4줄이면 승인 창',
-    { description: '무엇: feature\n왜: 시험\n확인: 통과\n되돌리기: revert' },
+    { description: '무엇: feature\n왜: 시험\n확인: 통과\n커밋 정리: 1개' },
+  ],
+  // 들어갈 커밋을 정리했다는 줄이 없으면, 훅이 뽑은 커밋 목록과 함께 돌려보낸다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '요약이 넉넉해도 「커밋 정리:」 줄이 없으면 커밋 목록과 함께 돌려보낸다',
+    { description: '무엇: feature\n왜: 시험\n확인: 통과\n되돌리기: revert', reasonIncludes: ['커밋 정리:', 'tidy-probe'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge feature`,
+    'deny',
+    '요약이 짧으면 요약 요구가 먼저다',
+    { description: '커밋 정리: 1개', reasonIncludes: ['4줄'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge nosuch`,
+    'deny',
+    '커밋 목록을 못 뽑아도 돌려보내며 직접 보라고 안내한다',
+    { description: '무엇: x\n왜: 시험\n확인: 통과\n되돌리기: revert', reasonIncludes: ['목록을 못 뽑았습니다'] },
   ],
   [
     'check-git-merge-policy.mjs',
@@ -1671,7 +1701,7 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
 // sessionCwd를 주면 세션 폴더(페이로드 cwd)로 싣는다 — 명령이 옮겨 간 폴더와 세션 폴더의 등급이 다를 때를 잰다.
 // description을 안 주면 여러 줄 요약을 싣는다 — 승인 창 머지는 요약 없는 설명을 돌려보내기 때문이다.
 // description: null이면 키째 뺀다(필드가 없는 codex 페이로드).
-const MERGE_SUMMARY = '무엇: feature 브랜치\n왜: 시험\n확인: 테스트 통과\n되돌리기: revert';
+const MERGE_SUMMARY = '무엇: feature 브랜치\n왜: 시험\n확인: 테스트 통과\n되돌리기: revert\n커밋 정리: 1개, 이미 정리됨';
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
   runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [], sessionCwd, description = MERGE_SUMMARY } = {}]) => {
     const payload = {
