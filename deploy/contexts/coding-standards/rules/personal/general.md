@@ -13,8 +13,6 @@ tags: [file-folder-structure]
 - **빈 값 타입의 설명**: [advanced.md 「빈 값(Optional, Null)에 대한 주석 규칙」](../../principles/personal/typescript/advanced.md#빈-값optional-null에-대한-주석-규칙)
 - **eslint-disable**: [universal/general.md 「eslint-disable 금지」](../universal/general.md#eslint-disable-금지)의 예외 조건에 한함
 
-허용 주석은 `/* */` 블록 주석을 사용합니다.
-
 아래는 이유를 설명하더라도 주석으로 달지 않는다. 위 「지우면 깨지는 코드의 이유」에도 해당하면 그쪽을 따른다.
 
 - 여러 방법 중 이 방법을 고른 배경·대안 비교 → PR 본문이나 결정문에 적는다
