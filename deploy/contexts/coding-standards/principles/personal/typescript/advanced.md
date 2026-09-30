@@ -44,4 +44,4 @@ interface InquiryArticle {
 
 ## 빈 값(Optional, Null)에 대한 주석 규칙
 
-`?`, `null`, `undefined`가 포함된 타입 정의 시 어떤 상황에서 값이 비어있는지 반드시 주석으로 설명한다.
+`?`, `null`, `undefined`가 포함된 타입 정의 시 어떤 상황에서 값이 비어있는지 주석으로 설명한다.
