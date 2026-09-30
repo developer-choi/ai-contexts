@@ -17,13 +17,13 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 | 입력 | 필수 | 설명 |
 |------|------|------|
 | **리뷰 대상** | O | PR diff, 커밋, 파일 |
-| **coding-standards 목록** | X | 적용할 coding-standards 파일 경로 리스트. 없으면 [code-map.md](../../contexts/code-map.md)에서 직접 판단 |
+| **coding-standards 목록** | X | only-standards 모드에서 적용할 coding-standards 파일 경로 리스트 (마이그레이션 의도 보존). 다른 모드에서 넘어오면 리뷰어가 고른 문서에 더해 읽는다 |
 | **추가 컨벤션** | X | coding-standards 외 경로 (사내 컨벤션 등) |
 | **리뷰 모드** | X | default / advanced / only-standards (기본: default) |
 
 ## 출력
 
-이슈 목록. severity (Critical / Minor / Suggestion) 포함.
+맨 앞에 리뷰어가 실제로 Read한 기준 문서 경로 목록, 그 뒤에 이슈 목록. severity (Critical / Minor / Suggestion) 포함.
 
 - **advanced 모드에서 coding-standards 이슈가 있으면**: coding-standards 이슈만 반환하고 "coding-standards 미통과로 advanced 미실행" 안내. 호출자가 수정 후 재호출하면 다시 판단한다.
 
@@ -33,11 +33,13 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 ### 1. 컨텍스트 준비
 
-coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제외한 나머지를 건너뛴다** (호출자가 이미 스탠다드를 정했으므로 재선별 불필요). 3번은 리뷰 대상 도메인(Next.js 등) 기준이라 coding-standards 주입 여부와 무관하게 항상 실행한다 — only-standards 모드는 어차피 3단계(리뷰 수행)에서 자유 리뷰·외부 스킬 리뷰어를 실행하지 않으므로 좁은 스코프가 유지된다.
+리뷰어를 띄우는 쪽은 기준 문서를 골라 넘기지 않는다. 기준 문서(2번)는 **리뷰어가 diff를 보고 직접 고른다**.
+
+호출 프롬프트에 리뷰 초점·판정 기준·문서 목록이 적혀 와도 2번을 건너뛰거나 좁히지 않는다. 넘어온 문서는 고른 문서와 함께 Read해 대조하고 보고 맨 앞 목록에 같이 올린다. 초점·판정 기준·문서 목록 어느 것도 선별을 좁히는 데 쓰지 않는다. 예외는 only-standards 모드에서 coding-standards 목록이 넘어온 경우다 — 이때는 2번 대신 그 목록을 쓴다. 목록이 없으면 2번을 밟는다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
-2. [code-map.md](../../contexts/code-map.md)의 탐색 절차를 따라 관련 coding-standards rules·principles + MP 구현 패턴을 선별·로드한다
-3. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool로 호출. 서브에이전트에 넘길 때는 메인이 형제 스킬 `../<name>/SKILL.md`를 읽어 그 내용을 전달한다). 우리 `coding-standards/`와 권고가 다른 항목이 있으면 사용자에게 보고한다 — 어느 쪽을 따를지 사용자가 결정한다.
+2. **리뷰어가** [code-map.md](../../contexts/code-map.md) 「탐색 절차」의 후보 선별과 전체 Read까지 밟아(reference.md 인용 게이트는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
+3. 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 추가 컨텍스트로 로드한다 (메인은 Skill tool로 호출. 서브에이전트에 넘길 때는 메인이 형제 스킬 `../<name>/SKILL.md`를 읽어 그 내용을 전달한다). 외부 스킬 권고가 리뷰어가 고른 기준 문서와 다르면 리뷰어가 보고에 적고, 메인이 사용자에게 올린다 — 어느 쪽을 따를지 사용자가 결정한다. 3번은 리뷰 대상 도메인(Next.js 등) 기준이라 모드와 무관하게 실행한다 — only-standards 모드는 3단계(리뷰 수행)에서 외부 스킬 리뷰어를 띄우지 않으므로 좁은 스코프가 유지된다.
 
    | 리뷰 대상 | 외부 스킬 |
    |---|---|
@@ -69,9 +71,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제
 
 #### 추가된 주석 전수 대조 (모드 공통)
 
-적용할 기준에 주석을 허용 목록으로 묶는 규칙(목록 밖 주석 금지)이 있으면, 리뷰 대상 diff를 `node {{skill_dir}}/scripts/added-comments.mjs`에 넣어(stdin 또는 파일 인자) 새로 추가된 주석 후보를 전부 뽑는다. 스크립트는 메인이 돌린다 — advanced 모드면 그 출력을 주석 규칙을 맡은 Coding-Standards Reviewer에게 넘기고, 리뷰어는 판정표만 채운다.
-
-후보마다 한 행씩 판정표를 만든다. 근거인 허용 목록의 파일 경로:줄은 표 위에 한 번 적는다.
+메인은 리뷰 대상 diff를 `node {{skill_dir}}/scripts/added-comments.mjs`에 넣어(stdin 또는 파일 인자) 새로 추가된 주석 후보를 전부 뽑고, 그 출력을 모든 리뷰어에게 넘긴다. 주석을 허용 목록으로 묶는 규칙(목록 밖 주석 금지)을 고른 리뷰어가 후보마다 한 행씩 판정표를 만든다. 근거인 허용 목록의 파일 경로:줄은 표 위에 한 번 적는다.
 
 | # | 위치 | 줄 | 판정 | 조치 |
 |---|---|---|---|---|
@@ -92,7 +92,7 @@ coding-standards 목록이 주입된 경우, **외부 스킬 선별(3번)을 제
 
 Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
-- **Coding-Standards Reviewer ×N**: coding-standards 영역별로 분할하여 병렬 리뷰
+- **Coding-Standards Reviewer ×N**: code-map.md 「탐색 절차」가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
 - **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
@@ -100,11 +100,13 @@ Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지
 
 #### only-standards 모드
 
-coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer 미실행. 호출자는 `--coding-standards` 경로 명시 권고 (의도 보존).
+coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer·External-Skill Reviewer 미실행. 호출자는 `--coding-standards` 경로 명시 권고 (의도 보존).
 
 용도: 신규 코드 작성 전 기존 코드를 새 스탠다드에 맞춰 정렬하는 마이그레이션. 자유 리뷰가 끼면 범위가 흐려지므로 분리.
 
 ### 4. 이슈 목록 산출
+
+보고 맨 앞에 리뷰어가 실제로 Read한 기준 문서 경로를 나열한다. MP 베스트 프랙티스 파일 아래에는 그 파일에서 따라간 `코드:` 경로를 들여 적는다. advanced 모드면 Lead가 리뷰어별 목록을 합친다.
 
 컨벤션 기반 지적에는 근거가 되는 컨벤션 파일 경로와 라인번호를 함께 명시한다.
 

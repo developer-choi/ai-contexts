@@ -60,13 +60,13 @@ next:
 
 ## Step 6.2. 리뷰 파이프라인
 
-Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차에서 관련 coding-standards·구현 패턴을 선별하고, `/code-review`를 advanced 모드로 호출한다.
+Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md#1-컨텍스트-준비)가 소유한다.
 
 ```
 code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
 
-- code-review에 전달하는 입력: PR diff, coding-standards 목록, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
+- code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
 - code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
 - 수정은 implement의 Implementer 흐름이 수행한다 (마크업 수정이면 그 모드의 진실검사 기준 — [modes.md](../conventions/modes.md) 매트릭스)
 
