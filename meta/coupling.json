@@ -159,6 +159,16 @@
         "deploy/skills/pre-exit/augmentations/workflow.md"
       ],
       "note": "회고 보강 「담당 step 절차 실행 감사」가 `steps.mjs start <세션>`의 출력 라벨 「이 세션의 step」을 글자 그대로 인용해 진입 step 범위를 읽는다. 세션 이름을 못 얻을 때의 대안은 `workflow/steps/` 경로다. 단방향 cross-ref라 steps.mjs 쪽에는 이 인용을 알릴 자리가 없다. 그래서 start 출력의 라벨·서브커맨드 이름·세션 이름 체계나 steps 폴더 위치를 바꾸면 보강 문구도 함께 고친다. 안 고치면 회고가 없는 라벨을 찾다가 step 범위를 기억으로 채우고, 그 누락은 감사 결과가 비어 보이는 것으로만 드러난다."
+    },
+    {
+      "name": "requirement-review 회고 재료 — review-material 출력·파일 패턴 ↔ 회고 보강의 인용",
+      "files": [
+        "deploy/skills/pre-exit/scripts/session-state.mjs",
+        "deploy/skills/pre-exit/augmentations/requirement-review.md",
+        "deploy/skills/workflow/requirement-review/free-review.md",
+        "deploy/skills/workflow/requirement-review/SKILL.md"
+      ],
+      "note": "회고 보강이 `review-material`의 절 라벨(「적용한 체크리스트」·「page·global 이력」·「자유 검토 보고」)을 글자 그대로 인용해 재료를 읽는다. 스크립트는 requirement-review 쪽 파일 이름을 패턴으로 박아 둔다 — `RR_SKILL`(스킬 본문 경로, 메뉴 판정의 read와 한 벌)·`RR_CHECKLIST`(모드별 `checklist/`와 `page-type/`)·`RR_FREE_REVIEW`(자유 검토 문서 이름, 옛 이름 retrospect.md 포함)·`RR_PAGE`(plan 산출물 이름). requirement-review는 이 회고를 모르는 단방향이라 그쪽에는 알릴 자리가 없다. 그래서 스킬 본문·자유 검토 문서·체크리스트 폴더(새 체크리스트 폴더를 더할 때 포함)·page 산출물의 이름이나 위치를 바꾸거나 출력 라벨을 바꾸면 스크립트 패턴과 보강 문구를 함께 고친다. 안 고치면 재료가 「없음」으로 나와 회고가 건너뛰거나 메뉴에서 항목이 사라지고, 그 사실은 아무 데도 안 남는다."
     }
   ]
 }

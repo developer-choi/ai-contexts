@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 세션 마감 전에 훑어야 할 상태들 — 사용자 발화 전수, 압축 스냅샷, 보강 매칭 근거,
-// squash 전후 동일성, 회고 표의 빈칸, 읽고 안 쓴 문서, 시간과 지시 순서.
+// squash 전후 동일성, 회고 표의 빈칸, 읽고 안 쓴 문서, 시간과 지시 순서, requirement-review 회고 재료.
 //
 // 전부 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
 //
@@ -29,6 +29,9 @@
 //   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
 //     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
+//   review-material — requirement-review 보강의 재료(적용한 체크리스트·page 이력·자유 검토 보고·
+//     사용자 발화). 체크리스트는 서브에이전트가 읽어 메인 대화에 안 남고(실측 2026-09-07 헬로디지털
+//     BG: 메인 Read 0건, 서브에이전트 5건), page는 도중에 옮겨져 plan/ 파일로는 이력이 안 이어진다.
 //
 // 판단은 안 한다 — 어느 커밋이 한 작업인지, 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
 // menu는 예외다: 「이 세션에 해당하는가」까지 낸다. 다만 무엇을 돌릴지는 사용자가 고른다.
@@ -41,6 +44,7 @@
 //   node <이 파일> changed --repo <레포 경로> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
 //   node <이 파일> read-files --session <session_id>
+//   node <이 파일> review-material --session <session_id>
 //   node <이 파일> read-usage --session <session_id> --from <판정 json>
 //   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
 //   node <이 파일> timeline --session <session_id> [--notes <요약 json>] [--clip <자를 글자수>] [--html]
@@ -304,12 +308,19 @@ function collapseUnresolved(keys) {
 //
 //   always — 조건 없이 메뉴에 오른다
 //   timeline — 시간·순서 표의 자체 판정(SKIP_TURNS·SKIP_MS)을 쓴다
-//   file·slash — 둘 중 하나만 맞아도 해당    cwd — 있으면 먼저 통과해야 하는 관문
+//   file·slash·read — 하나만 맞아도 해당    cwd — 있으면 먼저 통과해야 하는 관문
+//   read — 세션이 연 프롬프트 문서(collectReads 키). 다른 스킬 안에서 불려 슬래시 기록이 없고
+//     산출물이 커밋되거나 git 밖에 있어 file로도 안 잡히는 스킬을 여기로 잡는다. 그 문서를 이번
+//     세션이 고쳤으면 빼고 본다 — 스킬을 손보러 연 세션은 그 스킬을 돈 세션이 아니다
 // 순서는 SKILL.md 「회고 항목」 표와 같다 — 그 표의 순서가 실행 순서라, 메뉴를 다른 순서로 내면
 // 고르는 쪽이 무엇이 무엇에 흘러 들어가는지 못 본다.
+// requirement-review 스킬 본문. 메뉴 판정(RETRO_ITEMS의 read)과 review-material의 발화 창 시작이 같이 쓴다.
+const RR_SKILL = /workflow\/requirement-review\/SKILL\.md$/;
+
 const RETRO_ITEMS = [
   { key: 'timeline', when: 'timeline' },
   { key: 'workflow', file: /(^|\/)plan\/pr\d+\//, slash: [/^\/workflow$/] },
+  { key: 'requirement-review', read: [RR_SKILL] },
   { key: 'digest', file: /(^|\/)knowledge\//, slash: [/^\/digest$/] },
   { key: 'write-refine', slash: [/^\/write-refine$/] },
   { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
@@ -693,6 +704,18 @@ if (command === 'menu') {
   // 없는 채로 낸다 — 여기서 죽으면 파일·cwd로 걸리는 항목까지 함께 못 내게 된다.
   const file = session ? findTranscript(session) : null;
   let slashes = null;
+  // 연 문서는 경로마다 git을 불러 느리다 — read 항목이 cwd 관문을 넘어 실제로 판정될 때 한 번만 푼다.
+  let readDocsCache;
+  const readDocsOf = () => {
+    if (readDocsCache === undefined) {
+      if (!file) readDocsCache = null;
+      else {
+        const { reads, touched } = collectReads(file);
+        readDocsCache = [...reads.keys()].filter((k) => !touched.has(k));
+      }
+    }
+    return readDocsCache;
+  };
   let timelineLine = 'timeline  미확인  transcript 없음 — 이 항목은 세션이 판단한다';
   if (file) {
     const { turns } = collectTurns(file);
@@ -719,9 +742,12 @@ if (command === 'menu') {
     }
     const hitFile = item.file && changedFiles?.filter((f) => item.file.test(f));
     const hitSlash = item.slash && slashes?.filter((s) => item.slash.some((re) => re.test(s)));
+    const readDocs = item.read ? readDocsOf() : null;
+    const hitRead = item.read && readDocs?.filter((d) => item.read.some((re) => re.test(d)));
     const why = [];
     if (hitFile?.length) why.push(`변경 ${hitFile.slice(0, 3).join(', ')}`);
     if (hitSlash?.length) why.push(`호출 ${[...new Set(hitSlash)].join(', ')}`);
+    if (hitRead?.length) why.push(`읽음 ${hitRead.slice(0, 3).join(', ')}`);
     if (why.length) {
       lines.push(`${item.key}  해당  ${why.join(' / ')}`);
       continue;
@@ -730,7 +756,7 @@ if (command === 'menu') {
     // 안 걸린 것으로 보고된다.
     const missing = [];
     if (item.file && changedFiles === null) missing.push(`git 실패(${out.error})`);
-    if (item.slash && slashes === null) missing.push('transcript 없음');
+    if ((item.slash && slashes === null) || (item.read && readDocs === null)) missing.push('transcript 없음');
     if (!missing.length) {
       lines.push(`${item.key}  해당없음`);
       continue;
@@ -740,6 +766,7 @@ if (command === 'menu') {
     const checked = [];
     if (item.file && changedFiles !== null) checked.push('변경 파일에는 안 걸림');
     if (item.slash && slashes !== null) checked.push('슬래시 호출에는 안 걸림');
+    if (item.read && readDocs !== null) checked.push('연 문서에는 안 걸림');
     lines.push(`${item.key}  미확인  ${missing.join(', ')}${checked.length ? ` (${checked.join(', ')})` : ''}`);
   }
 
@@ -970,6 +997,176 @@ if (command === 'read-files') {
     console.log(`  ${p}${marks ? `  (${marks})` : ''}`);
   }
   console.log('\n한 세션의 「안 씀」은 신호가 아니라 눈금 하나다 — 그 자리에서 "쪼개라"고 결론내지 않는다.');
+  process.exit(0);
+}
+
+// ---------------------------------------------------------------- review-material
+
+// 서브에이전트 기록은 메인 jsonl에 안 섞이고 옆 폴더 `<세션 id>/subagents/*.jsonl`에 따로 쌓인다.
+// 메인만 읽으면 서브에이전트에게 맡긴 읽기가 통째로 안 보인다 — requirement-review는 체크리스트
+// 대조를 critic 서브에이전트에 맡기므로 메인에는 체크리스트 Read가 0건으로 남는다.
+function sessionFiles(file) {
+  const dir = path.join(file.replace(/\.jsonl$/, ''), 'subagents');
+  const subs = fs.existsSync(dir)
+    ? fs.readdirSync(dir).filter((f) => f.endsWith('.jsonl')).sort().map((f) => ({ file: path.join(dir, f), who: f.replace(/\.jsonl$/, '') }))
+    : [];
+  return [{ file, who: '메인' }, ...subs];
+}
+
+function jsonlEntries(file) {
+  const out = [];
+  fs.readFileSync(file, 'utf8').split('\n').forEach((line, i) => {
+    if (!line) return;
+    try {
+      out.push({ entry: JSON.parse(line), line: i + 1 });
+    } catch {
+      // 쓰는 중이라 끊긴 마지막 줄
+    }
+  });
+  return out;
+}
+
+// 적용한 체크리스트는 모드별 `checklist/`와 페이지 유형별 `page-type/` 두 곳에 산다.
+const RR_CHECKLIST = /requirement-review\/(.+\/checklist|page-type)\/[^/]+\.md$/;
+// retrospect.md는 자유 검토 문서의 옛 이름이다 — 이름이 바뀌기 전 회차의 기록도 재료로 읽는다.
+const RR_FREE_REVIEW = /requirement-review\/(free-review|retrospect)\.md$/;
+// page는 `background/consumable/page-{슬러그}.md`로 시작해 `pr{N}/consumable/page.md`로 옮겨진다.
+const RR_PAGE = /(^|\/)plan\/(.+\/)?(page(-[^/]+)?|global)\.md$/;
+const RR_MOVE = /(^|[;&|\n]\s*)(git\s+(-C\s+\S+\s+)?)?mv\s/;
+const RR_PAGE_WORD = /(^|[/\s"'])page(-[^/\s"']+)?\.md/;
+
+// 이력은 한 줄 요약이라 clip(앞뒤 보존)과 달리 앞만 남긴다 — 수십 건이 이어져 전문을 실으면
+// 체크리스트 대조에 쓸 순서가 본문에 묻힌다. 전문이 필요하면 적힌 줄 번호로 transcript를 연다.
+const MATERIAL_CLIP = 240;
+const shortClip = (text) => {
+  const flat = String(text ?? '').replace(/\s+/g, ' ').trim();
+  return flat.length > MATERIAL_CLIP ? `${flat.slice(0, MATERIAL_CLIP)}… (총 ${flat.length}자)` : flat;
+};
+const planRel = (p) => p.replace(/^.*?\/plan\//, 'plan/');
+const normPath = (p) => String(p ?? '').replaceAll('\\', '/');
+// BG는 여러 날에 걸쳐 돌아 시각만 적으면 「체크리스트를 page보다 먼저 읽었나」가 안 읽힌다. 날짜를 붙인다.
+const stamp = (at) =>
+  at && !Number.isNaN(Date.parse(at)) ? new Date(Date.parse(at) + KST_OFFSET_MS).toISOString().slice(5, 16).replace('T', ' ') : '--:--';
+
+function noteChecklist(checklists, norm, at, who) {
+  const key = sourcePath(norm);
+  const seen = checklists.get(key) ?? { at, who: new Set() };
+  if (String(at) < String(seen.at)) seen.at = at;
+  seen.who.add(who);
+  checklists.set(key, seen);
+}
+
+if (command === 'review-material') {
+  const session = optOf('session');
+  const file = session ? findTranscript(session) : null;
+  if (!file) {
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session ?? '<session_id>'}.jsonl 없음).`);
+    console.error('재료를 기억으로 채우지 않는다 — 못 뽑았다는 사실을 보고하고 requirement-review 보강을 건너뛴다.');
+    process.exit(1);
+  }
+  const files = sessionFiles(file);
+  const mainEntries = jsonlEntries(file);
+
+  const checklists = new Map(); // 원본 경로 → { at, who: Set }
+  const edited = new Set(); // 이번 세션이 고친 requirement-review 문서 — 읽기가 적용이 아니라 편집 준비일 수 있다
+  const pageLog = [];
+  let rrStart = null;
+  for (const { file: f, who } of files) {
+    for (const { entry, line } of f === file ? mainEntries : jsonlEntries(f)) {
+      const content = entry.message?.content;
+      if (!Array.isArray(content)) continue;
+      const where = `${who} ${line}줄`;
+      for (const block of content) {
+        if (block.type !== 'tool_use') continue;
+        if (block.name === 'Bash') {
+          const cmd = String(block.input?.command ?? '');
+          for (const norm of bashReads(cmd, entry.cwd)) if (RR_CHECKLIST.test(norm)) noteChecklist(checklists, norm, entry.timestamp, who);
+          if (RR_MOVE.test(cmd) && RR_PAGE_WORD.test(cmd)) pageLog.push({ at: entry.timestamp, where, kind: '옮김', path: '(명령)', text: shortClip(cmd) });
+          continue;
+        }
+        if (!block.input?.file_path) continue;
+        const norm = normPath(block.input.file_path);
+        if (block.name === 'Read') {
+          if (RR_CHECKLIST.test(norm)) noteChecklist(checklists, norm, entry.timestamp, who);
+          if (who === '메인' && RR_SKILL.test(norm) && !rrStart) rrStart = entry.timestamp;
+          continue;
+        }
+        if (block.name !== 'Write' && block.name !== 'Edit') continue;
+        if (RR_CHECKLIST.test(norm) || RR_SKILL.test(norm)) edited.add(sourcePath(norm));
+        if (!RR_PAGE.test(norm)) continue;
+        const text = block.name === 'Write' ? block.input.content : block.input.new_string;
+        // 지우기만 한 편집은 new_string이 비어 무엇이 빠졌는지 안 보인다 — 지운 쪽을 싣는다.
+        const shown = text || (block.name === 'Edit' && block.input.old_string ? `(지움) ${block.input.old_string}` : '');
+        pageLog.push({ at: entry.timestamp, where, kind: block.name, path: planRel(norm), text: shortClip(shown), size: String(text ?? '').length });
+      }
+    }
+  }
+
+  // 자유 검토 보고 — 메인이 그 문서를 열 때마다 창을 열고, 다음 사용자 발화에서 닫는다.
+  // 창 안에서는 AI가 한 말과 plan/ 산출물에 쓴 본문만 담는다.
+  const freeReview = [];
+  let freeOpen = false;
+  let freeEnd = null;
+  for (const { entry, line } of mainEntries) {
+    if (freeOpen) {
+      const raw = rawUserText(entry);
+      // 도는 중에 큐로 들어와 턴에 삼켜진 사용자 메시지도 발화다(queuedTurn 참고).
+      const queued = entry.type === 'queue-operation' && entry.operation === 'remove' && entry.reason === 'absorbed_mid_turn' && typedText(String(entry.content ?? ''));
+      if ((raw && typedText(raw)) || queued) freeOpen = false;
+    }
+    const content = entry.message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const block of content) {
+      if (block.type === 'tool_use' && block.name === 'Read' && RR_FREE_REVIEW.test(normPath(block.input?.file_path))) {
+        freeOpen = true;
+        continue;
+      }
+      if (!freeOpen || entry.type !== 'assistant' || entry.isSidechain) continue;
+      if (block.type === 'text' && block.text.trim()) freeReview.push({ line, head: '말', body: block.text.trim() });
+      if (block.type === 'tool_use' && (block.name === 'Write' || block.name === 'Edit') && /\/plan\//.test(normPath(block.input?.file_path))) {
+        const body = block.name === 'Write' ? block.input.content : block.input.new_string;
+        if (body) freeReview.push({ line, head: `${block.name} ${planRel(normPath(block.input.file_path))}`, body });
+      }
+      freeEnd = entry.timestamp;
+    }
+  }
+
+  console.log(`[requirement-review 회고 재료] ${file}`);
+  console.log(`  서브에이전트 기록 ${files.length - 1}개를 함께 읽었다.`);
+  if (edited.size) console.log(`  이 세션은 requirement-review 문서를 고쳤다 — 아래 읽기 중 일부는 적용이 아니라 편집 준비일 수 있다: ${[...edited].join(', ')}`);
+
+  console.log(`\n## 적용한 체크리스트 ${checklists.size}건`);
+  if (!checklists.size) console.log('  없음 — 체크리스트를 연 기록이 없다.');
+  for (const [key, { at, who }] of [...checklists].sort((a, b) => String(a[1].at).localeCompare(String(b[1].at)))) {
+    console.log(`  ${stamp(at)}  ${key}  (${[...who].join(', ')})${edited.has(key) ? '  [이 세션이 고침]' : ''}`);
+  }
+
+  pageLog.sort((a, b) => String(a.at).localeCompare(String(b.at)));
+  console.log(`\n## page·global 이력 ${pageLog.length}건`);
+  if (!pageLog.length) console.log('  없음');
+  for (const { at, where, kind, path: p, text, size } of pageLog) {
+    console.log(`  ${stamp(at)}  ${kind} ${p}${kind === 'Write' ? ` (${size}자)` : ''}  [${where}]`);
+    if (text) console.log(`      ${text}`);
+  }
+
+  console.log(`\n## 자유 검토 보고 ${freeReview.length}건`);
+  if (!freeReview.length) console.log('  없음 — 자유 검토 문서를 연 기록이 없거나, 연 뒤 사용자 발화 전까지 낸 것이 없다.');
+  for (const { line, head, body } of freeReview) {
+    // 자르지 않는다 — 발견이 본문 곳곳에 흩어져 있어 앞뒤만 남기면 가운데 발견이 통째로 빠진다.
+    console.log(`### ${head}  [메인 ${line}줄]`);
+    console.log(body);
+    console.log('');
+  }
+
+  // 발화 창 — requirement-review를 연 때부터 마지막 재료까지. 창 밖 발화는 다른 작업의 것이다.
+  const ends = [freeEnd, pageLog.at(-1)?.at].filter(Boolean).sort();
+  const from = rrStart ?? pageLog[0]?.at ?? null;
+  const to = ends.at(-1) ?? null;
+  const { turns } = collectTurns(file);
+  const inWindow = from && to ? turns.filter(({ at }) => String(at) >= String(from) && String(at) <= String(to)) : [];
+  console.log(`\n## 그 사이의 사용자 발화 ${inWindow.length}건${from && to ? ` (${stamp(from)}~${stamp(to)})` : ''}`);
+  if (!from || !to) console.log('  창을 못 정했다 — requirement-review를 연 기록이나 재료가 없다.');
+  inWindow.forEach(({ at, text }, i) => console.log(`### ${i + 1}. ${stamp(at)}\n${clip(text)}\n`));
   process.exit(0);
 }
 

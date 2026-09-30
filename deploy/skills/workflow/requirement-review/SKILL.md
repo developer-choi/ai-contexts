@@ -90,6 +90,6 @@ planning과 design이 모두 켜져 있으면, 동일 페이지에서 planning �
 
 ---
 
-## 회고
+## 자유 검토
 
-산출물 작성이 끝난 뒤, [retrospect.md](./retrospect.md)의 절차를 수행한다.
+산출물 작성이 끝난 뒤, [free-review.md](./free-review.md)의 절차를 수행한다.

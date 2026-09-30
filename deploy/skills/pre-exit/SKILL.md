@@ -23,6 +23,7 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 |---|---|---|
 | 시간·순서 표 | 무엇이 오래 걸렸고 지시가 어떤 순서로 왔는지 한 표로 만들어 브라우저로 연다 | [timeline.md](timeline.md) |
 | workflow 보강 | 안 따라간 cross-ref와 첫 요청을 `plan/pr{N}/**` 산출물에 맞대 누락을 건진다 | [augmentations/workflow.md](augmentations/workflow.md) |
+| requirement-review 보강 | 적용한 체크리스트가 이번 요구사항 리뷰에서 무엇을 놓쳤는지 재료로 대조해 체크리스트 개선안을 낸다 | [augmentations/requirement-review.md](augmentations/requirement-review.md) |
 | digest 보강 | 저장·해설·버림 판정이 번복된 자리를 모은다 | [augmentations/digest.md](augmentations/digest.md) |
 | write-refine 보강 | 채점기를 돌리고 톤 교정 사례·놓친 결함·과교정을 회수한다 | [augmentations/write-refine.md](augmentations/write-refine.md) |
 | routine 보강 | 루틴 데이터를 스크립트 우회로 다뤘는지, 그날 루틴을 굴린 방식 자체가 어땠는지 본다 | [augmentations/routine.md](augmentations/routine.md) |
