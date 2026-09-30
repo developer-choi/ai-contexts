@@ -16,9 +16,7 @@ export type NumericString = `${number}`;
 
 **심화: 특정 자릿수 숫자 문자열 (예: 2자리)**
 ```typescript
-// 1~9 유니온 정의
 type OneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
-// 0~9 유니온 정의
 type ZeroToNine = 0 | OneToNine;
 
 /**
@@ -39,7 +37,7 @@ interface InquiryArticle {
 
 // ✅ Explicit & Intuitive
 interface InquiryArticle {
-  // 빈 문자열: 서버에서 값이 없음을 빈 문자열로 응답하는 경우
+  /* 빈 문자열: 서버에서 값이 없음을 빈 문자열로 응답하는 경우 */
   img1: '' | string;
 }
 ```
