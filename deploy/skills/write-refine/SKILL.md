@@ -1,6 +1,6 @@
 ---
 name: write-refine
-description: write-init이 만든 패키지(frontmatter + 본문 단일 .md)나 레포 문서의 톤·표현·분량을 다듬는다. 같은 세션에서 이어 호출해도 되고, 히스토리가 무거우면 `/compact` 후 호출한다. 사실 검증은 안 함 — 표현만 다룬다.
+description: write-init이 만든 패키지(frontmatter + 본문 단일 .md)나 레포 문서의 톤·표현·분량을 다듬는다. 사실 검증은 안 함 — 표현만 다룬다.
 argument-hint: <package-file-path>
 ---
 
@@ -130,6 +130,6 @@ frontmatter에서 컨텍스트(독자·목적·분량·`rendering_env`·`placeho
 
 ## write-init과의 관계
 
-init과 같은 세션에서 이어 다듬어도 된다. 진입 전 `/compact`를 권장한다 — AI가 밀다가 기각당한 초안 문장이 히스토리에 남아 있으면 표현 개선을 핑계로 되살아난다.
+init과 같은 세션에서 이어 다듬어도 된다.
 
 **컨텍스트가 어긋나면 frontmatter가 정본이다.** 대화·compact 요약에 남은 잔재가 frontmatter와 다르면 frontmatter를 따른다.

@@ -29,7 +29,7 @@ WRITING은 코드 워크트리가 필요 없고 main repo의 공유 `/plan/`만 
 
 ## 장기세션 재사용
 
-WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장기세션 하나로 유지하며 여러 PR을 이어 처리할 수 있다(컨텍스트가 커지면 `/compact`).
+WRITING_IDEATOR·WRITING_REFINER는 PR마다 새로 열 필요 없이 각각 장기세션 하나로 유지하며 여러 PR을 이어 처리할 수 있다.
 
 단, 최초 진입은 `/workflow WRITING_IDEATOR <모드>` / `/workflow WRITING_REFINER <모드>`로 한다. `/write-refine <path>` 직접 호출로 시작하지 않는다.
 
