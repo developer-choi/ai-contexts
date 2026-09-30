@@ -8,7 +8,7 @@ argument-hint: <type> [<subtype>]
 
 ## 목적
 
-글의 내용을 AI와 사용자가 함께 써 나간다.
+글의 내용을 AI와 사용자가 함께 확정해 write-refine에 넘긴다.
 
 ## 입력
 
@@ -99,7 +99,7 @@ argument-hint: <type> [<subtype>]
 
 사용자가 거부한 표현은 그때마다 `rejected`에 적는다. 다음 세션의 write-refine이 그 거부를 알 유일한 통로다.
 
-## 산출 후 1회 안내
+### 7. write-refine으로 넘기기
 
 사용자 채움이 끝나면 아래를 한 번만 안내하고 끝낸다.
 
