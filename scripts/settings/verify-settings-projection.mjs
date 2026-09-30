@@ -129,6 +129,15 @@ function main() {
   check(claudePre.some((h) => h.matcher === 'Agent' && h.file === 'check-company-analysis-agent.mjs'),
     'claude: check-company-analysis-agent가 Agent 매처로 등록됨');
 
+  // workflow 팀원 종료를 막는 두 훅. 매처가 어긋나면 등록된 채로 한 번도 안 걸려 팀원이 조용히
+  // 끝난다. 두 도구 다 codex에 없어, 거기 실리면 '*' 매처로 모든 도구 호출에 헛돈다.
+  check(claudePre.some((h) => h.matcher === 'TaskStop' && h.file === 'check-agent-stop-policy.mjs'),
+    'claude: check-agent-stop-policy가 TaskStop 매처로 등록됨');
+  check(claudePre.some((h) => h.matcher === 'SendMessage' && h.file === 'check-team-message-policy.mjs'),
+    'claude: check-team-message-policy가 SendMessage 매처로 등록됨');
+  check(!codex.some((h) => h.file === 'check-agent-stop-policy.mjs' || h.file === 'check-team-message-policy.mjs'),
+    'codex: 에이전트 종료 훅 두 개 미등록');
+
   // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
   const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
   check(claudeCompact.some((h) => h.matcher === 'manual' && h.file === 'snapshot-precompact-transcript.mjs')

@@ -1,6 +1,14 @@
 {
   "groups": [
     {
+      "name": "workflow 팀원 이름 접두사 — 스킬 ↔ 훅",
+      "files": [
+        "deploy/skills/workflow/SKILL.md",
+        "deploy/hooks/hook-utils.mjs"
+      ],
+      "note": "workflow 팀원 이름 접두사(workflow-)가 두 곳에 산다 — workflow SKILL.md 「진행 중」과 hook-utils의 isWorkflowTeammate. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 한쪽만 바꾸면 팀원 이름이 훅 판정에서 빠져 종료 금지가 조용히 풀린다. 바꿀 때는 둘 다 고치고 verify-hook-policies 케이스도 맞춘다."
+    },
+    {
       "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅",
       "files": [
         "deploy/skills/write-init/SKILL.md",

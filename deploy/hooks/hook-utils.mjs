@@ -88,6 +88,18 @@ export function prose(src) {
     .replace(/`[^`\n]*`/g, " ");
 }
 
+// workflow가 띄우는 팀원은 이름이 `workflow-`로 시작한다([진행 중](deploy/skills/workflow/SKILL.md#진행-중)).
+// 종료를 막는 두 훅과 멈춤 안내가 이 판정을 함께 쓴다 — 한쪽만 고치면 막는 대상과 안내가 어긋난다.
+// 팀원은 `이름`·`이름@팀`·내부 ID `a이름-해시16자리`로 불린다. TaskStop은 앞의 둘만, SendMessage는
+// 셋 다 받는다(2026-09-30 실측). SendMessage는 ListAgents의 ` [ref]`를 덧붙인 것도 받는다.
+// 도구가 공백·대소문자를 어떻게 맞춰 찾는지는 안 쟀다 — 모르는 쪽은 막는 쪽으로 푼다.
+export function isWorkflowTeammate(target) {
+  if (typeof target !== "string") return false;
+  const name = target.trim().toLowerCase().replace(/\s*\[[^\]]*\]$/, "").split("@")[0];
+  const internal = name.match(/^a(.+)-[0-9a-f]{16}$/);
+  return (internal ? internal[1] : name).startsWith("workflow-");
+}
+
 export function addContext(context, hookEventName = "UserPromptSubmit") {
   process.stdout.write(
     JSON.stringify({

@@ -685,6 +685,87 @@ const WAIT_CASES = [
 // 파일도 명령도 아닌 payload를 보는 hook들. 도구 이름과 인자 모양만으로 판정이 끝난다.
 // [hook 파일, payload, 기대 판정, 설명]
 const TOOL_CASES = [
+  // workflow 팀원(이름이 workflow-) 종료 금지. 팀원은 이름·이름@팀·내부 ID(a이름-해시)로 불린다.
+  // 배경 셸과 workflow 밖의 팀원은 메인이 끝낸다.
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: 'workflow-reviewer' } },
+    'deny',
+    'workflow 팀원 이름 → 차단',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: 'workflow-reviewer@session-661cd207' } },
+    'deny',
+    'workflow 팀원 이름@팀 → 차단',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: ' Workflow-Reviewer' } },
+    'deny',
+    '앞 공백·대문자가 섞여도 차단',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: '', shell_id: 'workflow-reviewer' } },
+    'deny',
+    'task_id가 비면 shell_id를 본다',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { shell_id: 'workflow-reviewer' } },
+    'deny',
+    '옛 이름 shell_id로 와도 차단',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: 'bz81k2m4q' } },
+    'pass',
+    '배경 셸 ID는 통과',
+  ],
+  [
+    'check-agent-stop-policy.mjs',
+    { tool_name: 'TaskStop', tool_input: { task_id: 'reviewer@session-661cd207' } },
+    'pass',
+    'workflow 밖 팀원은 통과',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'workflow-reviewer', message: { type: 'shutdown_request' } } },
+    'deny',
+    'workflow 팀원에게 shutdown_request → 차단',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'aworkflow-reviewer-9d5baa3d9d36513b', message: { type: 'shutdown_request' } } },
+    'deny',
+    '내부 ID로 보내도 차단',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'workflow-reviewer [034cb9]', message: { type: 'shutdown_request' } } },
+    'deny',
+    '[ref]를 붙여 보내도 차단',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'reviewer', message: { type: 'shutdown_request' } } },
+    'pass',
+    'workflow 밖 팀원에게 shutdown_request는 통과',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'workflow-reviewer', message: '진행 상황 알려줘' } },
+    'pass',
+    'workflow 팀원에게 문자열 메시지는 통과',
+  ],
+  [
+    'check-team-message-policy.mjs',
+    { tool_name: 'SendMessage', tool_input: { to: 'workflow-reviewer', message: { type: 'shutdown_response', request_id: 'r1', approve: true } } },
+    'pass',
+    '다른 type의 객체 메시지는 통과',
+  ],
+
   // 측정 에이전트에 기대가 새는 것을 막는다. 「측정 지시서」로 여는 프롬프트는 표만 담아야 한다.
   [
     'check-blind-measure-prompt.mjs',
@@ -1941,13 +2022,13 @@ const subagentGroup = async () => {
     const user = (content) => JSON.stringify({ type: 'user', message: { role: 'user', content } });
     const bash = (id, command, extra = {}) => ({ type: 'tool_use', id, name: 'Bash', input: { command, ...extra } });
     // 세션 하나 = 에이전트 하나. 한 세션에 섞으면 어느 줄이 어느 케이스 것인지 판정이 흐려진다.
-    const session = (id, lines, { minutesAgo, shape = 'background', noDir = false } = {}) => {
+    const session = (id, lines, { minutesAgo, shape = 'background', noDir = false, name = `rev-${id}` } = {}) => {
       const transcript = path.join(root, `${id}.jsonl`);
       fs.writeFileSync(transcript, '');
       if (noDir) return { session_id: id, transcript_path: transcript };
       const dir = path.join(root, id, 'subagents');
       fs.mkdirSync(dir, { recursive: true });
-      fs.writeFileSync(path.join(dir, `agent-a${id}.meta.json`), JSON.stringify({ name: `rev-${id}`, requestShape: shape }));
+      fs.writeFileSync(path.join(dir, `agent-a${id}.meta.json`), JSON.stringify({ name, requestShape: shape }));
       const file = path.join(dir, `agent-a${id}.jsonl`);
       fs.writeFileSync(file, `${lines.join('\n')}\n`);
       const t = new Date(Date.now() - minutesAgo * 60 * 1000);
@@ -1957,6 +2038,7 @@ const subagentGroup = async () => {
     const prompt = (s) => ({ hook_event_name: 'UserPromptSubmit', prompt: 'x', ...s });
 
     const stuck = session('stuck', [assistant([bash('t1', 'ls "C:/x/scripts/"; wc -l a.mjs')])], { minutesAgo: 10 });
+    const workflowStuck = session('workflowstuck', [assistant([bash('t1', 'wc -l a.mjs')])], { minutesAgo: 10, name: 'workflow-reviewer' });
     const working = session('working', [assistant([bash('t1', 'ls')]), user([{ type: 'tool_result', tool_use_id: 't1', content: 'ok' }])], { minutesAgo: 0.3 });
     const idle = session('idle', [assistant([{ type: 'text', text: '끝났다' }])], { minutesAgo: 15 });
     const stale = session('stale', [assistant([{ type: 'text', text: '끝났다' }])], { minutesAgo: 45 });
@@ -1993,7 +2075,8 @@ const subagentGroup = async () => {
     const shellOld = bgShell('shellold', marker, { exited: false, idleMinutes: 15, recordedAt: spawnedAt - 10 * 60 * 1000 });
     // [payload, 기대 판정, 주입에 들어 있어야 할 것, 없어야 할 것, 설명]
     const cases = [
-      [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', 'TaskStop'], [], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + 종료 후 재기동 안내'],
+      [prompt(stuck), 'context', ['rev-stuck', '10분째', 'wc -l a.mjs', 'TaskStop으로 끝내고'], ['/tasks'], '결과 없는 tool_use가 10분 → 멈춤 + 명령 + TaskStop 종료 후 재기동 안내'],
+      [prompt(workflowStuck), 'context', ['workflow-reviewer', '10분째', '/tasks'], ['TaskStop으로 끝내고'], 'workflow 팀원이 멈춤 → 메인은 못 끝내니 사용자가 /tasks에서 끝낸다고 안내'],
       [prompt(working), 'context', ['rev-working: 일하는 중'], ['멈춤'], '도구 결과가 막 돌아옴 → 일하는 중'],
       [prompt(idle), 'context', ['rev-idle: 쉬는 중'], ['멈춤'], '텍스트 응답 15분 → 쉬는 중'],
       [prompt(stale), 'context', ['30분 넘게 쉬는 에이전트 1개'], ['rev-stale'], '30분 넘게 쉬면 개수만'],

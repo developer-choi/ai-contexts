@@ -123,7 +123,7 @@ sync·unsync 스크립트의 동작이 바뀌면 `meta/guides/` 하위의 관련
 `deploy/hooks/`(또는 배포된 `~/.claude/hooks/`)의 정책 hook을 수정·검증할 때:
 
 - **실제 명령으로 검증한다.** `echo '...' | node ~/.claude/hooks/<hook>.js`로 hook을 직접 호출하면 hook 내부 코드 경로만 확인되고 PreToolUse/PostToolUse 발동 여부와는 무관하다. Claude Code의 Bash·Write·SendMessage 도구로 실제 명령을 실행해 hook이 차단·통과하는지 확인한다.
-- **위험 케이스도 안전한 시나리오를 설계해서 실제 명령으로 검증한다.**
+- **위험 케이스도 안전한 시나리오를 설계해서 실제 명령으로 검증한다.** 막는 경우와 함께, 막으면 안 되는 이웃 대상(같은 도구의 다른 대상)이 그대로 통과하는지도 확인한다.
   - force push deny: 임시 커밋 만들고 실제 `git push --force-with-lease` 시도 → hook deny 확인 → `git reset --soft HEAD~1` + unstage + 파일 삭제로 정리
   - chained 우회(`reset && push --force`) deny: 한 명령에 history rewrite(reset --soft/--mixed/--hard·rebase·cherry-pick·commit --amend)와 force push가 함께 들어오면 deny — 이 룰은 git 상태와 무관한 정적 패턴 매칭이라 hook 직접 호출(child_process로 payload 주입)로 결정 로직을 완전히 검증할 수 있다 (force push diff 가드와 달리 PreToolUse 타이밍 갭이 없음)- **"검증 안 됨", "안전한 시뮬 어려움" 같은 회피 결론을 보고에 쓰지 않는다.** 회피 보고를 내기 전에 안전한 실제 명령 시나리오를 한 번 더 고민한다.
 - **검증용 임시 산출물(파일·커밋·팀·디버그 로그·임시 브랜치)은 같은 세션에서 즉시 정리한다.** 사용자에게 보고하기 전에 cleanup 완료.

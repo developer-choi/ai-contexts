@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { isWorkflowTeammate } from "./hook-utils.mjs";
 
 // 백그라운드 서브에이전트의 상태를 그 에이전트 기록 파일에서 직접 가른다. 주입 훅
 // (surface-subagent-status.mjs)과 감시기(subagent-watcher.mjs)가 같은 판정을 쓴다.
@@ -129,12 +130,16 @@ export function readAgents(dir, now = Date.now()) {
   return agents;
 }
 
-// 주입과 토스트가 같은 문장을 쓴다.
+// 주입과 토스트가 같은 문장을 쓴다. workflow 팀원은 메인이 TaskStop으로 못 끝낸다
+// (check-agent-stop-policy.mjs) — 그래서 그때만 다음 행동의 주체를 사용자로 적는다.
 export function stuckNotice(agent) {
   const tool = agent.lastTool ? `${agent.lastTool.name}: ${agent.lastTool.input}` : "도구 호출";
+  const stop = isWorkflowTeammate(agent.name)
+    ? `workflow 팀원이라 메인은 TaskStop을 쓸 수 없다 — 사용자가 /tasks에서 끝내고, 메인이 같은 지시로 다시 띄운다.`
+    : `TaskStop으로 끝내고 같은 지시로 다시 띄운다.`;
   return (
     `에이전트 ${agent.name}가 ${agent.minutes}분째 도구 호출에서 멈춤 (${tool}). ` +
     `멈춘 에이전트는 메시지를 못 읽으니 SendMessage로 묻지 말 것. ` +
-    `TaskStop으로 끝내고 같은 지시로 다시 띄운다.`
+    stop
   );
 }
