@@ -63,7 +63,9 @@ const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
 // 흉내내지 않고 세션 id로 된 파일을 찾는다(실측 8000여 폴더에서 0.2초 미만).
 const TRANSCRIPT_ROOT = path.join(os.homedir(), '.claude', 'projects');
 
-// task 저장소. 폴더명은 세션 id의 앞 8자다 — transcript와 달리 id 전체로는 안 찾아진다.
+// task 저장소. 폴더 이름 꼴은 readDiskTasks에 있다.
+// 원천이 아니라 transcript가 없을 때의 보조다 — json이 지워져 폴더에 `.highwatermark`만 남는 세션이
+// 있다(실측 2026-09-30: 68개 폴더 중 65개가 json이 모자랐고, 회고 직전에 task를 완료 처리한 세션은 0개였다).
 const TASK_ROOT = path.join(os.homedir(), '.claude', 'tasks');
 
 // 읽고 안 쓴 문서의 누계. 기기를 넘어 쌓여야 신호가 차므로 백로그 레포에 둔다(같은 이유로
@@ -802,33 +804,142 @@ if (command === 'snapshots') {
   process.exit(0);
 }
 
+// transcript에서 task를 되살린다. TaskCreate 호출이 subject·description을, 그 결과가 id를 갖고,
+// 뒤따르는 TaskUpdate가 바뀐 필드만 덮는다. 실패한 호출은 반영하지 않는다 — is_error만으로는 못 가른다.
+// 「Task not found」는 is_error 없이 `toolUseResult.success: false`로만 남는다(세션을 이어 연 뒤 목록이
+// 바뀌어 옛 번호를 못 찾는 경우).
+function collectTasks(file) {
+  const created = new Map(); // tool_use id → TaskCreate 입력
+  const updates = new Map(); // tool_use id → TaskUpdate 입력
+  const tasks = new Map(); // task id → { id, subject, description, status }
+  // 세션을 이어 열면 번호가 1부터 다시 매겨진다. 같은 번호에 다른 task가 오면 앞엣것을 덮지 않고 따로 둔다.
+  const replaced = [];
+  let unresolved = 0;
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line) continue;
+    let entry;
+    try {
+      entry = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    const content = entry.message?.content;
+    if (!Array.isArray(content)) continue;
+    for (const block of content) {
+      if (block.type === 'tool_use' && block.name === 'TaskCreate') created.set(block.id, block.input ?? {});
+      if (block.type === 'tool_use' && block.name === 'TaskUpdate') updates.set(block.id, block.input ?? {});
+      if (block.type !== 'tool_result') continue;
+      if (created.has(block.tool_use_id)) {
+        const input = created.get(block.tool_use_id);
+        created.delete(block.tool_use_id);
+        if (block.is_error) continue; // 만들어지지 않은 것이 확실하다
+        const text = typeof block.content === 'string' ? block.content : JSON.stringify(block.content ?? '');
+        const id = entry.toolUseResult?.task?.id ?? text.match(/Task #(\S+) created/)?.[1];
+        // 결과 형식이 바뀌어 id를 못 뽑으면 조용히 버리지 않고 「모른다」로 센다.
+        if (!id) {
+          unresolved += 1;
+          continue;
+        }
+        const prev = tasks.get(String(id));
+        if (prev && prev.subject !== input.subject) replaced.push({ ...prev, note: ' [같은 번호의 새 task에 밀려남]' });
+        tasks.set(String(id), { id: String(id), subject: input.subject, description: input.description, status: 'pending' });
+      } else if (updates.has(block.tool_use_id)) {
+        const input = updates.get(block.tool_use_id);
+        updates.delete(block.tool_use_id);
+        if (block.is_error || entry.toolUseResult?.success === false) continue;
+        const task = tasks.get(String(input.taskId ?? input.task_id));
+        if (!task) continue;
+        for (const key of ['subject', 'description', 'status']) if (input[key] !== undefined) task[key] = input[key];
+      }
+    }
+  }
+  // 결과가 안 남은 TaskCreate(중단 등)도 id를 모르는 쪽이다.
+  return { tasks: [...replaced, ...tasks.values()], unresolved: unresolved + created.size };
+}
+
+// 폴더 이름은 `session-{앞 8자}`와 세션 id 전체 두 꼴이 실측에 다 있다(후자는 `.highwatermark`가 없다).
+// 둘 다 읽는다 — 한쪽만 보면 다른 꼴로 저장된 세션이 통째로 「없음」이 된다.
+function readDiskTasks(session) {
+  const tasks = [];
+  const broken = [];
+  const present = new Set(); // 두 폴더를 합쳐 본다 — 따로 세면 서로 상대 폴더의 파일을 빠졌다고 낸다
+  let highwatermark = 0;
+  for (const dir of [path.join(TASK_ROOT, `session-${session.slice(0, 8)}`), path.join(TASK_ROOT, session)]) {
+    if (!fs.existsSync(dir)) continue;
+    for (const f of fs.readdirSync(dir).filter((name) => name.endsWith('.json'))) {
+      const name = path.basename(f, '.json');
+      if (present.has(name)) continue;
+      present.add(name);
+      try {
+        const task = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+        tasks.push({ ...task, id: String(task.id ?? name) });
+      } catch (e) {
+        // 한 건이 깨져도 나머지는 낸다. 조용히 건너뛰면 그 건이 없었던 것이 된다.
+        broken.push(`#${name} [읽기 실패] ${`${e.message}`.split('\n')[0]}`);
+      }
+    }
+    const mark = path.join(dir, '.highwatermark');
+    if (fs.existsSync(mark)) highwatermark = Math.max(highwatermark, parseInt(fs.readFileSync(mark, 'utf8'), 10) || 0);
+  }
+  // id는 1부터 매겨진다. `.highwatermark`는 만든 수가 아니라(hwm 1인데 2·3.json이 남은 폴더가 있다)
+  // 가장 큰 id의 하한으로만 쓰고, 그 범위에서 파일이 없는 번호를 빠진 것으로 센다.
+  const maxId = Math.max(highwatermark, ...[...present].map((id) => parseInt(id, 10) || 0));
+  const missing = [];
+  for (let id = 1; id <= maxId; id += 1) if (!present.has(String(id))) missing.push(String(id));
+  return { tasks, broken, missing };
+}
+
+function printTask(task, note = '') {
+  console.log(`#${task.id} (${task.status ?? '상태없음'})${note} ${task.subject ?? ''}`);
+  console.log(task.description ? `${task.description}\n` : '');
+}
+
 if (command === 'tasks') {
   const session = optOf('session');
   if (!session) {
     console.error('tasks 에는 --session <session_id> 가 필요합니다.');
     process.exit(1);
   }
-  const dir = path.join(TASK_ROOT, `session-${session.slice(0, 8)}`);
-  const files = fs.existsSync(dir)
-    ? fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort((a, b) => parseInt(a, 10) - parseInt(b, 10))
-    : [];
-  if (!files.length) {
-    console.log('이 세션의 task 없음 — 회수할 것이 없다.');
+  const disk = readDiskTasks(session);
+  const file = findTranscript(session);
+  const byId = (a, b) => parseInt(a.id, 10) - parseInt(b.id, 10) || a.id.localeCompare(b.id);
+
+  if (file) {
+    const { tasks, unresolved } = collectTasks(file);
+    // 두 원천이 어긋나면 어느 쪽이 맞는지 경우마다 다르다 — 이어 연 세션은 디스크가 옛 상태로 남고,
+    // 도중에 끊긴 실행은 transcript에 마지막 update가 안 남는다. 그래서 transcript 쪽을 내되 디스크 값을 곁에 적는다.
+    const sameTask = (a, b) => a.id === b.id && a.subject === b.subject;
+    for (const task of tasks) {
+      const onDisk = !task.note && disk.tasks.find((t) => sameTask(t, task));
+      if (onDisk && onDisk.status !== task.status) task.note = ` [디스크: ${onDisk.status}]`;
+    }
+    // transcript에 없는 디스크 task — 이 세션 밖(팀원 등)에서 같은 목록에 넣은 것일 수 있다. 버리지 않고 표시해 낸다.
+    const diskOnly = disk.tasks.filter((t) => !tasks.some((task) => sameTask(t, task)));
+    const total = tasks.length + diskOnly.length;
+    if (!total && !unresolved && !disk.broken.length) {
+      console.log(`이 세션의 task 없음 — 회수할 것이 없다. (transcript 기준 — ${file})`);
+      process.exit(0);
+    }
+    console.log(`[이 세션의 task] ${total}건, 상태 무관(transcript 기준 — ${file}). 회고 재료가 아닌 것(작업 추적용)은 세션이 거른다.\n`);
+    for (const task of tasks.sort(byId)) printTask(task, task.note);
+    for (const task of diskOnly.sort(byId)) printTask(task, ' [디스크에만 있음]');
+    for (const line of disk.broken) console.log(`${line}\n`);
+    if (unresolved) console.log(`[주의] id를 확인 못 한 TaskCreate ${unresolved}건(결과가 안 남았거나 형식이 달랐다) — 목록에 없다. transcript에서 직접 본다.`);
     process.exit(0);
   }
-  console.log(`[이 세션의 task] ${files.length}건. 회고 재료가 아닌 것(작업 추적용)은 세션이 거른다.\n`);
-  for (const f of files) {
-    let task;
-    try {
-      task = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
-    } catch (e) {
-      // 한 건이 깨져도 나머지는 낸다. 조용히 건너뛰면 그 건이 없었던 것이 된다.
-      console.log(`#${path.basename(f, '.json')} [읽기 실패] ${`${e.message}`.split('\n')[0]}\n`);
-      continue;
-    }
-    console.log(`#${task.id ?? path.basename(f, '.json')} (${task.status ?? '상태없음'}) ${task.subject ?? ''}`);
-    if (task.description) console.log(`${task.description}\n`);
-    else console.log('');
+
+  // transcript가 없으면 디스크뿐이다. json은 지워지기도 하므로(언제 지워지는지는 모른다) 「없음」으로 끝내지 않고 빠진 수를 낸다.
+  const { missing } = disk;
+  if (!disk.tasks.length && !disk.broken.length && !missing.length) {
+    console.log('이 세션의 task 없음 — 회수할 것이 없다. (transcript를 못 찾아 디스크만 봤다)');
+    process.exit(0);
+  }
+  console.log(`[이 세션의 task] 디스크에 ${disk.tasks.length}건 (transcript를 못 찾아 디스크만 봤다). 회고 재료가 아닌 것(작업 추적용)은 세션이 거른다.\n`);
+  for (const task of disk.tasks.sort(byId)) printTask(task);
+  for (const line of disk.broken) console.log(`${line}\n`);
+  if (missing.length) {
+    console.log(`[전부가 아니다] ${missing.map((id) => `#${id}`).join(' ')} ${missing.length}건이 디스크에 없다 — 지워진 json은 내용을 되살릴 수 없다.`);
+    console.log('빠진 건은 회고가 대화에서 찾아 채운다. 「task 없음」으로 적지 않는다.');
   }
   process.exit(0);
 }
