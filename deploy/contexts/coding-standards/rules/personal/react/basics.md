@@ -29,35 +29,6 @@ function formatPrice(price: number): string {
 
 ---
 
-## children props는 PropsWithChildren 사용
-
-children을 받는 컴포넌트는 `PropsWithChildren`을 사용합니다.
-
-```tsx
-// ❌ Bad
-function Layout({ children }: { children: ReactNode }) {
-  return <main>{children}</main>;
-}
-
-// ✅ Good
-import { PropsWithChildren } from 'react';
-
-function Layout({ children }: PropsWithChildren) {
-  return <main>{children}</main>;
-}
-
-// ✅ Good — 다른 props도 있는 경우
-interface SidebarProps {
-  title: string;
-}
-
-function Sidebar({ title, children }: PropsWithChildren<SidebarProps>) {
-  return <aside><h2>{title}</h2>{children}</aside>;
-}
-```
-
----
-
 ## useRef로 임시 값 저장 시 네이밍
 
 `useRef`를 DOM 참조가 아닌 **리렌더링 없이 값을 보존하는 용도**로 사용할 때, 변수명에 `Ref` 대신 `Cache` 접미사를 사용합니다.
