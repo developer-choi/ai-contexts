@@ -6,7 +6,7 @@
 
 - 갱신 대상 README 목록과 각 README의 기준 문서(그 디렉토리의 SKILL.md 또는 핵심 문서)
 - 각 README의 깨진 링크 목록(링크 체커 검출분) — dispatch가 이 링크를 우선 교정한다
-- 갱신 방식: 각 README가 기준 문서와 정합한지 확인하고, 어긋난 곳만 고친 뒤 `/write-refine`(톤·구조·분량 다듬기)으로 다듬는다. 문서를 통째로 다시 쓰지 않는다
+- 갱신 방식: 각 README가 기준 문서와 정합한지 확인하고, 어긋난 곳만 고친 뒤 `/write-refine`(표현 다듬기)으로 다듬는다. 문서를 통째로 다시 쓰지 않는다
 - 대조 문항: 각 문장이 기준 문서와 맞는지에 더해, **README가 첫머리에서 선언한 것과 본문 절들이 같은 방향인지**를 함께 본다
 - 결과 md 경로: `refresh-projects/dispatch/<repo>-readme-result.md`
 
