@@ -100,6 +100,25 @@ export function isWorkflowTeammate(target) {
   return (internal ? internal[1] : name).startsWith("workflow-");
 }
 
+// 커밋이 남에게 보이는 자리(보호 브랜치 머지·PR 생성) 직전에, 들어갈 커밋을 주제별로 정리했다는 한 줄을
+// description에 요구한다. 두 훅이 같은 줄·같은 기준을 써야 한쪽에서 통과한 설명이 다른 쪽에서 안 막힌다.
+// 정리가 됐는지는 훅이 판정하지 못한다 — 막는 것은 커밋 목록을 안 보고 내는 것까지라, 돌려보낼 때 목록을 보여 준다.
+// description 필드가 없는 도구·에이전트(codex)에는 요구하지 않는다 — 따를 방법이 없는 거부가 된다.
+const TIDY_LINE = /^\s*커밋 정리:/m;
+export function lacksTidyLine(payload) {
+  const input = payload.tool_input ?? {};
+  if (!["Bash", "PowerShell"].includes(payload.tool_name) || !("description" in input)) return false;
+  return !TIDY_LINE.test(typeof input.description === "string" ? input.description : "");
+}
+export function tidyRequest(what, lists) {
+  return (
+    `${what} 전에 들어갈 커밋을 정리하고, description에 \`커밋 정리:\`로 시작하는 줄로 그 결과를 적어 같은 명령을 다시 내세요. ` +
+    "기준 — 주제 하나에 커밋 하나, 앞 커밋을 고치는 커밋이 없을 것, 중간 시행착오가 이력에 안 보일 것. " +
+    "합쳤으면 무엇을 무엇으로 합쳤는지, 이미 정리돼 있으면 그렇다고 적습니다.\n" +
+    lists.join("\n")
+  );
+}
+
 export function addContext(context, hookEventName = "UserPromptSubmit") {
   process.stdout.write(
     JSON.stringify({

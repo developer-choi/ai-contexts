@@ -1,6 +1,7 @@
 import { execSync, spawnSync } from "node:child_process";
 import { allInFreeRepos, originRepoName, repoTier, tierOfRepoName } from "./repo-tiers.mjs";
 import {
+  findGhPrCreates,
   findGhPrMerges,
   findGitInvocations,
   invocationCwd,
@@ -8,7 +9,7 @@ import {
   splitSegments,
   tokenize,
 } from "./git-command-parser.mjs";
-import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { deny, getCommand, getCwd, lacksTidyLine, readPayload, tidyRequest } from "./hook-utils.mjs";
 
 // 보호 브랜치 push는 레포 등급(repo-tiers.mjs)으로 가른다. FREE는 통과, 승인·PR 전용은 차단 —
 // 승인 창을 두지 않는다. push는 밖으로 나가 되돌리기 어려우니 사용자가 리뷰한 뒤 직접 민다.
@@ -26,7 +27,15 @@ if (typeof cmd !== "string") process.exit(0);
 const sessionCwd = getCwd(payload);
 const pushInvocations = findGitInvocations(cmd, "push").map((inv) => ({ ...inv, cwd: invocationCwd(inv, sessionCwd) }));
 const ghMerges = findGhPrMerges(cmd);
-if (pushInvocations.length === 0 && ghMerges.length === 0) process.exit(0);
+const ghCreates = findGhPrCreates(cmd);
+if (pushInvocations.length === 0 && ghMerges.length === 0 && ghCreates.length === 0) process.exit(0);
+
+// gh로 PR을 여는 호출. PR이 열리면 AI는 그 브랜치에 push하지 못해(아래 열린 PR 검사) 커밋을 더 정리할 수 없다.
+// 그래서 여는 직전에 들어갈 커밋 목록을 보이고 정리했다는 줄을 요구한다. 레포 등급과 무관하다 —
+// PR의 커밋 이력은 채용 레포에서 평가 대상이고, 정리 기준은 어느 레포든 같다.
+if (ghCreates.length > 0 && lacksTidyLine(payload)) {
+  deny(tidyRequest("PR 생성", ghCreates.map((c) => prCommits(c, invocationCwd({ moveCwd: c.moveCwd }, sessionCwd) || sessionCwd))));
+}
 
 // gh로 PR을 머지하는 호출. `-R owner/name`이나 API 경로에 레포가 적혀 있으면 그 이름으로, 없으면 gh가
 // 실제로 보는 작업 폴더로 등급을 정한다.
@@ -114,6 +123,24 @@ for (const inv of pushInvocations) {
       deny(`force push 차단: origin/${branch}과 코드가 다릅니다. 히스토리 정리(squash, reword)만 허용됩니다.`);
     }
   }
+}
+
+// PR에 들어갈 커밋 목록(오래된 것부터). base가 없으면 원격 기본 브랜치, head가 없으면 지금 브랜치다.
+// 못 읽으면 그렇다고 적는다 — 목록은 안내일 뿐이라 이것 때문에 통과시키지 않는다.
+function prCommits({ base, head }, cwd) {
+  const opts = { encoding: "utf8", stdio: "pipe", ...(cwd ? { cwd } : {}) };
+  const git = (...args) => spawnSync("git", args, opts);
+  let baseRef = base ? `origin/${base}` : null;
+  if (!baseRef) {
+    const r = git("symbolic-ref", "--short", "refs/remotes/origin/HEAD");
+    baseRef = r.status === 0 ? r.stdout.trim() : null;
+  }
+  const headRef = head && !head.includes(":") ? head : "HEAD";
+  const title = `PR에 들어갈 커밋(${baseRef ?? "기준 브랜치 미확인"}..${headRef}):`;
+  if (!baseRef) return `${title} (기준 브랜치를 못 정했습니다 — \`git log --oneline origin/<기준>..HEAD\`로 직접 보세요)`;
+  const r = git("log", "--reverse", "--oneline", `${baseRef}..${headRef}`);
+  if (r.status !== 0) return `${title} (목록을 못 뽑았습니다 — \`git log --oneline ${baseRef}..${headRef}\`로 직접 보세요)`;
+  return `${title}\n${r.stdout.trim() || "(없음)"}`;
 }
 
 function findHistoryRewrites(command) {

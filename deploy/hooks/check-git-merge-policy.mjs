@@ -2,7 +2,7 @@ import { execFileSync, execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { allInFreeRepos, originRepoName, repoTier } from "./repo-tiers.mjs";
 import { findGitInvocations, invocationCwd } from "./git-command-parser.mjs";
-import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { ask, deny, getCommand, getCwd, lacksTidyLine, readPayload, tidyRequest } from "./hook-utils.mjs";
 
 // 보호 브랜치(master/main/develop/release)로의 머지·포인터 이동을 AI가 사용자 결정 없이 못 하게 한다.
 // hook은 AI 도구 호출만 게이트한다(사용자 터미널 명령엔 영향 없음).
@@ -62,21 +62,8 @@ const lacksSummary = (payload) => {
   return d.split("\n").filter((l) => l.trim()).length < MIN_SUMMARY_LINES;
 };
 
-// 머지로 들어갈 커밋이 주제별로 정리됐는지 본 흔적을 description에 한 줄 요구한다. 작업 중 쌓인
-// 「앞 커밋 문구를 고치는 커밋」이 그대로 보호 브랜치에 들어간 적이 있다(2026-09-30 AC, 승인 창에서 사용자가 거절).
-// 정리가 됐는지는 훅이 판정하지 못한다 — 막는 것은 커밋 목록을 안 보고 머지를 내는 것까지다.
-// 그래서 돌려보낼 때 들어갈 커밋 목록을 훅이 직접 뽑아 보여 준다.
-const TIDY_LINE = /^\s*커밋 정리:/m;
-const lacksTidyLine = (payload) => {
-  const input = payload.tool_input ?? {};
-  if (!DESCRIBED_TOOLS.has(payload.tool_name) || !("description" in input)) return false;
-  return !TIDY_LINE.test(typeof input.description === "string" ? input.description : "");
-};
-const MERGE_NEEDS_TIDY = (lists) =>
-  "머지 전에 들어갈 커밋을 정리하고, description에 `커밋 정리:`로 시작하는 줄로 그 결과를 적어 같은 명령을 다시 내세요. " +
-  "기준 — 주제 하나에 커밋 하나, 앞 커밋을 고치는 커밋이 없을 것, 중간 시행착오가 이력에 안 보일 것. " +
-  "합쳤으면 무엇을 무엇으로 합쳤는지, 이미 정리돼 있으면 그렇다고 적습니다.\n" +
-  lists.join("\n");
+// 머지로 들어갈 커밋을 정리했다는 줄(hook-utils의 lacksTidyLine)도 요구한다. 작업 중 쌓인
+// 「앞 커밋 문구를 고치는 커밋」이 그대로 보호 브랜치에 들어갈 뻔한 적이 있다(2026-09-30 AC, 승인 창에서 사용자가 거절).
 
 // 판정 불가로 차단할 때의 안내. MERGE_MSG·MERGE_ASK와 분리한다 — 그 둘은 보호 브랜치를 건드린다고 판정된
 // 뒤의 안내이고, 여기서 걸린 명령은 아직 그걸 모르는 상태라 "경로를 통째로 적어 다시 실행하라"가 답이다.
@@ -150,7 +137,7 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
 
 // 서브에이전트는 ask()가 어차피 거부하고 메인에 넘기므로 요약을 요구하지 않는다.
 if (merges.length > 0 && !payload.agent_id && lacksSummary(payload)) deny(MERGE_NEEDS_SUMMARY);
-if (merges.length > 0 && !payload.agent_id && lacksTidyLine(payload)) deny(MERGE_NEEDS_TIDY(merges.map(incomingCommits)));
+if (merges.length > 0 && !payload.agent_id && lacksTidyLine(payload)) deny(tidyRequest("머지", merges.map(incomingCommits)));
 if (merges.length > 0) ask(merges.map(MERGE_ASK).join(" / "));
 
 process.exit(0);

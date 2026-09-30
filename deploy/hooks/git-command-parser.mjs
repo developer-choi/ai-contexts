@@ -73,6 +73,57 @@ export function findGhPrMerges(command) {
   return out;
 }
 
+// PR을 새로 여는 gh 호출을 { base, head, moveCwd }로 돌려준다. PR이 열리면 AI는 그 브랜치에 push하지
+// 못하므로(check-git-push-policy), 들어갈 커밋을 정리할 마지막 자리가 이 호출 직전이다. 잡는 형태:
+//   gh pr create …                  — base는 `-B`/`--base`, head는 `-H`/`--head`, 없으면 null
+//   gh api …/pulls  (필드를 실으면 gh가 POST로 보낸다) — base·head는 `-f`/`-F` 필드의 `base=`·`head=`
+//   gh api graphql … createPullRequest …  — base·head는 null
+// base가 null이면 훅이 원격 기본 브랜치를, head가 null이면 지금 브랜치를 쓴다.
+export function findGhPrCreates(command) {
+  const out = [];
+  const folder = { current: null, stack: [] };
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    trackFolder(tokens, folder);
+    const moveCwd = folder.current;
+    const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
+    if (at < 0) continue;
+    const args = tokens.slice(at + 1);
+    const words = args.filter((t) => !t.startsWith("-"));
+    if (words[0] === "pr" && words[1] === "create") {
+      out.push({ base: flagValue(args, "-B", "--base"), head: flagValue(args, "-H", "--head"), moveCwd });
+      continue;
+    }
+    if (words[0] !== "api") continue;
+    const rest = args.slice(args.indexOf("api") + 1);
+    if (rest.some((t) => /createPullRequest/.test(t))) {
+      out.push({ base: null, head: null, moveCwd });
+      continue;
+    }
+    if (!rest.some((t) => /(?:^|\/)pulls\/?$/.test(t))) continue;
+    const fields = [];
+    for (let i = 0; i < rest.length; i += 1) {
+      if (["-f", "-F", "--field", "--raw-field"].includes(rest[i]) && rest[i + 1]) fields.push(rest[i + 1]);
+      else if (/^--(raw-)?field=/.test(rest[i])) fields.push(rest[i].slice(rest[i].indexOf("=") + 1));
+    }
+    const method = flagValue(rest, "-X", "--method");
+    const posts = method ? method.toUpperCase() === "POST" : fields.length > 0 || rest.includes("--input");
+    if (!posts) continue;
+    const field = (key) => fields.find((f) => f.startsWith(`${key}=`))?.slice(key.length + 1) ?? null;
+    out.push({ base: field("base"), head: field("head"), moveCwd });
+  }
+  return out;
+}
+
+// `-B main`·`--base main`·`--base=main` 꼴의 값. 없으면 null.
+function flagValue(args, short, long) {
+  for (let i = 0; i < args.length; i += 1) {
+    if ((args[i] === short || args[i] === long) && args[i + 1]) return args[i + 1];
+    if (args[i].startsWith(`${long}=`)) return args[i].slice(long.length + 1);
+  }
+  return null;
+}
+
 // 폴더를 옮기는 명령. 셸마다 이름이 달라 `cd`만 보면 `pushd <레포> && git push`·
 // `Set-Location <레포>; git push`가 세션 폴더 기준으로 판정돼 등급 정책을 빠져나간다(2026-09-26 실측).
 // PowerShell 명령·별칭은 대소문자를 가리지 않는다.
