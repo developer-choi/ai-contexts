@@ -83,20 +83,36 @@ function listMarkdownFiles(dir) {
   return results;
 }
 
-// 실제 상황이 와야 확인할 수 있는 항목(frontmatter `on-real-use`)이면 기다리는 상황 문장을, 아니면 ""를 낸다.
+// 실제 상황이 와야 확인할 수 있는 항목(frontmatter `on-real-use`)이면 { kind, note }를, 아니면 null을 낸다.
 // 파일명만으로는 세션이 「지금 내가 그 상황인가」를 못 알아봐, 그 상황을 겪는 세션이 지나쳐 버린다.
-// 문장은 `on-real-use-note`, 없으면 종류 값. 형식은 backlog 레포 `projects/CLAUDE.md`가 정한다.
-function realUseNote(file) {
+// note는 `on-real-use-note`, 없으면 종류 값. 형식은 backlog 레포 `projects/CLAUDE.md`가 정한다.
+function readRealUse(file) {
   let text;
   try {
     text = fs.readFileSync(file, "utf8");
   } catch (_e) {
-    return "";
+    return null;
   }
   const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text)?.[1] ?? "";
   const kind = /^on-real-use:[ \t]*(.*)$/m.exec(fm)?.[1].trim();
-  if (!kind) return "";
-  return /^on-real-use-note:[ \t]*(.*)$/m.exec(fm)?.[1].trim() || kind;
+  if (!kind) return null;
+  return { kind, note: /^on-real-use-note:[ \t]*(.*)$/m.exec(fm)?.[1].trim() || kind };
+}
+
+// 실사용 대기 항목의 계기 종류 → 그 계기가 왔다는 신호인 스킬.
+// 계기는 대개 cwd 프로젝트가 아닌 레포에서 온다(AC 항목의 채용 회차는 채용과제 레포에서 돈다). cwd 폴더만
+// 띄우면 그 세션은 항목이 있는 줄 몰라 아무도 태그를 못 뗀다. 그래서 스킬을 부를 때 프로젝트를 가리지 않고 띄운다.
+// 종류 어휘의 정본은 backlog 레포 `scripts/backlog-ready-shape.mjs`의 REAL_USE_KINDS다 — 거기 종류를 더하면 여기도 더한다.
+const REAL_USE_SKILLS = {
+  "recruitment-round": (skill) => skill === "workflow" || skill.startsWith("recruitment"),
+  "blog-post": (skill) => skill === "write-refine",
+  "workflow-pr": (skill) => skill === "workflow",
+};
+
+// 프롬프트 맨 앞의 `/스킬명`. 플러그인 스킬(`plugin:skill`)은 콜론 뒤를 쓴다.
+function skillFromPrompt(prompt) {
+  const name = /^\s*\/([\w:-]+)/.exec(String(prompt ?? ""))?.[1] ?? "";
+  return name.slice(name.lastIndexOf(":") + 1);
 }
 
 // 거절 캐시를 읽어 (rel 폴더에 속한) 만료 전 항목 경로를 모은다.
@@ -161,25 +177,63 @@ function markSurfaced(sessionId, key) {
   fs.writeFileSync(seenFile(sessionId), JSON.stringify(seen));
 }
 
-try {
-  const payload = readPayload();
-  const project = projectFromCwd(getCwd(payload));
-  if (!project) process.exit(0);
+// 스킬을 부른 프롬프트면, 그 스킬이 신호인 계기를 기다리는 항목을 전 프로젝트에서 모아 블록으로 낸다. 없으면 "".
+// 세션당 스킬당 1회 — 같은 스킬을 다시 불러도 목록은 그대로다.
+function skillRealUseBlock(prompt, sessionId) {
+  const skill = skillFromPrompt(prompt);
+  if (!skill) return "";
+  const kinds = Object.keys(REAL_USE_SKILLS).filter((k) => REAL_USE_SKILLS[k](skill));
+  if (!kinds.length) return "";
+  const key = `skill:${skill}`;
+  if (sessionId && alreadySurfaced(sessionId, key)) return "";
+
+  let projects;
+  try {
+    projects = fs.readdirSync(path.join(BACKLOG_ROOT, "projects"), { withFileTypes: true }).filter((e) => e.isDirectory());
+  } catch (_e) {
+    return "";
+  }
+  const excluded = new Set(readExclusions("projects"));
+  const lines = [];
+  for (const p of projects) {
+    const rel = `projects/${p.name}/active`;
+    const folder = path.join(BACKLOG_ROOT, rel);
+    for (const f of listMarkdownFiles(folder)) {
+      const item = `${rel}/${f}`;
+      const realUse = readRealUse(path.join(folder, f));
+      if (realUse && kinds.includes(realUse.kind) && !excluded.has(item)) lines.push(`  - ${item}  [실사용 대기: ${realUse.note}]`);
+    }
+  }
+  if (!lines.length) return "";
+  if (sessionId) markSurfaced(sessionId, key);
+
+  return (
+    `[실사용 대기 — /${skill}] 이 스킬을 부른 세션은 아래 항목이 기다리던 상황일 수 있다(어느 레포에서 켰든 같다). 경로는 ${BACKLOG_ROOT} 기준:\n` +
+    `${lines.join("\n")}\n` +
+    `지금이 적힌 상황이면 "이 백로그도 같이 다룰까요?"로 먼저 제안한 뒤 허락받고 반영한다. 같이 다뤘으면 마칠 때 규칙 파일 「실사용 대기 항목을 다룬 뒤」대로 항목 파일을 고친다. ` +
+    `상세 규칙은 반드시 이 파일을 읽고 따른다: ${RULES_FILE}\n` +
+    `거절 기록 위치(거절 시 여기에 항목별 기록을 쓴다): ${CACHE_ROOT}`
+  );
+}
+
+// cwd 프로젝트에 연결된 백로그 폴더 블록. 띄울 것이 없으면 "".
+function folderBlock(cwd, sessionId) {
+  const project = projectFromCwd(cwd);
+  if (!project) return "";
 
   // cwd 프로젝트 → 백로그 폴더. 모든 프로젝트(ai-contexts 포함)가 projects/<project>/active/.
   // active/ 하위만 표면화한다(inactive/는 배제). 규칙은 backlog 루트 CLAUDE.md 「projects 영역」.
   const rel = path.join("projects", project, "active");
   const folder = path.join(BACKLOG_ROOT, rel);
-  if (!fs.existsSync(folder) || !hasMarkdown(folder)) process.exit(0);
+  if (!fs.existsSync(folder) || !hasMarkdown(folder)) return "";
 
   // 전체 블록은 세션당 폴더당 1회만 주입한다. 폴더는 cwd에서 파생되어 세션 내내 고정이므로
   // 첫 주입이 "무관한 프롬프트에 낭비"되는 일은 없다. 이미 안내한 폴더는 이후 턴에 아무것도
   // 주입하지 않고 빠져, 전체 블록을 매 턴 주입할 때 생기던 과잉 priming(관련 없는
   // "저장할까요?" 제안 반복)을 완전히 제거한다. session_id가 없으면(폴백) 매 턴 전체 블록.
-  const sessionId = getSessionId(payload);
   const relPosix = rel.split(path.sep).join("/");
   if (sessionId) {
-    if (alreadySurfaced(sessionId, relPosix)) process.exit(0);
+    if (alreadySurfaced(sessionId, relPosix)) return "";
     markSurfaced(sessionId, relPosix);
   }
 
@@ -193,9 +247,9 @@ try {
   const fileListBlock = files.length
     ? files
         .map((f) => {
-          const note = realUseNote(path.join(folder, f));
-          if (note) waiting++;
-          return note ? `  - ${f}  [실사용 대기: ${note}]` : `  - ${f}`;
+          const realUse = readRealUse(path.join(folder, f));
+          if (realUse) waiting++;
+          return realUse ? `  - ${f}  [실사용 대기: ${realUse.note}]` : `  - ${f}`;
         })
         .join("\n")
     : "  (파일 없음)";
@@ -203,17 +257,27 @@ try {
     ? `[실사용 대기] 표시가 붙은 항목은 적힌 상황이 와야만 확인할 수 있다. 이 세션이 그 상황이면 겹치는 항목으로 보고 같은 방식으로 제안하고, 같이 다뤘으면 마칠 때 규칙 파일 「실사용 대기 항목을 다룬 뒤」대로 항목 파일을 고친다.\n`
     : "";
 
-  addContext(
+  return (
     `[백로그 표면화] 현재 작업 디렉터리(${project})에 연결된 백로그 폴더(${folder}) 항목 목록:\n` +
-      `${fileListBlock}\n` +
-      `위 목록 중 현재 작업과 겹치는 항목이 있으면 "이 백로그도 같이 다룰까요?"로 먼저 제안한 뒤 허락받고 반영한다. ` +
-      `허락 없이 흡수 금지 — 직접 입력물처럼 보여도 예외 아님. 파일명만으로 관련성이 불분명하면 Read로 열어 내용으로 판단한다(단정 금지). ` +
-      `겹치는 게 없으면 조용히 넘어간다.\n` +
-      waitingLine +
-      `상세 규칙은 반드시 이 파일을 읽고 따른다: ${RULES_FILE}\n` +
-      `${exclusionLine}\n` +
-      `거절 기록 위치(거절 시 여기에 항목별 기록을 쓴다): ${CACHE_ROOT}`,
+    `${fileListBlock}\n` +
+    `위 목록 중 현재 작업과 겹치는 항목이 있으면 "이 백로그도 같이 다룰까요?"로 먼저 제안한 뒤 허락받고 반영한다. ` +
+    `허락 없이 흡수 금지 — 직접 입력물처럼 보여도 예외 아님. 파일명만으로 관련성이 불분명하면 Read로 열어 내용으로 판단한다(단정 금지). ` +
+    `겹치는 게 없으면 조용히 넘어간다.\n` +
+    waitingLine +
+    `상세 규칙은 반드시 이 파일을 읽고 따른다: ${RULES_FILE}\n` +
+    `${exclusionLine}\n` +
+    `거절 기록 위치(거절 시 여기에 항목별 기록을 쓴다): ${CACHE_ROOT}`
   );
+}
+
+try {
+  const payload = readPayload();
+  const sessionId = getSessionId(payload);
+  const context = [
+    folderBlock(getCwd(payload), sessionId),
+    skillRealUseBlock(payload.prompt, sessionId),
+  ].filter(Boolean);
+  if (context.length) addContext(context.join("\n\n"));
 } catch (_e) {
   // 표면화 실패가 프롬프트 처리를 막아서는 안 된다.
   process.exit(0);
