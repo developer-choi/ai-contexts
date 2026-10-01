@@ -60,10 +60,19 @@ const MAX_REPORTS = 20;
 //
 // 하위 폴더의 `CLAUDE.md`도 잰다. 루트가 무거워 규격을 하위 폴더 규칙 파일로 떼어내면(backlog
 // `projects/CLAUDE.md`), 루트만 재는 검사에서는 뗀 만큼이 통째로 감시 밖으로 빠진다.
-function inScope(rel, exclude) {
-  if (!rel.endsWith(".md")) return false;
+//
+// 같은 이유로 위 자리의 md가 가리키는 md도 위치와 무관하게 잰다(가리켜진 md가 또 가리키는 것까지).
+// 폴더·이름 규칙만 두면 규격을 그 밖으로 떼는 순간 같은 구멍이 다시 열린다 — 실측: backlog
+// `item-processing.md`, PP `routine/docs/design.md`(선을 넘은 채)가 그렇게 빠져 있었다. 가리켜지지만
+// 규격이 아닌 md(보관 글·지식 글 예시)는 `exclude`로 뺀다. 빠진 자리는 가리키는 것도 세지 않는다.
+function isRoot(rel) {
   const isRuleFile = rel === "CLAUDE.md" || rel.endsWith("/CLAUDE.md");
-  if (!(isRuleFile || rel.startsWith("local/") || rel.startsWith("deploy/"))) return false;
+  return isRuleFile || rel.startsWith("local/") || rel.startsWith("deploy/");
+}
+
+// 잴 후보 = exclude 밖의 md 전부. 실제로 잴지는 measure가 참조를 따라가 정한다.
+function isCandidate(rel, exclude) {
+  if (!rel.endsWith(".md")) return false;
   return !exclude.some((prefix) => rel === prefix || rel.startsWith(prefix));
 }
 
@@ -72,12 +81,21 @@ function measure(config) {
   const entries = effectiveMd(config.exclude); // [{ sha, rel }]
   const sizes = objectSizes(entries.map((e) => e.sha));
   const bodies = objectBodies(entries.map((e) => e.sha));
-  const files = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
+  const candidates = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
+  // 참조는 후보 전체로 한 번만 푼다 — 범위와 닿는 곳을 다른 집합으로 따로 풀면, 파일명만 적힌
+  // 참조가 한쪽에서는 유일해 이어지고 다른 쪽에서는 겹쳐 끊겨 「재는가」와 「누가 여는가」가 갈린다.
+  const allParents = directParents(candidates);
+  const scoped = reachableFromRoots(candidates, allParents);
+  const files = candidates.filter((f) => scoped.has(f.rel));
 
-  const { parents, ancestors } = referenceGraph(files);
+  // 닿는 곳은 잴 대상끼리만 센다 — 후보 전체로 세면 규격도 아닌 지식 글이 여는 곳까지 선을 낮춘다.
+  const parents = new Map(files.map((f) => [f.rel, new Set([...allParents.get(f.rel)].filter((p) => scoped.has(p)))]));
+  const ancestors = ancestorsOf(files, parents);
   const reach = new Map([...ancestors].map(([rel, set]) => [rel, set.size]));
   const limitFor = (rel) => (reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT);
-  return { files, parents, ancestors, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
+  // 잴 내용에는 있는데 아무 뿌리에서도 안 닿은 md — `--report`가 「인덱스에 없다」와 가르는 데 쓴다.
+  const unreached = new Set(candidates.filter((f) => !scoped.has(f.rel)).map((f) => f.rel));
+  return { files, unreached, parents, ancestors, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
 }
 
 // 선 아래로 내려온 등재분. 파일이 지워졌을 때도 걷을 자리다.
@@ -161,7 +179,7 @@ function main() {
 
   if (settled.length) {
     report(
-      "[문서 크기] 기준선에 등재된 파일이 선 아래로 내려왔다 — 등재를 걷을 자리다:",
+      "[문서 크기] 기준선에 등재된 파일이 선 아래로 내려왔거나 검사 대상에서 빠졌다 — 등재를 걷을 자리다:",
       settled,
       [
         `걷으려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --settle`,
@@ -187,8 +205,42 @@ function report(heading, lines, advice) {
 const LINK_RE = /\]\(([^)\s]+\.md(?:#[^)\s]*)?)\)/g;
 const PATH_RE = /[`'"(\s]((?:\.{1,2}\/)?[A-Za-z0-9_\-./ㄱ-힣]+\.md)(?=[`'")\s,.:]|$)/g;
 
-// 파일마다 직접 가리키는 쪽(parents)과, 그 위로 거슬러 닿는 쪽 전부(ancestors)를 낸다.
-function referenceGraph(files) {
+// 파일마다 직접 가리키는 쪽(parents)을 거슬러 닿는 쪽 전부(ancestors)를 낸다.
+// 역방향 도달 — 서로 물고 도는 참조가 있어도 멈추도록 방문 표시를 둔다.
+function ancestorsOf(files, parents) {
+  const ancestors = new Map();
+  for (const f of files) {
+    const seen = new Set();
+    const stack = [...parents.get(f.rel)];
+    while (stack.length) {
+      const n = stack.pop();
+      if (n === f.rel || seen.has(n)) continue;
+      seen.add(n);
+      for (const p of parents.get(n)) if (!seen.has(p)) stack.push(p);
+    }
+    ancestors.set(f.rel, seen);
+  }
+  return ancestors;
+}
+
+// 잴 대상 = 뿌리 자리(isRoot)의 md와, 거기서 참조를 따라 정방향으로 닿는 md 전부.
+function reachableFromRoots(candidates, parents) {
+  const children = new Map(candidates.map((f) => [f.rel, []]));
+  for (const [child, ps] of parents) for (const p of ps) children.get(p).push(child);
+
+  const scoped = new Set();
+  const stack = candidates.filter((f) => isRoot(f.rel)).map((f) => f.rel);
+  while (stack.length) {
+    const n = stack.pop();
+    if (scoped.has(n)) continue;
+    scoped.add(n);
+    for (const c of children.get(n)) if (!scoped.has(c)) stack.push(c);
+  }
+  return scoped;
+}
+
+// 파일마다 그 파일을 직접 가리키는 파일 집합.
+function directParents(files) {
   const set = new Set(files.map((f) => f.rel));
   const byBase = new Map();
   for (const f of files) {
@@ -222,21 +274,7 @@ function referenceGraph(files) {
       }
     }
   }
-
-  // 역방향 도달 — 서로 물고 도는 참조가 있어도 멈추도록 방문 표시를 둔다.
-  const ancestors = new Map();
-  for (const f of files) {
-    const seen = new Set();
-    const stack = [...parents.get(f.rel)];
-    while (stack.length) {
-      const n = stack.pop();
-      if (n === f.rel || seen.has(n)) continue;
-      seen.add(n);
-      for (const p of parents.get(n)) if (!seen.has(p)) stack.push(p);
-    }
-    ancestors.set(f.rel, seen);
-  }
-  return { parents, ancestors };
+  return parents;
 }
 
 // --- git ------------------------------------------------------------------
@@ -299,7 +337,7 @@ function defaultTip() {
   return remote ? `refs/remotes/${remote}` : null;
 }
 
-// 커밋 하나의 검사 대상 md → blob sha.
+// 커밋 하나의 잴 후보 md → blob sha.
 function treeMd(commit, exclude) {
   const out = execFileSync("git", ["ls-tree", "-r", "-z", "--full-tree", commit], {
     encoding: "utf8",
@@ -311,7 +349,7 @@ function treeMd(commit, exclude) {
     if (tab === -1) continue;
     const [, type, sha] = line.slice(0, tab).split(" ");
     const rel = line.slice(tab + 1);
-    if (type === "blob" && inScope(rel, exclude)) blobs.set(rel, sha);
+    if (type === "blob" && isCandidate(rel, exclude)) blobs.set(rel, sha);
   }
   return blobs;
 }
@@ -341,7 +379,7 @@ function indexedMd(exclude) {
     const tab = line.indexOf("\t");
     if (tab === -1) continue;
     const rel = line.slice(tab + 1);
-    if (!inScope(rel, exclude)) continue;
+    if (!isCandidate(rel, exclude)) continue;
     entries.push({ sha: line.slice(0, tab).split(" ")[1], rel });
   }
   return entries;
@@ -509,7 +547,7 @@ function settleBaseline() {
   console.log(`${CONFIG_FILE}의 "${repo}"에서 ${settled.length}건을 걷었다:`);
   for (const rel of settled) {
     const f = files.find((x) => x.rel === rel);
-    const now = f ? `${f.size}B (선 ${limitFor(rel)}B)` : "검사 대상에 없음 (삭제·이름 변경·제외)";
+    const now = f ? `${f.size}B (선 ${limitFor(rel)}B)` : "검사 대상에 없음 (삭제·이름 변경·제외·아무 규칙 파일도 안 가리킴)";
     console.log(`  ${rel} — 등재 ${config.files[rel]}B → ${now}`);
     delete whole.repos[repo].files[rel];
   }
@@ -545,13 +583,18 @@ function reportFile(target) {
   // 설정이 없어도 재는 데는 지장이 없다 — 제외 목록만 비는 것이라 그 사실을 함께 낸다.
   const config = readConfig(repo);
   const exclude = config?.exclude ?? [];
-  if (!inScope(rel, exclude)) {
-    console.log(`${rel} — 검사 대상 밖이다 (CLAUDE.md·local/·deploy/ 하위 md만 재고, 설정의 exclude는 뺀다).`);
+  const outOfScope = `${rel} — 검사 대상 밖이다 (CLAUDE.md·local/·deploy/ 하위 md와 그 md들이 가리키는 md만 재고, 설정의 exclude는 뺀다).`;
+  if (!isCandidate(rel, exclude)) {
+    console.log(outOfScope);
     return;
   }
 
-  const { files, parents, ancestors, limitFor } = measure({ exclude });
+  const { files, unreached, parents, ancestors, limitFor } = measure({ exclude });
   const f = files.find((x) => x.rel === rel);
+  if (unreached.has(rel)) {
+    console.log(outOfScope);
+    return;
+  }
   if (!f) {
     console.log(
       `${rel} — 잴 내용에 없다. git 인덱스에 안 올라갔으면 git add 뒤에 다시 부른다. ` +
@@ -569,7 +612,7 @@ function reportFile(target) {
   for (const o of openers) console.log(`    ${direct.has(o) ? "직접  " : "거쳐서"} ${o}`);
   if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
   console.log(
-    "한계: 이 레포 안의 CLAUDE.md·local/·deploy/ md가 링크나 .md 경로로 가리키는 것만 센다. " +
+    "한계: 이 레포 안의 잴 대상 md가 링크나 .md 경로로 가리키는 것만 센다. " +
       "다른 레포의 스킬·문서가 여는 것, 세션 자동 로드, 훅 주입, 확장자 없이 이름으로만 부르는 참조는 안 잡힌다 — " +
       "그런 진입점은 따로 찾아 더한다.",
   );
