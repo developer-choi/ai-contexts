@@ -19,6 +19,12 @@
       "msg": "Checking skill-creator for scw bench..."
     },
     {
+      "file": "surface-sub-file.mjs",
+      "event": "PostToolUse",
+      "on": "read",
+      "msg": "Surfacing paired .sub.md file..."
+    },
+    {
       "file": "post-enterworktree-install.mjs",
       "event": "PostToolUse",
       "on": "enterworktree",

@@ -2003,6 +2003,37 @@ const skillCreatorGroup = async () => {
   }
 };
 
+// 짝 파일 알림은 실제 파일 유무로 가르므로 임시 폴더에 짝이 있는 파일·없는 파일을 만들어 두고 돈다.
+// 세션당 1회 마커는 tmpdir에 쌓이므로 TEMP를 이 폴더로 돌려 폴더와 함께 지운다.
+// a.sub.sub.md를 두는 이유: 없으면 「짝 파일 자신을 읽으면 조용하다」가 .sub.md 제외 조건이 빠져도
+// 짝이 없어서 조용해져 항상 통과한다.
+const SUB_FILE_HOOK = 'surface-sub-file.mjs';
+const subFileGroup = async () => {
+  const dir = await makeTempDir('hook-sub-file-');
+  try {
+    for (const name of ['a.md', 'a.sub.md', 'a.sub.sub.md', 'b.md']) fs.writeFileSync(path.join(dir, name), '# x\n');
+    const env = { TEMP: dir, TMP: dir, TMPDIR: dir };
+    const session = 'verify';
+    const read = (name, sessionId = session) => ({ tool_name: 'Read', tool_input: { file_path: path.join(dir, name) }, cwd: dir, session_id: sessionId });
+    // 1회 마커를 보는 두 케이스는 순서가 결과를 정하므로 병렬로 돌리지 않는다.
+    const cases = [
+      [read('a.md'), 'context', '짝 파일이 있는 X.md를 읽으면 알린다'],
+      [read('a.md'), 'pass', '같은 세션에서 같은 파일을 다시 읽으면 조용하다'],
+      [read('a.md', `${session}-other`), 'context', '다른 세션은 다시 알린다'],
+      [read('b.md'), 'pass', '짝 파일이 없으면 조용하다'],
+      [read('a.sub.md'), 'pass', '짝 파일 자신을 읽으면 조용하다'],
+      [{ tool_name: 'Edit', tool_input: { file_path: path.join(dir, 'a.md') }, cwd: dir, session_id: `${session}-edit` }, 'pass', 'Read가 아니면 조용하다'],
+    ];
+    return await runCases(cases, async ([payload, expected, note]) => {
+      const { decision, reason, stderr } = await runHookPayload(SUB_FILE_HOOK, payload, { env });
+      const named = expected !== 'context' || (reason ?? '').includes(path.join(dir, 'a.sub.md'));
+      return judge(`${SUB_FILE_HOOK} :: ${payload.tool_name} → ${expected} (${note})`, decision, expected, stderr, { ok: decision === expected && named });
+    }, { concurrency: 1 });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 응답 언어 훅은 마지막 응답만 본다. 사용자 발화로 면제하지 않는다 — 그 면제가 되살아나면 잡히도록
 // 마지막 발화가 `ㅇㅋ`·`ok`인 기록 파일을 주고도 되돌리는지 본다(2026-10-01 누수).
 // 영어 보고는 실제로 샌 보고의 한 토막이다.
@@ -2239,6 +2270,7 @@ async function main() {
     recruitmentGroup,
     recruitmentGuardGroup,
     skillCreatorGroup,
+    subFileGroup,
     responseLanguageGroup,
     subagentGroup,
   ];
