@@ -200,6 +200,13 @@ function main() {
       `${f}: permissions.ask 없음${asks.length ? ` (${asks.join(', ')}) — ask 규칙은 서브에이전트를 멈추게 한다. 훅의 ask()로 옮겨라` : ''}`);
   }
 
+  // override의 hooks 키는 base에서 생성한 hook 전체를 통째로 덮고, 인라인 명령을 그대로 배포한다.
+  for (const f of fs.readdirSync(deployDir).filter((n) => n.endsWith('settings.json') && n !== 'base-settings.json')) {
+    const override = JSON.parse(fs.readFileSync(path.join(deployDir, f), 'utf8'));
+    check(!('hooks' in override),
+      `${f}: hooks 키 없음 — hook은 base-settings.json에 논리 항목으로 더하고 본체를 deploy/hooks/의 .mjs로 둔다`);
+  }
+
   if (failures.length) {
     console.error(`settings 생성 계약 검증 실패: ${failures.length}건`);
     process.exit(1);

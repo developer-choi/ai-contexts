@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import {
@@ -7,7 +8,9 @@ import {
   hasLegacyRepoHooks,
   missingRepoHookWiring,
   registerRepoHookWiring,
+  unwiredHookEvents,
 } from './git-hooks.mjs';
+import { defaultLocalRoots, listLocalRepos } from '../local-system/local-deploy-lib.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
@@ -25,11 +28,12 @@ function ensureHooksReady() {
   }
 
   const lines = [
-    'AC git hook 준비 상태가 올바르지 않습니다.',
+    'git hook 준비 상태가 올바르지 않습니다.',
     ...state.issues.map((issue) => `- ${issue}`),
-    '',
-    '의존성이 없으면 이 worktree에서 npm ci를 실행하세요.',
   ];
+  if (state.issues.some((issue) => issue.includes('npm ci'))) {
+    lines.push('', '의존성이 없으면 이 worktree에서 npm ci를 실행하세요.');
+  }
   throw new Error(lines.join('\n'));
 }
 
@@ -69,8 +73,18 @@ function checkHooks() {
     issues.push('commitlint 실행 파일이 없음: npm ci 필요');
   }
 
+  // 원인은 AC가 아니라 그 훅을 쓰는 레포라 AC worktree 복구로는 안 고쳐진다 — 고칠 자리를 따로 알린다.
+  for (const { repo, event } of unwiredHookEvents(listLocalRepos(HOOK_SCAN_ROOTS))) {
+    issues.push(
+      `${repo}/${HOOKS_DIR}/${event}에 전역 배선이 없음: AC scripts/lib/git-hooks.mjs의 HOOK_EVENTS에 더한 뒤 npm run verify:hooks로 등록하세요`,
+    );
+  }
+
   return { ok: issues.length === 0, issues, repairable };
 }
+
+// 전역 배선은 기기의 모든 레포에 닿으므로, 로컬 sync가 훑는 곳에 더해 채용 과제 레포까지 본다.
+const HOOK_SCAN_ROOTS = [...defaultLocalRoots, path.join(os.homedir(), 'WebstormProjects', 'recruitment')];
 
 function commitlintBin() {
   return path.join(repoRoot, 'node_modules', '.bin', process.platform === 'win32' ? 'commitlint.cmd' : 'commitlint');

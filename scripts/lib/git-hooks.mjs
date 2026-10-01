@@ -11,14 +11,13 @@
 //
 // 등록 주체는 `npm run sync:environment` 하나다. 레포에 prepare 나 설치 스크립트를 두지 않는다.
 import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
 
 const HOOKS_DIR = '.githooks';
 const MIN_GIT = { major: 2, minor: 54 };
 
 // 전역 훅을 걸 이벤트 목록. 어느 레포든 `.githooks/<이벤트>` 가 있으면 그 이벤트에서 돈다.
-// **새 이벤트를 쓰는 레포가 생기면 여기에 더한다** — 안 더하면 그 레포의 검사가 통째로 무음
-// 통과한다. 2026-08-31 실측 기준 사용처: commit-msg(AC), pre-commit(AC·backlog·PP),
-// post-commit(backlog), pre-push(AC).
+// **새 이벤트를 쓰는 레포가 생기면 여기에 더한다** — 빠뜨리면 `verify:hooks`(unwiredHookEvents)가 잡는다.
 //
 // 받아온 뒤 이벤트 셋(post-merge·post-rewrite·post-checkout)은 커밋하지 않는 생성 파일을 다시 굽는
 // 자리다(PP 채용 필터 이력 사본). 머지·`pull`(merge·rebase 둘 다)·clone과 브랜치 전환이 각각 다른
@@ -26,6 +25,38 @@ const MIN_GIT = { major: 2, minor: 54 };
 const HOOK_EVENTS = [
   'commit-msg', 'pre-commit', 'post-commit', 'pre-push', 'post-merge', 'post-rewrite', 'post-checkout',
 ];
+
+// git이 훅으로 부르는 이름 전부(githooks(5)). `.githooks/`에는 README·보조 스크립트도 놓이므로
+// 이 이름인 파일만 훅으로 본다.
+const GIT_HOOK_NAMES = new Set([
+  'applypatch-msg', 'pre-applypatch', 'post-applypatch', 'pre-commit', 'pre-merge-commit',
+  'prepare-commit-msg', 'commit-msg', 'post-commit', 'pre-rebase', 'post-checkout', 'post-merge',
+  'pre-push', 'pre-receive', 'update', 'proc-receive', 'post-receive', 'post-update',
+  'reference-transaction', 'push-to-checkout', 'pre-auto-gc', 'post-rewrite', 'sendemail-validate',
+  'fsmonitor-watchman', 'p4-changelist', 'p4-prepare-changelist', 'p4-post-changelist', 'p4-pre-submit',
+  'post-index-change',
+]);
+
+// 레포들의 `.githooks/`에서 HOOK_EVENTS 밖의 훅을 찾는다. 배선은 HOOK_EVENTS에만 걸리므로
+// 그런 훅은 아무 표시 없이 안 돈다 — 훅을 쓰는 쪽은 이 목록을 모르므로 여기서 잡는다.
+function unwiredHookEvents(repos) {
+  const found = [];
+  for (const repo of repos) {
+    const dir = `${repo}/${HOOKS_DIR}`;
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      continue; // `.githooks/`가 없는 레포
+    }
+    for (const entry of entries) {
+      if (entry.isFile() && GIT_HOOK_NAMES.has(entry.name) && !HOOK_EVENTS.includes(entry.name)) {
+        found.push({ repo, event: entry.name });
+      }
+    }
+  }
+  return found;
+}
 
 function git(repoPath, args, { allowFail = false } = {}) {
   const result = spawnSync('git', ['-C', repoPath, ...args], { encoding: 'utf8' });
@@ -199,4 +230,5 @@ export {
   clearLegacyRepoHooks,
   hasLegacyRepoHooks,
   localHooksPath,
+  unwiredHookEvents,
 };

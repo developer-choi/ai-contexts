@@ -262,7 +262,7 @@ function listEntries(dir) {
 
 // SKILL.md frontmatter에 name이 없으면 폴더명을 주입한 내용을 반환한다.
 // Antigravity는 frontmatter name이 있어야 스킬을 인식하므로(Claude는 폴더명으로 잡음),
-// 소스에는 name을 적지 않고 배포 시점에 주입한다. 이미 name이 있으면 그대로 둔다(멱등).
+// 소스가 name을 빠뜨렸을 때의 안전망이다. 이미 name이 있으면 그대로 둔다(멱등).
 function withSkillName(content, name) {
   const frontmatter = content.match(/^---\r?\n([\s\S]*?\r?\n)---(\r?\n|$)/);
   if (!frontmatter) return `---\nname: ${name}\n---\n\n${content}`;

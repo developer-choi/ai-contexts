@@ -25,6 +25,7 @@ import {
   registerRepoHookWiring,
   unregisterRepoHookWiring,
   missingRepoHookWiring,
+  unwiredHookEvents,
 } from '../lib/git-hooks.mjs';
 
 const failures = [];
@@ -120,6 +121,15 @@ function verifyGlobalHookMechanism(sandbox) {
   check('하나만 빠져도 잡아냄', missingRepoHookWiring({ env }).join() === HOOK_EVENTS[0]);
   unregisterRepoHookWiring({ env });
   check('일괄 해제 후 전부 빠짐', missingRepoHookWiring({ env }).length === HOOK_EVENTS.length);
+
+  // HOOK_EVENTS 밖의 훅만 잡고, README·보조 스크립트·`.githooks/` 없는 레포는 건너뛴다.
+  const repo = path.join(sandbox, 'repo-with-hooks');
+  fs.mkdirSync(path.join(repo, '.githooks'), { recursive: true });
+  for (const name of ['pre-commit', 'pre-rebase', 'README', 'helper.mjs']) {
+    fs.writeFileSync(path.join(repo, '.githooks', name), '', 'utf8');
+  }
+  const unwired = unwiredHookEvents([repo, path.join(sandbox, 'repo-without-hooks')]);
+  check('배선 밖 훅만 잡아냄', unwired.map((item) => item.event).join() === 'pre-rebase');
 }
 
 function main() {
