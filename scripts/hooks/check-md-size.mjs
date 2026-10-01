@@ -30,7 +30,7 @@
 // 줄을 매 커밋 영원히** 찍는다(실측: AC 당시 step-4.md(지금 realize-plan.md) 한 줄이 24커밋 연속). 그 반복은 새로 넘는 파일을
 // 묻는다 — 첫날 수십 건을 쏟지 않으려고 등재를 둔 것과 같은 이유로 막아야 한다.
 // 기억을 등재 목록에 합치지 않고 `~/.ai-contexts/`에 따로 두는 이유: 등재는 사람이 관리하는
-// 다이어트 대상 목록이고 이 기억은 기계 상태다. 합치면 커밋마다 도는 검사가 backlog에 사용자가
+// 문서 전체를 고칠 대상 목록이고 이 기억은 기계 상태다. 합치면 커밋마다 도는 검사가 backlog에 사용자가
 // 낸 적 없는 diff를 쌓게 되고(그 레포는 커밋마다 자동 push한다), 그건 아래 settleBaseline 주석이
 // 이미 거부한 설계다. 기기별로 따로 기억하고, 파일이 없어지면 한 번 더 찍고 마는 것이 전부다.
 import { execFileSync } from "node:child_process";
@@ -149,12 +149,12 @@ function main() {
       baseline
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
-            "무엇을 줄일지는 줄일 후보를 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 후보 갈래는 deploy/skills/scw/rounds/diet.md에 있다.",
+            "사실로 증명된 잘못은 바로 고치고, 나머지 후보는 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
+            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 후보 갈래는 deploy/skills/scw/rounds/weight.md와 judging.md에 있다.",
           ]
         : [
             `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,
-            "등재 목록이 곧 다이어트 대상 목록이다 — 지우는 파일이 아니라 이어서 볼 목록이다.",
+            "등재 목록이 곧 문서 전체를 고칠 대상 목록이다 — 지우는 파일이 아니라 이어서 볼 목록이다.",
           ],
     );
   } else if (unregistered.length) {
