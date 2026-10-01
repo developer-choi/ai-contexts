@@ -1,4 +1,3 @@
-import fs from "node:fs";
 import { readPayload } from "./hook-utils.mjs";
 
 // 턴을 마치는 응답이 영어로 나가면 한국어로 다시 쓰게 돌려보낸다.
@@ -16,8 +15,10 @@ import { readPayload } from "./hook-utils.mjs";
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 이 훅이 한 번 되돌린 뒤도 여기 든다.
 //     계속 되돌리면 세션이 못 끝나고, 영어 산출물이 정답인 턴(번역 등)은 이 한 번의 되물음 뒤 그대로
 //     다시 내면 끝난다
-//   - 사용자의 마지막 발화에 한글이 한 자도 없는 턴 — 영어로 답하는 게 맞다
 //   - 걷어낸 뒤 남는 영문자가 적은 짧은 응답 — 판정할 산문이 없다
+//
+// 사용자 발화가 영어여도 통과시키지 않는다. 목표 언어는 settings가 정하고, 발화로 면제하면
+// `ok`·`ㅇㅋ`처럼 한글 음절이 없는 짧은 대답 뒤의 영어 보고가 그대로 샌다(2026-10-01).
 //
 // 못 보는 것: 도구 호출 사이의 중간 진행 문구. Stop은 턴의 마지막 응답만 받는다.
 
@@ -48,36 +49,6 @@ function hangulRatio(text) {
   return { hangul, latin, ratio: hangul + latin ? hangul / (hangul + latin) : 1 };
 }
 
-// 하네스가 사용자 자리에 넣는 줄. 사용자 발화가 아니므로 건너뛴다.
-const HARNESS_LINE = /^\[Request interrupted by user[^\]]*\]$/;
-
-// transcript에서 사용자가 직접 친 마지막 발화를 찾는다. tool_result·하네스 주입(<system-reminder> 등)은
-// 사용자 발화가 아니므로 건너뛴다. 못 읽으면 null.
-function lastUserText(transcriptPath) {
-  let lines;
-  try {
-    lines = fs.readFileSync(transcriptPath, "utf8").split("\n");
-  } catch {
-    return null;
-  }
-  for (let i = lines.length - 1; i >= 0; i -= 1) {
-    let entry;
-    try {
-      entry = JSON.parse(lines[i]);
-    } catch {
-      continue;
-    }
-    if (entry.type !== "user" || entry.isMeta) continue;
-    const content = entry.message?.content;
-    const text = typeof content === "string"
-      ? content
-      : Array.isArray(content) ? content.filter((c) => c.type === "text").map((c) => c.text).join("\n") : "";
-    const own = text.replace(/<([\w-]+)[^>]*>[\s\S]*?<\/\1>/g, " ").trim();
-    if (own && !HARNESS_LINE.test(own)) return own;
-  }
-  return null;
-}
-
 function verdict(payload) {
   if (payload.stop_hook_active) return null;
   // 필드가 없으면 판정할 게 없어 통과하지만, 이름이 바뀐 것이면 이 훅이 영영 꺼진 것이다 — 조용히 넘기지 않는다.
@@ -87,8 +58,6 @@ function verdict(payload) {
   }
   const { latin, ratio } = hangulRatio(payload.last_assistant_message);
   if (latin < MIN_LATIN || ratio >= THRESHOLD) return null;
-  const user = lastUserText(payload.transcript_path ?? "");
-  if (user !== null && !HANGUL.test(user)) return null;
   return (
     `방금 응답이 영어로 나갔습니다(코드·경로·인용·식별자를 뺀 산문의 한글 비율 ${ratio.toFixed(2)}). ` +
     "같은 내용을 한국어로 다시 써서 턴을 마치세요. 코드·경로·식별자·영어 원문 인용은 그대로 두고 설명 문장만 한국어로 씁니다. " +
