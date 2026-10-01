@@ -40,7 +40,7 @@ npm run unsync:system -- <target>
 
 ## 반복 실행 기준
 
-`sync:system`은 기존 AC 관리 파일을 먼저 제거한 뒤 다시 복사해 고아 파일을 남기지 않아야 합니다. 사용자 동적 설정은 `settings.json` 병합 규칙을 통해 보존하고, 외부 스킬과 공존해야 하는 `skills`는 항목 단위로 관리합니다.
+`sync:system`은 기존 AC 관리 파일을 먼저 제거한 뒤 다시 복사해 고아 파일을 남기지 않아야 합니다. 사용자 동적 설정은 `settings.json` 병합 규칙으로 보존하고, 외부 스킬과 공존해야 하는 `skills`는 항목 단위로 관리합니다.
 
 ## Hook 준비 상태
 
@@ -50,7 +50,7 @@ npm run unsync:system -- <target>
 npm run verify:hooks
 ```
 
-AC는 추적되는 `.githooks` 붙박이 훅을 쓰므로 훅 파일은 새 worktree 체크아웃에 항상 딸려옵니다. `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성만 자동 설치합니다(편의). 하네스 밖(맨 터미널)에서 만든 worktree는 그 안에서 `npm ci`를 실행해 `commitlint` 등 deps를 채운 뒤 커밋합니다.
+AC는 추적되는 `.githooks` 붙박이 훅을 쓰므로 훅 파일은 새 worktree 체크아웃에 항상 딸려옵니다. `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성과 gitignore된 env 파일을 primary에서 자동으로 채웁니다(편의). 하네스 밖(맨 터미널)에서 만든 worktree는 그 안에서 `npm ci`를 실행해 `commitlint` 등 deps를 채운 뒤 커밋합니다.
 
 ## Windows 참고
 

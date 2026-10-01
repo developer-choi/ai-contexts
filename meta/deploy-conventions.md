@@ -115,7 +115,7 @@ sync·unsync 스크립트의 동작이 바뀌면 `meta/guides/` 하위의 관련
 - AC 훅은 **두 짝**으로 발동한다 — 추적되는 `.githooks` 파일(체크아웃에 항상 딸려옴) + 기기 전역에 걸린 설정 훅 배선(`.githooks/<이벤트>`가 있으면 실행). 둘 다 워크트리를 어떻게 만들든 따라오므로 첫 커밋부터 훅이 돈다. "생성 순간 heal"에 의존하지 않는다.
 - 배선은 `sync:environment` **하나**가 건다. 레포에 `prepare`나 설치 스크립트를 두지 않는다 — 등록이 `.git/config`에 살면 clone이 그것을 못 가져와, 레포별 등록으로는 "클론만 하면 훅이 돈다"가 원리적으로 불가능하기 때문이다. 대가로 그 명령을 한 번도 안 돌린 기기에서는 **모든 레포**의 검사가 함께 빠진다. **git 2.54 미만은 설정 훅을 조용히 무시하므로** 등록 전에 버전을 확인해 시끄럽게 끊는다(`scripts/lib/git-hooks.mjs`).
 - 걸 이벤트 목록은 `scripts/lib/git-hooks.mjs`의 `HOOK_EVENTS`가 정본이다. `.githooks/`에 새 이벤트를 쓰는 레포가 생기면 여기에 더한다 — 안 더하면 그 레포의 그 검사가 아무 표시 없이 사라진다.
-- 직후 PostToolUse self-heal hook(`post-worktree-install` / `post-enterworktree-install`)은 새 워크트리에 **의존성만** 설치한다(husky 셋업 복구는 더 이상 없다). 훅 발동은 `.githooks`가 구조적으로 보장하고, deps는 편의(DX)일 뿐이다 — deps가 없어도 훅은 fail-loud로 커밋을 막는다. self-heal은 하네스를 거친 생성에만 발동하므로, 맨 터미널에서 만든 워크트리는 그 안에서 `npm ci`를 직접 실행한다.
+- 직후 PostToolUse self-heal hook(`post-worktree-install` / `post-enterworktree-install`)은 새 워크트리에 의존성과 gitignore된 env 파일을 primary에서 채운다. 둘 다 편의(DX)이고 훅 발동은 `.githooks`가 구조적으로 보장한다 — deps가 없어도 훅은 fail-loud로 커밋을 막는다. self-heal은 하네스를 거친 생성에만 발동하므로, 맨 터미널에서 만든 워크트리는 그 안에서 `npm ci`를 직접 실행한다.
 - 커밋 전 hook 상태가 의심되면 `npm run verify:hooks`를 실행한다. git 버전·`.githooks` 파일·전역 배선·`commitlint` 실행 파일을 확인하고, 배선이 빠져 있으면 재등록으로 복구한다. 옛 방식의 잔재(레포별 `hook.repo-*` 등록)가 남아 있으면 전역 훅과 둘 다 돌아 같은 검사가 두 번 실행되므로 이것도 어긋남으로 잡는다. `core.hooksPath`는 우리가 안 건 값일 수 있어 어느 쪽도 지우지 않는다.
 
 ## deploy/hooks 검증 원칙
