@@ -103,11 +103,12 @@ export function isWorkflowTeammate(target) {
 // 커밋이 남에게 보이는 자리(보호 브랜치 머지·PR 생성) 직전에, 들어갈 커밋을 주제별로 정리했다는 한 줄을
 // description에 요구한다. 두 훅이 같은 줄·같은 기준을 써야 한쪽에서 통과한 설명이 다른 쪽에서 안 막힌다.
 // 정리가 됐는지는 훅이 판정하지 못한다 — 막는 것은 커밋 목록을 안 보고 내는 것까지라, 돌려보낼 때 목록을 보여 준다.
-// description 필드가 없는 도구·에이전트(codex)에는 요구하지 않는다 — 따를 방법이 없는 거부가 된다.
+// description 키가 없어도 빈 문자열로 보고 요구한다 — 모델이 생략하면 키가 빠져 들어온다.
+// codex도 Bash로 들어오는 호출은 함께 거부된다 — codex를 안 쓰기로 해 받아들였다(2026-10-03 결정).
 const TIDY_LINE = /^\s*커밋 정리:/m;
 export function lacksTidyLine(payload) {
   const input = payload.tool_input ?? {};
-  if (!["Bash", "PowerShell"].includes(payload.tool_name) || !("description" in input)) return false;
+  if (!["Bash", "PowerShell"].includes(payload.tool_name)) return false;
   return !TIDY_LINE.test(typeof input.description === "string" ? input.description : "");
 }
 export function tidyRequest(what, lists) {

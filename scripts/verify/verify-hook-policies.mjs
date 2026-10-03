@@ -1214,7 +1214,13 @@ const freeRepoCases = (repos) => {
     'GraphQL createPullRequest도 돌려보낸다',
     { description: 'PR을 연다', reasonIncludes: ['커밋 정리:'] },
   ],
-  ['check-git-push-policy.mjs', `cd ${gated} && gh pr create --title t`, 'pass', 'description 필드가 없는 페이로드(codex)는 요구하지 않는다', { description: null }],
+  [
+    'check-git-push-policy.mjs',
+    `cd ${gated} && gh pr create --title t`,
+    'deny',
+    'description 키가 없어도 「커밋 정리:」 줄을 요구한다',
+    { description: null, reasonIncludes: ['커밋 정리:'] },
+  ],
   ['check-git-push-policy.mjs', `cd ${gated} && gh pr list`, 'pass', 'PR을 안 여는 gh pr은 요구하지 않는다', { description: 'PR 목록' }],
   ['check-git-push-policy.mjs', `cd ${gated} && gh pr view 3`, 'pass', 'PR 조회는 막지 않는다'],
   [
@@ -1320,9 +1326,9 @@ const freeRepoCases = (repos) => {
   [
     'check-git-merge-policy.mjs',
     `git -C ${gated} merge feature`,
-    'ask',
-    'description 필드가 없는 페이로드(codex)는 요구하지 않고 승인 창',
-    { description: null },
+    'deny',
+    'description 키가 없어도 요약을 요구하며 돌려보낸다',
+    { description: null, reasonIncludes: ['요약'] },
   ],
   [
     'check-git-merge-policy.mjs',
@@ -1740,7 +1746,7 @@ const untrackedGroup = () => withUntrackedFixture((dir) =>
 // 다섯째 칸(선택): agentId를 주면 서브에이전트 페이로드로 돌리고, reasonIncludes의 낱말이 사유에 다 있어야 통과.
 // sessionCwd를 주면 세션 폴더(페이로드 cwd)로 싣는다 — 명령이 옮겨 간 폴더와 세션 폴더의 등급이 다를 때를 잰다.
 // description을 안 주면 여러 줄 요약을 싣는다 — 승인 창 머지는 요약 없는 설명을 돌려보내기 때문이다.
-// description: null이면 키째 뺀다(필드가 없는 codex 페이로드).
+// description: null이면 키째 뺀다(모델이 description을 생략한 호출).
 const MERGE_SUMMARY = '무엇: feature 브랜치\n왜: 시험\n확인: 테스트 통과\n되돌리기: revert\n커밋 정리: 1개, 이미 정리됨';
 const freeRepoGroup = () => withFreeRepoFixture((repos) =>
   runCases(freeRepoCases(repos), async ([file, command, expected, note, { agentId, reasonIncludes = [], sessionCwd, description = MERGE_SUMMARY } = {}]) => {

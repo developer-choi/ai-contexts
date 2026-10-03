@@ -52,12 +52,13 @@ const MERGE_NEEDS_SUMMARY =
   "승인 창에는 명령과 이 호출의 설명(description)만 보여, 지금 설명으로는 사용자가 이 머지를 판단할 근거가 없습니다. " +
   `이 브랜치에서 한 일을 사용자가 읽기 좋게 줄을 나눠(비어 있지 않은 줄 ${MIN_SUMMARY_LINES}줄 이상) 요약해 description에 싣고 같은 명령을 다시 내세요 — ` +
   "무엇을 왜 바꿨는지, 어떻게 확인했는지처럼 머지를 정하는 데 필요한 것을 담습니다.";
-// description 필드가 있는 호출에만 요구한다. 이 훅은 codex에도 실리는데 거기엔 이 필드가 없어,
-// 요구하면 따를 방법이 없는 거부가 된다. 필드가 없으면 예전처럼 승인 창으로 간다.
+// description 키가 없어도 빈 문자열로 보고 요구한다. 모델이 description을 생략하면 키가 빠져 들어오는데,
+// 그때 검사를 건너뛰었더니 한 줄 승인 창이 떴다(2026-10-03 MP 머지).
+// codex도 Bash로 들어오는 호출은 함께 거부된다 — codex를 안 쓰기로 해 받아들였다(2026-10-03 결정).
 const DESCRIBED_TOOLS = new Set(["Bash", "PowerShell"]);
 const lacksSummary = (payload) => {
   const input = payload.tool_input ?? {};
-  if (!DESCRIBED_TOOLS.has(payload.tool_name) || !("description" in input)) return false;
+  if (!DESCRIBED_TOOLS.has(payload.tool_name)) return false;
   const d = typeof input.description === "string" ? input.description : "";
   return d.split("\n").filter((l) => l.trim()).length < MIN_SUMMARY_LINES;
 };
