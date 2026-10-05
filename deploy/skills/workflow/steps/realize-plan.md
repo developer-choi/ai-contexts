@@ -140,7 +140,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
-- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([verify의 1회차 커밋 정리·재정렬](verify.md#step-65-1회차-커밋-정리재정렬))
+- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([verify 「커밋 정리 — 사용자 리뷰 전」](verify.md#step-625-커밋-정리--사용자-리뷰-전))
 - stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 

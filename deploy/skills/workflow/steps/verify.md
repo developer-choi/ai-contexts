@@ -16,7 +16,7 @@ next:
 ## 입력·산출물·작업 위치
 
 - **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
-- **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 1회차 정리·재정렬된 커밋 + force-push 요청
+- **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
 ---
@@ -72,18 +72,32 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 ---
 
+## Step 6.2.5. 커밋 정리 — 사용자 리뷰 전
+
+verify에서 Step 6.2가 **처음** 0건으로 수렴하면, 사용자 리뷰에 앞서 커밋을 정리한다. 한 번만 한다 — 6.3 이후 다시 도는 6.2가 수렴해도 다시 정리하지 않는다.
+
+- stub 커밋은 [stub 정리](../conventions/artifact/stub.md#정리)의 케이스대로 처리한다
+- 서로 상쇄되는 커밋은 없앤다
+- 리뷰 수정 커밋은 고친 대상 커밋에 합친다
+
+verify의 커밋 정리는 본 PR 슬라이스 정리에만 집중한다. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다.
+
+**이 정리 뒤의 수정은 모두 fixup 커밋으로 쌓는다** — 6.3 사용자 리뷰, 6.4 동작 테스트, 6.4.1 시각 대조, 그 뒤 다시 도는 6.2 AI 리뷰의 수정 전부다. Implementer가 고친 뒤 고친 대상 커밋을 가리키는 `git commit --fixup=<대상>`으로 쌓고, 정리한 커밋을 다시 묶지 않는다. 합치기는 Step 6.5에서 한 번에 한다.
+
+---
+
 ## Step 6.3. 사용자 리뷰 대기
 
-AI 리뷰(Step 6.2 code-review) + 모든 수정 완료 후, **사용자가 직접 코드 리뷰**한다. 이 시점까지 stub 커밋부터 IMPL/리뷰 수정 커밋이 그대로 보존되어 있어야 한다.
+Step 6.2.5에서 정리된 커밋으로 **사용자가 직접 코드 리뷰**한다.
 
-이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — 모르는 코드는 Step 6.5 정리 전에 여기서 모두 짚어 해소한다.
+이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — 모르는 코드는 여기서 모두 짚어 해소한다.
 
 Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
-- 현재 커밋 목록 (stub + IMPL + 리뷰 수정) 출력
+- 정리된 커밋 목록 출력
 - 사용자 리뷰 통과 시 Step 6.4로 진행
 
-사용자가 추가 수정 요청하면 implement의 Implementer가 처리 → 다시 Step 6.2 AI 리뷰 → Step 6.3 사용자 리뷰 반복.
+사용자가 추가 수정을 요청하면 implement의 Implementer가 고쳐 [fixup 커밋으로 쌓는다](#step-625-커밋-정리--사용자-리뷰-전) → 다시 Step 6.2 AI 리뷰 → Step 6.3 사용자 리뷰 반복.
 
 ---
 
@@ -108,7 +122,7 @@ AI 실행:
 - [ ] (사용자 · <사유>) <시나리오>: <조건>일 때 <기대 동작>
 ```
 
-Lead는 변경분을 훑어 TC 추출 → 크롬으로 실행 → 넘길 항목이 있으면 파일 작성 → 사용자에게 보고한다. 보고에는 AI가 돌린 시나리오마다 판정 근거가 된 측정값 한 줄과 사용자 몫 건수(0건이어도 적는다)를 싣고, 사용자 몫이 있으면 파일 경로 + 테스트 진입 방법(dev 서버 URL 등) + 항목별 사유를 더한다. AI 실행 또는 사용자 테스트에서 실패 발견 시 LLM에게 수정 지시 → 구현 단계 Implementer 처리 → 다시 6.2부터 진행.
+Lead는 변경분을 훑어 TC 추출 → 크롬으로 실행 → 넘길 항목이 있으면 파일 작성 → 사용자에게 보고한다. 보고에는 AI가 돌린 시나리오마다 판정 근거가 된 측정값 한 줄과 사용자 몫 건수(0건이어도 적는다)를 싣고, 사용자 몫이 있으면 파일 경로 + 테스트 진입 방법(dev 서버 URL 등) + 항목별 사유를 더한다. AI 실행 또는 사용자 테스트에서 실패 발견 시 LLM에게 수정 지시 → 구현 단계 Implementer 처리(fixup 커밋) → 다시 6.2부터 진행.
 
 ### Step 6.4.1. Figma 시각 대조 + 승인 게이트 (UI 컴포넌트 PR 한정)
 
@@ -116,25 +130,21 @@ UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더
 
 - 검증 기준은 figma 원본: [검증 기준 — figma 원본 직접 fetch](../conventions/artifact/markup-spec.md#검증-기준--figma-원본-직접-fetch) 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
-- 반려분은 구현 단계 Implementer 흐름으로 수정 → 다시 6.2부터 진행.
+- 반려분은 구현 단계 Implementer 흐름으로 수정(fixup 커밋) → 다시 6.2부터 진행.
 - 승인 게이트이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
 - **figma 없는 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려·반려분 수정 흐름은 같다.
 
 ---
 
-## Step 6.5. 1회차 커밋 정리·재정렬
+## Step 6.5. fixup 합치기
 
-사용자 리뷰·동작 테스트 통과 후 WRITING_REFINER(PR 본문 확정) 진입 전, stub 커밋을 drop하고 슬라이스별로 커밋을 재정렬한다.
+사용자 리뷰·동작 테스트 통과 후 WRITING_REFINER(PR 본문 확정) 진입 전, Step 6.2.5 뒤에 쌓인 fixup 커밋을 대상 커밋에 합친다. 이 환경은 대화형 편집기를 못 띄우므로 시퀀스 편집기를 비워 비대화형으로 돌린다:
 
-이 정리는 **1회차**로 본 PR 슬라이스 정리에만 집중한다. 메시지 양식·라이프사이클은 [conventions/commits.md](../conventions/commits.md) 참조. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다.
+```
+GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
+```
 
-### Step 6.5.1. 케이스 분기
-
-stub 커밋 상태(빈 껍데기 / 본문 안고 있음)에 따라 정리 방식이 갈린다. 케이스별 명령·사유는 [정리](../conventions/artifact/stub.md#정리) 참조.
-
-### Step 6.5.2. 사용자에게 force-push 요청 안내
-
-재정렬 완료 후 사용자에게 force-push를 요청한다. 이 PR 브랜치의 커밋을 딛고 뻗은 다른 브랜치가 있으면 새 tip 위로 옮기도록 함께 요청한다 — 의존 PR은 이 PR의 realize-plan 커밋 위에서 뻗으므로 재정렬이 그 밑을 바꾼다.
+합친 뒤 사용자에게 force-push를 요청한다. 이 PR 브랜치의 커밋을 딛고 뻗은 다른 브랜치가 있으면 새 tip 위로 옮기도록 함께 요청한다 — 의존 PR은 이 PR의 realize-plan 커밋 위에서 뻗으므로 Step 6.2.5와 이 단계가 그 밑을 바꾼다.
 
 ---
 
@@ -180,7 +190,7 @@ Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 �
 - 사용자 리뷰 통과 여부
 - 사용자 동작 테스트 결과 (실패 시 수정 사항 포함)
 - 사용자 Figma 시각 대조 승인 여부 (UI 컴포넌트 PR — 반려·수정분 포함)
-- 커밋 정리·재정렬 결과 (재정렬 후 커밋 목록)
+- 커밋 정리 결과 (사용자 리뷰 전 정리 후 커밋 목록, fixup 합치기 후 커밋 목록)
 - decisions.md 최신화 항목 (변경·추가된 결정만)
 - 수정 사항
 

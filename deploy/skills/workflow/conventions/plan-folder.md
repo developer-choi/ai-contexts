@@ -34,7 +34,7 @@
       reference.md      ← plan·realize-plan 누적
       implementation.md ← realize-plan 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조
       overview.md       ← plan 산출물
-    retained/           ← verify 「1회차 커밋 정리·재정렬」 진입 시 일괄 폐기
+    retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기
       markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 충실도 검증 자체는 MARKUP 담당)
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비

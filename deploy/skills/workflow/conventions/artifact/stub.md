@@ -102,7 +102,7 @@ export type UserListResponse = {
 
 ### 보존
 
-- stub 커밋이 base 위에 쌓여 있음. 사용자 리뷰까지 보존
+- stub 커밋이 base 위에 쌓여 있음. verify 「커밋 정리 — 사용자 리뷰 전」까지 보존
 - Lead가 stub 파일들을 탐색·분류해서 Implementer에게 컨텍스트 주입. Implementer가 직접 탐색 X
 - 보존 단계 안에서 squash 금지
 
@@ -112,13 +112,11 @@ export type UserListResponse = {
 
 ### 정리
 
-사용자 리뷰·동작 테스트 통과 후 stub 커밋을 정리한다.
-
 케이스 분기:
 
 #### 케이스 A — stub이 빈 껍데기
 
-stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐. stub 커밋을 drop하고 슬라이스별 IMPL에 리뷰 수정을 합친다.
+stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐. stub 커밋을 drop한다.
 
 #### 케이스 B — stub이 본문 안고 있음
 
