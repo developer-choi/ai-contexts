@@ -16,7 +16,7 @@ stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·�
 마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
 
 - **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — realize-plan 전면 stub 대상이 아니다.
-- **공통 지정 컴포넌트** (MARKUP이 [markup/index.md](../../steps/markup/index.md) 「공통 컴포넌트 확정」으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.
+- **공통 지정 컴포넌트** (MARKUP이 [공통 컴포넌트 확정](../../steps/markup/index.md#공통-컴포넌트-확정)으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.
 
 PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. realize-plan의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
@@ -98,7 +98,7 @@ export type UserListResponse = {
 
 ### 생성
 
-- 주석은 [comments.md](./comments.md) 「라이프사이클 > 생성」 적용
+- 주석은 [comments.md 생성](./comments.md#생성-신규-stub-작성-시) 적용
 
 ### 보존
 
