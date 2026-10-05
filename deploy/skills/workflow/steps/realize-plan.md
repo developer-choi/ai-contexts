@@ -185,7 +185,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 **산출물 간 정합성**
 - stub `.tsx`의 props 타입을 `.module.scss`/hook stub이 일관되게 소비하는지 대조한다
 - hook stub의 API 응답 placeholder가 호출자 타입과 일치하는지 확인한다
-- `it.todo` 자연어가 logic stub의 에러/엣지 시나리오를 커버하는지 확인한다
+- `it.todo` 주석이 logic stub의 에러/엣지 시나리오를 커버하는지 확인한다
 - implementation.md의 각 컴포넌트/모듈 커밋에 해당 테스트가 포함되어 있는지 확인한다
 
 **채용과제 관점 (채용과제인 경우에만)**

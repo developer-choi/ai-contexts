@@ -14,25 +14,25 @@ implement(구현)·[verify 「Gap Analysis」](../../steps/verify.md#step-61-gap
 
 ## 양식
 
-각 커밋 항목은 **신설** 구현 파일과 대응 테스트 파일(stub `*.test.tsx`)을 sub-bullet으로 나란히 명시. **테스트 파일 안의 `it.todo` 문자열은 옮겨 적지 않는다** — 그 목록의 진실 원천은 stub 파일이다. 면제는 사유를 함께 적는다 (예: "page/layout이라 단위테스트 면제, E2E에서 다룸").
+각 커밋 항목은 **신설** 구현 파일과 대응 테스트 파일(stub `*.test.tsx`)을 sub-bullet으로 나란히 명시. **테스트 파일 안의 `it.todo` 주석 내용은 옮겨 적지 않는다** — 그 목록의 진실 원천은 stub 파일이다. 면제는 사유를 함께 적는다 (예: "page/layout이라 단위테스트 면제, E2E에서 다룸").
 
 ## `it.todo` 매칭 게이트
 
-같은 매칭 룰이 **상류→하류 사슬**로 두 시점에 적용된다: `decisions 행동 결정 → it.todo → 실제 it(...)`.
+**상류→하류 사슬** `decisions 행동 결정 → it.todo → 실제 it(...)`을 두 시점에 본다. PLAN 시점엔 행동 결정마다 `it.todo`가 있는지 맞추고, IMPL 종료 시점엔 테스트 경로에 `it.todo`가 남았는지 센다.
 
 ### PLAN 시점 — decisions 행동 결정 ↔ `it.todo` (커버리지 표 강제)
 
 - decisions.md(+ overview.md 의도)에서 **행동 결정**을 모두 추출 — 사용자에게 관측되는 동작·트리거·분기·상태 전이·성공/실패 갈래. 실패와 취소, 이동과 머무름처럼 **UI 동작이 다르면 별개 행동 결정**으로 센다. Q&A·열린 질문 절에 묻힌 갈래도 빠짐없이
-- 각 행동 결정 → 커버하는 `it.todo`(또는 면제 사유)를 아래 표로 implementation.md 「행동 결정 커버리지」 절에 기재:
+- 각 행동 결정 → 커버하는 `it.todo`(또는 면제 사유)를 아래 표로 적는다. `it.todo` 이름은 고정 문구라 구분이 안 되므로([stub.md](stub.md#testtsx)), 칸에는 테스트 파일과 그 `it.todo` 주석의 요지를 적는다. 표는 implementation.md 「행동 결정 커버리지」 절에 기재:
 
-  | 행동 결정 (decisions 출처) | 커버 `it.todo` | 면제 사유 |
+  | 행동 결정 (decisions 출처) | 커버 `it.todo` (파일 · 주석 요지) | 면제 사유 |
   |---|---|---|
 
-- **이 표의 `it.todo` 전사는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 「코드-narrative 오배치 검출」 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
+- **이 표의 `it.todo` 주석 요지 기재는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 「코드-narrative 오배치 검출」 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
 - 면제는 MP `docs/patterns/testing/WhatToTest.md` 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
 - **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지** — `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md>`가 센다. 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 그대로 사람 몫이고, 기계가 하는 것은 채워진 표에 빈 행이 있는지뿐이다
 - 오라클은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다
 
-### IMPL 종료 시점 — `it.todo` ↔ 실제 `it(...)` 케이스
+### IMPL 종료 시점 — 남은 `it.todo`
 
-`node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <테스트 경로>`가 대조한다. 짝이 없는 `it.todo`가 나오면 사용자에게 보고한다 — 문구만 다듬어 옮긴 것인지 정말 빠진 것인지는 사람이 가른다.
+`node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <테스트 경로>`가 테스트 경로에 남은 `it.todo`를 센다. 1건이라도 남으면 IMPL 종료 금지 — IMPL은 `it.todo`마다 주석을 보고 MP `docs/patterns/testing/TestWriting.md` 「네이밍」대로 이름을 지어 실제 `it(...)`로 바꾼다.

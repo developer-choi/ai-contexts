@@ -141,9 +141,10 @@ function reviewBypass() {
   console.log('\n  조건 ①(진실원천 아티팩트 선언 여부)은 계획 문서를 봐야 하므로 여기서 안 본다.');
 }
 
-// ── todo-coverage: 표 빈 행 + it.todo ↔ it(...) ──────────────────────────────
+// ── todo-coverage: 표 빈 행 + 남은 it.todo ────────────────────────────────────
 // 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 사람 몫이다. 여기서 세는 것은
-// 채워진 표에 빈 행이 있는지와, 그 `it.todo`가 실제 `it(...)`로 옮겨졌는지뿐이다.
+// 채워진 표에 빈 행이 있는지와, 테스트 경로에 `it.todo`가 남았는지뿐이다.
+// `it.todo` 이름은 PLAN이 고정 문구로 두고 IMPL이 새로 지으므로 문구로 짝을 맞추지 않는다.
 function todoCoverage() {
   const impl = optOf('impl');
   const tests = optOf('tests');
@@ -178,16 +179,9 @@ function todoCoverage() {
     .map((f) => fs.readFileSync(f, 'utf8'))
     .join('\n');
 
-  const desc = (re) => [...source.matchAll(re)].map((m) => m[2]);
-  const todos = desc(/it\.todo\s*\(\s*(['"`])(.*?)\1/g);
-  const written = new Set(desc(/(?<!\.todo)\bit\s*\(\s*(['"`])(.*?)\1/g));
-  const missing = todos.filter((t) => !written.has(t));
-
-  console.log(`\n[it.todo ↔ it(...)] todo ${todos.length}건 · 작성 ${written.size}건 · 짝 없는 todo ${missing.length}건`);
-  missing.forEach((t) => console.log(`  ${t}`));
-  if (missing.length) {
-    problems.push('짝이 없는 it.todo가 있다 — 문구만 다듬은 것인지 정말 빠진 것인지는 사람이 가른다');
-  }
+  const left = (source.match(/\bit\.todo\s*\(/g) ?? []).length;
+  console.log(`\n[남은 it.todo] ${left}건`);
+  if (left) problems.push('실제 it(...)로 바꾸지 않은 it.todo가 남았다 — IMPL 종료 금지');
 }
 
 if (command === 'artifacts') artifacts();

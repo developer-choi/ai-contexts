@@ -120,12 +120,12 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 ## Step 5.4. 마무리
 
-- [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--ittodo--실제-it-케이스) 적용
+- [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo) 적용
 - **TODO 잔존 점검** — [종료 게이트](../conventions/artifact/comments.md#종료-게이트-구현-마무리) 실행. 인라인 마커·상단 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
-  - **`it.todo` 커버리지 (전체 todo 수 / 구현된 it 수)**
+  - **작성한 `it` 수 / stub의 `it.todo` 수** — `it.todo`를 바꾸지 않고 지워도 게이트는 통과하므로 두 수를 나란히 보인다
   - 수정 사항 (있는 경우)
 - 사용자가 verify에서 코드 리뷰 수행
 
