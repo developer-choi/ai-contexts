@@ -1,6 +1,6 @@
 # implementation.md 컨벤션
 
-`/plan/pr{N}/persistent/implementation.md`의 책임·양식·`it.todo` 매칭 게이트 단일 출처.
+`/plan/pr{N}/retained/implementation.md`의 책임·양식·`it.todo` 매칭 게이트 단일 출처.
 
 ## 책임·위치
 
@@ -10,9 +10,17 @@
 
 정확한 편집 문자열·식별자·줄번호·**커밋 SHA**는 전사하지 않는다 — rename·이동·설정치환은 "grep `<패턴>` → 일괄 치환" 지시로 접고, md엔 코드로 표현 못 하는 것(gotcha·근거)만 남긴다. 커밋은 계획 상대 순번(`### N`)으로만 지칭한다.
 
-implement(구현)·[verify 「Gap Analysis」](../../steps/verify.md#step-61-gap-analysis-계획--실제-차이-검사)·WRITING_REFINER(PR body 확정)에서 소비.
+implement(구현)·IMPL 종료 매칭 게이트·[verify 「Gap Analysis」](../../steps/verify.md#step-61-gap-analysis-계획--실제-차이-검사)에서 소비.
+
+IMPL에 들어간 뒤로는 고치지 않는다. 위 소비처는 모두 계획과 실제를 대조하므로, 계획을 실제에 맞춰 고치면 잡아야 할 차이가 미리 지워진다. 지금 상태의 정본은 코드·커밋이다.
 
 ## 양식
+
+파일 맨 위에 아래 안내문을 둔다.
+
+```markdown
+> PLAN 시점 구현 계획의 스냅샷이다. IMPL에 들어간 뒤로는 고치지 않는다 — 지금 상태의 정본은 코드·커밋이고, 이 문서와 다른 점은 verify Gap Analysis가 차이로 잡는다.
+```
 
 각 커밋 항목은 **신설** 구현 파일과 대응 테스트 파일(stub `*.test.tsx`)을 sub-bullet으로 나란히 명시. **테스트 파일 안의 `it.todo` 주석 내용은 옮겨 적지 않는다** — 그 목록의 진실 원천은 stub 파일이다. 면제는 사유를 함께 적는다 (예: "page/layout이라 단위테스트 면제, E2E에서 다룸").
 

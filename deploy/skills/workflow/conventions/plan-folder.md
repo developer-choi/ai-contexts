@@ -30,11 +30,11 @@
       design-system.md  ← recruitment 4단계 산출물 (채용 한정). COMPONENTS 종류 PR이 소비 ([conventions/pr-types/components.md])
   pr{N}/
     persistent/
-      decisions.md      ← plan 산출물 + verify 「decisions.md 최신화」 갱신
+      decisions.md      ← plan 산출물. 그 뒤로는 verify 「decisions.md 최신화」에서만 갱신
       reference.md      ← plan·realize-plan 누적
-      implementation.md ← realize-plan 산출물. 소비처는 [conventions/artifact/implementation-spec.md] 참조
       overview.md       ← plan 산출물
     retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기
+      implementation.md ← realize-plan 산출물. 이후 갱신 없음 — 마지막 소비는 verify 「Gap Analysis」. 소비처는 [conventions/artifact/implementation-spec.md] 참조
       markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 충실도 검증 자체는 MARKUP 담당)
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비

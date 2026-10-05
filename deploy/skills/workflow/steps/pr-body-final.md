@@ -17,7 +17,6 @@ next: []
 
 - **입력**:
   - WRITING_IDEATOR 입력([입력](pr-body-draft.md#입력산출물작업-위치): overview·decisions·reference·todo.md) +
-  - `pr{N}/persistent/implementation.md`
   - 커밋 로그 (브랜치 유도는 아래 「cwd」)
   - `decisions.md`의 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화) 갱신분
   - `pr{N}/consumable/` 잔여 산출물

@@ -22,8 +22,9 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 입력·산출물·작업 위치
 
-- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/persistent/implementation.md`·`reference.md` + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
+- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md` + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
+- 구현 중 생긴 결정·plan 정정은 implementation.md·decisions.md에 적지 않는다 — decisions.md 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 
 ---
@@ -61,7 +62,7 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/persistent/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
+| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
 | Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중), `pr{N}/persistent/reference.md` (회사·프로젝트 고유 컨벤션 — 리뷰어 자체 컨벤션 외 추가 검증 기준) |
 | Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, `pr{N}/persistent/reference.md`, stub `*.test.tsx`의 `it.todo` |
 
@@ -86,7 +87,7 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 ### Step 5.2.2. gotchas
 
 - **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
-- **커밋 분할 기준선: PLAN 계획** — `pr{N}/persistent/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
+- **커밋 분할 기준선: PLAN 계획** — `pr{N}/retained/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
 - **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
 - **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.
 - 새 파일/모듈을 만들기 전에 프로젝트에 같은 역할의 코드가 이미 있는지 확인한다. 기존 API, 타입, 컴포넌트를 재사용할 수 있으면 새로 만들지 않는다.

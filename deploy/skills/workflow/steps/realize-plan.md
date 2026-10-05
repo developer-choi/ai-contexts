@@ -26,8 +26,8 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 - **입력**: plan 산출물 `pr{N}/persistent/`의 overview.md·decisions.md·reference.md + `/plan/pr{N}/`·`/plan/background/`의 잔여 산출물(아래 [잔여 산출물 소비](#1-잔여-산출물-소비)에서 소비)
 - **산출물**:
   - 코드 변경 + 커밋 — stub 커밋(무거운 PR) 또는 그 자리 실행·커밋(가벼운 PR)
-  - `pr{N}/persistent/`: implementation.md, reference.md 누적
-  - `pr{N}/retained/`: markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
+  - `pr{N}/persistent/`: reference.md 누적
+  - `pr{N}/retained/`: implementation.md, markup.md (UI 컴포넌트 PR만, figma 없는 모드 제외)
 - **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(`<레포>/.claude/worktrees/pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
 
 ---
@@ -104,7 +104,7 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [정의·범위](../conventions/artifact/stub.md#정의범위)) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
 | `markup.md` | `pr{N}/retained/` | **「Figma 원본 링크 인덱스」 절(사용자 입력)** + 토큰 매핑표, 매칭표 | UI 컴포넌트가 있는 PR이면 필수. 사용자가 figma 컴포넌트·상태별 URL을 직접 입력. [verify 「Figma 시각 대조」](verify.md#step-641-figma-시각-대조--승인-게이트-ui-컴포넌트-pr-한정) 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. figma 없는 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
-| `implementation.md` | `pr{N}/persistent/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
+| `implementation.md` | `pr{N}/retained/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
 

@@ -15,7 +15,7 @@ next:
 
 ## 입력·산출물·작업 위치
 
-- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/persistent/implementation.md`(Gap Analysis 계획)·`reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/retained/implementation.md`(Gap Analysis 계획) + `pr{N}/persistent/reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
 - **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
@@ -23,7 +23,7 @@ next:
 
 ## Step 6.1. Gap Analysis (계획 ↔ 실제 차이 검사)
 
-`pr{N}/persistent/implementation.md`의 `### N.` 계획 커밋 항목 목록과 실제 `git log`를 대조하여 차이를 식별한다.
+`pr{N}/retained/implementation.md`의 `### N.` 계획 커밋 항목 목록과 실제 `git log`를 대조하여 차이를 식별한다.
 
 대조 기준:
 
@@ -152,25 +152,15 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 
 구현·리뷰 과정에서 새로 발생하거나 plan 작성 시점과 달라진 의사결정을 반영한다. 기준은 [갱신](../conventions/artifact/decisions-lifecycle.md#갱신-구현리뷰-후) 참조.
 
+결정은 두 곳에서 모은 뒤 decisions.md에 한 번에 쓴다.
+
+1. 이 PR의 implement·verify 대화 — 앞 세션에서 나온 결정은 그 세션 대화 기록을 읽는다
+2. 후임자 시각 예상 질문 — 코드를 본 후임자(히스토리 모름)가 "여기 왜 이렇게 했어요?"라고 물을 만한 질문을 PR diff + decisions.md로 뽑아 사용자에게 던진다. PR 머지 후 `/discussion` 대비
+   - decisions.md에 이미 있는 결정과 1에서 모은 결정은 제외 (중복)
+   - 사용자가 답할 수 있으면 → decisions.md에 결정 항목으로 추가할지 사용자가 선택
+   - 답하기 어려운 항목은 [/discussion](../../discussion/SKILL.md) 스킬로 토론
+
 **6.5와 의존 없음 — 병렬 진행 가능.**
-
----
-
-## Step 6.7. decisions.md 2단 점검
-
-Step 6.6 「decisions.md 최신화」 직후 수행. 결정·코드 정합과 후임자 시각 질문을 한 자리에서 점검한다.
-
-### Step 6.7.1. decisions ↔ 코드 정합 점검 (1차)
-
-[정합 점검 게이트](../conventions/artifact/decisions-lifecycle.md#정합-점검-게이트-decisions--코드) 적용. 코드 수정이 필요한 경우 implement Implementer 흐름으로 진입.
-
-### Step 6.7.2. 후임자 시각 예상 질문 (2차)
-
-코드를 본 후임자(히스토리 모름)가 "여기 왜 이렇게 했어요?"라고 물을 만한 예상 질문 목록을 AI가 PR diff + decisions.md 기반으로 추출해 사용자에게 던진다. PR 머지 후 `/discussion` 대비.
-
-- decisions.md에 이미 있는 결정은 제외 (중복)
-- 사용자가 답할 수 있으면 → decisions.md에 결정 항목으로 추가할지 사용자가 선택
-- 답하기 어려운 항목은 [/discussion](../../discussion/SKILL.md) 스킬로 토론
 
 ---
 
