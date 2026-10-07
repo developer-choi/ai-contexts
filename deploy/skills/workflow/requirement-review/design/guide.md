@@ -2,7 +2,7 @@
 
 기획서 리뷰(planning)의 산출물(page.md, global.md)이 이미 있으면 보완하고, 없으면 디자인 시안을 기반으로 신규 생성한다.
 
-**개인 모드**는 사용자가 미리 만든 마크업 시안(`background/retained/mockup/`)이 디자인 원본이다 — [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기)에서 받는다. 이 시안을 참조해 의도·구조를 page.md/global.md에 반영하고 사용자 확인을 받는다. 시각 충실도는 MARKUP의 시안 대조 + 사용자 시각 확인이 담당하므로([steps/markup/personal.md](../../steps/markup/personal.md)) 본 단계는 비시각 의도·구조 정의에 집중한다.
+**개인 모드**는 사용자가 미리 만든 마크업 시안(`background/retained/mockup/`)이 디자인 원본이다 — [requirement 「자료 받기」](../../steps/requirement.md#자료-받기)에서 받는다. 이 시안을 참조해 의도·구조를 page.md/global.md에 반영하고 사용자 확인을 받는다. 시각 충실도는 MARKUP의 시안 대조 + 사용자 시각 확인이 담당하므로([steps/markup/personal.md](../../steps/markup/personal.md)) 본 단계는 비시각 의도·구조 정의에 집중한다.
 
 **코드기반 모드**는 시안이 없고 기존 구현 코드가 있는 경우다 — planning의 코드기반 모드와 짝을 이룬다. 디자인 시안을 분석하는 대신 기존 코드의 실제 스타일·레이아웃·인터랙션을 읽어 디자인 체크리스트에 대입한다. 디자인↔기획서 불일치 대조 대신, 코드에서 읽어낸 현재 동작을 page.md/global.md에 반영하고 사용자 확인을 받는다.
 

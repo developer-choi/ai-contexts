@@ -38,7 +38,7 @@
 
 - `/plan/background/consumable/global.md` — **생성**. 전체 서비스 맥락, 공통 컴포넌트
 - `page.md` — **생성**. 페이지별 분석 결과. PR 확정 전에는 `/plan/background/consumable/page-{페이지명}.md`, 확정 후 `pr{N}/consumable/page.md` ([conventions/plan-folder.md](../../conventions/plan-folder.md))
-- `/plan/background/consumable/layout.md` — **필요 시 생성**. 여러 페이지가 공유하는 레이아웃이 식별된 경우
+- `/plan/background/consumable/layout.md` — 「종합」에서 생성하기로 한 경우에만 **생성**
 
 ### 분석 과정
 
@@ -46,9 +46,9 @@
 
 page.md는 준비 방식 슬롯에서 생성해둔 것을 씁니다 (위치는 「산출물」). 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
 
-**개인 모드**는 [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기)가 받은 마크업 시안(`retained/mockup/`)·`retained/spec.md`(있으면)를 참조해 page.md 초안(비시각 스펙: 동작·API·메타)을 작성하고 사용자 공동 승인을 받습니다. 리뷰 중 시안·spec.md에도 없던 구멍(엣지값·에러 처리 등)이 나오면 todo.md TODO로 남깁니다(저자가 나중에 보완). 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 figma"가 아니라 "받은 마크업 시안 + spec.md"입니다.
+**개인 모드**는 [requirement 「자료 받기」](../../steps/requirement.md#자료-받기)가 받은 마크업 시안(`retained/mockup/`)·`retained/spec.md`(있으면)를 참조해 page.md 초안(비시각 스펙: 동작·API·메타)을 작성하고 사용자 공동 승인을 받습니다. 리뷰 중 시안·spec.md에도 없던 구멍(엣지값·에러 처리 등)이 나오면 todo.md TODO로 남깁니다(저자가 나중에 보완). 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 figma"가 아니라 "받은 마크업 시안 + spec.md"입니다.
 
-**코드기반 모드**는 목업·기획서가 없고 기존 구현 코드가 있는 경우입니다(기존 동작 코드 개선형 채용과제 등) — [requirement 「requirement-review 본체」](../../steps/requirement.md#step-12-requirement-review-본체)에서 planning·design ON/OFF를 묻는 사용자 확인 질문에서 사용자가 이 모드를 확인한 경우에 적용합니다. 자료를 받아 분석하는 대신, 대상 코드를 읽고 기획 체크리스트를 코드에 대입하여 역산합니다. 이후 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 자료"가 아니라 "코드에서 읽어낸 현재 동작"입니다.
+**코드기반 모드**는 목업·기획서가 없고 기존 구현 코드가 있는 경우입니다(기존 동작 코드 개선형 채용과제 등) — [requirement 「requirement-review 본체」](../../steps/requirement.md#requirement-review-본체)에서 planning·design ON/OFF를 묻는 사용자 확인 질문에서 사용자가 이 모드를 확인한 경우에 적용합니다. 자료를 받아 분석하는 대신, 대상 코드를 읽고 기획 체크리스트를 코드에 대입하여 역산합니다. 이후 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 자료"가 아니라 "코드에서 읽어낸 현재 동작"입니다.
 
 - 현재 리뷰 대상과 관련 없어 보이는 자료가 있으면 사용자에게 알립니다.
 
@@ -69,7 +69,7 @@ AI가 자료와 체크리스트를 기반으로 page.md 초안을 작성합니�
 모든 페이지 리뷰를 마친 후, 페이지 단위를 넘어 전체 플로우 관점에서 점검합니다.
 
 1. [cross-page.md](./checklist/cross-page.md)의 체크리스트를 적용합니다.
-2. 공통화 검토 — 모든 page.md를 대조해 컴포넌트·로직·UI 패턴이 2개 이상의 페이지에서 쓰이는지 셉니다. 2개 이상이면 사용자에게 알리고 global.md 공통 항목으로 올릴지 검토합니다. 단일 페이지에서만 쓰이면 그 페이지 page.md의 구현 컴포넌트 목록에 둡니다. 여러 페이지가 공유하는 레이아웃이 있으면 사용자에게 layout.md를 생성할지 확인합니다.
+2. 공통화 검토 — 모든 page.md를 대조해 컴포넌트·로직·UI 패턴이 여러 페이지에서 쓰이는지 봅니다. 여러 페이지에서 쓰이면 사용자에게 알리고 global.md 공통 항목으로 올릴지 검토합니다. 단일 페이지에서만 쓰이면 그 페이지 page.md의 구현 컴포넌트 목록에 둡니다. 여러 페이지가 공유하는 레이아웃이 있으면 사용자에게 layout.md를 생성할지 확인합니다.
 3. TODO 목록을 최종 정리합니다.
 
-AI가 `global.md`와 필요 시 `layout.md`의 초안을 채웁니다. 사용자가 리뷰합니다.
+AI가 `global.md`와, 생성하기로 한 경우 `layout.md`의 초안을 채웁니다. 사용자가 리뷰합니다.

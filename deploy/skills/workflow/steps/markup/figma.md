@@ -6,7 +6,7 @@ figma 원본이 디자인 진실 원천인 모드. 본 파일은 figma 고유 �
 
 ## 재료
 
-- (채용·실무 공통) 누적한 figma URL·캡처 — [requirement 「자료 받기」](../requirement.md#step-11-자료-받기)/BG가 `background/retained/figma-url.md`·`background/retained/figma/`에 수집. **다시 요청하지 않는다** — 빠진 컴포넌트만 콕 집어 요청
+- (채용·실무 공통) 누적한 figma URL·캡처 — [requirement 「자료 받기」](../requirement.md#자료-받기)/BG가 `background/retained/figma-url.md`·`background/retained/figma/`에 수집. **다시 요청하지 않는다** — 빠진 컴포넌트만 콕 집어 요청
 - (실무) 매칭표 (아래 「매칭표 생성」)
 - (채용) 아래 「(채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리」 참조
 

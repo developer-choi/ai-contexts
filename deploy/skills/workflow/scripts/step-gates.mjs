@@ -25,9 +25,9 @@ const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
-// ── artifacts: requirement 1.1 종료 게이트 ──────────────────────────────────────────
+// ── artifacts: requirement 「자료 받기」 종료 게이트 ──────────────────────────────────────────
 // 「원본 저장 + 시각 원본 + design-root + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
-// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement 1.2는 그대로 굴러가고, MARKUP이
+// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement 「requirement-review 본체」는 그대로 굴러가고, MARKUP이
 // 진입 문서를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
@@ -38,10 +38,12 @@ function artifacts() {
   }
   const bg = path.join(plan, 'background');
   const required = [
-    { label: '원본 자료', p: path.join(bg, 'persistent'), dir: true },
     { label: '시각 원본 진입 문서', p: path.join(bg, 'retained', 'design-root.md') },
     { label: '컨벤션 인덱스', p: path.join(bg, 'retained', 'conventions-index.md') },
   ];
+  if (mode === '채용') {
+    required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
+  }
   if (mode === '개인') {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
@@ -49,13 +51,13 @@ function artifacts() {
     required.push({ label: 'figma 캡처', p: path.join(bg, 'retained', 'figma'), dir: true });
   }
 
-  console.log(`[requirement 1.1 종료 게이트] 모드: ${mode}`);
+  console.log(`[requirement 「자료 받기」 종료 게이트] 모드: ${mode}`);
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);
     if (!ok) problems.push(`${r.label}가 없다`);
   }
-  // 레포가 아직 없어 인덱스를 미룬 경우는 「연기 사실을 한 줄로 남긴다」가 규칙이라, 그 판정은 사람 몫이다.
+  // 레포가 아직 없어 인덱스를 미룬 경우는 파일로 판별할 수 없어, 넘어갈지는 사람이 판정한다.
   if (problems.length) console.log('\n  (레포 미확보로 인덱스를 미룬 경우라면 연기 사실을 한 줄로 남기고 넘어간다)');
 }
 

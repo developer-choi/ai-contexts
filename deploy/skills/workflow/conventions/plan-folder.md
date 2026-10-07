@@ -70,6 +70,6 @@ realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`
 
 - 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
 
-캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 ([requirement 「자료 받기」](../steps/requirement.md#step-11-자료-받기)에서 수집). 어느 단위 캡처든 같은 폴더에.
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 ([requirement 「자료 받기」](../steps/requirement.md#자료-받기)에서 수집). 어느 단위 캡처든 같은 폴더에.
 
 requirement(전체 페이지 URL) ~ implement(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

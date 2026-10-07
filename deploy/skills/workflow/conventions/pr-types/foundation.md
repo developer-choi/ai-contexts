@@ -18,7 +18,7 @@
 - **코딩 스탠다드 마이그레이션** — `/code-review --mode only-standards` 호출 → coding-standards 이슈만 받아 기존 코드 수정
 - **루트 layout 폰트 셋업** — 본 코드라 이 PR에 들어간다
 
-**folder-structure.md 결정 기준**: 폴더 구조는 사용자 확인 전에 임의로 정해 스캐폴딩하지 않는다 — 항상 사용자에게 확인받는다. BG의 [requirement 「자료 받기」](../../steps/requirement.md#step-11-자료-받기) 자료(요구사항·우대사항)로 추천은 곁들이되(채용공고 우대사항의 FSD 등은 지원자에게 바라는 역량이지 이 과제를 그 구조로 구현하라는 지시가 아니다), FSD든 DDD든 사용자 확정 없이 진행하지 않는다. 사용자가 이미 구조를 지정했으면 재질문하지 않는다. DDD로 지정되면 트리 작성 전 MP `monorepo-playground/docs/patterns/folder-structure/FolderStructure.md`를 읽고 그 패턴(디렉토리 골격·네이밍·배럴 유무)을 따른다.
+**folder-structure.md 결정 기준**: 폴더 구조는 사용자 확인 전에 임의로 정해 스캐폴딩하지 않는다 — 항상 사용자에게 확인받는다. BG의 [requirement 「자료 받기」](../../steps/requirement.md#자료-받기) 자료(요구사항·우대사항)로 추천은 곁들이되(채용공고 우대사항의 FSD 등은 지원자에게 바라는 역량이지 이 과제를 그 구조로 구현하라는 지시가 아니다), FSD든 DDD든 사용자 확정 없이 진행하지 않는다. 사용자가 이미 구조를 지정했으면 재질문하지 않는다. DDD로 지정되면 트리 작성 전 MP `monorepo-playground/docs/patterns/folder-structure/FolderStructure.md`를 읽고 그 패턴(디렉토리 골격·네이밍·배럴 유무)을 따른다.
 
 **베이스라인에 기존 구조가 있어도 확인은 면제되지 않는다**: 마이그레이션 착수 전 먼저 MP `docs/best-practices/setup.md`(폴더 구조·셋업)를 Read해 후보 패턴을 파악하고, 기존 구조와 후보를 나란히 사용자에게 제시해 유지할지 다른 구조로 마이그레이션할지 확정받는다. 확인 없이 기존 구조를 그대로 `folder-structure.md`에 문서화하지 않는다.
 
