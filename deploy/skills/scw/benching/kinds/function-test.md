@@ -10,7 +10,7 @@
 
 확정한 정답이 실제로 발동 가능한지도 함께 본다. 그 해석대로면 한 번도 발동할 수 없는 규칙이면 해석이 틀린 것이다.
 
-- 서브에이전트 위임 구조 테스트와 gotchas는 [delegation.md](delegation.md) 참조. 특정 스킬의 벤치 대입값(단위 매핑·오라클·fixture)은 해당 스킬의 `specialized/` 파일 참조.
+- 서브에이전트 위임 구조 테스트와 gotchas는 [delegation.md](delegation.md) 참조. 특정 스킬의 벤치 대입값(단위 매핑·오라클·fixture)은 해당 스킬의 `benching/targets/` 파일 참조.
 - description 트리거 정확도 측정(false negative/positive 정량)은 [trigger-eval.md](trigger-eval.md)를 따른다. skill-creator 표준 도구는 쓰지 않는다 — 사유와 대체 도구는 그 파일에 있다.
 - 벤치를 돌리면 환경 격리·측정 도구 감사·종결 시 정리는 [../operations.md](../operations.md)를 따른다 — 회차 운용이든 단발이든 해당한다.
 
