@@ -496,6 +496,18 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
+    mdWrite('# 계획\n', homeDeploy('.claude', 'plans', 'x.md')),
+    'pass',
+    'plan mode 계획 파일은 산출물이 아니다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 계획\n', homeDeploy('.claude', 'plansX', 'a.md')),
+    'ask',
+    'plans 접두어만 같은 형제 폴더는 막는다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
     mdWrite('# 스킬\n', 'C:/repo/.agents/skills/a/SKILL.md'),
     'ask',
     '레포 안 .agents 세그먼트',

@@ -8,6 +8,8 @@
 //     .claude/contexts, .claude/settings.json
 //   - 투영 산출물 파일명: AGENTS.md, GEMINI.md (CLAUDE.md가 원본, 이 둘은 항상 산출물)
 //
+// 예외: ~/.claude/plans는 plan mode가 계획 파일을 쓰는 자리라 sync 산출물이 아니다.
+//
 // ask(deny 아님)인 이유: "사용자가 명시 허용하면 테스트 목적 직접 수정 가능"이라는 예외가
 // 규칙에 있어, 그 순간 사용자가 승인할 수 있어야 한다.
 //
@@ -22,6 +24,8 @@ import { ask, readPayload } from "./hook-utils.mjs";
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
 const HOME_DEPLOY_DIRS = [".claude", ".codex", ".gemini"].map((d) => norm(path.join(os.homedir(), d)));
+// plan mode가 계획 파일을 쓰는 자리. sync 산출물이 아니라 막으면 계획을 고칠 때마다 승인 창이 뜬다.
+const PLANS_DIR = norm(path.join(os.homedir(), ".claude", "plans"));
 
 const payload = readPayload();
 const toolName = typeof payload.tool_name === "string" ? payload.tool_name : "";
@@ -38,6 +42,7 @@ process.exit(0);
 
 function isArtifact(file) {
   const abs = norm(path.resolve(file));
+  if (abs.startsWith(PLANS_DIR + path.sep)) return false;
   for (const root of HOME_DEPLOY_DIRS) {
     if (abs === root || abs.startsWith(root + path.sep)) return true;
   }
