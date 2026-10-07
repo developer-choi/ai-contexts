@@ -682,6 +682,31 @@ const WAIT_CASES = [
   ['until [ -f out.txt ]; do sleep 5; done', 'a1b2c3', null, '조건을 확인하는 루프는 서브에이전트에서도 통과'],
 ];
 
+// cd && git 차단 문구의 EnterWorktree 안내(사유는 check-shell-policy.mjs의 worktreeOutsideSession 주석).
+// 판정은 모두 deny라 판정만 보면 안내가 빠지거나 엉뚱한 곳에 붙어도 통과하므로, 안내 유무와 짚은 루트까지 본다.
+// 경로는 글자로만 판정되므로 실존하지 않아도 된다.
+// [명령, 세션 폴더(페이로드 cwd), 안내에 짚혀야 할 워크트리 루트(null이면 안내 없음 기대), 설명]
+const WT_MAIN = 'C:/Users/u/WebstormProjects/main';
+const WT_ROOT = `${WT_MAIN}/plan-for-myself/.claude/worktrees/pr2`;
+const WT_ROOT_MSYS = '/c/Users/u/WebstormProjects/main/plan-for-myself/.claude/worktrees/pr2';
+const WORKTREE_HINT_CASES = [
+  [`cd ${WT_ROOT} && git status`, WT_MAIN, WT_ROOT, '워크트리 밖 세션이 워크트리로 옮겨 git → 안내'],
+  [`cd ${WT_ROOT}/apps/web && git status`, WT_MAIN, WT_ROOT, '워크트리 하위 폴더로 옮겨도 루트를 짚는다'],
+  [`cd ${WT_MAIN}/backlog && git status`, WT_MAIN, null, '워크트리가 아닌 폴더로 옮기면 안내 없음'],
+  [`cd ${WT_ROOT}/apps/web && git status`, WT_ROOT, null, '세션이 이미 그 워크트리 안이면 안내 없음'],
+  [`cd ${WT_ROOT}/apps/web && git status`, `${WT_ROOT}/apps/web/src`, null, '세션이 그 워크트리 하위 폴더여도 안내 없음'],
+  [`cd ${WT_ROOT} && git status`, `${WT_MAIN}/plan-for-myself/.claude/worktrees/pr1`, WT_ROOT, '다른 워크트리 안의 세션 → 안내'],
+  [`cd ${WT_ROOT} && git status`, `${WT_ROOT}2`, WT_ROOT, '이름이 앞부분만 같은 워크트리는 그 워크트리가 아니다'],
+  ['cd plan-for-myself/.claude/worktrees/pr2 && git status', WT_MAIN, WT_ROOT, '상대 경로는 세션 폴더 기준으로 푼다'],
+  [`cd ${WT_ROOT_MSYS} && git status`, WT_MAIN, WT_ROOT, 'Git Bash 경로 표기도 잡는다'],
+  [`W=${WT_ROOT_MSYS}/apps/web; ls $W; cd $W; git status`, WT_MAIN, WT_ROOT, '같은 명령에서 대입한 변수 경로를 따라간다'],
+  [`cd ${WT_ROOT}; cd ${WT_MAIN}/backlog; git status`, WT_MAIN, WT_ROOT, '앞의 이동이 워크트리면 뒤에 다른 곳으로 옮겨도 안내'],
+  [`cd $UNSET && git status`, WT_MAIN, null, '못 푼 변수는 안내 없음'],
+  [`Set-Location ${WT_ROOT}; git status`, WT_MAIN, WT_ROOT, 'Set-Location도 같다'],
+  [`cd ${WT_MAIN}/plan-for-myself/.Claude/Worktrees/pr2 && git status`, WT_MAIN, `${WT_MAIN}/plan-for-myself/.Claude/Worktrees/pr2`, '대소문자만 다른 표기도 잡는다'],
+  ['cd .claude/worktrees/inner && git status', WT_ROOT, `${WT_ROOT}/.claude/worktrees/inner`, '워크트리 안의 워크트리는 가장 안쪽 루트를 짚는다'],
+];
+
 // 파일도 명령도 아닌 payload를 보는 hook들. 도구 이름과 인자 모양만으로 판정이 끝난다.
 // [hook 파일, payload, 기대 판정, 설명]
 const TOOL_CASES = [
@@ -1889,6 +1914,21 @@ const waitGroup = () => runCases(WAIT_CASES, async ([command, agentId, expectSub
   });
 });
 
+const worktreeHintGroup = () => runCases(WORKTREE_HINT_CASES, async ([command, cwd, root, note]) => {
+  const { decision, reason = '', stderr } = await runHookPayload('check-shell-policy.mjs', {
+    tool_name: 'Bash',
+    tool_input: { command },
+    cwd,
+  });
+  const hinted = reason.includes('EnterWorktree');
+  const rootOk = root === null || reason.includes(`(${path.normalize(root)})`);
+  const label = `check-shell-policy.mjs :: ${command} [세션 ${cwd}] → deny ${root ? '+ EnterWorktree 안내' : '안내 없음'} (${note})`;
+  return judge(label, decision, 'deny', stderr, {
+    ok: decision === 'deny' && hinted === (root !== null) && rootOk,
+    failLine: `  FAIL  ${label} — 실제: ${decision} / 사유: ${reason.slice(-160)}`,
+  });
+});
+
 // ask를 기대하는 케이스를 서브에이전트 페이로드로 한 번 더 돌려 deny로 바뀌는지 본다. 사유에는 원래
 // ask 사유가 그대로 남아야 한다 — 무엇이 막혔는지 모르면 메인에 보고할 거리가 없다.
 // CASES·WRITE_CASES·미등록 파일 케이스의 ask를 모은다. 다른 배열의 ask는 여기에 안 들어온다.
@@ -2271,6 +2311,7 @@ async function main() {
     sectionRefReverseGroup,
     crossRepoGroup,
     waitGroup,
+    worktreeHintGroup,
     subagentAskGroup,
     toolGroup,
     recruitmentGroup,

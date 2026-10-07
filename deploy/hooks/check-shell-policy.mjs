@@ -1,5 +1,16 @@
-import { hasFolderMove, hasGitCall, parseGitInvocation, splitSegments, tokenize } from "./git-command-parser.mjs";
-import { deny, getCommand, getToolName, readPayload } from "./hook-utils.mjs";
+import path from "node:path";
+
+import {
+  folderMoveTargets,
+  hasFolderMove,
+  hasGitCall,
+  normalizeCwd,
+  parseGitInvocation,
+  splitSegments,
+  tokenize,
+  UNKNOWN_FOLDER,
+} from "./git-command-parser.mjs";
+import { deny, getCommand, getCwd, getToolName, readPayload } from "./hook-utils.mjs";
 
 const payload = readPayload();
 const cmd = getCommand(payload);
@@ -13,7 +24,33 @@ if (/(?:^|&&|\|\||[;|]|\$\(|`)\s*npx\b/.test(cmd)) {
 // git -C <path>로 강제 교정. cd만이 아니라 pushd·Set-Location 등 폴더 이동 전반을 본다 — 빠지면 git 정책 훅이
 // 옮긴 폴더가 아니라 세션 폴더로 등급을 판정해 보호 브랜치 push·reset이 새어 나간다.
 if (hasFolderMove(cmd) && hasGitCall(cmd)) {
-  deny("cd && git 금지(pushd·Set-Location 등 폴더 이동 포함) — 다른 디렉터리의 git은 'git -C <path> <cmd>' 형태로 실행하세요. 폴더를 옮긴 뒤 git을 돌리면 대상 폴더의 .git/hooks가 실행될 수 있어 Claude Code가 무조건 권한 프롬프트를 띄웁니다(allowlist·hook allow로 우회 불가).");
+  const root = worktreeOutsideSession(cmd, getCwd(payload));
+  const hint = root
+    ? ` 이 워크트리(${root})에서 계속 일하는 중이면 git -C로 고치기 전에 EnterWorktree에 그 경로를 줘 세션을 옮기세요. 옮기면 cd 없이 그 폴더에서 git이 돌고, 의존성·env 파일도 채워집니다.`
+    : "";
+  deny(`cd && git 금지(pushd·Set-Location 등 폴더 이동 포함) — 다른 디렉터리의 git은 'git -C <path> <cmd>' 형태로 실행하세요. 폴더를 옮긴 뒤 git을 돌리면 대상 폴더의 .git/hooks가 실행될 수 있어 Claude Code가 무조건 권한 프롬프트를 띄웁니다(allowlist·hook allow로 우회 불가).${hint}`);
+}
+
+// 워크트리 밖 세션이 `.claude/worktrees/<이름>` 아래로 옮겨 git을 치다 위 룰에 막히면, git -C만 권해서는
+// 세션이 끝까지 워크트리 밖에 머문다 — 실측(PFM PR 2 구현, 2026-10)에서 다섯 번 막히는 동안 매번 git -C로만
+// 고치고 EnterWorktree를 부르지 않아, 그 뒤에 도는 의존성·env 채우기도 안 돌았다. 그 경우의 워크트리 루트를
+// 돌려준다. 세션 폴더가 이미 그 워크트리 안이면 null이다. 페이로드 cwd가 EnterWorktree로 옮긴 것인지
+// Bash cd로 흘러 들어온 것인지는 가리지 못한다.
+function worktreeOutsideSession(command, sessionCwd) {
+  const session = normalizeCwd(sessionCwd);
+  for (const target of folderMoveTargets(command)) {
+    if (!target || target === UNKNOWN_FOLDER) continue;
+    if (!path.isAbsolute(target) && !session) continue;
+    // 탐욕 매칭이라 워크트리 안의 워크트리면 가장 안쪽 루트를 잡는다. Windows 폴더 이름은 대소문자를 안 가린다.
+    const root = path.resolve(session || "", target).match(/^(.*[\\/]\.claude[\\/]worktrees[\\/][^\\/]+)/i)?.[1];
+    if (root && !(session && isWithin(session, root))) return root;
+  }
+  return null;
+}
+
+function isWithin(child, parent) {
+  const rel = path.relative(parent, child);
+  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
 // git -C 뒤의 ~ / $HOME: 셸이 실행 시점에 펼치는 표기라 Claude Code가 실행 전에 대상 폴더를 확정하지

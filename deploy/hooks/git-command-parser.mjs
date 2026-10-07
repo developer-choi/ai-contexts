@@ -146,6 +146,23 @@ export function hasGitCall(command) {
   return splitSegments(command).some((seg) => tokenize(seg).includes("git"));
 }
 
+// 명령이 폴더 이동으로 옮겨 가는 폴더들을 앞에서부터 돌려준다. 같은 명령 안의 대입(`W=<경로>; cd $W`)은
+// 풀어서 따라간다 — 워크트리로 옮기는 명령은 경로를 변수에 담아 넘기는 일이 잦다. 상대 경로는 앞 폴더에
+// 이어 붙인 채로 두고, 세션 폴더 기준 풀이는 훅이 한다. 글자로 못 정한 이동은 UNKNOWN_FOLDER다.
+export function folderMoveTargets(command) {
+  const out = [];
+  const vars = new Map();
+  const folder = { current: null, stack: [] };
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    if (recordAssignment(tokens, vars)) continue;
+    if (folderMoveKind(tokens) === null) continue;
+    trackFolder(tokens.map((t) => expandVars(t, vars)), folder);
+    out.push(folder.current);
+  }
+  return out;
+}
+
 function folderMoveKind(tokens) {
   const name = tokens[0]?.toLowerCase();
   if (FOLDER_SET.has(name)) return "set";
