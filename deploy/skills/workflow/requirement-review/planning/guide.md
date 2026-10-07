@@ -44,7 +44,7 @@
 
 #### 자료 참조 (수집은 requirement 「자료 받기」)
 
-page.md는 준비 방식 슬롯에서 생성해둔 것을 씁니다 (위치는 「산출물」). 자료의 저장 위치와 재요청 정책은 [conventions/plan-folder.md](../../conventions/plan-folder.md) 「피그마 URL·캡처 캐싱」.
+page.md는 준비 방식 슬롯에서 생성해둔 것을 씁니다 (위치는 「산출물」). 자료의 저장 위치와 재요청 정책은 [피그마 URL·캡처 캐싱](../../conventions/plan-folder.md#피그마-url캡처-캐싱).
 
 **개인 모드**는 [requirement 「자료 받기」](../../steps/requirement.md#자료-받기)가 받은 마크업 시안(`retained/mockup/`)·`retained/spec.md`(있으면)를 참조해 page.md 초안(비시각 스펙: 동작·API·메타)을 작성하고 사용자 공동 승인을 받습니다. 리뷰 중 시안·spec.md에도 없던 구멍(엣지값·에러 처리 등)이 나오면 todo.md TODO로 남깁니다(저자가 나중에 보완). 「같이 분석 → 논의 → 확정」 절차는 동일하되, 기준이 "받은 figma"가 아니라 "받은 마크업 시안 + spec.md"입니다.
 
@@ -62,7 +62,7 @@ AI가 자료와 체크리스트를 기반으로 page.md 초안을 작성합니�
 4. UX 개선 제안 (해당 시에만): 더 나은 대안이 있을 때 선택지를 제시합니다.
 5. 채팅에서 발견한 모호점·`[?]` 항목·엣지케이스를 구체적으로 나열합니다. **여기서 멈춥니다. 사용자 응답을 기다립니다.**
 
-> **Figma 데이터 기록 범위**: [conventions/artifact/markup-spec.md](../../conventions/artifact/markup-spec.md) 「기록 시점 — Background 단계 보류」 참조.
+> **Figma 데이터 기록 범위**: [기록 시점 — Background 단계 보류](../../conventions/artifact/markup-spec.md#기록-시점--background-단계-보류) 참조.
 
 #### 종합
 

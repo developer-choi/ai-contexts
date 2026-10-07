@@ -30,7 +30,7 @@
 ### 산출물
 
 - `/plan/background/consumable/global.md` — 디자인 관련 공통 컴포넌트, TODO
-- `page.md` — 디자인 분석 결과. 저장 위치는 [planning/guide.md](../planning/guide.md) 「산출물」의 page.md 규칙과 같다
+- `page.md` — 디자인 분석 결과. 저장 위치는 [산출물](../planning/guide.md#산출물)의 page.md 규칙과 같다
 
 ### 분석 과정
 
@@ -44,4 +44,4 @@
 
 #### 종합
 
-design 단독(planning 꺼짐)이면 design 관점의 종합만 수행한다: 공통화 검토([planning/guide.md](../planning/guide.md) 「종합」 2번), 페이지 간 디자인 패턴 일관성 점검.
+design 단독(planning 꺼짐)이면 design 관점의 종합만 수행한다: 공통화 검토([종합](../planning/guide.md#종합)), 페이지 간 디자인 패턴 일관성 점검.
