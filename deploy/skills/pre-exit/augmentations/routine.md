@@ -26,7 +26,7 @@ routine-start/summary를 굴린 오늘 세션 전체를 돌이켜 회고한다. 
 
 ## 회고하지 않는 것
 
-- 스크립트를 통해 정상적으로 데이터를 조작한 경우 (logAction, appendActionLogToRoutine 등)
+- 스크립트로 정상적으로 데이터를 조작한 경우 (logAction, appendActionLogToRoutine 등)
 - tsx -e 인라인이라도 scripts/ 모듈을 import해 쓴 경우
 
 ## 반영 위치
