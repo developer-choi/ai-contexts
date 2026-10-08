@@ -13,7 +13,7 @@
 - 구조 — 정보가 효과적으로 배치되어 있는가. [파일·폴더 나누기](../../../contexts/prompt-standards/file-layout.md)로 본다
 - 간결성 — 더 적은 토큰으로 같은 효과를 낼 수 있는가
   - 문장은 [문장 다듬기](../../../contexts/prompt-standards/wording.md)로 한 줄씩 본다
-- 에이전트 설계 — 서브에이전트/메인 에이전트 구조가 최적인가 (해당 시에만). [스킬 짜임](../../../contexts/prompt-standards/skill-structure.md#에이전트-설계)으로 본다
+- 에이전트 설계 — 서브에이전트/메인 에이전트 구조가 최적인가 (흐름 문서이거나 에이전트를 나눈 구조일 때). [스킬 짜임](../../../contexts/prompt-standards/skill-structure.md#에이전트-설계)으로 본다
 
 대상 경로별로 어떤 특화 체크리스트를 함께 읽는지는 SKILL.md 「특화 리뷰」 표가 정한다.
 
