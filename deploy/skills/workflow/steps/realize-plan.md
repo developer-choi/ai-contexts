@@ -70,14 +70,14 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 [code-map.md](../../../contexts/code-map.md)의 탐색 절차를 따른다:
 
-1. coding-standards `rules/`·`principles/`를 Glob → 프로젝트 유형 판별(회사: `universal/`만, 개인: `universal/` + `personal/`) → 해당하는 파일 중 현재 구현에 관련된 것을 선별 (`file-folder-structure` 태그 포함, frontmatter로 확인)
+1. coding-standards `rules/`·`principles/`를 Glob → code-map 로드 규칙의 범주를 모드로 고른다(`실무` → 회사 프로젝트, `채용`·`개인` → 개인 프로젝트) → 해당하는 파일 중 현재 구현에 관련된 것을 선별 (`file-folder-structure` 태그 포함, frontmatter로 확인)
 2. MP `docs/best-practices/*.md`에서 현재 구현에 매칭되는 패턴을 탐색한다 — 매칭되는 엔트리가 있으면 해당 산출물에 참조 패턴으로 기록한다
    - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
 3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [누적 원칙](../conventions/artifact/reference-curation.md#누적-원칙) 참조.
 
 ### 컨벤션 1차 소스 직접 grep 의무
 
-stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관련 컨벤션 1차 소스를 **직접 grep**한 후 결과를 stub 주석 `[Convention]` 블록에 인용한다. "안다고 가정"·"이전 세션 기억"·"이전 PR에서 본 패턴"에 의존하지 않는다. 결정·도구 호출·stub 파일 작성 전에 grep 결과를 받는다.
+stub 폴더 구조·파일 배치·네이밍·import 경로를 결정할 때 관련 컨벤션 1차 소스를 **직접 grep**한다. "안다고 가정"·"이전 세션 기억"·"이전 PR에서 본 패턴"에 의존하지 않는다. 결정·도구 호출·stub 파일 작성 전에 grep 결과를 받는다. 그 결과를 stub 상단 출처 블록에 인용하는지는 모드로 갈린다 — [comments.md 「적용 대상」](../conventions/artifact/comments.md#적용-대상).
 
 대상 컨벤션 1차 소스:
 - 프로젝트의 아키텍처·컨벤션 문서와 기존 슬라이스의 평행 사례
@@ -173,7 +173,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 **컨벤션 대조**
 - 각 산출물에 적힌 내용 기반으로 관련 코딩 컨벤션을 찾아 대조한다 (컴포넌트 설계가 있으면 컴포넌트 컨벤션, 테스트 계획이 있으면 테스트 컨벤션)
 - **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 ([plan 「산출물: overview.md」](plan.md#산출물-planprnpersistentoverviewmd) 절의 산출물 분담 표 참조)
-- 프로젝트 유형(회사/개인)에 맞는 경로만 포함되었는지 확인한다
+- 「코딩 스탠다드 · 베스트프랙티스」 1번의 모드별 범위에 맞는 경로만 포함되었는지 확인한다
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
 - **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
 - **코드-narrative 오배치 검출** — **모든 md 산출물**에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2). **단 `implementation.md` 「행동 결정 커버리지」 표의 `it.todo`는 예외** — 상위 결정과의 대조표라 코드에 대응물이 없다 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조). 특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.
