@@ -52,11 +52,11 @@ node {{skill_dir}}/augmentations/score.mjs <산출물.md> [--props 명제리스�
 
 회수한 항목은 환류 대상에 따라 가른다:
 
-- **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 [writing-guide](../../../contexts/writing-guide/map.md)에 규칙 + before/after 한 쌍으로 심는다. 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 `score.mjs`의 `RULES`에 낱말과 상세를 함께 넣는다 — 무엇으로 바꾸는지(`swap`)까지 적어야 위반이 뜬 자리에서 대체어가 나간다. tone.md에는 옮겨 적지 않는다.
+- **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 백로그 항목으로 낸다. 항목이 넣을 자리는 [writing-guide](../../../contexts/writing-guide/map.md)의 규칙 + before/after 한 쌍이고, 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다. 금지어로 굳힐 위반이면 넣을 자리는 `score.mjs`의 `RULES`이고, 낱말과 상세를 함께 적는다 — 무엇으로 바꾸는지(`swap`)까지 적어야 위반이 뜬 자리에서 대체어가 나간다. tone.md에는 옮겨 적지 않는다.
   - **`warn: true`를 붙일지 고른다** — 그 낱말이 나오면 무조건 위반이면 안 붙이고, 쓰임에 따라 정상일 수 있으면 붙인다. 판단이 안 서면 붙인다. 안 붙여야 할 것에 안 붙이면 멀쩡한 문장이 0-수렴에 걸려 깎인다(`인터페이스`가 그 예라 목록에서 뺐다).
   - **판단이 남는 규칙은 tone.md에 산문으로 둔다.** 기계가 판정 못 하는 것을 목록으로만 옮기면 적발 0건이 「통과」로 읽혀 규칙이 사라진다.
-- **출발점 오판** → write-init SKILL.md 「재료 받기」의 질문 문구를 고친다.
-- **잘 읽힌 새 글 골격** → [article-skeletons.md](../../../contexts/writing-guide/article-skeletons.md)에 어떤 상황에서 쓴 골격인지와 함께 누적한다. 이 파일은 골격을 고르는 쪽만 참조하고 있어, 여기서 되돌려 쌓지 않으면 처음 만든 몇 개에 고정된다.
+- **출발점 오판** → write-init SKILL.md 「재료 받기」의 질문 문구를 고치는 백로그 항목으로 낸다.
+- **잘 읽힌 새 글 골격** → [article-skeletons.md](../../../contexts/writing-guide/article-skeletons.md)에 어떤 상황에서 쓴 골격인지와 함께 누적하는 백로그 항목으로 낸다. 이 파일은 골격을 고르는 쪽만 참조하고 있어, 여기서 되돌려 쌓지 않으면 처음 만든 몇 개에 고정된다.
 
 ## 출력
 

@@ -32,8 +32,8 @@ routine-start/summary를 굴린 오늘 세션 전체를 돌이켜 회고한다. 
 ## 반영 위치
 
 - 스크립트 우회 발견 → 「문제 리스트업 + 규칙화」의 문제 목록 (AI 규칙화 후보)
-- 스크립트 없는 작업 발견 → `routine/docs/scripts-reference.md` 등재 제안
-- 절차 보완 발견 → 해당 SKILL.md/design.md/스크립트 갱신 제안 (일일 routine 커밋과 별도 커밋)
+- 스크립트 없는 작업 발견 → `routine/docs/scripts-reference.md`에 등재하는 백로그 항목
+- 절차 보완 발견 → 해당 SKILL.md/design.md/스크립트를 고치는 백로그 항목
 
 ## 출력
 

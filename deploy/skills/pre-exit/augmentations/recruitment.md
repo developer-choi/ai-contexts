@@ -23,7 +23,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 종류가 보이면 사용자에게 둘 중 하나를 고르게 한다.
 
-- **안 떠온다** — PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED`에 행을 더한다. 더하기 전에 지난 회차 덤프에 돌려, 인용된 절이 걸리는지 본다(그 파일 첫 주석의 FAQ 사례가 그렇게 잡혔다)
+- **안 떠온다** — PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED`에 행을 더하는 백로그 항목을 낸다. 더하기 전에 지난 회차 덤프에 돌려 인용된 절이 걸리는지 보는 것을 그 항목의 테스트 계획에 적는다(그 파일 첫 주석의 FAQ 사례가 그렇게 잡혔다)
 - **그대로 둔다** — 아무것도 안 고친다. 다음 회차 회고가 같은 종류를 다시 만나면 그때 판단이 한 번 더 쌓인다
 
 #### 4단 — 갈래를 누계에 쌓는다
@@ -38,7 +38,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 선을 넘은 갈래마다 사용자에게 셋 중 하나를 고르게 한다.
 
-- **안 떠온다** — `check-site-scope.mjs`. 누계는 손대지 않는다 — 안 떠오면 눈금이 멈춰 창 밖으로 저절로 빠진다
+- **안 떠온다** — 1~3단과 같이 `check-site-scope.mjs`에 행을 더하는 백로그 항목. 누계는 손대지 않는다 — 안 떠오면 눈금이 멈춰 창 밖으로 저절로 빠진다
 - **판단 보류** — 아무것도 안 한다. 다음 회차에 눈금이 하나 더 쌓이고 알람은 다시 뜬다
 - **원래 가끔만 맞는 갈래다** — `--exclude`로 뺀다. 다시 안 뜬다
 
@@ -48,14 +48,14 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 `site-usage.mjs`가 함께 내는 공고 원문(`-posting.md`) 쪽 미사용도 **절 종류**로 올린다. 종류가 보이면 사용자에게 둘 중 하나를 고르게 한다.
 
-- **안 옮긴다** — PP `local/contexts/recruitment/application/flow/step1.md` 공고 원문 저장의 「옮기지 않는 것」에 행을 더한다. 근무조건 줄이 섞여 들어오는 종류면 그 줄은 남긴다고 함께 적는다 — 결격 점검이 공고 원문 전체에서 근무조건 낱말을 찾는다
+- **안 옮긴다** — PP `local/contexts/recruitment/application/flow/step1.md` 공고 원문 저장의 「옮기지 않는 것」에 행을 더하는 백로그 항목을 낸다. 근무조건 줄이 섞여 들어오는 종류면 그 줄은 남긴다고 항목에 함께 적는다 — 결격 점검이 공고 원문 전체에서 근무조건 낱말을 찾는다
 - **그대로 둔다** — 아무것도 안 고친다
 
 ### 뒤에서 다시 판 조사
 
 지원동기 세션의 최종 보고에 「서류 단계 조사가 못 대서 다시 판 자리」 줄이 있으면(없으면 이 절은 건너뛴다) 그 자리마다 판정한다.
 
-- **그 회사만의 사정인가, 판을 가리지 않는 자리인가.** 앞이면 아무것도 안 고친다. 뒤면 PP `local/skills/recruitment-company-analysis/SKILL.md` 「입력 자료 수집」이 여는 자리 목록에 그 자리를 올릴지 제안한다
+- **그 회사만의 사정인가, 판을 가리지 않는 자리인가.** 앞이면 아무것도 안 고친다. 뒤면 PP `local/skills/recruitment-company-analysis/SKILL.md` 「입력 자료 수집」이 여는 자리 목록에 그 자리를 올리는 백로그 항목을 제안한다
 - 4단(업계 실무 자료·기사·인터뷰)을 뒤늦게 연 회차는 **「못 찾은 것」이 늦게 난 것인지, 1~3단을 덜 판 것인지** 가른다. 뒤면 고칠 자리는 「못 찾은 것」이 아니라 회사가 직접 쓴 글을 찾는 순서다
 
 ### 재료가 없어서 난 반려
@@ -70,12 +70,15 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 ## 반영 위치
 
+4단 갈래 눈금은 이 세션에서 쓴다 — 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다).
+
+그 밖에는 회고 세션이 파일을 고치지 않는다. 아래 자리를 target으로 백로그 `projects/private-playground/active/recruitment/`에 항목을 낸다.
+
 - 안 떠올 종류 → PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED` (+ 지난 덤프에 돌려 확인)
 - 안 옮길 공고 절 종류 → PP `local/contexts/recruitment/application/flow/step1.md` 「옮기지 않는 것」
-- 4단 갈래 눈금 → 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다)
 - 새로 여는 자리 → PP `recruitment-company-analysis` SKILL.md 「입력 자료 수집」
-- 그 밖의 절차 문제 → 「문제 리스트업 + 규칙화」의 문제 목록
-- 한 세션에서 못 정할 것 → 백로그 `projects/private-playground/active/recruitment/`
+
+그 밖의 절차 문제는 「문제 리스트업 + 규칙화」의 문제 목록으로 보낸다 — 위치는 그쪽이 정한다.
 
 ## 출력
 
