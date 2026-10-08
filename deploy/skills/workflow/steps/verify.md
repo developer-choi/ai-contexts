@@ -161,7 +161,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 
 ## Step 6.6. decisions.md 최신화
 
-구현·리뷰 과정에서 새로 발생하거나 plan 작성 시점과 달라진 의사결정을 반영한다. 결정을 쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다 — 무엇을 적을지(「포함·제외 기준」), 어떤 양식으로 쓸지(「세 갈래 양식」·「작성 양식」), 단발 발화를 넣기 전 확인(「생성 게이트」), 갱신 대상(「갱신」)이 모두 그 문서에 있다.
+구현·리뷰 과정에서 새로 발생하거나 plan 작성 시점과 달라진 의사결정을 반영한다. 결정을 쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다.
 
 결정은 두 곳에서 모은 뒤 decisions.md에 한 번에 쓴다.
 
