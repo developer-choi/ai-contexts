@@ -177,6 +177,16 @@
         "deploy/skills/workflow/requirement-review/SKILL.md"
       ],
       "note": "회고 보강이 `review-material`의 절 라벨(「적용한 체크리스트」·「page·global 이력」·「자유 검토 보고」)을 글자 그대로 인용해 재료를 읽는다. 스크립트는 requirement-review 쪽 파일 이름을 패턴으로 박아 둔다 — `RR_SKILL`(스킬 본문 경로, 메뉴 판정의 read와 한 벌)·`RR_CHECKLIST`(모드별 `checklist/`와 `page-type/`)·`RR_FREE_REVIEW`(자유 검토 문서 이름, 옛 이름 retrospect.md 포함)·`RR_PAGE`(plan 산출물 이름). requirement-review는 이 회고를 모르는 단방향이라 그쪽에는 알릴 자리가 없다. 그래서 스킬 본문·자유 검토 문서·체크리스트 폴더(새 체크리스트 폴더를 더할 때 포함)·page 산출물의 이름이나 위치를 바꾸거나 출력 라벨을 바꾸면 스크립트 패턴과 보강 문구를 함께 고친다. 안 고치면 재료가 「없음」으로 나와 회고가 건너뛰거나 메뉴에서 항목이 사라지고, 그 사실은 아무 데도 안 남는다."
+    },
+    {
+      "name": "workflow 별도 세션 방아쇠 — 정본 ↔ 요약 두 곳",
+      "files": [
+        "deploy/skills/workflow/conventions/side-session.md",
+        "deploy/skills/workflow/SKILL.md",
+        "deploy/skills/workflow/scripts/steps.mjs",
+        "deploy/CLAUDE.md"
+      ],
+      "note": "별도 세션 제안의 방아쇠 정본은 side-session.md 방아쇠 표다. 세션이 그 문서를 안 연 채 지나치지 않게 SKILL.md 「진행 중」과 steps.mjs start 출력에 요약을 둔다(2026-10 벤치: 요약 없이 정본만 링크했을 때 사용자가 시킨 조사·재현에서 발동 0회). 요약은 과정이 큰 방아쇠만 골라 「등」으로 끝낸다. 정본의 방아쇠·판단 기준(결론만 필요하고 과정은 다시 쓰지 않는가)을 바꾸면 두 요약의 낱말도 맞춘다. 안 맞추면 정본을 안 연 세션이 옛 기준으로 발동하거나 지나친다. 전역 지침(deploy/CLAUDE.md 서브에이전트 절)은 「호출 전 확인은 그대로 한다」의 예로 별도 세션 제안을 부른다 — 그 예가 없으면 사용자가 서브에이전트 조사를 시켰을 때 「되묻지 않는다」에 눌려 제안이 안 나왔다(벤치 0/3 → 예 포함 2/3). 정책 이름을 바꾸면 그 예도 맞춘다."
     }
   ]
 }

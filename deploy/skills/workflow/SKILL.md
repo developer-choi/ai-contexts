@@ -42,6 +42,7 @@ PR과 세션의 관계: 세션마다 맡는 범위가 PR 하나이거나 작업 
 ### 진행 중
 - 리뷰·검증은 진실 원천(figma 원본, 컨벤션 1차 소스, 사용자 발화 등)과 대조한다
 - 팀원을 띄울 때 Agent `name`을 `workflow-`로 시작한다
+- 이 세션에 결론만 있으면 되고 과정은 다시 쓰지 않는 작업 — 결정 하나의 근거를 대려고 외부 문서·라이브러리 소스를 여러 곳 읽기(WebFetch·WebSearch·소스 내려받기로 직접이든 서브에이전트든), 재현용 앱·페이지 제작, 원인 가설이 2번 틀린 버그의 3번째 가설 등 — 은 사용자가 시킨 일이어도(서브에이전트로 조사하라·직접 검증하라는 지시도 수단을 정한 것일 뿐이다) 그 일을 시작하기 전에 [conventions/side-session.md](conventions/side-session.md)의 방아쇠를 보고 별도 세션으로 뺄지 묻는다
 
 ### step을 넘길 때
 - 같은 세션에서 다음 step으로 넘어가기 전에 사용자 승인을 받는다
@@ -58,4 +59,3 @@ PR과 세션의 관계: 세션마다 맡는 범위가 PR 하나이거나 작업 
 ## 참조
 
 - [conventions/plan-folder.md](conventions/plan-folder.md) — `/plan/` 폴더 구조의 규칙과 정책
-- [conventions/side-session.md](conventions/side-session.md) — 진행 중인 세션에서 핵심 목적을 벗어난 작업(버그 해결 등)의 분량이 커지는 경우, 컨텍스트 절약을 위해 별도 세션으로 안내하기 위한 정책

@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url';
 const SKILL_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STEPS_DIR = path.join(SKILL_DIR, 'steps');
 const PR_TYPES_DIR = path.join(SKILL_DIR, 'conventions', 'pr-types');
+const SIDE_SESSION_DOC = path.join(SKILL_DIR, 'conventions', 'side-session.md');
 
 // 진행 단계. 뒤로 가지 않는다. 어느 step이 끝나면 어느 단계로 올리는지.
 const STAGES = ['confirmed', 'consumed', 'realized'];
@@ -397,6 +398,7 @@ function cmdStart(raw, opt) {
   }
   const [head] = chain;
   // 검증은 출력 전에 — 몇 줄 찍고 실패하면 앞 줄을 믿고 진행할 수 있다.
+  if (!fs.existsSync(SIDE_SESSION_DOC)) fail(`별도 세션 정책 문서가 없다: ${rel(SIDE_SESSION_DOC)} — 옮겼으면 SIDE_SESSION_DOC을 고친다`);
   let data = null;
   let pr = null;
   if (opt.pr !== undefined) {
@@ -412,6 +414,11 @@ function cmdStart(raw, opt) {
   console.log(`이 세션의 step: ${chain.map((s) => s.step).join(' → ')}`);
   console.log(`진입 조건: ${head.entry}`);
   console.log(`권장 모델: ${head.model ?? '(없음)'}`);
+  // 정책 본문은 side-session.md에 있다. 세션이 그 문서를 안 연 채 방아쇠를 지나치지 않게, 시작 출력에 방아쇠와 경로만 띄운다.
+  console.log(
+    '별도 세션 제안: 결론만 있으면 되고 과정은 다시 쓰지 않는 작업(결정 하나의 근거로 외부 문서·라이브러리 소스 여러 곳 읽기(직접이든 서브에이전트든), 재현용 앱·페이지 제작, 원인 가설이 2번 틀린 버그의 3번째 가설 등)은' +
+      ` 사용자가 시킨 일이어도 그 일을 시작하기 전에 ${rel(SIDE_SESSION_DOC)}의 방아쇠를 보고 별도 세션으로 뺄지 묻는다`,
+  );
   if (!pr) {
     if (session.includes('{N}')) console.log(`PR 상태·종류 문서를 보려면 다시 부른다: start ${raw} --plan /plan --pr <N>`);
     return;
