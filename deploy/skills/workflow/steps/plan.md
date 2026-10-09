@@ -25,19 +25,36 @@ next:
 - **산출물**: `pr{N}/persistent/`: overview.md, decisions.md, reference.md
 - **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — realize-plan이 만든다
 
+### 읽기 위임
+
+끝난 PR·컨벤션·background는 메인이 직접 읽지 않고 일회성 서브에이전트들에 나눠 맡긴다. 메인이 다 읽으면 맥락이 무거워져 파일을 잘라 읽거나 뒤쪽 확인을 건너뛰고, 그 자리에서 이어받을 결정이 빠진다.
+
+띄우기 전에 메인은 todo.md 이번 PR 절을 읽고, 완료 PR을 가리고, `/plan/` 파일 목록에 `/plan/background/retained/conventions-index.md`(자료 수집 단계 산출물)가 있는지만 본다. 완료 PR은 `node {{skill_dir}}/scripts/steps.mjs pr list`와 `/plan/` 폴더 목록으로 가린다 — 서브에이전트가 읽을 파일을 메인이 열지 않기 위해서다. 인덱스가 없으면(이전 단계 스킵 등) 사용자에게 프로젝트별 컨벤션(회사 컨벤션 등)이 있는지 먼저 묻고, 그 답을 2번 서브에이전트에 넘긴다 — 서브에이전트는 사용자에게 묻지 못한다.
+
+그다음 아래 서브에이전트를 한 메시지로 나란히 띄운다. 모두 이번 PR 범위(todo.md 절·`/plan/pr{N}/` 경로)를 받고, 돌려주는 항목마다 출처 파일·원문 인용을 붙인다. 띄워 둔 동안 메인은 `/plan/pr{N}/` 하위(이번 PR 몫 분석이라 걸러 낼 것이 없다)를 직접 읽는다.
+
+1. 이전 PR 결정 — 완료 PR이 없으면 띄우지 않는다
+   - 넘기는 것: 메인이 가린 완료 PR들의 `pr{M}/persistent/` 경로
+   - 돌려받는 것: 이번 PR이 이어받을 결정·컨벤션, 그리고 이번 PR이 전제를 바꿔 다시 열어야 할 결정
+2. 컨벤션 매칭
+   - 맡기는 것: [code-map.md](../../../contexts/code-map.md)의 탐색 절차 중 후보 선별과 Read까지(reference.md 기록과 사용자 확인은 메인 몫) + conventions-index.md 선별
+   - 넘기는 것: code-map 범주(모드에서 [realize-plan의 대응](realize-plan.md#코딩-스탠다드--베스트프랙티스)대로 고른다)
+   - 돌려받는 것: 이번 PR에 매칭된 규칙 행·경로·라인 범위, 이번 PR이 건드리는데 인덱스 트리거에 안 걸리는 영역 목록. 인덱스가 없어 메인이 먼저 물었으면 영역 목록은 받지 않는다
+3. background 발췌
+   - 넘기는 것: `/plan/background/` 파일 목록에서 todo.md·conventions-index.md를 뺀 경로들
+   - 돌려받는 것: 이번 PR 범위에 걸리는 발췌
+
 ### 컨벤션 사전 참조
 
-overview.md 작성 전에 아래를 읽고 기술 전략에 반영한다:
+2번이 돌려준 컨벤션 매칭은 아래대로 쓴다:
 
-- [code-map.md](../../../contexts/code-map.md)의 탐색 절차로 현재 작업과 관련된 규칙·구현 패턴 확인
-- `/plan/background/retained/conventions-index.md`(자료 수집 단계 산출물)에서 이번 PR 관련 항목을 **선별**한다. 프로젝트 컨벤션을 여기서 재수집하거나 사용자에게 재질문하지 않는다 — 인덱스에 없는 갭이 의심될 때만 그 갭을 콕 집어 질문한다
-- 인덱스가 없으면(이전 단계 스킵 등) fallback으로 사용자에게 프로젝트별 컨벤션(회사 컨벤션 등)이 있는지 확인하고, 있으면 함께 참조
-
-여기서 선별한 컨벤션은 `/plan/pr{N}/persistent/reference.md`에 초기 작성한다. 책임·포함 항목·소비처는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
+- 프로젝트 컨벤션을 재수집하거나 사용자에게 재질문하지 않는다. 질문은 2번이 돌려준 「인덱스 트리거에 안 걸리는 영역」만 콕 집어 한다
+- 그 질문은 그 영역에 따를 프로젝트 컨벤션이 있는지를 묻는다 — 그 영역의 기술 선택을 묻는 질문으로 갈음하지 않는다
+- 2번의 매칭 결과로 메인이 `/plan/pr{N}/persistent/reference.md`를 초기 작성한다. 책임·포함 항목·소비처는 [conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조.
 
 ### overview.md 생성 + 기술 전략 수립
 
-`/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 산출물을 읽고, overview.md를 작성한다. 이 단계에서는 읽기만 하며, 원본 산출물을 삭제하지 않는다 (소비는 구현 단계에서).
+읽기 위임 결과와 메인이 읽은 todo.md 절·`/plan/pr{N}/` 하위로 overview.md를 작성한다. 이 단계에서는 읽기만 하며, 원본 산출물을 삭제하지 않는다 (소비는 구현 단계에서).
 
 이 단계는 "무엇을 구현할지"를 결정한다. "어떻게 구현할지"는 구현 단계에서 다룬다.
 
