@@ -16,13 +16,16 @@
 //   node <이 파일> start <세션> [--plan <plan 폴더> --pr <N>]
 //       → 세션의 첫 step 파일·step 순서·진입 조건·권장 모델 (PR_3_IMPL도 받는다). PR에 종류가 있으면 읽을 종류 문서
 //   node <이 파일> pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps 1,2]   → PR 확정. 번호를 매겨 출력
-//   node <이 파일> pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2]
+//   node <이 파일> pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]
 //   node <이 파일> pr list --plan <plan 폴더>
+//   node <이 파일> pr branches --plan <plan 폴더> --repo <레포>
+//       → PR마다 형태(스택·독립)·범위 커밋. 스택인데 아래 브랜치 tip이 안 들어 있으면 어긋남으로 exit 1
 //   node <이 파일> graph                → mermaid 흐름도 초안(stdout). README 흐름도는 이걸 바탕으로 사람이 다듬어 둔다
 //   node <이 파일> check                → `on` 값 ↔ 헤딩 대응
 //
 // frontmatter는 YAML 부분집합만 읽는다(아래 parseFrontmatter). 밖의 문법이면 추측하지 않고 exit 1.
 
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -247,6 +250,9 @@ function cmdPr(sub, opt) {
     console.log(`${prLabel(pr)} 확정 (번호 ${n})`);
   } else if (sub === 'set') {
     const pr = findPr(data, parseNum(opt.n, '--n'));
+    if (!['name', 'type', 'deps', 'branch', 'base'].some((k) => opt[k] !== undefined)) {
+      fail('pr set은 바꿀 값이 필요하다: --name <이름> | --type <종류> | --deps 1,2 | --branch <브랜치> --base <ref>');
+    }
     if (opt.name) pr.name = opt.name;
     // 종류·의존은 plan이 이 PR을 가져가기 전에만 바꾼다 — 뒤 step은 가져간 시점의 값으로 이미 진행 중이다.
     if ((opt.type || opt.deps !== undefined) && pr.stage !== 'confirmed') {
@@ -257,16 +263,79 @@ function cmdPr(sub, opt) {
       pr.deps = parseDeps(opt.deps, data, pr.n);
       assertNoCycle(data, pr);
     }
+    if ((opt.branch === undefined) !== (opt.base === undefined)) fail('--branch와 --base는 함께 준다');
+    if (opt.branch !== undefined) {
+      for (const ref of [opt.branch, opt.base]) {
+        if (!ref || ref.startsWith('-')) fail(`브랜치·base로 쓸 수 없는 값: '${ref}'`);
+      }
+      if (opt.branch === opt.base) fail('--branch와 --base가 같다');
+      const owner = data.prs.find((other) => other.n !== pr.n && other.branch === opt.branch);
+      if (owner) fail(`${opt.branch}는 이미 ${prLabel(owner)}의 브랜치다`);
+      pr.branch = opt.branch;
+      pr.base = opt.base;
+    }
     writePrs(opt.plan, data);
     console.log(`${prLabel(pr)} 갱신`);
   } else if (sub === 'list') {
     if (!data.prs.length) console.log('확정된 PR 없음');
     for (const pr of data.prs) {
       const deps = pr.deps.length ? pr.deps.map((d) => `PR ${d}`).join(', ') : '-';
-      console.log(`${prLabel(pr)} | 종류: ${pr.type ?? '-'} | 의존: ${deps} | 단계: ${pr.stage}`);
+      const branch = pr.branch ? `${pr.branch} ← ${pr.base}` : '-';
+      console.log(`${prLabel(pr)} | 종류: ${pr.type ?? '-'} | 의존: ${deps} | 단계: ${pr.stage} | 브랜치: ${branch}`);
     }
+  } else if (sub === 'branches') {
+    cmdBranches(data, opt);
   } else {
-    fail('사용: pr (add | set | list) --plan <plan 폴더> …');
+    fail('사용: pr (add | set | list | branches) --plan <plan 폴더> …');
+  }
+}
+
+// git이 실패하면 null — 없는 브랜치·조상 아님을 오류가 아니라 판정 결과로 쓴다.
+function git(repo, args) {
+  try {
+    return execFileSync('git', ['-C', repo, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function cmdBranches(data, opt) {
+  if (!opt.repo) fail('pr branches는 --repo <PR 브랜치가 있는 레포>가 필요하다');
+  if (git(opt.repo, ['rev-parse', '--git-dir']) === null) fail(`git 레포가 아니다: ${opt.repo}`);
+  if (!data.prs.length) console.log('확정된 PR 없음');
+  let broken = 0;
+  for (const pr of data.prs) {
+    if (!pr.branch) {
+      console.log(`${prLabel(pr)} | 브랜치 미기록 — pr set --n ${pr.n} --branch <브랜치> --base <ref>로 기록한다`);
+      broken += 1;
+      continue;
+    }
+    const missing = [pr.branch, pr.base].filter((ref) => git(opt.repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === null);
+    if (missing.length) {
+      console.log(`${prLabel(pr)} | 레포에 없음: ${missing.join(', ')}`);
+      broken += 1;
+      continue;
+    }
+    const below = data.prs.find((other) => other.n !== pr.n && other.branch === pr.base);
+    const shape = below ? `스택(PR ${below.n} 위)` : `독립(base ${pr.base})`;
+    const log = git(opt.repo, ['log', '--reverse', '--format=%h %s', `${pr.base}..${pr.branch}`]);
+    const commits = log ? log.split('\n') : [];
+    console.log(`${prLabel(pr)} | ${pr.branch} | ${shape} | 범위 ${pr.base}..${pr.branch} ${commits.length}커밋`);
+    commits.forEach((commit) => console.log(`    ${commit}`));
+    // 아래 브랜치가 다른 워크트리에 체크아웃돼 있으면 `rebase --update-refs`가 건너뛰어 옛 커밋에 남는데, git은 에러를 내지 않는다.
+    if (below && git(opt.repo, ['merge-base', '--is-ancestor', pr.base, pr.branch]) === null) {
+      console.log(`  어긋남: ${pr.base}의 tip이 ${pr.branch}에 없다 — 아래 브랜치가 안 따라왔거나 이 브랜치가 옛 base 위에 있다`);
+      broken += 1;
+    }
+    const baseMatchesDeps = below ? pr.deps.includes(below.n) : pr.deps.length === 0;
+    if (!baseMatchesDeps) {
+      const deps = pr.deps.length ? pr.deps.map((dep) => `PR ${dep}`).join(', ') : '없음';
+      console.log(`  직접 확인: 의존(${deps})과 base(${below ? `PR ${below.n}` : pr.base})가 다르다`);
+    }
+  }
+  if (broken) {
+    console.log(`[pr branches] 확인할 PR ${broken}건`);
+    process.exit(1);
   }
 }
 
@@ -518,7 +587,7 @@ function cmdCheck() {
   if (problems.length) process.exit(1);
 }
 
-const USAGE = '사용: node <이 파일> (next <step> [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list) --plan <p> … | graph | check)';
+const USAGE = '사용: node <이 파일> (next <step> [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list|branches) --plan <p> … | graph | check)';
 const [command, ...rest] = process.argv.slice(2);
 if (command === 'next' || command === 'start') {
   const { pos, opt } = parseArgs(rest, ['plan', 'pr']);
@@ -526,7 +595,7 @@ if (command === 'next' || command === 'start') {
   if (command === 'next') cmdNext(pos[0], opt);
   else cmdStart(pos[0], opt);
 } else if (command === 'pr') {
-  const { pos, opt } = parseArgs(rest, ['plan', 'name', 'type', 'deps', 'n']);
+  const { pos, opt } = parseArgs(rest, ['plan', 'name', 'type', 'deps', 'n', 'branch', 'base', 'repo']);
   if (pos.length !== 1) fail(USAGE);
   cmdPr(pos[0], opt);
 } else if (command === 'graph' && !rest.length) console.log(graph());

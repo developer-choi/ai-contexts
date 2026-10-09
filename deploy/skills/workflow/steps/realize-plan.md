@@ -41,6 +41,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
   - **선행 PR에 의존하면** → 그 PR 브랜치 위가 후보. 선행의 realize-plan 커밋(stub 또는 실행 결과)을 딛는 경우다 (무엇이 필요한지는 `pr{N}/persistent/overview.md`의 「의존」 — 적는 기준은 [의존 — 판단거리 노출](../conventions/pr-split.md#의존--판단거리-노출)).
   - **의존하지 않으면** → 프로젝트 기본 브랜치(main 또는 master)가 후보. 독립인 PR을 습관적으로 앞 PR 위에 쌓지 않는다.
 - 워크트리는 `<레포>/.claude/worktrees/pr{N}`에 만들고, `EnterWorktree`에 그 경로를 줘 세션을 옮긴다.
+- 브랜치를 딴 뒤 `node {{skill_dir}}/scripts/steps.mjs pr set`으로 이 PR의 브랜치와 base를 기록한다.
 
 이후 이 단계의 모든 작업(구현 실행 또는 stub 파일 생성·커밋 포함)은 새로 만든 워크트리 안에서 수행한다. 이전 step 산출물(`/plan/pr{N}/persistent/` 하위 등)이 워크트리에 보이지 않을 때 처리는 두 갈래로 갈린다:
 

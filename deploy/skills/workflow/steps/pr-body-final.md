@@ -27,7 +27,7 @@ next: []
 
 코드 워크트리 무관 규칙은 [cwd — 코드 워크트리 무관](pr-body-draft.md#cwd--코드-워크트리-무관)을 따른다.
 
-REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 워크트리 목록과 [PR 워크트리 명명규칙](realize-plan.md#사전-준비-브랜치워크트리-생성)으로 유도한다.
+REFINER가 커밋 로그를 읽을 때 pr{N}→브랜치명은 `node {{skill_dir}}/scripts/steps.mjs pr list`가 찍는 브랜치를 쓴다. 브랜치가 기록되기 전에 시작한 프로젝트면 워크트리 목록(`pr{N}`)에서 찾는다.
 
 ## fallback — pr-body 초안 부재 시 (IDEATOR 역할 흡수)
 

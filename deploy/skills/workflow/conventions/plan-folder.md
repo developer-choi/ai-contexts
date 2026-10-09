@@ -9,7 +9,7 @@
       공고.md           ← BG의 requirement 「자료 받기」 산출 (채용만)
       메일.md           ← (채용만)
       과제요구사항.md   ← (채용만)
-      prs.json          ← PR 진행 상태(번호·이름·종류·의존·단계). `scripts/steps.mjs`가 쓰고 읽는다 — 손으로 고치지 않고 `pr add`·`pr set`·`next … --pr`으로
+      prs.json          ← PR 진행 상태(번호·이름·종류·의존·단계·브랜치·base). `scripts/steps.mjs`가 쓰고 읽는다 — 손으로 고치지 않고 `pr add`·`pr set`·`next … --pr`으로
     retained/
       folder-structure.md ← FOUNDATION PR 산출 (채용만)
       tech-constraints.md ← BG의 requirement 산출
