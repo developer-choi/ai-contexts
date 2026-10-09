@@ -94,7 +94,7 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 - **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목)
 - `## TODO` — 고정 헤딩. `todo.md` 이 PR 절의 TODO를 옮겨 오고, 소비 뒤에 생기는 이 PR 몫 TODO도 여기 쌓인다. 없으면 `- 없음`
 
-**PR 이연 항목은 「열려있는 질문」이 아니라 그 PR의 TODO로 적는다** ([PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)).
+**다른 PR로 넘긴 항목은 「열려있는 질문」이 아니라 그 PR의 TODO로 적는다** ([PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)).
 
 외부 참조 자료 링크는 overview.md에 적지 않고 reference.md(아래)에 누적한다.
 
