@@ -141,10 +141,7 @@ step이 스킬을 오케스트레이션하는 구조를 따르고 있는지.
 
 ### 컨벤션 커버리지
 
-`contexts/coding-standards/{rules,principles}/**/*.md`를 Glob해 전체 규칙 목록을 얻고, 각 규칙이 workflow step에서 적절한 시점에 참조되고 있는지 점검한다.
-
-- 참조 시점이 부적절한 규칙이 있는지 (예: 코딩 컨벤션이 구현 step이 아닌 곳에만 있는 경우)
-- 새로 추가된 규칙이 적절한 step에 참조되지 않은 경우
+`contexts/coding-standards/{rules,principles}/**/*.md`를 Glob해 전체 규칙 목록을 얻고, 각 규칙이 realize-plan이나 code-review 중 한 곳에는 걸리는지 점검한다. 구현 단계(implement)에 규칙 참조가 없는 것은 지적하지 않는다.
 
 ### 코드 컨벤션 위치 — workflow/conventions/
 
