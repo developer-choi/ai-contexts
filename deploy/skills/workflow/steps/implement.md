@@ -47,30 +47,20 @@ realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)�
 
 [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
-implement는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자와 리뷰어로 팀을 구성한다. 리뷰어 구성은 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출할 때 A 메커니즘이 결정한다 (로직은 오라클형이라 축 A Reviewer 미spawn).
+implement는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자를 spawn한다. 리뷰는 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)가 맡는다 (로직은 오라클형이라 축 A Reviewer 미spawn).
 
 ```
-Lead (메인 세션) — 사용자 소통 + 팀 spawn + Coding-Standards 리뷰 종합
-├── Feature Implementer (sonnet) — 로직 구현 + 테스트 작성 + React.memo 등 성능 최적화
-├── Coding-Standards Reviewer ×N (sonnet) — 컨벤션 기계적 대조
-└── Advanced Reviewer (opus) — coding standard 판단 + 자유 리뷰
+Lead (메인 세션) — 사용자 소통 + 팀 spawn
+└── Feature Implementer (sonnet) — 로직 구현 + 테스트 작성 + React.memo 등 성능 최적화
 ```
 
 ### Step 5.1.1. Spawn 시 컨텍스트 주입
 
-에이전트는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위와 realize-plan stub 파일들을 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 각 에이전트에게 전달한다.
+Feature Implementer는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위와 realize-plan stub 파일들을 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 전달한다.
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
 | Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
-| Coding-Standards Reviewer ×N | 담당 컨벤션 문서, 리뷰 관점 지시 (해당 컨벤션 위반만 집중), `pr{N}/persistent/reference.md` (회사·프로젝트 고유 컨벤션 — 리뷰어 자체 컨벤션 외 추가 검증 기준) |
-| Advanced Reviewer | [code-review](../../code-review/SKILL.md) 절차, `pr{N}/persistent/reference.md`, stub `*.test.tsx`의 `it.todo` |
-
-리뷰어는 [code-review](../../code-review/SKILL.md)의 절차를 따른다.
-
-### Step 5.1.2. Coding-Standards Reviewer 분할
-
-Lead가 [code-map.md](../../../contexts/code-map.md) 탐색 절차 + 프로젝트별 컨벤션에서 이번 PR 범위에 해당하는 규칙을 선별하고, 주제별로 N개 reviewer를 spawn한다.
 
 ---
 
@@ -86,7 +76,7 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 
 ### Step 5.2.2. gotchas
 
-- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인(Coding-Standards Reviewer + Advanced Reviewer)은 여전히 실행한다.**
+- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인은 여전히 실행한다.**
 - **커밋 분할 기준선: PLAN 계획** — `pr{N}/retained/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
 - **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
 - **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.
@@ -107,11 +97,11 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md) 엔진을 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조). 두 축의 순서·병렬은 엔진이 A 메커니즘으로 정하므로 호출자가 지시하지 않는다.
 
-> **엔진 호출 전 우회 게이트.** 직접 Reviewer를 spawn하기 전에, 엔진 생략이 허용되는지 [impl-review-loop의 우회](../impl-review-loop/SKILL.md#우회-호출자의-사전-점검--입력-아님) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 직접 Reviewer spawn 허용, 하나라도 거짓이면 엔진 호출 강제. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
+> **엔진 호출 전 우회 게이트.** 엔진을 건너뛰기 전에 [impl-review-loop의 우회](../impl-review-loop/SKILL.md#우회-호출자의-사전-점검--입력-아님) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 엔진 대신 [code-review](../../code-review/SKILL.md)를 advanced 모드로 호출한다. 하나라도 거짓이면 엔진을 호출한다. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
 
 | 구현자 | 진실검사 A (메커니즘) | 규칙검사 B | 증분 단위 |
 |---|---|---|---|
-| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 오라클형(실행이 곧 판정). 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | Coding-Standards ×N + Advanced (로직 rules, Step 5.1.2 분할) | 로직 커밋 |
+| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 오라클형(실행이 곧 판정). 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 

@@ -24,6 +24,6 @@ PR이 참조하는 외부 자료·컨벤션·베스트프랙티스 경로 인덱
 ## 소비처
 
 - realize-plan: 파생 산출물 작성 시 참조
-- implement: Lead가 팀에게 컨텍스트 주입할 때 함께 전달 (Markup·Feature Implementer, Coding-Standards Reviewer, Advanced Reviewer)
+- implement: Lead가 Feature Implementer에게 컨텍스트 주입할 때 함께 전달, 리뷰 때는 code-review 추가 컨벤션으로 전달
 - verify: code-review 입력에 포함
 - 후속 PR / 미래 다른 프로젝트: 같은 컨벤션 환경이면 재참조
