@@ -60,8 +60,8 @@ const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json>
   --eval-set <경로>      측정 명세 JSON (필수)
   --out <경로>           결과 JSON 출력 경로 (필수)
   --reps <n>             시나리오×팔당 반복 수 (기본 3)
-  --model <id>           측정 대상 생성 모델 (기본 claude-sonnet-4-6)
-  --grader-model <id>    채점 모델 (기본 claude-sonnet-4-6)
+  --model <id>           측정 대상 생성 모델 (기본 sonnet = 그 시점 최신 Sonnet)
+  --grader-model <id>    채점 모델 (기본 sonnet)
   --workers <n>          동시 실행 상한 (기본 8)
   --timeout <초>         call당 타임아웃 (기본 180). 타임아웃은 재시도하지 않는다
   --variants <a,b>       팔 필터
@@ -213,6 +213,32 @@ async function claudeP(prompt, system, model, timeoutMs, tries = 3, fixedCwd = n
     if (i < tries - 1) await sleep(2000 * (i + 1));
   }
   throw new Error(`claude -p 실패: ${last}`);
+}
+
+/**
+ * 별칭(`sonnet`)을 실제 모델 ID로 푼다. 발사 전에 한 번 물어 그 ID로 모든 run을 고정한다 —
+ * 발사 도중 새 모델이 나와도 팔끼리 다른 모델로 재지 않고, 결과에 어느 판으로 쟀는지가 남는다.
+ *
+ * 기본값은 별칭이어야 한다: 2026-10-09까지 기본값이 `claude-sonnet-4-6`으로 박혀 있어, Sonnet 5.5가
+ * 나온 뒤에도 `--model`을 빠뜨린 회차가 옛 모델로 쟀고 그 결과로 항목을 판정했다(같은 항목을 5.5로
+ * 다시 재자 2/3이 3/3으로 바뀌었다). 박힌 ID는 낡아도 아무것도 알려주지 않는다.
+ */
+async function resolveModel(model) {
+  const result = await execFileAsync(
+    CLAUDE,
+    ['-p', 'Reply with OK', '--model', model, '--setting-sources', '', '--output-format', 'json'],
+    { cwd: os.tmpdir(), timeout: 120000, encoding: 'utf8', maxBuffer: 1024 * 1024, shell: NEEDS_SHELL },
+  );
+  let ids = [];
+  try {
+    ids = Object.keys(JSON.parse(result.stdout).modelUsage ?? {});
+  } catch {
+    // 아래에서 던진다.
+  }
+  if (ids.length !== 1) {
+    throw new Error(`모델 '${model}'을 실제 ID로 풀지 못했다 (rc=${result.code} modelUsage=${JSON.stringify(ids)} err=${(result.stderr || '').slice(0, 160)})`);
+  }
+  return ids[0];
 }
 
 /** 시나리오가 쓸 채점 축 목록. 단축이면 길이 1, 다축이면 축마다 하나. */
@@ -405,8 +431,8 @@ async function main() {
   if (!args['eval-set'] || !args.out) { process.stderr.write(USAGE); process.exitCode = 2; return; }
 
   args.reps = Number(args.reps ?? 3);
-  args.model ??= 'claude-sonnet-4-6';
-  args['grader-model'] ??= 'claude-sonnet-4-6';
+  args.model ??= 'sonnet';
+  args['grader-model'] ??= 'sonnet';
   const workers = Number(args.workers ?? 8);
 
   const spec = readJson(args['eval-set']);
@@ -481,12 +507,19 @@ async function main() {
     if (!fs.existsSync(cwd)) throw new Error(`팔 작업 폴더가 없다 (${variant}): ${cwd}`);
   }
 
+  // 생성·채점 모델을 실제 ID로 고정한다. 아래 로그·결과 JSON·요약 표가 모두 이 ID를 찍는다.
+  const resolved = new Map();
+  for (const key of ['model', 'grader-model']) {
+    if (!resolved.has(args[key])) resolved.set(args[key], await resolveModel(args[key]));
+    args[key] = resolved.get(args[key]);
+  }
+
   if (args.verbose) {
     process.stderr.write(`rule=${spec.rule_id} variants=${variantNames.join(',')} `
       + `scenarios=${scenarios.map((s) => s.id).join(',')} reps=${args.reps} `
       + `-> ${pending.length} run x2 call = ${calls}/${CALL_CAP} call`
       + `${jobs.length > pending.length ? ` (이어받음 ${jobs.length - pending.length} run)` : ''}`
-      + ` (gen=${args.model}, workers=${workers})\n`);
+      + ` (gen=${args.model}, grader=${args['grader-model']}, workers=${workers})\n`);
   }
   if (args['dump-dir']) fs.mkdirSync(args['dump-dir'], { recursive: true });
 
@@ -663,7 +696,7 @@ async function main() {
   const rowIds = Object.keys(table);
   const lines = [
     '',
-    `# ablation: ${spec.rule_id}  (model=${args.model}, reps=${args.reps})`,
+    `# ablation: ${spec.rule_id}  (model=${args.model}, grader=${args['grader-model']}, reps=${args.reps})`,
     '',
     `| 시나리오 | type | ${variantNames.join(' | ')} | 실패 | 판정 |`,
     `|${'---|'.repeat(variantNames.length + 4)}`,

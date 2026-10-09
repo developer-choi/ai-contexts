@@ -5,8 +5,9 @@
 // 그래서 트리거되는 쿼리도 스킬 본문 작업이 끝나기를 기다리지 않고 ~10초에 회수된다.
 //
 // eval-set JSON: 최상위 배열, 항목마다 `query`(문자열)와 `should_trigger`(불리언).
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
@@ -20,7 +21,7 @@ const USAGE = `사용법: node bench-trigger.mjs --eval-set <json> --skill-path 
   --timeout <초>           쿼리당 타임아웃 (기본 60)
   --runs-per-query <n>     쿼리당 반복 (기본 3)
   --trigger-threshold <f>  통과 판정 임계 비율 (기본 0.5)
-  --model <id>             측정 모델 (기본 claude-sonnet-4-6)
+  --model <id>             측정 모델 (기본 sonnet = 그 시점 최신 Sonnet)
   --verbose                진행 로그를 stderr로
 `;
 
@@ -66,6 +67,26 @@ function findProjectRoot() {
     if (parent === dir) return process.cwd();
     dir = parent;
   }
+}
+
+// 별칭(`sonnet`)을 실제 모델 ID로 풀어 모든 쿼리를 그 ID로 고정하고 결과에 남긴다.
+// 기본값을 박힌 ID로 두면 새 모델이 나와도 아무것도 안 알려준다 — bench-ablation.mjs `resolveModel` 머리 주석.
+function resolveModel(model) {
+  const result = spawnSync(
+    CLAUDE,
+    ['-p', 'Reply with OK', '--model', model, '--setting-sources', '', '--output-format', 'json'],
+    { cwd: os.tmpdir(), timeout: 120000, encoding: 'utf8', shell: NEEDS_SHELL },
+  );
+  let ids = [];
+  try {
+    ids = Object.keys(JSON.parse(result.stdout).modelUsage ?? {});
+  } catch {
+    // 아래에서 던진다.
+  }
+  if (ids.length !== 1) {
+    throw new Error(`모델 '${model}'을 실제 ID로 풀지 못했다 (rc=${result.status} modelUsage=${JSON.stringify(ids)} err=${(result.stderr || '').slice(0, 160)})`);
+  }
+  return ids[0];
 }
 
 function parseSkillMd(skillPath) {
@@ -211,7 +232,7 @@ async function main() {
   const workers = Number(args['num-workers'] ?? 3);
   const timeoutMs = Number(args.timeout ?? 240) * 1000;
   const threshold = Number(args['trigger-threshold'] ?? 0.5);
-  const model = args.model ?? 'claude-sonnet-4-6';
+  const model = resolveModel(args.model ?? 'sonnet');
 
   const evalSet = readJson(args['eval-set']);
   const { name, description: skillDescription } = parseSkillMd(args['skill-path']);
@@ -220,7 +241,7 @@ async function main() {
 
   if (args.verbose) {
     process.stderr.write(`Skill: ${name}\nDescription: ${description.slice(0, 200)}...\n`
-      + `Queries: ${evalSet.length}, runs: ${runsPerQuery}, workers: ${workers}\n`);
+      + `Model: ${model}, queries: ${evalSet.length}, runs: ${runsPerQuery}, workers: ${workers}\n`);
   }
 
   const jobs = [];
@@ -292,11 +313,12 @@ async function main() {
     should_not_trigger_triggered_rate: mean(shouldNot),
   };
 
-  fs.writeFileSync(args.out, JSON.stringify({ description, summary, results: perQuery }, null, 2), 'utf8');
+  fs.writeFileSync(args.out, JSON.stringify({ model, description, summary, results: perQuery }, null, 2), 'utf8');
 
   // 실패한 런은 트리거 안 된 런과 같은 모양으로 찍히므로 실패 수와 보류 표시를 함께 낸다.
   const lines = [
     '',
+    `model=${model}`,
     `| 쿼리 | should_trigger | rate | 실패 | 판정 |`,
     `|---|---|---|---|---|`,
     ...perQuery.map((r) => `| ${r.query.slice(0, 60).replaceAll('|', '\\|')} | ${r.should_trigger} | `
