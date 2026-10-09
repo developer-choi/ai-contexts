@@ -55,7 +55,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 지원동기 세션의 최종 보고에 「서류 단계 조사가 못 대서 다시 판 자리」 줄이 있으면(없으면 이 절은 건너뛴다) 그 자리마다 판정한다.
 
-- **그 회사만의 사정인가, 판을 가리지 않는 자리인가.** 앞이면 아무것도 안 고친다. 뒤면 PP `local/skills/recruitment-company-analysis/SKILL.md` 「입력 자료 수집」이 여는 자리 목록에 그 자리를 올리는 백로그 항목을 제안한다
+- **그 회사만의 사정인가, 판을 가리지 않는 자리인가.** 앞이면 아무것도 안 고친다. 뒤면 PP `local/skills/recruit-company-analysis/SKILL.md` 「입력 자료 수집」이 여는 자리 목록에 그 자리를 올리는 백로그 항목을 제안한다
 - 4단(업계 실무 자료·기사·인터뷰)을 뒤늦게 연 회차는 **「못 찾은 것」이 늦게 난 것인지, 1~3단을 덜 판 것인지** 가른다. 뒤면 고칠 자리는 「못 찾은 것」이 아니라 회사가 직접 쓴 글을 찾는 순서다
 
 ### 재료가 없어서 난 반려
@@ -76,7 +76,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 - 안 떠올 종류 → PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED` (+ 지난 덤프에 돌려 확인)
 - 안 옮길 공고 절 종류 → PP `local/contexts/recruitment/application/flow/step1.md` 「옮기지 않는 것」
-- 새로 여는 자리 → PP `recruitment-company-analysis` SKILL.md 「입력 자료 수집」
+- 새로 여는 자리 → PP `recruit-company-analysis` SKILL.md 「입력 자료 수집」
 
 그 밖의 절차 문제는 「문제 리스트업 + 규칙화」의 문제 목록으로 보낸다 — 위치는 그쪽이 정한다.
 

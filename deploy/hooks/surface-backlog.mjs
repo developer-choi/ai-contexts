@@ -104,7 +104,7 @@ function readRealUse(file) {
 // 띄우면 그 세션은 항목이 있는 줄 몰라 아무도 태그를 못 뗀다. 그래서 스킬을 부를 때 프로젝트를 가리지 않고 띄운다.
 // 종류 어휘의 정본은 backlog 레포 `scripts/backlog-ready-shape.mjs`의 REAL_USE_KINDS다 — 거기 종류를 더하면 여기도 더한다.
 const REAL_USE_SKILLS = {
-  "recruitment-round": (skill) => skill === "workflow" || skill.startsWith("recruitment"),
+  "recruitment-round": (skill) => skill === "workflow" || skill.startsWith("recruit"),
   "blog-post": (skill) => skill === "write-refine",
   "workflow-pr": (skill) => skill === "workflow",
 };

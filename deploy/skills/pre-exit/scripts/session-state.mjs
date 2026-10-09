@@ -326,7 +326,7 @@ const RETRO_ITEMS = [
   { key: 'digest', file: /(^|\/)knowledge\//, slash: [/^\/digest$/] },
   { key: 'write-refine', slash: [/^\/write-refine$/] },
   { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
-  { key: 'recruitment', slash: [/^\/recruitment-(application|motivation)$/], cwd: 'private-playground' },
+  { key: 'recruitment', slash: [/^\/recruit-(application|motivation)$/], cwd: 'private-playground' },
   { key: 'step-1', when: 'always' },
   { key: 'error-notebook', when: 'always' },
 ];
