@@ -25,8 +25,6 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 맨 앞에 리뷰어가 실제로 Read한 기준 문서 경로 목록, 그 뒤에 이슈 목록. severity (Critical / Minor / Suggestion) 포함.
 
-- **advanced 모드에서 coding-standards 이슈가 있으면**: coding-standards 이슈만 반환하고 "coding-standards 미통과로 advanced 미실행" 안내. 호출자가 수정 후 재호출하면 다시 판단한다.
-
 ---
 
 ## 절차
