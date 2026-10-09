@@ -123,6 +123,8 @@ Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Ad
 
 Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인). 기존 코드에 같은 모양의 선례가 있다는 것만으로 기준 문서(예시 포함)를 근거로 한 지적을 기각하지 않는다.
 
+External-Skill Reviewer는 기준 문서를 읽지 않으므로, 외부 스킬 권고와 기준 문서의 충돌은 기준 문서를 Read한 리뷰어가 가린다. Lead는 External-Skill Reviewer의 이슈마다 위치와 권고 모양을 Coding-Standards Reviewer들과 Advanced Reviewer에게 보내, 자기가 Read한 기준 문서(예시 포함)가 그 위치의 지금 모양을 권하거나 Good 예시로 드는지, 외부 권고의 모양을 금지하거나 Bad 예시로 드는지 묻는다. 그렇다면 근거 `파일:줄`과 원문을 함께 답하게 한다. 그렇다는 답이 온 이슈가 1단계 3번의 「외부 스킬 권고가 기준 문서와 다른」 경우다 — 외부 권고와 답으로 온 `파일:줄`을 나란히 적어 사용자에게 올린다. 답을 Lead가 다시 해석해 충돌에서 빼지 않는다.
+
 #### only-standards 모드
 
 coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer·External-Skill Reviewer 미실행. 호출자는 `--coding-standards` 경로 명시 권고 (의도 보존).
