@@ -40,7 +40,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 리뷰어를 띄우는 쪽은 사용자 결정을 풀어 쓰지 않는다. 결정 기록에서 이 diff에 닿는 결정의 번호(있으면)·`파일:줄`·원문 줄을 지시문에 그대로 옮겨 넣는다. 결정 기록 경로만 주고 리뷰어에게 찾게 하지 않는다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
-2. **리뷰어가** [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)의 후보 선별과 전체 Read까지 밟아(reference.md 인용 게이트는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. 기준 문서는 Read 도구로 파일째 읽는다 — 셸의 `cat`·`head`·`sed`로 읽지 않는다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
+2. **리뷰어가** [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)의 후보 선별과 전체 Read까지 밟아(`reference.md`에 인용하는 단계는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. 기준 문서는 Read 도구로 파일째 읽는다 — 셸의 `cat`·`head`·`sed`로 읽지 않는다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
 3. 메인이 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 아래 표에서 고른다. 외부 스킬 권고가 리뷰어가 고른 기준 문서와 다르면 리뷰어가 보고에 적고, 메인이 사용자에게 올린다 — 어느 쪽을 따를지 사용자가 결정한다. 3번은 리뷰 대상 도메인(Next.js 등) 기준이라 모드와 무관하게 실행한다 — only-standards 모드는 3단계(리뷰 수행)에서 외부 스킬 리뷰어를 띄우지 않으므로 좁은 스코프가 유지된다.
 
    | 리뷰 대상 | 외부 스킬 |
