@@ -2058,6 +2058,52 @@ const recruitmentGuardGroup = async () => {
   });
 };
 
+// AC 로컬 훅 check-ac-main-commit은 「자기가 놓인 레포」를 AC로 본다. 프로세스로 띄우면 그 레포가 늘
+// 진짜 AC라 fixture를 못 넣으므로, 판정 함수를 import해 homeMain에 fixture 레포를 넘긴다.
+// 레포는 진짜 git이어야 한다 — 가짜 경로면 메인 루트를 못 구해 전부 fail-open→pass가 된다.
+const AC_MAIN_COMMIT_HOOK = path.join(import.meta.dirname, '..', '..', 'local', 'hooks', 'check-ac-main-commit.mjs');
+const acMainCommitGroup = async () => {
+  const { judgeMainCommit } = await import(pathToFileURL(AC_MAIN_COMMIT_HOOK).href);
+  const root = await makeTempDir('hook-ac-main-commit-');
+  const initRepo = async (dir, branch) => {
+    fs.mkdirSync(dir);
+    await runGit(['init', '-q', '-b', branch], dir);
+    await runGit([...COMMIT_AS, 'commit', '-q', '--allow-empty', '-m', 'init'], dir);
+  };
+  try {
+    const posix = (value) => value.replace(/\\/g, '/');
+    const ac = path.join(root, 'ac');
+    const wt = path.join(root, 'ac-wt');
+    const other = path.join(root, 'other');
+    const acFeature = path.join(root, 'ac-feature');
+    await initRepo(ac, 'master');
+    await runGit(['worktree', 'add', '-q', wt, '-b', 'work'], ac);
+    await initRepo(other, 'master');
+    await initRepo(acFeature, 'feature');
+    const [AC, WT, OTHER, FEAT] = [ac, wt, other, acFeature].map(posix);
+    const REASON = '무엇을 바꿨는지 요약\n메인 커밋 사유: 사용자가 이 세션에서 master 직접 커밋을 승인함';
+    // [명령, 세션 폴더, description, homeMain, 기대 판정, 설명]
+    const cases = [
+      ['git commit a.md -m x', AC, '', AC, 'deny', '메인 master 커밋은 사유 줄이 없으면 막는다'],
+      ['git commit a.md -m x', AC, REASON, AC, 'ask', '사유 줄이 있으면 승인 창을 띄운다'],
+      ['git commit a.md -m x', AC, '메인 커밋 사유:', AC, 'deny', '비어 있는 사유 줄은 사유가 아니다'],
+      [`git -C ${AC} commit a.md -m x`, WT, '', AC, 'deny', 'git -C로 메인을 가리켜도 잡는다'],
+      [`git status && git -C ${AC} commit a.md -m x`, WT, '', AC, 'deny', 'chain 뒷단의 커밋도 잡는다'],
+      ['git commit a.md -m x', WT, '', AC, 'pass', '연결 워크트리 안의 커밋은 통과'],
+      ['git commit a.md -m x', OTHER, '', AC, 'pass', '다른 레포의 master 커밋은 통과'],
+      ['git commit a.md -m x', FEAT, '', FEAT, 'pass', '메인 워크트리라도 master/main이 아니면 통과'],
+      [`git -C ${AC} status`, AC, '', AC, 'pass', '커밋이 아닌 git 명령은 통과'],
+      ['git commit a.md -m "$P"', '', '', AC, 'pass', '폴더를 못 정하면 fail-open'],
+    ];
+    return await runCases(cases, async ([cmd, sessionCwd, description, homeMain, expected, note]) => {
+      const { decision, reason } = judgeMainCommit({ cmd, sessionCwd, description, homeMain });
+      return judge(`check-ac-main-commit.mjs :: ${cmd} → ${expected} (${note})`, decision, expected, reason ?? '');
+    });
+  } finally {
+    await removeTempDir(root);
+  }
+};
+
 // skill-creator 알림은 대화 기록 파일을 읽어 「이미 불렀는가」를 가르므로, 기록 두 벌(부른 것·안 부른 것)을
 // 임시 폴더에 만들어 두고 그 안에서 실행까지 끝낸다. 부른 기록은 플러그인 접두가 붙은 이름으로 둔다 —
 // 이름 전체 일치로 판정하면 이 형태를 놓친다.
@@ -2357,6 +2403,7 @@ async function main() {
     toolGroup,
     recruitmentGroup,
     recruitmentGuardGroup,
+    acMainCommitGroup,
     skillCreatorGroup,
     subFileGroup,
     responseLanguageGroup,

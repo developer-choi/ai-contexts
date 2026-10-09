@@ -5,6 +5,12 @@
       "event": "PreToolUse",
       "on": "bash",
       "msg": "Checking for sync:* commands..."
+    },
+    {
+      "file": "check-ac-main-commit.mjs",
+      "event": "PreToolUse",
+      "on": "bash",
+      "msg": "Checking AC main-worktree commit..."
     }
   ]
 }
