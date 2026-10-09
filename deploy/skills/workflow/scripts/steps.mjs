@@ -20,6 +20,8 @@
 //   node <이 파일> pr list --plan <plan 폴더>
 //   node <이 파일> pr branches --plan <plan 폴더> --repo <레포>
 //       → PR마다 형태(스택·독립)·범위 커밋. 스택인데 아래 브랜치 tip이 안 들어 있으면 어긋남으로 exit 1
+//   node <이 파일> pr links --plan <plan 폴더> --repo <레포> --n <N> --body <PR 본문 md>
+//       → 본문의 커밋 링크마다 그 SHA가 이 PR의 base..branch 범위에 있는지. 어긋난 링크가 있으면 exit 1
 //   node <이 파일> graph                → mermaid 흐름도 초안(stdout). README 흐름도는 이걸 바탕으로 사람이 다듬어 둔다
 //   node <이 파일> check                → `on` 값 ↔ 헤딩 대응
 //
@@ -285,8 +287,10 @@ function cmdPr(sub, opt) {
     }
   } else if (sub === 'branches') {
     cmdBranches(data, opt);
+  } else if (sub === 'links') {
+    cmdLinks(data, opt);
   } else {
-    fail('사용: pr (add | set | list | branches) --plan <plan 폴더> …');
+    fail('사용: pr (add | set | list | branches | links) --plan <plan 폴더> …');
   }
 }
 
@@ -335,6 +339,83 @@ function cmdBranches(data, opt) {
   }
   if (broken) {
     console.log(`[pr branches] 확인할 PR ${broken}건`);
+    process.exit(1);
+  }
+}
+
+// GitHub 커밋 링크 두 꼴 — 레포 커밋(`/commit/<sha>`)과 PR 안 커밋(`/pull/N/commits/<sha>`). 앞의 owner/repo도 잡는다.
+const COMMIT_LINK = /github\.com\/([\w.-]+\/[\w.-]+)\/(?:commit|pull\/\d+\/commits)\/([0-9a-f]{7,40})\b/gi;
+
+// origin URL의 owner/repo. origin이 없으면 null — 그때는 링크의 레포를 가리지 않는다.
+function originSlug(repo) {
+  const url = git(repo, ['remote', 'get-url', 'origin']);
+  const m = url?.match(/github\.com[:/]([\w.-]+\/[\w.-]+?)(?:\.git)?\/?$/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
+// sha가 base..branch 범위에 있는가 — branch의 조상이고 base의 조상이 아니다.
+function inRange(repo, sha, pr) {
+  return (
+    git(repo, ['merge-base', '--is-ancestor', sha, pr.branch]) !== null &&
+    git(repo, ['merge-base', '--is-ancestor', sha, pr.base]) === null
+  );
+}
+
+function cmdLinks(data, opt) {
+  if (!opt.repo || !opt.n || !opt.body) {
+    fail('pr links는 --repo <PR 브랜치가 있는 레포> --n <N> --body <그 PR 본문 md 파일>이 필요하다 — 게시본만 있으면 md 파일로 받아 넘긴다');
+  }
+  if (git(opt.repo, ['rev-parse', '--git-dir']) === null) fail(`git 레포가 아니다: ${opt.repo}`);
+  if (!fs.existsSync(opt.body) || !fs.statSync(opt.body).isFile()) fail(`--body가 있는 파일이 아니다: ${opt.body}`);
+  const pr = findPr(data, parseNum(opt.n, '--n'));
+  if (!pr.branch) fail(`${prLabel(pr)}은 브랜치 미기록 — pr set --n ${pr.n} --branch <브랜치> --base <ref>로 기록한다`);
+  const missing = [pr.branch, pr.base].filter((ref) => git(opt.repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === null);
+  if (missing.length) fail(`${prLabel(pr)} | 레포에 없음: ${missing.join(', ')}`);
+  // 아래 브랜치가 메시지 최종화를 안 따라왔으면 새 SHA가 위 PR 범위로 잡혀 맞는 링크가 어긋남으로 나온다.
+  const lagging = data.prs.filter((p) => {
+    const below = p.branch && data.prs.find((other) => other.n !== p.n && other.branch === p.base);
+    return below && git(opt.repo, ['merge-base', '--is-ancestor', p.base, p.branch]) === null;
+  });
+  if (lagging.length) {
+    fail(`스택이 어긋나 범위를 믿을 수 없다(${lagging.map(prLabel).join(', ')}) — pr branches로 확인하고 아래 브랜치를 맞춘 뒤 다시 돌린다`);
+  }
+
+  // 업스트림 라이브러리 커밋처럼 다른 레포를 인용한 링크는 이 PR과 무관하다.
+  const origin = originSlug(opt.repo);
+  const links = [...fs.readFileSync(opt.body, 'utf8').matchAll(COMMIT_LINK)].map((m) => ({ slug: m[1].toLowerCase(), sha: m[2].toLowerCase() }));
+  const others = links.filter((l) => origin && l.slug !== origin);
+  const shas = [...new Set(links.filter((l) => !others.includes(l)).map((l) => l.sha))];
+  console.log(`${prLabel(pr)} | 범위 ${pr.base}..${pr.branch} | 본문 커밋 링크 ${shas.length}개`);
+  others.forEach((l) => console.log(`  건너뜀: ${l.sha} — 다른 레포(${l.slug}) 링크`));
+  let broken = 0;
+  for (const sha of shas) {
+    const full = git(opt.repo, ['rev-parse', '--verify', '--quiet', `${sha}^{commit}`]);
+    if (full === null) {
+      console.log(`  어긋남: ${sha} — 레포에 없는 커밋`);
+      broken += 1;
+      continue;
+    }
+    if (inRange(opt.repo, full, pr)) {
+      console.log(`  ok: ${sha} ${git(opt.repo, ['log', '-1', '--format=%s', full])}`);
+      continue;
+    }
+    const owner = data.prs.find((other) => other.n !== pr.n && other.branch && inRange(opt.repo, full, other));
+    if (owner) {
+      console.log(`  어긋남: ${sha} — ${prLabel(owner)}의 범위에 있다`);
+      broken += 1;
+      continue;
+    }
+    // 어느 PR 범위에도 없이 base에 든 커밋은 이미 머지된 것이라 메시지 최종화로 SHA가 안 바뀐다.
+    if (git(opt.repo, ['merge-base', '--is-ancestor', full, pr.base]) !== null) {
+      console.log(`  참고: ${sha} — base(${pr.base})에 이미 있는 커밋`);
+      continue;
+    }
+    // 메시지 최종화 전 SHA는 커밋 객체가 남아 있어도 어느 브랜치에도 안 든다.
+    console.log(`  어긋남: ${sha} — 어느 PR 범위에도 없다(옛 SHA)`);
+    broken += 1;
+  }
+  if (broken) {
+    console.log(`[pr links] 어긋난 링크 ${broken}개`);
     process.exit(1);
   }
 }
@@ -587,7 +668,7 @@ function cmdCheck() {
   if (problems.length) process.exit(1);
 }
 
-const USAGE = '사용: node <이 파일> (next <step> [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list|branches) --plan <p> … | graph | check)';
+const USAGE = '사용: node <이 파일> (next <step> [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list|branches|links) --plan <p> … | graph | check)';
 const [command, ...rest] = process.argv.slice(2);
 if (command === 'next' || command === 'start') {
   const { pos, opt } = parseArgs(rest, ['plan', 'pr']);
@@ -595,7 +676,7 @@ if (command === 'next' || command === 'start') {
   if (command === 'next') cmdNext(pos[0], opt);
   else cmdStart(pos[0], opt);
 } else if (command === 'pr') {
-  const { pos, opt } = parseArgs(rest, ['plan', 'name', 'type', 'deps', 'n', 'branch', 'base', 'repo']);
+  const { pos, opt } = parseArgs(rest, ['plan', 'name', 'type', 'deps', 'n', 'branch', 'base', 'repo', 'body']);
   if (pos.length !== 1) fail(USAGE);
   cmdPr(pos[0], opt);
 } else if (command === 'graph' && !rest.length) console.log(graph());
