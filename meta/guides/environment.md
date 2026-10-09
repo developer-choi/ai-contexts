@@ -24,11 +24,14 @@ npm run sync:environment
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
   - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 경로를 주지 않았거나 파일이 없을 때만 exit 1입니다.
-- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md에서 「문장 다듬기」(`deploy/contexts/prompt-standards/wording.md`)가 금하는 낱말 — 강조 라벨·약한 어휘·군더더기 — 을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.
+- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md에서 「문장 다듬기」(`deploy/contexts/prompt-standards/wording.md`)가 금하는 낱말 — 강조 라벨·약한 어휘·군더더기·사용자가 못 알아본 말 — 을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.
   - 검사 범위·제외(건드린 파일 전체, `R100` 제외, backlog 데이터 제외, `|| true`)는 바로 위 개수 하드코딩 훅과 같습니다.
   - 낱말 목록과 처방은 스크립트가 정본입니다. 문자열만으로 정탐이 대부분인 낱말만 켭니다 — 정상 조건문·명사로 더 많이 쓰이는 낱말(`필요하면`·`옵션` 등)은 뺍니다.
   - AC가 아닌 레포에서는 `[CRITICAL]`도 강조 라벨로 경고합니다. AC는 `.githooks`의 `check-critical-marker.mjs`가 막고, 다른 레포에는 이것이 유일한 표면입니다.
   - `node ~/.ai-contexts/check-wording.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 경로를 주지 않았거나 파일이 없을 때만 exit 1입니다.
+  - 「금지 표현」 범주는 낱말 목록이 스크립트가 아니라 금지 표현 목록 `scripts/hooks/blocked-expressions.json`에 있어, 이 파일도 `~/.ai-contexts/blocked-expressions.json`으로 복사합니다. 훅은 그 사본을 읽어 걸린 줄과 행마다의 「대신 쓸 말」을 `[금지 표현 의심]`으로 경고하고, 사본이 없으면 이 범주만 건너뜁니다.
+    - 금지 표현 목록은 등재 스크립트(`scripts/hooks/blocked-expressions.mjs`)로만 고칩니다. 이 스크립트는 원본과 사본을 함께 고쳐, 다음 sync 전에도 바로 걸리게 합니다.
+    - 그래서 사본이 원본과 달라질 수 있어, `unsync:environment`는 동일성 비교 없이 사본을 지웁니다(`md-size-seen.json`과 같은 근거 — 이름도 자리도 AC 전유입니다).
 - `scripts/hooks/check-coupling-patterns.mjs`를 `~/.ai-contexts/check-coupling-patterns.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-coupling-patterns.*`)으로 멱등하게 등록합니다. 커밋하는 레포에 `meta/coupling.json`이 있으면 등록된 짝꿍 패턴 **하나하나**가 실물 파일을 가리키는지 확인해 경고합니다 — 커밋을 막지는 않습니다.
   - 왜 필요한가: 짝꿍을 띄우는 편집 시점 훅(`surface-coupling`)은 「편집 중인 파일이 어느 묶음에 드는가」만 봅니다. 묶음 쪽 패턴이 낡아 아무 파일도 안 가리키게 되면 그 훅에서는 「이 파일은 짝꿍이 아니다」와 똑같은 모양이 되어, 짝꿍 대조가 통째로 꺼진 상태가 매 편집마다 통과처럼 보입니다([대상 0개는 통과가 아니라 고장이다](../../deploy/contexts/rules-as-code-authoring.md#대상-0개는-통과가-아니라-고장이다)).
   - 등록부를 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돕니다. 패턴이 죽는 계기는 등록부를 고칠 때가 아니라 다른 파일이 옮겨갈 때라, 등록부를 건드린 커밋만 보면 죽은 뒤 아무도 등록부를 안 여는 동안 계속 안 잡힙니다.

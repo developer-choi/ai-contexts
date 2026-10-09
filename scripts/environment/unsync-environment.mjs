@@ -12,7 +12,7 @@ import {
   runs,
 } from './environment-lib.mjs';
 import { unregisterGlobalHook } from '../lib/git-hooks.mjs';
-import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest } from './precommit-hooks.mjs';
+import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest, precommitHookCompanions } from './precommit-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -130,10 +130,14 @@ function unsyncPrecommitHook(state, hook) {
     }[status],
   );
 
-  // 훅이 돌면서 스스로 만드는 상태 파일. 내용은 매번 달라 동일성 비교가 안 되지만, 이름도 자리도
-  // AC 전유라(`~/.ai-contexts/`) 사용자 파일을 지울 위험이 없다.
-  for (const name of hook.stateFiles ?? []) {
-    const file = path.join(stateDir, name);
+  // 훅이 돌면서 스스로 만드는 상태 파일과, 훅 옆에 복사해 둔 데이터 파일. 둘 다 내용이 원본과
+  // 달라질 수 있어 동일성 비교가 안 되지만, 이름도 자리도 AC 전유라(`~/.ai-contexts/`) 사용자
+  // 파일을 지울 위험이 없다.
+  const leftovers = [
+    ...(hook.stateFiles ?? []).map((name) => path.join(stateDir, name)),
+    ...precommitHookCompanions(hook).map(([, dest]) => dest),
+  ];
+  for (const file of leftovers) {
     const existed = fs.existsSync(file);
     fs.rmSync(file, { force: true });
     console.log(existed ? `Removed ${file}` : `Already absent: ${file}`);

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // 전역 git pre-commit 훅. 이 커밋이 건드린 프롬프트 md를 통째로 훑어 `wording.md`(문장 다듬기)가
-// 금하는 낱말 — 강조 라벨·약한 어휘·군더더기 — 을 감지해 처방과 함께 경고한다(차단하지 않는다).
+// 금하는 낱말 — 강조 라벨·약한 어휘·군더더기·사용자가 못 알아본 말 — 을 감지해 처방과 함께
+// 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 // 경로 판정·staged 읽기는 check-count-hardcoding.mjs와 같은 모양이다.
 //
@@ -17,9 +18,15 @@
 //
 // `--report <md>`로 파일 하나를 지목해 물을 수도 있다. 커밋 없이 문서를 훑는 회차는 훅이 안 뜨는데
 // 낱말 목록은 이 스크립트에만 있어서, 이 출구가 없으면 대조할 재료가 없다.
+//
+// 「금지 표현」 범주만은 낱말이 이 파일이 아니라 옆의 `blocked-expressions.json`에 있다. 사용자가 못
+// 알아본 말을 세션이 그때그때 등재하는 목록이라 코드 수정 없이 늘어나야 하고, 등재는
+// `blocked-expressions.mjs`로만 한다. 그 스크립트가 등재 전에 이 파일의 매칭으로 실제로 대 보므로
+// 매칭·판별 함수를 export한다 — 등재 때 대 본 결과와 훅이 짚는 결과가 같은 코드에서 나와야 한다.
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
+import { fileURLToPath } from "node:url";
 
 // 프롬프트 문서만 본다 — 일반 문서까지 걸면 소음이 된다.
 const PROMPT_DOC = /\/(skills|rules|contexts|meta\/guides)\//;
@@ -88,20 +95,81 @@ const CATEGORIES = [
   },
 ];
 
+// 사용자가 못 알아본 말. 낱말은 금지 표현 목록 행에서 오고, 처방도 행마다 다르다(걸린 줄 아래에 찍힌다).
+const BLOCKED = {
+  kind: "blocked",
+  tag: "[금지 표현 의심]",
+  noun: "사용자가 못 알아본 말이",
+  advice: [
+    "판단: 걸린 말을 줄 아래 「대신」의 풀어 쓴 말로 바꾼다. 바로 옆에 이미 풀려 있으면 그 말만 지운다.",
+    "      다른 뜻으로 멀쩡히 쓴 자리면 그대로 두고, 같은 꼴이 또 걸릴 것 같으면 그 꼴을 예외로 올린다:",
+    "      node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --exclude --word <말> --exclusions <꼴>",
+  ],
+};
+
+// 원본(AC `scripts/hooks/`)에서 돌든 사본(`~/.ai-contexts/`)에서 돌든 금지 표현 목록은 바로 옆에 있다.
+export const LIST_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "blocked-expressions.json");
+
+export const MATCH_TYPES = ["prefix", "substring"];
+
+// 파일이 없으면(sync 전·unsync 뒤) 이 범주만 건너뛴다 — 나머지 범주는 계속 돌아야 한다.
+// 깨졌으면 조용히 넘기지 않고 한 줄 알린다. 조용히 넘기면 경고가 사라진 것을 아무도 모른다.
+function loadBlockedRows() {
+  if (!fs.existsSync(LIST_FILE)) return [];
+  try {
+    const rows = JSON.parse(fs.readFileSync(LIST_FILE, "utf8"));
+    if (!Array.isArray(rows)) throw new Error("배열이 아니다");
+    return rows;
+  } catch (error) {
+    console.log(`[금지 표현 목록을 못 읽어 그 범주만 건너뜀] ${LIST_FILE}: ${error.message}`);
+    return [];
+  }
+}
+
+// `prefix`는 낱말 앞만 막는다 — 뒤를 막으면 「눈금이」·「팔의」처럼 조사가 붙은 꼴을 다 놓친다.
+// `substring`은 앞도 안 막아 「실행오라클」처럼 붙여 쓴 꼴까지 잡는다.
+export function wordPattern(type, word) {
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  if (type === "substring") return new RegExp(escaped, "gi");
+  // 영어 낱말은 `_`·숫자 뒤도 막는다 — `[EMPATHY_SEAM]` 같은 식별자 조각이 `seam`으로 걸렸다.
+  const before = /^[가-힣]/.test(word) ? H : /^[A-Za-z]/.test(word) ? "(?<![A-Za-z0-9_])" : "";
+  return new RegExp(`${before}${escaped}`, "gi");
+}
+
+// 한 줄에서 행들이 걸린 자리. 예외 꼴 안에 들어간 적중은 뺀다.
+export function blockedHits(rows, line) {
+  const hits = [];
+  for (const row of rows) {
+    const excluded = (row.exclusions ?? []).flatMap((phrase) =>
+      [...line.matchAll(wordPattern("substring", phrase))].map((m) => [m.index, m.index + m[0].length]),
+    );
+    for (const word of row.words ?? []) {
+      for (const m of line.matchAll(wordPattern(row.type, word))) {
+        const end = m.index + m[0].length;
+        if (excluded.some(([from, to]) => from <= m.index && end <= to)) continue;
+        hits.push({ row, word: m[0] });
+      }
+    }
+  }
+  return hits;
+}
+
 // 파일 하나가 옛 위반을 많이 안고 있어도 출력이 화면을 덮지 않게 자른다.
 const MAX_REPORTS = 20;
 
 function main() {
-  const reports = new Map(CATEGORIES.map((c) => [c.kind, []]));
+  const categories = [...CATEGORIES, BLOCKED];
+  const reports = new Map(categories.map((c) => [c.kind, []]));
+  const rows = loadBlockedRows();
 
   for (const file of stagedMarkdownFiles()) {
     if (!isPromptDoc(file)) continue;
     const content = stagedContent(file);
     if (content === null) continue;
-    for (const report of detectInFile(file, content)) reports.get(report.kind).push(report);
+    for (const report of detectInFile(file, content, rows)) reports.get(report.kind).push(report);
   }
 
-  const found = CATEGORIES.filter((c) => reports.get(c.kind).length > 0);
+  const found = categories.filter((c) => reports.get(c.kind).length > 0);
   if (found.length === 0) return;
 
   for (const category of found) {
@@ -118,8 +186,9 @@ function main() {
 
 function printReports({ tag, noun, advice }, reports, where) {
   console.log(`${tag} ${where}에서 ${noun} 감지됐다:`);
-  for (const { file, lineNo, line, hits } of reports.slice(0, MAX_REPORTS)) {
+  for (const { file, lineNo, line, hits, notes = [] } of reports.slice(0, MAX_REPORTS)) {
     console.log(`  ${file}:${lineNo}: ${line}  (${hits.join(", ")})`);
+    for (const note of notes) console.log(`      ${note}`);
   }
   if (reports.length > MAX_REPORTS) {
     console.log(`  ... 그 밖에 ${reports.length - MAX_REPORTS}건 더`);
@@ -165,11 +234,12 @@ function stagedContent(file) {
   }
 }
 
-function isPromptDoc(file) {
+// `repo`는 cwd가 아닌 레포의 파일을 가릴 때 넘긴다(등재 스크립트가 AC를 훑을 때).
+export function isPromptDoc(file, repo = repoName()) {
   // 앞에 슬래시를 붙여, 레포 루트 바로 아래(`meta/guides/...`)도 `/meta/guides/`로 잡히게 한다.
   const posix = `/${file.replace(/\\/g, "/").replace(/^\/+/, "")}`;
   if (EXCLUDE.test(posix)) return false;
-  if (BACKLOG_DATA.test(posix) && repoName() === BACKLOG_REPO) return false;
+  if (BACKLOG_DATA.test(posix) && repo === BACKLOG_REPO) return false;
   if (PROMPT_DOC.test(posix)) return true;
   return CLAUDE_LIKE.test(posix.split("/").pop());
 }
@@ -192,8 +262,8 @@ function repoName() {
 }
 
 // 코드블록·인라인코드는 걷어낸 뒤 본다 — 규칙 문서가 낱말 자체를 호명하는 자리다.
-function detectInFile(file, content) {
-  const found = [];
+export function proseLines(content) {
+  const lines = [];
   let fence = null;
 
   content.split("\n").forEach((raw, index) => {
@@ -204,13 +274,34 @@ function detectInFile(file, content) {
       return;
     }
     if (fence !== null) return;
+    lines.push({ lineNo: index + 1, raw, clean: raw.replace(/`[^`\n]*`/g, " ") });
+  });
 
-    const clean = raw.replace(/`[^`\n]*`/g, " ");
+  return lines;
+}
+
+function detectInFile(file, content, rows) {
+  const found = [];
+
+  for (const { lineNo, raw, clean } of proseLines(content)) {
     for (const category of CATEGORIES) {
       const hits = patternsOf(category).flatMap((pattern) => [...clean.matchAll(pattern)].map((m) => m[0]));
-      if (hits.length > 0) found.push({ kind: category.kind, file, lineNo: index + 1, line: raw.trim(), hits });
+      if (hits.length > 0) found.push({ kind: category.kind, file, lineNo, line: raw.trim(), hits });
     }
-  });
+
+    const blocked = blockedHits(rows, clean);
+    if (blocked.length > 0) {
+      const matchedRows = [...new Set(blocked.map((hit) => hit.row))];
+      found.push({
+        kind: BLOCKED.kind,
+        file,
+        lineNo,
+        line: raw.trim(),
+        hits: blocked.map((hit) => hit.word),
+        notes: matchedRows.map((row) => `「${row.words.join("·")}」 대신: ${row.instead} — ${row.why}`),
+      });
+    }
+  }
 
   return found;
 }
@@ -235,9 +326,9 @@ function reportFile(target) {
   }
   process.chdir(path.dirname(abs));
 
-  const found = detectInFile(target, fs.readFileSync(abs, "utf8"));
+  const found = detectInFile(target, fs.readFileSync(abs, "utf8"), loadBlockedRows());
   const where = target;
-  for (const category of CATEGORIES) {
+  for (const category of [...CATEGORIES, BLOCKED]) {
     const reports = found.filter((r) => r.kind === category.kind);
     if (reports.length > 0) printReports(category, reports, where);
   }
@@ -248,13 +339,27 @@ function reportFile(target) {
   );
 }
 
-try {
-  const reportAt = process.argv.indexOf("--report");
-  if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
-  else main();
-} catch (error) {
-  console.error(`[낱말 검사 훅 내부 오류, 건너뜀] ${error.message}`);
+// 등재 스크립트가 함수만 가져다 쓸 때는 검사를 돌리지 않는다. 실제 경로로 견준다 — `import.meta.url`은
+// 정션·링크를 푼 경로라, 부른 경로 그대로 견주면 훅 폴더가 링크 뒤에 있을 때 검사가 말없이 꺼진다.
+// Windows는 드라이브 문자 대소문자가 호출마다 달라질 수 있어 소문자로 맞춘다.
+const realLower = (file) => {
+  try {
+    return fs.realpathSync(file).toLowerCase();
+  } catch {
+    return "";
+  }
+};
+const invokedDirectly =
+  Boolean(process.argv[1]) && realLower(process.argv[1]) === realLower(fileURLToPath(import.meta.url));
+if (invokedDirectly) {
+  try {
+    const reportAt = process.argv.indexOf("--report");
+    if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
+    else main();
+  } catch (error) {
+    console.error(`[낱말 검사 훅 내부 오류, 건너뜀] ${error.message}`);
+  }
+  // 문자열만으로는 정탐이 안 갈리는 알림이라 사람의 커밋을 막으면 안 된다 — 검사(main)는 늘 0이다.
+  // 사람이 부른 `--report`가 파일을 못 찾았을 때만 그 실패가 그대로 나간다.
+  process.exit(process.exitCode ?? 0);
 }
-// 문자열만으로는 정탐이 안 갈리는 알림이라 사람의 커밋을 막으면 안 된다 — 검사(main)는 늘 0이다.
-// 사람이 부른 `--report`가 파일을 못 찾았을 때만 그 실패가 그대로 나간다.
-process.exit(process.exitCode ?? 0);

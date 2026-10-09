@@ -1,0 +1,262 @@
+[
+  {
+    "type": "substring",
+    "words": [
+      "오라클"
+    ],
+    "why": "영어 oracle을 음역한 은어라 무엇이 합격·불합격을 정하는지 떠오르지 않는다",
+    "instead": "판정 기준 — 실행 결과로 가르면 「실행 결과로 판정」, 사람이 가르면 「사람이 판정」, 벤치면 「채점 정답 기준」",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "진실검사"
+    ],
+    "why": "무엇이 진실인지 안 적힌 조어라 무엇과 대조하는 검사인지 모른다",
+    "instead": "원본(figma·테스트 결과)과 맞는지 보는 검사",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "미리팩토링"
+    ],
+    "why": "「미리 팩토링」으로 잘못 읽히는 조어다",
+    "instead": "리팩토링 전 코드",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "이연"
+    ],
+    "why": "회계 용어라 개발 문서 독자가 뜻을 못 떠올린다",
+    "instead": "미룬다 / 다른 PR로 넘긴다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "이설"
+    ],
+    "why": "토목 용어라 개발 문서 독자가 뜻을 못 떠올린다",
+    "instead": "옮긴다 / 옮겨 담는다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "비계"
+    ],
+    "why": "건설 현장 용어 비유라 뜻이 바로 안 온다",
+    "instead": "임시값 / 임시로 두는 것",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "seam"
+    ],
+    "why": "영어 비유라 무엇과 무엇의 경계인지 안 보인다",
+    "instead": "책임 경계 (누가 무엇을 정하는지 갈리는 자리)",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "굽지",
+      "굽는"
+    ],
+    "why": "파일을 만든다는 뜻의 비유라 처음 읽는 사람은 뜻을 못 떠올린다",
+    "instead": "만든다 / 생성한다 / 미리 정해 박아 둔다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "폴드"
+    ],
+    "why": "영어 fold 음역이라 커밋을 어떻게 한다는 건지 모른다",
+    "instead": "원래 커밋에 합친다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "재스택"
+    ],
+    "why": "영어 restack 음역이라 무엇을 다시 한다는 건지 모른다",
+    "instead": "커밋 히스토리를 다시 쌓는다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "팔"
+    ],
+    "why": "실험 설계의 arm을 직역한 은어라 신체 부위로 읽힌다",
+    "instead": "비교군 (규칙 있는 쪽·없는 쪽)",
+    "exclusions": [
+      "팔아",
+      "팔지",
+      "팔고",
+      "팔리",
+      "팔로우"
+    ]
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "발사"
+    ],
+    "why": "실행을 발사로 부른 비유라 무엇을 몇 번 돌린다는 건지 모른다",
+    "instead": "실행 1회 / 본 실행",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "눈금"
+    ],
+    "why": "누계를 눈금으로 부른 비유라 무엇이 차오르는지 모른다",
+    "instead": "누계 횟수",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "그레인"
+    ],
+    "why": "영어 grain 음역이라 뜻이 바로 안 온다",
+    "instead": "단위 (파일 단위·기능 단위)",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "harvest"
+    ],
+    "why": "영어 비유라 무엇을 거둔다는 건지 모른다",
+    "instead": "직전 단계를 실제로 돌려 그 출력을 받아 쓴다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "자기증명 루프"
+    ],
+    "why": "조어라 무엇이 무엇을 증명하는 순환인지 모른다",
+    "instead": "검증 대상이 스스로 정답을 정해 스스로 통과시키는 순환",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "사문"
+    ],
+    "why": "한자어(死文)라 뜻이 바로 안 온다",
+    "instead": "아무도 안 부르는 문장",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "날조가드"
+    ],
+    "why": "조어라 어느 규칙을 가리키는지 모른다",
+    "instead": "write-init의 「지어내지 않는다」 규칙(근거가 없으면 빈칸으로 둔다)",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "상속 가드"
+    ],
+    "why": "어디서 물려받는지 안 적힌 조어다",
+    "instead": "write-init의 가드를 다듬기에서도 그대로 지키는 제약",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "진입 무게"
+    ],
+    "why": "조어라 무엇이 무거워진다는 건지 모른다",
+    "instead": "미리 읽어 두어 늘어나는 컨텍스트",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "인용 게이트"
+    ],
+    "why": "가리키는 문서에 그런 이름이 없는 조어다",
+    "instead": "code-map 「탐색 절차」의 reference.md 인용 단계",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "발행 청결"
+    ],
+    "why": "조어라 무엇이 깨끗해야 한다는 건지 모른다",
+    "instead": "발행본에 frontmatter 같은 작업 흔적이 남지 않은 상태",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "표면 교정"
+    ],
+    "why": "조어라 무엇을 고친다는 건지 모른다",
+    "instead": "오탈자·띄어쓰기 수정",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "lede"
+    ],
+    "why": "저널리즘 용어라 개발 문서 독자가 모른다",
+    "instead": "제목 아래 첫 줄",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "ceremony"
+    ],
+    "why": "영어 비유라 무엇을 가리키는지 모른다",
+    "instead": "형식적으로 붙는 부수 절차",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "무는 자리",
+      "무는 시점"
+    ],
+    "why": "「물다」를 비용을 치른다는 뜻으로 쓴 비유라 「깨문다」로 읽힌다",
+    "instead": "문서를 불러와 비용을 치르는 자리 / 시점",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "판정하는 쪽이 진다"
+    ],
+    "why": "「짐을 진다」가 「패배한다」로 읽힌다",
+    "instead": "판정 재료는 판정하는 쪽이 맡는다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "결을 읽"
+    ],
+    "why": "「결」 비유라 무엇을 읽는다는 건지 모른다",
+    "instead": "뉘앙스를 읽",
+    "exclusions": []
+  }
+]

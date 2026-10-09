@@ -24,6 +24,10 @@ export const PRECOMMIT_HOOKS = [
     file: 'check-wording.mjs',
     label: '낱말 검사 훅',
     stateKey: 'wordingHookSetByAiContexts',
+    // 훅이 바로 옆에서 읽는 데이터. 훅 파일과 함께 복사하고 함께 걷는다. 등재 스크립트
+    // (blocked-expressions.mjs)가 사본도 바로 고치므로 원본과 달라질 수 있어, unsync는 동일성
+    // 비교 없이 `stateFiles`처럼 지운다.
+    companions: ['blocked-expressions.json'],
   },
   {
     alias: 'coupling-patterns',
@@ -83,4 +87,10 @@ export function precommitHookEvent(hook) {
 
 export function precommitHookDest(hook) {
   return path.join(stateDir, hook.file);
+}
+
+// 훅과 같은 폴더에 두는 데이터 파일: [원본, 사본] 쌍.
+export function precommitHookCompanions(hook) {
+  const srcDir = path.dirname(precommitHookSrc(hook));
+  return (hook.companions ?? []).map((name) => [path.join(srcDir, name), path.join(stateDir, name)]);
 }

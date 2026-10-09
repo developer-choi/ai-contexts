@@ -18,7 +18,13 @@ import {
   clearLegacyRepoHooks,
   localHooksPath,
 } from '../lib/git-hooks.mjs';
-import { PRECOMMIT_HOOKS, precommitHookSrc, precommitHookDest, precommitHookEvent } from './precommit-hooks.mjs';
+import {
+  PRECOMMIT_HOOKS,
+  precommitHookSrc,
+  precommitHookDest,
+  precommitHookEvent,
+  precommitHookCompanions,
+} from './precommit-hooks.mjs';
 
 const home = os.homedir();
 const stateDir = path.join(home, '.ai-contexts');
@@ -88,6 +94,17 @@ function syncPrecommitHook(state, hook) {
       unchanged: `Already up to date: ${dest}`,
     }[status],
   );
+
+  for (const [src, companionDest] of precommitHookCompanions(hook)) {
+    const companionStatus = writeWholeFile(companionDest, fs.readFileSync(src, 'utf8'));
+    console.log(
+      {
+        created: `Created ${companionDest}`,
+        updated: `Updated ${companionDest}`,
+        unchanged: `Already up to date: ${companionDest}`,
+      }[companionStatus],
+    );
+  }
 
   // `|| true`로 감싸는 이유: 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막힌다. 스크립트 내부
   // 오류는 스크립트가 스스로 삼키지만(항상 exit 0), 파일 자체가 없거나 node가 없으면 그 앞에서
