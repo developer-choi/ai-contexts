@@ -40,7 +40,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 리뷰어를 띄우는 쪽은 사용자 결정을 풀어 쓰지 않는다. 결정 기록에서 이 diff에 닿는 결정의 번호(있으면)·`파일:줄`·원문 줄을 지시문에 그대로 옮겨 넣는다. 결정 기록 경로만 주고 리뷰어에게 찾게 하지 않는다.
 
 1. 사용자에게 **리뷰 대상**을 확인받는다
-2. **리뷰어가** [code-map.md](../../contexts/code-map.md) 「탐색 절차」의 후보 선별과 전체 Read까지 밟아(reference.md 인용 게이트는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. 기준 문서는 Read 도구로 파일째 읽는다 — 셸의 `cat`·`head`·`sed`로 읽지 않는다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
+2. **리뷰어가** [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)의 후보 선별과 전체 Read까지 밟아(reference.md 인용 게이트는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. 기준 문서는 Read 도구로 파일째 읽는다 — 셸의 `cat`·`head`·`sed`로 읽지 않는다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
 3. 메인이 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 아래 표에서 고른다. 외부 스킬 권고가 리뷰어가 고른 기준 문서와 다르면 리뷰어가 보고에 적고, 메인이 사용자에게 올린다 — 어느 쪽을 따를지 사용자가 결정한다. 3번은 리뷰 대상 도메인(Next.js 등) 기준이라 모드와 무관하게 실행한다 — only-standards 모드는 3단계(리뷰 수행)에서 외부 스킬 리뷰어를 띄우지 않으므로 좁은 스코프가 유지된다.
 
    | 리뷰 대상 | 외부 스킬 |
@@ -117,7 +117,7 @@ MP 베스트 프랙티스 파일과 거기서 따라간 `코드:` 경로 문서�
 
 Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다. diff가 작아도 Lead가 기준 문서를 직접 읽어 대조하지 않는다 — 대조는 리뷰어가 한다.
 
-- **Coding-Standards Reviewer ×N**: code-map.md 「탐색 절차」가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
+- **Coding-Standards Reviewer ×N**: [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
 - **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
