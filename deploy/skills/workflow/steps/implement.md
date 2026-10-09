@@ -58,9 +58,11 @@ Lead (메인 세션) — 사용자 소통 + 팀 spawn
 
 Feature Implementer는 스스로 컨텍스트를 탐색하지 않는다. **Lead가 필요한 컨텍스트를 주입한다.** Lead는 `/plan/` 하위와 realize-plan stub 파일들을 탐색하여 산출물을 파악하고, 아래 기준에 따라 분류하여 전달한다.
 
+Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라 넘기지 않는다. `/plan/` 산출물과 workflow 문서가 경로로 짚은 문서는 그대로 넘긴다. 규칙 준수는 Step 5.3 리뷰가 맡는다 — 구현자까지 같은 문서 수십 개를 들면 컨텍스트가 두 벌로 든다.
+
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, [code-map.md](../../../contexts/code-map.md) 탐색 절차로 찾은 로직 관련 rules·패턴, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
+| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
 
 ---
 
