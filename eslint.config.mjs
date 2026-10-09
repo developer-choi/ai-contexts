@@ -1,6 +1,6 @@
 // AC ESLint flat config.
 //
-// 현재 목적은 단 하나 — CJS 금지. AC는 전부 ESM(.mjs)이라 require()/module.exports/exports.X는
+// 목적: CJS 금지, 버전이 박힌 Claude 모델 ID 금지. AC는 전부 ESM(.mjs)이라 require()/module.exports/exports.X는
 // 회귀다. AST 기반이라 settings-projection이 node -e 명령을 만드느라 문자열 안에 담는 require(
 // 같은 정당한 사례는 오탐하지 않는다(문자열은 CallExpression이 아님).
 //
@@ -23,6 +23,20 @@ const noCjs = [
   },
 ];
 
+// 버전이 박힌 모델 ID(`claude-sonnet-4-6` 등)는 새 모델이 나와도 아무것도 안 알려주고 옛 모델로 돈다.
+// 2026-10-09 scw 벤치 하네스 기본값이 `claude-sonnet-4-6`이라 Sonnet 5.5가 나온 뒤에도 옛 모델로 재
+// 항목을 판정했다. 별칭(`sonnet`·`opus`·`haiku`)을 쓰고, 실제 ID가 필요하면 실행 시점에 물어 얻는다.
+const noPinnedModelId = [
+  {
+    selector: "Literal[value=/claude-(opus|sonnet|haiku|fable)-\\d/]",
+    message: "버전이 박힌 Claude 모델 ID 금지. 별칭(sonnet·opus·haiku)을 쓰세요 — 박힌 ID는 새 모델이 나와도 조용히 옛 모델로 돕니다.",
+  },
+  {
+    selector: "TemplateElement[value.raw=/claude-(opus|sonnet|haiku|fable)-\\d/]",
+    message: "버전이 박힌 Claude 모델 ID 금지. 별칭(sonnet·opus·haiku)을 쓰세요 — 박힌 ID는 새 모델이 나와도 조용히 옛 모델로 돕니다.",
+  },
+];
+
 export default [
   {
     ignores: ["node_modules/**", ".claude/**", ".agents/**", ".codex/**", ".gemini/**"],
@@ -34,7 +48,7 @@ export default [
       sourceType: "module",
     },
     rules: {
-      "no-restricted-syntax": noCjs,
+      "no-restricted-syntax": [...noCjs, ...noPinnedModelId],
     },
   },
 ];
