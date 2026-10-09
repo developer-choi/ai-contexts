@@ -113,7 +113,7 @@ MP 베스트 프랙티스 파일과 거기서 따라간 `코드:` 경로 문서�
 
 [CRITICAL] [team-agent](../../contexts/team-agent.md)의 규칙에 따라 팀을 구성한다.
 
-Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
+Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다. diff가 작아도 Lead가 기준 문서를 직접 읽어 대조하지 않는다 — 대조는 리뷰어가 한다.
 
 - **Coding-Standards Reviewer ×N**: code-map.md 「탐색 절차」가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
 - **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
