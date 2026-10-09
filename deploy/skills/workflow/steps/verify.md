@@ -16,7 +16,7 @@ next:
 ## 입력·산출물·작업 위치
 
 - **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/retained/implementation.md`(Gap Analysis 계획) + `pr{N}/persistent/reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
-- **산출물**: `pr{N}/consumable/`: review.md, user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
+- **산출물**: `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
 ---
@@ -35,7 +35,7 @@ next:
 - **계획에 있는데 git에 없음** = 누락. 사용자에게 보고
 - **git에 있는데 계획에 없음** = 추가 (버그 수정, 엣지 케이스, 임의 리팩토링 등). 다음을 검증해 사용자에게 보고:
   - 추가 사유 (왜 계획 밖으로 갔는지)
-  - 본 PR 범위인지 vs 별 PR 이연 판단
+  - 본 PR 범위인지, 다른 PR로 넘길지 판단
   - 테스트 커버리지 (추가된 코드 테스트)
   - 글로벌 룰 「내 작업 외 변경은 커밋하지 않는다」 위반 가능성
 
@@ -192,15 +192,9 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 
 ---
 
-## 산출물
-
-결과를 `/plan/pr{N}/consumable/review.md`에 작성한다.
-
----
-
 ## 보고 내용
 
-산출물 작성 후 사용자에게 다음을 요약하여 보고:
+사용자에게 다음을 요약하여 보고:
 
 - Gap Analysis 결과 (계획 ↔ 실제 차이 — 누락·추가가 있는 경우)
 - 미배정 blanket eslint-disable 고아 목록 (6.1.5 주석 게이트 — 고아가 있는 경우만)
@@ -217,7 +211,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 
 ## 산출물 정리
 
-리뷰 파이프라인이 완료되고 모든 이슈가 수정 커밋에 반영된 것을 확인한 뒤, `/plan/pr{N}/consumable/review.md`를 소비한다 (리뷰 결과가 수정 커밋으로 반영됨 = 소비). `user-test-cases.md`는 사용자가 넘겨받은 항목을 모두 통과시키면 소비한다. 소비 후 정리는 consumable 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
+`user-test-cases.md`는 사용자가 넘겨받은 항목을 모두 통과시키면 소비한다. 소비 후 정리는 consumable 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
 
 ---
 
