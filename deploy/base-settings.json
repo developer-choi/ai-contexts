@@ -163,6 +163,18 @@
       "msg": "Checking worktree location policy..."
     },
     {
+      "file": "check-git-ref-slug.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking branch name slug..."
+    },
+    {
+      "file": "check-git-ref-slug.mjs",
+      "event": "PreToolUse",
+      "on": "enterworktree",
+      "msg": "Checking worktree name slug..."
+    },
+    {
       "file": "check-team-message-policy.mjs",
       "event": "PreToolUse",
       "on": "message",

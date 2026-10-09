@@ -180,6 +180,21 @@ const CASES = [
   ['check-deploy-script-policy.mjs', 'npm run verify:local-system', 'pass', 'local-system도 verify는 통과'],
   ['check-deploy-script-policy.mjs', 'node scripts/verify/verify-hook-policies.mjs', 'pass', '직접 호출도 verify면 통과'],
   ['check-deploy-script-policy.mjs', 'git commit a.md -m "npm run sync:system 금지 훅 추가"', 'pass', '메시지 안의 명령은 실행이 아니다'],
+
+  // --- 새 브랜치·워크트리 이름의 한글 (check-git-ref-slug) ---
+  ['check-git-ref-slug.mjs', 'git branch 맹점-기록', 'deny', 'branch로 만드는 한글 이름'],
+  ['check-git-ref-slug.mjs', 'git -C ~/repo checkout -b backlog-scw-6회차', 'deny', 'git -C가 껴도 checkout -b를 잡는다'],
+  ['check-git-ref-slug.mjs', 'git switch -c 기록', 'deny', 'switch -c'],
+  ['check-git-ref-slug.mjs', 'git switch --orphan=기록', 'deny', '값을 붙여 쓴 꼴'],
+  ['check-git-ref-slug.mjs', 'git branch -m old 새이름', 'deny', '이름 바꾸기는 마지막 이름을 본다'],
+  ['check-git-ref-slug.mjs', 'git worktree add .claude/worktrees/x -b 기록', 'deny', 'worktree add -b'],
+  ['check-git-ref-slug.mjs', 'git worktree add .claude/worktrees/기록 -b record', 'deny', '워크트리 디렉토리 이름'],
+  ['check-git-ref-slug.mjs', 'git status && git branch 기록', 'deny', 'chain 뒷단도 잡는다'],
+  ['check-git-ref-slug.mjs', 'git branch -D 맹점-기록', 'pass', '옛 한글 브랜치 삭제는 통과'],
+  ['check-git-ref-slug.mjs', 'git checkout 맹점-기록', 'pass', '이미 있는 브랜치로 옮기기는 통과'],
+  ['check-git-ref-slug.mjs', 'git branch -m 맹점-기록 blind-spot-log', 'pass', '한글 이름을 영문으로 바꾸기는 통과'],
+  ['check-git-ref-slug.mjs', 'git checkout -b scw-file-layout', 'pass', '영문 슬러그는 통과'],
+  ['check-git-ref-slug.mjs', 'git commit a.md -m "브랜치 정리"', 'pass', '메시지 안의 한글은 관여하지 않는다'],
 ];
 
 // 쓰기 시점 정책 hook은 Bash 명령이 아니라 Write/Edit payload를 본다.
@@ -729,6 +744,8 @@ const WORKTREE_HINT_CASES = [
 // 파일도 명령도 아닌 payload를 보는 hook들. 도구 이름과 인자 모양만으로 판정이 끝난다.
 // [hook 파일, payload, 기대 판정, 설명]
 const TOOL_CASES = [
+  ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: '파일-정리' } }, 'deny', 'EnterWorktree 한글 이름'],
+  ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: 'file-layout' } }, 'pass', 'EnterWorktree 영문 슬러그'],
   // workflow 팀원(이름이 workflow-) 종료 금지. 팀원은 이름·이름@팀·내부 ID(a이름-해시)로 불린다.
   // 배경 셸과 workflow 밖의 팀원은 메인이 끝낸다.
   [
