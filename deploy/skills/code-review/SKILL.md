@@ -74,6 +74,12 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 ### 3. 리뷰 수행
 
+#### 리뷰어 띄우기 (모드 공통)
+
+메인(advanced면 Lead)은 [team-agent](../../contexts/team-agent.md)의 규칙에 따라 리뷰어를 이름 있는 팀원으로 띄운다. 몇 명을 어느 모델로 띄우는지는 아래 모드 절이 정한다.
+
+diff가 작아도 메인이 기준 문서를 직접 읽어 대조하지 않는다 — 대조는 리뷰어가 한다.
+
 #### 기준 문서 절 단위 대조 (모드 공통)
 
 1단계 2번에서 Read한 문서마다 규칙을 하나씩(절이 있으면 절, 없으면 문단·항목 단위) diff에 대보고, 해당하는 코드가 있으면 이슈로 낸다.
@@ -120,21 +126,19 @@ MP 베스트 프랙티스 파일과 거기서 따라간 `코드:` 경로 문서�
 
 #### advanced 모드
 
-[CRITICAL] [team-agent](../../contexts/team-agent.md)의 규칙에 따라 팀을 구성한다.
-
-Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다. diff가 작아도 Lead가 기준 문서를 직접 읽어 대조하지 않는다 — 대조는 리뷰어가 한다.
+Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
 - **Coding-Standards Reviewer ×N**: [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
 - **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
-Lead가 모든 리뷰어의 결과를 종합한다 (중복 제거, 이상한 지적은 사용자에게 확인). 기존 코드에 같은 모양의 선례가 있다는 것만으로 기준 문서(예시 포함)를 근거로 한 지적을 기각하지 않는다.
+Lead가 모든 리뷰어의 결과를 종합하며 중복을 걷는다.
 
 Lead는 External-Skill Reviewer의 이슈마다 위치와 권고 모양을 Coding-Standards Reviewer들과 Advanced Reviewer에게 보내, 자기가 Read한 기준 문서(예시 포함)가 그 위치의 지금 모양을 권하거나 Good 예시로 드는지, 외부 권고의 모양을 금지하거나 Bad 예시로 드는지 묻는다. 그렇다면 근거 `파일:줄`과 원문을 함께 답하게 한다. 그렇다는 답이 온 이슈가 1단계 3번의 「외부 스킬 권고가 기준 문서와 다른」 경우다 — 외부 권고와 답으로 온 `파일:줄`을 나란히 적어 사용자에게 올린다. 답을 Lead가 다시 해석해 충돌에서 빼지 않는다.
 
 #### only-standards 모드
 
-coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer·External-Skill Reviewer 미실행. 호출자는 `--coding-standards` 경로 명시 권고 (의도 보존).
+단일 리뷰어 (sonnet) 1명. coding-standards 대조만 하고 그 이슈만 반환한다 — 자유 리뷰는 하지 않는다. 호출자는 `--coding-standards` 경로 명시 권고 (의도 보존).
 
 용도: 신규 코드 작성 전 기존 코드를 새 스탠다드에 맞춰 정렬하는 마이그레이션. 자유 리뷰가 끼면 범위가 흐려지므로 분리.
 
@@ -143,6 +147,8 @@ coding-standards 이슈만 반환. 자유 리뷰·Advanced Reviewer·External-Sk
 리뷰어 결과를 받아 이슈 목록을 내는 쪽(advanced면 Lead)은 리뷰어가 낸 위험 가설(「~할 수 있음」·「확인하지 못함」)을, 가설이 맞으면 생길 결과를 재현(테스트·브라우저·최소 앱)해 본 뒤에 채택·기각한다. 결정·범위 해석만으로 기각하지 않는다. 재현을 시도했는데 못 했으면 무엇을 시도했고 어디서 막혔는지와 「확인 안 함」을 밝혀 사용자에게 올린다.
 
 보고 맨 앞에 리뷰어가 실제로 Read한 기준 문서 경로를 나열한다. MP 베스트 프랙티스 파일 아래에는 그 파일에서 따라간 `코드:` 경로를 들여 적는다. advanced 모드면 Lead가 리뷰어별 목록을 합친다.
+
+이상한 지적은 사용자에게 확인한다. 기존 코드에 같은 모양의 선례가 있다는 것만으로 기준 문서(예시 포함)를 근거로 한 지적을 기각하지 않는다.
 
 컨벤션 기반 지적에는 근거가 되는 컨벤션 파일 경로와 라인번호를 함께 명시한다.
 
