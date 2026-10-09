@@ -39,7 +39,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 세션이 워크트리 밖에서 시작했으면 `EnterWorktree`에 그 워크트리 경로를 줘 들어간다.
 
-realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다(5.2.2의 세팅 PR처럼 Feature Implementer만 spawn하지 않는다). 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
+realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다. 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
 
 ---
 
@@ -64,6 +64,8 @@ Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라
 |----------|--------------------------|
 | Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰 |
 
+**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR도 설치·설정·위반 수정을 Feature Implementer에게 맡기되, 주입 재료·진실검사 A·증분 단위는 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)을 따른다.
+
 ---
 
 ## Step 5.2. 구현 중 공통 룰
@@ -78,7 +80,6 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 
 ### Step 5.2.2. gotchas
 
-- **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 팀 spawn 없이 Lead가 직접 구현한다. 도구별로 (설치+설정 → 커밋 → 위반 수정 → 커밋) 사이클을 반복한다. lint-staged는 해당 시점에 설치된 도구만 참조한다. **"팀 spawn 없음"은 Feature Implementer를 spawn하지 않는다는 의미다. Step 5.3 리뷰 파이프라인은 여전히 실행한다.**
 - **커밋 분할 기준선: PLAN 계획** — `pr{N}/retained/implementation.md`의 `### N` 항목이 커밋 분할의 출발점이다. 아래 커밋 분리 룰들은 그 계획을 대체하지 않고, 계획에 없던 작업이 생겼을 때 그것을 어디에 넣을지 판단한다.
 - **커밋 분리 디폴트: 마크업 / 그 외** — MARKUP에서 가져온 마크업 코드(JSX·SCSS)와 본 step의 로직 산출(로직·테스트·hook·설정)은 다른 커밋으로 분리한다. 더 세분화는 아래 「독립 설명 테스트」가 판단.
 - **커밋 분리 판단: 독립 설명 테스트** — 구현 중 계획에 없던 작업이 발생하면, "이 변경을 현재 작업 대상 없이도 독립적으로 설명할 수 있는가?"를 묻는다. 독립 설명이 가능하면 별도 커밋, 불가능하면 현재 커밋에 포함한다.
