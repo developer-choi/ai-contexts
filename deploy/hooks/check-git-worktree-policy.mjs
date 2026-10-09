@@ -18,8 +18,6 @@ const cmd = getCommand(payload);
 if (typeof cmd !== "string" || !/\bworktree\b/.test(cmd)) process.exit(0);
 
 const MANAGED = path.join(".claude", "worktrees");
-// 올바른 형태를 첫 문장에 둔다 — check-md-hook-restatement가 이 메시지를 md 작성 화면에 주입할 때
-// 160자에서 자르므로, 뒤에 두면 해야 할 일이 잘려나간다(check-git-merge-policy.mjs가 같은 배치를 쓴다).
 const MSG = (target, expected) =>
   `워크트리는 \`<레포>/${MANAGED.replace(/\\/g, "/")}/<이름>\` 밑에만 만듭니다 — ` +
   `\`git worktree add ${expected}/<이름> -b <브랜치>\` 형태로 다시 실행하세요. ` +

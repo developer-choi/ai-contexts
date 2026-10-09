@@ -328,6 +328,13 @@ WRITE_CASES.push(
   ],
   [
     'check-md-hook-restatement.mjs',
+    mdWrite('## 산출물 저장·커밋\n\n리포트 파일 하나만 커밋한다.\n', skillDoc),
+    'context',
+    '긴 거부 문구도 자르지 않고 끝까지 싣는다 — 머지 정책의 승인 등급 안내는 문구 뒷부분에 있다',
+    { reasonIncludes: ['merge --ff-only <branch>', 'PR 전용 레포면 작업 브랜치를 push해 PR을 엽니다.'] },
+  ],
+  [
+    'check-md-hook-restatement.mjs',
     mdWrite('## 리포트 형식\n\n한 일과 새로 생긴 도구를 나눠 적는다.\n', skillDoc),
     'pass',
     '커밋·staging 이야기가 없으면 조용하다',
@@ -1765,10 +1772,15 @@ const crossRepoCases = [
 ];
 
 // 쓰기 시점 hook: [파일, payload, 기대, 설명] 꼴을 공유하는 그룹들.
-const runWriteCases = (cases) => runCases(cases, async ([file, payload, expected, note]) => {
-  const { decision, stderr } = await runHookPayload(file, payload);
+// 다섯째 칸(선택): reasonIncludes의 낱말이 사유(주입 문구)에 다 있어야 통과.
+const runWriteCases = (cases) => runCases(cases, async ([file, payload, expected, note, { reasonIncludes = [] } = {}]) => {
+  const { decision, reason = '', stderr } = await runHookPayload(file, payload);
   const label = `${file} :: ${payload.tool_name} ${payload.tool_input.file_path} → ${expected} (${note})`;
-  return judge(label, decision, expected, stderr);
+  const missing = reasonIncludes.filter((word) => !reason.includes(word));
+  return judge(label, decision, expected, stderr, {
+    ok: decision === expected && missing.length === 0,
+    failLine: `  FAIL  ${label} — 판정: ${decision} / 사유에 없는 낱말: ${missing.join(', ') || '없음'}`,
+  });
 });
 
 // fixture 안에서 실행까지 끝낸다 — 케이스 목록만 만들어 나오면 임시 레포가 먼저 지워져

@@ -23,9 +23,6 @@ if (typeof cmd !== "string") process.exit(0);
 if (!/\b(merge|pull|rebase|cherry-pick|branch|checkout|switch)\b/.test(cmd)) process.exit(0);
 
 const PROTECTED = /^(master|main|develop|release)$/;
-// 면제 안내를 첫 문장에 두는 이유: check-md-hook-restatement가 이 메시지를 md 작성 화면에
-// 주입할 때 160자에서 자른다. 뒤에 두면 잘려나가, FREE 레포에서 md를 쓰는 AI가 "여기도 막힌다"로
-// 읽는다 (2026-08-29 PP 세션 실측: 주입 2회, AI가 면제 레포에서 머지를 사용자에게 떠넘김).
 // 머지는 MERGE_ASK가 다루므로 이 문구는 pull·rebase·cherry-pick·포인터 이동만 다룬다. 마지막 문장은
 // 여기 걸린 AI가 실은 작업 브랜치를 통합하려던 것일 때 갈 길이다.
 const MERGE_MSG =

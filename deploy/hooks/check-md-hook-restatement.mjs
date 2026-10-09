@@ -86,8 +86,9 @@ function collectDenyMessages() {
 }
 
 // `deny(...)` 인자에서 문자열 리터럴만 뽑는다. 상수로 뺀 메시지(`deny(MERGE_MSG)`)는 그 상수
-// 선언을 찾아 잇는다. 문장 단위로 자르지 않는다 — 메시지에 `git add .`처럼 마침표가 들어 있어
-// 첫 마침표에서 끊으면 정작 중요한 뒷부분이 날아간다.
+// 선언을 찾아 잇는다. 문장 단위로든 글자 수로든 자르지 않는다 — 해야 할 일은 메시지 뒷부분에
+// 있는 경우가 많다. 160자에서 자르던 때 머지 정책 문구의 면제·승인 안내가 잘려, 세션이 잘린
+// 문구를 정책으로 읽고 할 수 있는 머지를 사용자에게 넘겼다(2026-08-29 PP, 2026-10-09 AC).
 function denyMessages(src) {
   const code = src.replace(/^\s*\/\/.*$/gm, " ");
   const found = [];
@@ -98,8 +99,7 @@ function denyMessages(src) {
     // 겹친 마침표만 합친다. 붙어 있는 `...`은 건드리지 않는다 — 그대로 인용문의 일부다.
     const flat = literal.replace(/\s+/g, " ").replace(/\.\s+\./g, ".").trim();
     if (flat.length < 12 || !COMMAND_RULE.test(flat)) continue;
-    const shown = flat.length > 160 ? `${flat.slice(0, 160)}…` : flat;
-    if (!found.includes(shown)) found.push(shown);
+    if (!found.includes(flat)) found.push(flat);
   }
   return found;
 }
