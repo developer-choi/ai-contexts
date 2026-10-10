@@ -138,12 +138,16 @@ function surface() {
   if (!agents.length) process.exit(0);
 
   const shown = agents.filter((a) => !(a.state === "idle" && a.ageMs > STALE_IDLE_MS));
-  const staleCount = agents.length - shown.length;
+  const stale = agents.filter((a) => !shown.includes(a)).map((a) => a.name);
   const order = { stuck: 0, working: 1, idle: 2 };
   shown.sort((x, y) => order[x.state] - order[y.state] || x.ageMs - y.ageMs);
 
   const lines = shown.map(describe);
-  if (staleCount) lines.push(`- 그 밖에 30분 넘게 쉬는 에이전트 ${staleCount}개 (끝난 것으로 보인다)`);
+  // 오래 쉰 것만으로 끝났다고 쓰지 않는다 — 같은 세션 안의 팀원은 다시 부르면 답한다(2026-10-11 실측).
+  if (stale.length)
+    lines.push(
+      `- 그 밖에 30분 넘게 쉬는 에이전트: ${stale.join(", ")} (기록만으로는 끝났는지 모른다 — 같은 세션이면 SendMessage로 다시 부를 수 있다)`,
+    );
 
   const sends = takeUnseenSends(agents, sessionId);
   const sendBlock = sends.length
@@ -162,7 +166,7 @@ function surface() {
   addContext(
     `[서브에이전트 상태 — 기록 파일 기준, ListAgents의 running보다 이것을 믿는다]\n` +
       `${lines.join("\n")}${sendBlock}${shellBlock}\n` +
-      `사용자가 에이전트 상태를 물으면 위 상태로 답한다. 멈춘 에이전트에게 SendMessage로 진행 상황을 묻지 않는다.`,
+      `사용자가 에이전트 상태를 물으면 위 상태로 답한다. 도구 호출에서 멈춘 에이전트에게 SendMessage로 진행 상황을 묻지 않는다.`,
   );
 }
 

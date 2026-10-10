@@ -11,7 +11,7 @@ import { isWorkflowTeammate } from "./hook-utils.mjs";
 
 // 결과 없는 tool_use가 이만큼 안 바뀌면 멈춤으로 본다.
 export const STUCK_MS = 5 * 60 * 1000;
-// 이보다 오래 쉬는 에이전트는 개수만 센다 — 끝난 에이전트도 대기 상태로 남아 실행 중처럼 쌓인다.
+// 이보다 오래 쉬는 에이전트는 이름만 묶는다 — 끝난 에이전트도 대기 상태로 남아 실행 중처럼 쌓인다.
 export const STALE_IDLE_MS = 30 * 60 * 1000;
 
 // 파일 전체가 아니라 끝부분만 읽는다. 매 프롬프트마다 에이전트 수만큼 돈다.
