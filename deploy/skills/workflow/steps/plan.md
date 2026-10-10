@@ -40,6 +40,7 @@ next:
    - 맡기는 것: [code-map.md](../../../contexts/code-map.md)의 탐색 절차 중 후보 선별과 Read까지(reference.md 기록과 사용자 확인은 메인 몫) + conventions-index.md 선별
    - 넘기는 것: code-map 범주(모드에서 [realize-plan의 대응](realize-plan.md#코딩-스탠다드--베스트프랙티스)대로 고른다)
    - 돌려받는 것: 이번 PR에 매칭된 규칙 행·경로·라인 범위, 이번 PR이 건드리는데 인덱스 트리거에 안 걸리는 영역 목록. 인덱스가 없어 메인이 먼저 물었으면 영역 목록은 받지 않는다
+   - 인덱스에 [표준 참고처](requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd) 레포가 등재돼 있으면 레포마다 이번 PR 컴포넌트에 대응하는 파일 경로도 돌려받는다. 레포 경로만으로는 받지 않는다
 3. background 발췌
    - 넘기는 것: `/plan/background/` 파일 목록에서 todo.md·conventions-index.md를 뺀 경로들
    - 돌려받는 것: 이번 PR 범위에 걸리는 발췌
