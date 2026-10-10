@@ -41,21 +41,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 1. 호출 입력에 **리뷰 대상**이 명시돼 있지 않으면, 추정한 대상을 내보이고 사용자에게 확인받은 뒤 진행한다
 2. **리뷰어가** [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)의 후보 선별과 전체 Read까지 밟아(`reference.md`에 인용하는 단계는 제외) 관련 coding-standards rules·principles + MP 구현 패턴을 선별·Read한다. 기준 문서는 Read 도구로 파일째 읽는다 — 셸의 `cat`·`head`·`sed`로 읽지 않는다. Read한 경로(따라간 `코드:` 경로 포함)는 4단계 보고에 쓰므로 적어 둔다
-3. 메인이 리뷰 대상 영역에 해당하는 **외부 베스트 프랙티스 스킬**을 아래 표에서 고른다. 외부 스킬 권고가 리뷰어가 고른 기준 문서와 다르면 리뷰어가 보고에 적고, 메인이 사용자에게 올린다 — 어느 쪽을 따를지 사용자가 결정한다. only-standards 모드는 3번을 건너뛴다.
-
-   | 리뷰 대상 | 외부 스킬 |
-   |---|---|
-   | React/Next.js 컴포넌트, 데이터 페칭, 번들 최적화, 성능 | `vercel-react-best-practices` |
-   | 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
-   | UI 마크업, 접근성, UX | `web-design-guidelines` |
-
-   메인은 고른 스킬의 본문을 읽지 않는다. 그 스킬을 맡은 리뷰어(advanced 모드면 External-Skill Reviewer, default 모드면 단일 리뷰어)에게 스킬 이름과, 형제 경로 `../<name>/SKILL.md`를 이 스킬 위치 기준 절대경로로 풀어 넘긴다. 리뷰어는 Skill tool로 그 스킬을 직접 로드하고, Skill tool이 없으면 넘겨받은 경로를 Read한다. 리뷰어는 로드한 스킬 이름을 보고 맨 앞 기준 문서 목록에 적고, 로드하지 못한 스킬은 이름 옆에 「로드 못 함」과 사유를 적는다.
-
-   외부 스킬이 설치돼 있지 않으면(Skill tool 목록에 없거나 형제 경로 `../<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다. 리뷰어 보고에 「로드 못 함」으로 온 스킬도 같은 안내를 사용자에게 올린다.
-
-   `--extra-standards`(사내 컨벤션)는 외부 스킬 로드를 트리거하지 않는다 — 외부 스킬 선별은 위 표의 리뷰 대상 도메인으로만 한다.
-
-4. 독립 호출이고 추가 컨벤션이 호출 입력에 없으면 사용자에게 있는지 확인한다 (사내 컨벤션 등)
+3. 독립 호출이고 추가 컨벤션이 호출 입력에 없으면 사용자에게 있는지 확인한다 (사내 컨벤션 등)
 
 ### 2. 리뷰 대상 파악
 
@@ -71,6 +57,22 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 리뷰어는 테스트 자동 포함 목록의 테스트 파일을, 요청에 테스트가 명시되지 않았어도 리뷰 범위에 넣는다. 훅의 설계 적절성을 리뷰하면서 테스트 검증 수준을 확인하지 않으면, 구현과 테스트의 결합도·품질 문제를 놓치게 된다.
 
 리뷰 대상은 해당 작성자가 실제로 수정한 코드에 한정한다. 기존 코드의 문제는 리뷰 항목에 포함하지 않는다. 테스트 자동 포함 목록의 테스트는 변경된 구현을 얼마나 검증하는지만 보고, 그 테스트의 기존 코드 문제는 리뷰 항목에 포함하지 않는다.
+
+#### 외부 스킬 고르기
+
+메인이 위에서 읽은 diff를 아래 표의 「리뷰 대상」 칸에 대어 **외부 베스트 프랙티스 스킬**을 고른다. 외부 스킬 권고가 리뷰어가 고른 기준 문서와 다르면 리뷰어가 보고에 적고, 메인이 사용자에게 올린다 — 어느 쪽을 따를지 사용자가 결정한다. only-standards 모드는 이 절을 건너뛴다.
+
+| 리뷰 대상 | 외부 스킬 |
+|---|---|
+| React/Next.js 컴포넌트, 데이터 페칭, 번들 최적화, 성능 | `vercel-react-best-practices` |
+| 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
+| UI 마크업, 접근성, UX | `web-design-guidelines` |
+
+메인은 고른 스킬의 본문을 읽지 않는다. 그 스킬을 맡은 리뷰어(advanced 모드면 External-Skill Reviewer, default 모드면 단일 리뷰어)에게 스킬 이름과, 형제 경로 `../<name>/SKILL.md`를 이 스킬 위치 기준 절대경로로 풀어 넘긴다. 리뷰어는 Skill tool로 그 스킬을 직접 로드하고, Skill tool이 없으면 넘겨받은 경로를 Read한다. 리뷰어는 로드한 스킬 이름을 보고 맨 앞 기준 문서 목록에 적고, 로드하지 못한 스킬은 이름 옆에 「로드 못 함」과 사유를 적는다.
+
+외부 스킬이 설치돼 있지 않으면(Skill tool 목록에 없거나 형제 경로 `../<name>/` 부재) 사용자에게 https://vercel.com/docs/agent-resources/skills 에서 설치하도록 안내한 뒤 진행한다. 리뷰어 보고에 「로드 못 함」으로 온 스킬도 같은 안내를 사용자에게 올린다.
+
+`--extra-standards`(사내 컨벤션)는 외부 스킬 로드를 트리거하지 않는다 — 외부 스킬 선별은 위 표의 리뷰 대상 도메인으로만 한다.
 
 ### 3. 리뷰 수행
 
@@ -122,19 +124,19 @@ MP 베스트 프랙티스 파일과 거기서 따라간 `코드:` 경로 문서�
 
 #### default 모드
 
-단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행하며, 1단계 3번에서 선별된 외부 스킬이 있으면 그 관점도 함께 적용한다.
+단일 리뷰어 (sonnet) 1명. coding-standards 기반 검증 + 자유 리뷰를 함께 수행하며, 2단계 「외부 스킬 고르기」에서 선별된 외부 스킬이 있으면 그 관점도 함께 적용한다.
 
 #### advanced 모드
 
 Coding-Standards Reviewer ×N (sonnet), External-Skill Reviewer ×M (sonnet), Advanced Reviewer (opus)를 **병렬 실행**한다.
 
 - **Coding-Standards Reviewer ×N**: [code-map.md 탐색 절차](../../contexts/code-map.md#critical-탐색-절차)가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡긴다. Lead는 영역만 배정하고, 영역 안의 문서는 각 리뷰어가 diff를 보고 1단계 2번대로 고른다. `principles/`는 Advanced Reviewer가 같은 방식으로 고른다
-- **External-Skill Reviewer ×M**: 1단계 3번에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
+- **External-Skill Reviewer ×M**: 2단계 「외부 스킬 고르기」에서 선별된 외부 스킬마다 1명씩 배정한다 (M = 적용 외부 스킬 수, 없으면 0명). 각 리뷰어는 담당 스킬의 관점만으로 diff를 리뷰한다.
 - **Advanced Reviewer**: diff 전달. 특정 주제·관점을 짚어 달라고 지시할 수 있다. 규칙에 없는 문제를 자유 리뷰 시점으로 짚는다.
 
 Lead가 모든 리뷰어의 결과를 종합하며 중복을 걷는다.
 
-Lead는 External-Skill Reviewer의 이슈마다 위치와 권고 모양을 Coding-Standards Reviewer들과 Advanced Reviewer에게 보내, 자기가 Read한 기준 문서(예시 포함)가 그 위치의 지금 모양을 권하거나 Good 예시로 드는지, 외부 권고의 모양을 금지하거나 Bad 예시로 드는지 묻는다. 그렇다면 근거 `파일:줄`과 원문을 함께 답하게 한다. 그렇다는 답이 온 이슈가 1단계 3번의 「외부 스킬 권고가 기준 문서와 다른」 경우다 — 외부 권고와 답으로 온 `파일:줄`을 나란히 적어 사용자에게 올린다. 답을 Lead가 다시 해석해 충돌에서 빼지 않는다.
+Lead는 External-Skill Reviewer의 이슈마다 위치와 권고 모양을 Coding-Standards Reviewer들과 Advanced Reviewer에게 보내, 자기가 Read한 기준 문서(예시 포함)가 그 위치의 지금 모양을 권하거나 Good 예시로 드는지, 외부 권고의 모양을 금지하거나 Bad 예시로 드는지 묻는다. 그렇다면 근거 `파일:줄`과 원문을 함께 답하게 한다. 그렇다는 답이 온 이슈가 2단계 「외부 스킬 고르기」의 「외부 스킬 권고가 기준 문서와 다른」 경우다 — 외부 권고와 답으로 온 `파일:줄`을 나란히 적어 사용자에게 올린다. 답을 Lead가 다시 해석해 충돌에서 빼지 않는다.
 
 #### only-standards 모드
 
