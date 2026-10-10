@@ -37,7 +37,9 @@ PR과 세션의 관계: 세션마다 맡는 범위가 PR 하나이거나 작업 
 
 ### 시작할 때
 - BG 세션이면 [conventions/session-args.md](conventions/session-args.md)대로 인자를 확정한다. 그 밖의 세션은 `node {{skill_dir}}/scripts/steps.mjs start <세션> --mode <받은 모드> [--prefix <받은 접두어>] [--plan <받은 plan 경로>]`를 돌린다. 실패하면 작업을 시작하지 않고 빠진 값을 사용자에게 묻는다. 통과하면 그 출력대로 진행하고, 이후 plan을 받는 호출에는 출력이 찍은 plan 값을 쓴다
-- `start`가 찍은 plan 폴더를 탐색해 이전 step 산출물과 맥락을 파악한다. 기억해 둔 내용이 아니라 파일의 현재 상태로 읽는다
+- `start`가 찍은 plan 폴더로 이전 step 산출물과 맥락을 파악한다. 기억해 둔 내용이 아니라 파일의 현재 상태를 기준으로 한다
+  - 메인은 폴더의 파일 목록과 `node {{skill_dir}}/scripts/steps.mjs pr list` 출력만 본다. 산출물 내용은 일회성 서브에이전트에 맡겨, 산출물마다 무엇을 정해 두었는지 요약만 돌려받는다. 요약은 step 입력을 대신하지 않는다 — step이 쓸 입력은 그 step 문서가 정한 대로 읽는다
+  - plan 폴더가 아직 없으면(BG 초반) 파일 목록과 `pr list`를 건너뛴다. 파일 목록에 이전 step 산출물이 없으면 서브에이전트를 띄우지 않는다
 - 맥락이 부족하면 사용자에게 질문한다
 - 이전 step을 거치지 않고 진입해도 된다
 
