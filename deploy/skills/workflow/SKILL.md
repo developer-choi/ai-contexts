@@ -1,7 +1,7 @@
 ---
 name: workflow
 description: 기획서, 피그마, 피그마 디자인토큰, 채용과제를 PR로 변환하는 워크플로우. 배경 파악 → PR 분할 → 구현 → 코드리뷰 → PR 작성까지 단계별 진행. 커밋, PR 작성, 코드리뷰 요청 시 이 스킬을 사용한다.
-argument-hint: <세션 이름> <채용|실무|개인>
+argument-hint: <세션 이름> <채용|실무|개인> [--prefix <접두어>] [--plan <plan 경로>]
 ---
 
 # 워크플로우
@@ -14,11 +14,13 @@ argument-hint: <세션 이름> <채용|실무|개인>
 
 ## 호출
 
-`/workflow <세션 이름> <모드>`
+`/workflow <세션 이름> <모드> [--prefix <접두어>] [--plan <plan 경로>]`
 
 - 세션 이름·모드 둘 다 디폴트 없음 — 사용자가 명시 전달하고, 폴더 검사 등으로 자동 감지하지 않는다.
 - 세션 이름: `BG` / `MARKUP` / `PR_{N}_PLAN` / `PR_{N}_IMPL` / `WRITING_IDEATOR` / `WRITING_REFINER` / `FINALIZE`
 - 모드: `채용` / `실무` / `개인`
+- 접두어: 후속 세션 이름 앞에 붙는다(`<접두어>_PR_1_PLAN`). 개인 모드는 필수 — 작업 묶음을 겹쳐 돌려 이름이 겹친다
+- plan 경로: 이 작업의 plan 폴더. 생략하면 개인 `plan/<접두어>`, 그 밖은 `plan`(메인 레포 루트 기준)
 
 ## 구조
 
@@ -34,8 +36,8 @@ PR과 세션의 관계: 세션마다 맡는 범위가 PR 하나이거나 작업 
 ## 세션 진행
 
 ### 시작할 때
-- `node {{skill_dir}}/scripts/steps.mjs start <세션>`을 돌려 그 출력대로 진행한다
-- `/plan/`을 탐색해 이전 step 산출물과 맥락을 파악한다. 기억해 둔 내용이 아니라 파일의 현재 상태로 읽는다
+- BG 세션이면 [conventions/session-args.md](conventions/session-args.md)대로 인자를 확정한다. 그 밖의 세션은 `node {{skill_dir}}/scripts/steps.mjs start <세션> --mode <받은 모드> [--prefix <받은 접두어>] [--plan <받은 plan 경로>]`를 돌린다. 실패하면 작업을 시작하지 않고 빠진 값을 사용자에게 묻는다. 통과하면 그 출력대로 진행하고, 이후 plan을 받는 호출에는 출력이 찍은 plan 값을 쓴다
+- `start`가 찍은 plan 폴더를 탐색해 이전 step 산출물과 맥락을 파악한다. 기억해 둔 내용이 아니라 파일의 현재 상태로 읽는다
 - 맥락이 부족하면 사용자에게 질문한다
 - 이전 step을 거치지 않고 진입해도 된다
 
@@ -54,7 +56,7 @@ PR과 세션의 관계: 세션마다 맡는 범위가 PR 하나이거나 작업 
 - 안내 시점
   1. step이 끝났을 때
   2. step 도중 특정 사건이 일어났을 때. 어떤 사건인지는 그 step frontmatter `next`의 `on`에 있다. 일어나는 즉시, 일어날 때마다 안내하고 하던 일을 이어간다.
-- 안내할 내용: `node {{skill_dir}}/scripts/steps.mjs next <현재 step>` 출력 참고.
+- 안내할 내용: `start`가 찍은 next 줄에 현재 step을 넣어 돌린 출력 참고. 인자를 다시 조립하지 않는다.
 
 ## 참조
 

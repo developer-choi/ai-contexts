@@ -49,7 +49,7 @@ next:
 
 > **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
-`node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan /plan`
+`node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan <plan>`
 
 둘을 함께 본다.
 
