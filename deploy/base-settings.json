@@ -193,6 +193,12 @@
       "msg": "Checking company-analysis agent call..."
     },
     {
+      "file": "check-code-review-caller.mjs",
+      "event": "PreToolUse",
+      "on": "skill",
+      "msg": "Checking code-review caller..."
+    },
+    {
       "file": "check-agent-stop-policy.mjs",
       "event": "PreToolUse",
       "on": "taskstop",

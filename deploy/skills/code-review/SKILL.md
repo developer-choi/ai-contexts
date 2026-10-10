@@ -78,7 +78,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 
 #### 리뷰어 띄우기 (모드 공통)
 
-메인(advanced면 Lead)은 [team-agent](../../contexts/team-agent.md)의 규칙에 따라 리뷰어를 이름 있는 팀원으로 띄운다. 몇 명을 어느 모델로 띄우는지는 아래 모드 절이 정한다.
+메인(advanced면 Lead)이 리뷰어를 띄운다. [advanced 모드](#advanced-모드)에서 Lead가 되묻는 리뷰어는 [team-agent](../../contexts/team-agent.md#claude-code)의 규칙대로 이름 있는 팀원으로, 나머지는 `name` 없이 띄운다. 몇 명을 어느 모델로 띄우는지는 아래 모드 절이 정한다.
 
 diff가 작아도 메인이 기준 문서를 직접 읽어 대조하지 않는다 — 대조는 리뷰어가 한다.
 

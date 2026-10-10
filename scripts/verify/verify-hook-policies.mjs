@@ -746,6 +746,12 @@ const WORKTREE_HINT_CASES = [
 const TOOL_CASES = [
   ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: '파일-정리' } }, 'deny', 'EnterWorktree 한글 이름'],
   ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: 'file-layout' } }, 'pass', 'EnterWorktree 영문 슬러그'],
+  // code-review는 메인만 돈다. 서브에이전트의 도구 호출에만 agent_id가 실려 온다.
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' }, agent_id: 'a4bec0644659e5080', agent_type: 'general-purpose' }, 'deny', '서브에이전트가 code-review → 차단'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: '/code-review' }, agent_id: 'areviewer-e97f90164e618f3d' }, 'deny', '앞에 슬래시가 붙어도 차단'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'apps/web:code-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '접두가 붙은 다른 code-review는 통과'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' } }, 'pass', '메인이 code-review → 통과'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'scw' }, agent_id: 'a4bec0644659e5080' }, 'pass', '서브에이전트의 다른 스킬 → 통과'],
   // workflow 팀원(이름이 workflow-) 종료 금지. 팀원은 이름·이름@팀·내부 ID(a이름-해시)로 불린다.
   // 배경 셸과 workflow 밖의 팀원은 메인이 끝낸다.
   [

@@ -132,6 +132,12 @@ function main() {
   // 등록된 모습 그대로 한 번도 발동하지 않는다.
   check(claudePre.some((h) => h.matcher === 'Agent' && h.file === 'check-company-analysis-agent.mjs'),
     'claude: check-company-analysis-agent가 Agent 매처로 등록됨');
+  // code-review 호출자 훅은 Skill 매처에 걸려야 스킬 이름을 본다. codex의 스킬 도구 이름은
+  // 실측하지 못해, 거기 실리면 '*' 매처로 모든 도구 호출에 헛돈다.
+  check(claudePre.some((h) => h.matcher === 'Skill' && h.file === 'check-code-review-caller.mjs'),
+    'claude: check-code-review-caller가 Skill 매처로 등록됨');
+  check(!codex.some((h) => h.file === 'check-code-review-caller.mjs'),
+    'codex: Skill 매처 훅 미등록(codex 스킬 도구 이름 미실측)');
 
   // workflow 팀원 종료를 막는 두 훅. 매처가 어긋나면 등록된 채로 한 번도 안 걸려 팀원이 조용히
   // 끝난다. 두 도구 다 codex에 없어, 거기 실리면 '*' 매처로 모든 도구 호출에 헛돈다.
