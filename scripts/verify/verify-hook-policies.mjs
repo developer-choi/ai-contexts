@@ -861,7 +861,10 @@ const BROWSER_HOOK = 'check-browser-write-policy.mjs';
 const BLOCKED_TAB = 100; // 차단 도메인, 방금 기록됨
 const FREE_TAB = 200; // 허용 도메인, 방금 기록됨
 const STALE_TAB = 300; // 차단 도메인이지만 기록이 낡음
+const LOOPBACK_TAB = 400; // 사용자 dev 서버(localhost)
+const SUBHOST_TAB = 500; // 서브에이전트 자기 호스트(<이름>.localhost)
 const BLOCKED_URL = 'https://securities.miraeasset.com/';
+const SUBAGENT = { agent_id: 'a-test-subagent' };
 
 const chrome = (name, input) => ({ tool_name: `mcp__claude-in-chrome__${name}`, tool_input: input });
 const batch = (...actions) => chrome('browser_batch', { actions });
@@ -911,6 +914,37 @@ const BROWSER_CASES = [
     'pass',
     '배치 안에서 다른 도메인으로 옮기면 그 뒤 클릭은 통과',
   ],
+
+  // 서브에이전트는 사용자 로그인 쿠키가 붙은 localhost 탭을 조작하지 못한다. 메인은 그대로 된다.
+  [{ ...chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: LOOPBACK_TAB }), ...SUBAGENT }, 'deny', '서브에이전트의 localhost 클릭'],
+  [{ ...chrome('javascript_tool', { tabId: LOOPBACK_TAB, text: '1' }), ...SUBAGENT }, 'deny', '서브에이전트의 localhost 스크립트 실행'],
+  [{ ...chrome('computer', { action: 'screenshot', tabId: LOOPBACK_TAB }), ...SUBAGENT }, 'deny', '서브에이전트의 localhost 스크린샷(사용자 세션으로 판정)'],
+  [{ ...chrome('get_page_text', { tabId: LOOPBACK_TAB }), ...SUBAGENT }, 'deny', '서브에이전트의 localhost 페이지 읽기'],
+  [{ ...chrome('navigate', { url: 'http://localhost:3917/', tabId: SUBHOST_TAB }), ...SUBAGENT }, 'deny', '서브에이전트의 localhost 이동'],
+  [{ ...chrome('navigate', { url: 'http://agent-a.localhost:3917/', tabId: LOOPBACK_TAB }), ...SUBAGENT }, 'pass', '서브에이전트가 localhost 탭을 자기 호스트로 옮기는 것은 통과'],
+  [{ ...chrome('tabs_close_mcp', { tabId: LOOPBACK_TAB }), ...SUBAGENT }, 'pass', '서브에이전트의 localhost 탭 닫기는 통과'],
+  [chrome('navigate', { url: 'http://localhost:3917/', tabId: SUBHOST_TAB }), 'pass', '메인의 localhost 이동은 통과'],
+  [chrome('get_page_text', { tabId: LOOPBACK_TAB }), 'pass', '메인의 localhost 페이지 읽기는 통과'],
+  [{ ...chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: SUBHOST_TAB }), ...SUBAGENT }, 'pass', '서브에이전트의 자기 호스트 클릭은 통과'],
+  [chrome('computer', { action: 'left_click', coordinate: [10, 10], tabId: LOOPBACK_TAB }), 'pass', '메인의 localhost 클릭은 통과'],
+  [
+    { ...batch(
+      { name: 'navigate', input: { url: 'http://127.0.0.1:3000/', tabId: SUBHOST_TAB } },
+      { name: 'computer', input: { action: 'left_click', coordinate: [10, 10], tabId: SUBHOST_TAB } },
+    ), ...SUBAGENT },
+    'deny',
+    '서브에이전트가 배치 안에서 127.0.0.1로 옮긴 뒤의 클릭도 거부',
+  ],
+  [{ ...chrome('navigate', { url: 'localhost:3917/x', tabId: SUBHOST_TAB }), ...SUBAGENT }, 'deny', '프로토콜 없는 localhost 이동도 거부'],
+  [{ ...chrome('navigate', { url: 'http://localhost.:3917/', tabId: SUBHOST_TAB }), ...SUBAGENT }, 'deny', '끝에 점이 붙은 localhost 이동도 거부'],
+  [
+    batch(
+      { name: 'navigate', input: { url: 'back', tabId: FREE_TAB } },
+      { name: 'computer', input: { action: 'left_click', coordinate: [10, 10], tabId: FREE_TAB } },
+    ),
+    'deny',
+    '배치 안 뒤로가기 뒤의 클릭은 주소를 몰라 거부',
+  ],
 ];
 
 // 상태 파일을 임시 경로에 깔고 환경변수로 훅에 물린다(실제 기록을 건드리지 않는다).
@@ -932,6 +966,8 @@ async function withBrowserStateFixture(fn) {
       [BLOCKED_TAB]: { url: BLOCKED_URL, at: now },
       [FREE_TAB]: { url: 'https://www.google.com/', at: now },
       [STALE_TAB]: { url: BLOCKED_URL, at: now - 10 * 60 * 1000 },
+      [LOOPBACK_TAB]: { url: 'http://localhost:3917/study-records/2026/10', at: now },
+      [SUBHOST_TAB]: { url: 'http://agent-a.localhost:3917/demo', at: now },
     }),
   );
   fs.writeFileSync(recordFile, '{}');

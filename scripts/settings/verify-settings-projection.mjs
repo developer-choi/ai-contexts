@@ -116,6 +116,10 @@ function main() {
   check(['computer', 'form_input', 'javascript_tool', 'file_upload', 'upload_image', 'shortcuts_execute', 'browser_batch']
     .every((t) => (browserWrite?.matcher || '').includes(t)),
     'claude: browser-write 매처가 페이지 쓰기 도구 전부를 담음');
+  // 서브에이전트의 localhost 차단은 읽기·이동에도 걸린다. 매처에서 빠지면 그 도구로 사용자 세션을 연다.
+  check(['navigate', 'read_page', 'get_page_text', 'find', 'read_console_messages', 'read_network_requests']
+    .every((t) => (browserWrite?.matcher || '').includes(t)),
+    'claude: browser-write 매처가 서브에이전트 localhost 차단용 읽기·이동 도구를 담음');
   const browserTrack = claude.find((h) => h.file === 'record-browser-tab-url.mjs');
   check(browserTrack?.event === 'PostToolUse' && browserTrack?.matcher === 'mcp__claude-in-chrome__.*',
     'claude: record-browser-tab-url이 PostToolUse에서 claude-in-chrome 전체 매처로 등록됨');

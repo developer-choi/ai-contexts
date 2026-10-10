@@ -19,17 +19,37 @@ export function stateFilePath() {
   return process.env.CLAUDE_BROWSER_TAB_URLS_FILE || path.join(os.homedir(), ".claude", "state", "browser-tab-urls.json");
 }
 
+// 사용자가 평소 쓰는 dev 서버 주소. 사용자의 로그인 쿠키가 여기 붙어 있어, 서브에이전트가 이 탭에서
+// 누르면 사용자 계정에 조용히 쓴다. 서브에이전트는 `<이름>.localhost`처럼 자기 호스트를 받으므로
+// 서브도메인은 넣지 않는다(정확히 이 호스트만).
+const USER_LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
+
+export function isUserLoopbackUrl(url) {
+  return USER_LOOPBACK_HOSTS.has(hostOf(url));
+}
+
 // 호스트가 그 도메인이거나 그 아래 서브도메인이면 차단. `endsWith(domain)`만 보면
 // `evil-securities.miraeasset.com.attacker.net` 같은 꼴을 못 가른다.
 export function isBlockedUrl(url) {
-  let host;
-  try {
-    host = new URL(url).hostname.toLowerCase();
-  } catch {
-    return false;
-  }
+  const host = hostOf(url);
+  if (!host) return false;
   return BLOCKED_DOMAINS.some((d) => {
     const domain = d.toLowerCase();
     return host === domain || host.endsWith(`.${domain}`);
   });
+}
+
+// navigate는 프로토콜 없는 주소도 받아 https://를 붙여 연다(`localhost:3917/x`). 그대로 `new URL`에
+// 넣으면 호스트가 비어 판정을 비켜가므로 같은 꼴로 풀고, 끝의 점(`localhost.`)도 떼어 같은 호스트로 본다.
+function hostOf(url) {
+  if (typeof url !== "string" || !url) return "";
+  for (const candidate of [url, `https://${url}`]) {
+    try {
+      const host = new URL(candidate).hostname.toLowerCase().replace(/\.$/, "");
+      if (host) return host;
+    } catch {
+      // 다음 꼴로 다시 푼다
+    }
+  }
+  return "";
 }

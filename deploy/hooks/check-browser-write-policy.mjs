@@ -1,6 +1,7 @@
 // 차단 도메인(금융 사이트 등)에 떠 있는 탭에는 브라우저 자동화의 쓰기 동작을 거부한다.
 // 읽기(스크린샷·read_page·get_page_text·console·network·navigate)는 그대로 통과시킨다 —
 // 화면을 같이 보며 해설받는 것이 목적이고, 되돌리기 어려운 클릭·입력·주문만 사람이 직접 한다.
+// 서브에이전트에게는 사용자의 로그인 쿠키가 붙은 `localhost`·`127.0.0.1`을 읽기·이동까지 막는다.
 //
 // 판정은 tabId가 아니라 "그 순간 그 탭의 URL"로 한다. 차단 도메인에 있던 탭이 다른 사이트로
 // 옮겨가면 즉시 다시 쓰기가 열린다.
@@ -11,7 +12,7 @@
 // 호출 한 번이다(클릭 좌표를 얻으려면 어차피 직전에 화면을 본다).
 import fs from "node:fs";
 import { deny } from "./hook-utils.mjs";
-import { MAX_AGE_MS, isBlockedUrl, stateFilePath } from "./browser-tab-state.mjs";
+import { MAX_AGE_MS, isBlockedUrl, isUserLoopbackUrl, stateFilePath } from "./browser-tab-state.mjs";
 
 const PREFIX = "mcp__claude-in-chrome__";
 
@@ -57,12 +58,22 @@ function main() {
   const items = short === "browser_batch" ? normalizeBatch(input.actions) : [{ name: short, input }];
   const moved = new Map();
 
+  const subagent = Boolean(payload.agent_id);
+
   for (const item of items) {
     if (NAVIGATE_TOOLS.has(item.name)) {
       const tabId = tabIdOf(item.input);
       const url = typeof item.input.url === "string" ? item.input.url : "";
-      if (tabId && url) moved.set(tabId, url);
+      if (subagent && isUserLoopbackUrl(url)) denyUserLoopback(item.name, url);
+      // 뒤로·앞으로는 어디로 갈지 모른다 — 빈 값으로 두어 그 뒤 쓰기를 "주소 모름"으로 거부한다.
+      if (tabId && url) moved.set(tabId, url === "back" || url === "forward" ? "" : url);
       continue;
+    }
+    // 서브에이전트는 사용자 세션 화면을 읽어 판정해도 안 되므로 읽기까지 막는다(닫기는 둔다).
+    if (subagent && item.name !== "tabs_close_mcp") {
+      const tabId = tabIdOf(item.input);
+      const url = tabId ? (moved.get(tabId) ?? freshUrl(state, tabId)) : "";
+      if (url && isUserLoopbackUrl(url)) denyUserLoopback(describe(item), url);
     }
     if (!isWrite(item)) continue;
 
@@ -88,6 +99,19 @@ function main() {
     }
   }
   process.exit(0);
+}
+
+// 서브에이전트(agent_id)만 막는다. 메인이 혼자 확인할 때는 사용자와 같은 화면을 쓰는 게 맞고,
+// 여럿이 나눠 돌 때는 로그인 뒤 리다이렉트가 앱에 의해 `localhost`로 튕겨 프롬프트로는 못 막는다.
+// 한계: 한 배치 안에서 클릭이 리다이렉트를 일으키면 그 뒤 항목은 옛 주소로 판정된다(사전 훅은 아직
+// 안 일어난 이동을 모른다). 호출이 나뉘면 기록 훅이 바뀐 주소를 적어 다음 호출부터 막힌다.
+function denyUserLoopback(what, url) {
+  deny(
+    `[브라우저 차단] ${what} 거부 — 서브에이전트가 ${url} 를 쓰려 합니다. ` +
+      "localhost·127.0.0.1은 사용자의 실제 로그인 세션이라 서브에이전트는 열지도, 보고 판정하지도, 누르지도 않습니다. " +
+      "로그인 뒤 리다이렉트로 이 주소에 왔다면 같은 경로를 받은 자기 호스트(`<이름>.localhost:<포트>`)로 다시 여세요. " +
+      "자기 호스트를 받지 못했으면 메인에게 물으세요.",
+  );
 }
 
 function denyUnknown(what, why) {
