@@ -2,7 +2,7 @@ import childProcess from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { readPayload, getSessionId, addContext } from "./hook-utils.mjs";
-import { killCommand, leftoverShells } from "./subagent-shells.mjs";
+import { killCommand, leftoverShells, processTable } from "./subagent-shells.mjs";
 import { readAgents, stuckNotice, subagentsDirOf, STALE_IDLE_MS, STATE_DIR } from "./subagent-status.mjs";
 import { watch } from "./subagent-watcher.mjs";
 
@@ -14,7 +14,7 @@ import { watch } from "./subagent-watcher.mjs";
 // - PostToolUse(Agent): 감시기만 살린다. 한 턴이 길게 이어지다 에이전트를 새로 띄우면
 //   그사이 감시기가 스스로 끝나 있을 수 있다.
 //
-// 멈춤을 프롬프트 없이 알리는 것은 감시기가 맡는다. 감시기는 이 파일을 `--watch <폴더> <세션>`으로
+// 멈춤을 프롬프트 없이 알리는 것은 감시기가 맡는다. 감시기는 이 파일을 `--watch <폴더> <세션> <Claude Code pid>`로
 // 다시 띄운 분리 프로세스이고, 본체는 subagent-watcher.mjs의 watch()다.
 
 const SELF = import.meta.filename;
@@ -33,12 +33,38 @@ function watcherAlive(sessionId) {
   }
 }
 
+// 설치 실행 파일(claude.exe)과 npm 설치(node …/@anthropic-ai/claude-code/cli.js) 둘 다 본다. 실행 파일은
+// 명령줄 첫 토큰만 본다 — 인자에 `…/claude/…` 경로가 든 셸까지 잡지 않게.
+const CLAUDE_CMD =
+  /^(?:"(?:[^"]*[\\/])?claude(?:\.exe)?"|(?:[^"\s]*[\\/])?claude(?:\.exe)?)(?:\s|$)|@anthropic-ai[\\/]claude-code[\\/]cli\.m?js/i;
+
+// 감시기가 함께 끝날 이 세션의 Claude Code. 훅의 부모는 훅 명령을 돌리고 곧 끝나는 셸이라
+// (node ← bash ← bash ← claude.exe, 2026-10-11 실측) ppid가 아니라 조상을 거슬러 찾는다. 감시기 안에서
+// 찾으면 그때는 훅과 셸이 이미 끝나 사슬이 끊겨 있어, 감시기를 띄우는 이 자리에서 찾는다.
+// 못 찾으면 0이고, 감시기는 폴더가 조용해질 때만 끝난다.
+function claudePid() {
+  if (process.platform !== "win32") return 0;
+  try {
+    const byPid = new Map(processTable().map((p) => [p.pid, p]));
+    const seen = new Set();
+    for (let pid = process.ppid; pid && !seen.has(pid); pid = byPid.get(pid)?.ppid) {
+      seen.add(pid);
+      if (CLAUDE_CMD.test(byPid.get(pid)?.cmd ?? "")) return pid;
+    }
+  } catch {
+    /* 프로세스 목록을 못 읽었다 */
+  }
+  return 0;
+}
+
 function ensureWatcher(dir, sessionId) {
   // 검증 스크립트가 훅을 수십 번 띄울 때 감시기가 따라 뜨지 않게 한다.
   if (process.env.SUBAGENT_WATCH_DISABLE === "1") return;
   if (!fs.existsSync(dir) || watcherAlive(sessionId)) return;
   fs.mkdirSync(STATE_DIR, { recursive: true });
-  const child = childProcess.spawn(process.execPath, [SELF, "--watch", dir, sessionId], {
+  const child = childProcess.spawn(process.execPath, [SELF, "--watch", dir, sessionId, String(claudePid())], {
+    // 훅의 cwd(세션 작업 폴더)를 물려받으면 감시기가 사는 동안 그 폴더를 지울 수 없다.
+    cwd: STATE_DIR,
     detached: true,
     stdio: "ignore",
     windowsHide: true,
@@ -141,7 +167,7 @@ function surface() {
 }
 
 if (process.argv[2] === "--watch") {
-  watch(process.argv[3], process.argv[4]);
+  watch(process.argv[3], process.argv[4], Number(process.argv[5]) || 0);
 } else {
   try {
     surface();

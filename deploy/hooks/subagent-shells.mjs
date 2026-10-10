@@ -73,7 +73,7 @@ function scanNotices(file) {
 }
 
 // Windows만 PID를 찾는다. 다른 OS는 트리째 끝내는 명령을 검증하지 않았다.
-function processTable() {
+export function processTable() {
   const r = childProcess.spawnSync(
     "powershell.exe",
     [

@@ -46,7 +46,19 @@ function lastChangeMs(dir) {
   return latest;
 }
 
-export function watch(dir, sessionId) {
+// EPERM은 프로세스가 있는데 신호 권한이 없다는 뜻이라 살아 있는 쪽으로 본다 — 감시기는 세션이 확실히
+// 끝났을 때만 먼저 끝난다.
+function alive(pid) {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (e) {
+    return e.code === "EPERM";
+  }
+}
+
+// ownerPid = 이 세션의 Claude Code(0이면 모른다). 세션이 끝나면 멈춤을 알려도 받을 사람이 없다.
+export function watch(dir, sessionId, ownerPid = 0) {
   const logFile = path.join(STATE_DIR, `${sessionId}.log`);
   const pidFile = path.join(STATE_DIR, `${sessionId}.pid`);
   const log = (line) => {
@@ -57,7 +69,18 @@ export function watch(dir, sessionId) {
   const notified = new Set();
   const startedAt = Date.now();
 
+  const exit = (reason) => {
+    log(`EXIT ${reason}`);
+    try {
+      if (fs.readFileSync(pidFile, "utf8") === String(process.pid)) fs.unlinkSync(pidFile);
+    } catch {
+      /* 이미 없다 */
+    }
+    process.exit(0);
+  };
+
   const tick = () => {
+    if (ownerPid && !alive(ownerPid)) exit("session-gone");
     const now = Date.now();
     let pendingStuck = false;
     for (const a of readAgents(dir, now)) {
@@ -71,18 +94,10 @@ export function watch(dir, sessionId) {
     }
     // 폴더가 30분 넘게 조용하면 끝낸다. 다음 프롬프트나 Agent 호출이 다시 띄운다.
     const quietSince = Math.max(lastChangeMs(dir), startedAt);
-    if (!pendingStuck && now - quietSince > QUIET_MS) {
-      log("EXIT quiet");
-      try {
-        if (fs.readFileSync(pidFile, "utf8") === String(process.pid)) fs.unlinkSync(pidFile);
-      } catch {
-        /* 이미 없다 */
-      }
-      process.exit(0);
-    }
+    if (!pendingStuck && now - quietSince > QUIET_MS) exit("quiet");
   };
 
-  log(`START ${dir}`);
+  log(`START ${dir} owner=${ownerPid || "unknown"}`);
   tick();
   setInterval(tick, POLL_MS);
 }
