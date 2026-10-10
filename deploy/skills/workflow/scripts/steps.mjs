@@ -11,8 +11,9 @@
 // 쉬워야 하고, JSON은 스크립트를 위해 만든다」).
 //
 // 사용:
-//   node <이 파일> next <step> [--plan <plan 폴더> [--pr <N>]]
+//   node <이 파일> next <step> [--mode <모드>] [--prefix <접두어>] [--plan <plan 폴더> [--pr <N>]]
 //       → 그 step 뒤의 후속(같은 세션 이어서 / spawn / 출발 알림). `--pr`이 있으면 그 PR의 진행 단계를 먼저 기록한다
+//         spawn마다 `claude --model … --name …` 실행 명령을 낸다. --mode·--plan·--prefix는 이 세션이 받은 값을 준다
 //   node <이 파일> start <세션> [--plan <plan 폴더> --pr <N>]
 //       → 세션의 첫 step 파일·step 순서·진입 조건·권장 모델 (PR_3_IMPL도 받는다). PR에 종류가 있으면 읽을 종류 문서
 //   node <이 파일> pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps 1,2]   → PR 확정. 번호를 매겨 출력
@@ -41,11 +42,32 @@ const SIDE_SESSION_DOC = path.join(SKILL_DIR, 'conventions', 'side-session.md');
 const STAGES = ['confirmed', 'consumed', 'realized'];
 const STAGE_BY_STEP = { plan: 'consumed', 'realize-plan': 'realized' };
 const DIRECTIVE = '안내 규칙: 이 출력에 없는 세션은 언급하지 않는다. 「직접 확인」 항목만 판단해 덧붙인다.';
+const LAUNCH_RULE = '「실행」 줄은 사용자가 그대로 붙여 넣는다 — 줄이거나 자리표시로 바꾸지 않고 글자 그대로 옮긴다(<모델>·<모드>만 채운다).';
 const DIRECTIVE_SESSION_END = '이 step으로 세션을 끝낼 때: 종료 보고의 남은 단계마다 담당 세션을 붙인다.';
+
+// frontmatter `model:` 값 → `claude --model` 별칭. 조건이 붙은 값(「Sonnet — … 이면 Opus」)은 여기 없다.
+const MODEL_IDS = { Opus: 'opus', Sonnet: 'sonnet', Haiku: 'haiku' };
 
 function fail(msg) {
   console.error(msg);
   process.exit(1);
+}
+
+// 다음 세션을 띄우는 명령 한 줄. 모드·plan 경로·이름 접두어는 이 세션이 받은 값을 그대로 실어,
+// 다음 세션도 같은 값을 받아 또 넘긴다 — 어디에 저장해 두지 않고 명령이 들고 다닌다.
+// 세션은 메인 레포 루트에서 띄운다는 전제로, plan 경로를 그 기준으로 줄인다. 절대경로가 길면 안내하는 세션이
+// 읽기 좋게 `<PLAN>` 같은 자리표시로 바꿔 내 붙여 넣어도 안 도는 명령이 됐다(2026-10 벤치 6회 중 1회).
+// 루트의 `plan`이면 기본값이라 빼서 실무·채용 명령을 예전 그대로 둔다.
+function launchCommand(session, model, opt) {
+  const args = [session, opt.mode ?? '<모드>'];
+  if (opt.plan) {
+    const plan = path.relative(process.cwd(), path.resolve(opt.plan)).replace(/\\/g, '/');
+    const inside = plan && !plan.startsWith('..') && !path.isAbsolute(plan);
+    if (plan !== 'plan') args.push('--plan', inside ? plan : opt.plan);
+  }
+  if (opt.prefix) args.push('--prefix', opt.prefix);
+  const name = opt.prefix ? `${opt.prefix}_${session}` : session;
+  return `claude --model ${model} --name ${name} "/workflow ${args.join(' ')}"`;
 }
 
 function walk(dir, out = []) {
@@ -452,6 +474,10 @@ function cmdNext(name, opt) {
   const from = steps.get(name);
   if (!from) fail(`모르는 step: ${name} (${[...steps.keys()].join(', ')})`);
   if (opt.pr !== undefined && !opt.plan) fail('--pr은 --plan과 함께 준다');
+  // 실행 명령의 따옴표 안에 그대로 넣는 값이라 공백·따옴표가 섞이면 셸에서 인자가 갈라진다. 단계 기록 전에 막는다.
+  for (const key of ['mode', 'plan', 'prefix']) {
+    if (opt[key] !== undefined && /[\s"'`$]/.test(opt[key])) fail(`--${key} 값에 공백·따옴표·$가 있으면 실행 명령에 실을 수 없다: ${opt[key]}`);
+  }
   const data = opt.plan ? readPrs(opt.plan) : null;
   const pr = opt.pr !== undefined ? findPr(data, parseNum(opt.pr, '--pr')) : null;
 
@@ -477,15 +503,16 @@ function cmdNext(name, opt) {
     const keep = head.scope === 'project' ? ' (이미 떠 있으면 그 세션에서 이어서)' : '';
     // PR마다 뜨는 세션의 호출문: IMPL 등은 이 PR 번호로. PLAN은 `--pr`(방금 확정한 PR)이 있으면 그것만,
     // 없으면 아직 안 가져간 PR마다 한 줄씩 — PR 확정마다 전부 찍으면 이미 띄운 PLAN을 또 안내한다.
-    let calls = [`/workflow ${t.session} <모드>`];
+    const model = MODEL_IDS[head.model] ?? '<모델>';
+    let calls = [launchCommand(t.session, model, opt)];
     if (data && perPr && t.session !== 'PR_{N}_PLAN') {
-      if (pr) calls = [`/workflow ${t.session.replace('{N}', pr.n)} <모드>`];
+      if (pr) calls = [launchCommand(t.session.replace('{N}', pr.n), model, opt)];
     } else if (data && perPr) {
       calls = (pr ? [pr] : data.prs)
         .filter((p) => p.stage === 'confirmed')
         .map((p) => {
           const wait = waitingOn(data, p);
-          const call = `/workflow ${t.session.replace('{N}', p.n)} <모드>`;
+          const call = launchCommand(t.session.replace('{N}', p.n), model, opt);
           return wait.length ? `대기 — ${call} (PR ${wait.join(', ')}의 realize-plan 커밋 전)` : call;
         });
       if (!calls.length) continue;
@@ -493,11 +520,18 @@ function cmdNext(name, opt) {
     spawnLines.push(`  → ${e.to} · 세션 ${t.session}${keep} — ${describe(e)}`);
     spawnLines.push(`    ${data ? '직접 확인' : '진입 조건'}: ${head.entry ?? '(없음)'}`);
     spawnLines.push(`    권장 모델: ${head.model ?? '(없음)'}`);
-    for (const c of calls) spawnLines.push(`    호출: ${c}`);
+    // 조건이 붙은 권장 모델은 스크립트가 못 가린다 — 안내하는 세션이 조건을 보고 하나를 고른다.
+    if (model === '<모델>') spawnLines.push('    직접 확인: 권장 모델의 조건을 판단해 <모델>을 opus·sonnet 중 하나로 채우고, 고른 근거를 명령 옆에 괄호로 붙인다');
+    for (const c of calls) spawnLines.push(`    실행: ${c}`);
   }
   if (spawnLines.length) {
     console.log('새 세션 spawn:');
+    // 개인 모드는 작업 묶음(BG+PLAN+IMPL)을 여럿 겹쳐 돌려 세션 이름이 겹친다. 접두어를 안 받았으면 안내하는 세션이 짓는다.
+    if (opt.mode === '개인' && !opt.prefix) {
+      console.log('  직접 확인: 이름 접두어가 없다 — 이 작업을 알아볼 짧은 접두어(공백·따옴표 없이)를 지어 --prefix로 다시 부른다. 한 번 정한 접두어는 이 작업 내내 같은 값을 쓴다');
+    }
     spawnLines.forEach((l) => console.log(l));
+    console.log(LAUNCH_RULE);
   }
 
   const goLines = [];
@@ -668,10 +702,10 @@ function cmdCheck() {
   if (problems.length) process.exit(1);
 }
 
-const USAGE = '사용: node <이 파일> (next <step> [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list|branches|links) --plan <p> … | graph | check)';
+const USAGE = '사용: node <이 파일> (next <step> [--mode <모드>] [--prefix <접두어>] [--plan <p> [--pr <N>]] | start <세션> [--plan <p> --pr <N>] | pr (add|set|list|branches|links) --plan <p> … | graph | check)';
 const [command, ...rest] = process.argv.slice(2);
 if (command === 'next' || command === 'start') {
-  const { pos, opt } = parseArgs(rest, ['plan', 'pr']);
+  const { pos, opt } = parseArgs(rest, command === 'next' ? ['plan', 'pr', 'mode', 'prefix'] : ['plan', 'pr']);
   if (pos.length !== 1) fail(USAGE);
   if (command === 'next') cmdNext(pos[0], opt);
   else cmdStart(pos[0], opt);
