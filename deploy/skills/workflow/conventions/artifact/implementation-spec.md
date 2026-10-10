@@ -44,7 +44,7 @@ IMPL에 들어간 뒤로는 고치지 않는다. 위 소비처는 모두 계획�
 - **이 표의 `it.todo` 주석 요지 기재는 전사 금지 룰 전체에 대한 예외다** — 본 문서 「책임·위치」·「양식」의 금지와 「코드-narrative 오배치 검출」 모두에 걸리지 않는다. 리뷰어·후속 편집자 모두 이 표를 중복으로 보고 지우지 않는다.
 - 면제는 MP `docs/patterns/testing/WhatToTest.md` 판정 4문항이 skip을 낸 경우(어느 문항인지 적는다), 또는 같은 파일 화이트리스트 카테고리 매칭 + 사유 명시여야 인정
 - **표 미산출, 또는 면제 없이 커버 `it.todo`가 빈 행이 1건이라도 있으면 PLAN 종료 금지** — `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md>`가 센다. 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 그대로 사람 몫이고, 기계가 하는 것은 채워진 표에 빈 행이 있는지뿐이다
-- 오라클은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다
+- 판정 기준은 decisions·overview가 아니라 그 근거인 요구사항 원본·사용자 발화다
 
 ### IMPL 종료 시점 — 남은 `it.todo`
 

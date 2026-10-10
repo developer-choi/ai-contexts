@@ -47,7 +47,7 @@ realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)�
 
 [team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
 
-implement는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자를 spawn한다. 리뷰는 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)가 맡는다 (로직은 오라클형이라 축 A Reviewer 미spawn).
+implement는 로직 전용이라(마크업은 MARKUP 완성본을 가져온다) 로직 구현자를 spawn한다. 리뷰는 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)가 맡는다 (로직은 테스트 실행 결과로 판정하므로 축 A Reviewer 미spawn).
 
 ```
 Lead (메인 세션) — 사용자 소통 + 팀 spawn
@@ -76,7 +76,7 @@ implement 진입 직후 본 PR 영역에서 [IMPL 시작 게이트](../conventio
 
 ### Step 5.2.1. TODO 주석 처리
 
-IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#처리-구현-중) 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 PR 이연 마커 코드 안 금지 룰은 컨벤션이 단일 출처.
+IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#처리-구현-중) 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 다른 PR로 미루는 마커를 코드에 두지 않는 룰은 컨벤션이 단일 출처.
 
 ### Step 5.2.2. gotchas
 
@@ -107,7 +107,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 | 구현자 | 진실검사 A (메커니즘) | 규칙검사 B | 증분 단위 |
 |---|---|---|---|
-| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 오라클형(실행이 곧 판정). 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
+| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 실행 결과로 판정. 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 
