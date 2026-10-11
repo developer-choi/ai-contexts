@@ -145,6 +145,12 @@
       "msg": "Checking git push policy..."
     },
     {
+      "file": "check-pr-attribution-policy.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking PR body attribution..."
+    },
+    {
       "file": "check-git-reset-policy.mjs",
       "event": "PreToolUse",
       "on": "shell",

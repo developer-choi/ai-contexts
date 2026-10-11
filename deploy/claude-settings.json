@@ -4,6 +4,10 @@
   "language": "korean",
   "autoMemoryEnabled": false,
   "remoteControlAtStartup": false,
+  "attribution": {
+    "pr": "",
+    "sessionUrl": false
+  },
   "env": {
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"

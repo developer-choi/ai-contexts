@@ -195,6 +195,23 @@ const CASES = [
   ['check-git-ref-slug.mjs', 'git branch -m 맹점-기록 blind-spot-log', 'pass', '한글 이름을 영문으로 바꾸기는 통과'],
   ['check-git-ref-slug.mjs', 'git checkout -b scw-file-layout', 'pass', '영문 슬러그는 통과'],
   ['check-git-ref-slug.mjs', 'git commit a.md -m "브랜치 정리"', 'pass', '메시지 안의 한글은 관여하지 않는다'],
+
+  // --- PR 본문의 생성 표기 줄 (check-pr-attribution-policy). 본문 파일 케이스는 prAttributionGroup ---
+  ['check-pr-attribution-policy.mjs', "gh pr create --draft --body \"$(cat <<'EOF'\n## 요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nEOF\n)\"", 'deny', 'heredoc 본문 끝의 표기 줄'],
+  ['check-pr-attribution-policy.mjs', 'gh pr edit 12 --body "요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)" --title x', 'deny', '따옴표 본문 끝의 표기 뒤에 옵션이 이어진다'],
+  ['check-pr-attribution-policy.mjs', 'gh pr edit 12 --body "요약\\n\\n🤖 Generated with [Claude Code](https://claude.com/claude-code)" --title x', 'deny', '한 줄 명령의 글자 그대로 \\n 뒤 표기'],
+  ['check-pr-attribution-policy.mjs', 'gh pr create --body "요약\\n\\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\\n"', 'deny', '표기 뒤에 글자 그대로 \\n이 붙어도 잡는다'],
+  ['check-pr-attribution-policy.mjs', 'gh pr create --body "요약`n`n🤖 Generated with [Claude Code](https://claude.com/claude-code)"', 'deny', 'PowerShell 백틱-n 뒤 표기'],
+  ['check-pr-attribution-policy.mjs', 'gh pr new --body "요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"', 'deny', 'pr new는 pr create의 별칭이다'],
+  ['check-pr-attribution-policy.mjs', 'gh -R o/r pr create --body "요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"', 'deny', 'pr 앞의 -R 값을 서브커맨드로 세지 않는다'],
+  ['check-pr-attribution-policy.mjs', "git commit a.md -F - <<'MSG'\nfeat: x\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nMSG\ngh pr create --fill", 'pass', '같은 체인 앞쪽 커밋 메시지의 표기는 보지 않는다'],
+  ['check-pr-attribution-policy.mjs', "gh pr create -F - <<'EOF'\n요약\n\nGenerated with Claude Code\nEOF", 'deny', '이모지·링크 없는 표기도 잡는다'],
+  ['check-pr-attribution-policy.mjs', "gh pr edit 12 --body @'\n요약\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n'@", 'deny', 'PowerShell here-string 본문'],
+  ['check-pr-attribution-policy.mjs', 'cd ~/repo && gh pr create --body "요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"', 'deny', 'chain 뒷단의 gh도 잡는다'],
+  ['check-pr-attribution-policy.mjs', 'gh pr create --draft --body "## 요약\n\n본문만 있다"', 'pass', '표기 없는 본문은 통과'],
+  ['check-pr-attribution-policy.mjs', 'gh pr create --body "PR 본문에서 Generated with Claude Code 줄을 막는 훅을 더한다"', 'pass', '표기를 설명하는 문장은 줄 전체가 아니라 통과'],
+  ['check-pr-attribution-policy.mjs', 'gh pr view 12 --json body', 'pass', '본문을 쓰지 않는 gh pr 명령은 보지 않는다'],
+  ['check-pr-attribution-policy.mjs', "git commit a.md -F - <<'MSG'\nfeat: x\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nMSG", 'pass', '커밋 메시지는 대상이 아니다'],
 ];
 
 // 쓰기 시점 정책 hook은 Bash 명령이 아니라 Write/Edit payload를 본다.
@@ -2077,6 +2094,34 @@ const recruitmentGroup = () => runCases(RECRUITMENT_CASES, async ([command, sub,
   return judge(`check-git-commit-policy.mjs :: ${command} [${sub ? '채용' : '밖'}] → ${expected} (${note})`, decision, expected, stderr);
 });
 
+// `--body-file`은 본문이 명령 글자에 없어 훅이 파일을 연다 — 실제 파일이 있어야 판정된다.
+// 상대 경로는 세션 폴더(페이로드 cwd) 기준으로 푸는지도 함께 본다.
+const PR_ATTRIBUTION_HOOK = 'check-pr-attribution-policy.mjs';
+const prAttributionGroup = async () => {
+  const dir = await makeTempDir('hook-pr-attribution-');
+  try {
+    fs.writeFileSync(path.join(dir, 'tagged.md'), '## 요약\n\n본문\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n');
+    fs.writeFileSync(path.join(dir, 'clean.md'), '## 요약\n\n본문\n');
+    const posix = dir.replace(/\\/g, '/');
+    const cases = [
+      // [명령, 기대 판정, 설명]
+      [`gh pr edit 12 --body-file ${posix}/tagged.md`, 'deny', '본문 파일 끝의 표기 줄'],
+      [`gh pr create --draft -F ${posix}/tagged.md`, 'deny', '짧은 옵션 -F'],
+      [`gh pr create --body-file=${posix}/tagged.md`, 'deny', '= 로 붙인 값'],
+      ['gh pr edit 12 --body-file tagged.md', 'deny', '상대 경로는 세션 폴더 기준'],
+      [`gh pr edit 12 --body-file "${posix}/tagged.md"`, 'deny', '따옴표로 감싼 경로'],
+      [`gh pr edit 12 --body-file ${posix}/clean.md`, 'pass', '표기 없는 본문 파일은 통과'],
+      [`gh pr create --draft -F ${posix}/clean.md`, 'pass', 'create도 표기 없으면 통과'],
+    ];
+    return await runCases(cases, async ([command, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(PR_ATTRIBUTION_HOOK, { tool_name: 'Bash', tool_input: { command }, cwd: dir });
+      return judge(`${PR_ATTRIBUTION_HOOK} :: ${command} → ${expected} (${note})`, decision, expected, stderr);
+    });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 첫 그물(git 훅)의 판정 함수. 순수 함수라 git 없이 직접 부른다.
 const RECRUITMENT_GUARD_CASES = [
   // [판정 함수, 입력, 기대 판정, 설명]
@@ -2444,6 +2489,7 @@ async function main() {
     subagentAskGroup,
     toolGroup,
     recruitmentGroup,
+    prAttributionGroup,
     recruitmentGuardGroup,
     acMainCommitGroup,
     skillCreatorGroup,

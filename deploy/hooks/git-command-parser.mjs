@@ -115,6 +115,39 @@ export function findGhPrCreates(command) {
   return out;
 }
 
+// PR 본문을 쓰는 gh 호출(`gh pr create`·`gh pr new`·`gh pr edit`)을 { bodyFiles, moveCwd }로 돌려준다. bodyFiles는
+// `-F`/`--body-file`로 넘긴 파일 경로들이다 — 본문이 명령 글자에 없어 훅이 파일을 열어 봐야 한다.
+// 값이 `-`(표준입력)이면 넣지 않는다. heredoc이면 본문이 명령 글자에 있다.
+export function findGhPrBodyWrites(command) {
+  const out = [];
+  const folder = { current: null, stack: [] };
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    trackFolder(tokens, folder);
+    const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
+    if (at < 0) continue;
+    // `gh -R o/r pr create`처럼 `pr` 앞에 레포 지정이 올 수 있다 — 그 값을 서브커맨드로 세지 않게 건너뛴다.
+    let args = tokens.slice(at + 1);
+    while (args[0] === "-R" || args[0] === "--repo" || args[0]?.startsWith("--repo=")) {
+      args = args.slice(args[0].includes("=") ? 1 : 2);
+    }
+    const words = args.filter((t) => !t.startsWith("-"));
+    // `pr new`는 `pr create`의 별칭이다(`gh help pr create`의 ALIASES).
+    if (words[0] !== "pr" || !["create", "new", "edit"].includes(words[1])) continue;
+    const bodyFiles = [];
+    for (let i = 0; i < args.length; i += 1) {
+      const t = args[i];
+      let value = null;
+      if ((t === "-F" || t === "--body-file") && args[i + 1]) value = args[i + 1];
+      else if (t.startsWith("--body-file=")) value = t.slice("--body-file=".length);
+      else if (/^-F./.test(t)) value = t.slice(2);
+      if (value && value !== "-") bodyFiles.push(value);
+    }
+    out.push({ bodyFiles, moveCwd: folder.current });
+  }
+  return out;
+}
+
 // `-B main`·`--base main`·`--base=main` 꼴의 값. 없으면 null.
 function flagValue(args, short, long) {
   for (let i = 0; i < args.length; i += 1) {
