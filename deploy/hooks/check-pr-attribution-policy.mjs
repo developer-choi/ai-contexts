@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { findGhPrBodyWrites, invocationCwd, normalizeCwd } from "./git-command-parser.mjs";
+import { findGhPrBodyWrites, findRedirectTargets, invocationCwd, normalizeCwd } from "./git-command-parser.mjs";
 import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // PR 본문에 Claude Code 생성 표기 줄(`🤖 Generated with [Claude Code](…)`)이 실린 채 게시되는 것을 막는다.
@@ -12,8 +12,17 @@ import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 // 본문을 볼 수 있는 자리는 둘이다. 명령 글자(`--body "…"`, heredoc, here-string)는 첫 `gh pr` 호출부터
 // 명령 끝까지에서 찾고, `-F`/`--body-file <파일>`은 파일을 열어 찾는다. 앞부분을 안 보는 것은 같은 체인의
 // 커밋 메시지에 든 표기까지 잡지 않기 위해서다(커밋은 대상이 아니다).
+//
+// 예외로, 같은 명령이 본문 파일에 리다이렉트(`>`·`>>`)로 쓰면 명령 글자 전체를 본다. 훅은 명령 실행 전에
+// 파일을 읽어서 그 명령이 붙일 줄을 못 보고, 붙일 줄은 `gh pr` 앞의 `printf`·`echo`에 있다. 2026-10-11 PFM
+// PR #40이 이 꼴(`printf '…표기…' >> "$S/body.md"; gh pr edit 40 --body-file "$S/body.md"`)로 빠져나갔다.
+// 리다이렉트 대상과 본문 파일은 토큰 글자로 맞대므로 셸 변수로 쓴 경로도 양쪽이 같으면 잡는다.
+//
 // 보지 못하는 것: 다른 명령이 넘겨주는 본문(`cat x | gh pr create -F -`, `-F - < x`, `--body "$(cat x)"`),
-// 셸 변수로 쓴 파일 경로(`-F "$TEMP/x.md"`), Git Bash의 `/tmp` 같은 MSYS 가상 경로.
+// 셸 변수로 쓴 파일 경로(`-F "$TEMP/x.md"`)의 파일 내용, Git Bash의 `/tmp` 같은 MSYS 가상 경로, 리다이렉트가
+// 아닌 수단으로 같은 명령 안에서 본문 파일에 쓰는 꼴(`tee -a body.md`, `sed -i`, 스크립트 실행), 리다이렉트
+// 대상과 본문 파일을 서로 다른 글자로 쓴 같은 파일(`./b.md`와 절대경로, 다른 변수), 따옴표 바로 뒤에
+// 공백 없이 붙인 리다이렉트(`printf '…'>>b.md` — 토큰 하나로 이어진다).
 //
 // 떼어서 실행하지 않고 막는다 — 본문 파일을 몰래 고치면 사용자가 보는 파일과 게시된 본문이 달라진다.
 //
@@ -24,6 +33,9 @@ import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 // 줄 끝 쪽은 본문을 닫는 따옴표·괄호일 수 있다(`--body "…\n\n🤖 Generated with …" --draft`).
 const ATTRIBUTION_LINE =
   /(?:^|\\n|`n)[ \t]*(?:🤖[ \t]*)?Generated with \[?Claude Code\]?(?:\(https?:\/\/[^)\s]*\))?[ \t]*(?:["')]|\\n|`n|\r?$)/im;
+// 본문 파일에 한 줄을 이어 쓰는 명령(`echo "🤖 Generated with …" >> body.md`)에서는 줄 앞쪽이 여는 따옴표다.
+// 이 넓은 경계는 그 명령을 볼 때만 쓴다 — 표기 문구를 따옴표로 인용해 설명하는 본문까지 막지 않기 위해서다.
+const ATTRIBUTION_IN_WRITE = new RegExp(ATTRIBUTION_LINE.source.replace("(?:^|", "(?:[\"']|^|"), "im");
 const GH_PR_BODY_CALL = /\bgh(?:\.exe)?\b[^\n]*?\bpr\s+(?:create|new|edit)\b/;
 
 const payload = readPayload();
@@ -34,8 +46,13 @@ const writes = findGhPrBodyWrites(cmd);
 if (writes.length === 0) process.exit(0);
 
 const found = [];
+const redirected = new Set(findRedirectTargets(cmd));
+const writesBodyFile = writes.some((inv) => inv.bodyFiles.some((file) => redirected.has(file)));
 const callAt = cmd.search(GH_PR_BODY_CALL);
-if (ATTRIBUTION_LINE.test(callAt >= 0 ? cmd.slice(callAt) : cmd)) found.push("명령에 실린 본문");
+const scope = writesBodyFile || callAt < 0 ? cmd : cmd.slice(callAt);
+if ((writesBodyFile ? ATTRIBUTION_IN_WRITE : ATTRIBUTION_LINE).test(scope)) {
+  found.push(writesBodyFile ? "본문 파일에 이어 쓰는 명령" : "명령에 실린 본문");
+}
 
 for (const inv of writes) {
   const base = invocationCwd(inv, getCwd(payload)) || getCwd(payload);

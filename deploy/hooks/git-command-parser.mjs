@@ -433,6 +433,22 @@ export function stripRedirections(args) {
   return out;
 }
 
+// 명령 안의 출력 리다이렉트(`>`·`>>`, `1>`·`&>` 포함) 대상 파일을 토큰 그대로(따옴표는 벗긴 채) 돌려준다.
+// `2>&1` 같은 fd 복제는 파일이 아니라 뺀다.
+export function findRedirectTargets(command) {
+  const out = [];
+  for (const seg of splitSegments(command)) {
+    const tokens = tokenize(seg);
+    for (let i = 0; i < tokens.length; i += 1) {
+      const m = tokens[i].match(/^(?:\d*|&)>>?(?!&)(.*)$/);
+      if (!m) continue;
+      const target = m[1] || tokens[i + 1];
+      if (target) out.push(target);
+    }
+  }
+  return out;
+}
+
 // 서브커맨드 인자를 옵션과 positional(주로 파일 경로)로 가른다.
 // `--` 이후는 전부 positional로 본다(git 규약).
 export function partitionArgs(args, valuedFlags = new Set()) {

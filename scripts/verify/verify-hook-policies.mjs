@@ -210,6 +210,7 @@ const CASES = [
   ['check-pr-attribution-policy.mjs', 'cd ~/repo && gh pr create --body "요약\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)"', 'deny', 'chain 뒷단의 gh도 잡는다'],
   ['check-pr-attribution-policy.mjs', 'gh pr create --draft --body "## 요약\n\n본문만 있다"', 'pass', '표기 없는 본문은 통과'],
   ['check-pr-attribution-policy.mjs', 'gh pr create --body "PR 본문에서 Generated with Claude Code 줄을 막는 훅을 더한다"', 'pass', '표기를 설명하는 문장은 줄 전체가 아니라 통과'],
+  ['check-pr-attribution-policy.mjs', 'gh pr create --title x --body "이 훅은 \'Generated with Claude Code\' 줄을 막는다"', 'pass', '표기 문구를 따옴표로 인용한 설명도 통과'],
   ['check-pr-attribution-policy.mjs', 'gh pr view 12 --json body', 'pass', '본문을 쓰지 않는 gh pr 명령은 보지 않는다'],
   ['check-pr-attribution-policy.mjs', "git commit a.md -F - <<'MSG'\nfeat: x\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\nMSG", 'pass', '커밋 메시지는 대상이 아니다'],
 ];
@@ -2102,7 +2103,11 @@ const prAttributionGroup = async () => {
   try {
     fs.writeFileSync(path.join(dir, 'tagged.md'), '## 요약\n\n본문\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n');
     fs.writeFileSync(path.join(dir, 'clean.md'), '## 요약\n\n본문\n');
+    fs.writeFileSync(path.join(dir, 'empty.md'), '');
+    fs.writeFileSync(path.join(dir, 'quoted.md'), "이 훅은 'Generated with Claude Code' 줄을 막는다.\n");
     const posix = dir.replace(/\\/g, '/');
+    const tag = '🤖 Generated with [Claude Code](https://claude.com/claude-code)';
+    const commitWithTag = `git commit a.md -F - <<'MSG'\nfeat: x\n\n${tag}\nMSG\n`;
     const cases = [
       // [명령, 기대 판정, 설명]
       [`gh pr edit 12 --body-file ${posix}/tagged.md`, 'deny', '본문 파일 끝의 표기 줄'],
@@ -2112,6 +2117,14 @@ const prAttributionGroup = async () => {
       [`gh pr edit 12 --body-file "${posix}/tagged.md"`, 'deny', '따옴표로 감싼 경로'],
       [`gh pr edit 12 --body-file ${posix}/clean.md`, 'pass', '표기 없는 본문 파일은 통과'],
       [`gh pr create --draft -F ${posix}/clean.md`, 'pass', 'create도 표기 없으면 통과'],
+      // 같은 명령이 본문 파일에 먼저 써서, 훅이 파일을 열 때는 아직 줄이 없는 꼴(2026-10-11 PFM PR #40)
+      [`printf '\\n${tag}\\n' >> ${posix}/empty.md && gh pr edit 1 --body-file ${posix}/empty.md`, 'deny', 'gh pr 앞 printf가 본문 파일에 이어 쓴다'],
+      [`S=${posix}; printf '\\n${tag}\\n' >> "$S/empty.md"; gh pr edit 40 --title x --body-file "$S/empty.md"`, 'deny', '셸 변수 경로라도 리다이렉트 대상과 본문 파일 글자가 같다'],
+      [`echo "${tag}" > ${posix}/empty.md && gh pr create -F ${posix}/empty.md`, 'deny', '> 덮어쓰기도 같다'],
+      [`git commit -m "x" && gh pr edit 1 --body-file ${posix}/clean.md`, 'pass', '앞 명령에 표기가 없고 본문도 깨끗하다'],
+      [`${commitWithTag}gh pr edit 1 --body-file ${posix}/clean.md`, 'pass', '리다이렉트가 없으면 앞 커밋 메시지의 표기는 보지 않는다'],
+      [`echo hi > ${posix}/other.md\n${commitWithTag}gh pr edit 1 --body-file ${posix}/clean.md`, 'pass', '본문 파일이 아닌 곳으로의 리다이렉트는 앞부분을 열지 않는다'],
+      [`gh pr create --title x --body-file ${posix}/quoted.md`, 'pass', '표기 문구를 따옴표로 인용해 설명하는 본문 파일은 통과'],
     ];
     return await runCases(cases, async ([command, expected, note]) => {
       const { decision, stderr } = await runHookPayload(PR_ATTRIBUTION_HOOK, { tool_name: 'Bash', tool_input: { command }, cwd: dir });

@@ -369,7 +369,9 @@ function checkEmptySections(text, placeholderPolicy) {
     const body = lines.slice(i + 1, end).join("\n").trim();
     const bodyWoLinks = body.replace(/\[[^\]]*\]\([^)]*\)/g, "");
     const bodyWoPh = bodyWoLinks.replace(/\[.*?\]/g, "");
-    const hasPlaceholder = /\[.*?\]/.test(bodyWoLinks);
+    // 코드의 대괄호(`x['a']`, 배열)는 placeholder가 아니다 — 코드블록·인라인 코드를 걷은 뒤 센다.
+    const bodyWoCode = bodyWoLinks.replace(/(```|~~~)[\s\S]*?\1/g, "").replace(/`[^`\n]*`/g, "");
+    const hasPlaceholder = /\[.*?\]/.test(bodyWoCode);
     if (hasPlaceholder) placeholders.push(head.trim());
     // keep 정책에서 placeholder만 있는 절은 사용자가 채울 자리라 C1b로만 보고한다.
     if (hasPlaceholder && placeholderPolicy === "keep") return;
