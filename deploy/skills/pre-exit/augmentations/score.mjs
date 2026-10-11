@@ -429,6 +429,55 @@ function readDocType(text) {
   return m ? m[1] : null;
 }
 
+// YAML 스칼라 하나의 따옴표를 푼다(`'…'`의 `''`, `"…"`의 이스케이프).
+function unquoteYaml(value) {
+  const v = value.trim();
+  if (/^'.*'$/.test(v)) return v.slice(1, -1).replace(/''/g, "'");
+  if (/^".*"$/.test(v)) {
+    try {
+      return JSON.parse(v);
+    } catch {
+      return v.slice(1, -1);
+    }
+  }
+  return v;
+}
+
+// frontmatter `user_phrases`의 항목(`'"구절 원문" (출처)'`)을 [구절, 항목 전체]로 돌려준다.
+// 구절은 첫 `" (`까지다 — 구절 안에 큰따옴표가 있어도(`"버튼 "저장"을 누른다" (출처)`) 출처 앞에서 끊는다.
+// 큰따옴표로 감싼 구절이 없으면 항목 전체를 구절로 본다.
+function readUserPhrases(text) {
+  const src = text.replace(/\r\n/g, "\n");
+  if (!src.startsWith("---")) return [];
+  const end = src.indexOf("\n---", 3);
+  if (end === -1) return [];
+  const fm = src.slice(3, end).split("\n");
+  const at = fm.findIndex((ln) => /^user_phrases:/.test(ln));
+  if (at === -1) return [];
+  const items = [];
+  const inline = fm[at].slice("user_phrases:".length).trim();
+  if (inline.startsWith("[")) {
+    // 인라인 배열은 쉼표가 구절 안에도 올 수 있어 따옴표 단위로 자른다.
+    for (const m of inline.matchAll(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/g)) items.push(unquoteYaml(m[0]));
+  } else {
+    // 다음 최상위 키가 나올 때까지 목록 항목을 모은다. 주석·빈 줄은 건너뛴다.
+    for (const ln of fm.slice(at + 1)) {
+      if (/^\S/.test(ln) && !ln.startsWith("-")) break;
+      const m = ln.match(/^\s*-\s+(.*)$/);
+      if (m) items.push(unquoteYaml(m[1]));
+    }
+  }
+  return items.map((item) => {
+    const quoted = item.match(/^"(.*?)"\s*\(/) ?? item.match(/^"(.*)"$/);
+    return [quoted ? quoted[1] : item, item];
+  });
+}
+
+// 서식만 바뀐 것(줄바꿈·공백 수·굵게·기울임)은 구절이 그대로 남은 것으로 본다.
+function normalizeForPhrase(s) {
+  return s.replace(/\*\*|__|(?<![\w*])\*(?!\s)|(?<!\s)\*(?![\w*])/g, "").replace(/\s+/g, " ");
+}
+
 function checkProps(body, propsPath) {
   const props = fs
     .readFileSync(propsPath, "utf8")
@@ -559,6 +608,24 @@ function main() {
     for (const m of missing) console.log(`   누락: ${m}`);
   } else {
     console.log("\n[C2 핵심명제] --props 미지정 (G2 명제 리스트 필요)");
+  }
+
+  // 사용자가 직접 넣거나 승인한 구절이 다듬기·리뷰어 대안 반영 중에 사라졌는지 본다. 바꾼 쪽에도 근거가
+  // 있을 수 있어 기계가 되살리거나 합계에 넣어 0으로 밀지 않고, 사용자가 고르게 넘긴다.
+  const userPhrases = readUserPhrases(raw);
+  const flatBody = normalizeForPhrase(body);
+  const lostPhrases = userPhrases.filter(([phrase]) => !flatBody.includes(normalizeForPhrase(phrase)));
+  console.log(
+    `\n[사용자 구절 누락] frontmatter user_phrases ${userPhrases.length}개 중 ${lostPhrases.length}개` +
+      (lostPhrases.length ? " (합계에서 뺌 — 사용자에게 알린다)" : ""),
+  );
+  for (const [, item] of lostPhrases) console.log(`   누락: ${item}`);
+  if (lostPhrases.length) {
+    console.log(
+      "   → 되살리지도 바뀐 채 두지도 말고 사용자에게 알린다: 어느 구절이 빠졌는지, 무엇이 바꿨는지(리뷰어 대안·메인 수정)," +
+        " 바꾼 쪽의 근거, 원래 구절로 둘지 바뀐 쪽을 받을지. 사용자가 고른 대로 본문과 user_phrases를 맞춘다." +
+        " 사용자가 직접 지운 구절이면 묻지 않고 user_phrases에서 뺀다.",
+    );
   }
 
   section("주관 (사람 전속 — 여기서 안 잼)");
