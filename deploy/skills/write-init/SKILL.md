@@ -61,6 +61,7 @@ argument-hint: <type> [<subtype>]
 - 템플릿이 칸을 주는 type도 핵심 문장은 정한다. 템플릿은 칸을 줄 뿐 골자를 주지 않는다.
 - 독자(`audience`)·목적(`purpose`)도 재료에서 뽑아 핵심 문장과 함께 확인받는다.
 - 합의된 문장은 패키지를 저장할 때 `key_message`에 그대로 옮긴다.
+- `pr-body`면 합의한 핵심 문장으로 PR 제목 한 줄을 [템플릿의 「PR 제목」](templates/pr-body.md#pr-제목) 기준대로 지어 함께 확인받는다.
 
 ### 3. 골격
 

@@ -25,7 +25,7 @@ refs:
     - docs/perf.md
 ---
 
-# PR 본문
+# 무한스크롤 도입으로 초기 렌더 시간 60% 단축
 
 ## 스크롤 끝 감지를 IntersectionObserver로 바꾼 이유
 ...
