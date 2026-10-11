@@ -40,7 +40,7 @@ argument-hint: <package-file-path>
 
 - **룰 — 메인이 Read한다**: `../../contexts/writing-guide/tone.md`. 톤·표현 룰의 SSOT이자 다듬는 근거다.
 - **리뷰어에게 넘길 경로** (「3. 검수」). 사례(`examples/`)는 판정에만 쓰는 재료라 메인은 읽지 않는다 — 메인이 읽으면 미리 읽어 둔 컨텍스트만 늘고 쓰이지 않는다. type·맥락에 걸린 것만 고른다.
-  - 모든 type: `../../contexts/writing-guide/examples/tone.md` (금지어·말투 변별)
+  - 모든 type: `../../contexts/writing-guide/tone.md` (판정 근거 규칙 — 「위반 규칙」 칸에 적을 절 이름이 여기 있다) + `../../contexts/writing-guide/examples/tone.md` (금지어·말투 변별)
   - 문단·구조 이슈 보이면: `../../contexts/writing-guide/examples/structure.md`
   - `resume-item`·`resume-intro`: `../../contexts/writing-guide/examples/resume.md` + `../../contexts/writing-guide/resume-guide.md`
   - `readme`: `../../contexts/writing-guide/readme-guide.md`
