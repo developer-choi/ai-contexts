@@ -19,15 +19,6 @@ export function stateFilePath() {
   return process.env.CLAUDE_BROWSER_TAB_URLS_FILE || path.join(os.homedir(), ".claude", "state", "browser-tab-urls.json");
 }
 
-// 사용자가 평소 쓰는 dev 서버 주소. 사용자의 로그인 쿠키가 여기 붙어 있어, 서브에이전트가 이 탭에서
-// 누르면 사용자 계정에 조용히 쓴다. 서브에이전트는 `<이름>.localhost`처럼 자기 호스트를 받으므로
-// 서브도메인은 넣지 않는다(정확히 이 호스트만).
-const USER_LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"]);
-
-export function isUserLoopbackUrl(url) {
-  return USER_LOOPBACK_HOSTS.has(hostOf(url));
-}
-
 // 호스트가 그 도메인이거나 그 아래 서브도메인이면 차단. `endsWith(domain)`만 보면
 // `evil-securities.miraeasset.com.attacker.net` 같은 꼴을 못 가른다.
 export function isBlockedUrl(url) {
