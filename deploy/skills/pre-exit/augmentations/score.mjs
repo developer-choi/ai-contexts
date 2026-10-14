@@ -471,9 +471,15 @@ function readUserPhrases(text) {
       if (m) items.push(unquoteYaml(m[1]));
     }
   }
-  return items.map((item) => {
+  return items.flatMap((item) => {
+    // 한 항목에 구절 여럿을 묶어 적은 꼴(`"A" / "B" (출처)`)은 통째로 대조하면 남아 있는 구절도 누락으로 잡혀,
+    // 구절마다 따로 대조하고 묶였다고 표시한다. 따옴표 덩어리 사이에 구두점·공백만 있을 때만 묶음으로 본다.
+    const head = item.match(/^(.*?")\s*\(/)?.[1] ?? item;
+    if (/^"[^"]+"(?:\s*[/,·|+&]?\s*"[^"]+")+$/.test(head)) {
+      return [...head.matchAll(/"([^"]+)"/g)].map((m) => [m[1], item, true]);
+    }
     const quoted = item.match(/^"(.*?)"\s*\(/) ?? item.match(/^"(.*)"$/);
-    return [quoted ? quoted[1] : item, item];
+    return [[quoted ? quoted[1] : item, item, false]];
   });
 }
 
@@ -623,7 +629,12 @@ function main() {
     `\n[사용자 구절 누락] frontmatter user_phrases ${userPhrases.length}개 중 ${lostPhrases.length}개` +
       (lostPhrases.length ? " (합계에서 뺌 — 사용자에게 알린다)" : ""),
   );
-  for (const [, item] of lostPhrases) console.log(`   누락: ${item}`);
+  for (const [phrase, item, bundled] of lostPhrases) console.log(`   누락: ${bundled ? `"${phrase}" ← ${item}` : item}`);
+  const bundledItems = [...new Set(userPhrases.filter(([, , bundled]) => bundled).map(([, item]) => item))];
+  if (bundledItems.length) {
+    console.log(`   묶임: 한 줄에 구절 여럿 ${bundledItems.length}줄 — 구절마다 한 줄로 나눠 적는다(대조는 구절마다 했다)`);
+    for (const item of bundledItems) console.log(`     ${item}`);
+  }
   if (lostPhrases.length) {
     console.log(
       "   → 되살리지도 바뀐 채 두지도 말고 사용자에게 알린다: 어느 구절이 빠졌는지, 무엇이 바꿨는지(리뷰어 대안·메인 수정)," +
