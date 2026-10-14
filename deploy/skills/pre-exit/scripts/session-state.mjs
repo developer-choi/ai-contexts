@@ -1,22 +1,20 @@
 #!/usr/bin/env node
-// 세션 마감 전에 훑어야 할 상태들 — 사용자 발화 전수, 압축 스냅샷, 보강 매칭 근거,
+// 세션 마감 전에 훑어야 할 상태들 — 사용자 발화 전수, 압축 횟수, 보강 매칭 근거,
 // squash 전후 동일성, 회고 표의 빈칸, 읽고 안 쓴 문서, 시간과 지시 순서, requirement-review 회고 재료.
 //
 // 전부 산문이 "확인한다"까지만 적고 확인 수단은 세션마다 즉흥으로 정해지던 자리다.
 //
 //   user-turns — 「사용자 지적을 빠짐없이 회수한다」. 세는 일을 산문이 부탁하면 세는 척해도 아무도 못
-//     막는다. 실측(2026-09-03 이에이트 세션): 첫 회고 목록 7건, 실제 13건. 압축 스냅샷과 달리
-//     라이브 transcript는 압축 여부와 무관하게 항상 있으므로 발화 전수는 언제나 뽑힌다.
-//   snapshots — 스냅샷을 *쓰는* 쪽은 코드인데(hooks/snapshot-precompact-transcript.mjs) 읽는
-//     진입점이 없어, 폴더 경로와 파일명 규약을 산문에서 읽어 손으로 글롭했다. 빗나가면
-//     "이 세션은 압축이 없었다"로 결론내고 넘어가 압축 구간의 사용자 교정이 통째로 유실된다.
+//     막는다. 실측(2026-09-03 이에이트 세션): 첫 회고 목록 7건, 실제 13건. 압축은 대화 맥락만
+//     줄이고 라이브 transcript는 압축 전 기록을 그대로 갖고 있어, 압축된 세션도 전수가 뽑힌다.
 //   tasks — 세션 도중 "이건 회고 때 보자"로 적어둔 task. 적을 때는 회고에서 볼 생각이었는데 회고는
 //     대화 끝에서 돌아 그 대목이 요약에 접혀 있고, 그러면 사용자가 매번 말로 다시 꺼내야 한다.
 //     description까지 봐야 재료가 나오므로 한 번에 덤프한다 — 목록만 받으면 항목 수만큼 더 물어야 한다.
 //   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**)을
 //     세션 변경 목록과 눈으로 대조했다. 놓치면 보강이 통째로 안 돌고, 안 돈 사실은 아무 데도 안 남는다.
 //   menu — 「이번 세션에 해당하는 회고 항목」. changed와 달리 파일·대화·cwd 조건을 한 번에 돌려
-//     골라 받을 목록까지 낸다. 세션이 기억으로 목록을 만들면 안 떠오른 항목이 조용히 빠지고,
+//     골라 받을 목록까지 낸다. 압축 횟수도 함께 낸다 — 정리 단계가 압축이 있었던 세션의 기억 의존
+//     확인을 보강하는데, 메뉴만 매 회차 도는 진입점이다. 세션이 기억으로 목록을 만들면 안 떠오른 항목이 조용히 빠지고,
 //     빠졌다는 것도 아무 데도 안 남는다 — 회고가 길어진 뒤에 도는 절차라 특히 그렇다.
 //   squash-check — 「합친 뒤 정리 전과 파일 내용이 같은지 확인한다」. 「커밋 정리」는 사용자 지시를
 //     기다리지 않으므로 사람 눈이 안 거친다. rebase 중 hunk가 빠져도 로그는 깔끔해 보이고,
@@ -33,13 +31,12 @@
 //     사용자 발화). 체크리스트는 서브에이전트가 읽어 메인 대화에 안 남고(실측 2026-09-07 헬로디지털
 //     BG: 메인 Read 0건, 서브에이전트 5건), page는 도중에 옮겨져 plan/ 파일로는 이력이 안 이어진다.
 //
-// 판단은 안 한다 — 어느 커밋이 한 작업인지, 스냅샷에서 무엇을 회수할지는 부르는 쪽이 정한다.
+// 판단은 안 한다 — 어느 커밋이 한 작업인지, 발화에서 무엇을 회수할지는 부르는 쪽이 정한다.
 // menu는 예외다: 「이 세션에 해당하는가」까지 낸다. 다만 무엇을 돌릴지는 사용자가 고른다.
 //
 // 사용:
 //   node <이 파일> user-turns --session <session_id>
 //   node <이 파일> menu --session <session_id> --repo <레포 경로> [--cwd <세션 cwd>]
-//   node <이 파일> snapshots --session <session_id>
 //   node <이 파일> tasks --session <session_id>
 //   node <이 파일> changed --repo <레포 경로> [--base <ref>]
 //   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
@@ -53,11 +50,6 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-
-// 스냅샷 위치·파일명 규약의 정본은 쓰는 쪽(deploy/hooks/snapshot-precompact-transcript.mjs)이다.
-// 여기 사본을 두는 이유는 훅이 배포돼 나가는 파일이라 import가 안 되기 때문이고, 그래서
-// meta/coupling.json에 짝꿍으로 올려 뒀다.
-const SNAPSHOT_DIR = path.join(os.homedir(), '.claude', 'precompact-snapshots');
 
 // 라이브 transcript. 폴더명은 cwd를 인코딩한 것이지만 세션이 옮겨 다니면 어긋나므로, 인코딩을
 // 흉내내지 않고 세션 id로 된 파일을 찾는다(실측 8000여 폴더에서 0.2초 미만).
@@ -432,6 +424,23 @@ function transcriptOrDie(session, who) {
   return file;
 }
 
+// 압축이 끝나면 transcript에 `type: system, subtype: compact_boundary` 줄이 남는다. 취소됐거나
+// 끝나기 전에 세션이 닫힌 압축은 이 줄이 없으므로 셈에 안 든다. 낱말로 찾지 않고 줄을 파싱한다 —
+// 도구 출력에 이 낱말이 실린 세션이 있다.
+function countCompactions(file) {
+  let n = 0;
+  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
+    if (!line.includes('compact_boundary')) continue;
+    try {
+      const o = JSON.parse(line);
+      if (o.type === 'system' && o.subtype === 'compact_boundary') n++;
+    } catch {
+      // 깨진 줄은 셈에서 뺀다
+    }
+  }
+  return n;
+}
+
 if (command === 'user-turns') {
   const session = optOf('session');
   const file = transcriptOrDie(session, 'user-turns');
@@ -776,31 +785,8 @@ if (command === 'menu') {
   for (const line of lines) console.log(`  ${line}`);
   console.log('\n라벨과 상세 파일은 SKILL.md 「회고 항목」 표에서 읽는다 — 여기는 해당 여부만 낸다.');
   console.log('슬래시 호출은 사용자가 직접 부른 것만 남는다. 자동 발동은 안 잡히므로 「해당없음」은 안 불렀다는 증거가 아니다.');
-  process.exit(0);
-}
-
-if (command === 'snapshots') {
-  const session = optOf('session');
-  if (!session) {
-    console.error('snapshots 에는 --session <session_id> 가 필요합니다.');
-    process.exit(1);
-  }
-  if (!fs.existsSync(SNAPSHOT_DIR)) {
-    console.log(`스냅샷 폴더가 없다 (${SNAPSHOT_DIR}) — 이 기기에서 압축이 일어난 적이 없다.`);
-    process.exit(0);
-  }
-  const hits = fs
-    .readdirSync(SNAPSHOT_DIR)
-    .filter((f) => f.startsWith(session) && f.endsWith('.jsonl'))
-    .map((f) => ({ f, at: fs.statSync(path.join(SNAPSHOT_DIR, f)).mtimeMs }))
-    .sort((a, b) => b.at - a.at);
-
-  if (!hits.length) {
-    console.log('이 세션의 스냅샷 없음 — 압축이 없었던 세션이다. 회수 단계를 건너뛴다.');
-    process.exit(0);
-  }
-  console.log(`[압축 스냅샷] ${hits.length}건 (최신순). 가장 위를 Read해 압축 이전 구간의 교정을 회수한다:`);
-  hits.forEach(({ f }, i) => console.log(`  ${i === 0 ? '→' : ' '} ${path.join(SNAPSHOT_DIR, f)}`));
+  // 정리 단계가 고른 항목과 무관하게 이 줄을 본다 — 메뉴는 매 회차 맨 먼저 돈다.
+  console.log(`\n[압축] ${file ? `${countCompactions(file)}회` : '미확인 — transcript 없음'}`);
   process.exit(0);
 }
 

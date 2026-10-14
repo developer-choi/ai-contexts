@@ -4,20 +4,9 @@
 
 문제 목록과 함께, 규칙화 대상인 것은 규칙 초안·before/after까지 만들어 마지막 「승인」에서 한 번에 제시하고 거기서만 승인을 받는다.
 
-## pre-compact 스냅샷 회수
-
-문제 추출 전에, 이 세션의 pre-compact 스냅샷이 있는지 확인한다. compaction(대화 요약 압축)은 full tool output·intermediate reasoning을 버려서, 압축 이전의 세밀한 사용자 교정이 현재 컨텍스트에서 휘발됐을 수 있다. PreCompact hook이 매 compaction마다 transcript를 자기소유 폴더에 스냅샷해두므로 그 파일로 회수한다.
-
-절차:
-1. `node {{skill_dir}}/scripts/session-state.mjs snapshots --session <session_id>`. 폴더 경로·파일명 규약·최신 선택은 그 스크립트가 안다 — 손으로 글롭하면 빗나갔을 때 "압축이 없었다"로 결론내고 넘어가 그 구간의 교정이 통째로 유실된다.
-2. 나온 파일(여럿이면 맨 위)을 Read해 압축 이전 구간의 사용자 교정·반려·방향 수정을 회수한다.
-3. 회수한 항목을 아래 「문제 추출」 목록에 합류시킨다 (현재 컨텍스트에 이미 남아 있는 항목과 중복되면 합친다).
-
-스냅샷 jsonl은 verbatim 복사본이라 줄별 스키마가 미문서화다 — 정밀 파싱에 의존하지 말고, 사용자 발화(`type=user` 류)와 교정 맥락을 읽어내는 데 쓴다.
-
 ## 사용자 발화 전수 회수
 
-스냅샷은 압축이 있었던 세션에만 있다. 그와 달리 라이브 transcript는 압축 여부와 무관하게 항상 있으므로, **발화 전수는 압축이 없었던 세션에서도 뽑힌다.**
+압축(compaction)은 대화 맥락만 요약으로 접고 transcript는 압축 이전 기록을 그대로 갖고 있다. 그래서 **압축이 있었던 세션도 발화 전수가 transcript에서 뽑힌다** — 접힌 구간의 교정을 기억으로 되살리지 않는다.
 
 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`
 

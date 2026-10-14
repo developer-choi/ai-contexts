@@ -229,18 +229,6 @@
       "msg": "Checking browser connection..."
     },
     {
-      "file": "snapshot-precompact-transcript.mjs",
-      "event": "PreCompact",
-      "on": "manual",
-      "msg": "Snapshotting transcript before compaction..."
-    },
-    {
-      "file": "snapshot-precompact-transcript.mjs",
-      "event": "PreCompact",
-      "on": "auto",
-      "msg": "Snapshotting transcript before compaction..."
-    },
-    {
       "file": "check-response-language.mjs",
       "event": "Stop",
       "msg": "Checking response language..."

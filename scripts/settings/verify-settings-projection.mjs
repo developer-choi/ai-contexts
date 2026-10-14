@@ -144,12 +144,6 @@ function main() {
   check(!codex.some((h) => h.file === 'check-agent-stop-policy.mjs' || h.file === 'check-team-message-policy.mjs'),
     'codex: 에이전트 종료 훅 두 개 미등록');
 
-  // claude: PreCompact가 manual·auto 매처로 fan-out 등록됨 (compaction 트리거가 곧 매처)
-  const claudeCompact = claude.filter((h) => h.event === 'PreCompact');
-  check(claudeCompact.some((h) => h.matcher === 'manual' && h.file === 'snapshot-precompact-transcript.mjs')
-    && claudeCompact.some((h) => h.matcher === 'auto' && h.file === 'snapshot-precompact-transcript.mjs'),
-    'claude: PreCompact가 manual·auto 매처로 등록됨');
-
   // 응답 언어 훅은 matcher 없는 Stop으로 걸려야 턴마다 불린다. codex에선 Stop 훅 동작을 실측하지 못해 뺀다.
   const langStop = claude.find((h) => h.file === 'check-response-language.mjs');
   check(langStop?.event === 'Stop' && langStop?.matcher === null,
