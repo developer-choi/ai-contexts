@@ -107,6 +107,8 @@ const REAL_USE_SKILLS = {
   "recruitment-round": (skill) => skill === "workflow" || skill.startsWith("recruit"),
   "blog-post": (skill) => skill === "write-refine",
   "workflow-pr": (skill) => skill === "workflow",
+  // 계기가 스킬 호출이 아니다 — 기록이 정한 건수에 닿으면 그 훅(check-table-render)이 직접 알린다.
+  "hook-fires": () => false,
 };
 
 // 프롬프트 맨 앞의 `/스킬명`. 플러그인 스킬(`plugin:skill`)은 콜론 뒤를 쓴다.

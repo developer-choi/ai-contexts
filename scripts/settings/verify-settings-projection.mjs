@@ -154,6 +154,9 @@ function main() {
   const langStop = claude.find((h) => h.file === 'check-response-language.mjs');
   check(langStop?.event === 'Stop' && langStop?.matcher === null,
     'claude: check-response-language가 matcher 없는 Stop으로 등록됨');
+  const tableStop = claude.find((h) => h.file === 'check-table-render.mjs');
+  check(tableStop?.event === 'Stop' && tableStop?.matcher === null,
+    'claude: check-table-render가 matcher 없는 Stop으로 등록됨');
   check(!codex.some((h) => h.event === 'Stop'), 'codex: Stop hook 미등록');
 
   // codex: UserPromptSubmit 없음, PreToolUse 전부 단일 '*'

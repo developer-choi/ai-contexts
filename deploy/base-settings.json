@@ -244,6 +244,11 @@
       "file": "check-response-language.mjs",
       "event": "Stop",
       "msg": "Checking response language..."
+    },
+    {
+      "file": "check-table-render.mjs",
+      "event": "Stop",
+      "msg": "Checking table rendering..."
     }
   ]
 }

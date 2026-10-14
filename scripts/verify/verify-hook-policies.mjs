@@ -2327,6 +2327,152 @@ const responseLanguageCases = async (dir) => {
   return mergeReports([lang, missing]);
 };
 
+// 표 렌더 훅은 실제로 세로 목록으로 깨졌던 표와, 같은 세션이 고쳐 다시 내 박스로 그려진 표로 판정을 고정한다
+// (backlog projects/ai-contexts/active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md 「발생 사례」).
+// 박스 쪽 둘(boxApproved·boxOptions)은 폭 100에서 칸이 4줄로 문턱 바로 아래다. 로그는 임시 파일로 돌리고,
+// 기록이 5건에 닿는 되돌림에서만 후속 항목 안내가 붙는지 본다.
+const TABLE_HOOK = 'check-table-render.mjs';
+const TABLE_FIXTURES = {
+  brokenUrl: [
+    "| URL | 봐야 할 상태 | 자리 | 전 | 후 |",
+    "|---|---|---|---|---|",
+    "| http://localhost:3000/intro | 비로그인 | 위·아래 주 버튼 | 시작하기 | **기록 시작하기** |",
+    "| 〃 | 로그인(게스트·Google) | 주 버튼 | 내 달력으로 이동 | 그대로 (같은 상수로 묶기만 함) |",
+    "| http://localhost:3000/demo/study-records | 비로그인 | 띠 「꾸준히 기록하면 이렇게 보여요」 옆 버튼 | 시작하기 | **기록 시작하기** |",
+    "| 〃 | 비로그인 | 날짜 칸을 누르면 뜨는 창의 버튼 | 시작하기 | **기록 시작하기** |",
+    "| 〃 | 로그인 | 띠·창·메뉴 버튼 | 내 달력으로 이동 | 그대로 |",
+    "| http://localhost:3000/demo/study-record-stats/2026/10 | 비로그인 | 투어를 끝까지 보면 뜨는 창의 버튼 | 시작하기 | **기록 시작하기** |",
+    "| http://localhost:3000/login | 비로그인 | 제목 | 로그인 | **기록 시작하기** |",
+    "| 〃 | 비로그인 | 부제 | Google 계정으로 간편하게 시작하세요. | **이미 쓰던 계정이 있다면 Google로 로그인하세요.** |",
+    "| 〃 | 게스트 | 제목 | Google 계정 연결 | **Google 연결** |",
+    "| 〃 | 게스트 | 맨 아래 링크 | 내 달력으로 돌아가기 | **내 달력으로 이동** |",
+    "| 〃 | 게스트 + 쿠키 (아래 설명) | 「이미 가입된 계정이에요」 안내 제목 | 이미 가입된 계정이에요 | **이 Google 계정은 연결할 수 없어요** |",
+    "| 〃 | 〃 | 같은 안내 설명 | 지금 기록은 그대로 있어요. 아래 버튼을 누르면 삭제돼요 | **이미 가입된 Google 계정이에요.** / **로그인하면 지금 게스트 계정과 기록이 삭제돼요.** (두 줄) |",
+    "| 〃 | 〃 | 같은 안내 빨간 버튼 | 지금 기록 삭제하고 로그인 | **게스트 계정 삭제 후 로그인** |",
+    "| http://localhost:3000/study-records | 게스트 | 머리 오른쪽 링크 | Google 연결 | 그대로 (게스트 `/login` 제목과 같은 상수로 묶음) |",
+    "| 〃 | 게스트, 기록 1건 이상 | 연결 안내 카드 버튼 | Google 연결 | **Google 계정 연결하기** |",
+    "| 〃 | 로그인 | 기록 창에서 삭제에 실패했을 때 | 지우지 못했어요. 잠시 뒤 다시 시도해 주세요 | **삭제하지 못했어요.** 잠시 뒤 다시 시도해 주세요 |",
+    "| http://localhost:3000/account | 게스트 | 맨 아래 빨간 글자 버튼 | 게스트 계정 지우기 | **게스트 계정 삭제** |",
+    "| 〃 | 게스트 | 그 버튼을 누르면 뜨는 확인 창 내용 / 확인 버튼 | 계정과 기록을 모두 지워요. … / 지우기 | 계정과 기록을 모두 **삭제해요.** … / **삭제** |",
+    "| 〃 | 게스트 | 삭제에 실패했을 때 | 기록을 지우지 못했어요. … | **게스트 계정을 삭제하지 못했어요.** … |",
+    "| 〃 | Google | 「회원 탈퇴」 확인 창 내용 | 계정과 기록을 모두 지워요. … | 계정과 기록을 모두 **삭제해요.** … |",
+    "| http://localhost:3000/privacy | 상관없음 | 보관 기간 | …게스트 계정 지우기를 할 때까지… | …게스트 계정 **삭제**를 할 때까지… |",
+    "| 〃 | 상관없음 | 소제목 | 지우는 방법 | **삭제하는 방법** |",
+    "| 〃 | 상관없음 | 그 아래 본문 | 탈퇴·지우기를 누르면 … 모두 지워요. … 함께 지우지 못하고 | **회원 탈퇴나 게스트 계정 삭제를 누르면** … 모두 **삭제해요.** … 함께 **삭제하지** 못하고 |",
+    "| 〃 | 상관없음 | 내 권리 항목 | 탈퇴·지우기를 할 수 있어요 | 탈퇴·**삭제**를 할 수 있어요 |",
+  ].join('\n'),
+  brokenSource: [
+    "| 자리 | 승인받은 것 | 이번 시안 | 출처 · 등급 |",
+    "|---|---|---|---|",
+    "| ① (승인됨) | 기존 로봇이 못 해서 정밀하게 끼우고 조이는 조립이 지금도 작업자 손에 남아 있다 | 공장 로봇은 부품이 정해진 자리에 규격대로 놓여 있어야 움직일 수 있어서, 부품을 정밀하게 끼우고 조이는 조립은 지금도 작업자가 두 손으로 합니다. | 회사소개서 20·2쪽 · 1차 (site 446–447, 390) |",
+    "| **③ (이번)** | 회사가 하는 것: 「사람이 두 손을 사용해 수행하던 정밀 작업을 로봇이 스스로 인식하고 수행할 수 있도록」 (site 448) | 플라잎은 로봇이 부품을 스스로 알아보고 힘을 조절하며 조립하게 만들고, 그 로봇을 조작하고 상태를 확인하는 소프트웨어까지 함께 만들어, 작업자 대신 로봇이 그 조립을 하게 합니다. | 스스로 알아봄은 site 448, 힘 조절은 「힘·감각·상황 판단이 필요한 정교한 작업」 site 449와 「Force control 기술이 적용된 조립 솔루션」 site 276, 조작·상태 소프트웨어는 공고 「AI 및 로봇 제품의 운영·제어·시각화를 위한 다양한 소프트웨어를 개발」 posting 36행. 모두 1차(회사 자기 진술) |",
+    "| ④ (승인됨) | 핵심비전: 「힘들고 위험한 단순 반복 노동을 대신할 수 있는 AI 기술」 (site 398) | 제가 가진 역량으로, 작업자가 정밀한 조립을 두 손으로 하지 않아도 되게 돕고 싶습니다. | 1차 |",
+  ].join('\n'),
+  boxScreens: [
+    "| 화면 | 주소 |",
+    "|---|---|",
+    "| 예시 달력 | http://localhost:3000/demo/study-records |",
+    "| 예시 통계 | http://localhost:3000/demo/study-record-stats/2026/10 |",
+    "| 내 달력 | http://localhost:3000/study-records |",
+  ].join('\n'),
+  boxStates: [
+    "| 화면 | 상태 | 자리 | 전 → 후 |",
+    "|---|---|---|---|",
+    "| 로그인 | 게스트 | 맨 아래 링크 | 내 달력으로 돌아가기 → 내 달력으로 이동 |",
+    "| 로그인 | 게스트+쿠키 | 빨간 버튼 | 지금 기록 삭제하고 로그인 → 게스트 계정 삭제 후 로그인 |",
+    "| 내 달력 | 게스트(기록 1건+) | 연결 카드 버튼 | Google 연결 → Google 계정 연결하기 |",
+  ].join('\n'),
+  boxApproved: [
+    "| 자리 | 승인받은 것 | 이번 시안 |",
+    "|---|---|---|",
+    "| ① 승인됨 | 정밀한 조립이 지금도 작업자 손에 남아 있다 | 공장 로봇은 부품이 정해진 자리에 규격대로 놓여 있어야 움직일 수 있어서, 부품을 정밀하게 끼우고 조이는 조립은 지금도 작업자가 두 손으로 합니다. |",
+    "| **③ 이번** | 로봇이 사람의 정밀 작업을 스스로 알아보고 한다 | 플라잎은 로봇이 부품을 스스로 알아보고 힘을 조절하며 조립하게 만들고, 그 로봇을 조작하고 상태를 확인하는 소프트웨어까지 함께 만들어, 작업자 대신 로봇이 그 조립을 하게 합니다. |",
+    "| ④ 승인됨 | 힘들고 위험한 반복 노동을 대신한다 | 제가 가진 역량으로, 작업자가 정밀한 조립을 두 손으로 하지 않아도 되게 돕고 싶습니다. |",
+  ].join('\n'),
+  boxOptions: [
+    "| 안 | 시안 | 근거와 단점 |",
+    "|---|---|---|",
+    "| **가 (추천)** | 비운다 | 산업 방향(피지컬 AI 부상)은 회사가 파는 것 그 자체라 뺍니다. ①이 「지금은 손으로 한다」를 이미 세워서, ②가 없어도 ③이 기능 소개로 읽히지 않습니다 |",
+    "| 나 | 로봇으로 하려 해도 부품을 맞춰 놓고 다시 잡아 주는 장치를 따로 달아야 했습니다. | site 277 · 1차. ①과 같은 불편을 한 번 더 말하는 셈이라 같은 말 반복으로 걸릴 수 있습니다 |",
+    "| 다 | 일할 사람을 구하기 어려운 공장일수록 이 일을 로봇에 맡길 방법이 필요하다고 생각합니다. | 회사소개서 5쪽 · 1차. 「일할 사람을 구하기 어렵다」는 전제의 근거가 회사 진술뿐입니다 |",
+  ].join('\n'),
+};
+const tableRenderGroup = async () => {
+  const dir = await makeTempDir('hook-table-render-');
+  try {
+    return await tableRenderCases(dir);
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+const tableRenderCases = async (dir) => {
+  const report = (text) => `보고입니다.\n\n${text}\n\n끝입니다.`;
+  const stop = (message, active = false) =>
+    ({ hook_event_name: 'Stop', session_id: 'verify', cwd: dir, last_assistant_message: message, stop_hook_active: active });
+  let logSeq = 0;
+  // 케이스마다 제 로그 파일을 쓴다 — 케이스가 겹쳐 돌아도 줄 수가 섞이지 않는다.
+  const logWith = (lines) => {
+    const file = path.join(dir, `log-${++logSeq}.jsonl`);
+    if (lines > 0) fs.writeFileSync(file, `${Array.from({ length: lines }, () => '{}').join('\n')}\n`);
+    return file;
+  };
+  const countLines = (file) => (fs.existsSync(file) ? fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).length : 0);
+  const fenced = `\`\`\`markdown\n${TABLE_FIXTURES.brokenSource}\n\`\`\``;
+  const unclosed = `\`\`\`markdown\n${TABLE_FIXTURES.brokenSource}`;
+  // 파이프로 시작하는 긴 문장 아래 수평선 — 표처럼 재면 칸이 7줄이라 되돌린다.
+  const pipeProse = `| ${'이 문장은 파이프로 시작하는 일반 문장입니다 '.repeat(14)}\n---\n다음 문단`;
+  // 구분행 칸 수가 머리행과 다르면 GFM 표가 아니다.
+  const [srcHead, , ...srcRows] = TABLE_FIXTURES.brokenSource.split('\n');
+  const mismatched = [srcHead, '|---|---|', ...srcRows].join('\n');
+  // [payload, 기대 판정, 메모, 사유에 있어야 할 말, 시작 로그 줄 수, 끝난 뒤 로그 줄 수, 「5건」 안내 여부]
+  const cases = [
+    [stop(report(TABLE_FIXTURES.brokenUrl)), 'context', '실제로 깨진 5열 표', "'후' 칸", 0, 1, false],
+    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '실제로 깨진 4열 표', "'승인받은 것' 칸", 0, 1, false],
+    [stop(report(`${TABLE_FIXTURES.boxScreens}\n\n${TABLE_FIXTURES.boxStates}`)), 'pass', '고쳐 다시 낸 2열·4열 표', null, 0, 0, false],
+    [stop(report(TABLE_FIXTURES.boxApproved)), 'pass', '문턱 바로 아래 3열 표(4줄)', null, 0, 0, false],
+    [stop(report(TABLE_FIXTURES.boxOptions)), 'pass', '문턱 바로 아래 3열 표(4줄) 둘째', null, 0, 0, false],
+    [stop(report(fenced)), 'pass', '코드블록 안의 깨질 표', null, 0, 0, false],
+    [stop(report(unclosed)), 'pass', '닫히지 않은 코드블록 안의 깨질 표', null, 0, 0, false],
+    [stop(report(pipeProse)), 'pass', '파이프로 시작하는 긴 문장 아래 수평선', null, 0, 0, false],
+    [stop(report(mismatched)), 'pass', '구분행 칸 수가 머리행과 다른 표 모양', null, 0, 0, false],
+    [stop(report(`${TABLE_FIXTURES.brokenUrl}\n\n${TABLE_FIXTURES.brokenSource}`)), 'context', '깨질 표 둘 — 로그는 응답 하나에 한 줄', '표 2', 0, 1, false],
+    [stop(report(TABLE_FIXTURES.brokenSource), true), 'pass', '어느 Stop 훅이든 이어가는 중이면 반복하지 않는다', null, 0, 0, false],
+    [stop('표 없는 보고입니다.'), 'pass', '표 없는 응답', null, 0, 0, false],
+    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '기록이 5건에 닿는 되돌림', '5건 찼습니다', 4, 5, true],
+    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '기록이 4건이 되는 되돌림', "'승인받은 것' 칸", 3, 4, false],
+    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '이미 5건을 넘긴 뒤의 되돌림', "'승인받은 것' 칸", 5, 6, false],
+  ];
+  const table = await runCases(cases, async ([payload, expected, note, needle, before, after, notice]) => {
+    const log = logWith(before);
+    const { decision, reason = '', stderr } = await runHookPayload(TABLE_HOOK, payload, { env: { CHECK_TABLE_RENDER_LOG: log } });
+    const lines = countLines(log);
+    const label = `${TABLE_HOOK} :: Stop → ${expected} (${note})`;
+    const ok = decision === expected
+      && (!needle || reason.includes(needle))
+      && reason.includes('5건 찼습니다') === notice
+      && lines === after;
+    return judge(label, decision, expected, stderr, {
+      ok,
+      failLine: `  FAIL  ${label} — 실제: ${decision}, 로그 ${before}→${lines}줄(기대 ${after}), 사유: ${reason.slice(0, 120) || '(없음)'}`,
+    });
+  });
+  // 필드 이름이 바뀌면 훅이 영영 꺼진다. 통과는 하되 stderr로 소리를 내는지 본다.
+  const missing = await (async () => {
+    const { decision, stderr } = await runHookPayload(TABLE_HOOK, { hook_event_name: 'Stop', stop_hook_active: false }, { env: { CHECK_TABLE_RENDER_LOG: logWith(0) } });
+    const label = `${TABLE_HOOK} :: Stop → pass + 경고 (last_assistant_message 없음)`;
+    const ok = decision === 'pass' && /last_assistant_message/.test(stderr);
+    return toReport([{ ok, label, failLine: `  FAIL  ${label} — 실제: ${decision}, stderr: ${stderr.trim() || '(없음)'}` }]);
+  })();
+  // 후속 항목의 계기(on-real-use: hook-fires)는 surface-backlog의 종류 표에도 있어야 한다 — 빠지면 그 종류의 항목이 표면화에서 조용히 빠진다.
+  const surface = (() => {
+    const src = fs.readFileSync(path.join(hooksDir, 'surface-backlog.mjs'), 'utf8');
+    const label = 'surface-backlog.mjs :: REAL_USE_SKILLS에 hook-fires 종류가 있다';
+    const ok = /"hook-fires":/.test(src);
+    return toReport([{ ok, label, failLine: `  FAIL  ${label}` }]);
+  })();
+  return mergeReports([table, missing, surface]);
+};
+
 // 서브에이전트 상태는 기록 파일의 마지막 줄과 수정 시각으로 갈리므로, 세션마다 가짜 subagents/ 폴더를
 // 만들고 utimes로 시각을 과거로 돌린다. 감시기는 끄고(SUBAGENT_WATCH_DISABLE), 상태 파일이 실제 임시
 // 폴더에 새지 않게 TEMP·TMP를 픽스처 폴더로 돌린다(os.tmpdir()이 이 둘을 따른다).
@@ -2498,6 +2644,7 @@ async function main() {
     skillCreatorGroup,
     subFileGroup,
     responseLanguageGroup,
+    tableRenderGroup,
     subagentGroup,
   ];
 
