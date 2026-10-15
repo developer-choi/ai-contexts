@@ -21,22 +21,21 @@ argument-hint: "[대상 파일/디렉토리 경로]"
 ## 절차
 
 1. 크기를 잰다 — `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값은 파일·폴더 나누기를 맡은 리뷰어에게 넘긴다.
-2. 리뷰어를 띄운다 — 기준이 많아 한 명이 다 들면 무겁고 한 종류 문제에 쏠리므로, 아래 기준을 나눠 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어를 한 명 더 둔다. 나누는 법은 [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md#에이전트-설계)를 따른다. 리뷰어는 지적만 낸다.
+2. 리뷰어를 띄운다 — 아래 표의 리뷰어마다 이름 있는 팀원을 하나씩 띄워([team-agent](../../contexts/team-agent.md#claude-code)) 그 리뷰어가 붙은 행의 기준을 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어 팀원을 하나 더 둔다. 모델은 [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md#에이전트-설계)대로 제안한다.
 3. 지적을 모아 사용자에게 낸다 — 사실로 증명된 것(죽은 참조·다른 곳에 그대로 있는 중복)은 바로 고치고, 그 밖은 잃는 것을 적어 사용자가 고르게 한다.
-4. 반영한 뒤 다시 리뷰한다 — 지적이 0건이 될 때까지, 최대 5회.
-5. 반영을 마친 뒤, 사람이 처음 읽어도 바로 이해되게 다듬는다.
+4. 반영하며 사람이 처음 읽어도 바로 이해되게 다듬은 뒤, 같은 팀원들에게 다시 리뷰를 맡긴다 — 지적이 0건이 될 때까지, 최대 5회.
 
 ## 기준
 
-| 리뷰어가 맡는 기준 | 문서 |
-|---|---|
-| 필요한 것만 짧게 적었나 | [trimming.md](../../contexts/prompt-standards/trimming.md) |
-| 정본과 참조 | [sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md) |
-| 코드로 옮길 수 있나 | [rules-as-code.md](../../contexts/rules-as-code.md) |
-| 파일·폴더 나누기, 크기 | [file-layout.md](../../contexts/prompt-standards/file-layout.md) |
-| 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) |
-| 여러 CLI 호환 (대상이 스킬일 때) | [cross-cli.md](../../contexts/prompt-standards/cross-cli.md) |
-| workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
+| 리뷰어 | 맡는 기준 | 문서 |
+|---|---|---|
+| BODY | 필요한 것만 짧게 적었나 | [trimming.md](../../contexts/prompt-standards/trimming.md) |
+| BODY | 코드로 옮길 수 있나 | [rules-as-code.md](../../contexts/rules-as-code.md) |
+| STRUCTURE | 정본과 참조 | [sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md) |
+| STRUCTURE | 파일·폴더 나누기, 크기 | [file-layout.md](../../contexts/prompt-standards/file-layout.md) |
+| AGENT | 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) |
+| COMPAT | 여러 CLI 호환 (**사용자가 명시적으로 지시할 때만**) | [cross-cli.md](../../contexts/prompt-standards/cross-cli.md) |
+| WORKFLOW | workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
 
 ## 후속 작업
 
