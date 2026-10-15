@@ -1,5 +1,5 @@
 ---
-name: scw
+name: prompt-review
 description: 스킬·규칙·프롬프트 문서가 기준에 맞는지 리뷰해 지적을 낸다. 대상 md를 고친 뒤나 리뷰를 청할 때 쓴다.
 argument-hint: "[대상 파일/디렉토리 경로]"
 ---

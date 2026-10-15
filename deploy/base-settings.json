@@ -16,7 +16,7 @@
       "file": "surface-skill-creator.mjs",
       "event": "PostToolUse",
       "on": "read",
-      "msg": "Checking skill-creator for scw bench..."
+      "msg": "Checking skill-creator for prompt-review bench..."
     },
     {
       "file": "surface-sub-file.mjs",

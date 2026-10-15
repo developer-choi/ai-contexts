@@ -88,7 +88,7 @@ git reflog로 되찾을 수 있다.
 
 | 조건                                                                                                                      | 참고 |
 |-------------------------------------------------------------------------------------------------------------------------|---|
-| 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위의 md를 만들거나 고칠 때 | 끝나면 `/scw`로 리뷰한다 |
+| 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/` 하위의 md를 만들거나 고칠 때 | 끝나면 `/prompt-review`로 리뷰한다 |
 | "리뷰어"·"팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시                                                                   | `{{contexts}}/team-agent.md` |
 | 브라우저를 열어 산출물을 확인할 때, 또는 "제가 할 수 없으니 직접 하세요"로 작업을 넘기려 할 때(웹 콘솔·대시보드 설정 포함) | `{{contexts}}/browser-verification.md` |
 | AI 설정(규칙·스킬·hook·settings)을 고칠 때. 고칠 대상이 배포 위치로 보여 원본을 찾아야 할 때 포함                                                       | `{{contexts}}/ai-config-locations.md` |
