@@ -189,15 +189,6 @@
   {
     "type": "prefix",
     "words": [
-      "인용 게이트"
-    ],
-    "why": "가리키는 문서에 그런 이름이 없는 조어다",
-    "instead": "code-map 「탐색 절차」의 reference.md 인용 단계",
-    "exclusions": []
-  },
-  {
-    "type": "prefix",
-    "words": [
       "발행 청결"
     ],
     "why": "조어라 무엇이 깨끗해야 한다는 건지 모른다",
@@ -286,5 +277,64 @@
     "why": "한자어라 문서 독자가 뜻을 바로 못 잡는다",
     "instead": "그 글만 읽고 이해되는지(다른 맥락 없이)",
     "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "등재"
+    ],
+    "why": "한자어라 문서 독자가 뜻을 바로 못 잡는다",
+    "instead": "목록에 올린다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "게이트"
+    ],
+    "why": "무엇을 확인하는 관문인지 안 적힌 외래어라 뜻을 바로 못 잡는다",
+    "instead": "무엇을 확인하는지 풀어 쓴다 (예: rules-as-code의 두 게이트 → 두 가지 물음)",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "엔진"
+    ],
+    "why": "무엇을 돌리는 장치인지 안 적힌 비유라 뜻을 바로 못 잡는다",
+    "instead": "가리키는 것의 실제 이름을 쓴다 (예: 리뷰 엔진 → impl-review-loop 스킬)",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "렌즈"
+    ],
+    "why": "무엇을 보는 관점인지 안 적힌 비유라 뜻을 바로 못 잡는다",
+    "instead": "관점 또는 무엇을 보는지 풀어 쓴다",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "코퍼스"
+    ],
+    "why": "외래어라 문서 독자가 뜻을 바로 못 잡는다",
+    "instead": "모아 둔 예문 묶음",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "감사"
+    ],
+    "why": "점검(audit)이라는 뜻의 한자어라 뜻을 바로 못 잡는다",
+    "instead": "점검",
+    "exclusions": [
+      "감사합니다",
+      "감사드립니다",
+      "감사해",
+      "감사히"
+    ]
   }
 ]
