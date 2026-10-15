@@ -39,10 +39,9 @@ const PATTERNS = [
 const GUIDE = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
-  "skills",
-  "scw",
-  "rounds",
-  "editing.md",
+  "contexts",
+  "prompt-standards",
+  "wording.md",
 );
 
 const payload = readPayload();
@@ -72,19 +71,19 @@ addContext(
   "PreToolUse",
 );
 
-// 적지 않는 꼴 목록을 skills/scw/rounds/editing.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
+// 적지 않는 꼴 목록을 contexts/prompt-standards/wording.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
 // 훅만 낡는다.
 function guideExcerpt() {
   let src;
   try {
     src = fs.readFileSync(GUIDE, "utf8");
   } catch {
-    return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」에 있다. 지금 열어서 대입한다.`];
+    return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」·「히스토리를 거의 쓰지 않는다」에 있다. 지금 열어서 대입한다.`];
   }
 
   const section = src.match(/^###\s*히스토리를 거의 쓰지 않는다\s*$([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/m);
   const bullets = (section?.[1] ?? "").split("\n").filter((line) => /^-\s+\S/.test(line));
-  if (!bullets.length) return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」에 있다. 지금 열어서 대입한다.`];
+  if (!bullets.length) return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」·「히스토리를 거의 쓰지 않는다」에 있다. 지금 열어서 대입한다.`];
 
   return [`적지 않는 꼴:`, ...bullets];
 }

@@ -22,9 +22,9 @@ argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
 
 | 이번 회차 | 읽는다 |
 |---|---|
-| 없던 스킬을 새로 만든다 | [rounds/editing.md](rounds/editing.md) + [rounds/judging.md](rounds/judging.md) |
-| 지정한 부분을 고친다 (규칙 넣기·빼기·고쳐 쓰기) | [rounds/editing.md](rounds/editing.md) + [rounds/judging.md](rounds/judging.md) |
-| 문서 전체를 고친다 (다이어트·의심 지점 훑기) | [rounds/editing.md](rounds/editing.md) + [rounds/judging.md](rounds/judging.md) |
+| 없던 스킬을 새로 만든다 | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
+| 지정한 부분을 고친다 (규칙 넣기·빼기·고쳐 쓰기) | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
+| 문서 전체를 고친다 (다이어트·의심 지점 훑기) | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
 | 벤치·eval을 돌려 규칙의 효과를 잰다 | [benching/SKILL.md](benching/SKILL.md) |
 | description이 트리거되게 고친다 | [benching/kinds/trigger-eval.md](benching/kinds/trigger-eval.md) |
 

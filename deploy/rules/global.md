@@ -18,6 +18,12 @@
 
 git reflog로 되찾을 수 있다.
 
+### 사용자가 못 알아본 말은 금지 표현 목록에 올린다
+
+사용자가 스킬·규칙 md의 말을 못 알아봐 뜻을 묻거나 풀어 쓰게 하면, 그 말을 금지 표현 목록에 올린다.
+
+목록에 올리는 명령: `node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs` (인자 없이 부르면 사용법이 나온다)
+
 ## 사용자에게 답변, 보고 시
 
 - 사용자 지시를 수행하기 위해 파일을 읽으려고 봤더니 5개 이상일것같으면 멈추고 이 파일들을 다 읽는게 맞는지 되묻는다.
@@ -86,7 +92,6 @@ git reflog로 되찾을 수 있다.
 | "리뷰어"·"팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시                                                                   | `{{contexts}}/team-agent.md` |
 | 브라우저를 열어 산출물을 확인할 때, 또는 "제가 할 수 없으니 직접 하세요"로 작업을 넘기려 할 때(웹 콘솔·대시보드 설정 포함) | `{{contexts}}/browser-verification.md` |
 | AI 설정(규칙·스킬·hook·settings)을 고칠 때. 고칠 대상이 배포 위치로 보여 원본을 찾아야 할 때 포함                                                       | `{{contexts}}/ai-config-locations.md` |
-| 사용자가 스킬·규칙 md의 말을 못 알아봐 뜻을 묻거나 풀어 쓰게 할 때 | `{{contexts}}/prompt-standards/wording.md#사용자가-못-알아본-말은-금지-표현-목록에-올린다` |
 
 ## 메모·기록 도구 분리
 

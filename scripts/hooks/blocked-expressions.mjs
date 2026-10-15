@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // 사용자가 못 알아본 말을 금지 표현 목록(`blocked-expressions.json`)에 등재한다. 금지 표현 목록은 이
 // 스크립트로만 고친다 — 손으로 행을 붙이면 칸이 빠지거나 오타가 나도 아무도 안 잡고, 그 말은
-// 조용히 안 걸린다. 무엇을 등재하는지(기준)는 `deploy/contexts/prompt-standards/wording.md`
+// 조용히 안 걸린다. 언제 목록에 올리는지는 `deploy/rules/global.md`
 // 「사용자가 못 알아본 말은 금지 표현 목록에 올린다」가 정본이다.
 //
 // usage:
