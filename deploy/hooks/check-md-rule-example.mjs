@@ -41,7 +41,7 @@ const GUIDE = path.join(
   "..",
   "contexts",
   "prompt-standards",
-  "wording.md",
+  "trimming.md",
 );
 
 const payload = readPayload();
@@ -71,7 +71,7 @@ addContext(
   "PreToolUse",
 );
 
-// 적지 않는 꼴 목록을 contexts/prompt-standards/wording.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
+// 적지 않는 꼴 목록을 contexts/prompt-standards/trimming.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
 // 훅만 낡는다.
 function guideExcerpt() {
   let src;

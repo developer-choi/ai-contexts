@@ -30,7 +30,7 @@ argument-hint: "[대상 파일/디렉토리 경로]"
 
 | 리뷰어가 맡는 기준 | 문서 |
 |---|---|
-| 무엇을 어떻게 적나 | [wording.md](../../contexts/prompt-standards/wording.md) |
+| 필요한 것만 짧게 적었나 | [trimming.md](../../contexts/prompt-standards/trimming.md) |
 | 정본과 참조 | [sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md) |
 | 코드로 옮길 수 있나 | [rules-as-code.md](../../contexts/rules-as-code.md) |
 | 파일·폴더 나누기, 크기 | [file-layout.md](../../contexts/prompt-standards/file-layout.md) |
