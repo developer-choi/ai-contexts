@@ -1,69 +1,42 @@
-# 스킬 짜임
+# 에이전트 나누기
 
-스킬 폴더 안에서 SKILL.md와 흐름 파일이 무엇을 나눠 맡는지, 목적을 어떻게 적는지, 에이전트를 어떻게 나누는지를 본다.
-
-## SKILL.md는 안내만 한다
-
-SKILL.md는 라우팅·트리거 매핑·산출물 위치·모드 추상 정의와 그 스킬의 모든 흐름에 걸리는 규칙만 담당한다. 구체적 절차·베이스 파일 매핑·Step 번호·내부 진행 로직은 sub 흐름 파일이 가져간다.
-
-- **남길 것**: 트리거 → 진입 흐름 매핑, 모드 추상 정의, 산출물 위치, 폴더 구조, 그 스킬의 모든 흐름에 걸리는 규칙
-- **빼야 할 것**: 어떤 베이스 파일을 어떻게 쓰는지, "Step N부터 진행", 호출 순서, 분기 디테일, 사용자에게 던질 문구·답변 가이드
-
-규칙이 흐름 몇 개에만 걸리면 공통 파일 하나에 두고 그 흐름들이 링크한다. 흐름 하나에만 걸리면 그 흐름 파일에 둔다.
-
-## 목적
-
-SKILL.md는 H1 제목 바로 아래 첫 섹션으로 `## 목적`을 두고, 스킬의 목표를 한 줄로 적는다. frontmatter `description`은 트리거(언제 부르는가) 판정용이라 매 세션 로드되고, `## 목적`은 호출된 AI가 "왜 이걸 하는가"를 본문 진입에서 잡는 용도다 — 역할이 다르므로 둘 다 둔다. 목적이 이미 제목 아래 첫 줄로 적혀 있으면 그 줄을 `## 목적` 섹션으로 승격하고 중복 생성하지 않는다.
-
-description은 스킬 밖에서 이 스킬을 부를지 가르는 자리다. 스킬 안에서 흐름을 가르는 조건은 본문 몫이다. 발동을 늘리려고 description을 밀어붙이듯 쓰지 않는다 — 부를 필요 없는 자리에서도 불린다. skill-creator가 description을 "a little bit pushy"하게 쓰라고 권해도 이쪽을 따른다.
-
-`disable-model-invocation: true`인 스킬은 description이 모델 컨텍스트에 안 올라간다. 그 자리의 description은 `/` 메뉴에서 사용자가 읽는 설명이므로, 모델을 향한 지시(트리거 발화 목록·"반드시 호출한다"·"자동 트리거하지 말 것")를 적지 않는다.
-
-### 목적 진술 ↔ 본문 정합
-
-선언된 목적을 현행 본문이 아직 달성하는지 본다. 본문은 손댈 때마다 늘고 바뀌는데 목적은 처음 쓴 채 굳으므로, 둘이 어긋나도 드러나는 자리가 없다.
-
-어긋남은 셋 중 하나다 — 본문이 목적 밖으로 나갔다 / 목적이 낡았다 / 목적이 애초에 부정확했다. 어느 쪽을 고칠지는 스킬의 존재 이유를 바꾸는 결정이라 AI가 단독 판정하지 않고 사용자가 정한다.
-
-본문에서 역산한 초안만 내놓지 않는다. 스킬의 축이 바뀌어도 본문은 옛 축을 담은 채 남으므로, 본문 어디에도 지금의 존재 이유가 없을 수 있다. 초안과 함께 "이 스킬이 지금도 이걸 위해 있나"를 스킬별로 묻는다.
-
-본문에 남아 있는 절이 그 축이 아직 살아 있다는 증거는 아니다. 다른 스킬로 넘어간 축의 절이 그대로 남아 있을 수 있으므로, 절의 존재가 아니라 그 축을 지금 누가 맡고 있는지로 확인한다.
-
-목적에는 그 스킬이 지금 무엇을 위해 있는지만 적는다. 만들게 된 계기, 안 헷갈리게 하려고 미리 그어두는 경계, 본문에 이미 있는 절차 요약, 그리고 그게 왜 중요한지·안 하면 무슨 일이 벌어지는지는 목적이 아니다.
-
-마지막 것이 존재 근거이고, 목적과 별개 절(「왜 이 스킬이 필요한가」)에 둔다. 목적 한 줄을 쓴 뒤 그 아래에 이유를 한 문단 더 잇는 형태로 가장 자주 샌다 — 목적을 보강하는 것처럼 보이지만, 읽는 쪽은 목적 자리에서 목적이 아닌 것을 읽게 된다. 파일에 쓸 때는 훅이 그 자리에서 알린다. **초안을 대화로만 제시할 때는 아무것도 안 걸리므로** 그때는 여기서 판단한다.
-
-목적 진술 자체가 없으면 그 자리에서 쓴다.
+스킬·절차의 일을 메인과 서브에이전트·팀원 중 누가 맡을지를 본다.
 
 ## 에이전트 설계
 
-에이전트를 이미 나눈 구조든 위임 줄이 하나도 없는 흐름 문서든 아래 첫 묶음을 돌린다.
+단계마다 메인이 할지, 서브에이전트나 팀원에게 맡길지를 아래 공식 자료로 판단한다.
 
-메인이 지는 단계마다 떼어낼지 가른다 — 메인 컨텍스트는 그 흐름의 주 작업에 쓰고, 메인이 쓴 글이 이해되는지는 메인이 확인하지 않는다.
+결과를 받은 뒤 같은 에이전트에게 다시 시킬 일이 있으면 이름 있는 팀원으로 띄운다([team-agent](../team-agent.md#claude-code)).
 
-- 주 작업에 필요 없는 자료를 읽어 결과만 쓰는 단계(웹 조사 → 요약) → 위임
-- 메인과 읽는 파일이 겹쳐도 처리량이 많고 중간 과정이 메인에 필요 없는 단계(회사 분석 → 결과만) → 위임
-  - 처리량은 메인이 실제로 들일 양(도구 출력 크기)으로 잰다. 파일 개수·대상 범위로 재지 않는다
-  - 그 양이 위임 왕복(지시문 + 돌려받는 양 + 기다림)보다 뚜렷이 클 때만 위임 사유가 된다. 흐름 초반에 읽는 양은 남은 단계 내내 실려 다니므로 무겁게 친다. 흐름이 끝나도 세션이 이어지는 스킬(다른 작업 중에 불리는 스킬)은 끝에 읽은 양도 남는다
-- 메인이 쓴 글(문서·백로그 항목·PR 본문)이 그 글만 읽고 이해되는지 확인하는 단계 → 처리량과 무관하게 위임. 글과 확인 기준만 넘기고 메인의 작업 맥락은 넘기지 않는다
-- 다른 단계가 기다리지 않아 병렬로 돌릴 수 있는 단계 → 시간 이득과 같은 파일을 두 번 읽는 비용을 함께 적어 보류로 적는다
-- 사용자와 주고받는 단계, 대화 원문이 있어야 하는 단계(판정 기준이 대화 전체에 퍼진 맥락이라 지시문 몇 줄로 못 옮기는 단계 포함 — 처리량이 많아도 메인. 글 확인 단계는 위 줄을 따른다) → 메인
-- 위임으로 가른 단계는 어떻게 맡길지도 판정표에 적는다 — 결과를 받은 뒤 같은 에이전트에게 다시 시킬 일이 있으면(사용자가 결과를 고치게 하거나, 여러 번 주고받으면) 이름 있는 팀원, 아니면 일회성 서브에이전트. 이름이 필요한 이유는 [team-agent](../team-agent.md#claude-code)
-  - 맡긴 결과를 보고 무언가를 결정하는 위임(중복 없음 → 새로 만듦, 재현 안 됨 → 가설 기각 등)이면, 메인이 그 결과를 검증할 단서도 함께 받게 적는다 — 찾았으면 위치, 못 찾았으면 무엇으로 어디까지 찾았는지
+### 공식 자료 (확인: 2026-10-15)
 
-이미 나눈 구조는 아래도 본다.
+[Create custom subagents](https://code.claude.com/docs/en/sub-agents) — 「Choose between subagents and main conversation」 절
 
-- 위임하는 이유가 무엇인가 — 컨텍스트 격리·병렬화·객관성 중 어느 것도 아니면 나눌 이유가 없다
-- 메인이 이미 가진 컨텍스트를 서브에이전트가 다시 로드하는가 (글 확인 단계가 그 글을 다시 읽는 것은 빼고)
-- 반복 사이클에서 이전 반복의 맥락이 유실되는가
-- 에이전트 간 결과 전달 구조가 명확한가 (산출물 → 입력 체이닝)
-- 사용자가 직접 쓰거나 승인한 부분을 리뷰어가 구분할 수 있는가 — 모르면 리뷰어가 사용자의 말을 반려한다
+> Use the **main conversation** when:
+> * The task needs frequent back-and-forth or iterative refinement
+> * Multiple phases share significant context, such as planning, implementation, and testing
+> * You're making a quick, targeted change
+> * Latency matters. A subagent that isn't a fork starts fresh and may need time to gather context
 
-## 독립 호출
+> Use **subagents** when:
+> * The task produces verbose output you don't need in your main context
+> * You want to enforce specific tool restrictions or permissions
+> * The work is self-contained and can return a summary
 
-호출자가 선택 표로 골라 부르는 스킬은 호출자 없이도 불릴 수 있는 구조인지 본다 (스킬 내부에 호출자 맥락 의존이 없는지).
+같은 문서 첫머리
 
-## gotchas
+> Use one when a side task would flood your main conversation with search results, logs, or file contents you won't reference again: the subagent does that work in its own context and returns only the summary.
 
-- 스킬을 처음 만들 때 gotchas는 비워둔다
-- 실사용 중 AI가 반복 실패하는 패턴을 발견하면 SKILL.md에 gotchas 섹션으로 추가
+같은 문서 「Run parallel research」 절
+
+> When subagents complete, their results return to your main conversation. Running many subagents that each return detailed results can consume significant context, and each subagent spends tokens of its own while it runs.
+
+[Orchestrate teams of Claude Code sessions](https://code.claude.com/docs/en/agent-teams) — 「When to use agent teams」·「Compare with subagents」 절
+
+> Agent teams add coordination overhead and use significantly more tokens than a single session. They work best when teammates can operate independently. For sequential tasks, same-file edits, or work with many dependencies, a single session or subagents are more effective.
+
+> Use subagents when you need quick, focused workers that report back. Use agent teams when teammates need to share findings, challenge each other, and coordinate on their own.
+
+같은 문서 「Run a parallel code review」 절
+
+> A single reviewer tends to gravitate toward one type of issue at a time. Splitting review criteria into independent domains means security, performance, and test coverage all get thorough attention simultaneously.

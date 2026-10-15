@@ -39,9 +39,10 @@ const PATTERNS = [
 const GUIDE = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
-  "contexts",
-  "prompt-standards",
-  "what-to-keep.md",
+  "skills",
+  "scw",
+  "rounds",
+  "editing.md",
 );
 
 const payload = readPayload();
@@ -66,14 +67,12 @@ addContext(
     ``,
     ...guideExcerpt(),
     ``,
-    `세션에서 얻은 조건은 사례가 아니라 규칙 문장에 담는다. 사건을 빼면 규칙이 안 선다면,`,
-    `그 조건이 아직 문장에 안 들어간 것이다 — 문장으로 옮긴 뒤 사건은 적지 않는다.`,
-    `사용자가 지목했거나, 검수 입력으로 넘어가는 판정 재료면 그대로 넣는다.`,
+    `사용자가 지목했으면 그대로 넣는다.`,
   ].join("\n"),
   "PreToolUse",
 );
 
-// 적지 않는 꼴 목록을 prompt-standards/what-to-keep.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
+// 적지 않는 꼴 목록을 skills/scw/rounds/editing.md에서 읽어온다. 여기 옮겨 적으면 사본이 되어 그 문서가 바뀔 때
 // 훅만 낡는다.
 function guideExcerpt() {
   let src;
@@ -83,7 +82,7 @@ function guideExcerpt() {
     return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」에 있다. 지금 열어서 대입한다.`];
   }
 
-  const section = src.match(/^###\s*사건은 규칙 문장으로 옮기고 지운다\s*$([\s\S]*?)^###\s/m);
+  const section = src.match(/^###\s*히스토리를 거의 쓰지 않는다\s*$([\s\S]*?)(?=^#{1,3}\s|(?![\s\S]))/m);
   const bullets = (section?.[1] ?? "").split("\n").filter((line) => /^-\s+\S/.test(line));
   if (!bullets.length) return [`판정 기준은 ${GUIDE} 「규칙 옆에 예시를 붙이지 않는다」에 있다. 지금 열어서 대입한다.`];
 

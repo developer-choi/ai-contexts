@@ -37,7 +37,7 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 claude·codex 공통이�
 
 ## 스킬·규칙 md의 자리표시자 렌더링
 
-배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`와 규칙 md의 `{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`·`withContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`·`compareRulePaths`가 고정한다. 렌더링을 바꾸면 그 검사와 [표기 규칙](../deploy/contexts/prompt-standards/cross-cli.md#읽는-문서와-실행하는-스크립트는-표기가-다르다)을 함께 맞춘다.
+배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`와 규칙 md의 `{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`·`withContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`·`compareRulePaths`가 고정한다. 렌더링을 바꾸면 그 검사를 함께 맞춘다.
 
 ## 배포 스크립트 변경 원칙
 

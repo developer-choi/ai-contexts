@@ -66,7 +66,7 @@ addContext(
   "PreToolUse",
 );
 
-// 사다리와 두 게이트만 뽑아 온다. 못 읽으면 파일을 지목하는 데서 멈춘다 — 사본을 두지 않으려는
+// 사다리와 두 물음만 뽑아 온다. 못 읽으면 파일을 지목하는 데서 멈춘다 — 사본을 두지 않으려는
 // 것이므로, 여기에 대신 적어두면 애초의 목적이 사라진다.
 function guideExcerpt() {
   let src;
@@ -80,10 +80,10 @@ function guideExcerpt() {
   const ladder = src.match(/^##\s*강제 사다리\s*$[\s\S]*?```\n([\s\S]*?)```/m);
   if (ladder) out.push(ladder[1].trim(), ``);
 
-  const gates = src.split("\n").filter((line) => /^>\s*\*\*게이트/.test(line));
+  const gates = src.split("\n").filter((line) => /^>\s*\*\*물음/.test(line));
   if (gates.length) out.push(...gates);
 
   if (!out.length) return [`판정 기준은 ${GUIDE} 에 있다. 지금 열어서 대입한다.`];
-  out.push(``, `사다리 칸·게이트 판정의 근거와 예외는 ${GUIDE} 에 있다.`);
+  out.push(``, `사다리 칸·두 물음 판정의 근거와 예외는 ${GUIDE} 에 있다.`);
   return out;
 }

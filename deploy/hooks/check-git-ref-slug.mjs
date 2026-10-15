@@ -4,8 +4,7 @@ import { deny, getCommand, getToolName, readPayload } from "./hook-utils.mjs";
 
 // 새로 만드는 브랜치·워크트리 이름에 한글이 들어가지 못하게 막는다.
 //
-// git은 한글 브랜치를 오류 없이 받아서, 틀려도 그 자리에서 아무것도 드러나지 않는다. 이름이 영문 슬러그여야
-// 하는 이유는 [식별자 자리에는 영문 슬러그](deploy/contexts/prompt-standards/file-layout.md#식별자-자리에는-영문-슬러그)가 정본이다.
+// git은 한글 브랜치를 오류 없이 받아서, 틀려도 그 자리에서 아무것도 드러나지 않는다.
 // 이미 있는 브랜치로 옮기거나 지우는 호출은 관여하지 않는다 — 막으면 옛 한글 브랜치를 정리할 길도 막힌다.
 const payload = readPayload();
 const HANGUL = /[ㄱ-ㆎ가-힣]/;

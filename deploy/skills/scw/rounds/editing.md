@@ -1,47 +1,43 @@
 # 문서를 고쳐 쓰는 회차
 
-프롬프트·스킬 문서에 규칙을 넣거나 빼거나 고쳐 쓸 때 읽는다. 새 스킬을 만드는 회차와 리뷰 회차도 결국 여기로 온다.
-
-## 정본과 참조
-
-다른 문서·다른 파일의 단계나 절을 가리키는 줄을 고치거나 쓰기 전에, 그리고 규칙을 어디에 둘지 정하기 전에 [정본과 참조](../../../contexts/prompt-standards/sources-and-links.md#다른-파일의-번호내부-구조는-역할-이름으로-부른다)를 연다.
-
-**규칙을 지우거나 다른 파일로 옮긴 회차는 그 명제의 핵심 구절로 대상이 속한 도메인 폴더 전체를 찾는다.** 다른 파일에 남은 사본과, 지운 절을 이름으로 부르던 줄이 여기서 나온다 — 편집은 고친 자리만 보고, 「」로 이름만 부르는 줄은 링크 검사에도 안 걸린다.
-
-## 목적 기반 수단 검증
-
-스킬을 만들거나 기능·규칙을 추가할 때, 그 수단이 스킬 `## 목적`을 달성하는 가장 효과적인 방법인지 먼저 검증한다. 떠오른 방법을 곧바로 박지 않는다 — 직관으로 채택해 더 나은 대안을 놓치는 것을 막기 위함이다.
-
-- 검증은 skill-creator 절차 또는 [설계 토론](creating.md#설계-토론-capture-intent-보강) 팀으로 대안 수단과 비교해 수행한다.
-- 더 효과적인 수단이 있으면 그것을 역제안한다.
-
-## 번들 스크립트
-
-스킬에 스크립트를 넣거나 옮길 때는 [번들 스크립트의 거처](../../../contexts/prompt-standards/file-layout.md#번들-스크립트의-거처는-그것이-다루는-데이터가-사는-곳)를 연다.
-
-## 검사로 내리는 회차
-
-낱말·패턴을 검사 쪽에 **새로 올리는 그 자리에서**, 그 낱말을 설명하던 산문을 같은 커밋에서 걷는다. 걷기 전에 검사가 실제로 무엇을 찍는지 한 번 돌려 본다 — 찍히는 글이 산문보다 얇으면 먼저 검사가 더 찍게 고치고, 그다음에 걷는다.
-
 ## how 최소화 원칙
 
-절차 문장이 잘못됐을 때 문장을 고치는 게 먼저 떠오르지만, 그 문장이 필요해진 상황을 환경이 없앨 수 있으면 문장은 통째로 사라진다. 고치려는 문장 하나가 아니라 그 문장을 부른 상황을 본다 — 상황이 없어지면 그 문장뿐 아니라 같은 상황이 부른 옆 문장들도 함께 사라진다.
+규칙을 넣거나 고칠 때는 먼저 스크립트·훅·설정으로 옮길 수 있는지 본다. 그럴 수 없어 문서에 문장으로 적을 때는, 아래 근거대로 how(명령·조건·예외)를 줄이고 목적을 적는다.
 
-how 제거는 **사용자 즉석 리뷰 → 비교 테스트** 두 구간으로 나눈다. AI가 박은 노이즈 how와 사용자가 의도해서 박은 how가 섞여 있어, 제거 후보를 전부 벤치에 넣으면 비용이 과하다. 노이즈는 벤치 없이 떼고, 가치가 의심되는 것만 벤치로 보낸다.
+### 근거 원문
 
-1. **사용자 즉석 리뷰 (벤치 없이)** — 제거 후보 how를 일괄로 떼어낸 모습을 사용자에게 보여주고 즉석 판정을 받는다. AI가 노이즈 여부를 스스로 정하지 않는다 — 후보를 전부 떼서 보여주기만 하고, 노이즈 판정은 사용자가 한다. 사용자가 노이즈(AI가 박은 군더더기)로 판정한 how는 벤치 없이 제거하고 종료한다. 정말 필요한지 사용자도 확신 못 하는 how만 다음으로 넘긴다.
-2. **비교 테스트 (벤치)** — 1에서 넘어온 의심 how만 OLD(현재) vs NEW(how 제거)로 검증한다. 판단 기준은 "이걸 빼면 AI가 못 하는가?"이며, AI 자체 판단만으로 유지·삭제를 결정하지 않는다. 벤치를 돌리는 규칙은 [benching/SKILL.md](../benching/SKILL.md)에 있다.
+[Effective context engineering for AI agents](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 
-## 텍스트 작성 자가검토
+> We're already seeing that smarter models require less prescriptive engineering, allowing agents to operate with more autonomy.
 
-SKILL.md·specialized·회차 파일 등 프롬프트 텍스트를 작성·수정한 직후 자가검토한다. 외부 리뷰와 별개로, 작성자가 즉시 잡을 수 있는 패턴을 놓치지 않기 위함이다.
+> As model capabilities improve, agentic design will trend towards letting intelligent models act intelligently, with progressively less human curation.
 
-방금 쓴 줄을 [문장 다듬기](../../../contexts/prompt-standards/wording.md)로 한 줄씩 본다.
+> At one extreme, we see engineers hardcoding complex, brittle logic in their prompts to elicit exact agentic behavior. This approach creates fragility and increases maintenance complexity over time.
 
-## 산출물 규칙
+> At the other extreme, engineers sometimes provide vague, high-level guidance that fails to give the LLM concrete signals for desired outputs or falsely assumes shared context. The optimal altitude strikes a balance: specific enough to guide behavior effectively, yet flexible enough to provide the model with strong heuristics to guide behavior.
 
-- SKILL.md의 `## 목적` 절과 description은 [스킬 짜임](../../../contexts/prompt-standards/skill-structure.md#목적)으로 쓴다
-- 스킬은 `deploy/skills/{skill-name}/`에 생성
-- 드래프트 상태면 `STATUS.md`를 함께 생성하여 진행 상황과 남은 작업 기록
-- 실사용 후 안정되면 `STATUS.md` 삭제
-- 완료된 백로그는 `backlog` 레포의 해당 항목에서 삭제
+[Prompting best practices](https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices) — 「Add context to improve performance」 절
+
+> Providing context or motivation behind your instructions, such as explaining to Claude why such behavior is important, can help Claude better understand your goals and deliver more targeted responses.
+
+> Claude is smart enough to generalize from the explanation.
+
+같은 문서 「Leverage thinking & interleaved thinking capabilities」 절 — thinking에 한정된 말이다
+
+> Prefer general instructions over prescriptive steps. A prompt like "think thoroughly" often produces better reasoning than a hand-written step-by-step plan. Claude's reasoning frequently exceeds what a human would prescribe.
+
+## 규칙 옆에 예시를 붙이지 않는다
+
+**기본값은 안 붙인다**이고, 붙이는 쪽이 예외다.
+
+예시는 사용자가 지목한 것만 붙인다.
+
+### 히스토리를 거의 쓰지 않는다
+
+언제·어느 레포·어느 세션에서 무슨 일이 있었는지는 적을 필요가 거의 없다. 예:
+
+- 날짜·레포·회사명이 붙은 사건 서술, `❌ 위반 (…, 날짜)` 꼴 블록
+- 사용자 발화 인용과 그것을 감싼 `사용자 교정`·`사용자 반려`·`사용자 지시` 서술
+- `그전에는 ~였다`·`~를 폐기했다`·`부분 철회했다` 꼴 개정 이력
+
+쓸 때마다 히스토리를 한 줄씩 붙이면, 만 번 쓴 스킬에는 히스토리만 만 줄이 쌓인다.

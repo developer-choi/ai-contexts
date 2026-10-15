@@ -24,7 +24,7 @@ npm run sync:environment
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
   - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 경로를 주지 않았거나 파일이 없을 때만 exit 1입니다.
-- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md에서 「문장 다듬기」(`deploy/contexts/prompt-standards/wording.md`)가 금하는 낱말 — 강조 라벨·약한 어휘·군더더기·사용자가 못 알아본 말 — 을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.
+- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md에서 강조 라벨·약한 어휘·군더더기·금지 표현(사용자가 못 알아본 말)을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.
   - 검사 범위·제외(건드린 파일 전체, `R100` 제외, backlog 데이터 제외, `|| true`)는 바로 위 개수 하드코딩 훅과 같습니다.
   - 낱말 목록과 처방은 스크립트가 정본입니다. 문자열만으로 정탐이 대부분인 낱말만 켭니다 — 정상 조건문·명사로 더 많이 쓰이는 낱말(`필요하면`·`옵션` 등)은 뺍니다.
   - AC가 아닌 레포에서는 `[CRITICAL]`도 강조 라벨로 경고합니다. AC는 `.githooks`의 `check-critical-marker.mjs`가 막고, 다른 레포에는 이것이 유일한 표면입니다.
@@ -37,7 +37,7 @@ npm run sync:environment
   - 등록부를 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돕니다. 패턴이 죽는 계기는 등록부를 고칠 때가 아니라 다른 파일이 옮겨갈 때라, 등록부를 건드린 커밋만 보면 죽은 뒤 아무도 등록부를 안 여는 동안 계속 안 잡힙니다.
   - 아직 만들지 않은 짝을 자리만 잡아둔 경우는 그 묶음의 `pending`(패턴 → 사유)으로 면제합니다. 사유는 필수이며 너무 짧으면 형식 오류로 걸립니다. 면제한 패턴에 실물이 생기면 「면제 낡음」으로 걸려 걷을 자리를 알려줍니다.
   - **면제 건수는 출력할 때마다 함께 냅니다.** 면제가 늘어나는 것이 안 보이면 이 검사는 「죽은 패턴에 면제를 붙인다」로 우회되어 초록불인 채 꺼집니다. 면제가 늘어나는 계기는 등록부를 고치는 것뿐이라, 깨끗해도 `meta/coupling.json`이 스테이징된 커밋에서는 한 줄 요약(묶음·패턴·면제 건수)을 냅니다.
-- `scripts/hooks/check-md-size.mjs`를 `~/.ai-contexts/check-md-size.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-md-size.*`)으로 멱등하게 등록합니다. 커밋하는 레포의 프롬프트·스킬 md(`CLAUDE.md`·`local/`·`deploy/` 하위와, 거기서 링크·경로로 닿는 md를 위치와 무관하게 재귀로)를 전수로 재서 「주제의 축척은 크기가 정한다」([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘은 문서를 경고합니다 — 커밋을 막지는 않습니다.
+- `scripts/hooks/check-md-size.mjs`를 `~/.ai-contexts/check-md-size.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-md-size.*`)으로 멱등하게 등록합니다. 커밋하는 레포의 프롬프트·스킬 md(`CLAUDE.md`·`local/`·`deploy/` 하위와, 거기서 링크·경로로 닿는 md를 위치와 무관하게 재귀로)를 전수로 재서 「무엇을 한 파일로 묶을지는 크기가 정한다」([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘은 문서를 경고합니다 — 커밋을 막지는 않습니다.
   - 선은 둘입니다. 닿는 곳이 기준 수 이상이면 낮은 선, 아니면 높은 선을 씁니다 — 같은 크기여도 여러 곳에서 열리는 문서가 비싸기 때문입니다([문서의 비용은 크기가 아니라 「크기 × 불려가는 자리 수」다](../../deploy/contexts/prompt-standards/file-layout.md#문서의-비용은-크기가-아니라-크기--불려가는-자리-수다)). 숫자는 스크립트 상단 상수가 정본입니다.
   - 「닿는 곳」은 재귀로 셉니다. A가 B 하나만 가리켜도 그 A가 여러 곳에서 열리면 B도 결국 그만큼의 경로에서 열리므로, 직접 참조만 세면 그것이 안 보입니다. 확장자 없이 산문으로 부르는 참조는 못 세므로 값이 실제보다 적게 나옵니다 — 놓치는 쪽이지 없는 참조를 만들지는 않습니다.
   - 고친 파일만이 아니라 **전수**로 잽니다. 크기는 이번 세션이 무엇을 건드렸는지와 무관한 사실이라, 고친 파일만 보면 아무도 안 고치는 큰 파일이 영영 안 걸립니다.
