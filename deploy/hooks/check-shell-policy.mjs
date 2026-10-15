@@ -82,7 +82,7 @@ if (shorthandCwd) {
 // 백그라운드 작업 대기용 빈 명령. 완료 알림은 푸시로 오므로 이런 콜은 아무것도 앞당기지 못하고
 // 턴과 컨텍스트만 태운다(실측: 한 회차에 수십 턴). 명령 전체가 무작용일 때만 막는다.
 // 서브에이전트는 안내를 반대로 낸다 — 턴을 끝내 대기하면 완료 알림이 깨우지 못해, 누가 메시지를 보낼
-// 때까지 멈춘다(Claude Code 2.1.270 실측, backlog archives/upstream-bugs/idle-subagent-misses-background-completion.md).
+// 때까지 멈춘다(Claude Code 2.1.270 실측).
 // 기다리는 루프도 백그라운드로 보내면 같은 대기로 돌아가므로 포그라운드로 보낸다. agent_id는 서브에이전트
 // 안에서 발동할 때만 실린다.
 if (/^\s*(echo\s+\S*|Write-Output\s+\S*|sleep\s+[\d.]+|Start-Sleep(\s+-\w+)?\s+[\d.]+|true|:)\s*$/.test(cmd)) {
