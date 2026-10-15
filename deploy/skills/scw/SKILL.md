@@ -1,57 +1,46 @@
 ---
 name: scw
-description: 스킬·규칙·프롬프트 문서를 기준에 맞춰 만들고 고치고 줄이며, 규칙 문장을 넣고 뺀 효과를 벤치(ablation·트리거·위임 구조)로 잰다. 스킬 뼈대와 스킬 eval의 틀(시험 프롬프트·baseline 비교·채점)은 skill-creator에 맡기고 이 스킬은 그 위에 기준과 문장 단위 검증을 얹는다.
-argument-hint: "[대상 파일/디렉토리 경로 또는 스킬 설명]"
+description: 스킬·규칙·프롬프트 문서가 기준에 맞는지 리뷰해 지적을 낸다. 대상 md를 고친 뒤나 리뷰를 청할 때 쓴다.
+argument-hint: "[대상 파일/디렉토리 경로]"
 ---
 
-# 스킬·규칙 문서 기준과 검증
+# 프롬프트 문서 리뷰
 
 ## 목적
 
-스킬·규칙 문서를 좋은 기준에 맞춰 고치고, 작성된 대로 동작하는지와 문장마다 제값을 하는지 검증한다. 대상은 레포를 가리지 않는다.
+스킬·규칙·프롬프트 문서가 기준에 맞는지 리뷰해 지적을 낸다. 대상은 레포를 가리지 않는다.
 
-## 왜 필요한가
+## 입력
 
-프롬프트는 고칠수록 늘어난다 — 문장을 더하는 쪽은 효과가 있어 보이고 빼는 쪽은 근거를 대야 해서, 아무도 안 뺀다. 고치는 일과 잘 고쳐졌는지 따지는 일을 한자리에 묶어 그 자리에서 검증하게 한다.
+- 리뷰할 파일·폴더 경로
 
-새 스킬의 뼈대와 스킬 단위 eval은 skill-creator가 하지만, 그것은 스킬 전체를 옛 판·스킬 없는 판과 비교할 뿐 문장 하나를 뺐을 때 무엇이 달라지는지는 재지 않는다. skill-creator를 같이 실었으면, 그 권고가 이 스킬이나 이 스킬이 부르는 기준 파일과 다를 때 이쪽을 따른다.
+## 출력
 
-## 이번 회차가 무엇을 하러 왔는가
+- 지적 목록: 위치(파일:줄), 무엇이 문제인지, 근거가 된 기준
 
-문서를 고치는 회차는 범위(지정한 부분 / 문서 전체)로 갈리고, 새 스킬은 만든 뒤 지정한 부분처럼 판정한다. 해당하는 것만 읽는다.
+## 절차
 
-| 이번 회차 | 읽는다 |
-|---|---|
-| 없던 스킬을 새로 만든다 | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
-| 지정한 부분을 고친다 (규칙 넣기·빼기·고쳐 쓰기) | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
-| 문서 전체를 고친다 (다이어트·의심 지점 훑기) | [남길 이유가 있는가](../../contexts/prompt-standards/wording.md#남길-이유가-있는가) |
-| 벤치·eval을 돌려 규칙의 효과를 잰다 | [benching/SKILL.md](benching/SKILL.md) |
-| description이 트리거되게 고친다 | [benching/kinds/trigger-eval.md](benching/kinds/trigger-eval.md) |
-
-## 문서 무게
-
-프롬프트·스킬 md를 고치러 들어오면 손대기 전에 `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`로 대상 문서의 바이트 크기와 그 문서를 여는 다른 md를 잰다. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값을 [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md)로 판정한다.
-
-고르기 전에 되묻지 않는다. 후보마다 얼마가 갈리는지 재본 뒤 그 결과와 권장안을 함께 낸다.
+1. 크기를 잰다 — `node ~/.ai-contexts/check-md-size.mjs --report <대상 md>`. 이 명령은 그 레포 안에서 여는 곳만 세므로, 레포 밖에서 여는 곳은 따로 찾아 더한다. 잰 값은 파일·폴더 나누기를 맡은 리뷰어에게 넘긴다.
+2. 리뷰어를 띄운다 — 기준이 많아 한 명이 다 들면 무겁고 한 종류 문제에 쏠리므로, 아래 기준을 나눠 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어를 한 명 더 둔다. 나누는 법은 [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md#에이전트-설계)를 따른다. 리뷰어는 지적만 낸다.
+3. 지적을 모아 사용자에게 낸다 — 사실로 증명된 것(죽은 참조·다른 곳에 그대로 있는 중복)은 바로 고치고, 그 밖은 잃는 것을 적어 사용자가 고르게 한다.
+4. 반영한 뒤 다시 리뷰한다 — 지적이 0건이 될 때까지, 최대 5회.
+5. 반영을 마친 뒤, 사람이 처음 읽어도 바로 이해되게 다듬는다.
 
 ## 기준
 
-프롬프트·스킬 md를 쓰거나 고치거나 훑을 때 아래 표대로 기준 파일을 불러 적용한다. 회차 문서에는 "이 기준을 읽어라" 줄을 두지 않는다.
-
-| 조건 | 부르는 기준 |
+| 리뷰어가 맡는 기준 | 문서 |
 |---|---|
-| 대상 문서의 산문을 쓰거나 고치거나 훑을 때 | [문장 다듬기](../../contexts/prompt-standards/wording.md) · [정본과 참조](../../contexts/prompt-standards/sources-and-links.md) |
-| 대상 문서에 규칙·금지·절차 문장을 넣거나, 산문을 검사·스크립트로 옮길 때 | [코드로 표현 가능한 것은 코드로](../../contexts/rules-as-code.md) |
-| 지정한 부분: 「문서 무게」 측정에서 걸릴 때. 문서 전체: 매번 | [파일·폴더 나누기](../../contexts/prompt-standards/file-layout.md) |
-| 대상이 SKILL.md·절차 라우터이거나 에이전트를 띄우는 구조일 때. 문서 전체: 매번 | [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md) |
-| 대상이 스킬이거나 스킬이 읽는 문서일 때 | [여러 CLI 호환](../../contexts/prompt-standards/cross-cli.md) |
-| 대상 경로별 | 아래 [targets/ 파일](#targets-파일) |
+| 무엇을 어떻게 적나 | [wording.md](../../contexts/prompt-standards/wording.md) |
+| 정본과 참조 | [sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md) |
+| 코드로 옮길 수 있나 | [rules-as-code.md](../../contexts/rules-as-code.md) |
+| 파일·폴더 나누기, 크기 | [file-layout.md](../../contexts/prompt-standards/file-layout.md) |
+| 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) |
+| 여러 CLI 호환 (대상이 스킬일 때) | [cross-cli.md](../../contexts/prompt-standards/cross-cli.md) |
+| workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
 
-- 크기 선은 AC `scripts/hooks/check-md-size.mjs` 상수(`LONE_LIMIT`·`BUSY_LIMIT`·`FANOUT`)가 정본이다. `--report <md>`가 등재와 무관하게 아무 git 레포에서 한 파일의 크기·선·닿는 곳을 내므로 등재 안 된 레포용 한 줄은 두지 않는다.
-- 벤치 운영 문서([benching/](benching/SKILL.md))는 이 표를 부르지 않는다.
+## 후속 작업
 
-### targets/ 파일
+리뷰가 끝나면 아래 목록을 사용자에게 그대로 보여 주고 필요한지 묻는다.
 
-| 대상 경로 | 특화 파일 |
-|-----------|-----------|
-| `deploy/skills/workflow/` | [workflow.md](targets/workflow.md) |
+- 고친 스킬이 실제로 잘 도는지 벤치로 본다 → [benching/SKILL.md](benching/SKILL.md)
+- description이 제대로 트리거되는지 본다 → [benching/kinds/trigger-eval.md](benching/kinds/trigger-eval.md)
