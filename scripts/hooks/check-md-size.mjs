@@ -47,6 +47,9 @@ const SEEN_FILE = path.join(hookHome(), "md-size-seen.json");
 const LONE_LIMIT = 25000;
 const BUSY_LIMIT = 20000;
 const FANOUT = 4;
+// SKILL.md는 닿는 곳과 무관하게 이 선을 쓴다. 스킬을 부르면 통째로 실리는 진입점이라, 두꺼우면 불러 놓고서야
+// 필요 없는 스킬인 줄 알게 되고 한눈에 무슨 스킬인지도 안 보인다. 세부는 하위 파일로 보낸다.
+const SKILL_LIMIT = 10000;
 
 // 한 레포가 무너져도 출력이 화면을 덮지 않게 자른다.
 const MAX_REPORTS = 20;
@@ -92,7 +95,8 @@ function measure(config) {
   const parents = new Map(files.map((f) => [f.rel, new Set([...allParents.get(f.rel)].filter((p) => scoped.has(p)))]));
   const ancestors = ancestorsOf(files, parents);
   const reach = new Map([...ancestors].map(([rel, set]) => [rel, set.size]));
-  const limitFor = (rel) => (reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT);
+  const limitFor = (rel) =>
+    path.basename(rel) === "SKILL.md" ? SKILL_LIMIT : reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT;
   // 잴 내용에는 있는데 아무 뿌리에서도 안 닿은 md — `--report`가 「인덱스에 없다」와 가르는 데 쓴다.
   const unreached = new Set(candidates.filter((f) => !scoped.has(f.rel)).map((f) => f.rel));
   return { files, unreached, parents, ancestors, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
@@ -607,7 +611,8 @@ function reportFile(target) {
   const openers = [...ancestors.get(rel)].sort();
   console.log(`${rel} (레포 "${repo}", 이 브랜치가 고친 파일은 git 인덱스, 안 건드린 파일은 기본 브랜치 끝 기준)`);
   console.log(`  크기     ${f.size}B`);
-  console.log(`  선       ${limitFor(rel)}B (닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B)`);
+  const why = path.basename(rel) === "SKILL.md" ? "SKILL.md 선" : `닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B`;
+  console.log(`  선       ${limitFor(rel)}B (${why})`);
   console.log(`  닿는 곳  ${openers.length}`);
   for (const o of openers) console.log(`    ${direct.has(o) ? "직접  " : "거쳐서"} ${o}`);
   if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
