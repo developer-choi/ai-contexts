@@ -1285,6 +1285,11 @@ const freeRepoCases = (repos) => {
     'PR 링크를 넘기면 작업 폴더가 아니라 링크의 레포로 판정',
   ],
   ['check-git-push-policy.mjs', `cd ${gated} && gh pr merge 3 --repo developer-choi/backlog`, 'pass', '-R이 FREE 레포면 작업 폴더와 무관하게 통과'],
+  // `pr` 앞에 레포 지정을 두는 순서도 gh가 받는다 — 그 값을 서브커맨드로 세면 호출이 통째로 빠진다.
+  ['check-git-push-policy.mjs', `cd ${free} && gh -R developer-choi/ai-contexts pr merge 3`, 'deny', 'pr 앞의 -R 값으로 판정'],
+  ['check-git-push-policy.mjs', `cd ${free} && gh --repo developer-choi/ai-contexts pr merge 3`, 'deny', 'pr 앞의 --repo 값으로 판정'],
+  ['check-git-push-policy.mjs', `cd ${free} && gh --repo=developer-choi/ai-contexts pr merge 3`, 'deny', 'pr 앞의 --repo= 값으로 판정(원래 잡히던 꼴 — 회귀 방지)'],
+  ['check-git-push-policy.mjs', `cd ${gated} && gh -R developer-choi/backlog pr merge 3`, 'pass', 'pr 앞의 -R이 FREE 레포면 통과'],
   ['check-git-push-policy.mjs', `gh api -X PUT repos/developer-choi/some-client/pulls/3/merge`, 'deny', 'gh api로 머지 엔드포인트를 불러도 차단'],
   ['check-git-push-policy.mjs', `cd ${gated} && gh api graphql -f query='mutation { mergePullRequest(input: {}) { clientMutationId } }'`, 'deny', 'GraphQL mergePullRequest도 차단'],
   // PR을 여는 호출은 등급과 무관하게, 「커밋 정리:」 줄이 없으면 들어갈 커밋 목록과 함께 돌려보낸다.
@@ -1296,6 +1301,19 @@ const freeRepoCases = (repos) => {
     { description: 'PR을 연다', reasonIncludes: ['PR 생성', '커밋 정리:'] },
   ],
   ['check-git-push-policy.mjs', `cd ${gated} && gh pr create --title t --body b`, 'pass', '「커밋 정리:」 줄이 있으면 gh pr create 통과'],
+  ...[
+    ['gh pr new --title t --body b', 'pr new는 pr create의 별칭이다'],
+    ['gh -R developer-choi/ai-contexts pr create --title t --body b', 'pr 앞의 -R'],
+    ['gh --repo developer-choi/ai-contexts pr create --title t --body b', 'pr 앞의 --repo'],
+    ['gh --repo=developer-choi/ai-contexts pr create --title t --body b', 'pr 앞의 --repo=(원래 잡히던 꼴 — 회귀 방지)'],
+  ].map(([gh, note]) => [
+    'check-git-push-policy.mjs',
+    `cd ${gated} && ${gh}`,
+    'deny',
+    `${note}도 「커밋 정리:」 줄이 없으면 돌려보낸다`,
+    { description: 'PR을 연다', reasonIncludes: ['PR 생성', '커밋 정리:'] },
+  ]),
+  ['check-git-push-policy.mjs', `cd ${gated} && gh -R developer-choi/ai-contexts pr new --title t --body b`, 'pass', 'pr 앞의 -R·pr new도 「커밋 정리:」 줄이 있으면 통과'],
   [
     'check-git-push-policy.mjs',
     `cd ${free} && gh pr create --title t --body b`,

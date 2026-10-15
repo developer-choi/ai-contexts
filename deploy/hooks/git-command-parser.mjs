@@ -35,7 +35,7 @@ export function findGitInvocations(command, subcommand) {
 
 // 원격 PR을 머지하는 gh 호출을 { repo }로 돌려준다. 원격 보호 브랜치를 바로 바꾸므로 훅은 이것을
 // 로컬 merge가 아니라 push와 같이 친다. 잡는 형태:
-//   gh pr merge …                               — repo는 `-R`/`--repo owner/name`의 name, PR을 URL로 주면
+//   gh [-R owner/name] pr merge …               — repo는 `-R`/`--repo owner/name`의 name, PR을 URL로 주면
 //                                                  그 URL의 name, 둘 다 없으면 null
 //   gh api …/pulls/<n>/merge                    — repo는 `repos/owner/name/…`의 name, `{repo}` 자리표시면 null
 //   gh api graphql … mergePullRequest …         — repo는 null
@@ -49,12 +49,12 @@ export function findGhPrMerges(command) {
     const moveCwd = folder.current;
     const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
     if (at < 0) continue;
-    const args = tokens.slice(at + 1);
+    const { args, repo: leadingRepo } = skipLeadingRepo(tokens.slice(at + 1));
     const words = args.filter((t) => !t.startsWith("-"));
     if (words[0] === "pr" && words[1] === "merge") {
       const i = args.findIndex((t) => t === "-R" || t === "--repo");
       const inline = args.find((t) => t.startsWith("--repo="));
-      const spec = inline ? inline.slice("--repo=".length) : i >= 0 ? args[i + 1] : null;
+      const spec = inline ? inline.slice("--repo=".length) : i >= 0 ? args[i + 1] : leadingRepo;
       // 사용자가 붙여 준 PR 링크를 그대로 넘기는 형태 — gh는 작업 폴더가 아니라 링크의 레포를 머지한다.
       const url = words[2] && words[2].match(/github\.com\/[^/]+\/([^/]+)\/pull\//);
       out.push({ repo: spec ? spec.split("/").pop() : url ? url[1] : null, moveCwd });
@@ -75,7 +75,7 @@ export function findGhPrMerges(command) {
 
 // PR을 새로 여는 gh 호출을 { base, head, moveCwd }로 돌려준다. PR이 열리면 AI는 그 브랜치에 push하지
 // 못하므로(check-git-push-policy), 들어갈 커밋을 정리할 마지막 자리가 이 호출 직전이다. 잡는 형태:
-//   gh pr create …                  — base는 `-B`/`--base`, head는 `-H`/`--head`, 없으면 null
+//   gh [-R owner/name] pr create|new … — base는 `-B`/`--base`, head는 `-H`/`--head`, 없으면 null
 //   gh api …/pulls  (필드를 실으면 gh가 POST로 보낸다) — base·head는 `-f`/`-F` 필드의 `base=`·`head=`
 //   gh api graphql … createPullRequest …  — base·head는 null
 // base가 null이면 훅이 원격 기본 브랜치를, head가 null이면 지금 브랜치를 쓴다.
@@ -88,9 +88,10 @@ export function findGhPrCreates(command) {
     const moveCwd = folder.current;
     const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
     if (at < 0) continue;
-    const args = tokens.slice(at + 1);
+    const { args } = skipLeadingRepo(tokens.slice(at + 1));
     const words = args.filter((t) => !t.startsWith("-"));
-    if (words[0] === "pr" && words[1] === "create") {
+    // `pr new`는 `pr create`의 별칭이다(`gh help pr create`의 ALIASES).
+    if (words[0] === "pr" && ["create", "new"].includes(words[1])) {
       out.push({ base: flagValue(args, "-B", "--base"), head: flagValue(args, "-H", "--head"), moveCwd });
       continue;
     }
@@ -126,11 +127,7 @@ export function findGhPrBodyWrites(command) {
     trackFolder(tokens, folder);
     const at = tokens.findIndex((t) => t === "gh" || t === "gh.exe");
     if (at < 0) continue;
-    // `gh -R o/r pr create`처럼 `pr` 앞에 레포 지정이 올 수 있다 — 그 값을 서브커맨드로 세지 않게 건너뛴다.
-    let args = tokens.slice(at + 1);
-    while (args[0] === "-R" || args[0] === "--repo" || args[0]?.startsWith("--repo=")) {
-      args = args.slice(args[0].includes("=") ? 1 : 2);
-    }
+    const { args } = skipLeadingRepo(tokens.slice(at + 1));
     const words = args.filter((t) => !t.startsWith("-"));
     // `pr new`는 `pr create`의 별칭이다(`gh help pr create`의 ALIASES).
     if (words[0] !== "pr" || !["create", "new", "edit"].includes(words[1])) continue;
@@ -146,6 +143,18 @@ export function findGhPrBodyWrites(command) {
     out.push({ bodyFiles, moveCwd: folder.current });
   }
   return out;
+}
+
+// `gh -R o/r pr create`처럼 `pr` 앞에 레포 지정이 올 수 있다 — 그 값을 서브커맨드로 세지 않게 건너뛴다.
+// 건너뛴 레포 지정(`owner/name`)을 repo로 함께 돌려준다. 없으면 null.
+function skipLeadingRepo(args) {
+  let repo = null;
+  while (args[0] === "-R" || args[0] === "--repo" || args[0]?.startsWith("--repo=")) {
+    const inline = args[0].includes("=");
+    repo = inline ? args[0].slice("--repo=".length) : (args[1] ?? null);
+    args = args.slice(inline ? 1 : 2);
+  }
+  return { args, repo };
 }
 
 // `-B main`·`--base main`·`--base=main` 꼴의 값. 없으면 null.
