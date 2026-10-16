@@ -4,7 +4,7 @@
 
 frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 아니다 — 그 description은 모델 컨텍스트에 올라가지 않아 측정할 트리거가 없다. 사용자만 부르게 하려는 스킬은 재려 하지 말고 그 필드를 켠다.
 
-[CRITICAL] 작업 시작 전 「현재 상태」와 「피해야 할 함정」을 반드시 읽는다. 같은 6시간 함정 재발 방지용이다.
+작업 시작 전 「현재 상태」와 「피해야 할 함정」을 읽는다. 같은 6시간 함정 재발 방지용이다.
 
 ## 현재 상태 (2026-09-18 재확인)
 
@@ -46,7 +46,7 @@ FAIL 중 **추상 쿼리**(예: "description 너무 길어")는 description 문�
 
 ## 안전 절차 — 측정 직전 description 상태 확인
 
-[CRITICAL] **측정 시작 직전 측정 대상의 description 상태를 반드시 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- <측정 대상 SKILL.md>`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 다시 잡는다.
+**측정 시작 직전 측정 대상의 description 상태를 확인한다**. 사용자 또는 다른 세션이 wip로 description을 미리 바꿔놓았을 수 있다 — 그 상태로 측정하면 BEFORE/AFTER가 사실은 같은 description 두 번 측정이라 delta 0이 "변경 효과 없음"이 아니라 "변경 자체가 없었음"이 된다. 측정 전 `git diff <base>..HEAD -- <측정 대상 SKILL.md>`로 description 라인이 base와 같은지 확인. wip로 변경돼 있으면 wip 풀거나 명확한 base commit 위에서 다시 잡는다.
 
 ## 자동 루프는 없다
 
