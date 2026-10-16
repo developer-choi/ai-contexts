@@ -67,7 +67,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 | 영역 | 대상 |
 |------|------|
 | `projects/{project}/{topic}/` | 레포별 작업·지식·참고 (AC 자체 포함 → `projects/ai-contexts/`) |
-| `articles/{slug}/` | 기술블로그에 발행할 포스트 재료 |
+| `articles/{slug}.md` | 기술블로그에 발행할 포스트 재료 |
 
 #### projects의 destination은 intent로 가린다
 
