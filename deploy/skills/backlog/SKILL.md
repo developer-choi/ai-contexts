@@ -35,7 +35,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 - **경로**: `~/WebstormProjects/main/backlog/`
 - **원격**: `https://github.com/developer-choi/backlog` (private). 레포가 없는 기기에서는 위 경로로 클론한다
 
-[CRITICAL] 백로그를 읽거나 쓰기 전에 `~/WebstormProjects/main/backlog/CLAUDE.md`(영역별 경로·파일명, 커밋 규칙)와 `~/WebstormProjects/main/backlog/projects/CLAUDE.md`(frontmatter 어휘, 항목 양식, Ready 게이트 문항)를 Read한다. 둘이 백로그 규격의 단일 출처다. 본 스킬은 그 규격을 중복 정의하지 않으므로, 읽지 않으면 산출물의 위치·양식을 정할 수 없다.
+백로그를 읽거나 쓰기 전에 `~/WebstormProjects/main/backlog/CLAUDE.md`(영역별 경로·파일명, 커밋 규칙)와 `~/WebstormProjects/main/backlog/projects/CLAUDE.md`(frontmatter 어휘, 항목 양식, Ready 요건 문항)를 Read한다. 둘이 백로그 규격의 단일 출처다. 본 스킬은 그 규격을 중복 정의하지 않으므로, 읽지 않으면 산출물의 위치·양식을 정할 수 없다.
 
 ---
 
@@ -103,7 +103,7 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 
 #### 판정 후 처리
 
-- **같은 항목** → 새 파일을 만들지 않고 **기존 파일을 갱신**한다. 트래커도 예외가 아니다 — "1건 = 파일 1개"는 한 항목이 파일 하나를 차지한다는 뜻이지 새 메모마다 파일을 늘리라는 뜻이 아니다. 새로 알게 된 사실은 「현재상태」에, 새 방안은 「현재 생각중인 방법」에 덧붙이고, 빈칸이 차서 게이트를 넘으면 `status`를 올린다. 무상태 지식노트·발행 재료는 기존 파일의 관련 섹션에 병합한다.
+- **같은 항목** → 새 파일을 만들지 않고 **기존 파일을 갱신**한다. 트래커도 예외가 아니다 — "1건 = 파일 1개"는 한 항목이 파일 하나를 차지한다는 뜻이지 새 메모마다 파일을 늘리라는 뜻이 아니다. 새로 알게 된 사실은 「현재상태」에, 새 방안은 「현재 생각중인 방법」에 덧붙이고, 빈칸이 차서 요건을 충족하면 `status`를 올린다. 무상태 지식노트·발행 재료는 기존 파일의 관련 섹션에 병합한다.
 - **겹치지만 별개** (같은 곳을 고치나 다른 문제) → 새 파일을 만들되, 어느 쪽이 먼저인지 정해 뒤에 오는 파일에 선행을 단다.
   - 앞 항목의 산출물 없이는 뒤 항목의 **구현을 시작할 수 없으면** `start-dependencies`, 시작할 수 있으면 `close-dependencies`다 — 테스트에만 앞 산출물이 필요해도 close다.
 - **`inactive/`에서 찾음** → 갱신은 제자리에서 하고, `active/`로 올릴지는 **사용자에게 묻는다**. 묻지 않고 올리면 그 프로젝트에서 작업할 때마다 뜨게 되는데, 내려둔 데는 이유가 있었을 수 있다.
@@ -115,10 +115,10 @@ AC 자체(`ai-contexts`) 항목도 자동 분류로 `projects/ai-contexts/`에 �
 
 ### 4. 등록 상태 — 기본 ready (`ai-contexts`·`private-playground` 트래커 항목)
 
-`ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 사용자가 명시적으로 낮은 상태를 요청하지 않는 한("일단 적어만 둬", "아이디어만" 등) **frontmatter `status: ready`로 등록한다**. 작성 세션이 정보가 가장 풍부한 시점이고, 미뤄둔 보강은 잘 일어나지 않는다. 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니므로 이 기본-ready 대상이 아니다 — `status` 없이 둔다. 다른 projects 항목은 기본 무상태이고, `status: ready`는 opt-in이다(달면 아래 게이트가 적용된다).
+`ai-contexts`·`private-playground`의 `active/`에 캡처하는 **fix·룰 트래커 항목**(`## 기대상황`을 갖는 양식)은 사용자가 명시적으로 낮은 상태를 요청하지 않는 한("일단 적어만 둬", "아이디어만" 등) **frontmatter `status: ready`로 등록한다**. 작성 세션이 정보가 가장 풍부한 시점이고, 미뤄둔 보강은 잘 일어나지 않는다. 개인 메모·완성형 지식 노트(기대상황 없는 항목)는 트래커가 아니므로 이 기본-ready 대상이 아니다 — `status` 없이 둔다. 다른 projects 항목은 기본 무상태이고, `status: ready`는 opt-in이다(달면 아래 요건이 적용된다).
 
-- 캡처하면서 「Ready 게이트」 필수 문항을 빈칸 없이 채운다. 채울 정보가 부족하면 등록 전에 사용자에게 그 자리에서 묻는다 — 미뤄두면 안 채워진다.
-- 게이트 문항 판정은 백로그 레포 `projects/CLAUDE.md` 「검증 절차」를 따른다 — 0건 통과한 뒤 `status: ready`를 단다.
+- 캡처하면서 「Ready 요건」 필수 문항을 빈칸 없이 채운다. 채울 정보가 부족하면 등록 전에 사용자에게 그 자리에서 묻는다 — 미뤄두면 안 채워진다.
+- 요건 문항 판정은 백로그 레포 `projects/CLAUDE.md` 「검증 절차」를 따른다 — 0건 통과한 뒤 `status: ready`를 단다.
 - `ideation`/`draft`는 사용자가 명시적으로 요청한 경우에만 쓴다. 이때도 「Draft · Ideation 최소검증」은 채운다.
 
 ---

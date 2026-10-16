@@ -6,7 +6,7 @@
 
 `projects/`(단, AC 자기수정 트래커 `projects/ai-contexts/`는 제외)를 대상으로 한다.
 
-- `projects/ai-contexts/` 제외: Ready 게이트·상태 라벨이 달린 AC 자기수정 트래커라, 구조를 AI가 임의로 바꾸면 우선순위·실행 순서가 깨진다.
+- `projects/ai-contexts/` 제외: Ready 요건·상태 라벨이 달린 AC 자기수정 트래커라, 구조를 AI가 임의로 바꾸면 우선순위·실행 순서가 깨진다.
 - `articles/` 제외: 발행 단위(slug)로 사용자가 큐레이션하는 재료라, 임의 분리가 글 구성을 흩뜨린다.
 
 ## 현황파악
