@@ -21,6 +21,8 @@ const VERIFY_STEPS = [
   { file: path.join(import.meta.dirname, 'verify-local-system.mjs') },
   // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
   { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs') },
+  // 배포가 바뀌지 않은 파일까지 다시 쓰면, 열려 있던 다른 세션이 그 스킬·문서를 모두 새로 받아 다시 읽는다.
+  { file: path.join(import.meta.dirname, '..', 'verify', 'verify-incremental-deploy.mjs') },
   // 목적 검사는 AC 안에서만 돌고 있었다. 남의 레포 local/skills도 같은 규칙을 받으므로 여기서 함께 본다.
   { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs'), args: ['--local'] },
 ];

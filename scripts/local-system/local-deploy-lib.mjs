@@ -15,17 +15,19 @@ import path from 'node:path';
 
 import { buildHooks, LOCAL_ADAPTERS, localHookCommand } from '../settings/settings-projection.mjs';
 import {
-  copyPath,
-  ensureDir,
+  logTreeChanges,
   mergeSettings,
   readJson,
+  readTreeEntries,
   removePath,
   repoDir,
   settingsManifestPath,
   splitSettings,
+  syncTree,
   trustCodexHooks,
   verifyJsonExact,
   verifySettings,
+  writeIfChanged,
   writeJson,
 } from '../lib/deploy-lib.mjs';
 
@@ -95,20 +97,26 @@ function codexHasHooks(repo = repoDir) {
   return Object.keys(localCodexHooksObject(repo).hooks).length > 0;
 }
 
-// local/hooks/*.mjs를 .claude/hooks/·(codex hook이 있으면).codex/hooks/로 복사한다. 복사 전
-// AC 생성 디렉토리를 제거해 소스에서 사라진 hook(고아)이 잔존하지 않게 한다.
+// local/hooks/*.mjs를 .claude/hooks/·(codex hook이 있으면).codex/hooks/에 맞춘다. 내용이 바뀐
+// 파일만 쓰고, 소스에서 사라진 hook(고아)은 지운다. codex hook이 없어졌으면 .codex 쪽 산출물을 지운다.
 function copyLocalHooks(log = console.log, repo = repoDir) {
   const p = localPaths(repo);
   if (!fs.existsSync(p.localHooksSource) || !fs.statSync(p.localHooksSource).isDirectory()) {
     throw new Error(`local/hooks/를 찾을 수 없습니다: ${p.localHooksSource}`);
   }
-  const targets = [[p.localClaudeDir, p.localClaudeHooksDir]];
-  if (codexHasHooks(repo)) targets.push([p.localCodexDir, p.localCodexHooksDir]);
-  for (const [targetDir, hooksDir] of targets) {
-    ensureDir(targetDir);
-    removePath(hooksDir);
-    copyPath(p.localHooksSource, hooksDir);
-    log(`  COPY  ${path.relative(repo, hooksDir).replaceAll(path.sep, '/')}`);
+  const entries = readTreeEntries(p.localHooksSource);
+  const hooksDirs = [p.localClaudeHooksDir];
+  if (codexHasHooks(repo)) {
+    hooksDirs.push(p.localCodexHooksDir);
+  } else {
+    for (const stale of [p.localCodexHooksDir, p.localCodexHooksPath]) {
+      if (!fs.existsSync(stale)) continue;
+      removePath(stale);
+      log(`  DEL   ${path.relative(repo, stale).replaceAll(path.sep, '/')}`);
+    }
+  }
+  for (const hooksDir of hooksDirs) {
+    logTreeChanges(log, `${path.relative(repo, hooksDir).replaceAll(path.sep, '/')}/`, syncTree(hooksDir, entries));
   }
 }
 
@@ -141,23 +149,23 @@ function uninstallLocal(log = console.log, repo = repoDir) {
 }
 
 // 한 레포의 로컬 settings/hooks를 투영한다(sync-local-system part-2를 추출·일반화).
-// uninstall(고아 제거) → hook 복사 → claude 부분키 머지 → codex whole-file(있을 때만) →
+// hook 맞추기(고아 제거 포함) → claude 부분키 머지 → codex whole-file(있을 때만) →
 // 배포 후 검증. codex hook이 없는 레포(KA)는 codex write/verify/trust를 건너뛴다.
 // 반환: 실패 메시지 배열(빈 배열이면 성공).
 async function projectRepoLocalSettings(repo, { log = console.log, trust = true } = {}) {
   const p = localPaths(repo);
   const failures = [];
 
-  uninstallLocal(log, repo);
+  // 지우고 다시 쓰지 않는다 — 바뀐 파일만 쓴다(이유는 deploy-lib의 writeIfChanged 주석).
+  // settings.json의 고아 키는 mergeSettings가 .ac-keys 매니페스트로 걷는다.
   copyLocalHooks(log, repo);
 
-  mergeSettings(localClaudeSettingsObject(repo), p.localClaudeSettingsPath);
-  log('  MERGE .claude/settings.json');
+  if (mergeSettings(localClaudeSettingsObject(repo), p.localClaudeSettingsPath)) {
+    log('  MERGE .claude/settings.json');
+  }
 
   const hasCodex = codexHasHooks(repo);
-  if (hasCodex) {
-    ensureDir(p.localCodexDir);
-    writeJson(p.localCodexHooksPath, localCodexHooksObject(repo));
+  if (hasCodex && writeIfChanged(p.localCodexHooksPath, `${JSON.stringify(localCodexHooksObject(repo), null, 2)}\n`)) {
     log('  WRITE .codex/hooks.json');
   }
 

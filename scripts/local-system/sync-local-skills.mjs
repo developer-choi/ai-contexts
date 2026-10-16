@@ -5,7 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
-import { copyPath, ensureDir, injectSkillName, listEntries, resolveUserPath } from '../lib/deploy-lib.mjs';
+import { readTreeEntries, resolveUserPath, skillEntries, syncTree, writeIfChanged } from '../lib/deploy-lib.mjs';
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),
@@ -50,7 +50,7 @@ function main(opts = {}) {
 // contexts는 배포한다 — 스킬 본문의 `../../contexts/...`가 풀리는 자리가 배포본 옆이기 때문이다.
 // 한때 사본이 세 벌 되는 것을 피하려 제외했는데, 제외해도 그전에 배포된 사본은 남고 sync가 더는
 // 덮어쓰지 않아 조용히 낡는다. KA가 그 상태로 2026-06-14자 규칙을 두 달간 읽었다(2026-08-14 발견).
-// 배포하면 sync마다 덮어써져 낡을 수 없고, 고아는 unsync가 청소한다.
+// 배포하면 sync마다 원본과 맞춰져 낡을 수 없고, 원본에서 사라진 파일은 sync가 지운다.
 const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
 
 function localDeployDirs(repo) {
@@ -80,29 +80,28 @@ function syncRepo(repo) {
     // contexts에 산다. `.claude/`는 Claude가, `.agents/`는 Codex가 읽으므로 각자의 홈으로 푼다.
     const globalContextsFor = (targetDir) =>
       path.join(resolveUserPath(targetDir === agentsDir ? '~/.codex' : '~/.claude'), 'contexts');
+    // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
+    let changed = 0;
     for (const name of deployDirs) {
       const source = path.join(repo, 'local', name);
-      ensureDir(claudeDir);
-      ensureDir(agentsDir);
       for (const targetDir of [claudeDir, agentsDir]) {
         const dest = path.join(targetDir, name);
-        copyPath(source, dest);
-        // 스킬 SKILL.md에는 폴더명 name을 주입한다(Antigravity는 name 필수 — deploy-lib 참고).
-        if (name === 'skills') {
-          for (const skill of listEntries(dest)) {
-            if (skill.isDirectory()) {
-              injectSkillName(path.join(dest, skill.name), globalContextsFor(targetDir));
-            }
-          }
-        }
+        // 스킬 md는 렌더해 배포한다(폴더명 name 주입 등 — deploy-lib의 renderSkillMd 참고).
+        const entries = name === 'skills'
+          ? skillEntries(source, dest, () => globalContextsFor(targetDir))
+          : readTreeEntries(source);
+        const { written, removed } = syncTree(dest, entries);
+        changed += written.length + removed.length;
       }
       synced.push(`local/${name} -> .claude/${name}, .agents/${name}`);
     }
     if (hasAgents) {
-      copyPath(claudeAgents, path.join(repo, 'AGENTS.md'));
-      copyPath(claudeAgents, path.join(repo, 'GEMINI.md'));
+      const content = fs.readFileSync(claudeAgents);
+      changed += Number(writeIfChanged(path.join(repo, 'AGENTS.md'), content));
+      changed += Number(writeIfChanged(path.join(repo, 'GEMINI.md'), content));
       synced.push(`${shortSource(repo, claudeAgents)} -> AGENTS.md, GEMINI.md`);
     }
+    if (changed === 0) return { repo, status: 'unchanged', detail: synced.join(', ') };
     return { repo, status: 'synced', detail: synced.join(', ') };
   } catch (error) {
     return { repo, status: 'failed', detail: error.message };

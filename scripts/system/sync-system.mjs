@@ -14,15 +14,15 @@ import {
   comparePaths,
   compareRulePaths,
   compareSkillPaths,
-  copyPath,
   defaultCodexDir,
   defaultClaudeDir,
   defaultGeminiDir,
+  deployCategory,
   deployCodexGlobals,
   deployGeminiGlobals,
   deployRootFiles,
   deploySkills,
-  resolveRulePaths,
+  removeLegacyCategories,
   ensureDeploySource,
   ensureDir,
   geminiSettingsObject,
@@ -31,7 +31,6 @@ import {
   resolveUserPath,
   sourceDir,
   trustCodexHooks,
-  uninstallTarget,
   verifyJsonExact,
   verifySettings,
 } from '../lib/deploy-lib.mjs';
@@ -48,6 +47,8 @@ const VERIFY_STEPS = [
   { file: path.join(scriptsDir, 'verify', 'verify-skill-purpose.mjs') },
   // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
   { file: path.join(scriptsDir, 'verify', 'verify-skill-render.mjs') },
+  // 배포가 바뀌지 않은 파일까지 다시 쓰면, 열려 있던 다른 세션이 그 스킬·문서를 모두 새로 받아 다시 읽는다.
+  { file: path.join(scriptsDir, 'verify', 'verify-incremental-deploy.mjs') },
   // 실행 위치에 기대는 스크립트 호출이 배포되면, 그 스킬을 다른 레포에서 부른 순간 엉뚱한 폴더를 뒤진다.
   { file: path.join(scriptsDir, 'verify', 'verify-skill-script-paths.mjs') },
   // 잘못 세는 눈금은 그 자리에서 정상으로 보이고 몇 달 뒤 안 차는 것으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
@@ -66,30 +67,17 @@ async function main() {
 
   ensureDir(targetDir);
 
-  console.log('기존 파일 제거 중...');
-  uninstallTarget(targetDir, { removeAlias: false });
-  console.log('');
-
-  let copied = 0;
-
+  // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
+  let changed = removeLegacyCategories(targetDir, console.log);
   for (const category of CATEGORIES) {
-    const src = path.join(sourceDir, category);
-    if (!existsDir(src)) continue;
-
-    copyPath(src, path.join(targetDir, category));
-    console.log(`  COPY  ${category}/`);
-    copied += 1;
+    changed += deployCategory(targetDir, category, console.log);
   }
-  // 규칙이 가리키는 contexts 경로는 타겟마다 달라 배포 시점에 채운다.
-  resolveRulePaths(targetDir);
-
-  copied += deploySkills(targetDir, console.log);
+  changed += deploySkills(targetDir, console.log);
+  changed += deployRootFiles(targetDir, console.log);
 
   console.log('---');
-  console.log(`복사 완료: ${copied}개`);
+  console.log(changed === 0 ? '변경 없음' : `바뀐 파일: ${changed}개`);
   console.log('');
-
-  copied += deployRootFiles(targetDir, console.log);
 
   console.log('검증 중...');
   const failures = [];
@@ -164,8 +152,8 @@ async function main() {
     console.log('---');
     const codexTargetDir = defaultCodexDir();
     console.log(`Codex 전역 자산 배포 중: ${codexTargetDir}`);
-    const codexCopied = deployCodexGlobals(codexTargetDir, console.log);
-    console.log(`Codex 배포 완료: ${codexCopied}개`);
+    const codexChanged = deployCodexGlobals(codexTargetDir, console.log);
+    console.log(codexChanged === 0 ? 'Codex 변경 없음' : `Codex 바뀐 파일: ${codexChanged}개`);
     try {
       await trustCodexHooks(codexTargetDir, console.log);
     } catch (error) {
@@ -179,8 +167,8 @@ async function main() {
     console.log('---');
     const geminiTargetDir = defaultGeminiDir();
     console.log(`Gemini 전역 자산 배포 중: ${geminiTargetDir}`);
-    const geminiCopied = deployGeminiGlobals(geminiTargetDir, console.log);
-    console.log(`Gemini 배포 완료: ${geminiCopied}개`);
+    const geminiChanged = deployGeminiGlobals(geminiTargetDir, console.log);
+    console.log(geminiChanged === 0 ? 'Gemini 변경 없음' : `Gemini 바뀐 파일: ${geminiChanged}개`);
     verifyGeminiGlobals(geminiTargetDir);
   }
 }

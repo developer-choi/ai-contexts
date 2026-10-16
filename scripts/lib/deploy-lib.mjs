@@ -88,6 +88,81 @@ function copyPath(src, dest) {
   fs.cpSync(src, dest, { recursive: true, force: true, errorOnExist: false });
 }
 
+// 배포는 바뀐 파일만 쓴다. 통째로 지우고 다시 쓰면 열려 있던 다른 세션이 바뀌지 않은 스킬까지
+// 새로 받은 것으로 알림받아 다시 읽고(컨텍스트 낭비), 지운 뒤 다시 쓰는 사이에는 hook·스킬
+// 파일이 수백 ms 동안 없다. 쓸 때는 같은 폴더의 임시 파일에 쓰고 rename해 반쯤 쓴 파일이
+// 읽히지 않게 한다. 다른 프로세스가 잡고 있어 rename이 거부되면 직접 쓰기로 대신한다.
+function writeIfChanged(file, content) {
+  const buf = Buffer.isBuffer(content) ? content : Buffer.from(content, 'utf8');
+  if (fs.existsSync(file) && fs.statSync(file).isFile() && fs.readFileSync(file).equals(buf)) return false;
+  ensureDir(path.dirname(file));
+  if (fs.existsSync(file) && fs.statSync(file).isDirectory()) removePath(file);
+  const tmp = `${file}.ac-tmp`;
+  fs.writeFileSync(tmp, buf);
+  try {
+    fs.renameSync(tmp, file);
+  } catch (error) {
+    if (!['EPERM', 'EBUSY', 'EACCES'].includes(error.code)) throw error;
+    removePath(tmp);
+    fs.writeFileSync(file, buf);
+  }
+  return true;
+}
+
+function listFilesRelative(dir, base = dir, found = []) {
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return found;
+  for (const entry of listEntries(dir)) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) listFilesRelative(full, base, found);
+    else found.push(path.relative(base, full));
+  }
+  return found;
+}
+
+// 원본 폴더를 「상대 경로 → 내용」으로 읽는다. transform(rel, buf)이 배포본 내용을 돌려준다.
+function readTreeEntries(srcDir, transform = (_rel, buf) => buf) {
+  const entries = new Map();
+  for (const rel of listFilesRelative(srcDir)) {
+    entries.set(rel, transform(rel, fs.readFileSync(path.join(srcDir, rel))));
+  }
+  return entries;
+}
+
+// destDir을 entries 상태로 맞춘다. 내용이 다른 파일만 쓰고, entries에 없는 파일은 지운다.
+// keep(rel)이 참인 파일은 AC 소유가 아니라 건드리지 않는다(외부 스킬 등).
+function syncTree(destDir, entries, { keep = () => false } = {}) {
+  const written = [];
+  const removed = [];
+  if (fs.existsSync(destDir) && !fs.statSync(destDir).isDirectory()) removePath(destDir);
+  for (const [rel, buf] of entries) {
+    if (writeIfChanged(path.join(destDir, rel), buf)) written.push(rel);
+  }
+  for (const rel of listFilesRelative(destDir)) {
+    if (entries.has(rel) || keep(rel)) continue;
+    removePath(path.join(destDir, rel));
+    removed.push(rel);
+  }
+  removeEmptyDirs(destDir, keep);
+  return { written, removed };
+}
+
+function removeEmptyDirs(dir, keep, base = dir) {
+  if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return;
+  for (const entry of listEntries(dir)) {
+    if (!entry.isDirectory()) continue;
+    const full = path.join(dir, entry.name);
+    if (keep(path.relative(base, full))) continue;
+    removeEmptyDirs(full, keep, base);
+    if (fs.readdirSync(full).length === 0) fs.rmdirSync(full);
+  }
+}
+
+function logTreeChanges(log, prefix, { written, removed }) {
+  for (const rel of written) log(`  WRITE ${prefix}${rel.replaceAll(path.sep, '/')}`);
+  for (const rel of removed) log(`  DEL   ${prefix}${rel.replaceAll(path.sep, '/')}`);
+  return written.length + removed.length;
+}
+
 function readJson(file) {
   const raw = fs.readFileSync(file, 'utf8').trim();
   return raw ? JSON.parse(raw) : {};
@@ -121,6 +196,13 @@ function resolveRulePaths(targetDir) {
     const updated = withContextsPath(raw, targetDir);
     if (updated !== raw) fs.writeFileSync(file, updated, 'utf8');
   }
+}
+
+// 배포할 rules/ 내용. resolveRulePaths와 같은 결과를 파일에 쓰기 전에 만든다.
+function ruleEntries(srcDir, targetDir) {
+  return readTreeEntries(srcDir, (rel, buf) => (
+    rel.endsWith('.md') ? Buffer.from(withContextsPath(buf.toString('utf8'), targetDir), 'utf8') : buf
+  ));
 }
 
 // rules/ 대조: 자리표시자를 채운 결과와 일치해야 한다.
@@ -209,8 +291,9 @@ function mergeSettings(deploy, targetPath) {
     if (!deployKeys.includes(key)) delete existing[key];
   }
 
-  writeJson(targetPath, { ...existing, ...deploy });
-  fs.writeFileSync(settingsManifestPath(targetPath), `${JSON.stringify(deployKeys)}\n`, 'utf8');
+  const settingsChanged = writeIfChanged(targetPath, `${JSON.stringify({ ...existing, ...deploy }, null, 2)}\n`);
+  const manifestChanged = writeIfChanged(settingsManifestPath(targetPath), `${JSON.stringify(deployKeys)}\n`);
+  return settingsChanged || manifestChanged;
 }
 
 function splitSettings(deploy, targetPath) {
@@ -361,6 +444,31 @@ function injectSkillName(skillDir, contextsDir = contextsDirForSkill(skillDir)) 
   }
 }
 
+// 배포할 skills/ 내용(skills 폴더 기준 상대 경로). 복사한 뒤 injectSkillName을 돌린 결과와
+// 같은 것을 파일에 쓰기 전에 만든다. 최상위의 스킬 폴더가 아닌 파일은 그대로 둔다.
+function skillEntries(srcSkillsDir, targetSkillsDir, contextsFor = contextsDirForSkill) {
+  const entries = new Map();
+  for (const entry of listEntries(srcSkillsDir)) {
+    const src = path.join(srcSkillsDir, entry.name);
+    if (!entry.isDirectory()) {
+      entries.set(entry.name, fs.readFileSync(src));
+      continue;
+    }
+    const skillDir = path.join(targetSkillsDir, entry.name);
+    const contextsDir = contextsFor(skillDir);
+    const rendered = readTreeEntries(src, (rel, buf) => {
+      const file = path.join(skillDir, rel);
+      if (!rel.endsWith('.md') || anchorExcluded(skillDir, file)) return buf;
+      const raw = buf.toString('utf8');
+      return Buffer.from(rel === 'SKILL.md'
+        ? renderSkillMd(raw, skillDir, contextsDir)
+        : renderSkillSubMd(raw, path.dirname(file), skillDir, contextsDir), 'utf8');
+    });
+    for (const [rel, buf] of rendered) entries.set(path.join(entry.name, rel), buf);
+  }
+  return entries;
+}
+
 function collectMarkdown(dir, found = []) {
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return found;
   for (const entry of listEntries(dir)) {
@@ -427,42 +535,59 @@ function comparePaths(left, right) {
   return fs.readFileSync(left).equals(fs.readFileSync(right));
 }
 
+// 아래 deploy* 함수는 바꾼 파일 수(쓰기·지우기)를 돌려준다. 0이면 그 타겟은 손대지 않았다.
+
+function writeFileLogged(file, content, log, label) {
+  if (!writeIfChanged(file, content)) return 0;
+  log(`  WRITE ${label}`);
+  return 1;
+}
+
 function deployRootFiles(targetDir, log) {
-  let copied = 0;
+  let changed = 0;
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
     if (SOURCE_ONLY_ROOT_FILES.has(entry.name)) continue;
 
-    const src = path.join(sourceDir, entry.name);
-    const dest = path.join(targetDir, entry.name);
-    copyPath(src, dest);
-    log(`  COPY  ${entry.name}`);
-    copied += 1;
+    changed += writeFileLogged(path.join(targetDir, entry.name), fs.readFileSync(path.join(sourceDir, entry.name)), log, entry.name);
   }
 
-  mergeSettings(claudeSettingsObject(), path.join(targetDir, 'settings.json'));
-  log('  MERGE settings.json');
-  copied += 1;
-  return copied;
+  if (mergeSettings(claudeSettingsObject(), path.join(targetDir, 'settings.json'))) {
+    log('  MERGE settings.json');
+    changed += 1;
+  }
+  return changed;
 }
 
-function deploySkills(targetDir, log) {
-  const srcSkills = path.join(sourceDir, 'skills');
+// rules·contexts·hooks 중 하나를 원본 상태로 맞춘다. 폴더 전체가 AC 소유라 원본에 없는 파일은 지운다.
+function deployCategory(targetDir, category, log, srcRoot = sourceDir) {
+  const src = path.join(srcRoot, category);
+  if (!fs.existsSync(src) || !fs.statSync(src).isDirectory()) return 0;
+  const entries = category === 'rules' ? ruleEntries(src, targetDir) : readTreeEntries(src);
+  return logTreeChanges(log, `${category}/`, syncTree(path.join(targetDir, category), entries));
+}
+
+// 예전 배포에만 있던 카테고리가 남아 있으면 지운다.
+function removeLegacyCategories(targetDir, log) {
+  let removed = 0;
+  for (const category of LEGACY_CATEGORIES) {
+    const target = path.join(targetDir, category);
+    if (!fs.existsSync(target) || !fs.statSync(target).isDirectory()) continue;
+    removePath(target);
+    log(`  DEL   ${category}/`);
+    removed += 1;
+  }
+  return removed;
+}
+
+function deploySkills(targetDir, log, srcRoot = sourceDir) {
+  const srcSkills = path.join(srcRoot, 'skills');
   if (!fs.existsSync(srcSkills) || !fs.statSync(srcSkills).isDirectory()) return 0;
 
   const targetSkills = path.join(targetDir, 'skills');
-  ensureDir(targetSkills);
-
-  let copied = 0;
-  for (const entry of listEntries(srcSkills)) {
-    const src = path.join(srcSkills, entry.name);
-    const dest = path.join(targetSkills, entry.name);
-    copyPath(src, dest);
-    if (entry.isDirectory()) injectSkillName(dest);
-    log(`  COPY  skills/${entry.name}`);
-    copied += 1;
-  }
-  return copied;
+  // 보존 목록의 스킬은 AC가 배포한 것이 아니라 건드리지 않는다.
+  const keep = (rel) => SKILLS_PRESERVE.has(rel.split(path.sep)[0]);
+  return logTreeChanges(log, 'skills/', syncTree(targetSkills, skillEntries(srcSkills, targetSkills), { keep }));
 }
 
 function uninstallSkills(targetDir, log) {
@@ -480,61 +605,39 @@ function uninstallSkills(targetDir, log) {
 
 function deployCodexGlobals(targetDir, log = console.log) {
   ensureDir(targetDir);
-  uninstallCodexGlobals(targetDir, log);
 
-  let copied = 0;
-  const srcContexts = path.join(sourceDir, 'contexts');
-  if (fs.existsSync(srcContexts) && fs.statSync(srcContexts).isDirectory()) {
-    copyPath(srcContexts, path.join(targetDir, 'contexts'));
-    log('  COPY  contexts/');
-    copied += 1;
-  }
-
-  const srcHooks = path.join(sourceDir, 'hooks');
-  if (fs.existsSync(srcHooks) && fs.statSync(srcHooks).isDirectory()) {
-    copyPath(srcHooks, path.join(targetDir, 'hooks'));
-    log('  COPY  hooks/');
-    copied += 1;
-  }
-
-  writeJson(path.join(targetDir, 'hooks.json'), codexHooksObject());
-  log('  WRITE hooks.json');
-  copied += 1;
-
-  fs.writeFileSync(path.join(targetDir, 'AGENTS.md'), buildCodexAgentsContent(targetDir), 'utf8');
-  log('  WRITE AGENTS.md');
-  copied += 1;
-
-  copied += deploySkills(targetDir, log);
-  return copied;
+  let changed = 0;
+  changed += deployCategory(targetDir, 'contexts', log);
+  changed += deployCategory(targetDir, 'hooks', log);
+  changed += writeFileLogged(path.join(targetDir, 'hooks.json'), `${JSON.stringify(codexHooksObject(), null, 2)}\n`, log, 'hooks.json');
+  changed += writeFileLogged(path.join(targetDir, 'AGENTS.md'), buildCodexAgentsContent(targetDir), log, 'AGENTS.md');
+  changed += deploySkills(targetDir, log);
+  return changed;
 }
 
 function deployGeminiGlobals(targetDir, log = console.log) {
   ensureDir(targetDir);
-  uninstallGeminiGlobals(targetDir, log);
 
-  let copied = 0;
-  const srcContexts = path.join(sourceDir, 'contexts');
-  if (fs.existsSync(srcContexts) && fs.statSync(srcContexts).isDirectory()) {
-    copyPath(srcContexts, path.join(targetDir, 'contexts'));
-    log('  COPY  contexts/');
-    copied += 1;
-  }
+  let changed = 0;
+  changed += deployCategory(targetDir, 'contexts', log);
 
   // gemini(Antigravity CLI)는 hook 러너가 없어 hook을 발동하지 못한다. hook 본문을
-  // ~/.gemini/hooks/로 복사하지 않는다 (러너 없는 dead artifact 방지).
+  // ~/.gemini/hooks/로 복사하지 않는다 (러너 없는 dead artifact 방지). 예전 배포가 남긴 것은 지운다.
+  const hooksDir = path.join(targetDir, 'hooks');
+  if (fs.existsSync(hooksDir) && fs.statSync(hooksDir).isDirectory()) {
+    removePath(hooksDir);
+    log('  DEL   hooks/');
+    changed += 1;
+  }
 
-  fs.writeFileSync(path.join(targetDir, 'GEMINI.md'), buildGeminiAgentsContent(targetDir), 'utf8');
-  log('  WRITE GEMINI.md');
-  copied += 1;
+  changed += writeFileLogged(path.join(targetDir, 'GEMINI.md'), buildGeminiAgentsContent(targetDir), log, 'GEMINI.md');
+  changed += deploySkills(targetDir, log);
 
-  copied += deploySkills(targetDir, log);
-
-  mergeSettings(geminiSettingsObject(), path.join(targetDir, 'settings.json'));
-  log('  MERGE settings.json');
-  copied += 1;
-
-  return copied;
+  if (mergeSettings(geminiSettingsObject(), path.join(targetDir, 'settings.json'))) {
+    log('  MERGE settings.json');
+    changed += 1;
+  }
+  return changed;
 }
 
 function uninstallGeminiGlobals(targetDir, log = console.log) {
@@ -906,6 +1009,7 @@ export {
   defaultCodexDir,
   defaultClaudeDir,
   defaultGeminiDir,
+  deployCategory,
   deployCodexGlobals,
   deployGeminiGlobals,
   deployRootFiles,
@@ -915,8 +1019,14 @@ export {
   injectSkillName,
   listEntries,
   mergeSettings,
+  logTreeChanges,
   readJson,
   readManagedKeys,
+  readTreeEntries,
+  removeLegacyCategories,
+  skillEntries,
+  syncTree,
+  writeIfChanged,
   compareRulePaths,
   renderSkillMd,
   renderSkillSubMd,
