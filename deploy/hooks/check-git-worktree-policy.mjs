@@ -1,7 +1,8 @@
 import { execSync } from "node:child_process";
 import path from "node:path";
 import { findGitInvocations, invocationCwd, partitionArgs } from "./git-command-parser.mjs";
-import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { addContext, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { repoTier } from "./repo-tiers.mjs";
 
 // 워크트리를 `<메인레포>/.claude/worktrees/` 밖에 만들지 못하게 막는다.
 //
@@ -13,6 +14,14 @@ import { deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 //
 // 레포 등급으로 면제하지 않는다 — repo-tiers.mjs는 브랜치 정책(merge·push·reset)의 강도를 가르는 목록이고,
 // 거기 FREE로 올라 있는 레포들이야말로 워크트리를 형제 경로에 쌓아 온 곳이다.
+//
+// 대신 FREE 레포에서 워크트리를 만들 때는 막지 않고 마무리 방식을 알린다. FREE에서는 브랜치 정책 훅이
+// 아무것도 막지 않아 말할 계기가 없고, 그러면 AI는 다른 레포에서처럼 머지 명령을 사용자에게 넘기고 멈춘다.
+// 이 안내가 예전엔 FREE 레포마다 CLAUDE.md 사본으로 있었다.
+const FREE_NOTE =
+  "이 레포는 git 정책 FREE 등급이라 보호 브랜치 머지·푸시·reset이 막히지 않는다. 이 워크트리 작업이 끝나면 " +
+  "실행할 명령을 사용자에게 넘기고 멈추지 말고, 기본 브랜치 위로 rebase하고 커밋을 작업 단위로 정리한 뒤 " +
+  "**기본 브랜치 머지 → 워크트리 제거 → 브랜치 삭제**(원격이 있으면 기본 브랜치 push까지) 직접 끝내고 결과만 보고한다.";
 const payload = readPayload();
 const cmd = getCommand(payload);
 if (typeof cmd !== "string" || !/\bworktree\b/.test(cmd)) process.exit(0);
@@ -29,6 +38,8 @@ const MSG = (target, expected) =>
 // `git worktree add`에서 다음 토큰을 값으로 먹는 플래그. 값을 positional로 세면 브랜치명이 경로로 오인된다.
 const VALUED = new Set(["-b", "-B", "--reason"]);
 
+let freeAdd = false;
+
 for (const inv of findGitInvocations(cmd, "worktree")) {
   if (inv.args[0] !== "add") continue;
   const { positionals } = partitionArgs(inv.args.slice(1), VALUED);
@@ -42,8 +53,10 @@ for (const inv of findGitInvocations(cmd, "worktree")) {
 
   const expected = path.join(mainRoot, MANAGED);
   if (!isInside(path.resolve(runCwd, target), expected)) deny(MSG(target, expected.replace(/\\/g, "/")));
+  if (repoTier(mainRoot) === "free") freeAdd = true;
 }
 
+if (freeAdd) addContext(FREE_NOTE, "PreToolUse");
 process.exit(0);
 
 // --- helpers ---

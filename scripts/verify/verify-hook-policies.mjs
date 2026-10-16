@@ -1566,9 +1566,18 @@ async function withWorktreePolicyFixture(fn) {
     await runGit(['add', 'a.txt'], main);
     await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'a.txt'], main);
     await runGit(['worktree', 'add', '-q', wtOutside, '-b', 'wt-branch'], main);
+    // FREE 등급 안내를 보려면 레포 이름이 FREE 목록에 있어야 한다(등급은 원본 레포 폴더 이름으로 가른다).
+    const free = path.join(root, 'backlog');
+    fs.mkdirSync(free);
+    await runGit(['init', '-q', '-b', 'main'], free);
+    fs.writeFileSync(path.join(free, 'a.txt'), 'a\n');
+    await runGit(['add', 'a.txt'], free);
+    await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'init', 'a.txt'], free);
     const posix = (value) => value.replace(/\\/g, '/');
     return await fn({
       main: posix(main),
+      free: posix(free),
+      freeManaged: posix(path.join(free, '.claude', 'worktrees')),
       managed: posix(path.join(main, '.claude', 'worktrees')),
       sibling: posix(path.join(root, 'sibling')),
       wtOutside: posix(wtOutside),
@@ -1580,7 +1589,11 @@ async function withWorktreePolicyFixture(fn) {
 }
 
 // [hook 파일, 명령, 기대 판정, 설명, (선택) payload.cwd]
-const worktreePolicyCases = ({ main, managed, sibling, wtOutside, nonGit }) => [
+const worktreePolicyCases = ({ main, free, freeManaged, managed, sibling, wtOutside, nonGit }) => [
+  // --- FREE 등급 레포는 막지 않고 마무리 방식을 알린다 ---
+  ['check-git-worktree-policy.mjs', `git -C ${free} worktree add ${freeManaged}/feature -b feature`, 'context', 'FREE 레포 관리 위치 밑은 통과하며 머지·정리까지 직접 하라고 알린다'],
+  ['check-git-worktree-policy.mjs', `git -C ${free} worktree add ${sibling}/free-feature -b free-feature`, 'deny', 'FREE 레포라도 관리 위치 밖은 차단'],
+
   // --- 위치 판정 ---
   ['check-git-worktree-policy.mjs', `git -C ${main} worktree add ${sibling}/feature -b feature`, 'deny', '형제 경로는 관리 위치 밖이라 차단'],
   ['check-git-worktree-policy.mjs', `git -C ${main} worktree add ${managed}/feature -b feature`, 'pass', '관리 위치 밑은 통과'],
