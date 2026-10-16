@@ -14,8 +14,16 @@ next:
 
 ## 입력·산출물·작업 위치
 
-- **입력**: implement가 쌓은 커밋(stub + IMPL + 리뷰 수정) + `pr{N}/retained/implementation.md`(Gap Analysis 계획) + `pr{N}/persistent/reference.md`·`decisions.md` + `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트) + `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
-- **산출물**: `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만) / `pr{N}/persistent/decisions.md` 갱신 / 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
+- **입력**
+  - implement가 쌓은 커밋(stub + IMPL + 리뷰 수정)
+  - `pr{N}/retained/implementation.md`(Gap Analysis 계획)
+  - `pr{N}/persistent/reference.md`·`decisions.md`
+  - `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트)
+  - `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+- **산출물**
+  - `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만)
+  - `pr{N}/persistent/decisions.md` 갱신
+  - 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 
 ---
@@ -40,7 +48,14 @@ next:
 
 `pr{N}/persistent/overview.md` `## TODO`에 남은 항목도 계획·커밋과 대조해 보고한다 — implement 시작 뒤에 도착한 항목이 여기서 잡힌다.
 
-위 대조는 Lead가 직접 하지 않고 일회성 서브에이전트에 맡긴다 — Lead에는 차이 목록만 있으면 된다. 두 파일 경로와 PR 기준 ref를 넘기고, 누락된 계획 항목, 추가 커밋(SHA·제목, 테스트가 함께 들어왔는지, 이 PR 범위 밖 파일을 건드렸는지와 그 파일 경로), 남은 TODO 항목만 돌려받는다. 추가 사유와 본 PR 범위인지·다른 PR로 넘길지의 판단은 Lead가 붙인다. implement가 앞 세션에서 돌았으면 그 세션 대화 기록 경로(찾는 법은 Step 6.6)도 넘겨 추가 커밋마다 사유가 된 대화 원문을 함께 받고, 거기서도 안 나오면 사용자에게 묻는다.
+위 대조는 Lead가 직접 하지 않고 일회성 서브에이전트에 맡긴다 — Lead에는 차이 목록만 있으면 된다.
+
+- 두 파일 경로와 PR 기준 ref를 넘기고, 아래만 돌려받는다.
+  - 누락된 계획 항목
+  - 추가 커밋(SHA·제목, 테스트가 함께 들어왔는지, 이 PR 범위 밖 파일을 건드렸는지와 그 파일 경로)
+  - 남은 TODO 항목
+- 추가 사유와 본 PR 범위인지·다른 PR로 넘길지의 판단은 Lead가 붙인다.
+- implement가 앞 세션에서 돌았으면 그 세션 대화 기록 경로(찾는 법은 Step 6.6)도 넘겨 추가 커밋마다 사유가 된 대화 원문을 함께 받고, 거기서도 안 나오면 사용자에게 묻는다.
 
 보고 기준: 차이가 있을 때만 기재. 차이가 없으면 섹션 생략.
 
@@ -77,7 +92,13 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 Step 6.2가 0건으로 수렴할 때마다(다시 돈 수렴 포함) 다음 단계로 넘어가기 전에 돈다. stub을 거쳤든 realize-plan에서 바로 실행했든 같다.
 
-Lead는 직접 대조하지 않고 서브에이전트를 띄운다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다. 서브에이전트는 MP `docs/patterns/testing/TestWriting.md` 「네이밍」 절을 Read 도구로 끝까지 읽고, 이 PR에서 새로 생기거나 이름이 바뀐 테스트 이름(`it`·`test`. 템플릿·`each`로 만든 이름은 펼친 값마다)을 감싼 `describe` 경로와 함께 한 행씩 표에 올린다. 행마다 그 절의 규칙을 하나씩 대보고 걸린 규칙 원문과 고칠 이름을 적는다. 걸린 규칙이 없으면 「없음」으로 적는다. 리뷰에서 반영한 대안 이름도 대상이다.
+Lead는 직접 대조하지 않고 서브에이전트를 띄운다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다.
+
+서브에이전트가 하는 일:
+
+- MP `docs/patterns/testing/TestWriting.md` 「네이밍」 절을 Read 도구로 끝까지 읽는다.
+- 이 PR에서 새로 생기거나 이름이 바뀐 테스트 이름(`it`·`test`. 템플릿·`each`로 만든 이름은 펼친 값마다)을 감싼 `describe` 경로와 함께 한 행씩 표에 올린다. 리뷰에서 반영한 대안 이름도 대상이다.
+- 행마다 그 절의 규칙을 하나씩 대보고 걸린 규칙 원문과 고칠 이름을 적는다. 걸린 규칙이 없으면 「없음」으로 적는다.
 
 걸린 이름은 Implementer가 고치고 이 대조를 다시 돌린다. 「네이밍」 절에 맞는 이름을 정하지 못하면 고치지 않고 사용자에게 올린다.
 
@@ -185,10 +206,16 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 결정은 두 곳에서 모은 뒤 decisions.md에 한 번에 쓴다.
 
 1. 이 PR의 implement·verify 대화 — 앞 세션에서 나온 결정은 그 세션 대화 기록에서 모은다
-   - 대화 기록은 Lead가 읽지 않고 일회성 서브에이전트에 맡긴다 — 기록이 수 MB이고 Lead에는 결정만 있으면 된다. Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
-   - 기록 경로와 decisions-lifecycle.md 경로를 넘기고 세 가지로 나눠 돌려받는다: 포함 기준에 드는 결정(결정마다 갈래, LLM 초안, 차수별 사용자 발화, 차수별 LLM 보고, 최종 채택안을 원문으로. 단발 발화에서 나온 것은 표시), 포함 여부가 애매한 후보(Lead가 사용자에게 묻는다), PR 분할·범위 변경 발화(TODO로 보낸다). 받은 원문으로 쓰고 기록을 다시 열지 않는다
+   - 대화 기록은 Lead가 읽지 않고 일회성 서브에이전트에 맡긴다 — 기록이 수 MB이고 Lead에는 결정만 있으면 된다.
+   - Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
+   - 기록 경로와 decisions-lifecycle.md 경로를 넘기고 세 가지로 나눠 돌려받는다. 받은 원문으로 쓰고 기록을 다시 열지 않는다
+     - 포함 기준에 드는 결정(결정마다 갈래, LLM 초안, 차수별 사용자 발화, 차수별 LLM 보고, 최종 채택안을 원문으로. 단발 발화에서 나온 것은 표시)
+     - 포함 여부가 애매한 후보(Lead가 사용자에게 묻는다)
+     - PR 분할·범위 변경 발화(TODO로 보낸다)
 2. 후임자 시각 예상 질문 — 코드를 본 후임자(히스토리 모름)가 "여기 왜 이렇게 했어요?"라고 물을 만한 질문을 PR diff + decisions.md로 뽑아 사용자에게 던진다. PR 머지 후 `/discussion` 대비
-   - 뽑기는 Lead가 하지 않고 일회성 서브에이전트에 맡긴다 — PR diff 전체를 훑는 일이고 Lead에는 질문만 있으면 된다. PR 기준 ref, decisions.md 경로, 1에서 모은 결정 목록을 넘기고, decisions.md에 이미 있는 결정과 1에서 모은 결정에 닿는 질문은 서브에이전트가 뺀 뒤 질문 목록(질문마다 닿는 `파일:줄`과 그 원문 줄)만 돌려받는다. Lead는 받은 줄로 사용자에게 던지고 diff·코드를 다시 열지 않는다
+   - 뽑기는 Lead가 하지 않고 일회성 서브에이전트에 맡긴다 — PR diff 전체를 훑는 일이고 Lead에는 질문만 있으면 된다.
+   - PR 기준 ref, decisions.md 경로, 1에서 모은 결정 목록을 넘기고, decisions.md에 이미 있는 결정과 1에서 모은 결정에 닿는 질문은 서브에이전트가 뺀 뒤 질문 목록(질문마다 닿는 `파일:줄`과 그 원문 줄)만 돌려받는다.
+   - Lead는 받은 줄로 사용자에게 던지고 diff·코드를 다시 열지 않는다
    - 사용자가 답할 수 있으면 → decisions.md에 결정 항목으로 추가할지 사용자가 선택
    - 답하기 어려운 항목은 [/discussion](../../discussion/SKILL.md) 스킬로 토론
 

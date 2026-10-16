@@ -112,7 +112,11 @@ README 초안은 workflow가 직접 쓰지 않는다. `/plan/`의 과제 요구�
 
 ### 클린 환경 실행 확인
 
-작업 폴더에는 `node_modules/`·미커밋 파일·`.env.local`이 그대로 있어, 빠뜨린 것이 있어도 빌드가 통과한다. 리뷰어가 받는 것만 든 빈 머신(GitHub Actions)에서 설치→빌드→실행→홈페이지 응답까지 돌려, 빨간불이면 제출하지 않고 실패 로그로 빠진 것을 사용자에게 보고한다. 절차는 [clean-env/procedure.md](clean-env/procedure.md).
+작업 폴더에는 `node_modules/`·미커밋 파일·`.env.local`이 그대로 있어, 빠뜨린 것이 있어도 빌드가 통과한다.
+
+- 리뷰어가 받는 것만 든 빈 머신(GitHub Actions)에서 설치→빌드→실행→홈페이지 응답까지 돌린다.
+- 빨간불이면 제출하지 않고 실패 로그로 빠진 것을 사용자에게 보고한다.
+- 절차는 [clean-env/procedure.md](clean-env/procedure.md).
 
 ### 제출 메일 작성
 
