@@ -183,7 +183,7 @@ const CASES = [
 
   // --- 새 브랜치·워크트리 이름의 한글 (check-git-ref-slug) ---
   ['check-git-ref-slug.mjs', 'git branch 맹점-기록', 'deny', 'branch로 만드는 한글 이름'],
-  ['check-git-ref-slug.mjs', 'git -C ~/repo checkout -b backlog-scw-6회차', 'deny', 'git -C가 껴도 checkout -b를 잡는다'],
+  ['check-git-ref-slug.mjs', 'git -C ~/repo checkout -b backlog-prompt-review-6회차', 'deny', 'git -C가 껴도 checkout -b를 잡는다'],
   ['check-git-ref-slug.mjs', 'git switch -c 기록', 'deny', 'switch -c'],
   ['check-git-ref-slug.mjs', 'git switch --orphan=기록', 'deny', '값을 붙여 쓴 꼴'],
   ['check-git-ref-slug.mjs', 'git branch -m old 새이름', 'deny', '이름 바꾸기는 마지막 이름을 본다'],
@@ -193,7 +193,7 @@ const CASES = [
   ['check-git-ref-slug.mjs', 'git branch -D 맹점-기록', 'pass', '옛 한글 브랜치 삭제는 통과'],
   ['check-git-ref-slug.mjs', 'git checkout 맹점-기록', 'pass', '이미 있는 브랜치로 옮기기는 통과'],
   ['check-git-ref-slug.mjs', 'git branch -m 맹점-기록 blind-spot-log', 'pass', '한글 이름을 영문으로 바꾸기는 통과'],
-  ['check-git-ref-slug.mjs', 'git checkout -b scw-file-layout', 'pass', '영문 슬러그는 통과'],
+  ['check-git-ref-slug.mjs', 'git checkout -b prompt-review-file-layout', 'pass', '영문 슬러그는 통과'],
   ['check-git-ref-slug.mjs', 'git commit a.md -m "브랜치 정리"', 'pass', '메시지 안의 한글은 관여하지 않는다'],
 
   // --- PR 본문의 생성 표기 줄 (check-pr-attribution-policy). 본문 파일 케이스는 prAttributionGroup ---
@@ -769,7 +769,7 @@ const TOOL_CASES = [
   ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: '/code-review' }, agent_id: 'areviewer-e97f90164e618f3d' }, 'deny', '앞에 슬래시가 붙어도 차단'],
   ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'apps/web:code-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '접두가 붙은 다른 code-review는 통과'],
   ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' } }, 'pass', '메인이 code-review → 통과'],
-  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'scw' }, agent_id: 'a4bec0644659e5080' }, 'pass', '서브에이전트의 다른 스킬 → 통과'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'prompt-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '서브에이전트의 다른 스킬 → 통과'],
   // workflow 팀원(이름이 workflow-) 종료 금지. 팀원은 이름·이름@팀·내부 ID(a이름-해시)로 불린다.
   // 배경 셸과 workflow 밖의 팀원은 메인이 끝낸다.
   [

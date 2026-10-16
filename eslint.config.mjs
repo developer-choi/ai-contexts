@@ -24,7 +24,7 @@ const noCjs = [
 ];
 
 // 버전이 박힌 모델 ID(`claude-sonnet-4-6` 등)는 새 모델이 나와도 아무것도 안 알려주고 옛 모델로 돈다.
-// 2026-10-09 scw 벤치 하네스 기본값이 `claude-sonnet-4-6`이라 Sonnet 5.5가 나온 뒤에도 옛 모델로 재
+// 2026-10-09 prompt-review 벤치 하네스 기본값이 `claude-sonnet-4-6`이라 Sonnet 5.5가 나온 뒤에도 옛 모델로 재
 // 항목을 판정했다. 별칭(`sonnet`·`opus`·`haiku`)을 쓰고, 실제 ID가 필요하면 실행 시점에 물어 얻는다.
 const noPinnedModelId = [
   {

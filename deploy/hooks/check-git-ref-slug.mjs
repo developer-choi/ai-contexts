@@ -10,7 +10,7 @@ const payload = readPayload();
 const HANGUL = /[ㄱ-ㆎ가-힣]/;
 const MSG = (name) =>
   `브랜치·워크트리 이름 \`${name}\`에 한글이 들어 있어 차단했습니다. ` +
-  "영문 슬러그(소문자 + 하이픈, 예: `scw-file-layout-diet`)로 다시 만드세요.";
+  "영문 슬러그(소문자 + 하이픈, 예: `prompt-review-file-layout-diet`)로 다시 만드세요.";
 
 const check = (name) => {
   if (typeof name === "string" && HANGUL.test(name)) deny(MSG(name));
