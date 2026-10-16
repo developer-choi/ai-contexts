@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // `session-state.mjs source-usage`의 집계·거부·알림 판정을 회귀 검증한다.
 //
-// 이 눈금은 틀려도 아무 소리를 안 낸다 — 한 칸 잘못 세거나 같은 갈래가 두 줄로 갈려도 그 자리에서는
+// 이 눈금은 틀려도 아무 소리를 안 낸다 — 한 칸 잘못 세거나 같은 종류가 두 줄로 갈려도 그 자리에서는
 // 정상으로 보이고, 몇 달 뒤 안 차는 눈금으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
 // sync:system이 배포 전 fail-fast로 돌려, 잘못 세는 판이 배포되는 것을 막는다.
 
@@ -24,7 +24,7 @@ const label = (pairs) => Object.fromEntries(pairs.map(([t, kind]) => [`## 4단 �
 // 각 케이스: 씨앗 상태 → 인자 → 기대 exit code·상태·출력
 const CASES = [
   {
-    note: '같은 갈래 두 절 중 하나만 인용되면 그 갈래는 값을 했다',
+    note: '같은 종류 두 절 중 하나만 인용되면 그 종류는 값을 했다',
     sections: [sec('A', true), sec('B', false)],
     labels: label([['A', '업계 실무 자료'], ['B', '업계 실무 자료']]),
     expect: { code: 0, kinds: { '업계 실무 자료': { read: 1, unused: 0 } } },
@@ -36,7 +36,7 @@ const CASES = [
     expect: { code: 0, kinds: { 학술논문: { read: 1, unused: 1 } } },
   },
   {
-    note: '절이 많은 갈래도 한 눈금이다 — 절 단위로 세면 그 갈래가 분모를 독식한다',
+    note: '절이 많은 종류도 한 눈금이다 — 절 단위로 세면 그 종류가 분모를 독식한다',
     sections: [sec('A', false), sec('B', false), sec('C', false), sec('D', true)],
     labels: label([['A', '법령·제도 원문'], ['B', '법령·제도 원문'], ['C', '법령·제도 원문'], ['D', '법령·제도 원문']]),
     expect: { code: 0, kinds: { '법령·제도 원문': { read: 1, unused: 0 } } },
@@ -48,13 +48,13 @@ const CASES = [
     expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 1 } }, absent: ['해당 없음'] },
   },
   {
-    note: '목록 밖 갈래는 거부하고 상태를 안 건드린다',
+    note: '목록 밖 종류는 거부하고 상태를 안 건드린다',
     sections: [sec('A', false)],
     labels: label([['A', '사람 축 1차']]),
-    expect: { code: 1, unchanged: true, stderr: '모르는 갈래' },
+    expect: { code: 1, unchanged: true, stderr: '모르는 종류' },
   },
   {
-    note: '라벨을 빠뜨리면 거부한다 — 빠뜨림은 곧 그 갈래의 분모가 줄어드는 것이다',
+    note: '라벨을 빠뜨리면 거부한다 — 빠뜨림은 곧 그 종류의 분모가 줄어드는 것이다',
     sections: [sec('A', false), sec('B', false)],
     labels: label([['A', '인터뷰']]),
     expect: { code: 1, unchanged: true, stderr: '라벨이 안 붙은 4단 절' },
@@ -70,10 +70,10 @@ const CASES = [
     expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 0 } } },
   },
   {
-    note: '옛 갈래 이름 「앱스토어 설명·리뷰」는 거부한다 — 앱 설명은 3단으로 옮겨 4단 갈래는 「앱 리뷰」다',
+    note: '옛 종류 이름 「앱스토어 설명·리뷰」는 거부한다 — 앱 설명은 3단으로 옮겨 4단 종류는 「앱 리뷰」다',
     sections: [sec('A', false)],
     labels: label([['A', '앱스토어 설명·리뷰']]),
-    expect: { code: 1, unchanged: true, stderr: '모르는 갈래' },
+    expect: { code: 1, unchanged: true, stderr: '모르는 종류' },
   },
   {
     note: '이 회차가 안 떠온 절은 거부한다',
@@ -109,14 +109,14 @@ const CASES = [
     expect: { code: 0, kinds: { 학술논문: { read: 2, unused: 2 } }, noStdout: '[4단 낭비 의심]' },
   },
   {
-    note: '이번 회차가 안 떠온 갈래는 선을 넘었어도 안 뜬다',
+    note: '이번 회차가 안 떠온 종류는 선을 넘었어도 안 뜬다',
     seed: { 학술논문: { read: 3, unused: 3, last: today }, 인터뷰: { read: 2, unused: 2, last: today } },
     sections: [sec('A', false)],
     labels: label([['A', '인터뷰']]),
     expect: { code: 0, stdout: '인터뷰', noStdout: '학술논문' },
   },
   {
-    note: '창 밖으로 나간 갈래는 안 뜬다 — 자리를 고쳐 눈금이 멈추면 알람이 저절로 꺼진다',
+    note: '창 밖으로 나간 종류는 안 뜬다 — 자리를 고쳐 눈금이 멈추면 알람이 저절로 꺼진다',
     seed: { 학술논문: { read: 5, unused: 5, last: daysAgo(200) } },
     sections: [sec('A', true)],
     labels: label([['A', '설문·통계']]),
@@ -131,7 +131,7 @@ const CASES = [
     expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 1 } }, stdout: '이미 더했다' },
   },
   {
-    note: '센 회차는 갈래마다 쓰였는지와 함께 남는다 — 안 남으면 다음 세션이 같은 회차를 또 센다',
+    note: '센 회차는 종류마다 쓰였는지와 함께 남는다 — 안 남으면 다음 세션이 같은 회차를 또 센다',
     sections: [sec('A', true), sec('B', false)],
     labels: label([['A', '인터뷰'], ['B', '학술논문']]),
     expect: { code: 0, round: { 인터뷰: true, 학술논문: false } },
@@ -152,7 +152,7 @@ const CASES = [
     expect: { code: 0, kinds: { 인터뷰: { read: 2, unused: 2 } } },
   },
   {
-    note: '같은 회차 앞 세션이 안 쓴 갈래를 뒤 세션이 쓰면 안 쓴 눈금만 되돌리고, 앞 세션에 없던 갈래는 더한다',
+    note: '같은 회차 앞 세션이 안 쓴 종류를 뒤 세션이 쓰면 안 쓴 눈금만 되돌리고, 앞 세션에 없던 종류는 더한다',
     seed: { 인터뷰: { read: 1, unused: 1, last: today } },
     rounds: { [`${today}/x`]: { day: today, kinds: { 인터뷰: false } } },
     sections: [sec('A', true), sec('B', false)],
@@ -160,7 +160,7 @@ const CASES = [
     expect: { code: 0, kinds: { 인터뷰: { read: 1, unused: 0 }, 학술논문: { read: 1, unused: 1 } }, stdout: '쓴 것으로 고침 1건' },
   },
   {
-    note: '제외한 갈래는 눈금에서 지워지고 다시 안 쌓인다',
+    note: '제외한 종류는 눈금에서 지워지고 다시 안 쌓인다',
     seed: { 학술논문: { read: 3, unused: 3, last: today } },
     sections: [sec('A', false)],
     labels: label([['A', '학술논문']]),
@@ -251,10 +251,10 @@ function main() {
     fs.rmSync(dir, { recursive: true, force: true });
   }
   if (failures.length) {
-    console.error(`4단 갈래 누계 판정 검증 실패: ${failures.length}건`);
+    console.error(`4단 종류 누계 판정 검증 실패: ${failures.length}건`);
     process.exit(1);
   }
-  console.log('4단 갈래 누계 판정 정상');
+  console.log('4단 종류 누계 판정 정상');
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
