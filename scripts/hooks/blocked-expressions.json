@@ -293,7 +293,7 @@
       "게이트"
     ],
     "why": "무엇을 확인하는 관문인지 안 적힌 외래어라 뜻을 바로 못 잡는다",
-    "instead": "ready를 달기 전 채워야 하는 문항이란 뜻이면 「Ready 요건」으로 정해 두었다(backlog projects/CLAUDE.md 「Ready 요건 — 자가검증」). 그 밖의 뜻이면 무엇을 확인하는지 풀어 쓴다 (예: rules-as-code의 두 게이트 → 두 가지 물음)",
+    "instead": "ready를 달기 전 채워야 하는 문항이란 뜻이면 「Ready 요건」으로 정해 두었다(backlog projects/ready.md 「Ready 요건 — 자가검증」). 그 밖의 뜻이면 무엇을 확인하는지 풀어 쓴다 (예: rules-as-code의 두 게이트 → 두 가지 물음)",
     "exclusions": []
   },
   {

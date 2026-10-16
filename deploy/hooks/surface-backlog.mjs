@@ -85,7 +85,7 @@ function listMarkdownFiles(dir) {
 
 // 실제 상황이 와야 확인할 수 있는 항목(frontmatter `on-real-use`)이면 { kind, note }를, 아니면 null을 낸다.
 // 파일명만으로는 세션이 「지금 내가 그 상황인가」를 못 알아봐, 그 상황을 겪는 세션이 지나쳐 버린다.
-// note는 `on-real-use-note`, 없으면 종류 값. 형식은 backlog 레포 `projects/CLAUDE.md`가 정한다.
+// note는 `on-real-use-note`, 없으면 종류 값. 형식은 backlog 레포 `projects/item-format.md`가 정한다.
 function readRealUse(file) {
   let text;
   try {
