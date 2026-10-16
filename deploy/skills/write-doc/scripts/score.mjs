@@ -1,17 +1,31 @@
 #!/usr/bin/env node
 // write 산출물 채점 하네스 (객관 + 반객관 자동 계측).
 //
-// pre-exit write-refine 보강과 write-refine 검수의 채점 스크립트 검사가 호출하는 채점 도구.
 // 주관(만족/불만족·추가교정)은 사람 전속이라 여기서 안 잰다. 점수로 합치지 않는다 —
-// 층(객관·반객관)을 따로 출력한다.
+// 객관(숫자)과 반객관(기계 매칭)을 따로 출력한다.
 //
-// 금지어 목록과 그 규칙의 상세는 아래 RULES가 함께 든다(SSOT). 문서에는 사본을 두지 않는다 —
+// 이미 굳힌 금지어 목록과 그 규칙의 상세는 아래 RULES가 함께 든다. 문서에는 사본을 두지 않는다 —
 // 기계가 100% 잡는 규칙을 문서에 적으면 그 규칙을 어길 글이든 아니든 매 회차 통째로 실린다.
-// 가르는 기준과 못 내리는 것은 RULES 주석에 적어 뒀다.
+// 앞으로 새로 막을 낱말은 RULES가 아니라 writing-guide/rejected.md에 레인과 함께 올린다(아래).
+//
+// PR 제목(pr-body의 H1)도 여기서 본다: 끝 마침표·conventional commit 접두사·공백 포함 60자 초과는 합계에 든다.
+// 기준은 pr-body 템플릿 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
+//
+// 사용자가 반려한 낱말·문구도 쌓인 두 곳에서 함께 잡는다.
+// - 모든 글: writing-guide/rejected.md(줄 꼴은 그 파일 머리). 배포본을 읽어서, 원본에 새로 올린 줄은 배포 뒤에 잡힌다.
+//   읽은 자리나 건너뛴 까닭을 출력 첫머리에 한 줄 남긴다.
+// - 이 글만: 패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 사유가 쓰임에 걸린 것이 많아 경고로만 낸다.
+//   절·내용 항목은 리뷰어 몫이라 안 잡는다.
 //
 // 사용:
-//   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]
-//   node score.mjs --rules            무엇을 잡는지 전부 낸다 (낱말·경고 레인·대체어)
+//   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]
+//   node score.mjs --rules            무엇을 잡는지 낸다 (낱말·경고 레인·대체어)
+//   node score.mjs <산출물.md> --structure   긴 한 줄 문단·개수 선언 뒤 리스트 없음만 낸다
+//                                            (톤을 다듬기 전, 내용을 채운 초안의 나눔만 볼 때)
+//   node score.mjs <산출물.md> --residual    남은 `[//]: #` 주석만 낸다. 있으면 exit 1 (발행 직전 확인)
+//   node score.mjs <산출물.md> --json        사람용 출력 끝에 기계용 `@@score {total,titleHits}` 한 줄을 더한다
+//
+// 줄 번호(L)는 frontmatter를 포함한 파일 기준이다.
 //
 // 명제리스트(--props): 한 줄에 핵심 명제 하나. 본문에 substring으로 들어있는지만 본다.
 // 토큰·턴(--tokens/--turns): 세션에서 얻는 값. 주면 객관 표에 기록만 한다(자동 산출 불가).
@@ -19,12 +33,98 @@
 // 반객관 매칭은 한국어 단어 경계가 없어 false positive가 날 수 있다(예: '유사' in '유사성').
 // 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
 import fs from "node:fs";
+import path from "node:path";
 
+// 소스(deploy/skills/write-doc/scripts)와 배포본(<타겟>/skills/write-doc/scripts) 둘 다 세 단계 위가 contexts의 부모다.
+const AC_REJECTED = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide", "rejected.md");
+
+// 「반려된 표현」 한 줄: `- [합계:|경고:] "<표현>"[·"<활용형>"…] → <대신 쓸 말> — <날짜> <근거>`.
+// 레인 표시가 없으면 경고로 읽는다 — 레인을 정하기 전에 쌓인 줄이라 쓰임을 가렸는지 모른다.
+// 큰따옴표 안 글자만 찾는다. 근거 발화에도 큰따옴표가 있어 `→` 앞에서만 꺼낸다.
+// 활용형은 늘리지 않는다 — `부르다 → 불러`처럼 불규칙이 흔해 기계가 만든 꼴은 틀리기 쉽다. 줄이 꼴을 하나씩 적는다.
+const REJECTED_LINE = /^-\s+(?:(합계|경고):\s*)?(.*?)\s+→\s+(.*?)(?:\s+—\s+\d{4}-\d{2}-\d{2}.*)?$/;
+
+function parseRejectedLines(text) {
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
+  const at = lines.findIndex((ln) => /^##\s+반려된 표현\s*$/.test(ln));
+  if (at === -1) return { entries: [], unreadable: 0, noLane: 0, badLane: 0 };
+  const entries = [];
+  let unreadable = 0;
+  // 레인을 빠뜨리거나 잘못 적은 줄은 경고로 읽혀, 「게시 막힘」으로 승인한 줄이 조용히 경고가 된다 — 따로 세서 알린다.
+  let noLane = 0;
+  let badLane = 0;
+  for (const ln of lines.slice(at + 1)) {
+    if (/^#{1,2}\s/.test(ln)) break;
+    if (!/^-\s/.test(ln)) continue;
+    const lane = ln.match(/^-\s+([^\s"]+):/);
+    if (!lane) noLane += 1;
+    else if (lane[1] !== "합계" && lane[1] !== "경고") badLane += 1;
+    const m = ln.match(REJECTED_LINE);
+    const words = m ? [...m[2].matchAll(/"([^"]+)"/g)].map((q) => q[1]) : [];
+    if (!words.length) {
+      unreadable += 1;
+      continue;
+    }
+    // 대신 쓸 말도 같은 수만큼 따옴표로 적었으면 꼴마다 짝짓는다(`"부르는"` → `"호출하는"`).
+    const swaps = [...m[3].matchAll(/"([^"]+)"/g)].map((q) => q[1]);
+    const paired = words.length > 1 && swaps.length === words.length;
+    words.forEach((w, i) => entries.push({ word: w, lane: m[1] ?? "경고", swap: paired ? `"${swaps[i]}"` : m[3] }));
+  }
+  return { entries, unreadable, noLane, badLane };
+}
+
+function loadAcRejected() {
+  if (!fs.existsSync(AC_REJECTED)) return { entries: [], note: `건너뜀 — 파일 없음 (${AC_REJECTED})` };
+  const { entries, unreadable, noLane, badLane } = parseRejectedLines(fs.readFileSync(AC_REJECTED, "utf8"));
+  const n = (lane) => entries.filter((e) => e.lane === lane).length;
+  return {
+    entries,
+    note:
+      `읽음 ${AC_REJECTED} — 합계 ${n("합계")} · 경고 ${n("경고")}` +
+      (unreadable ? ` · 따옴표 표현이 없어 기계가 안 찾는 줄 ${unreadable}` : "") +
+      (noLane ? ` · 레인 없음 ${noLane}(경고로 읽음)` : "") +
+      (badLane ? ` · 알 수 없는 레인 ${badLane}(경고로 읽음 — 합계:·경고: 중 하나로 고친다)` : ""),
+  };
+}
+
+// PR 제목 기계 기준. pr-body 템플릿 「PR 제목」과 짝이다.
+const CONVENTIONAL_PREFIX = /^(feat|fix|chore|refactor|docs|style|test|perf|build|ci|revert)(\([^)]*\))?!?:/i;
+const TITLE_MAX = 60;
+
+// 코드펜스 밖 첫 `# ` 줄을 [파일 줄 번호, 제목]으로 낸다.
+function firstH1(bodyLines, offset) {
+  let fenced = false;
+  for (let i = 0; i < bodyLines.length; i++) {
+    const ln = bodyLines[i];
+    if (/^\s*(```|~~~)/.test(ln)) fenced = !fenced;
+    else if (!fenced && /^# \S/.test(ln)) return [i + 1 + offset, ln.slice(2).trim()];
+  }
+  return null;
+}
+
+function checkTitle(title) {
+  const out = [];
+  if (/[.。]$/.test(title)) out.push("끝 마침표 — 뗀다");
+  if (CONVENTIONAL_PREFIX.test(title)) out.push("conventional commit 접두사 — 뗀다");
+  const len = [...title].length;
+  if (len > TITLE_MAX) out.push(`${len}자(공백 포함 ${TITLE_MAX}자 이하) — 주장을 받치는 방법·근거부터 덜어낸다`);
+  return out;
+}
+
+// 커밋 해시는 영문자(a-f)가 하나 이상 든 것만 본다 — 숫자로만 된 7자리 이상(측정값 등)을 해시로 잡지 않는다.
 const INTERNAL = {
   PR번호: /PR\s*#?\d+/g,
-  커밋해시: /\b[0-9a-f]{7,40}\b/g,
+  커밋해시: /\b(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}\b/g,
   브랜치명: /\b(feature|fix|chore|refactor)\/\S+/g,
 };
+
+// 내부 작업이력을 합계에 넣을지. PR 번호·커밋을 근거 링크로 일부러 싣는 글은 경고로만 낸다 — 채용 PR(커밋 링크),
+// README(PR 링크별 요약), 사례집(실제 작업 PR 링크), PR 코멘트(커밋을 짚어 말한다). pr-body 템플릿도 이 금지를
+// 「일반 PR이면」으로 한정한다.
+const INTERNAL_AS_EVIDENCE = new Set(["readme", "case-study", "pr-comment"]);
+function internalCounts(type, subtype) {
+  return !INTERNAL_AS_EVIDENCE.has(type) && subtype !== "recruitment";
+}
 
 const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 
@@ -32,7 +132,7 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 //
 // 왜 문서가 아니라 여기인가: 기계가 100% 잡는 규칙은 문서에 두면 그 규칙을 어길 글이든 아니든
 // 매 회차 통째로 실린다. 위반이 뜬 자리에서만 알리면 되고, 알릴 때 무엇으로 바꿀지까지 함께 내면
-// 사람이 규칙을 기억해 스스로 찾는 것보다 정확하다. decision-guide.md가 헤딩·라벨 표기에 이미
+// 사람이 규칙을 기억해 스스로 찾는 것보다 정확하다. writing-guide types/decision/guide.md가 헤딩·라벨 표기에 이미
 // 같은 방식을 쓴다. 목록을 보고 싶으면 `--rules`로 전부 낸다.
 //
 // 못 내리는 것: 반려가 안 오는 규칙. 기계가 판정 못 하는 규칙을 문서에서 걷으면 적발 0건이
@@ -42,7 +142,7 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 //
 // `warn: true`는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만 위반 등)이다. 매칭은 하되
 // 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라, 정상 문장이 걸릴 수 있는 항목을
-// 넣으면 멀쩡한 문장을 깎아야 0이 된다. **금지어를 새로 굳힐 때 어느 쪽에 넣을지가 이 갈림이다.**
+// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.md의 `합계:`·`경고:` 레인이 같은 갈림이다.
 const RULES = {
   "딱딱한 한자어 회피": {
     words: ["유사", "파편화", "구조화", "이원화", "직렬화", "명세"],
@@ -63,7 +163,7 @@ const RULES = {
       "「어떤 각도/방향이지?」에서 멈춘다. 본문이 즉시 받아주는 구체어나 풀어쓴 표현으로 간다 " +
       "(`다각도 학습` → `유형별 학습`, 본문이 「정의·비교·오해 점검 세 유형」으로 곧장 푼다. 풀이형은 `한 주제를 여러 각도에서 학습`).",
   },
-  // 「인터페이스」는 넣지 않는다 — Interface와 한글 표기를 둘 다 쓰는 낱말이라 0-강제 레인에
+  // 「인터페이스」는 넣지 않는다 — Interface와 한글 표기를 둘 다 쓰는 낱말이라 합계 레인에
   // 넣으면 정상적으로 쓴 자리까지 매번 고치게 된다. 음차 판정 자체는 tone.md 산문이 든다.
   "외래어 음차 회피": {
     words: ["디프리케이트"],
@@ -150,7 +250,7 @@ const RULES = {
   "en-dash(U+2013)": { what: "em dash와 같은 원칙으로 피한다. 대체도 같다." },
   "낫표 금지": {
     words: ["「", "」"],
-    what: "인용·라벨 표기에 낫표를 쓰지 않는다. [X] 꼴 대괄호로 바꾼다.",
+    what: "낫표(「」)를 쓰지 않는다. 화면 문구는 큰따옴표로, 버튼·UI 요소 이름은 [대괄호]로 바꾼다.",
   },
 };
 
@@ -183,43 +283,79 @@ function printRules() {
   }
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
+  const ac = loadAcRejected();
+  console.log(`\n## 모든 글 반려 표현  (줄마다 합계·경고 레인)`);
+  console.log(`   ${ac.note}`);
+  for (const e of ac.entries) console.log(`   ${e.lane}: '${e.word}' 대신: ${e.swap}`);
+  console.log(`\n## 이 글 반려  (경고 — 합계에서 뺌)`);
+  console.log("   패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 절·내용 항목은 안 잡는다.");
 }
 
-// 1a 습니다체 휴리스틱: 평서문 종결이 반말이면 잡는다. 명사형(이력서)·정중체는 통과.
+function findRejectedHits(lines, entries) {
+  const hits = [];
+  for (const e of entries) {
+    for (const [lineno, ln] of lines) if (ln.includes(e.word)) hits.push({ ...e, lineno, line: ln.trim() });
+  }
+  return hits;
+}
+
+function dumpRejectedHits(name, hits, note = "", label = "대신") {
+  console.log(`\n[${name}] ${hits.length}건${note}`);
+  for (const h of hits) {
+    console.log(`   '${h.word}' (L${h.lineno}): ${h.line.slice(0, 70)}`);
+    console.log(`   → ${label}: ${h.swap}`);
+  }
+}
+
+// 습니다체 휴리스틱: 평서문 종결이 반말이면 잡는다. 명사형·정중체는 통과.
 const BANMAL_END = /(?:[가-힣])(?:는다|ㄴ다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
 const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아요|에요|예요)\.?$/;
 
+const COMMENT_LINE = /^\[\/\/\]: #/;
+
+// 본문과, 본문 앞에서 뗀 줄 수를 돌려준다. 출력하는 줄 번호는 이 수를 더해 파일 기준으로 낸다 —
+// 읽는 쪽은 파일을 열어 본 줄 번호로 자리를 찾는다.
 function splitFrontmatter(text) {
   if (text.startsWith("---")) {
     const end = text.indexOf("\n---", 3);
     if (end !== -1) {
       const nl = text.indexOf("\n", end + 1);
-      return nl !== -1 ? text.slice(nl + 1) : "";
+      const body = nl !== -1 ? text.slice(nl + 1) : "";
+      const offset = text.slice(0, text.length - body.length).split("\n").length - 1;
+      return { body, offset };
     }
   }
-  return text;
+  return { body: text, offset: 0 };
 }
 
-// 코드펜스 안·인용블록(>) 줄은 dash/금지어 검사에서 뺀 본문만 돌려준다.
-function stripCodeAndQuotes(rawLines) {
+// 코드펜스 안·인용블록(>)·`[//]: #` 주석 줄을 뺀 본문 줄을 [파일 줄 번호, 줄]로 돌려준다.
+// 주석 줄은 AI가 사용자에게 묻거나 사용자가 남긴 지시라, 그 안의 낱말을 고치면 사용자 글자를 고치게 된다.
+// 남은 주석은 따로 센다(comments).
+function stripCodeAndQuotes(rawLines, offset = 0) {
   const out = [];
+  const comments = [];
   let inFence = false;
   rawLines.forEach((ln, i) => {
     const s = ln.trim();
-    if (s.startsWith("```")) {
+    if (s.startsWith("```") || s.startsWith("~~~")) {
       inFence = !inFence;
       return;
     }
     if (inFence) return;
     if (s.startsWith(">")) return;
-    out.push([i + 1, ln]);
+    if (COMMENT_LINE.test(ln)) {
+      comments.push([i + 1 + offset, ln]);
+      return;
+    }
+    out.push([i + 1 + offset, ln]);
   });
-  return out;
+  return { lines: out, comments };
 }
 
 function countSentences(body) {
   const text = body.replace(/```[\s\S]*?```/g, "");
-  return (text.match(/[.!?。]|다\s|요\s|니다/g) ?? []).length;
+  // 문장 끝 하나를 한 번만 센다. 구두점은 뒤가 공백·줄 끝일 때만(`1.5` 제외), `다`·`요`는 구두점 없이 끝날 때만 센다.
+  return (text.match(/[.!?。](?=\s|$)|[다요](?=\s|$)/gm) ?? []).length;
 }
 
 function objective(body) {
@@ -245,7 +381,9 @@ function findInternal(lines) {
   const hits = [];
   for (const [cat, rx] of Object.entries(INTERNAL)) {
     for (const [lineno, ln] of lines) {
-      for (const m of ln.matchAll(new RegExp(rx.source, rx.flags))) {
+      // 링크 주소(`](…)`) 안의 해시·번호는 독자에게 안 보이는 글자라 뺀다.
+      const shown = ln.replace(/\]\([^)]*\)/g, "]");
+      for (const m of shown.matchAll(new RegExp(rx.source, rx.flags))) {
         hits.push([cat, m[0], lineno, ln.trim()]);
       }
     }
@@ -264,7 +402,7 @@ function findDashes(lines) {
   return hits;
 }
 
-// 1a — 휴리스틱. 반말 종결로 보이는 본문 줄을 후보로 잡는다.
+// 휴리스틱. 반말 종결로 보이는 본문 줄을 후보로 잡는다.
 function checkPoliteness(lines) {
   const flags = [];
   for (const [lineno, ln] of lines) {
@@ -284,9 +422,11 @@ const QUESTION_END = /(?:까요|나요|은가요|는가요|던가요)$/;
 function checkQuestionMark(lines) {
   const hits = [];
   for (const [lineno, ln] of lines) {
-    const s = ln.trim().replace(/^#+\s*/, "").replace(/[*_`\s]+$/, "");
+    const s = ln.trim().replace(/^#+\s*/, "");
     if (!s || s.startsWith("|")) continue;
-    if (QUESTION_END.test(s)) hits.push([lineno, ln.trim()]);
+    // 물음표 자리에 마침표를 찍은 꼴(`볼까요.`)이 가장 흔해, 문장마다 끝 마침표·서식을 떼고 본다.
+    const sents = s.split(/(?<=[.!])\s+/).map((x) => x.replace(/[.!*_`\s]+$/, ""));
+    if (sents.some((x) => QUESTION_END.test(x))) hits.push([lineno, ln.trim()]);
   }
   return hits;
 }
@@ -326,11 +466,49 @@ function checkCountDeclaration(lines) {
   return hits;
 }
 
+// 엔터 없이 한 줄로 길게 몰아 쓴 문단·리스트 항목. tone.md 「문단 길이 상한선」이 문장 수로 적혀 있지만
+// 한국어 문장 끊기가 부정확해 기계는 글자 수로 잰다. 링크 URL·HTML 태그는 읽히지 않으니 빼고, 리스트 기호도 뺀다.
+//
+// 문턱 180자: 한 줄이라 읽기 어렵다고 반려된 문단이 200자, 같은 원고의 승인본에서
+// 가장 긴 줄이 159자였다. 실측(코드·표·인용·헤딩 밖 줄): 블로그 발행본 136줄 중 0건, writing-guide
+// 567줄 중 11건(1.9%). 한 논지를 길게 편 멀쩡한 문단도 걸릴 수 있어 합계에는 안 넣는다.
+const LONG_LINE = 180;
+
+function checkLongLines(lines) {
+  const hits = [];
+  for (const [lineno, ln] of lines) {
+    const s = ln.trim();
+    if (s.startsWith("#") || s.startsWith("|")) continue;
+    const len = s
+      .replace(/^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/, "")
+      .replace(/\]\((?:[^()]|\([^)]*\))*\)/g, "]")
+      .replace(/https?:\/\/\S+/g, "")
+      .replace(/<[^>]+>/g, "").length;
+    if (len >= LONG_LINE) hits.push([lineno, len, s]);
+  }
+  return hits;
+}
+
+function printStructure(lines) {
+  const longHits = checkLongLines(lines);
+  console.log(`\n[긴 한 줄 문단] ${longHits.length}건 (눈으로 확인 — ${LONG_LINE}자 이상)`);
+  for (const [lineno, len, ln] of longHits) console.log(`   L${lineno} (${len}자): ${ln.slice(0, 70)}`);
+  if (longHits.length) {
+    console.log(
+      "   → 단계·대비 항목·나열을 한 줄에 몰았으면 리스트로, 주제가 둘 이상이면 헤딩으로 나눈다." +
+        " 한 논지를 편 문단이면 문장 사이에서 문단을 끊는다.",
+    );
+  }
+  const countHits = checkCountDeclaration(lines);
+  console.log(`\n[개수 선언 뒤 리스트 없음] ${countHits.length}건 (눈으로 확인 — 핵심 나열이면 번호 목록으로)`);
+  for (const [lineno, ln] of countHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
+  return { longHits, countHits };
+}
+
 // 「명사 + 화」 꼴 한자어. tone.md 「딱딱한 한자어 회피」가 이 계열을 통째로 덮는데 낱말 목록으로는
 // 굳힌 여섯 개만 잡혀, 같은 결의 새 낱말이 매번 샜다.
 //
-// 목록이 아니라 패턴이라 tone.md 주석(<!-- banned: -->)에 못 담는다 — 그 주석은 낱말만 받는다.
-// 그래서 이 검사만 목록이 코드에 산다.
+// 목록이 아니라 패턴이라 RULES(낱말 목록만 받는다)에 못 담아 이 검사를 따로 둔다.
 //
 // 경고 레인이다(합계에서 뺀다). 「화」로 끝난다고 다 딱딱한 것이 아니라 사람이 골라야 한다.
 // 실측: 블로그 발행본 23편에 13건(파일당 0.6), AC deploy 173개에 236건(파일당 1.4).
@@ -354,38 +532,35 @@ function checkHanjaSuffix(lines) {
   return hits;
 }
 
-// C1 — 헤딩별 본문이 1문장 미만이면 빈 섹션. placeholder 잔존은 따로 센다
-// (placeholder_policy: keep이면 남기는 것이 정상이라 위반이 아니다).
-// 마크다운 링크([텍스트](url))는 placeholder 대괄호가 아니므로 먼저 걷어낸다.
-function checkEmptySections(text, placeholderPolicy) {
+// 헤딩별 본문이 1문장 미만이면 빈 섹션. 마크다운 링크([텍스트](url))는 내용으로 치지 않는다.
+// `[//]: #` 주석은 사용자에게 묻는 자리라, 주석만 남은 절은 빈 섹션으로 세지 않고 「남은 주석」으로만 보인다.
+// 코드펜스 안의 `#`(셸 주석 등)은 헤딩이 아니고, 코드블록은 내용으로 친다 — 실행 방법처럼 코드블록만 든 절이 있다.
+function checkEmptySections(text) {
   const lines = text.split("\n");
   const heads = [];
+  let inFence = false;
   lines.forEach((ln, i) => {
-    if (/^#{1,6}\s/.test(ln)) heads.push([i, ln, ln.match(/^#+/)[0].length]);
+    const s = ln.trim();
+    if (s.startsWith("```") || s.startsWith("~~~")) inFence = !inFence;
+    else if (!inFence && /^#{1,6}\s/.test(ln)) heads.push([i, ln, ln.match(/^#+/)[0].length]);
   });
   const empties = [];
-  const placeholders = [];
   heads.forEach(([i, head, level], idx) => {
     const next = heads[idx + 1];
     // 바로 다음이 더 깊은 헤딩이면 내용을 하위 절이 담는 상위 절이라 빈 섹션이 아니다.
     if (next && next[2] > level) return;
     const end = next ? next[0] : lines.length;
     const body = lines.slice(i + 1, end).join("\n").trim();
-    const bodyWoLinks = body.replace(/\[[^\]]*\]\([^)]*\)/g, "");
-    const bodyWoPh = bodyWoLinks.replace(/\[.*?\]/g, "");
-    // 코드의 대괄호(`x['a']`, 배열)는 placeholder가 아니다 — 코드블록·인라인 코드를 걷은 뒤 센다.
-    const bodyWoCode = bodyWoLinks.replace(/(```|~~~)[\s\S]*?\1/g, "").replace(/`[^`\n]*`/g, "");
-    const hasPlaceholder = /\[.*?\]/.test(bodyWoCode);
-    if (hasPlaceholder) placeholders.push(head.trim());
-    // keep 정책에서 placeholder만 있는 절은 사용자가 채울 자리라 C1b로만 보고한다.
-    if (hasPlaceholder && placeholderPolicy === "keep") return;
-    if (bodyWoPh.replace(/\s/g, "").length < 10) empties.push([head.trim(), "내용 1문장 미만"]);
+    const isComment = /^\[\/\/\]: #/m;
+    const prose = body.replace(/^\[\/\/\]: #.*$/gm, "").replace(/\[[^\]]*\]\([^)]*\)/g, "");
+    if (prose.replace(/\s/g, "").length >= 10 || isComment.test(body)) return;
+    empties.push([head.trim(), "내용 1문장 미만"]);
   });
-  return { empties, placeholders, nheads: heads.length };
+  return { empties, nheads: heads.length };
 }
 
 // decision 문서의 비교 구조. 「방법이 둘 이상인가」와 「각 방법이 장단점을 둘 다 채웠는가」는
-// 헤딩·리터럴 매칭이라 판단이 안 든다 — decision-guide 산문이 표기를 못박는 대신 여기서 잡는다.
+// 헤딩·리터럴 매칭이라 판단이 안 든다 — decision guide.md 산문이 표기를 못박는 대신 여기서 잡는다.
 // (탈락 사유가 실제로 드러나는가는 판단이 남아 여기서 안 본다.)
 const METHOD_HEAD = /^###\s+방법\s*\d+\./;
 
@@ -416,21 +591,54 @@ function checkDecisionStructure(text) {
   return methods;
 }
 
-// placeholder를 남기는 것이 정상인지는 frontmatter가 정한다. 없으면 keep(기본값).
-function readPlaceholderPolicy(text) {
-  if (!text.startsWith("---")) return "keep";
-  const end = text.indexOf("\n---", 3);
-  if (end === -1) return "keep";
-  const m = text.slice(3, end).match(/^\s*placeholder_policy:\s*(\S+)/m);
-  return m ? m[1] : "keep";
+// case-study 사례집의 골격·링크. 「사례마다 ### 문제·### 해결이 있는가」, 「[자세히 보기] 링크」,
+// 「사례 앞 굵은 요약 문장」은 헤딩·리터럴 매칭이라 판단이 안 든다 — case-study guide.md가 정한 골격을
+// 여기서 기계로 잡는다. (질문이 짧은가·굵게가 핵심 낱말뿐인가는 판단이 남아 안 본다.)
+// `###`도 굵은 칸 라벨(`**문제**` 등)도 없는 `##` 절은 하위 헤딩 없이 쓰는 맺음 절로 보고 칸 검사에서 뺀다.
+// 입력은 stripCodeAndQuotes를 거친 [줄번호, 줄] — 코드 예시 안의 `#` 주석을 헤딩으로 잡지 않는다.
+const MORE_LINK = /\[\s*자세히\s*보기\s*\]/;
+// 굵은 글이 문장으로 끝날 때만 요약 문장으로 본다 — `**바꾸기 전**` 같은 짧은 라벨은 정상이다.
+const BOLD_LEAD = /^\*\*[^*]+?(?:[.!?。]|[다요])\*\*/;
+const CELL_LABEL = /^\*\*\s*(문제|해결)\s*:?\s*\*\*\s*:?\s*$/;
+
+function checkCaseStudy(numbered) {
+  const cases = [];
+  let cur = null;
+  const moreLinks = [];
+  const boldLeads = [];
+  for (const [lineno, ln] of numbered) {
+    const s = ln.trim();
+    const top = ln.replace(/^ {0,3}/, ""); // 4칸 넘게 들여쓴 줄은 코드 블록이라 헤딩이 아니다
+    if (/^##\s/.test(top)) {
+      cur = { head: s, subs: [], labels: [] };
+      cases.push(cur);
+    } else if (/^###\s/.test(top) && cur) cur.subs.push(s.replace(/^###\s+/, "").replace(/\s+#+\s*$/, "").trim());
+    else if (CELL_LABEL.test(s) && cur) cur.labels.push(s.match(CELL_LABEL)[1]);
+    const noCode = s.replace(/`[^`\n]*`/g, "").replace(/<!--[\s\S]*?-->/g, "");
+    if (MORE_LINK.test(noCode)) moreLinks.push([lineno, s]);
+    const item = s.replace(/^(?:[-*+]|\d+\.)\s+/, "");
+    if (!CELL_LABEL.test(s) && BOLD_LEAD.test(item)) boldLeads.push([lineno, s]);
+  }
+  const real = cases.filter((c) => c.subs.length || c.labels.length);
+  const holes = real
+    .map((c) => ({
+      head: c.head,
+      labels: c.labels,
+      miss: [
+        !c.subs.some((h) => /^문제$/.test(h)) && "문제",
+        !c.subs.some((h) => /^해결(\s*\d+\s*[.:].*)?$/.test(h)) && "해결",
+      ].filter(Boolean),
+    }))
+    .filter((c) => c.miss.length);
+  return { ncases: real.length, holes, moreLinks, boldLeads };
 }
 
-function readDocType(text) {
+function readFrontmatterScalar(text, key) {
   if (!text.startsWith("---")) return null;
   const end = text.indexOf("\n---", 3);
   if (end === -1) return null;
-  const m = text.slice(3, end).match(/^\s*type:\s*(\S+)/m);
-  return m ? m[1] : null;
+  const m = text.slice(3, end).match(new RegExp(`^${key}:[ \\t]*(\\S+)`, "m"));
+  return m ? unquoteYaml(m[1]) : null;
 }
 
 // YAML 스칼라 하나의 따옴표를 푼다(`'…'`의 `''`, `"…"`의 이스케이프).
@@ -447,19 +655,17 @@ function unquoteYaml(value) {
   return v;
 }
 
-// frontmatter `user_phrases`의 항목(`'"구절 원문" (출처)'`)을 [구절, 항목 전체]로 돌려준다.
-// 구절은 첫 `" (`까지다 — 구절 안에 큰따옴표가 있어도(`"버튼 "저장"을 누른다" (출처)`) 출처 앞에서 끊는다.
-// 큰따옴표로 감싼 구절이 없으면 항목 전체를 구절로 본다.
-function readUserPhrases(text) {
+// frontmatter의 목록 필드(`user_phrases`·`rejected`) 항목을 따옴표를 푼 문자열로 돌려준다.
+function readFrontmatterList(text, key) {
   const src = text.replace(/\r\n/g, "\n");
   if (!src.startsWith("---")) return [];
   const end = src.indexOf("\n---", 3);
   if (end === -1) return [];
   const fm = src.slice(3, end).split("\n");
-  const at = fm.findIndex((ln) => /^user_phrases:/.test(ln));
+  const at = fm.findIndex((ln) => ln.startsWith(`${key}:`));
   if (at === -1) return [];
   const items = [];
-  const inline = fm[at].slice("user_phrases:".length).trim();
+  const inline = fm[at].slice(key.length + 1).trim();
   if (inline.startsWith("[")) {
     // 인라인 배열은 쉼표가 구절 안에도 올 수 있어 따옴표 단위로 자른다.
     for (const m of inline.matchAll(/'(?:[^']|'')*'|"(?:[^"\\]|\\.)*"/g)) items.push(unquoteYaml(m[0]));
@@ -471,7 +677,14 @@ function readUserPhrases(text) {
       if (m) items.push(unquoteYaml(m[1]));
     }
   }
-  return items.flatMap((item) => {
+  return items;
+}
+
+// frontmatter `user_phrases`의 항목(`'"구절 원문" (출처)'`)을 [구절, 항목 전체]로 돌려준다.
+// 구절은 첫 `" (`까지다 — 구절 안에 큰따옴표가 있어도(`"버튼 "저장"을 누른다" (출처)`) 출처 앞에서 끊는다.
+// 큰따옴표로 감싼 구절이 없으면 항목 전체를 구절로 본다.
+function readUserPhrases(text) {
+  return readFrontmatterList(text, "user_phrases").flatMap((item) => {
     // 한 항목에 구절 여럿을 묶어 적은 꼴(`"A" / "B" (출처)`)은 통째로 대조하면 남아 있는 구절도 누락으로 잡혀,
     // 구절마다 따로 대조하고 묶였다고 표시한다. 따옴표 덩어리 사이에 구두점·공백만 있을 때만 묶음으로 본다.
     const head = item.match(/^(.*?")\s*\(/)?.[1] ?? item;
@@ -480,6 +693,18 @@ function readUserPhrases(text) {
     }
     const quoted = item.match(/^"(.*?)"\s*\(/) ?? item.match(/^"(.*)"$/);
     return [[quoted ? quoted[1] : item, item, false]];
+  });
+}
+
+// frontmatter `rejected` 항목(`'"원문" (사유)'`) 중 낱말·문구만 {word, swap}으로 돌려준다. swap 자리에 사유를 낸다.
+// 사유 앞이 따옴표 덩어리뿐일 때만 낱말로 본다 — `"X" 절 (사유)`처럼 절을 가리키거나 따옴표 없이 내용을 적은 항목은
+// 본문 글자로 찾을 것이 아니라 리뷰어 몫이다. 한 항목에 여럿(`"A"·"B" (사유)`)이면 따로 찾는다.
+function readRejectedWords(text) {
+  return readFrontmatterList(text, "rejected").flatMap((item) => {
+    const head = item.match(/^(.*?")\s*\(/)?.[1] ?? item.trim();
+    if (!/^"[^"]+"(?:\s*[/,·|+&]?\s*"[^"]+")*$/.test(head)) return [];
+    const why = item.slice(head.length).trim().replace(/^\((.*)\)$/, "$1") || "(사유 없음)";
+    return [...head.matchAll(/"([^"]+)"/g)].map((m) => ({ word: m[1], lane: "경고", swap: why }));
   });
 }
 
@@ -503,15 +728,17 @@ function section(title) {
 }
 
 function parseArgs(argv) {
-  const args = { file: null, props: null, tokens: null, turns: null, resume: false };
+  const args = { file: null, props: null, tokens: null, turns: null };
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--props") args.props = argv[++i];
     else if (a === "--tokens") args.tokens = Number(argv[++i]);
     else if (a === "--turns") args.turns = Number(argv[++i]);
-    else if (a === "--resume") args.resume = true;
     else if (a === "--rules") args.rules = true;
+    else if (a === "--structure") args.structure = true;
+    else if (a === "--residual") args.residual = true;
+    else if (a === "--json") args.json = true;
     else rest.push(a);
   }
   args.file = rest[0] ?? null;
@@ -525,15 +752,32 @@ function main() {
     return;
   }
   if (!args.file) {
-    console.error("사용: node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N] [--resume]");
+    console.error("사용: node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]");
     console.error("      node score.mjs --rules   (무엇을 잡는지 전부 낸다)");
+    console.error("      node score.mjs <산출물.md> --structure   (긴 한 줄 문단·개수 선언만 낸다)");
+    console.error("      node score.mjs <산출물.md> --residual    (남은 [//]: # 주석만 본다, 있으면 exit 1)");
+    console.error("      node score.mjs <산출물.md> --json        (끝에 기계용 @@score 한 줄을 더한다)");
     process.exit(1);
   }
 
-  const raw = fs.readFileSync(args.file, "utf8");
-  const body = splitFrontmatter(raw);
-  const lines = stripCodeAndQuotes(body.split("\n"));
+  const raw = fs.readFileSync(args.file, "utf8").replace(/\r\n/g, "\n");
+  const { body, offset } = splitFrontmatter(raw);
+  const { lines, comments } = stripCodeAndQuotes(body.split("\n"), offset);
+  if (args.structure) {
+    printStructure(lines);
+    return;
+  }
+  if (args.residual) {
+    // 발행 직전 확인: 남은 주석이 있으면 줄을 내고 1로 끝난다. publish-pr를 안 거치는 발행처(README 등)가 쓴다.
+    for (const [lineno, ln] of comments) console.log(`L${lineno}: ${ln.trim()}`);
+    console.log(comments.length ? `남은 주석 ${comments.length}건 — 처리하거나 지운 뒤 발행한다` : "남은 주석 없음");
+    process.exit(comments.length ? 1 : 0);
+  }
+  const docType = readFrontmatterScalar(raw, "type");
+  const docSubtype = readFrontmatterScalar(raw, "subtype");
   const { banned, contextual } = wordLists();
+  const acRejected = loadAcRejected();
+  console.log(`모든 글 반려: ${acRejected.note}`);
 
   section("객관 (자동 계측)");
   const { chars, sents, words } = objective(body);
@@ -547,15 +791,15 @@ function main() {
   const internalHits = findInternal(lines);
   const dashHits = findDashes(lines);
   const politeHits = checkPoliteness(lines);
-  const policy = readPlaceholderPolicy(raw);
-  const { empties, placeholders, nheads } = checkEmptySections(body, policy);
+  const { empties, nheads } = checkEmptySections(body);
+  const internalInTotal = internalCounts(docType, docSubtype);
 
   const dump = (name, hits, fmt) => {
     console.log(`\n[${name}] ${hits.length}건`);
     for (const h of hits) console.log("   " + fmt(h));
   };
 
-  // 규칙 묶음별로 걸린 줄을 낸 뒤 그 규칙의 상세를 한 번 붙인다. 상세는 GUIDE가 든다.
+  // 규칙 묶음별로 걸린 줄을 낸 뒤 그 규칙의 상세를 한 번 붙인다. 상세는 RULES가 든다.
   const dumpByRule = (name, hits, note = "") => {
     console.log(`\n[${name}] ${hits.length}건${note}`);
     const groups = new Map();
@@ -571,18 +815,35 @@ function main() {
 
   dumpByRule("금지어", bannedHits);
   dumpByRule("문맥 확인 필요", contextHits, " (합계에서 뺌 — 쓰임을 보고 실제 위반만 고른다)");
-  dump("내부 작업이력(5a)", internalHits, (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`);
-  dumpByRule("em/en dash(10a)", dashHits);
+  const LANE_NOTE = " (합계에서 뺌 — 눈으로 확인, 쓰임이 반려된 뜻일 때만 고친다)";
+  const acHits = findRejectedHits(lines, acRejected.entries);
+  const rejectedBanned = acHits.filter((h) => h.lane === "합계");
+  const rejectedWarn = acHits.filter((h) => h.lane === "경고");
+  dumpRejectedHits("모든 글 반려 표현", rejectedBanned);
+  dumpRejectedHits("모든 글 반려 표현 — 경고", rejectedWarn, LANE_NOTE);
+  const pkgRejectedHits = findRejectedHits(lines, readRejectedWords(raw));
+  dumpRejectedHits(
+    "이 글 반려(frontmatter rejected)",
+    pkgRejectedHits,
+    " (합계에서 뺌 — 눈으로 확인, 반려된 쓰임으로 다시 들어갔으면 고친다)",
+    "사유",
+  );
+  dump(
+    internalInTotal
+      ? "내부 작업이력"
+      : "내부 작업이력 (합계에서 뺌 — 이 글은 PR·커밋 링크를 근거로 싣는다. 독자가 열 수 없는 것만 고른다)",
+    internalHits,
+    (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`,
+  );
+  dumpByRule("em/en dash", dashHits);
   const questionHits = checkQuestionMark(lines);
   dump("의문형에 물음표 없음", questionHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
-  console.log(
-    `\n[습니다체(1a) 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능` +
-      (args.resume ? ", 이력서 명사형 허용)" : ")"),
-  );
+  const h1 = docType === "pr-body" ? firstH1(body.split("\n"), offset) : null;
+  const titleHits = h1 ? checkTitle(h1[1]).map((why) => [h1[0], h1[1], why]) : [];
+  if (docType === "pr-body") dump("PR 제목", titleHits, (h) => `L${h[0]} 「${h[1]}」: ${h[2]}`);
+  console.log(`\n[습니다체 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능)`);
   for (const [lineno, ln] of politeHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
-  const countHits = checkCountDeclaration(lines);
-  console.log(`\n[개수 선언 뒤 리스트 없음] ${countHits.length}건 (눈으로 확인 — 핵심 나열이면 번호 목록으로)`);
-  for (const [lineno, ln] of countHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
+  const { longHits, countHits } = printStructure(lines);
   const hanjaHits = checkHanjaSuffix(lines);
   console.log(`\n[「~화」 한자어] ${hanjaHits.length}건 (눈으로 확인 — 「화」로 끝난다고 다 딱딱한 것은 아니다)`);
   for (const [w, lineno, ln] of hanjaHits) console.log(`   '${w}' (L${lineno}): ${ln.slice(0, 70)}`);
@@ -594,30 +855,59 @@ function main() {
   }
 
   section("완전성 (반객관)");
-  console.log(`[C1 빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
+  console.log(`[빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
   for (const [head, why] of empties) console.log(`   ${head}  ← ${why}`);
-  const phCounts = policy !== "keep";
   console.log(
-    `\n[C1b placeholder 잔존] ${placeholders.length}개 섹션 · placeholder_policy: ${policy}` +
-      (phCounts ? " (위반)" : " (남기는 것이 정상 — 위반 아님)"),
+    `\n[남은 주석] ${comments.length}건 (눈으로 확인 — 사용자에게 묻는 자리라 합계에서 뺀다. ` +
+      "남은 채로는 게시가 막힌다)",
   );
-  for (const head of placeholders) console.log(`   ${head}`);
-  if (readDocType(raw) === "decision") {
+  for (const [lineno, ln] of comments) console.log(`   L${lineno}: ${ln.trim().slice(0, 70)}`);
+  if (docType === "decision") {
     const methods = checkDecisionStructure(body);
     const holes = methods.filter((m) => !m.장점 || !m.단점);
-    console.log(`\n[decision 비교 구조] 방법 ${methods.length}개` + (methods.length < 2 ? " (2개 미만 — 보강 필요)" : ""));
+    const few =
+      methods.length === 0
+        ? " (`### 방법 N.` 꼴 헤딩을 못 찾음 — 표기가 다르면 그 꼴로 바꾸고, 방법이 없으면 사용자에게 받는다)"
+        : methods.length < 2
+          ? " (2개 미만 — 비교할 방법을 사용자에게 받는다)"
+          : "";
+    console.log(`\n[decision 비교 구조] 방법 ${methods.length}개` + few);
     for (const m of holes) {
       const miss = [!m.장점 && "장점", !m.단점 && "단점"].filter(Boolean).join("·");
       console.log(`   ${m.head}  ← ${miss} 누락·공란`);
     }
   }
+  let caseLinkHits = [];
+  let caseBoldHits = [];
+  if (docType === "case-study") {
+    const cs = checkCaseStudy(lines);
+    caseLinkHits = cs.moreLinks;
+    caseBoldHits = cs.boldLeads;
+    console.log(
+      `\n[case-study 칸] 사례 ${cs.ncases}개 중 ${cs.holes.length}개 칸 누락` +
+        (cs.holes.length ? " (합계에서 뺌 — 채울 내용은 지어내지 말고 사용자에게 받는다)" : ""),
+    );
+    for (const h of cs.holes) {
+      const fromLabel = h.miss.filter((m) => h.labels.includes(m));
+      const absent = h.miss.filter((m) => !h.labels.includes(m));
+      const why = [
+        fromLabel.length && `**${fromLabel.join("**·**")}** 굵은 라벨 → ### 헤딩으로 바꾼다`,
+        absent.length && `### ${absent.join("·### ")} 없음`,
+      ].filter(Boolean);
+      console.log(`   ${h.head}  ← ${why.join(" / ")}`);
+    }
+    dump("case-study [자세히 보기] 링크", caseLinkHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
+    if (caseLinkHits.length) console.log("   → 지운다. 근거가 필요하면 링크 글자에 무엇이 있는지 적은 근거 링크(실제 작업 PR·원문 글)로 바꾼다.");
+    dump("case-study 굵은 요약 문장", caseBoldHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
+    if (caseBoldHits.length) console.log("   → 문장 전체를 굵게 하지 않는다. 굵게는 그 문장의 핵심 낱말에만 남긴다.");
+  }
 
   if (args.props) {
     const { props, missing } = checkProps(body, args.props);
-    console.log(`\n[C2 핵심명제] ${props.length}개 중 ${missing.length}개 누락`);
+    console.log(`\n[핵심명제] ${props.length}개 중 ${missing.length}개 누락 (합계에서 뺌 — 빠진 명제를 사용자에게 알린다)`);
     for (const m of missing) console.log(`   누락: ${m}`);
   } else {
-    console.log("\n[C2 핵심명제] --props 미지정 (G2 명제 리스트 필요)");
+    console.log("\n[핵심명제] 안 봄 — 한 줄에 명제 하나씩 적은 파일을 --props로 넘기면 본문에 들어 있는지 본다");
   }
 
   // 사용자가 직접 넣거나 승인한 구절이 다듬기·리뷰어 대안 반영 중에 사라졌는지 본다. 바꾼 쪽에도 근거가
@@ -644,21 +934,31 @@ function main() {
   }
 
   section("주관 (사람 전속 — 여기서 안 잼)");
-  console.log("  만족/불만족 · 추가교정 횟수 → 눈가림 채점");
+  console.log("  만족/불만족 · 추가교정 횟수 → 사람이 적는다");
 
   const total =
     bannedHits.length +
-    internalHits.length +
+    rejectedBanned.length +
+    (internalInTotal ? internalHits.length : 0) +
     dashHits.length +
     questionHits.length +
+    titleHits.length +
     empties.length +
-    (phCounts ? placeholders.length : 0);
+    caseLinkHits.length +
+    caseBoldHits.length;
   console.log(
     `\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건` +
-      ` + 눈으로 확인 후보 ${politeHits.length + contextHits.length + countHits.length + hanjaHits.length}건` +
-      `(습니다체 ${politeHits.length} · 문맥 ${contextHits.length} · 개수 선언 ${countHits.length}` +
-      ` · ~화 ${hanjaHits.length})`,
+      ` + 눈으로 확인 후보 ${
+        politeHits.length + contextHits.length + rejectedWarn.length + pkgRejectedHits.length + longHits.length + countHits.length + hanjaHits.length +
+        (internalInTotal ? 0 : internalHits.length)
+      }건` +
+      `(습니다체 ${politeHits.length} · 문맥 ${contextHits.length} · 반려 경고 ${rejectedWarn.length} · 이 글 반려 ${pkgRejectedHits.length}` +
+      ` · 긴 줄 ${longHits.length} · 개수 선언 ${countHits.length} · ~화 ${hanjaHits.length}` +
+      (internalInTotal ? "" : ` · 작업이력 ${internalHits.length}`) +
+      ")",
   );
+  // 다른 스크립트(게시)가 읽는 기계용 한 줄. 사람이 읽는 출력 꼴이 바뀌어도 이 줄로 판정을 넘긴다.
+  if (args.json) console.log(`@@score ${JSON.stringify({ total, titleHits: titleHits.map((h) => `L${h[0]} 「${h[1]}」: ${h[2]}`) })}`);
 }
 
 main();

@@ -8,7 +8,6 @@ entry: >-
 model: Opus
 next:
   - to: realize-plan
-  - to: pr-body-draft
 ---
 
 # plan: 과제 정의
@@ -148,7 +147,7 @@ overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자�
 
 ### 산출물: `/plan/pr{N}/persistent/decisions.md`
 
-본 step에서 초기 작성. 책임·포함·제외 기준·갈래별 양식·생성 게이트(단발 발화 확인)는 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
+본 step에서 초기 작성. 책임·포함·제외 기준·갈래별 양식·만들어도 되는지 확인하는 조건(단발 발화 확인)은 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
 
 ---
 

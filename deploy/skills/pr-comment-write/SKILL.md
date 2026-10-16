@@ -8,7 +8,7 @@ argument-hint: "[PR URL 또는 코멘트 내용]"
 
 ## 목적
 
-남의 PR에 코멘트를 달기 전에, 사용자의 지적이 틀렸거나 이미 답이 나와 있는 것은 아닌지 검증한다. 말투 다듬기는 이 스킬이 직접 하지 않고 `write-init`·`write-refine`에 넘긴다.
+남의 PR에 코멘트를 달기 전에, 사용자의 지적이 틀렸거나 이미 답이 나와 있는 것은 아닌지 검증한다. 말투 다듬기는 이 스킬이 직접 하지 않고 `write-doc`에 넘긴다.
 
 ## 진행 절차
 
@@ -28,6 +28,4 @@ argument-hint: "[PR URL 또는 코멘트 내용]"
 
 ### 3. 코멘트 작성
 
-검증을 통과한 내용을 컨텍스트로 `/write-init pr-comment reviewer` 호출. 패키지 파일을 생성한다.
-
-다듬기는 `/write-refine <패키지 경로>`로 이어서 진행한다.
+검증을 통과한 내용을 컨텍스트로 `/write-doc pr-comment reviewer` 호출.

@@ -32,7 +32,7 @@ const PROMPT_DOC = /\/(skills|rules|contexts|meta\/guides)\//;
 const CLAUDE_LIKE = /^(CLAUDE|AGENTS|GEMINI)\.md$/i;
 
 // 남의 본문을 예시로 인용하는 자리.
-const EXCLUDE = /\/(writing-guide\/examples|recruitment\/pr-body)\//;
+const EXCLUDE = /\/writing-guide\/(examples|types\/pr-body\/recruitment\/library)\//;
 
 // backlog 레포의 백로그 데이터는 경로에 `/rules/`가 들어가도 프롬프트 문서가 아니다.
 const BACKLOG_REPO = "backlog";

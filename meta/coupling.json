@@ -9,12 +9,13 @@
       "note": "workflow 팀원 이름 접두사(workflow-)가 두 곳에 산다 — workflow SKILL.md 「진행 중」과 hook-utils의 isWorkflowTeammate. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 한쪽만 바꾸면 팀원 이름이 훅 판정에서 빠져 종료 금지가 조용히 풀린다. 바꿀 때는 둘 다 고치고 verify-hook-policies 케이스도 맞춘다."
     },
     {
-      "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅",
+      "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅 ↔ 채점기",
       "files": [
-        "deploy/skills/write-init/SKILL.md",
-        "deploy/hooks/check-package-frontmatter.mjs"
+        "deploy/skills/write-doc/SKILL.md",
+        "deploy/hooks/check-package-frontmatter.mjs",
+        "deploy/skills/write-doc/scripts/score.mjs"
       ],
-      "note": "type 목록과 subtype 필수 여부가 두 곳에 산다 — write-init 「입력」 표와 훅의 PACKAGE_TYPES·SUBTYPE_REQUIRED_TYPES. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 필수 필드 검사를 통째로 빠져나간다(훅이 PACKAGE_TYPES로 self-filter하므로 미등록 type은 검사가 아예 안 걸린다). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 둘 다 고치고 verify-hook-policies에 케이스를 넣는다."
+      "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅의 PACKAGE_TYPES·SUBTYPE_REQUIRED_TYPES, 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 필수 필드 검사를 통째로 빠져나간다(훅이 PACKAGE_TYPES로 self-filter하므로 미등록 type은 검사가 아예 안 걸린다). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type 이름을 바꾸거나 지울 때 함께 맞춘다."
     },
     {
       "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 커밋 시점 검사 ↔ 회차 점검",
@@ -108,11 +109,11 @@
       "files": [
         "deploy/contexts/writing-guide/map.md",
         "deploy/contexts/writing-guide/**",
-        "deploy/skills/write-init/SKILL.md",
-        "deploy/skills/write-refine/SKILL.md",
-        "deploy/skills/write-refine/expression-review.md"
+        "deploy/skills/write-doc/steps/draft.md",
+        "deploy/skills/write-doc/steps/polish.md",
+        "deploy/skills/write-doc/reviewers/expression.md"
       ],
-      "note": "이 폴더의 파일을 언제 읽을지는 write-init·write-refine의 로드 목록이 정본이다. write-refine은 사례 파일을 메인이 읽지 않고 리뷰어에게 경로로 넘기므로, 그 목록이 SKILL.md에 있고 넘기는 규격이 expression-review.md에 있다 — 한쪽만 고치면 리뷰어가 받는 경로와 실제 파일이 어긋나고, 그 어긋남은 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`contexts/prompt-standards/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 파일을 추가·삭제하거나 여는 조건이 바뀌면 두 스킬의 로드 목록을 함께 고치고, 두 목록을 맞대어 어긋난 곳이 없는지 본다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
+      "note": "이 폴더의 파일을 언제 읽을지는 write-doc 초안·다듬기 단계(steps/draft.md·polish.md)의 로드 목록이 정본이다. 다듬기 단계는 사례 파일을 메인이 읽지 않고 리뷰어에게 경로로 넘기므로, 그 목록이 steps/polish.md에 있고 넘기는 규격이 reviewers/expression.md에 있다 — 한쪽만 고치면 리뷰어가 받는 경로와 실제 파일이 어긋나고, 그 어긋남은 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`contexts/prompt-standards/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 파일을 추가·삭제하거나 여는 조건이 바뀌면 두 단계의 로드 목록을 함께 고치고, 두 목록을 맞대어 어긋난 곳이 없는지 본다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
     },
     {
       "name": "정책 hook ↔ 판정 회귀 계약",
@@ -144,14 +145,6 @@
         "scripts/local-system/sync-local-system.mjs"
       ],
       "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-environment·sync-system·sync-local-system을 이 순서로 실행·게이트하며, 세 진입 경로(scripts/environment/sync-environment.mjs·scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩한다. 이 세 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
-    },
-    {
-      "name": "금지어·경고 레인 — 채점기 ↔ 절차 문서",
-      "files": [
-        "deploy/skills/pre-exit/augmentations/score.mjs",
-        "deploy/skills/pre-exit/augmentations/write-refine.md"
-      ],
-      "note": "채점기 RULES가 낱말 목록과 규칙 상세의 정본이다(문서에 사본 없음 — 기계가 빠짐없이 잡는 규칙을 문서에 적으면 그 규칙을 어길 글이든 아니든 매 회차 실린다). 사본이 없으므로 목록 자체는 어긋날 자리가 없지만, **합계에 들어가는 것과 눈으로 확인할 것의 경계**는 두 곳에 걸쳐 있다 — 채점기가 무엇을 합계에 더하는지, 회고 보강의 「반객관」 항목 나열. write-refine 검수는 항목을 나열하지 않고 출력의 「눈으로 확인」 표시를 따른다. 경고 레인(RULES의 warn·「~화」 한자어·습니다체 휴리스틱·개수 선언)을 더하거나 빼면 두 곳을 함께 고친다. 합계에 잘못 넣으면 정상 문장이 0-수렴에 걸려 깎이고 그 손실은 산출물에서만 드러난다. 판단이 남는 규칙은 tone.md 산문이 들고 채점기는 안 건드린다 — 목록으로만 옮기면 적발 0건이 통과로 읽혀 규칙이 사라진다."
     },
     {
       "name": "프로젝트 약어 — 전역 규칙 ↔ 절 인용 훅",
@@ -198,6 +191,14 @@
         "deploy/rules/global.md"
       ],
       "note": "별도 세션 제안의 방아쇠 정본은 side-session.md 방아쇠 표다. 세션이 그 문서를 안 연 채 지나치지 않게 SKILL.md 「진행 중」과 steps.mjs start 출력에 요약을 둔다(2026-10 벤치: 요약 없이 정본만 링크했을 때 사용자가 시킨 조사·재현에서 발동 0회). 요약은 과정이 큰 방아쇠만 골라 「등」으로 끝낸다. 정본의 방아쇠·판단 기준(결론만 필요하고 과정은 다시 쓰지 않는가)을 바꾸면 두 요약의 낱말도 맞춘다. 안 맞추면 정본을 안 연 세션이 옛 기준으로 발동하거나 지나친다. 전역 지침(deploy/CLAUDE.md 서브에이전트 절)은 「호출 전 확인은 그대로 한다」의 예로 별도 세션 제안을 부른다 — 그 예가 없으면 사용자가 서브에이전트 조사를 시켰을 때 「되묻지 않는다」에 눌려 제안이 안 나왔다(벤치 0/3 → 예 포함 2/3). 전역 rules(deploy/rules/global.md 「검증이 가능한 경우…」 절 머리)도 스킬이 조사·재현 전에 정한 확인부터 하라는 문장의 예로 별도 세션 제안을 부른다 — 그 줄이 없으면 전역 rules를 실은 세션이 직접 재현 쪽으로 바로 들어가 제안이 회차마다 빠졌다(벤치 A 4/5·B 2/5·C 4/5 → 그 줄 포함 5/5·5/5·5/5). 정책 이름을 바꾸면 두 예를 함께 맞춘다. 그 절의 둘째 문장(옆 세션에서 가져온 결론도 직접 검증)은 side-session.md 머리 문단 문장의 사본이라, 정본 문장을 바꾸거나 빼면 함께 맞춘다."
+    },
+    {
+      "name": "PR 제목 기준 — pr-body 템플릿 ↔ 채점기",
+      "files": [
+        "deploy/contexts/writing-guide/types/pr-body/template.md",
+        "deploy/skills/write-doc/scripts/score.mjs"
+      ],
+      "note": "PR 제목의 기계 기준(끝 마침표·conventional commit 접두사·공백 포함 길이 상한)이 두 곳에 산다 — 초안 단계가 제목을 지을 때 읽는 pr-body 템플릿 「PR 제목」과, 다듬기 0-루프와 게시 스크립트가 쓰는 score.mjs의 checkTitle(CONVENTIONAL_PREFIX·TITLE_MAX). 템플릿은 제목을 짓기 전에 기준을 알아야 해서 숫자를 지울 수 없다. 한쪽만 바꾸면 초안에서 맞춘 제목이 다듬기에서 걸리거나, 기준을 어긴 제목이 그냥 지나간다. 기준을 바꾸면 둘 다 고친다."
     }
   ]
 }

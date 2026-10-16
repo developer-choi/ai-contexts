@@ -4,7 +4,7 @@
 
 ## 골격은 사례집에서 고른다
 
-article은 골격이 곧 글의 성패다. 헤딩을 세우기 전에 [article-skeletons.md](../../../contexts/writing-guide/article-skeletons.md)에서 이번 글의 상황에 맞는 서사구조를 고른다.
+article은 골격이 곧 글의 성패다. 헤딩을 세우기 전에 [skeletons.md](skeletons.md)에서 이번 글의 상황에 맞는 서사구조를 고른다.
 
 아래 본문 골격은 사례집의 첫 사례(같은 결과를 내는 방법이 여러 개일 때 — 최악 → 차악 → 최선)를 옮긴 것이다. 상황이 다르면 사례집에서 고른 골격으로 통째 교체한다.
 

@@ -417,7 +417,7 @@ function renderSkillMd(content, skillDir, contextsDir = contextsDirForSkill(skil
 }
 
 // 스킬 폴더 안의 SKILL.md 아닌 md. 앵커는 자기 디렉토리를 가리키지만 자리표시자는 스킬 루트로
-// 채운다 — 어느 하위 파일에 적든 `{{skill_dir}}/augmentations/score.mjs`가 같은 곳을 가리키게.
+// 채운다 — 어느 하위 파일에 적든 `{{skill_dir}}/scripts/session-state.mjs`가 같은 곳을 가리키게.
 function renderSkillSubMd(content, fileDir, skillDir, contextsDir = contextsDirForSkill(skillDir)) {
   return withSkillContextsPath(withSkillDirPath(withAnchor(content, fileDir), skillDir), contextsDir);
 }

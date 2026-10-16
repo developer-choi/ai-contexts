@@ -2,7 +2,6 @@
 step: verify
 session: PR_{N}_IMPL
 next:
-  - to: pr-body-final
   - to: markup
     when: 종류 FOUNDATION
 ---
@@ -49,13 +48,13 @@ next:
 
 ## Step 6.1.5. 주석 게이트 (안전망 + 백스톱)
 
-> **step-6.2 진입 전 게이트.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
+> **step-6.2 진입 전 검사.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan <plan>`
 
 둘을 함께 본다.
 
-- **금지 주석 잔존** — 걸리면 implement Implementer 흐름으로 처리하고 이 게이트를 다시 돌린다. 리뷰어에게 시키지 않는다.
+- **금지 주석 잔존** — 걸리면 implement Implementer 흐름으로 처리하고 이 검사를 다시 돌린다. 리뷰어에게 시키지 않는다.
 - **미배정 blanket disable 고아** — 생성 시 등록([file-level(blanket) eslint-disable 라이프사이클](../conventions/artifact/comments.md#file-levelblanket-eslint-disable-라이프사이클))을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 [PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)에 등록한다.
 
 ---
@@ -153,7 +152,7 @@ UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더
 
 - 검증 기준은 figma 원본: [검증 기준 — figma 원본 직접 fetch](../conventions/artifact/markup-spec.md#검증-기준--figma-원본-직접-fetch) 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
-- 승인 게이트이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
+- 사용자 승인으로 끝나는 단계이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
 - **figma 없는 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려는 같다.
 
 ---
@@ -169,7 +168,7 @@ UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더
 
 ## Step 6.5. fixup 합치기
 
-사용자 리뷰·동작 테스트 통과 후 WRITING_REFINER(PR 본문 확정) 진입 전, Step 6.2.5 뒤에 쌓인 fixup 커밋을 대상 커밋에 합친다. 이 환경은 대화형 편집기를 못 띄우므로 시퀀스 편집기를 비워 비대화형으로 돌린다:
+사용자 리뷰·동작 테스트 통과 후, Step 6.2.5 뒤에 쌓인 fixup 커밋을 대상 커밋에 합친다. 이 환경은 대화형 편집기를 못 띄우므로 시퀀스 편집기를 비워 비대화형으로 돌린다:
 
 ```
 GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>

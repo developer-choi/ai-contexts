@@ -316,7 +316,7 @@ const RETRO_ITEMS = [
   { key: 'workflow', file: /(^|\/)plan\/pr\d+\//, slash: [/^\/workflow$/] },
   { key: 'requirement-review', read: [RR_SKILL] },
   { key: 'digest', file: /(^|\/)knowledge\//, slash: [/^\/digest$/] },
-  { key: 'write-refine', slash: [/^\/write-refine$/] },
+  { key: 'write-doc', slash: [/^\/write-doc$/] },
   { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
   { key: 'recruitment', slash: [/^\/recruit-(application|motivation)$/], cwd: 'private-playground' },
   { key: 'step-1', when: 'always' },

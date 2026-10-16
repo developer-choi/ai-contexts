@@ -251,6 +251,48 @@ const WRITE_CASES = [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: case-study\naudience: 채용담당자\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'pass',
+    'case-study도 패키지 어휘다 — 필수 필드가 채워지면 통과',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: case-study\naudience: 채용담당자\n---\n\n# 제목\n' },
+    },
+    'deny',
+    'case-study도 필수 필드 검사를 받는다 — 어휘에서 빠지면 이 케이스가 통과로 바뀐다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: note\naudience: 나\npurpose: 복습\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'pass',
+    'note도 패키지 어휘다 — 필수 필드가 채워지면 통과',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: note\naudience: 나\n---\n\n# 제목\n' },
+    },
+    'deny',
+    'note도 필수 필드 검사를 받는다 — 어휘에서 빠지면 이 케이스가 통과로 바뀐다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
       tool_input: { file_path: 'C:/tmp/note.md', content: '---\ntype: guide\n---\n\n# 제목\n' },
     },
     'pass',
@@ -267,6 +309,18 @@ const WRITE_CASES = [
     },
     'deny',
     'type 오타는 self-filter를 빠져나가 아무 검사도 안 받으므로, 나머지 필수 필드가 있으면 막는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: resume-item\naudience: 채용담당자\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'deny',
+    '걷어낸 resume-item은 어휘 밖이라 오타와 같이 막는다 — 어휘에 되살아나면 이 케이스가 통과로 바뀐다',
   ],
   [
     'check-package-frontmatter.mjs',

@@ -25,7 +25,7 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 | workflow 보강 | 안 따라간 cross-ref와 첫 요청을 `plan/pr{N}/**` 산출물에 맞대 누락을 건진다 | [augmentations/workflow.md](augmentations/workflow.md) |
 | requirement-review 보강 | 적용한 체크리스트가 이번 요구사항 리뷰에서 무엇을 놓쳤는지 재료로 대조해 체크리스트 개선안을 낸다 | [augmentations/requirement-review.md](augmentations/requirement-review.md) |
 | digest 보강 | 저장·해설·버림 판정이 번복된 자리를 모은다 | [augmentations/digest.md](augmentations/digest.md) |
-| write-refine 보강 | 채점기를 돌리고 톤 교정 사례·놓친 결함·과교정을 회수한다 | [augmentations/write-refine.md](augmentations/write-refine.md) |
+| write-doc 보강 | 채점기를 돌리고 톤 교정 사례·놓친 결함·과교정을 회수한다 | [augmentations/write-doc.md](augmentations/write-doc.md) |
 | routine 보강 | 루틴 데이터를 스크립트 우회로 다뤘는지, 그날 루틴을 굴린 방식 자체가 어땠는지 본다 | [augmentations/routine.md](augmentations/routine.md) |
 | recruitment 보강 | 떠온 원문 중 안 쓰인 것과 뒤에서 다시 판 조사를 세어, 다음에 무엇을 떠올지 정한다 | [augmentations/recruitment.md](augmentations/recruitment.md) |
 | 문제 리스트업 + 규칙화 | 세션에서 문제만 추출해 백로그 항목으로 낸다 | [step-1.md](step-1.md) |
@@ -33,7 +33,7 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 
 ## 무엇을 돌릴지 고른다
 
-상세 파일을 열기 **전에** 고른다. 회고 항목에는 세션에 따라 아무 소득이 없는 것이 섞이는데, 상세를 먼저 열면 소득 없는 갈래의 절차까지 다 읽은 뒤에야 그걸 알게 된다.
+상세 파일을 열기 **전에** 고른다. 회고 항목에는 세션에 따라 아무 소득이 없는 것이 섞이는데, 상세를 먼저 열면 소득 없는 항목의 절차까지 다 읽은 뒤에야 그걸 알게 된다.
 
 1. `node {{skill_dir}}/scripts/session-state.mjs menu --session <session_id> --repo <레포 경로> --cwd <이 세션 cwd>`로 이 세션에 해당하는 항목을 받는다. 기억으로 답하지 않는다 — 회고는 세션이 길어진 뒤에 도는지라 앞머리가 요약으로 접혀 있기도 하고, 안 떠올라 항목을 건너뛰면 건너뛰었다는 것도 아무 데도 안 남는다
 2. `해당`·`항상`·`미확인`으로 나온 항목만 위 표의 이름으로 번호를 매겨 한 번에 내고, **돌릴 번호**를 회신받는다. 항목마다 위 표의 「무엇을 하는가」를 한 줄로 붙이고, 그 안의 「위 항목」은 메뉴 번호로 바꿔 쓴다

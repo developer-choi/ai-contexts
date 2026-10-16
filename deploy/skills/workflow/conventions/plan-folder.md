@@ -38,7 +38,6 @@
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
       user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자 몫으로 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비
-      pr-body.md        ← WRITING_IDEATOR가 초안 저작(잠정) → WRITING_REFINER가 확정·PR 본문 복사·게시. 게시 후 스윕 대상 — realize-plan 「잔여 산출물 소비」 스윕은 pr-body를 다루지 않는다(REFINER 전용)
 ```
 
 realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
@@ -48,7 +47,6 @@ realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`
 - **`persistent/`** — 소비 후에도 안 지움, PR·프로젝트 종료 후에도 안 지움.
 - **`retained/`** — 소비 후에도 안 지움, 컨텍스트(BG는 BG 라이프타임, PR은 PR 라이프타임) 종료 시 폐기. 마지막 소비자가 보고 나면 정리.
 - **`consumable/`** — 소비 시 즉시 폐기. 절 단위 큐 모델 — 사용처가 소비한 절을 삭제, 모든 절이 비면 파일 삭제.
-`persistent/`·`retained/` 하위는 WRITING_REFINER 「산출물 정리」의 정리 대상이 아니다 (REFINER는 consumable만 소비·정리).
 
 ## consumable/ 산출물 자가 정리 안내문
 

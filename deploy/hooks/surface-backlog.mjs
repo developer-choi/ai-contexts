@@ -105,7 +105,7 @@ function readRealUse(file) {
 // 종류 어휘의 정본은 backlog 레포 `scripts/backlog-ready-shape.mjs`의 REAL_USE_KINDS다 — 거기 종류를 더하면 여기도 더한다.
 const REAL_USE_SKILLS = {
   "recruitment-round": (skill) => skill === "workflow" || skill.startsWith("recruit"),
-  "blog-post": (skill) => skill === "write-refine",
+  "blog-post": (skill) => skill === "write-doc",
   "workflow-pr": (skill) => skill === "workflow",
   // 계기가 스킬 호출이 아니다 — 기록이 정한 건수에 닿으면 그 훅(check-table-render)이 직접 알린다.
   "hook-fires": () => false,
