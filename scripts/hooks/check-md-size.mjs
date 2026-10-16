@@ -615,12 +615,25 @@ function reportFile(target) {
   console.log(`  선       ${limitFor(rel)}B (${why})`);
   console.log(`  닿는 곳  ${openers.length}`);
   for (const o of openers) console.log(`    ${direct.has(o) ? "직접  " : "거쳐서"} ${o}`);
+  const auto = autoLoadNote(top, rel);
+  if (auto) console.log(`  자동 로드 ${auto}`);
   if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
   console.log(
     "한계: 이 레포 안의 잴 대상 md가 링크나 .md 경로로 가리키는 것만 센다. " +
-      "다른 레포의 스킬·문서가 여는 것, 세션 자동 로드, 훅 주입, 확장자 없이 이름으로만 부르는 참조는 안 잡힌다 — " +
+      "다른 레포의 스킬·문서가 여는 것, 훅 주입, 확장자 없이 이름으로만 부르는 참조는 안 잡힌다 — " +
       "그런 진입점은 따로 찾아 더한다.",
   );
+}
+
+// CLAUDE.md는 아무도 링크하지 않아도 Claude Code가 스스로 싣는다 — 루트 것은 세션 시작부터, 하위 폴더 것은
+// 그 폴더 파일을 Read하는 순간. 리뷰어가 「명시적으로 열 때만 읽힌다」고 가정하면 크기가 선 아래라는 이유로
+// 거의 모든 세션에 실리는 덩어리를 그냥 둔다(실측: backlog projects/CLAUDE.md 14.7KB가 항목 하나만 열어도 실렸다).
+function autoLoadNote(top, rel) {
+  if (path.basename(rel) !== "CLAUDE.md") return "";
+  const dir = path.posix.dirname(rel);
+  if (dir === ".") return "레포 루트 CLAUDE.md — 이 레포에서 여는 모든 세션에 처음부터 통째로 실린다";
+  const count = execFileSync("git", ["-C", top, "ls-files", "--", dir], { encoding: "utf8" }).split("\n").filter(Boolean).length;
+  return `하위 폴더 CLAUDE.md — \`${dir}/\` 아래 파일(${count}개) 중 하나라도 Read하면 통째로 실린다`;
 }
 
 // --- 세션 적재 재료 --------------------------------------------------------
