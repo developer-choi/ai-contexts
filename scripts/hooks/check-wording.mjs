@@ -94,6 +94,47 @@ const CATEGORIES = [
   },
 ];
 
+// 엔터 없이 한 줄로 길게 몰아 쓴 문단·리스트 항목. 낱말이 아니라 줄 길이를 재서 패턴 범주와 따로 둔다.
+// 셈법은 write-doc 채점기(`deploy/skills/write-doc/scripts/score.mjs` `checkLongLines`)와 같다 —
+// 링크 URL·HTML 태그는 읽히지 않으니 빼고, 리스트 기호도 뺀다. 이 파일은 홀로 복사돼 돌아 사본으로 둔다.
+//
+// 문턱 200자: AC 프롬프트 md의 실제 줄 표본(154~412자)을 사용자가 보고 정했다. 채점기(180자)보다
+// 높은 것은 프롬프트 md가 조건 하나를 한 줄에 다 적는 일이 많아서다.
+// 실측(2026-10-17, AC deploy skills·rules·contexts md 176개): 136줄(3.2%), 54개 파일.
+// 그래서 원래 있던 긴 줄까지 이 커밋에서 나누라고 하면 손댄 파일마다 긴 줄을 전부 끌고 온다 —
+// 아래 공통 꼬리말을 이 범주에는 걸지 않고, 처방이 별도 커밋을 따로 말한다.
+const LONG_LINE = 200;
+const LONG = {
+  kind: "long",
+  tag: `[긴 한 줄 문단 의심 — ${LONG_LINE}자 이상]`,
+  noun: "줄바꿈 없이 이어진 긴 줄이",
+  advice: [
+    "판단: 단계·조건·나열을 한 줄에 몰았으면 불릿으로, 주제가 둘 이상이면 헤딩으로 나눈다.",
+    "      한 논지를 편 문단이면 문장 사이에서 줄을 끊는다.",
+    "      이 커밋에서 쓰거나 고친 줄이면 이 커밋에서 나눈다. 원래 있던 줄이면 이 커밋에 섞지 말고 별도 커밋으로 나눈다.",
+  ],
+};
+
+export function lineLength(line) {
+  return line
+    .trim()
+    .replace(/^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/, "")
+    .replace(/\]\((?:[^()]|\([^)]*\))*\)/g, "]")
+    .replace(/https?:\/\/\S+/g, "")
+    .replace(/<[^>]+>/g, "").length;
+}
+
+// 헤딩·표는 줄을 못 나누고, 인용·`[//]: #` 주석은 남의 글이라 고칠 자리가 아니다.
+const LONG_SKIP = /^(?:#|\||>|\[\/\/\]: #)/;
+
+// frontmatter 줄 번호의 끝. `description:`은 한 줄 YAML이라 나눌 수 없어 긴 줄 범주에서 뺀다.
+function frontmatterEnd(content) {
+  const lines = content.split("\n");
+  if (lines[0]?.trim() !== "---") return 0;
+  const close = lines.findIndex((line, i) => i > 0 && line.trim() === "---");
+  return close === -1 ? 0 : close + 1;
+}
+
 // 사용자가 못 알아본 말. 낱말은 금지 표현 목록 행에서 오고, 처방도 행마다 다르다(걸린 줄 아래에 찍힌다).
 const BLOCKED = {
   kind: "blocked",
@@ -157,7 +198,7 @@ export function blockedHits(rows, line) {
 const MAX_REPORTS = 20;
 
 function main() {
-  const categories = [...CATEGORIES, BLOCKED];
+  const categories = [...CATEGORIES, BLOCKED, LONG];
   const reports = new Map(categories.map((c) => [c.kind, []]));
   const rows = loadBlockedRows();
 
@@ -175,9 +216,12 @@ function main() {
     printReports(category, reports.get(category.kind), "이 커밋이 건드린 프롬프트 md");
   }
 
+  // 긴 줄 범주는 처방이 커밋을 나누는 법을 따로 말한다 — 그것만 걸렸으면 꼬리말을 찍지 않는다.
+  if (found.every((c) => c.kind === LONG.kind)) return;
+
   // 안내는 "정리해도 된다"가 아니라 "지금 정리한다"로 적는다 — 고를 여지를 남기면 읽고도
   // 사용자에게 되넘긴다(check-count-hardcoding.mjs의 같은 문구 참고).
-  console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다.");
+  console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다(긴 한 줄 문단은 그 처방대로).");
   console.log('      "따로 다룰까요"로 사용자에게 넘기지 않는다. 줄마다 위 판단으로 고칠 것은 고치고,');
   console.log("      그대로 둘 것은 둔 뒤 몇 건을 어떤 사유로 뒀는지만 보고에 한 줄로 적는다.");
   console.log("");
@@ -281,8 +325,17 @@ export function proseLines(content) {
 
 function detectInFile(file, content, rows) {
   const found = [];
+  const bodyStart = frontmatterEnd(content);
 
   for (const { lineNo, raw, clean } of proseLines(content)) {
+    const trimmed = raw.trim();
+    if (lineNo > bodyStart && !LONG_SKIP.test(trimmed)) {
+      const length = lineLength(raw);
+      if (length >= LONG_LINE) {
+        found.push({ kind: LONG.kind, file, lineNo, line: `${trimmed.slice(0, 60)}…`, hits: [`${length}자`] });
+      }
+    }
+
     for (const category of CATEGORIES) {
       const hits = patternsOf(category).flatMap((pattern) => [...clean.matchAll(pattern)].map((m) => m[0]));
       if (hits.length > 0) found.push({ kind: category.kind, file, lineNo, line: raw.trim(), hits });
@@ -327,14 +380,15 @@ function reportFile(target) {
 
   const found = detectInFile(target, fs.readFileSync(abs, "utf8"), loadBlockedRows());
   const where = target;
-  for (const category of [...CATEGORIES, BLOCKED]) {
+  for (const category of [...CATEGORIES, BLOCKED, LONG]) {
     const reports = found.filter((r) => r.kind === category.kind);
     if (reports.length > 0) printReports(category, reports, where);
   }
   if (found.length === 0) console.log(`${where} — 적중 없음.`);
   console.log(
     "한계: 정탐이 대부분인 대표 낱말만 본다. 정상 쓰임이 많은 낱말(조건문으로 더 자주 쓰이는 `필요하면`, " +
-      "명사로 쓰이는 `옵션` 등)과 목록에 없는 모양은 안 잡히므로 스스로 살핀다.",
+      "명사로 쓰이는 `옵션` 등)과 목록에 없는 모양은 안 잡히므로 스스로 살핀다. " +
+      `긴 줄은 줄바꿈 없이 ${LONG_LINE}자 이상 이어진 줄만 본다 — 짧은 줄로 끊었어도 한 문단에 조건이 몰린 꼴은 못 잡는다.`,
   );
 }
 
