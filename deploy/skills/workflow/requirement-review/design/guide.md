@@ -23,7 +23,7 @@ planning이 켜져 있으면 그 산출물(page.md·global.md)을 보완합니�
 
 ### 체크리스트
 
-페이지마다 `checklist/page.md`를, 그 페이지에서 새로 만들 컴포넌트마다 `checklist/component.md`를 적용하고, `checklist/common.md`는 둘 다에 적용합니다.
+페이지마다 [페이지 체크리스트](./checklist/page.md)를, 그 페이지에서 새로 만들 컴포넌트마다 [컴포넌트 체크리스트](./checklist/component.md)를 적용하고, [공통 체크리스트](./checklist/common.md)는 둘 다에 적용합니다.
 planning이 꺼져 있으면 페이지 유형에 맞는 `../page-type/` 체크리스트를 추가 적용합니다.
 
 ### 산출물
