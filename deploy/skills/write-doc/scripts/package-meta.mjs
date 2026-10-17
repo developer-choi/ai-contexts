@@ -12,7 +12,7 @@ export const COMMENT_LINE = /^\s*\[\/\/\]: #/;
 // 길이가 같거나 길 때만 닫힌다(CommonMark) — ``` 블록 안의 ~~~ 한 줄에 상태를 뒤집으면 펜스 뒤 주석을 펜스 안으로 본다.
 export function fenceTracker() {
   let open = null;
-  return (line) => {
+  const track = (line) => {
     const fence = line.match(/^\s*(`{3,}|~{3,})/)?.[1];
     if (fence && !open) {
       open = fence;
@@ -25,6 +25,8 @@ export function fenceTracker() {
     }
     return open !== null;
   };
+  track.isOpen = () => open !== null;
+  return track;
 }
 
 // 읽을 수 없으면 까닭을 내고 멈춘다 — 빈 값으로 이어 가면 엉뚱한 type의 파일이 조용히 나온다.

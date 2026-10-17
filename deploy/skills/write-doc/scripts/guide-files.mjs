@@ -17,7 +17,7 @@
 // 단계 문서에 type 이름을 박은 분기를 두면 type이 늘 때마다 모든 세션이 남의 type 분기까지 읽는다.
 // steps.md의 `## [OUTLINE_STEP] …` 절은 단계 파일에 같은 절차 ID가 있어야 읽힌다.
 // 단계 파일에서 ID를 바꾸거나 지우면 type 절이 조용히 안 읽히므로, 낼 때마다 대조해 어긋나면 멈춘다.
-//   node guide-files.mjs --check   모든 type의 steps.md를 대조만 한다
+//   node guide-files.mjs --check   모든 type의 steps.md를 대조하고, subtype 폴더에 둔 template.md를 잡는다
 //
 // 조건부 경로는 판단이 드는 조건(본문에 수치가 있는가 등)이라 고르지 않고 조건과 함께 낸다. 고르는 것은 메인이다.
 import fs from "node:fs";
@@ -111,10 +111,15 @@ function check() {
     const subs = fs.readdirSync(path.join(typesDir, t), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
     for (const sub of [null, ...subs]) {
       try { typeSteps(t, sub); } catch (e) { console.error(e.message); failed = true; }
+      // typeFiles는 골격을 type 폴더에서만 읽는다 — subtype 폴더에 둔 template.md는 경고 없이 안 읽힌다.
+      if (sub && fs.existsSync(path.join(typesDir, t, sub, "template.md"))) {
+        console.error(`types/${t}/${sub}/template.md는 어느 단계에서도 읽히지 않는다 — 골격은 types/${t}/template.md에 둔다`);
+        failed = true;
+      }
     }
   }
   if (failed) process.exit(1);
-  console.log("type steps.md 절의 절차 ID 모두 단계 파일에 있음");
+  console.log("type steps.md 절의 절차 ID 모두 단계 파일에 있음, subtype 폴더에 template.md 없음");
 }
 
 function main() {

@@ -9,7 +9,7 @@
 재료 받기에서 재료를 읽은 뒤 승인본을 읽는다. 승인본 폴더를 Read하지 않고 스크립트로 읽는다 — 성격마다 한 편씩 쌓여, 통째로 읽으면 쓰지 않을 성격까지 실린다.
 
 1. `node {{skill_dir}}/scripts/approved.mjs <type>`로 고를 수 있는 승인본 성격 목록을 본다. subtype이 있으면 `--subtype <subtype>`을 붙인다.
-2. 목록에서 이 글과 성격(기능·버그·리팩터처럼 같은 type 안에서 글 모양이 갈리는 것)이 맞는 것이 있으면 `--kind <성격>`을 붙여 다시 불러 승인본 한 편을 읽고, 패키지를 저장할 때 frontmatter `kind`에 그 이름을 적는다.
+2. 목록에서 이 글과 성격이 맞는 것이 있으면 `--kind <성격>`을 붙여 다시 불러 승인본 한 편을 읽고, 패키지를 저장할 때 frontmatter `kind`에 그 이름을 적는다.
 
 ## 흐름
 
@@ -23,7 +23,7 @@
 
 독자가 이 글에서 가져갈 문장 하나를 사용자와 합의한 뒤에 문단을 쓴다. 템플릿이 칸을 주는 type도 정한다 — 템플릿은 칸을 줄 뿐 골자를 주지 않는다.
 
-독자(`audience`)·목적(`purpose`)·독자가 아는 것과 모르는 것(`audience_knowledge`, 한 줄)도 함께 확인받는다 — 다듬기 단계의 독자 리뷰어가 이 값으로 읽는다.
+`audience`·`purpose`·`audience_knowledge`도 함께 확인받는다 — 다듬기 단계의 독자 리뷰어가 이 값으로 읽는다.
 
 ### [OUTLINE_STEP] 3. 골격
 
@@ -61,7 +61,7 @@
 
 답을 받기 전에는 임시 자리에도 쓰지 않는다 — 지어낸 자리에 썼다가 옮기면 그 자리의 규칙에 걸린다.
 
-받은 경로에 채운 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이후 수정은 이 파일에서 한다. 형식은 [package-format.md](../../../contexts/writing-guide/package-format.md)를 따른다.
+받은 경로에 채운 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이후 수정은 이 파일에서 한다. 형식은 [package-format.md](../../../contexts/writing-guide/package-format.md)를 따르고, `key_message`에는 「2. 핵심 문장 합의」에서 합의한 문장을 그대로 옮긴다.
 
 안내 전에 `node {{skill_dir}}/scripts/score.mjs <패키지> --structure`로 긴 문단과 개수 선언 뒤 빠진 리스트를 찾아 나눈다.
 

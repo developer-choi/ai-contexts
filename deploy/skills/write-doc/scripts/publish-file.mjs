@@ -15,7 +15,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 // 패키지에만 쓰는 필드. check-package-frontmatter 훅이 패키지로 알아보는 필수 필드(type 밖)와 같다.
-const PACKAGE_ONLY_FIELDS = ["audience", "purpose", "key_message"];
+const PACKAGE_ONLY_FIELDS = ["audience", "audience_knowledge", "purpose", "key_message"];
 
 // 맨 앞 `---`~`---` 블록과 나머지 본문으로 가른다. 블록이 없으면 block은 null.
 function split(text) {

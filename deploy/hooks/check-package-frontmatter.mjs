@@ -12,7 +12,7 @@
 // 어휘의 단일 출처: type 목록과 subtype 필수 여부는 deploy/skills/write-doc/SKILL.md
 // 「입력」 표, 필드 목록은 package-format.md. 둘이 바뀌면 여기도 함께 고친다.
 //
-// 필수 셋에서 subtype을 뺀 이유: write-doc SKILL.md 「입력」 표에서 subtype이 필수인 type은
+// 필수 필드에서 subtype을 뺀 이유: write-doc SKILL.md 「입력」 표에서 subtype이 필수인 type은
 // pr-comment뿐이고(pr-body는 선택, 나머지는 미사용), 다듬기 단계 입구 정규화도 subtype은 유도하지 않는다.
 // 전 type에 강요하면 정상 패키지가 막힌다 — 그래서 pr-comment에만 건다.
 //
@@ -24,7 +24,7 @@ import { deny, getToolName, readPayload } from "./hook-utils.mjs";
 import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
-const REQUIRED_FIELDS = ["type", "audience", "purpose", "key_message"];
+const REQUIRED_FIELDS = ["type", "audience", "audience_knowledge", "purpose", "key_message"];
 const SUBTYPE_REQUIRED_TYPES = new Set(["pr-comment"]);
 
 const payload = readPayload();

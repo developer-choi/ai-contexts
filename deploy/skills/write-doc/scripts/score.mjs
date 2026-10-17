@@ -287,7 +287,7 @@ const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아
 const NO_EMOJI_TYPES = new Set(["pr-body", "pr-comment"]);
 const EMOJI = /\p{Extended_Pictographic}/gu;
 
-// `rendering_env: plain-text` 발행처(텍스트 폼 등)에서 기호 그대로 보이는 마크다운. 정본은 package-format.md `rendering_env`.
+// `rendering_env: plain-text` 발행처(텍스트 폼 등)에서 기호 그대로 보이는 마크다운. 무엇을 막는지는 이 검사가 정본이다.
 // 리스트 `-`는 텍스트 폼에서도 흔히 쓰는 꼴이라 세지 않는다.
 const PLAIN_TEXT_MARKDOWN = [
   ["헤딩", /^\s{0,3}#{1,6}\s/],

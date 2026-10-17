@@ -8,7 +8,7 @@
 
 ### 입구 정규화 — 건넨 글에 frontmatter가 없거나 필수 필드가 빠졌을 때
 
-본문과 주변 맥락에서 frontmatter를 추론해 대상 파일에 **임시로** 붙인다. `type`·`subtype`은 호출 인자를 적는다. 형제 문서에서는 가져오지 않는다 — 아직 안 다듬은 초안일 수 있다. 추론 못 한 것만 사용자에게 한 번에 묻는다. 독자 리뷰어가 쓰는 `audience_knowledge`도 채운다.
+본문과 주변 맥락에서 frontmatter를 추론해 대상 파일에 **임시로** 붙인다. `type`·`subtype`은 호출 인자를 적는다. 형제 문서에서는 가져오지 않는다 — 아직 안 다듬은 초안일 수 있다. 추론 못 한 것만 사용자에게 한 번에 묻는다.
 
 ### 시작 전 — 고치고 싶은 표현을 먼저 받는다
 
@@ -31,7 +31,6 @@
 
 ### [SCAN_STEP] 1. 파악
 
-- `rendering_env`가 `markdown`이 아니면 [package-format.md](../../../contexts/writing-guide/package-format.md)의 그 값 규칙대로 본문 문법을 제한한다.
 - 대안을 견줘 하나를 고른 절이 있으면 [tradeoff-guide.md](../../../contexts/writing-guide/tradeoff-guide.md)를 Read한다. 그 선택과 맞바꾼 것이 빠졌으면 채우지 않고 사용자에게 보고하고([저자만 아는 것은 일반론으로 메우지 않는다](../../../contexts/writing-guide/tradeoff-guide.md#저자만-아는-것은-일반론으로-메우지-않는다)), [서술 규칙](../../../contexts/writing-guide/tradeoff-guide.md#서술-규칙) 위반은 다듬기에서 직접 고친다.
 
 ### [EDIT_STEP] 2. 직접 다듬기
