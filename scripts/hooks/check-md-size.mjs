@@ -44,8 +44,8 @@ const CONFIG_FILE = path.join(BACKLOG_ROOT, "meta", "md-size.json");
 const SEEN_FILE = path.join(hookHome(), "md-size-seen.json");
 
 // 선. 닿는 곳이 FANOUT 이상이면 낮은 선(BUSY), 아니면 높은 선(LONE)을 쓴다.
-const LONE_LIMIT = 25000;
-const BUSY_LIMIT = 20000;
+const LONE_LIMIT = 20000;
+const BUSY_LIMIT = 15000;
 const FANOUT = 4;
 // SKILL.md는 닿는 곳과 무관하게 이 선을 쓴다. 스킬을 부르면 통째로 실리는 진입점이라, 두꺼우면 불러 놓고서야
 // 필요 없는 스킬인 줄 알게 되고 한눈에 무슨 스킬인지도 안 보인다. 세부는 하위 파일로 보낸다.
