@@ -4,4 +4,4 @@
 
 - 공통성·경계는 MARKUP의 산출을 그대로 소비한다(단방향) — 재판정하지 않는다.
 - 확정된 공통 컴포넌트가 0건이면 이 PR은 할 것 없이 끝난다. MARKUP은 이 PR에 기대는 PR도 함께 풀린다고 안내한다.
-- (채용) `background/consumable/design-system.md`(컴포넌트 종류·props 요구사항 설계)를 입력 재료로 읽는다. 이 PR이 그 파일의 소비처다.
+- (채용) `background/consumable/design-system.md`(컴포넌트 종류·구조 관찰)를 입력 재료로 읽는다. 이 PR이 그 파일의 소비처다.
