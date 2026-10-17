@@ -564,7 +564,7 @@ function settleBaseline() {
 // 그 파일이 있는 레포에서 잰다 — 부른 폴더가 다른 레포여도 경로만 맞으면 된다.
 function reportFile(target) {
   if (!target) {
-    console.error("사용법: check-md-size.mjs --report <md 경로>");
+    console.error("사용법: check-md-size.mjs --report <md 또는 폴더 경로>");
     process.exitCode = 1;
     return;
   }
@@ -609,8 +609,11 @@ function reportFile(target) {
 
   const direct = parents.get(rel);
   const openers = [...ancestors.get(rel)].sort();
-  console.log(`${rel} (레포 "${repo}", 이 브랜치가 고친 파일은 git 인덱스, 안 건드린 파일은 기본 브랜치 끝 기준)`);
-  console.log(`  크기     ${f.size}B`);
+  // 크기는 작업 트리에서 잰다. 리뷰 회차는 스테이징 전에 부르는 일이 많아, 인덱스로 재면 고친 만큼이
+  // 안 잡혀 고치기 전후가 같은 숫자로 나왔다. 닿는 곳은 커밋 검사와 같은 계산(인덱스·기본 브랜치 끝)을 쓴다.
+  const size = fs.statSync(abs).size;
+  console.log(`${rel} (레포 "${repo}", 크기는 작업 트리, 닿는 곳은 이 브랜치가 고친 파일은 git 인덱스·안 건드린 파일은 기본 브랜치 끝 기준)`);
+  console.log(`  크기     ${size}B${size === f.size ? "" : ` (커밋 검사가 재는 내용은 ${f.size}B — 스테이징 안 한 수정이 있거나, 기본 브랜치에서 바뀐 파일이다)`}`);
   const why = path.basename(rel) === "SKILL.md" ? "SKILL.md 선" : `닿는 곳 ${FANOUT} 이상이면 ${BUSY_LIMIT}B, 아니면 ${LONE_LIMIT}B`;
   console.log(`  선       ${limitFor(rel)}B (${why})`);
   console.log(`  닿는 곳  ${openers.length}`);
@@ -618,11 +621,38 @@ function reportFile(target) {
   const auto = autoLoadNote(top, rel);
   if (auto) console.log(`  자동 로드 ${auto}`);
   if (!config) console.log(`  (설정 ${CONFIG_FILE}을 못 읽어 exclude 없이 셌다)`);
+}
+
+// 폴더를 받으면 그 아래 md를 하나씩 잰다. 파일만 받던 때는 폴더째 리뷰하는 회차에서 「검사 대상 밖」
+// 한 줄로 끝나 크기 검사가 통째로 빠졌다. 경로는 절대로 넘긴다 — reportFile이 chdir한다.
+function reportTarget(target) {
+  for (const file of mdFilesUnder(target)) reportFile(file);
+  if (process.exitCode) return;
   console.log(
     "한계: 이 레포 안의 잴 대상 md가 링크나 .md 경로로 가리키는 것만 센다. " +
       "다른 레포의 스킬·문서가 여는 것, 훅 주입, 확장자 없이 이름으로만 부르는 참조는 안 잡힌다 — " +
       "그런 진입점은 따로 찾아 더한다.",
   );
+}
+
+function mdFilesUnder(target) {
+  const abs = target && path.resolve(target);
+  if (!abs || !fs.existsSync(abs) || !fs.statSync(abs).isDirectory()) return [target];
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === ".git") continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".md")) files.push(full);
+    }
+  };
+  walk(abs);
+  if (files.length === 0) {
+    console.error(`md가 없다: ${abs}`);
+    process.exitCode = 1;
+  }
+  return files.sort();
 }
 
 // CLAUDE.md는 아무도 링크하지 않아도 Claude Code가 스스로 싣는다 — 루트 것은 세션 시작부터, 하위 폴더 것은
@@ -856,10 +886,10 @@ try {
     // 파일을 먼저 읽는다 — `--report`가 잰 파일의 폴더로 chdir해 뒤의 상대경로가 어긋난다.
     const s = sections !== undefined ? readTarget(sections, "--sections") : null;
     const t = trace !== undefined ? readTarget(trace, "--trace") : null;
-    if (report !== undefined) reportFile(report);
+    if (report !== undefined) reportTarget(report);
     if (s) sectionsReport(s);
     if (t) traceReport(t);
-  } else if (report !== undefined) reportFile(report);
+  } else if (report !== undefined) reportTarget(report);
   else if (process.argv.includes("--write-baseline")) writeBaseline();
   else if (process.argv.includes("--settle")) settleBaseline();
   else main();

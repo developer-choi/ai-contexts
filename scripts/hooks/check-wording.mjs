@@ -15,7 +15,7 @@
 // (`scripts/check-critical-marker.mjs`)이 새로 넣는 줄을 막고, 그 훅은 AC `.githooks`에만 걸려
 // 있어 다른 레포에서는 이 경고가 유일한 표면이다.
 //
-// `--report <md>`로 파일 하나를 지목해 물을 수도 있다. 커밋 없이 문서를 훑는 회차는 훅이 안 뜨는데
+// `--report <md 또는 폴더>`로 지목해 물을 수도 있다. 커밋 없이 문서를 훑는 회차는 훅이 안 뜨는데
 // 낱말 목록은 이 스크립트에만 있어서, 이 출구가 없으면 대조할 재료가 없다.
 //
 // 「금지 표현」 범주만은 낱말이 이 파일이 아니라 옆의 `blocked-expressions.json`에 있다. 사용자가 못
@@ -366,7 +366,7 @@ function patternsOf({ kind, patterns }) {
 // 파일이면 본다 — 부른 쪽이 이미 대상을 골랐다. 그 파일이 있는 레포 기준으로 판정한다.
 function reportFile(target) {
   if (!target) {
-    console.error("사용법: check-wording.mjs --report <md 경로>");
+    console.error("사용법: check-wording.mjs --report <md 또는 폴더 경로>");
     process.exitCode = 1;
     return;
   }
@@ -385,11 +385,38 @@ function reportFile(target) {
     if (reports.length > 0) printReports(category, reports, where);
   }
   if (found.length === 0) console.log(`${where} — 적중 없음.`);
+}
+
+// 폴더를 받으면 그 아래 md를 하나씩 본다. 파일만 받던 때는 폴더째 리뷰하는 회차에서 EISDIR로
+// 「건너뜀」 한 줄만 남기고 검사가 통째로 빠졌다. 경로는 절대로 넘긴다 — reportFile이 chdir한다.
+function reportTarget(target) {
+  for (const file of mdFilesUnder(target)) reportFile(file);
+  if (process.exitCode) return;
   console.log(
     "한계: 정탐이 대부분인 대표 낱말만 본다. 정상 쓰임이 많은 낱말(조건문으로 더 자주 쓰이는 `필요하면`, " +
       "명사로 쓰이는 `옵션` 등)과 목록에 없는 모양은 안 잡히므로 스스로 살핀다. " +
       `긴 줄은 줄바꿈 없이 ${LONG_LINE}자 이상 이어진 줄만 본다 — 짧은 줄로 끊었어도 한 문단에 조건이 몰린 꼴은 못 잡는다.`,
   );
+}
+
+function mdFilesUnder(target) {
+  const abs = target && path.resolve(target);
+  if (!abs || !fs.existsSync(abs) || !fs.statSync(abs).isDirectory()) return [target];
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name === "node_modules" || entry.name === ".git") continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith(".md")) files.push(full);
+    }
+  };
+  walk(abs);
+  if (files.length === 0) {
+    console.error(`md가 없다: ${abs}`);
+    process.exitCode = 1;
+  }
+  return files.sort();
 }
 
 // 등재 스크립트가 함수만 가져다 쓸 때는 검사를 돌리지 않는다. 실제 경로로 견준다 — `import.meta.url`은
@@ -407,7 +434,7 @@ const invokedDirectly =
 if (invokedDirectly) {
   try {
     const reportAt = process.argv.indexOf("--report");
-    if (reportAt !== -1) reportFile(process.argv[reportAt + 1]);
+    if (reportAt !== -1) reportTarget(process.argv[reportAt + 1]);
     else main();
   } catch (error) {
     console.error(`[낱말 검사 훅 내부 오류, 건너뜀] ${error.message}`);
