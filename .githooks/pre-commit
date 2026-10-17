@@ -4,3 +4,4 @@ node scripts/check-critical-marker.mjs
 node scripts/verify/verify-skill-purpose.mjs || exit 1
 node scripts/verify/verify-skill-script-paths.mjs || exit 1
 node deploy/skills/write-doc/scripts/guide-files.mjs --check || exit 1
+node deploy/skills/write-doc/scripts/rejected-lines.mjs --check deploy/contexts/writing-guide/rejected.md || exit 1

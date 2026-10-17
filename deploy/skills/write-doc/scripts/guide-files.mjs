@@ -8,8 +8,10 @@
 // 사용:
 //   node guide-files.mjs <type> [--subtype <subtype>] --for draft      초안 단계가 Read할 type 템플릿·가이드
 //   node guide-files.mjs <type> [--subtype <subtype>] --for polish     다듬기 단계 메인이 Read할 톤 규칙·가이드
-//   node guide-files.mjs <type> [--subtype <subtype>] --for finish     마무리 단계 메인이 Read할 type 단계 파일
-//   node guide-files.mjs <type> [--subtype <subtype>] --for reviewer   표현 리뷰어에게 넘길 경로 (늘 넘길 것 + 조건부)
+//   node guide-files.mjs <type> [--subtype <subtype>] --for finish     마무리 단계 메인이 Read할 반려 줄 꼴·type 단계 파일
+//   node guide-files.mjs <type> [--subtype <subtype>] --for reviewer   표현 리뷰어가 읽을 경로 (늘 + 조건부, reviewer-input.mjs가 쓴다)
+//   node guide-files.mjs --from <패키지.md> --for <단계>                type·subtype을 패키지 frontmatter에서 읽는다
+//                                                                     (패키지가 생긴 뒤 단계는 이쪽을 쓴다 — 손으로 넘기면 subtype을 빠뜨린다)
 //
 // type 폴더의 steps.md는 그 type만 더 도는 절차라 메인 단계(draft·polish·finish)에만 낸다.
 // 단계 문서에 type 이름을 박은 분기를 두면 type이 늘 때마다 모든 세션이 남의 type 분기까지 읽는다.
@@ -21,6 +23,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { readPackageMeta } from "./package-meta.mjs";
 
 // 소스(deploy/skills/write-doc/scripts)와 배포본(<타겟>/skills/write-doc/scripts) 둘 다 세 단계 위가 contexts의 부모다.
 const GUIDE = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide");
@@ -78,7 +81,7 @@ function typeSteps(type, subtype) {
 export function guideFiles(type, subtype, step) {
   if (step === "draft") return { always: [...typeFiles(type, subtype, { template: true }), ...typeSteps(type, subtype)], conditional: [] };
   if (step === "polish") return { always: [...existing("tone.md"), ...typeFiles(type, subtype, { template: false }), ...typeSteps(type, subtype)], conditional: [] };
-  if (step === "finish") return { always: typeSteps(type, subtype), conditional: [] };
+  if (step === "finish") return { always: [...existing("rejected.md"), ...typeSteps(type, subtype)], conditional: [] };
   return {
     always: [...existing("tone.md", "examples/tone.md", "rejected.md"), ...typeFiles(type, subtype, { template: true })],
     conditional: CONDITIONAL.flatMap(([when, rel]) => existing(rel).map((file) => ({ when, file }))),
@@ -86,11 +89,17 @@ export function guideFiles(type, subtype, step) {
 }
 
 function parseArgs(argv) {
-  const args = { type: null, subtype: null, step: null };
+  const args = { type: null, subtype: null, step: null, from: null };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--subtype") args.subtype = argv[++i];
     else if (argv[i] === "--for") args.step = argv[++i];
+    else if (argv[i] === "--from") args.from = argv[++i];
     else args.type ??= argv[i];
+  }
+  if (args.from) {
+    const meta = readPackageMeta(args.from);
+    args.type ??= meta.type;
+    args.subtype ??= meta.subtype;
   }
   return args;
 }
@@ -112,7 +121,7 @@ function main() {
   if (process.argv.includes("--check")) return check();
   const { type, subtype, step } = parseArgs(process.argv.slice(2));
   if (!type || !FOR.includes(step)) {
-    console.error(`사용: node guide-files.mjs <type> [--subtype <subtype>] --for ${FOR.join("|")}`);
+    console.error(`사용: node guide-files.mjs <type> [--subtype <subtype>] | --from <패키지.md>  --for ${FOR.join("|")}`);
     process.exit(1);
   }
   const { always, conditional } = guideFiles(type, subtype, step);

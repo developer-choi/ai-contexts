@@ -21,17 +21,9 @@
 // self-filter한다.
 import fs from "node:fs";
 import { deny, getToolName, readPayload } from "./hook-utils.mjs";
+import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
-const PACKAGE_TYPES = new Set([
-  "pr-body",
-  "readme",
-  "pr-comment",
-  "decision",
-  "article",
-  "case-study",
-  "note",
-]);
 const REQUIRED_FIELDS = ["type", "audience", "purpose", "key_message"];
 const SUBTYPE_REQUIRED_TYPES = new Set(["pr-comment"]);
 
@@ -90,23 +82,6 @@ function readFileSafe(filePath) {
   } catch {
     return null;
   }
-}
-
-// 맨 앞 frontmatter 블록의 최상위 key만 읽는다. 값이 없거나 공백뿐이면 빈 문자열로 둔다
-// (리스트·중첩 블록은 들여쓰기·대시로 시작하므로 최상위 key로 잡히지 않는다).
-// 블록이 없으면 null.
-function parseFrontmatter(text) {
-  const body = text.replace(/^﻿/, "");
-  const lines = body.split(/\r?\n/);
-  if (lines[0]?.trim() !== "---") return null;
-  const end = lines.indexOf("---", 1);
-  if (end === -1) return null;
-  const fields = {};
-  for (const line of lines.slice(1, end)) {
-    const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
-    if (match) fields[match[1]] = match[2].trim();
-  }
-  return fields;
 }
 
 function missingFields(fields) {

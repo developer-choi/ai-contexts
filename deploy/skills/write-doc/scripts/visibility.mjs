@@ -7,20 +7,28 @@
 //
 // 사용: node visibility.mjs <레포 안 아무 경로 | owner/name>   → stdout에 public 또는 private 한 단어
 //   로컬 클론이 없는 레포(남의 PR에 다는 코멘트 등)는 owner/name으로 넘긴다.
+// approved.mjs --write도 이 판정을 import해 private 대상이면 승인본을 쓰지 않는다.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
+import { pathToFileURL } from "node:url";
 
 function run(cmd, args) {
   const r = spawnSync(cmd, args, { encoding: "utf8" });
   return r.status === 0 ? r.stdout.trim() : null;
 }
 
-const dir = process.argv[2];
-if (!dir) {
-  console.error("사용: node visibility.mjs <레포 안 아무 경로 | owner/name>");
-  process.exit(1);
+export function visibility(target) {
+  const isSlug = !fs.existsSync(target) && /^[\w.-]+\/[\w.-]+$/.test(target);
+  const url = isSlug ? target : run("git", ["-C", target, "remote", "get-url", "origin"]);
+  const vis = url ? run("gh", ["repo", "view", url, "--json", "visibility", "-q", ".visibility"]) : null;
+  return vis?.toLowerCase() === "public" ? "public" : "private";
 }
-const isSlug = !fs.existsSync(dir) && /^[\w.-]+\/[\w.-]+$/.test(dir);
-const url = isSlug ? dir : run("git", ["-C", dir, "remote", "get-url", "origin"]);
-const vis = url ? run("gh", ["repo", "view", url, "--json", "visibility", "-q", ".visibility"]) : null;
-console.log(vis?.toLowerCase() === "public" ? "public" : "private");
+
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  const target = process.argv[2];
+  if (!target) {
+    console.error("사용: node visibility.mjs <레포 안 아무 경로 | owner/name>");
+    process.exit(1);
+  }
+  console.log(visibility(target));
+}

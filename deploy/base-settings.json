@@ -25,6 +25,12 @@
       "msg": "Surfacing paired .sub.md file..."
     },
     {
+      "file": "score-writing-package.mjs",
+      "event": "PostToolUse",
+      "on": "edit",
+      "msg": "Scoring writing package..."
+    },
+    {
       "file": "post-enterworktree-install.mjs",
       "event": "PostToolUse",
       "on": "enterworktree",

@@ -2311,6 +2311,40 @@ const skillCreatorGroup = async () => {
   }
 };
 
+// 패키지 채점 훅은 저장된 파일을 score.mjs로 채점하므로 임시 폴더에 패키지를 만들어 두고 돈다.
+// 깨끗한 패키지를 두는 이유: 없으면 「적발이 없으면 조용하다」를 못 재고, 늘 알리는 훅도 통과한다.
+const SCORE_PACKAGE_HOOK = 'score-writing-package.mjs';
+const scorePackageGroup = async () => {
+  const dir = await makeTempDir('hook-score-package-');
+  try {
+    const fm = (type, extra = '') => `---\ntype: ${type}\naudience: 팀원\npurpose: 시험\nkey_message: 한 문장\n${extra}---\n`;
+    const files = {
+      hit: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n✅ 토큰 갱신을 고쳤습니다.\n`,
+      clean: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n토큰 갱신을 고쳤습니다.\n`,
+      lost: `${fm('pr-body', "user_phrases:\n  - '\"사라진 구절\" (사용자 발화)'\n")}# 로그인 토큰 갱신 수정\n\n## 요약\n\n토큰 갱신을 고쳤습니다.\n`,
+      readme: `${fm('readme')}# 소개\n\n## 쓰는 법\n\n✅ 설치하고 실행합니다.\n`,
+      plain: '# 그냥 문서\n\n✅ 이모지가 있어도 패키지가 아니다.\n',
+    };
+    for (const [name, body] of Object.entries(files)) fs.writeFileSync(path.join(dir, `${name}.md`), body);
+    const edit = (name, tool = 'Edit') => ({ tool_name: tool, tool_input: { file_path: path.join(dir, `${name}.md`) } });
+    const cases = [
+      [edit('hit'), 'context', '적발이 있는 패키지를 고치면 알린다'],
+      [edit('hit', 'Write'), 'context', 'Write도 같다'],
+      [edit('clean'), 'pass', '적발이 없으면 조용하다'],
+      [edit('lost'), 'context', '합계가 0이어도 사용자 구절이 사라졌으면 알린다'],
+      [edit('readme'), 'pass', 'readme의 이모지는 적발이 아니다'],
+      [edit('plain'), 'pass', '패키지가 아닌 md는 채점하지 않는다'],
+      [edit('hit', 'Read'), 'pass', 'Read는 고친 것이 아니다'],
+    ];
+    return await runCases(cases, async ([payload, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(SCORE_PACKAGE_HOOK, payload);
+      return judge(`${SCORE_PACKAGE_HOOK} :: ${payload.tool_name} ${path.basename(payload.tool_input.file_path)} → ${expected} (${note})`, decision, expected, stderr);
+    });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 짝 파일 알림은 실제 파일 유무로 가르므로 임시 폴더에 짝이 있는 파일·없는 파일을 만들어 두고 돈다.
 // 세션당 1회 마커는 tmpdir에 쌓이므로 TEMP를 이 폴더로 돌려 폴더와 함께 지운다.
 // a.sub.sub.md를 두는 이유: 없으면 「짝 파일 자신을 읽으면 조용하다」가 .sub.md 제외 조건이 빠져도
@@ -2727,6 +2761,7 @@ async function main() {
     recruitmentGuardGroup,
     acMainCommitGroup,
     skillCreatorGroup,
+    scorePackageGroup,
     subFileGroup,
     responseLanguageGroup,
     tableRenderGroup,

@@ -5,11 +5,16 @@
 // 파일 꼴: 첫 줄 `# <성격>`이 성격 이름이고, 그 아래 바깥 펜스 안이 승인된 본문이다.
 //
 // 사용:
+//   node approved.mjs --from <패키지.md>                             패키지 frontmatter의 type·subtype으로 성격 목록,
+//                                                                   `kind`가 있으면 그 한 편 (아래 인자를 frontmatter에서 채운다)
 //   node approved.mjs <type> [--subtype <subtype>]                  고를 수 있는 승인본 성격 목록
 //   node approved.mjs <type> [--subtype <subtype>] --kind <성격>    그 성격 승인본 한 편 (성격 이름이나 파일 slug)
-//   node approved.mjs <type> [--subtype <subtype>] --kind <성격> --write --root <AC 워크트리> --slug <영문 slug>
-//                     --source <출처(PR 주소·파일 경로)> --from <패키지.md>
+//   node approved.mjs --from <패키지.md> --write --root <AC 워크트리> --slug <영문 slug>
+//                     --source <출처(PR 주소·파일 경로)> (--repo <대상 레포 안 경로 | owner/name> | --no-repo)
 //                                                                   패키지 본문을 승인본 파일로 쓴다(같은 slug면 덮어쓴다)
+//
+// 승인본은 AC(public)에 본문째 들어가므로 --repo가 private이면 쓰지 않는다 — 메인이 visibility 값을 기억해 가르면
+// 틀려도 private 본문이 조용히 올라간다. 대상 레포가 없는 글은 사용자가 올려도 된다고 답했을 때만 --no-repo로 넘긴다.
 //
 // 쓰기는 배포본이 아니라 --root로 받은 AC 워크트리의 `deploy/contexts/writing-guide/`에 한다. 패키지 frontmatter는 떼고,
 // 날짜는 오늘, 바깥 펜스는 백틱 다섯 개 이상으로 본문 안 가장 긴 백틱 줄보다 한 개 길게 쓴다 — 짧으면 본문 펜스에서 승인본이 끊긴다.
@@ -19,6 +24,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { readPackageMeta } from "./package-meta.mjs";
+import { visibility } from "./visibility.mjs";
 
 // 소스(deploy/skills/write-doc/scripts)와 배포본(<타겟>/skills/write-doc/scripts) 둘 다 세 단계 위가 contexts의 부모다.
 const GUIDE = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide");
@@ -27,8 +34,8 @@ const toLines = (text) => text.replace(/\r\n/g, "\n").split("\n");
 
 // `types/<type>/[<subtype>/]approved/<slug>.md` → Map(성격 → {file, slug, body}). 성격 이름은 파일 첫 줄 `# <성격>`이다 —
 // 패키지 `kind`와 같은 말로 맞춰야 고를 수 있다.
-function acApproved(type, subtype) {
-  const dir = path.join(GUIDE, "types", type, ...(subtype ? [subtype] : []), "approved");
+function acApproved(type, subtype, guide = GUIDE) {
+  const dir = path.join(guide, "types", type, ...(subtype ? [subtype] : []), "approved");
   const out = new Map();
   if (!fs.existsSync(dir)) return out;
   for (const name of fs.readdirSync(dir).filter((f) => f.endsWith(".md")).sort()) {
@@ -41,14 +48,15 @@ function acApproved(type, subtype) {
   return out;
 }
 
-const VALUE_FLAGS = ["kind", "subtype", "root", "slug", "source", "from"];
+const VALUE_FLAGS = ["kind", "subtype", "root", "slug", "source", "from", "repo"];
 
 function parseArgs(argv) {
-  const args = { type: null, write: false };
+  const args = { type: null, write: false, noRepo: false };
   for (let i = 0; i < argv.length; i++) {
     const flag = argv[i].replace(/^--/, "");
     if (argv[i].startsWith("--") && VALUE_FLAGS.includes(flag)) args[flag] = argv[++i];
     else if (argv[i] === "--write") args.write = true;
+    else if (argv[i] === "--no-repo") args.noRepo = true;
     else args.type ??= argv[i];
   }
   return args;
@@ -60,31 +68,58 @@ export function renderApproved({ kind, source, body, date }) {
   return `# ${kind}\n\n${source} · ${date} 승인\n\n${fence}markdown\n${body}\n${fence}\n`;
 }
 
-function write({ type, subtype, kind, root, slug, source, from }) {
+function write({ type, subtype, kind, root, slug, source, from, repo, noRepo }) {
   const missing = ["kind", "root", "slug", "source", "from"].filter((k) => !{ kind, root, slug, source, from }[k]);
+  if (!repo && !noRepo) missing.push("repo(또는 --no-repo)");
   if (missing.length) {
     console.error(`--write에는 ${missing.map((k) => `--${k}`).join(" ")}가 필요하다`);
+    process.exit(1);
+  }
+  if (repo && visibility(repo) !== "public") {
+    console.error(`대상 레포 ${repo}가 public이 아니라 승인본을 쓰지 않는다 — 승인본은 public인 AC에 본문째 들어간다`);
     process.exit(1);
   }
   if (!/^[a-z0-9-]+$/.test(slug)) {
     console.error(`--slug는 영문 소문자·숫자·하이픈만 쓴다: ${slug}`);
     process.exit(1);
   }
+  // 같은 성격을 다른 slug로 쓰면 두 편이 남고, 읽기는 파일 이름순으로 뒤 것을 골라 교체가 조용히 무효가 될 수 있다.
+  const guide = path.join(root, "deploy", "contexts", "writing-guide");
+  // 읽기(--kind)처럼 성격 이름과 slug를 둘 다 받는다 — kind에 slug를 적어도 같은 성격으로 알아본다.
+  const kinds = acApproved(type, subtype, guide);
+  const name = kinds.has(kind) ? kind : ([...kinds].find(([, v]) => v.slug === kind)?.[0] ?? kind);
+  const existing = kinds.get(name);
+  if (existing && existing.slug !== slug) {
+    console.error(`성격 「${name}」 승인본이 이미 --slug ${existing.slug}로 있다 — 바꾸려면 --slug ${existing.slug}로 다시 쓴다`);
+    process.exit(1);
+  }
+  // 반대로 다른 성격이 쓰는 slug에 쓰면 그 성격 승인본이 「덮어씀」 한 마디로 사라진다.
+  const owner = [...kinds].find(([, v]) => v.slug === slug)?.[0];
+  if (owner && owner !== name) {
+    console.error(`--slug ${slug}는 성격 「${owner}」 승인본이 쓰고 있다 — 다른 slug를 준다`);
+    process.exit(1);
+  }
   const body = fs.readFileSync(from, "utf8").replace(/\r\n/g, "\n").replace(/^---\n[\s\S]*?\n---\n/, "").trim();
-  const dir = path.join(root, "deploy", "contexts", "writing-guide", "types", type, ...(subtype ? [subtype] : []), "approved");
+  const dir = path.join(guide, "types", type, ...(subtype ? [subtype] : []), "approved");
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${slug}.md`);
   const replaced = fs.existsSync(file);
   const date = new Date().toLocaleDateString("sv-SE");
-  fs.writeFileSync(file, renderApproved({ kind, source, body, date }));
-  console.log(`승인본 「${kind}」 ${replaced ? "덮어씀" : "새로 씀"}: ${file}`);
+  fs.writeFileSync(file, renderApproved({ kind: name, source, body, date }));
+  console.log(`승인본 「${name}」 ${replaced ? "덮어씀" : "새로 씀"}: ${file}`);
 }
 
 function main() {
   const args = parseArgs(process.argv.slice(2));
+  if (args.from) {
+    const meta = readPackageMeta(args.from);
+    args.type ??= meta.type;
+    args.subtype ??= meta.subtype;
+    args.kind ??= meta.kind;
+  }
   const { type, kind, subtype } = args;
   if (!type) {
-    console.error("사용: node approved.mjs <type> [--subtype <subtype>] [--kind <성격>] [--write --root <AC 워크트리> --slug <slug> --source <출처> --from <패키지.md>]");
+    console.error("사용: node approved.mjs --from <패키지.md> | <type> [--subtype <subtype>] [--kind <성격>] [--write --root <AC 워크트리> --slug <slug> --source <출처> --from <패키지.md> (--repo <대상 레포> | --no-repo)]");
     process.exit(1);
   }
   if (args.write) return write(args);

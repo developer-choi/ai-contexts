@@ -19,8 +19,8 @@
 
 ## 룰·사례 로드
 
-- **룰**: `node {{skill_dir}}/scripts/guide-files.mjs <type> [--subtype <subtype>] --for polish`가 낸 파일을 메인이 Read한다.
-- **승인본**: 완성된 글로 바로 들어왔으면 초안 단계 「읽을 파일」대로 승인본을 읽는다.
+- **룰**: `node {{skill_dir}}/scripts/guide-files.mjs --from <패키지> --for polish`가 낸 파일을 메인이 Read한다.
+- **승인본**: 완성된 글로 바로 들어왔으면 `node {{skill_dir}}/scripts/approved.mjs --from <패키지>`로 승인본을 읽는다.
 
 ## 구조 — 다듬기와 판정 분리
 
@@ -40,17 +40,16 @@
 
 - 명백한 사실 오류는 사용자에게 보고한다.
 - bullet·섹션·헤딩 개수는 기본 보존 — 통합·삭제·분할이 필요하면 사용자에게 한 번 확인.
-- 사용자가 직접 쓰거나 불러넣은 구절은 그 출처와 함께 frontmatter `user_phrases`에 적는다([package-format.md](../../../contexts/writing-guide/package-format.md)).
+- 리뷰어가 물지 않을 구절은 frontmatter `user_phrases`에 적는다([package-format.md](../../../contexts/writing-guide/package-format.md)).
 
 ### [CHECK_STEP] 3. 검수
 
 단위는 그 단위에 걸린 채점 적발을 0으로 닫아 내밀고, 전 단위가 끝나면 본문 전체를 채점하고 리뷰어 판정을 받는다. 채점이 줄지 않거나 리뷰어 상한에 닿으면 남은 것을 보이고 남길지 사용자에게 묻는다.
 
-- **채점**: `node {{skill_dir}}/scripts/score.mjs <패키지>`. 리뷰어 지적을 반영한 뒤에도 다시 돌린다 — 리뷰어 대안이 사용자 구절을 지우는 자리가 여기다.
-- **표현 리뷰어 (`block` 0까지, 최대 3회)**: [reviewers/expression.md](../reviewers/expression.md)대로 [이름 있는 팀원](../../../contexts/team-agent.md) `write-doc-expression`으로 띄운다.
-  - 넘길 경로는 `node {{skill_dir}}/scripts/guide-files.mjs <type> [--subtype <subtype>] --for reviewer`가 낸다. 사례(`examples/`)는 메인이 읽지 않는다.
+- 리뷰어 프롬프트는 `node {{skill_dir}}/scripts/reviewer-input.mjs --from <패키지> --for <expression | reader>`의 출력을 덧붙이는 말 없이 그대로 쓴다. 본문을 고치면 다시 돌린 출력을 두 리뷰어 모두에게 보낸다 — 표현 리뷰어는 같은 팀원에게, 독자 리뷰어는 매번 새로 띄운다. 앞 라운드를 기억하는 독자는 처음 읽는 독자가 아니다.
+- **표현 리뷰어 (`block` 0까지, 최대 3회)**: [이름 있는 팀원](../../../contexts/team-agent.md) `write-doc-expression`으로 띄운다([reviewers/expression.md](../reviewers/expression.md)).
   - `note`는 한 번만 반영한다 — 0이 될 기준이 없다.
-- **독자 리뷰어 (메인이 고칠 반응이 없을 때까지, 최대 3회)**: [reviewers/reader.md](../reviewers/reader.md)대로 `write-doc-reader`를 `model: sonnet`으로 띄운다 — 추론해야 이해되는 글이면 그 글이 잘못된 것이다. 고친 본문은 두 리뷰어 모두에게 다시 보낸다.
+- **독자 리뷰어 (메인이 고칠 반응이 없을 때까지, 최대 3회)**: `model: sonnet`으로 띄운다([reviewers/reader.md](../reviewers/reader.md)) — 추론해야 이해되는 글이면 그 글이 잘못된 것이다.
 - 빈 응답을 `clean`으로 읽지 않는다.
 
 ### [REPORT_STEP] 4. 보고·사용자 피드백

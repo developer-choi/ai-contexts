@@ -34,44 +34,11 @@
 // 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
 import fs from "node:fs";
 import path from "node:path";
+import { COMMENT_LINE, fenceTracker } from "./package-meta.mjs";
+import { parseRejectedLines } from "./rejected-lines.mjs";
 
 // 소스(deploy/skills/write-doc/scripts)와 배포본(<타겟>/skills/write-doc/scripts) 둘 다 세 단계 위가 contexts의 부모다.
 const AC_REJECTED = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide", "rejected.md");
-
-// 「반려된 표현」 한 줄: `- [합계:|경고:] "<표현>"[·"<활용형>"…] → <대신 쓸 말> — <날짜> <근거>`.
-// 레인 표시가 없으면 경고로 읽는다 — 레인을 정하기 전에 쌓인 줄이라 쓰임을 가렸는지 모른다.
-// 큰따옴표 안 글자만 찾는다. 근거 발화에도 큰따옴표가 있어 `→` 앞에서만 꺼낸다.
-// 활용형은 늘리지 않는다 — `부르다 → 불러`처럼 불규칙이 흔해 기계가 만든 꼴은 틀리기 쉽다. 줄이 꼴을 하나씩 적는다.
-const REJECTED_LINE = /^-\s+(?:(합계|경고):\s*)?(.*?)\s+→\s+(.*?)(?:\s+—\s+\d{4}-\d{2}-\d{2}.*)?$/;
-
-function parseRejectedLines(text) {
-  const lines = text.replace(/\r\n/g, "\n").split("\n");
-  const at = lines.findIndex((ln) => /^##\s+반려된 표현\s*$/.test(ln));
-  if (at === -1) return { entries: [], unreadable: 0, noLane: 0, badLane: 0 };
-  const entries = [];
-  let unreadable = 0;
-  // 레인을 빠뜨리거나 잘못 적은 줄은 경고로 읽혀, 「게시 막힘」으로 승인한 줄이 조용히 경고가 된다 — 따로 세서 알린다.
-  let noLane = 0;
-  let badLane = 0;
-  for (const ln of lines.slice(at + 1)) {
-    if (/^#{1,2}\s/.test(ln)) break;
-    if (!/^-\s/.test(ln)) continue;
-    const lane = ln.match(/^-\s+([^\s"]+):/);
-    if (!lane) noLane += 1;
-    else if (lane[1] !== "합계" && lane[1] !== "경고") badLane += 1;
-    const m = ln.match(REJECTED_LINE);
-    const words = m ? [...m[2].matchAll(/"([^"]+)"/g)].map((q) => q[1]) : [];
-    if (!words.length) {
-      unreadable += 1;
-      continue;
-    }
-    // 대신 쓸 말도 같은 수만큼 따옴표로 적었으면 꼴마다 짝짓는다(`"부르는"` → `"호출하는"`).
-    const swaps = [...m[3].matchAll(/"([^"]+)"/g)].map((q) => q[1]);
-    const paired = words.length > 1 && swaps.length === words.length;
-    words.forEach((w, i) => entries.push({ word: w, lane: m[1] ?? "경고", swap: paired ? `"${swaps[i]}"` : m[3] }));
-  }
-  return { entries, unreadable, noLane, badLane };
-}
 
 function loadAcRejected() {
   if (!fs.existsSync(AC_REJECTED)) return { entries: [], note: `건너뜀 — 파일 없음 (${AC_REJECTED})` };
@@ -93,11 +60,10 @@ const TITLE_MAX = 60;
 
 // 코드펜스 밖 첫 `# ` 줄을 [파일 줄 번호, 제목]으로 낸다.
 function firstH1(bodyLines, offset) {
-  let fenced = false;
+  const inFence = fenceTracker();
   for (let i = 0; i < bodyLines.length; i++) {
     const ln = bodyLines[i];
-    if (/^\s*(```|~~~)/.test(ln)) fenced = !fenced;
-    else if (!fenced && /^# \S/.test(ln)) return [i + 1 + offset, ln.slice(2).trim()];
+    if (!inFence(ln) && /^# \S/.test(ln)) return [i + 1 + offset, ln.slice(2).trim()];
   }
   return null;
 }
@@ -281,6 +247,10 @@ function printRules() {
     console.log(`   ${r.what}`);
     for (const [w, s] of Object.entries(r.swap ?? {})) console.log(`   '${w}' 대신: ${s}`);
   }
+  console.log(`\n## 이모지  (type ${[...NO_EMOJI_TYPES].join("·")}만)`);
+  console.log("   PR 본문·PR 코멘트에는 이모지를 쓰지 않는다.");
+  console.log(`\n## plain-text 마크다운  (rendering_env: plain-text만)`);
+  console.log(`   발행처에서 기호가 그대로 보인다: ${PLAIN_TEXT_MARKDOWN.map(([l]) => l).join(", ")}. 리스트 \`-\`는 안 센다.`);
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
   const ac = loadAcRejected();
@@ -311,7 +281,20 @@ function dumpRejectedHits(name, hits, note = "", label = "대신") {
 const BANMAL_END = /(?:[가-힣])(?:는다|ㄴ다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
 const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아요|에요|예요)\.?$/;
 
-const COMMENT_LINE = /^\[\/\/\]: #/;
+// PR 본문·PR 코멘트에는 이모지를 쓰지 않는다(2026-10-17 사용자 결정). 다른 type은 이모지를 세지 않는다.
+const NO_EMOJI_TYPES = new Set(["pr-body", "pr-comment"]);
+const EMOJI = /\p{Extended_Pictographic}/gu;
+
+// `rendering_env: plain-text` 발행처(텍스트 폼 등)에서 기호 그대로 보이는 마크다운. 정본은 package-format.md `rendering_env`.
+// 리스트 `-`는 텍스트 폼에서도 흔히 쓰는 꼴이라 세지 않는다.
+const PLAIN_TEXT_MARKDOWN = [
+  ["헤딩", /^\s{0,3}#{1,6}\s/],
+  ["코드펜스", /^\s*(```|~~~)/],
+  ["백틱", /`/],
+  ["굵게", /\*\*|__/],
+  ["링크", /\[[^\]]+\]\([^)]+\)/],
+  ["인용", /^\s*>/],
+];
 
 // 본문과, 본문 앞에서 뗀 줄 수를 돌려준다. 출력하는 줄 번호는 이 수를 더해 파일 기준으로 낸다 —
 // 읽는 쪽은 파일을 열어 본 줄 번호로 자리를 찾는다.
@@ -334,15 +317,10 @@ function splitFrontmatter(text) {
 function stripCodeAndQuotes(rawLines, offset = 0) {
   const out = [];
   const comments = [];
-  let inFence = false;
+  const inFence = fenceTracker();
   rawLines.forEach((ln, i) => {
-    const s = ln.trim();
-    if (s.startsWith("```") || s.startsWith("~~~")) {
-      inFence = !inFence;
-      return;
-    }
-    if (inFence) return;
-    if (s.startsWith(">")) return;
+    if (inFence(ln)) return;
+    if (ln.trim().startsWith(">")) return;
     if (COMMENT_LINE.test(ln)) {
       comments.push([i + 1 + offset, ln]);
       return;
@@ -350,6 +328,27 @@ function stripCodeAndQuotes(rawLines, offset = 0) {
     out.push([i + 1 + offset, ln]);
   });
   return { lines: out, comments };
+}
+
+function findEmoji(lines) {
+  const hits = [];
+  for (const [lineno, ln] of lines) {
+    const found = ln.match(EMOJI);
+    if (found) hits.push([lineno, found.join(""), ln.trim()]);
+  }
+  return hits;
+}
+
+// 코드펜스·인용도 기호로 보이므로 코드를 걷기 전 본문 줄에서 찾는다. 주석 줄은 발행 전에 지워지므로 뺀다.
+function findMarkdown(rawLines, offset) {
+  const hits = [];
+  rawLines.forEach((ln, i) => {
+    if (COMMENT_LINE.test(ln)) return;
+    const found = PLAIN_TEXT_MARKDOWN.filter(([, rx]) => rx.test(ln)).map(([label]) => label);
+    // 펜스 줄의 백틱은 펜스 하나로 센다.
+    for (const label of found.includes("코드펜스") ? ["코드펜스"] : found) hits.push([label, i + 1 + offset, ln.trim()]);
+  });
+  return hits;
 }
 
 function countSentences(body) {
@@ -538,11 +537,9 @@ function checkHanjaSuffix(lines) {
 function checkEmptySections(text) {
   const lines = text.split("\n");
   const heads = [];
-  let inFence = false;
+  const inFence = fenceTracker();
   lines.forEach((ln, i) => {
-    const s = ln.trim();
-    if (s.startsWith("```") || s.startsWith("~~~")) inFence = !inFence;
-    else if (!inFence && /^#{1,6}\s/.test(ln)) heads.push([i, ln, ln.match(/^#+/)[0].length]);
+    if (!inFence(ln) && /^#{1,6}\s/.test(ln)) heads.push([i, ln, ln.match(/^#+/)[0].length]);
   });
   const empties = [];
   heads.forEach(([i, head, level], idx) => {
@@ -551,9 +548,9 @@ function checkEmptySections(text) {
     if (next && next[2] > level) return;
     const end = next ? next[0] : lines.length;
     const body = lines.slice(i + 1, end).join("\n").trim();
-    const isComment = /^\[\/\/\]: #/m;
-    const prose = body.replace(/^\[\/\/\]: #.*$/gm, "").replace(/\[[^\]]*\]\([^)]*\)/g, "");
-    if (prose.replace(/\s/g, "").length >= 10 || isComment.test(body)) return;
+    const bodyLines = body.split("\n");
+    const prose = bodyLines.filter((l) => !COMMENT_LINE.test(l)).join("\n").replace(/\[[^\]]*\]\([^)]*\)/g, "");
+    if (prose.replace(/\s/g, "").length >= 10 || bodyLines.some((l) => COMMENT_LINE.test(l))) return;
     empties.push([head.trim(), "내용 1문장 미만"]);
   });
   return { empties, nheads: heads.length };
@@ -841,6 +838,17 @@ function main() {
   const h1 = docType === "pr-body" ? firstH1(body.split("\n"), offset) : null;
   const titleHits = h1 ? checkTitle(h1[1]).map((why) => [h1[0], h1[1], why]) : [];
   if (docType === "pr-body") dump("PR 제목", titleHits, (h) => `L${h[0]} 「${h[1]}」: ${h[2]}`);
+  const emojiHits = NO_EMOJI_TYPES.has(docType) ? findEmoji(lines) : [];
+  if (NO_EMOJI_TYPES.has(docType)) {
+    dump("이모지", emojiHits, (h) => `'${h[1]}' (L${h[0]}): ${h[2].slice(0, 70)}`);
+    if (emojiHits.length) console.log("   → PR 본문·PR 코멘트에는 이모지를 쓰지 않는다. 지우거나 말로 바꾼다.");
+  }
+  const plainText = readFrontmatterScalar(raw, "rendering_env") === "plain-text";
+  const markdownHits = plainText ? findMarkdown(body.split("\n"), offset) : [];
+  if (plainText) {
+    dump("plain-text 마크다운", markdownHits, (h) => `${h[0]} (L${h[1]}): ${h[2].slice(0, 70)}`);
+    if (markdownHits.length) console.log("   → 발행처가 마크다운을 그리지 않아 기호가 그대로 보인다. 기호를 걷고 문장·줄바꿈으로 나눈다.");
+  }
   console.log(`\n[습니다체 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능)`);
   for (const [lineno, ln] of politeHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
   const { longHits, countHits } = printStructure(lines);
@@ -943,6 +951,8 @@ function main() {
     dashHits.length +
     questionHits.length +
     titleHits.length +
+    emojiHits.length +
+    markdownHits.length +
     empties.length +
     caseLinkHits.length +
     caseBoldHits.length;
