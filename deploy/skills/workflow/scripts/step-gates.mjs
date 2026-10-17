@@ -38,6 +38,10 @@ function artifacts() {
     console.error('artifacts 에는 --plan 과 --mode 가 필요합니다.');
     process.exit(1);
   }
+  if (!['채용', '실무', '개인'].includes(mode)) {
+    console.error(`--mode 는 채용·실무·개인 중 하나입니다 (받은 값: ${mode}).`);
+    process.exit(1);
+  }
   const bg = path.join(plan, 'background');
   const required = [
     { label: '시각 원본 진입 문서', p: path.join(bg, 'retained', 'design-root.md') },
@@ -57,10 +61,10 @@ function artifacts() {
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);
-    if (!ok) problems.push(`${r.label}가 없다`);
+    if (!ok) problems.push(`없음: ${r.label}`);
   }
   // 레포가 아직 없어 인덱스를 미룬 경우는 파일로 판별할 수 없어, 넘어갈지는 사람이 판정한다.
-  if (problems.length) console.log('\n  (레포 미확보로 인덱스를 미룬 경우라면 연기 사실을 한 줄로 남기고 넘어간다)');
+  if (problems.includes('없음: 컨벤션 인덱스')) console.log('\n  (레포가 아직 없어 인덱스를 미뤘으면 컨벤션 인덱스 ✗는 넘어간다 — 「레포 확보」에서 만든다)');
 }
 
 // ── review-bypass: impl-review-loop 우회 조건 ────────────────────────────────
