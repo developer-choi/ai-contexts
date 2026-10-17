@@ -26,7 +26,7 @@
 
 **진입 전 베이스라인 확인 필수**: 착수 전 「회사 제공 베이스라인 커밋」 절을 먼저 적용한다.
 
-**컨벤션 소스 스캔 (이연분)**: `background/retained/conventions-index.md`가 없으면(레포를 세운 뒤 BG가 스캔을 건너뛴 경우), 폴더 마이그레이션 착수 전에 [requirement 「컨벤션 소스 수집」](../../steps/requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)의 이름 스캔·인덱스 생성을 수행한다
+**미룬 컨벤션 소스 수집**: `background/retained/conventions-index.md`가 없으면(레포를 세운 뒤 BG가 스캔을 건너뛴 경우), 폴더 마이그레이션 착수 전에 [conventions-index.md](../artifact/conventions-index.md)의 수집을 수행한다
 
 ## 회사 제공 베이스라인 커밋
 

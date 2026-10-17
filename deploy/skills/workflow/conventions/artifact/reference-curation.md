@@ -1,29 +1,15 @@
 # reference.md 컨벤션
 
-`/plan/pr{N}/persistent/reference.md`의 책임·포함 항목·작성·소비 단일 출처.
-
-## 책임·위치
-
-PR이 참조하는 외부 자료·컨벤션·베스트프랙티스 경로 인덱스.
+`/plan/pr{N}/persistent/reference.md` — PR이 참조하는 외부 자료·컨벤션·베스트프랙티스 경로 인덱스.
 
 ## 포함 항목
 
-- 외부 자료 링크 (기획서, 디자인 시안 URL 등 — `background/retained/figma-url.md`에 누적되는 figma URL은 중복 회피)
-- 회사·프로젝트 컨벤션 경로 + 라인 범위 (본 PR 작업 관련 규칙)
+- 외부 자료 링크. figma URL은 `background/retained/figma-url.md`에 있으니 넣지 않는다
+- 회사·프로젝트 컨벤션 경로 + 라인 범위
 - AC 코딩 스탠다드 + MP 베스트프랙티스 맵 중 본 PR 매칭 패턴 경로
-- 기술 선택이 기대는 라이브러리별 공식 가이드 확인 결과 — 양식은 [plan 「라이브러리에 기대는 기술 선택은 공식 가이드부터 찾는다」](../../steps/plan.md#라이브러리에-기대는-기술-선택은-공식-가이드부터-찾는다) 단일 출처
-- 개인·실무 모드: `conventions-index.md`에 등재된 외부 레퍼런스 레포(simplified) 중 본 PR 테스트·컴포넌트와 매칭되는 것 (등재는 [requirement 「컨벤션 소스 수집」](../../steps/requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd) 단일 출처)
+- 기술 선택이 기대는 라이브러리별 공식 가이드 확인 결과
+- 개인·실무 모드: `conventions-index.md` 「표준 참고처」 레포마다 이번 PR 컴포넌트에 대응하는 파일 경로
 
-## 누적 원칙
+## stub과의 분담
 
-결정 가능한 컨벤션은 stub 코드와 reference.md에 녹인다:
-
-- 파일 경로·네이밍 → stub 자체로
-- 토큰 사용 규칙·에러처리 전략 같은 명시 규칙 → reference.md로
-
-## 소비처
-
-- realize-plan: 파생 산출물 작성 시 참조
-- implement: Lead가 Feature Implementer에게 컨텍스트 주입할 때 함께 전달, 리뷰 때는 code-review 추가 컨벤션으로 전달
-- verify: code-review 입력에 포함
-- 후속 PR / 미래 다른 프로젝트: 같은 컨벤션 환경이면 재참조
+파일 경로·네이밍으로 정한 값은 reference.md에 풀어 적지 않고 stub 자체로 드러낸다.

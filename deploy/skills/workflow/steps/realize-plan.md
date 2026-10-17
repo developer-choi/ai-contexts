@@ -74,7 +74,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 1. coding-standards `rules/`·`principles/`를 Glob → code-map 로드 규칙의 범주를 모드로 고른다(`실무` → 회사 프로젝트, `채용`·`개인` → 개인 프로젝트) → 해당하는 파일 중 현재 구현에 관련된 것을 선별 (`file-folder-structure` 태그 포함, frontmatter로 확인)
 2. MP `docs/best-practices/*.md`에서 현재 구현에 매칭되는 패턴을 탐색한다 — 매칭되는 엔트리가 있으면 해당 산출물에 참조 패턴으로 기록한다
    - 매칭되는 엔트리가 없으면 사용자에게 어떤 패턴을 따를지 문의한다
-3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. 누적 원칙·stub과의 분담은 [누적 원칙](../conventions/artifact/reference-curation.md#누적-원칙) 참조.
+3. 선별된 컨벤션·패턴 경로를 `/plan/pr{N}/persistent/reference.md`에 누적 명시한다. stub과의 분담은 [reference-curation.md](../conventions/artifact/reference-curation.md#stub과의-분담) 참조.
 
 ### 컨벤션 1차 소스 직접 grep 의무
 

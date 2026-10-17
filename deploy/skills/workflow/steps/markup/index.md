@@ -20,7 +20,7 @@ next:
 모드 무관 공통 절차는 본 파일에 둔다. **디자인 진실 원천·재료·검사 방법은 모드 파일에 둔다** — figma 쓰는 모드(채용·실무)는 [figma.md](figma.md), figma 대신 사용자가 미리 만든 마크업 시안을 쓰는 모드(개인)는 [personal.md](personal.md).
 ## 입력·산출물·작업 위치
 
-- **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). 진입 문서 `background/retained/design-root.md`, (개인·실무) `background/retained/conventions-index.md`
+- **입력**: requirement 「자료 받기」에서 수집한 자료 — (채용·실무) figma·시안: `background/retained/figma-url.md`·`figma/` / (개인) 마크업 시안: `background/retained/mockup/`(+선택 `retained/spec.md`). (개인·실무) `background/retained/conventions-index.md`
 - **산출물**: markup 워크트리의 디자인 진실 원천 0건 완성 마크업 코드(`.tsx`·`.module.scss`) + 공통 컴포넌트 확정·독립 산출 (COMPONENTS 종류 PR이 소비하는 단방향 입력)
 - **작업 위치**: markup 워크트리(`<레포>/.claude/worktrees/markup`). 포트 3000 점유
   - 진입 시 MARKUP이 만든다. base는 FOUNDATION PR 브랜치의 verify 종료 시점 tip이고, 그 PR이 이미 머지됐거나 FOUNDATION PR이 없으면 기본 브랜치다
@@ -40,9 +40,7 @@ next:
 
 ## 자료 참조 (수집은 requirement 「자료 받기」)
 
-각 컴포넌트의 디자인 디테일 원천(재료)과 그 참조 방식은 모드 파일이 정의한다. 이 프로젝트의 구체 원본 위치와 대조 절차문서는 진입 문서 `background/retained/design-root.md`가 가리킨다 ([../../conventions/artifact/design-root.md](../../conventions/artifact/design-root.md) 양식).
-
-개인·실무 모드면 `background/retained/conventions-index.md`에 등재된 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 등재 절차·목록은 [requirement 「컨벤션 소스 수집」](../requirement.md#컨벤션-소스-수집--이름-스캔-선제안--conventions-indexmd)이 단일 출처.
+개인·실무 모드면 `background/retained/conventions-index.md`에 올라 있는 표준 참고처(simplified 레포)도 마크업 참고에 포함한다 — 올리는 기준은 [conventions-index.md](../../conventions/artifact/conventions-index.md)가 정한다.
 
 참조 자료가 갖춰지면 `EnterWorktree`에 markup 워크트리 경로를 줘 들어가 「마크업 구현·검사」로 진입한다.
 

@@ -13,12 +13,11 @@
     retained/
       folder-structure.md ← FOUNDATION PR 산출 (채용만)
       tech-constraints.md ← BG의 requirement 산출
-      conventions-index.md ← requirement 「자료 받기」 수집 (레포 미확보 시 레포 확보 시점 세션이 생성)
+      conventions-index.md ← requirement 「자료 받기」 수집. 양식·수집은 [conventions/artifact/conventions-index.md] 참조
       figma-url.md      ← requirement 「자료 받기」 수집 (figma 쓰는 모드)
       figma/            ← requirement 「자료 받기」 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
       mockup/           ← requirement 「자료 받기」 수집 (개인 모드)
       spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택 — 화면에 안 담기는 동작을 저자가 미리 아는 경우)
-      design-root.md    ← requirement 「자료 받기」 산출. 양식·규칙은 [conventions/artifact/design-root.md] 참조
       cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
     consumable/
@@ -69,6 +68,6 @@ realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`
 
 - 같은 대상의 피그마가 다시 필요할 때는 figma-url.md에서 조회 — 사용자에게 URL을 재요청하지 않는다
 
-캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 ([requirement 「자료 받기」](../steps/requirement.md#자료-받기)에서 수집). 어느 단위 캡처든 같은 폴더에.
+캡처 이미지는 `plan/background/retained/figma/[meaningful-name].[이미지확장자]`에 저장 (BG 「자료 받기」에서 수집). 어느 단위 캡처든 같은 폴더에.
 
 requirement(전체 페이지 URL) ~ implement(컴포넌트·프레임 URL) 어느 시점에 받든 동일하게 적용한다.

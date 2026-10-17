@@ -28,9 +28,9 @@ const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
 // ── artifacts: requirement 「자료 받기」 종료 게이트 ──────────────────────────────────────────
-// 「원본 저장 + 시각 원본 + design-root + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
+// 「원본 저장 + 시각 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
 // 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement 「requirement-review 본체」는 그대로 굴러가고, MARKUP이
-// 진입 문서를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
+// 시각 원본·인덱스를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
   const mode = optOf('mode');
@@ -44,7 +44,6 @@ function artifacts() {
   }
   const bg = path.join(plan, 'background');
   const required = [
-    { label: '시각 원본 진입 문서', p: path.join(bg, 'retained', 'design-root.md') },
     { label: '컨벤션 인덱스', p: path.join(bg, 'retained', 'conventions-index.md') },
   ];
   if (mode === '채용') {
