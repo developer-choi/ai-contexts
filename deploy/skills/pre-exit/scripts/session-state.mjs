@@ -1123,8 +1123,8 @@ function jsonlEntries(file) {
   return out;
 }
 
-// 적용한 체크리스트는 모드별 `checklist/`와 페이지 유형별 `page-type/` 두 곳에 산다.
-const RR_CHECKLIST = /requirement-review\/(.+\/checklist|page-type)\/[^/]+\.md$/;
+// 적용한 체크리스트는 모드별 `checklist/`, 페이지 유형별 `page-type/`, 종합 전용 `planning/cross-page.md`에 산다.
+const RR_CHECKLIST = /requirement-review\/((.+\/checklist|page-type)\/[^/]+|planning\/cross-page)\.md$/;
 // retrospect.md는 자유 검토 문서의 옛 이름이다 — 이름이 바뀌기 전 회차의 기록도 재료로 읽는다.
 const RR_FREE_REVIEW = /requirement-review\/(free-review|retrospect)\.md$/;
 // page는 `background/consumable/page-{슬러그}.md`로 시작해 `pr{N}/consumable/page.md`로 옮겨진다.

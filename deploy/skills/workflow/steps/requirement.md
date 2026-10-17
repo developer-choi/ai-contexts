@@ -42,7 +42,7 @@ BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디
 
 ### 자료 수집 점검
 
-외부에서 시안·기획서·Figma를 받는 작업이면 수집 방식이 적절한지 점검한다 — 아직 받기 전이면 먼저 안내한다. 상세는 [design-asset-collection.md](../conventions/design-asset-collection.md).
+외부에서 시안·기획서·Figma를 받는 작업이면 수집 방식이 적절한지 점검한다 — 아직 받기 전이면 먼저 안내한다. 상세는 [figma-asset-collection.md](../conventions/figma-asset-collection.md).
 
 채용 모드인 경우 사용자가 제공한 공고·메일·과제요구사항을 `/plan/background/persistent/`에 저장한다 ([입력 자료](../requirement-review/recruitment/guide.md#입력-자료) 참조). 저장 시 시간 압박 표현은 뺀다 ([입력 자료 저장 시 제외 항목](../requirement-review/recruitment/guide.md#입력-자료-저장-시-제외-항목)).
 
