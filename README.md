@@ -79,7 +79,6 @@ AI가 작성하는 코드의 양이 늘수록, 사람이 리뷰해야 할 양도
 ### 커뮤니케이션
 
 - [discussion](deploy/skills/discussion/README.md): 기술 주제에 대해 비판적으로 토론
-- [pr-comment-write](deploy/skills/pr-comment-write/README.md): 남의 PR 코멘트 내용을 확인하고 말투를 다듬기
 
 ### 유틸리티
 

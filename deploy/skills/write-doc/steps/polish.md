@@ -17,7 +17,7 @@
 - 주석 꼴은 `[//]: # (...)`.
 - 반영한 주석은 그 자리에서 지운다.
 
-## 룰·사례 로드
+## 룰·승인본 로드
 
 - **룰**: `node {{skill_dir}}/scripts/guide-files.mjs --from <패키지> --for polish`가 낸 파일을 메인이 Read한다.
 - **승인본**: 완성된 글로 바로 들어왔으면 `node {{skill_dir}}/scripts/approved.mjs --from <패키지>`로 승인본을 읽는다.

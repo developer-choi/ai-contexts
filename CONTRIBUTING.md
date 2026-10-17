@@ -81,4 +81,4 @@ coding-standards/
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 그 문서를 부르는 스킬(`write-doc`)의 단계별 로드 목록이 정합니다.
+[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 write-doc 스킬의 [guide-files.mjs](deploy/skills/write-doc/scripts/guide-files.mjs)가 단계마다 정합니다.

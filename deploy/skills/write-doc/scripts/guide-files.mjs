@@ -13,11 +13,11 @@
 //   node guide-files.mjs --from <패키지.md> --for <단계>                type·subtype을 패키지 frontmatter에서 읽는다
 //                                                                     (패키지가 생긴 뒤 단계는 이쪽을 쓴다 — 손으로 넘기면 subtype을 빠뜨린다)
 //
-// type 폴더의 steps.md는 그 type만 더 도는 절차라 메인 단계(draft·polish·finish)에만 낸다.
+// 스킬 types/<type>/steps.md는 그 type만 더 도는 절차라 메인 단계(draft·polish·finish)에만 낸다.
 // 단계 문서에 type 이름을 박은 분기를 두면 type이 늘 때마다 모든 세션이 남의 type 분기까지 읽는다.
 // steps.md의 `## [OUTLINE_STEP] …` 절은 단계 파일에 같은 절차 ID가 있어야 읽힌다.
 // 단계 파일에서 ID를 바꾸거나 지우면 type 절이 조용히 안 읽히므로, 낼 때마다 대조해 어긋나면 멈춘다.
-//   node guide-files.mjs --check   모든 type의 steps.md를 대조하고, subtype 폴더에 둔 template.md를 잡는다
+//   node guide-files.mjs --check   스킬 types/의 steps.md를 모두 대조하고, writing-guide subtype 폴더에 둔 template.md를 잡는다
 //
 // 조건부 경로는 판단이 드는 조건(본문에 수치가 있는가 등)이라 고르지 않고 조건과 함께 낸다. 고르는 것은 메인이다.
 import fs from "node:fs";
@@ -48,6 +48,7 @@ function typeFiles(type, subtype, { template }) {
 }
 
 const STEPS_DIR = path.resolve(import.meta.dirname, "..", "steps");
+const TYPE_STEPS_DIR = path.resolve(import.meta.dirname, "..", "types");
 const STEP_ID = /\[([A-Z_]+_STEP)\]/;
 
 // 단계 파일 셋에 있는 절차 ID. 같은 ID가 두 번 나오면 type 절이 어느 절차에 붙는지 갈리지 않으므로 멈춘다.
@@ -66,9 +67,10 @@ export function unmatchedSections(file) {
   return heads.filter((h) => !ids.has(h.match(STEP_ID)?.[1]));
 }
 
-// type 폴더의 steps.md, 이어서 subtype 폴더의 steps.md. subtype 절은 type 절 다음에 돈다.
+// 스킬 types/<type>/steps.md, 이어서 types/<type>/<subtype>/steps.md. subtype 절은 type 절 다음에 돈다.
 function typeSteps(type, subtype) {
-  const files = existing(path.join("types", type, "steps.md"), ...(subtype ? [path.join("types", type, subtype, "steps.md")] : []));
+  const files = [path.join(type, "steps.md"), ...(subtype ? [path.join(type, subtype, "steps.md")] : [])]
+    .map((r) => path.join(TYPE_STEPS_DIR, r)).filter((f) => fs.existsSync(f));
   for (const f of files) {
     const bad = unmatchedSections(f);
     if (bad.length) throw new Error(`${f}의 절 ${bad.map((b) => `「${b}」`).join(" ")}에 단계 파일의 절차 ID가 없다`);
@@ -102,22 +104,35 @@ function parseArgs(argv) {
   return args;
 }
 
+const subdirs = (dir) => fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : [];
+
 function check() {
   const typesDir = path.join(GUIDE, "types");
   let failed = false;
-  for (const t of fs.readdirSync(typesDir)) {
-    const subs = fs.readdirSync(path.join(typesDir, t), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name);
-    for (const sub of [null, ...subs]) {
+  for (const t of subdirs(TYPE_STEPS_DIR)) {
+    for (const sub of [null, ...subdirs(path.join(TYPE_STEPS_DIR, t))]) {
       try { typeSteps(t, sub); } catch (e) { console.error(e.message); failed = true; }
+    }
+  }
+  for (const t of fs.readdirSync(typesDir)) {
+    const subs = subdirs(path.join(typesDir, t));
+    // 절차는 스킬 types/에서만 읽는다 — writing-guide 쪽에 둔 steps.md는 경고 없이 안 읽힌다.
+    for (const rel of [t, ...subs.map((sub) => path.join(t, sub))]) {
+      if (fs.existsSync(path.join(typesDir, rel, "steps.md"))) {
+        console.error(`writing-guide types/${rel}/steps.md는 읽히지 않는다 — write-doc 스킬 types/${rel}/steps.md에 둔다`);
+        failed = true;
+      }
+    }
+    for (const sub of subs) {
       // typeFiles는 골격을 type 폴더에서만 읽는다 — subtype 폴더에 둔 template.md는 경고 없이 안 읽힌다.
-      if (sub && fs.existsSync(path.join(typesDir, t, sub, "template.md"))) {
+      if (fs.existsSync(path.join(typesDir, t, sub, "template.md"))) {
         console.error(`types/${t}/${sub}/template.md는 어느 단계에서도 읽히지 않는다 — 골격은 types/${t}/template.md에 둔다`);
         failed = true;
       }
     }
   }
   if (failed) process.exit(1);
-  console.log("type steps.md 절의 절차 ID 모두 단계 파일에 있음, subtype 폴더에 template.md 없음");
+  console.log("type steps.md 절의 절차 ID 모두 단계 파일에 있음, subtype 폴더에 template.md 없음, writing-guide에 steps.md 없음");
 }
 
 function main() {

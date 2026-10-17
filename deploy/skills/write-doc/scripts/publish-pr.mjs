@@ -76,7 +76,7 @@ function frontmatterType(raw) {
 }
 
 // 합계와, 합계 안에서도 --accept-residual로 못 넘기는 PR 제목 적발을 채점기 출력에서 읽는다.
-// 제목 판정은 채점기 한 곳에서 한다(기준은 pr-body 템플릿과 짝, 다듬기에서 먼저 잡히게).
+// 제목 판정은 채점기 한 곳에서 한다(기준은 pr-body 가이드와 짝, 다듬기에서 먼저 잡히게).
 function scoreRun(file) {
   const run = spawnSync(process.execPath, [SCORE, file, "--json"], { encoding: "utf8" });
   const line = (run.stdout ?? "").split("\n").find((ln) => ln.startsWith("@@score "));

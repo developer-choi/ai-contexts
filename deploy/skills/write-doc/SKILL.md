@@ -1,6 +1,6 @@
 ---
 name: write-doc
-description: 글(PR 본문·PR 코멘트·README·결정문·기술 글·사례집·학습 필기)을 사용자와 함께 골격부터 써서 표현을 다듬고 발행까지 한 세션에 마친다. 명시적으로 write-doc을 호출할 때만 사용.
+description: 글(PR 본문·README·결정문·기술 글·사례집·학습 필기)을 사용자와 함께 골격부터 써서 표현을 다듬고 발행까지 한 세션에 마친다. 명시적으로 write-doc을 호출할 때만 사용.
 argument-hint: <type> [<subtype>]
 ---
 
@@ -19,8 +19,6 @@ argument-hint: <type> [<subtype>]
 | `pr-body` | (없음) | 선택 | 일반 PR 본문 |
 | `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 |
 | `readme` | — | — | README (subtype 미사용) |
-| `pr-comment` | `reviewer` | **필수** | 검토자가 남의 PR에 코멘트 |
-| `pr-comment` | `author` | **필수** | 작성자가 자기 PR에 답글 |
 | `decision` | — | — | 기술적 의사결정 문서 |
 | `article` | — | — | 기술 글·가이드 |
 | `case-study` | — | — | README에서 링크하는 문제→해결 사례집 |
@@ -38,7 +36,7 @@ argument-hint: <type> [<subtype>]
 | 다듬기 | [steps/polish.md](steps/polish.md) |
 | 마무리 | [steps/finish.md](steps/finish.md) |
 
-단계 파일의 절차 제목 앞 `[OUTLINE_STEP]` 같은 표식은 그 절차의 ID다. 모든 type이 이 절차를 돌고, type마다 더 도는 것은 `writing-guide/types/<type>/steps.md`에 같은 ID 절로 있다. 단계마다 `guide-files.mjs`가 그 파일을 낸다.
+단계 파일의 절차 제목 앞 `[OUTLINE_STEP]` 같은 표식은 그 절차의 ID다. 모든 type이 이 절차를 돌고, type마다 더 도는 것은 이 스킬의 `types/<type>/steps.md`에 같은 ID 절로 있다. 단계마다 `guide-files.mjs`가 그 파일을 낸다.
 
 - ID가 붙은 절차에 들어갈 때마다 type 파일에 같은 ID 절이 있는지 보고, 있으면 이어서 돈다.
 - 기본 절차와 부딪치면 type 절을 따른다.

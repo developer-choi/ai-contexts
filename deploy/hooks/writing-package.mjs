@@ -7,7 +7,6 @@
 export const PACKAGE_TYPES = new Set([
   "pr-body",
   "readme",
-  "pr-comment",
   "decision",
   "article",
   "case-study",

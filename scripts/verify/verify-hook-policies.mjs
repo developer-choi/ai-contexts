@@ -259,18 +259,6 @@ const WRITE_CASES = [
       tool_name: 'Write',
       tool_input: {
         file_path: 'C:/tmp/pkg.md',
-        content: '---\ntype: pr-comment\naudience: 리뷰어\naudience_knowledge: 모름\npurpose: 질문\nkey_message: 한 문장\n---\n\n# 제목\n',
-      },
-    },
-    'deny',
-    'pr-comment는 subtype도 필수',
-  ],
-  [
-    'check-package-frontmatter.mjs',
-    {
-      tool_name: 'Write',
-      tool_input: {
-        file_path: 'C:/tmp/pkg.md',
         content: '---\ntype: case-study\naudience: 채용담당자\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
       },
     },

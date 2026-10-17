@@ -9,7 +9,7 @@
 // 앞으로 새로 막을 낱말은 RULES가 아니라 writing-guide/rejected.md에 레인과 함께 올린다(아래).
 //
 // PR 제목(pr-body의 H1)도 여기서 본다: 끝 마침표·conventional commit 접두사·공백 포함 60자 초과는 합계에 든다.
-// 기준은 pr-body 템플릿 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
+// 기준은 pr-body 가이드 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
 //
 // 사용자가 반려한 낱말·문구도 쌓인 두 곳에서 함께 잡는다.
 // - 모든 글: writing-guide/rejected.md(줄 꼴은 그 파일 머리). 배포본을 읽어서, 원본에 새로 올린 줄은 배포 뒤에 잡힌다.
@@ -54,7 +54,7 @@ function loadAcRejected() {
   };
 }
 
-// PR 제목 기계 기준. pr-body 템플릿 「PR 제목」과 짝이다.
+// PR 제목 기계 기준. pr-body 가이드 「PR 제목」과 짝이다.
 const CONVENTIONAL_PREFIX = /^(feat|fix|chore|refactor|docs|style|test|perf|build|ci|revert)(\([^)]*\))?!?:/i;
 const TITLE_MAX = 60;
 
@@ -85,9 +85,9 @@ const INTERNAL = {
 };
 
 // 내부 작업이력을 합계에 넣을지. PR 번호·커밋을 근거 링크로 일부러 싣는 글은 경고로만 낸다 — 채용 PR(커밋 링크),
-// README(PR 링크별 요약), 사례집(실제 작업 PR 링크), PR 코멘트(커밋을 짚어 말한다). pr-body 템플릿도 이 금지를
+// README(PR 링크별 요약), 사례집(실제 작업 PR 링크). pr-body 가이드도 이 금지를
 // 「일반 PR이면」으로 한정한다.
-const INTERNAL_AS_EVIDENCE = new Set(["readme", "case-study", "pr-comment"]);
+const INTERNAL_AS_EVIDENCE = new Set(["readme", "case-study"]);
 function internalCounts(type, subtype) {
   return !INTERNAL_AS_EVIDENCE.has(type) && subtype !== "recruitment";
 }
@@ -250,7 +250,7 @@ function printRules() {
   console.log("\n## 약어 풀네임 반복");
   console.log("   `약어 (Full Name)` 병기는 그 약어가 처음 나온 자리에만 둔다. 두 번째부터 센다.");
   console.log(`\n## 이모지  (type ${[...NO_EMOJI_TYPES].join("·")}만)`);
-  console.log("   PR 본문·PR 코멘트에는 이모지를 쓰지 않는다.");
+  console.log("   PR 본문에는 이모지를 쓰지 않는다.");
   console.log(`\n## plain-text 마크다운  (rendering_env: plain-text만)`);
   console.log(`   발행처에서 기호가 그대로 보인다: ${PLAIN_TEXT_MARKDOWN.map(([l]) => l).join(", ")}. 리스트 \`-\`는 안 센다.`);
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
@@ -283,8 +283,8 @@ function dumpRejectedHits(name, hits, note = "", label = "대신") {
 const BANMAL_END = /(?:는다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
 const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아요|에요|예요)\.?$/;
 
-// PR 본문·PR 코멘트에는 이모지를 쓰지 않는다(2026-10-17 사용자 결정). 다른 type은 이모지를 세지 않는다.
-const NO_EMOJI_TYPES = new Set(["pr-body", "pr-comment"]);
+// PR 본문에는 이모지를 쓰지 않는다(2026-10-17 사용자 결정). 다른 type은 이모지를 세지 않는다.
+const NO_EMOJI_TYPES = new Set(["pr-body"]);
 const EMOJI = /\p{Extended_Pictographic}/gu;
 
 // `rendering_env: plain-text` 발행처(텍스트 폼 등)에서 기호 그대로 보이는 마크다운. 무엇을 막는지는 이 검사가 정본이다.
@@ -894,7 +894,7 @@ function main() {
   const emojiHits = NO_EMOJI_TYPES.has(docType) ? findEmoji(lines) : [];
   if (NO_EMOJI_TYPES.has(docType)) {
     dump("이모지", emojiHits, (h) => `'${h[1]}' (L${h[0]}): ${h[2].slice(0, 70)}`);
-    if (emojiHits.length) console.log("   → PR 본문·PR 코멘트에는 이모지를 쓰지 않는다. 지우거나 말로 바꾼다.");
+    if (emojiHits.length) console.log("   → PR 본문에는 이모지를 쓰지 않는다. 지우거나 말로 바꾼다.");
   }
   const plainText = readFrontmatterScalar(raw, "rendering_env") === "plain-text";
   const markdownHits = plainText ? findMarkdown(body.split("\n"), offset) : [];

@@ -25,7 +25,7 @@ const PROMPT_DOC = /\/(skills|rules|contexts|meta\/guides)\//;
 const CLAUDE_LIKE = /^(CLAUDE|AGENTS|GEMINI)\.md$/i;
 
 // 남의 본문을 예시로 인용하는 자리 — 실측 오탐의 큰 덩어리.
-const EXCLUDE = /\/writing-guide\/(examples|types\/pr-body\/recruitment\/library)\//;
+const EXCLUDE = /\/writing-guide\/types\/pr-body\/recruitment\/library\//;
 
 // backlog 레포의 백로그 데이터. `projects/{repo}/active/rules/` 처럼 경로에 `/rules/`가 들어가
 // 프롬프트 문서로 오인되지만, 여기 적히는 개수는 그날 센 측정값(`V2 적중 40줄 / 26개 파일`)이라
