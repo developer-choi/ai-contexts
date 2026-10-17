@@ -130,7 +130,7 @@
         "deploy/skills/write-doc/scripts/guide-files.mjs",
         "deploy/skills/write-doc/steps/draft.md"
       ],
-      "note": "이 폴더의 파일을 언제 읽을지는 write-doc `scripts/guide-files.mjs`가 정본이다 — 초안·다듬기·마무리 메인이 Read할 파일(type 폴더의 steps.md 포함)과 표현 리뷰어에게 넘길 경로(늘 넘길 것과 조건부)를 단계마다 낸다. 예외로 본문을 보고 고르는 파일은 고르는 쪽 문서에 남는다 — accuracy·tradeoff-guide는 초안 단계(steps/draft.md), tradeoff-guide는 다듬기 「1. 파악」(steps/polish.md)에도, 채용 PR의 evidence·narrative는 `types/pr-body/recruitment/steps.md`. 이 폴더에 파일을 더하거나 지우거나 여는 조건을 바꾸면 스크립트를 고치고, 초안 단계의 남은 참조가 실제 파일과 맞는지 본다 — 어긋나면 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`contexts/prompt-standards/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
+      "note": "이 폴더의 파일을 언제 읽을지는 write-doc `scripts/guide-files.mjs`가 정본이다 — 초안·다듬기·마무리 메인이 Read할 파일(type 폴더의 steps.md 포함)과 표현 리뷰어에게 넘길 경로(늘 넘길 것과 조건부)를 단계마다 낸다. 예외로 본문을 보고 고르는 파일은 고르는 쪽 문서에 남는다 — tradeoff-guide는 초안 단계(steps/draft.md)와 다듬기 「1. 파악」(steps/polish.md)에도, 채용 PR의 evidence·narrative는 `types/pr-body/recruitment/steps.md`. 이 폴더에 파일을 더하거나 지우거나 여는 조건을 바꾸면 스크립트를 고치고, 초안 단계의 남은 참조가 실제 파일과 맞는지 본다 — 어긋나면 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`contexts/prompt-standards/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
     },
     {
       "name": "정책 hook ↔ 판정 회귀 계약",

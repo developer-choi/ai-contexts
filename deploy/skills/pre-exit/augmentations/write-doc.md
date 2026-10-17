@@ -51,7 +51,7 @@ node {{skill_dir}}/../write-doc/scripts/score.mjs <산출물.md> [--props 명제
 회수한 항목은 환류 대상에 따라 가른다:
 
 - **톤 교정 사례·놓친 결함·과교정** → pre-exit 「문제 리스트업 + 규칙화」에서 백로그 항목으로 낸다.
-  - 항목이 넣을 자리는 [writing-guide](../../../contexts/writing-guide/map.md)의 규칙 + before/after 한 쌍이고, 사례는 규칙과 같은 맥락(해당 examples 파일)에 둔다.
+  - 항목은 규칙 문장이고, 넣을 자리는 [writing-guide 「역할」](../../../contexts/writing-guide/map.md#역할)이 정한다.
   - 앞으로 막을 낱말·표현이면 넣을 자리는 writing-guide [rejected.md](../../../contexts/writing-guide/rejected.md)이고, 줄 꼴(레인 포함)은 그 파일을 따른다.
   - **판단이 남는 규칙은 common.md에 산문으로 둔다.** 기계가 판정 못 하는 것을 목록으로만 옮기면 적발 0건이 「통과」로 읽혀 규칙이 사라진다.
 - **출발점 오판** → write-doc 초안 단계([draft.md](../../write-doc/steps/draft.md))의 재료 받기 질문 문구를 고치는 백로그 항목으로 낸다.

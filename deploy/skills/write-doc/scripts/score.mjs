@@ -280,7 +280,7 @@ function dumpRejectedHits(name, hits, note = "", label = "대신") {
 }
 
 // 습니다체 휴리스틱: 평서문 종결이 반말이면 잡는다. 명사형·정중체는 통과.
-const BANMAL_END = /(?:[가-힣])(?:는다|ㄴ다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
+const BANMAL_END = /(?:는다|했다|이다|된다|온다|간다|왔다|갔다|보다|같다)\.?$/;
 const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아요|에요|예요)\.?$/;
 
 // PR 본문·PR 코멘트에는 이모지를 쓰지 않는다(2026-10-17 사용자 결정). 다른 type은 이모지를 세지 않는다.
@@ -421,13 +421,28 @@ function findDashes(lines) {
   return hits;
 }
 
-// 휴리스틱. 반말 종결로 보이는 본문 줄을 후보로 잡는다.
+// 휴리스틱. 반말 종결로 보이는 본문 줄을 후보로 잡는다. 줄 끝만 보면 「같다, 같다 — 아닙니다」처럼
+// 쉼표·대시로 이은 앞 절의 반말이 빠지므로 절 끝도 본다.
+// 「~ㄴ다」는 완성형 음절(한다·고친다·둔다)이라 정규식 자모로는 안 맞는다 — 받침 ㄴ을 음절 계산으로 본다.
+const jongN = (ch) => {
+  const c = ch.charCodeAt(0) - 0xac00;
+  return c >= 0 && c < 11172 && c % 28 === 4;
+};
+const isBanmal = (s) => {
+  s = s.replace(/[.\s]+$/, "");
+  if (POLITE_END.test(s)) return false;
+  if (BANMAL_END.test(s) || /(?:였다|있다|없다|됐다)$/.test(s)) return true;
+  const m = s.match(/([가-힣])다$/);
+  return !!(m && jongN(m[1]));
+};
 function checkPoliteness(lines) {
   const flags = [];
   for (const [lineno, ln] of lines) {
     const s = ln.trim().replace(/\.$/, "");
     if (!s || s.startsWith("#") || s.startsWith("|") || s.startsWith("-") || s.startsWith("*")) continue;
-    if (BANMAL_END.test(s) && !POLITE_END.test(s)) flags.push([lineno, ln.trim()]);
+    // 절 끝의 「~보다」는 비교 조사(「기존보다, 」)인 때가 많아 절 검사에서는 뺀다.
+    const clauses = s.split(/,\s|\s[—–]\s/).slice(0, -1).map((c) => c.trim());
+    if (isBanmal(s) || clauses.some((c) => isBanmal(c) && !/보다$/.test(c))) flags.push([lineno, ln.trim()]);
   }
   return flags;
 }

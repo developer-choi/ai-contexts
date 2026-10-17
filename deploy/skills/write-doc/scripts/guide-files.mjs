@@ -32,8 +32,6 @@ const FOR = ["draft", "polish", "finish", "reviewer"];
 
 // 리뷰어에게 넘길 조건부 경로. 조건 문장은 메인이 본문을 보고 가르는 기준이다.
 const CONDITIONAL = [
-  ["문단·구조 이슈가 보이면", "examples/structure.md"],
-  ["본문에 수치·단정 표현이 있거나 요약·축소 정확성이 걸리면 (단정 수위를 낮추는 것까지가 표현 다듬기다. 사실 자체의 검증은 초안 단계 책임)", "examples/accuracy.md"],
   ["대안을 견줘 하나를 고른 절이 있으면", "tradeoff-guide.md"],
 ];
 
@@ -83,7 +81,7 @@ export function guideFiles(type, subtype, step) {
   if (step === "polish") return { always: [...existing("common.md"), ...typeFiles(type, subtype, { template: false }), ...typeSteps(type, subtype)], conditional: [] };
   if (step === "finish") return { always: [...existing("rejected.md"), ...typeSteps(type, subtype)], conditional: [] };
   return {
-    always: [...existing("common.md", "examples/tone.md", "rejected.md"), ...typeFiles(type, subtype, { template: true })],
+    always: [...existing("common.md", "rejected.md"), ...typeFiles(type, subtype, { template: true })],
     conditional: CONDITIONAL.flatMap(([when, rel]) => existing(rel).map((file) => ({ when, file }))),
   };
 }
