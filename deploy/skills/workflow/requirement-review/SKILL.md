@@ -53,7 +53,7 @@ planning·design 가이드가 정의하는 슬롯:
 
 planning, design 중 하나라도 켜져 있으면, 플래그별 준비가 끝난 후 아래 사이클을 페이지마다 반복한다.
 
-planning과 design이 모두 켜져 있으면, 동일 페이지에서 planning 확정(3~4단계) 완료 후 design 분석을 시작한다. 루프를 두 번 돌지 않는다.
+planning과 design이 모두 켜져 있으면, 한 페이지에서 planning 2~3단계를 마친 뒤 design 2~3단계를 이어 하고, 4단계는 두 쪽 체크리스트를 함께 놓고 한 번 한다.
 
 ### 1. 자료 참조
 
