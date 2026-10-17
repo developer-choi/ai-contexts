@@ -592,7 +592,7 @@ function docIndex(root) {
     const dir = path.posix.basename(path.posix.dirname(rel));
     if (/^skill\.md$/i.test(base)) bump(`${dir} SKILL`, rel);
     else bump(base.replace(/\.md$/i, ""), rel);
-    // 경로 꼬리로도 등록한다 — `writing-guide/tone.md`처럼 레포 루트도 상대 위치도 아닌
+    // 경로 꼬리로도 등록한다 — `writing-guide/common.md`처럼 레포 루트도 상대 위치도 아닌
     // 중간 마디로 부르는 자리가 실제로 있다(AC `check-md-code-labels.mjs` 주석).
     const seg = rel.split("/");
     for (let i = seg.length - 1; i >= 0; i--) bump(seg.slice(i).join("/"), rel);

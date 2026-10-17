@@ -2323,6 +2323,7 @@ const scorePackageGroup = async () => {
       clean: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n토큰 갱신을 고쳤습니다.\n`,
       lost: `${fm('pr-body', "user_phrases:\n  - '\"사라진 구절\" (사용자 발화)'\n")}# 로그인 토큰 갱신 수정\n\n## 요약\n\n토큰 갱신을 고쳤습니다.\n`,
       readme: `${fm('readme')}# 소개\n\n## 쓰는 법\n\n✅ 설치하고 실행합니다.\n`,
+      long: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n${'토큰 갱신 흐름을 고쳤습니다. '.repeat(8)}\n${'만료 직전 요청도 이어집니다. '.repeat(8)}\n`,
       plain: '# 그냥 문서\n\n✅ 이모지가 있어도 패키지가 아니다.\n',
     };
     for (const [name, body] of Object.entries(files)) fs.writeFileSync(path.join(dir, `${name}.md`), body);
@@ -2333,6 +2334,7 @@ const scorePackageGroup = async () => {
       [edit('clean'), 'pass', '적발이 없으면 조용하다'],
       [edit('lost'), 'context', '합계가 0이어도 사용자 구절이 사라졌으면 알린다'],
       [edit('readme'), 'pass', 'readme의 이모지는 적발이 아니다'],
+      [edit('long'), 'context', '합계가 0이어도 빈 줄 없이 이어진 긴 문단이면 알린다'],
       [edit('plain'), 'pass', '패키지가 아닌 md는 채점하지 않는다'],
       [edit('hit', 'Read'), 'pass', 'Read는 고친 것이 아니다'],
     ];

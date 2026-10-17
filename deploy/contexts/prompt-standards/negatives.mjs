@@ -13,7 +13,8 @@
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
 
-const NEGATIVE = /않는다|않고|않게|않도록|않아야|않으면|말고|말라|금지|없이/;
+// 습니다체 문서(writing-guide 등)의 부정 종결도 잡는다 — 해라체 꼴만 보면 그런 문서에서 판정이 조용히 비어 돈다.
+const NEGATIVE = /않는다|않습니다|않고|않게|않도록|않아야|않으면|말고|말라|마십시오|마세요|금지|없이/;
 
 // 한국어 문장 끝: 「다.」「다」+줄끝, 그리고 「—」 앞 「다」. 목록 기호와 굵게 표시는 문장에 남긴다.
 export function sentences(line) {

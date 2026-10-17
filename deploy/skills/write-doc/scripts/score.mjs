@@ -20,7 +20,7 @@
 // 사용:
 //   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]
 //   node score.mjs --rules            무엇을 잡는지 낸다 (낱말·경고 레인·대체어)
-//   node score.mjs <산출물.md> --structure   긴 한 줄 문단·개수 선언 뒤 리스트 없음만 낸다
+//   node score.mjs <산출물.md> --structure   긴 문단·개수 선언 뒤 리스트 없음만 낸다
 //                                            (톤을 다듬기 전, 내용을 채운 초안의 나눔만 볼 때)
 //   node score.mjs <산출물.md> --residual    남은 `[//]: #` 주석만 낸다. 있으면 exit 1 (발행 직전 확인)
 //   node score.mjs <산출물.md> --json        사람용 출력 끝에 기계용 `@@score {total,titleHits}` 한 줄을 더한다
@@ -102,9 +102,9 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 // 같은 방식을 쓴다. 목록을 보고 싶으면 `--rules`로 전부 낸다.
 //
 // 못 내리는 것: 반려가 안 오는 규칙. 기계가 판정 못 하는 규칙을 문서에서 걷으면 적발 0건이
-// 「통과」로 읽혀 규칙이 그냥 사라진다. 그래서 tone.md에는 판단이 드는 절만 남아 있다.
-// 「외래어 음차 회피」가 양쪽에 걸친 자리다 — 낱말 하나는 여기가 잡고, 새 영어 용어를 음차할지와
-// 예외 넷(일상화된 외래어·고유명사·굳은 용어·괄호 병기)은 그 절의 산문이 든다.
+// 「통과」로 읽혀 규칙이 그냥 사라진다. 그래서 common.md에는 판단이 드는 절만 남아 있다.
+// 「외래어 음차 회피」는 아는 낱말만 여기서 잡고, 처음 보는 음차는 독자 리뷰어가 「모르는 말」로 낸다 —
+// 그렇게 걸린 낱말은 반려 적재로 rejected.md에 쌓여 다음부터 여기서 잡힌다.
 //
 // `warn: true`는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만 위반 등)이다. 매칭은 하되
 // 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라, 정상 문장이 걸릴 수 있는 항목을
@@ -130,10 +130,10 @@ const RULES = {
       "(`다각도 학습` → `유형별 학습`, 본문이 「정의·비교·오해 점검 세 유형」으로 곧장 푼다. 풀이형은 `한 주제를 여러 각도에서 학습`).",
   },
   // 「인터페이스」는 넣지 않는다 — Interface와 한글 표기를 둘 다 쓰는 낱말이라 합계 레인에
-  // 넣으면 정상적으로 쓴 자리까지 매번 고치게 된다. 음차 판정 자체는 tone.md 산문이 든다.
+  // 넣으면 정상적으로 쓴 자리까지 매번 고치게 된다. 처음 보는 음차는 독자 리뷰어가 낸다.
   "외래어 음차 회피": {
     words: ["디프리케이트"],
-    what: "영어 기술 용어를 한글 음차로 옮기지 않는다. 원문 영어(`Soft Deprecated`)나 의미 번역(`신규 생성 차단`) 중 하나를 고른다. 예외와 경계는 tone.md 「외래어 음차 회피」가 든다.",
+    what: "영어 기술 용어를 한글 음차로 옮기지 않는다. 원문 영어(`Soft Deprecated`)나 의미 번역(`신규 생성 차단`) 중 하나를 고른다.",
   },
   // 낱말 훅(`scripts/hooks/blocked-expressions.json`)의 금지 표현 중 독자용 글에서도 못 알아보는 것을
   // 옮겨 왔다. 두 목록을 하나로 합치기 전까지는 사본이라, 그쪽에 행이 늘어도 여기는 안 따라온다.
@@ -247,6 +247,8 @@ function printRules() {
     console.log(`   ${r.what}`);
     for (const [w, s] of Object.entries(r.swap ?? {})) console.log(`   '${w}' 대신: ${s}`);
   }
+  console.log("\n## 약어 풀네임 반복");
+  console.log("   `약어 (Full Name)` 병기는 그 약어가 처음 나온 자리에만 둔다. 두 번째부터 센다.");
   console.log(`\n## 이모지  (type ${[...NO_EMOJI_TYPES].join("·")}만)`);
   console.log("   PR 본문·PR 코멘트에는 이모지를 쓰지 않는다.");
   console.log(`\n## plain-text 마크다운  (rendering_env: plain-text만)`);
@@ -328,6 +330,24 @@ function stripCodeAndQuotes(rawLines, offset = 0) {
     out.push([i + 1 + offset, ln]);
   });
   return { lines: out, comments };
+}
+
+// 같은 약어에 풀네임을 두 번 이상 병기한 자리. 풀네임은 첫 등장에만 붙인다는 규칙을 여기서 잡는다(common.md에는 없다) —
+// 그 뒤의 병기는 판단 없이 군더더기라 합계에 넣는다. 첫 자리는 적발하지 않는다. 풀네임은 영어·한국어 모두 본다.
+const ABBR_WITH_FULL = /\b([A-Z][A-Z0-9]{1,9})\s*\(([A-Za-z가-힣][A-Za-z가-힣-]*(?:\s+[A-Za-z가-힣-]+)+)\)/g;
+
+function findRepeatedFullName(lines) {
+  const seen = new Set();
+  const hits = [];
+  for (const [lineno, ln] of lines) {
+    // 약어와 괄호 안을 함께 키로 쓴다 — 약어만 보면 `PR (리뷰 대기 중)`·`PR (스크롤 처리)` 같은 부연도 반복으로 잡혀 게시가 막힌다.
+    for (const m of ln.matchAll(ABBR_WITH_FULL)) {
+      const key = `${m[1]}\u0000${m[2].trim()}`;
+      if (seen.has(key)) hits.push([lineno, m[0], ln.trim()]);
+      else seen.add(key);
+    }
+  }
+  return hits;
 }
 
 function findEmoji(lines) {
@@ -414,7 +434,7 @@ function checkPoliteness(lines) {
 
 // 의문형 종결 어미로 끝났는데 물음표가 없는 줄. 판단이 안 드는 구두점이라 합계에 넣는다.
 // 「~는가」 꼴은 뺐다 — 독자에게 묻는 문장 말고 점검 문항(「오해 없이 실행할 수 있는가」)에도
-// 쓰여서, 레포 상주 문서를 다듬을 때 그 문항까지 물음표를 강제하게 된다. tone.md 규칙은
+// 쓰여서, 레포 상주 문서를 다듬을 때 그 문항까지 물음표를 강제하게 된다. common.md 규칙은
 // 의문형 전부를 덮고, 기계는 독자에게 묻는 꼴만 잡는다.
 const QUESTION_END = /(?:까요|나요|은가요|는가요|던가요)$/;
 
@@ -430,7 +450,7 @@ function checkQuestionMark(lines) {
   return hits;
 }
 
-// 개수를 밝혀 놓고 이어지는 줄이 리스트로 안 열리는 자리. tone.md 「비교/나열은 리스트로」가
+// 개수를 밝혀 놓고 이어지는 줄이 리스트로 안 열리는 자리. common.md 「비교/나열은 리스트로」가
 // 이미 덮는데 기계가 안 봐서 계속 새던 축이다.
 //
 // 처음엔 「N가지입니다/있습니다」 종결만 잡았는데, 실제로 반려된 자리는 「두 가지가 따라오기
@@ -465,32 +485,47 @@ function checkCountDeclaration(lines) {
   return hits;
 }
 
-// 엔터 없이 한 줄로 길게 몰아 쓴 문단·리스트 항목. tone.md 「문단 길이 상한선」이 문장 수로 적혀 있지만
-// 한국어 문장 끊기가 부정확해 기계는 글자 수로 잰다. 링크 URL·HTML 태그는 읽히지 않으니 빼고, 리스트 기호도 뺀다.
+// 길게 몰아 쓴 문단·리스트 항목. common.md 「문단 길이 상한선」을 기계가 잰다 — 한국어 문장 끊기가 부정확해
+// 문장 수가 아니라 글자 수로 잰다. 링크 URL·HTML 태그는 읽히지 않으니 빼고, 리스트 기호도 뺀다.
+// 줄이 아니라 문단(빈 줄로 나뉜 덩어리, 리스트 항목은 항목마다)으로 잰다 — 빈 줄 없는 줄바꿈은 화면에서
+// 같은 문단으로 렌더링되어, 줄 단위로 재면 줄바꿈만 넣은 벽이 통과한다.
 //
 // 문턱 180자: 한 줄이라 읽기 어렵다고 반려된 문단이 200자, 같은 원고의 승인본에서
 // 가장 긴 줄이 159자였다. 실측(코드·표·인용·헤딩 밖 줄): 블로그 발행본 136줄 중 0건, writing-guide
 // 567줄 중 11건(1.9%). 한 논지를 길게 편 멀쩡한 문단도 걸릴 수 있어 합계에는 안 넣는다.
 const LONG_LINE = 180;
+const LIST_ITEM = /^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/;
 
 function checkLongLines(lines) {
-  const hits = [];
+  const paragraphs = [];
+  let prev = null;
   for (const [lineno, ln] of lines) {
     const s = ln.trim();
-    if (s.startsWith("#") || s.startsWith("|")) continue;
+    const breaks = !s || s.startsWith("#") || s.startsWith("|");
+    const cur = paragraphs.at(-1);
+    if (breaks) {
+      prev = null;
+      continue;
+    }
     const len = s
-      .replace(/^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/, "")
+      .replace(LIST_ITEM, "")
       .replace(/\]\((?:[^()]|\([^)]*\))*\)/g, "]")
       .replace(/https?:\/\/\S+/g, "")
       .replace(/<[^>]+>/g, "").length;
-    if (len >= LONG_LINE) hits.push([lineno, len, s]);
+    // 바로 앞 줄에 이어지고 새 리스트 항목이 아니면 같은 문단이다.
+    if (cur && prev === lineno - 1 && !LIST_ITEM.test(s)) {
+      cur.len += len;
+    } else {
+      paragraphs.push({ lineno, len, text: s });
+    }
+    prev = lineno;
   }
-  return hits;
+  return paragraphs.filter((p) => p.len >= LONG_LINE).map((p) => [p.lineno, p.len, p.text]);
 }
 
 function printStructure(lines) {
   const longHits = checkLongLines(lines);
-  console.log(`\n[긴 한 줄 문단] ${longHits.length}건 (눈으로 확인 — ${LONG_LINE}자 이상)`);
+  console.log(`\n[긴 문단] ${longHits.length}건 (눈으로 확인 — ${LONG_LINE}자 이상)`);
   for (const [lineno, len, ln] of longHits) console.log(`   L${lineno} (${len}자): ${ln.slice(0, 70)}`);
   if (longHits.length) {
     console.log(
@@ -504,7 +539,7 @@ function printStructure(lines) {
   return { longHits, countHits };
 }
 
-// 「명사 + 화」 꼴 한자어. tone.md 「딱딱한 한자어 회피」가 이 계열을 통째로 덮는데 낱말 목록으로는
+// 「명사 + 화」 꼴 한자어. RULES 「딱딱한 한자어 회피」가 이 계열을 통째로 덮는데 낱말 목록으로는
 // 굳힌 여섯 개만 잡혀, 같은 결의 새 낱말이 매번 샜다.
 //
 // 목록이 아니라 패턴이라 RULES(낱말 목록만 받는다)에 못 담아 이 검사를 따로 둔다.
@@ -751,7 +786,7 @@ function main() {
   if (!args.file) {
     console.error("사용: node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]");
     console.error("      node score.mjs --rules   (무엇을 잡는지 전부 낸다)");
-    console.error("      node score.mjs <산출물.md> --structure   (긴 한 줄 문단·개수 선언만 낸다)");
+    console.error("      node score.mjs <산출물.md> --structure   (긴 문단·개수 선언만 낸다)");
     console.error("      node score.mjs <산출물.md> --residual    (남은 [//]: # 주석만 본다, 있으면 exit 1)");
     console.error("      node score.mjs <산출물.md> --json        (끝에 기계용 @@score 한 줄을 더한다)");
     process.exit(1);
@@ -838,6 +873,9 @@ function main() {
   const h1 = docType === "pr-body" ? firstH1(body.split("\n"), offset) : null;
   const titleHits = h1 ? checkTitle(h1[1]).map((why) => [h1[0], h1[1], why]) : [];
   if (docType === "pr-body") dump("PR 제목", titleHits, (h) => `L${h[0]} 「${h[1]}」: ${h[2]}`);
+  const fullNameHits = findRepeatedFullName(lines);
+  dump("약어 풀네임 반복", fullNameHits, (h) => `L${h[0]} '${h[1]}': ${h[2].slice(0, 70)}`);
+  if (fullNameHits.length) console.log("   → 풀네임은 그 약어가 처음 나온 자리에만 둔다. 여기서는 약어만 남긴다.");
   const emojiHits = NO_EMOJI_TYPES.has(docType) ? findEmoji(lines) : [];
   if (NO_EMOJI_TYPES.has(docType)) {
     dump("이모지", emojiHits, (h) => `'${h[1]}' (L${h[0]}): ${h[2].slice(0, 70)}`);
@@ -952,6 +990,7 @@ function main() {
     questionHits.length +
     titleHits.length +
     emojiHits.length +
+    fullNameHits.length +
     markdownHits.length +
     empties.length +
     caseLinkHits.length +
@@ -963,7 +1002,7 @@ function main() {
         (internalInTotal ? 0 : internalHits.length)
       }건` +
       `(습니다체 ${politeHits.length} · 문맥 ${contextHits.length} · 반려 경고 ${rejectedWarn.length} · 이 글 반려 ${pkgRejectedHits.length}` +
-      ` · 긴 줄 ${longHits.length} · 개수 선언 ${countHits.length} · ~화 ${hanjaHits.length}` +
+      ` · 긴 문단 ${longHits.length} · 개수 선언 ${countHits.length} · ~화 ${hanjaHits.length}` +
       (internalInTotal ? "" : ` · 작업이력 ${internalHits.length}`) +
       ")",
   );

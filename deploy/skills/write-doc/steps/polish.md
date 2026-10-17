@@ -32,11 +32,11 @@
 ### [SCAN_STEP] 1. 파악
 
 - `rendering_env`가 `markdown`이 아니면 [package-format.md](../../../contexts/writing-guide/package-format.md)의 그 값 규칙대로 본문 문법을 제한한다.
-- 해법·선택을 제시하는 절이 있으면 [tradeoff-guide.md](../../../contexts/writing-guide/tradeoff-guide.md)를 Read한다. 그 선택과 맞바꾼 것이 빠졌으면 채우지 않고 사용자에게 보고하고([저자만 아는 것은 일반론으로 메우지 않는다](../../../contexts/writing-guide/tradeoff-guide.md#저자만-아는-것은-일반론으로-메우지-않는다)), [서술 규칙](../../../contexts/writing-guide/tradeoff-guide.md#서술-규칙) 위반은 다듬기에서 직접 고친다.
+- 대안을 견줘 하나를 고른 절이 있으면 [tradeoff-guide.md](../../../contexts/writing-guide/tradeoff-guide.md)를 Read한다. 그 선택과 맞바꾼 것이 빠졌으면 채우지 않고 사용자에게 보고하고([저자만 아는 것은 일반론으로 메우지 않는다](../../../contexts/writing-guide/tradeoff-guide.md#저자만-아는-것은-일반론으로-메우지-않는다)), [서술 규칙](../../../contexts/writing-guide/tradeoff-guide.md#서술-규칙) 위반은 다듬기에서 직접 고친다.
 
 ### [EDIT_STEP] 2. 직접 다듬기
 
-이번 단위를 tone.md 룰에 맞게 직접 Edit한다.
+이번 단위를 common.md 룰에 맞게 직접 Edit한다.
 
 - 명백한 사실 오류는 사용자에게 보고한다.
 - bullet·섹션·헤딩 개수는 기본 보존 — 통합·삭제·분할이 필요하면 사용자에게 한 번 확인.

@@ -2,7 +2,7 @@
 //
 // 채점은 세션이 score.mjs를 직접 불러야 돌았다. 안 부르면 금지어나, 리뷰어 대안을 반영하다 지워진 사용자 구절이
 // 그대로 남는다 — 틀려도 그 자리에서 아무도 모른다. 그래서 고치는 순간 돌린다.
-// 기계 적발 합계가 0이고 사용자 구절 누락도 없으면 조용하다. 사용자 구절 누락은 합계 밖이지만 함께 낸다 —
+// 기계 적발 합계가 0이고 사용자 구절 누락·긴 문단도 없으면 조용하다. 사용자 구절 누락은 합계 밖이지만 함께 낸다 —
 // 이 훅이 막으려는 사고가 그것이다.
 //
 // 파일 전체를 채점하므로 아직 안 다듬은 단위의 적발도 섞여 나온다. 다듬기는 단위마다 그 단위 줄의 적발만 닫는다.
@@ -18,8 +18,10 @@ const SCORE = path.resolve(import.meta.dirname, "..", "skills", "write-doc", "sc
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
-// score.mjs 출력에서 합계에 드는 묶음(`[이름] N건`)과 사용자 구절 누락 묶음만 그 아래 줄째 고른다.
-// 「합계에서 뺌」·「눈으로 확인」 묶음은 판단이 드는 후보라 Edit마다 띄우면 소음이다.
+// score.mjs 출력에서 합계에 드는 묶음(`[이름] N건`)과 사용자 구절 누락·긴 문단 묶음만 그 아래 줄째 고른다.
+// 「합계에서 뺌」·「눈으로 확인」 묶음은 판단이 드는 후보라 Edit마다 띄우면 소음이다. 긴 문단은 예외로 띄운다 —
+// 초안부터 벽 같은 문단을 나눠 쓰게 해야 다듬기에서 쪼개는 왕복이 줄어든다. 게시는 막지 않는다(합계 밖).
+const ALWAYS_SHOWN = new Set(["사용자 구절 누락", "긴 문단"]);
 function pickBlocks(out) {
   const blocks = [];
   let current = null;
@@ -27,9 +29,9 @@ function pickBlocks(out) {
     const head = line.match(/^\[([^\]]+)\] (.*)$/);
     if (head) {
       const count = Number(head[2].match(/(\d+)건/)?.[1] ?? head[2].match(/중 (\d+)개/)?.[1] ?? 0);
-      const lost = head[1] === "사용자 구절 누락";
+      const shown = ALWAYS_SHOWN.has(head[1]);
       const inTotal = !/합계에서 뺌|눈으로 확인/.test(head[2]);
-      current = count > 0 && (lost || inTotal) ? [line] : null;
+      current = count > 0 && (shown || inTotal) ? [line] : null;
       if (current) blocks.push(current);
     } else if (current && /^\s{3}/.test(line)) {
       current.push(line);

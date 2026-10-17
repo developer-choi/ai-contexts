@@ -29,7 +29,7 @@
 
 ## 비교 나열을 쉼표로 연결 — 리스트로 분리
 
-> 관련: tone.md "비교/나열은 리스트로"
+> 관련: common.md "비교/나열은 리스트로"
 
 **배경**: README. API 1초 고정 제약에 대한 로딩 전략 선택지 비교.
 
@@ -57,7 +57,7 @@
 
 ## 전제+목적+비교가 한 문장에 — 볼드 분리 + 문단 나누기
 
-> 관련: tone.md "한 문단 = 한 논점"
+> 관련: common.md "한 문단 = 한 논점"
 
 **배경**: PR 본문. DDD 폴더 구조 선택 이유.
 
@@ -84,51 +84,9 @@ FSD 같은 구조는 Layer/Slice/Segment 규칙을 먼저 알아야 탐색이 �
 
 ---
 
-## 서술 사례와 코드 예제의 주체 불일치
-
-> 관련: tone.md "그림·예제와 옆 설명은 같은 것을 가리킵니다"
-
-**배경**: 기술 필기. 일반 주장을 펼치는 서술 뒤에 코드 예제가 따라오는 흐름.
-
-**Bad (AI)**
-
-```
-초기 배치를 잘못 하면 나중에 해체 비용이 큽니다. 실제로 langdy-admin의 outro 타입이 그랬습니다. 메인 챕터 파일에 타입이 정의되어 있고 문법·발음 도메인이 그걸 직접 import하는 구조였습니다.
-
-```ts
-// article-types.ts
-export interface ArticleContent { ... }
-
-// notice-logic.ts (남의 도메인)
-import type { ArticleContent } from '../article/article-types';
-```
-```
-
-- 서술은 langdy-admin outro 사례인데 뒤따르는 코드는 Article·Notice·FAQ — 주체가 다름
-- 독자가 "사례 얘기 따로, 예제 얘기 따로"로 맥락을 잃음
-
-**Result (사용자 확정)**
-
-```
-초기 배치를 잘못 하면 나중에 해체 비용이 큽니다. 예를 들어 형제 도메인 중 하나에 타입이 정의되어 있고 나머지가 그걸 직접 import하는 구조를 생각해 봅니다. Article·Notice·FAQ 세 도메인으로 단순화하면 다음과 같습니다.
-
-```ts
-// article-types.ts
-export interface ArticleContent { ... }
-
-// notice-logic.ts (남의 도메인)
-import type { ArticleContent } from '../article/article-types';
-```
-```
-
-- 서술을 일반화하여 코드 예제와 주체 일치
-- "세 도메인으로 단순화하면 다음과 같습니다" 연결 문구로 서술→예제 흐름 명시
-
----
-
 ## 결론 → 디테일 → 자랑 순서 위반
 
-> 관련: tone.md "읽는 순서 = 이해 순서"
+> 관련: common.md "읽는 순서 = 이해 순서"
 
 **배경**: 이력서 한줄소개 2번 항목. 첫 bullet에 "어떻게 구현했고 코드는 n줄"이라는 자랑부터 등장. 독자는 "뭘 한 건지(Sentry 연동)" 결론을 끝에서야 받음.
 
@@ -162,7 +120,7 @@ import type { ArticleContent } from '../article/article-types';
 
 ## 문서 첫머리 메타 독자 안내 섹션
 
-> 관련: tone.md "메타 독자 안내 섹션 금지"
+> 관련: 채점기 "메타 독자 안내 섹션 금지"
 
 **배경**: 히스토리 문서 H1 바로 아래에 `## 이 문서를 읽는 독자에게` 메타 헤더를 달고 "~을 정리한다" 류 메타 종결 문장으로 문단을 마감.
 
@@ -195,7 +153,7 @@ import type { ArticleContent } from '../article/article-types';
 
 ## 리드 문단에 수치·용어 뭉침
 
-> 관련: tone.md "괄호 안에 긴 용어 나열 금지", "읽는 순서 = 이해 순서"
+> 관련: common.md "읽는 순서 = 이해 순서"
 
 **배경**: 이력서·README 리드 문단. 용어 정의(괄호 병기)와 수치가 한 문장에 뒤엉키면 독자가 숨 돌릴 곳 없이 정보 폭격을 받음.
 
@@ -223,7 +181,7 @@ import type { ArticleContent } from '../article/article-types';
 
 ## 결론 섹션이 앞 섹션의 논점을 반복
 
-> 관련: tone.md "독자가 「이건 왜 있지」를 묻게 되는 것은 쓰지 않는다", "한 문단 = 한 논점"
+> 관련: common.md "한 문단 = 한 논점"
 
 **배경**: ADR 3회차 문서의 결론 섹션이 5문단에 걸쳐 앞 섹션들(`## 요지 미리 보기`, `## 2차 소비자 관점`, `## 검증`)의 내용을 부분적으로 반복하고, 마지막엔 리드 문장과 동어인 마무리까지 붙어 있음.
 
@@ -269,7 +227,7 @@ div + handleClick 쪽도 같은 결과를 낼 수 있지만 … label 쪽에서 
 
 ## 같은 글 코드 블록 표기 일관성
 
-> 관련: tone.md "기술 용어와 사실 관계는 정확하게 사용"
+> 관련: common.md "근거가 있는 사실만 쓴다"
 
 **배경**: 비개발자(채용담당자) 대상 블로그 포스트. 같은 글에 scss 코드 블록 두 개가 등장. "함정 코드"와 "원칙 코드"인데, 함정 쪽은 raw 값(`#eee`, `4px`), 원칙 쪽은 디자인 토큰(`variables.$gray100`, `variables.spacing(0.5)`)으로 표기가 혼재.
 
