@@ -154,7 +154,7 @@ function main() {
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
             "사실로 증명된 잘못은 바로 고치고, 나머지 후보는 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 줄일 후보는 [남길 이유가 있는가](deploy/contexts/prompt-standards/trimming.md#남길-이유가-있는가)로 가린다.",
+            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 줄일 꼴은 deploy/contexts/prompt-standards/trimming.md, deploy/contexts/prompt-standards/sources-and-links.md(다른 곳과 겹치는 것), deploy/contexts/rules-as-code.md(스크립트·데이터로 옮길 것)에 있다.",
           ]
         : [
             `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,

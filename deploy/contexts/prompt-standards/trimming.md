@@ -4,7 +4,9 @@
 
 ## how 최소화 원칙
 
-규칙을 넣거나 고칠 때는 먼저 스크립트·훅·설정으로 옮길 수 있는지 본다. 그럴 수 없어 문서에 내용으로 적을 때는, 아래 근거대로 how(명령·조건·예외)를 줄이고 목적을 적는다.
+규칙은 먼저 [스크립트·훅·설정으로 옮길 수 있는지](../rules-as-code.md) 본다. 그럴 수 없어 문서에 내용으로 적을 때는, 아래 근거대로 how(명령·조건·예외)를 줄이고 목적을 적는다.
+
+절마다 목적 문장을 찾고 나머지 줄을 그 목적에 대 본다. 목적만 알면 AI가 알아서 고를 진행 방식(재료가 있으면 이렇게·없으면 저렇게 같은 분기, 규칙을 되돌리는 예외)이면 지운다.
 
 ### 근거 원문
 
@@ -28,15 +30,11 @@
 
 > Prefer general instructions over prescriptive steps. A prompt like "think thoroughly" often produces better reasoning than a hand-written step-by-step plan. Claude's reasoning frequently exceeds what a human would prescribe.
 
-## 남길 이유가 있는가
-
-- 그 내용이 **왜 생겼나** — 무엇을 받치려고 붙었는지, 그것이 아직 있는지 본다
-- 같은 정보를 **다른 곳에서 얻나**
-- md에 스크립트·AI가 판정에 쓰는 상태·데이터가 있지 않은가 — [md는 사람이 읽기 쉬워야 하고, JSON은 스크립트를 위해 만든다](../rules-as-code.md#md는-사람이-읽기-쉬워야-하고-json은-스크립트를-위해-만든다)
-
 ## 군더더기를 지운다
 
 뜻을 더하지 않는 부사·접속어, 동어 반복, 늘어진 명사구는 지우거나 줄인다.
+
+부정문은 `node <이 문서가 있는 폴더>/negatives.mjs <대상 md>`로 앞뒤 문장과 함께 뽑아 줄마다 판정한다. 옆 문장이나 목적만으로 같은 행동이 나오면 지우고, AI가 시키지 않아도 하려는 행동을 막는 문장이면 남긴다.
 
 ### 규칙 옆에 예시를 붙이지 않는다
 
