@@ -10,6 +10,7 @@
 //
 // PR 제목(pr-body의 H1)도 여기서 본다: 끝 마침표·conventional commit 접두사·공백 포함 60자 초과는 합계에 든다.
 // 기준은 pr-body 가이드 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
+// pr-body 본문의 `#숫자` 중 GitHub가 PR 링크로 바꾸지 못하는 꼴(`#47에서`)도 합계에 든다.
 //
 // 사용자가 반려한 낱말·문구도 쌓인 두 곳에서 함께 잡는다.
 // - 모든 글: writing-guide/rejected.md(줄 꼴은 그 파일 머리). 배포본을 읽어서, 원본에 새로 올린 줄은 배포 뒤에 잡힌다.
@@ -23,7 +24,7 @@
 //   node score.mjs <산출물.md> --structure   긴 문단·개수 선언 뒤 리스트 없음만 낸다
 //                                            (톤을 다듬기 전, 내용을 채운 초안의 나눔만 볼 때)
 //   node score.mjs <산출물.md> --residual    남은 `[//]: #` 주석만 낸다. 있으면 exit 1 (발행 직전 확인)
-//   node score.mjs <산출물.md> --json        사람용 출력 끝에 기계용 `@@score {total,titleHits}` 한 줄을 더한다
+//   node score.mjs <산출물.md> --json        사람용 출력 끝에 기계용 `@@score {total,titleHits,refHits}` 한 줄을 더한다
 //
 // 줄 번호(L)는 frontmatter를 포함한 파일 기준이다.
 //
@@ -75,6 +76,28 @@ function checkTitle(title) {
   const len = [...title].length;
   if (len > TITLE_MAX) out.push(`${len}자(공백 포함 ${TITLE_MAX}자 이하) — 주장을 받치는 방법·근거부터 덜어낸다`);
   return out;
+}
+
+// GitHub가 `#숫자`를 PR·이슈 링크로 바꾸지 않는 꼴. 경계는 `gh api markdown`(gfm) 렌더로 실측했다 —
+// 번호 뒤에 글자·숫자·`_`가 붙거나 `#` 앞에 영문·숫자·`_`가 붙으면 안 걸린다. 문장부호·괄호와 `#` 앞의 한글은 걸린다.
+// `(?!\d)`는 `#475 `의 `#47`처럼 번호를 덜 잘라 뒤 숫자를 붙은 글자로 보는 것을 막는다.
+const BROKEN_REF = /(?<=[A-Za-z0-9_])#\d+|#\d+(?!\d)(?=[\p{L}\p{N}_])/gu;
+
+// pr-body 본문에서 링크로 안 바뀔 `#숫자`를 [파일 줄 번호, 번호와 붙은 글자, 줄]로 낸다.
+// 코드 스팬·URL 안의 `#`은 GitHub가 참조로 보지 않고, 마크다운 링크(`[PR #47에서](…)`)는 글자째 이미 링크라 걷고 본다.
+// 걷은 자리는 공백으로 둬 앞뒤가 붙지 않게 한다.
+function findBrokenRefs(lines) {
+  const hits = [];
+  for (const [lineno, ln] of lines) {
+    const shown = ln
+      .replace(/`[^`\n]*`/g, " ")
+      .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
+      .replace(/https?:\/\/\S+/g, " ");
+    for (const m of shown.matchAll(BROKEN_REF)) {
+      hits.push([lineno, shown.slice(Math.max(0, m.index - 1), m.index + m[0].length + 1).trim(), ln.trim()]);
+    }
+  }
+  return hits;
 }
 
 // 커밋 해시는 영문자(a-f)가 하나 이상 든 것만 본다 — 숫자로만 된 7자리 이상(측정값 등)을 해시로 잡지 않는다.
@@ -888,6 +911,16 @@ function main() {
   const h1 = docType === "pr-body" ? firstH1(body.split("\n"), offset) : null;
   const titleHits = h1 ? checkTitle(h1[1]).map((why) => [h1[0], h1[1], why]) : [];
   if (docType === "pr-body") dump("PR 제목", titleHits, (h) => `L${h[0]} 「${h[1]}」: ${h[2]}`);
+  const refHits = docType === "pr-body" ? findBrokenRefs(lines) : [];
+  if (docType === "pr-body") {
+    dump("번호 참조 링크 깨짐", refHits, (h) => `L${h[0]} 「${h[1]}」: ${h[2].slice(0, 70)}`);
+    if (refHits.length) {
+      console.log(
+        "   → GitHub는 번호 바로 뒤에 글자가, 바로 앞에 영문·숫자가 붙으면 PR 링크로 바꾸지 않는다." +
+          " 번호 뒤에 공백을 두거나(#47 에서) 괄호로 감싼다((#47)에서).",
+      );
+    }
+  }
   const fullNameHits = findRepeatedFullName(lines);
   dump("약어 풀네임 반복", fullNameHits, (h) => `L${h[0]} '${h[1]}': ${h[2].slice(0, 70)}`);
   if (fullNameHits.length) console.log("   → 풀네임은 그 약어가 처음 나온 자리에만 둔다. 여기서는 약어만 남긴다.");
@@ -1004,6 +1037,7 @@ function main() {
     dashHits.length +
     questionHits.length +
     titleHits.length +
+    refHits.length +
     emojiHits.length +
     fullNameHits.length +
     markdownHits.length +
@@ -1022,7 +1056,14 @@ function main() {
       ")",
   );
   // 다른 스크립트(게시)가 읽는 기계용 한 줄. 사람이 읽는 출력 꼴이 바뀌어도 이 줄로 판정을 넘긴다.
-  if (args.json) console.log(`@@score ${JSON.stringify({ total, titleHits: titleHits.map((h) => `L${h[0]} 「${h[1]}」: ${h[2]}`) })}`);
+  if (args.json) {
+    const json = {
+      total,
+      titleHits: titleHits.map((h) => `L${h[0]} 「${h[1]}」: ${h[2]}`),
+      refHits: refHits.map((h) => `L${h[0]} 「${h[1]}」`),
+    };
+    console.log(`@@score ${JSON.stringify(json)}`);
+  }
 }
 
 main();

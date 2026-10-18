@@ -10,8 +10,9 @@
 //     PR 코멘트처럼 같은 PR에 올리는 다른 글을 여기 넣으면 남의 PR 본문이 코멘트로 바뀐다.
 //   - 아래 중 하나라도 걸리면 게시하지 않고 멈춘다.
 //       `[//]: #` 주석 줄(채점기 --residual), 줄 중간에 남은 `[//]`, 채점기 기계 적발 합계 0 초과, 채점기의 PR 제목 적발,
-//       Claude Code 생성 표기 줄. 주석 줄은 반영하면 그 자리에서 지우는 것이라 남았으면 처리 안 된 요청이고, 표기 줄은
-//       사용자가 싣지 않기로 했고, 제목 기준은 판단이 없는 형식이라 — 셋 다 `--accept-residual`로도 넘기지 못한다. 대괄호는 버튼·UI 요소 이름(`[저장] 버튼`)에 쓰여 빈칸으로 보지 않는다.
+//       채점기의 번호 참조 링크 깨짐 적발, Claude Code 생성 표기 줄. 주석 줄은 반영하면 그 자리에서 지우는 것이라 남았으면
+//       처리 안 된 요청이고, 표기 줄은 사용자가 싣지 않기로 했고, 제목 기준과 링크 깨짐은 판단이 없는 형식이라 —
+//       넷 다 `--accept-residual`로도 넘기지 못한다. 대괄호는 버튼·UI 요소 이름(`[저장] 버튼`)에 쓰여 빈칸으로 보지 않는다.
 //   - 기본은 미리보기다. `--apply`를 줄 때만 `gh pr edit`을 실행한다.
 //
 // 사용:
@@ -75,14 +76,14 @@ function frontmatterType(raw) {
   return m ? m[1] : null;
 }
 
-// 합계와, 합계 안에서도 --accept-residual로 못 넘기는 PR 제목 적발을 채점기 출력에서 읽는다.
-// 제목 판정은 채점기 한 곳에서 한다(기준은 pr-body 가이드와 짝, 다듬기에서 먼저 잡히게).
+// 합계와, 합계 안에서도 --accept-residual로 못 넘기는 PR 제목·번호 참조 링크 깨짐 적발을 채점기 출력에서 읽는다.
+// 두 판정은 채점기 한 곳에서 한다(제목 기준은 pr-body 가이드와 짝, 다듬기에서 먼저 잡히게).
 function scoreRun(file) {
   const run = spawnSync(process.execPath, [SCORE, file, "--json"], { encoding: "utf8" });
   const line = (run.stdout ?? "").split("\n").find((ln) => ln.startsWith("@@score "));
   if (!line) throw new Error(`채점기 출력에서 판정 줄(@@score)을 못 찾았다: ${SCORE}\n${run.stderr ?? ""}`);
-  const { total, titleHits } = JSON.parse(line.slice("@@score ".length));
-  return { total, titleLines: titleHits.map((h) => ` ${h}`) };
+  const { total, titleHits, refHits } = JSON.parse(line.slice("@@score ".length));
+  return { total, titleLines: titleHits.map((h) => ` ${h}`), refLines: refHits.map((h) => ` ${h}`) };
 }
 
 function main() {
@@ -104,8 +105,11 @@ function main() {
 
   const stops = [];
   if (!title) stops.push("H1이 없다 — 첫 `# 제목` 줄이 PR 제목이 된다.");
-  const { total, titleLines } = scoreRun(args.file);
+  const { total, titleLines, refLines } = scoreRun(args.file);
   for (const ln of titleLines) stops.push(`PR 제목 기준에 걸렸다 — --accept-residual로도 못 넘긴다:${ln}`);
+  for (const ln of refLines) {
+    stops.push(`번호 참조 링크가 깨진다 — --accept-residual로도 못 넘긴다:${ln}. 번호 뒤에 공백을 두거나 괄호로 감싼다.`);
+  }
   const comments = residualComments(args.file);
   if (comments.length) {
     stops.push(
@@ -123,7 +127,7 @@ function main() {
         "--accept-residual로도 못 넘긴다. 형제 PR 본문 끝에 있던 것을 양식으로 보고 따라 붙였다면 패키지에서 그 줄을 지운다.",
     );
   }
-  if (total - titleLines.length > 0 && !args.acceptResidual) {
+  if (total - titleLines.length - refLines.length > 0 && !args.acceptResidual) {
     stops.push(`채점기 기계 적발 합계가 ${total}건이다 — 고치거나, 사용자가 잔여를 받아들였으면 --accept-residual.`);
   }
 
