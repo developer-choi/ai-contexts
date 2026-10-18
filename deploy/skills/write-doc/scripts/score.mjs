@@ -121,8 +121,7 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 //
 // 왜 문서가 아니라 여기인가: 기계가 100% 잡는 규칙은 문서에 두면 그 규칙을 어길 글이든 아니든
 // 매 회차 통째로 실린다. 위반이 뜬 자리에서만 알리면 되고, 알릴 때 무엇으로 바꿀지까지 함께 내면
-// 사람이 규칙을 기억해 스스로 찾는 것보다 정확하다. writing-guide types/decision/guide.md가 헤딩·라벨 표기에 이미
-// 같은 방식을 쓴다. 목록을 보고 싶으면 `--rules`로 전부 낸다.
+// 사람이 규칙을 기억해 스스로 찾는 것보다 정확하다. 목록을 보고 싶으면 `--rules`로 전부 낸다.
 //
 // 못 내리는 것: 반려가 안 오는 규칙. 기계가 판정 못 하는 규칙을 문서에서 걷으면 적발 0건이
 // 「통과」로 읽혀 규칙이 그냥 사라진다. 그래서 common.md에는 판단이 드는 절만 남아 있다.
@@ -629,78 +628,25 @@ function checkEmptySections(text) {
   return { empties, nheads: heads.length };
 }
 
-// decision 문서의 비교 구조. 「방법이 둘 이상인가」와 「각 방법이 장단점을 둘 다 채웠는가」는
-// 헤딩·리터럴 매칭이라 판단이 안 든다 — decision guide.md 산문이 표기를 못박는 대신 여기서 잡는다.
-// (탈락 사유가 실제로 드러나는가는 판단이 남아 여기서 안 본다.)
-const METHOD_HEAD = /^###\s+방법\s*\d+\./;
-
-function checkDecisionStructure(text) {
-  const lines = text.split("\n");
-  const heads = [];
-  lines.forEach((ln, i) => {
-    if (METHOD_HEAD.test(ln)) heads.push([i, ln.trim()]);
-    else if (/^#{1,3}\s/.test(ln) && heads.length) heads.push([i, null]); // 같은/상위 레벨 헤딩 = 구간 끝
-  });
-  const methods = [];
-  for (let k = 0; k < heads.length; k++) {
-    if (!heads[k][1]) continue;
-    const end = heads[k + 1] ? heads[k + 1][0] : lines.length;
-    const body = lines.slice(heads[k][0] + 1, end);
-    const filled = (label) => {
-      const at = body.findIndex((ln) => ln.includes(`**${label}:**`));
-      if (at === -1) return false;
-      const after = body[at].split(`**${label}:**`)[1] ?? "";
-      const rest = body.slice(at + 1).join("\n");
-      // 라벨 뒤 같은 줄이 비었으면 다음 라벨/헤딩 전까지의 줄로 채워졌는지 본다.
-      if (after.trim()) return true;
-      const upto = rest.split(/\n(?=\*\*\S+?:\*\*|#{1,6}\s)/)[0] ?? "";
-      return upto.replace(/\s/g, "").length > 0;
-    };
-    methods.push({ head: heads[k][1], 장점: filled("장점"), 단점: filled("단점") });
-  }
-  return methods;
-}
-
-// case-study 사례집의 골격·링크. 「사례마다 ### 문제·### 해결이 있는가」, 「[자세히 보기] 링크」,
-// 「사례 앞 굵은 요약 문장」은 헤딩·리터럴 매칭이라 판단이 안 든다 — case-study guide.md가 정한 골격을
-// 여기서 기계로 잡는다. (질문이 짧은가·굵게가 핵심 낱말뿐인가는 판단이 남아 안 본다.)
-// `###`도 굵은 칸 라벨(`**문제**` 등)도 없는 `##` 절은 하위 헤딩 없이 쓰는 맺음 절로 보고 칸 검사에서 뺀다.
-// 입력은 stripCodeAndQuotes를 거친 [줄번호, 줄] — 코드 예시 안의 `#` 주석을 헤딩으로 잡지 않는다.
+// case-study 사례집의 링크·굵게. 「[자세히 보기] 링크」와 「사례 앞 굵은 요약 문장」은 리터럴 매칭이라
+// 판단이 안 든다. [자세히 보기] 금지는 가이드에 없고 여기만 있다. 골격(칸 이름)은 가이드가 예시로만 주므로 보지 않는다.
+// (질문이 짧은가·굵게가 핵심 낱말뿐인가는 판단이 남아 안 본다.)
+// 입력은 stripCodeAndQuotes를 거친 [줄번호, 줄].
 const MORE_LINK = /\[\s*자세히\s*보기\s*\]/;
 // 굵은 글이 문장으로 끝날 때만 요약 문장으로 본다 — `**바꾸기 전**` 같은 짧은 라벨은 정상이다.
 const BOLD_LEAD = /^\*\*[^*]+?(?:[.!?。]|[다요])\*\*/;
-const CELL_LABEL = /^\*\*\s*(문제|해결)\s*:?\s*\*\*\s*:?\s*$/;
 
 function checkCaseStudy(numbered) {
-  const cases = [];
-  let cur = null;
   const moreLinks = [];
   const boldLeads = [];
   for (const [lineno, ln] of numbered) {
     const s = ln.trim();
-    const top = ln.replace(/^ {0,3}/, ""); // 4칸 넘게 들여쓴 줄은 코드 블록이라 헤딩이 아니다
-    if (/^##\s/.test(top)) {
-      cur = { head: s, subs: [], labels: [] };
-      cases.push(cur);
-    } else if (/^###\s/.test(top) && cur) cur.subs.push(s.replace(/^###\s+/, "").replace(/\s+#+\s*$/, "").trim());
-    else if (CELL_LABEL.test(s) && cur) cur.labels.push(s.match(CELL_LABEL)[1]);
     const noCode = s.replace(/`[^`\n]*`/g, "").replace(/<!--[\s\S]*?-->/g, "");
     if (MORE_LINK.test(noCode)) moreLinks.push([lineno, s]);
     const item = s.replace(/^(?:[-*+]|\d+\.)\s+/, "");
-    if (!CELL_LABEL.test(s) && BOLD_LEAD.test(item)) boldLeads.push([lineno, s]);
+    if (BOLD_LEAD.test(item)) boldLeads.push([lineno, s]);
   }
-  const real = cases.filter((c) => c.subs.length || c.labels.length);
-  const holes = real
-    .map((c) => ({
-      head: c.head,
-      labels: c.labels,
-      miss: [
-        !c.subs.some((h) => /^문제$/.test(h)) && "문제",
-        !c.subs.some((h) => /^해결(\s*\d+\s*[.:].*)?$/.test(h)) && "해결",
-      ].filter(Boolean),
-    }))
-    .filter((c) => c.miss.length);
-  return { ncases: real.length, holes, moreLinks, boldLeads };
+  return { moreLinks, boldLeads };
 }
 
 function readFrontmatterScalar(text, key) {
@@ -956,40 +902,12 @@ function main() {
       "남은 채로는 게시가 막힌다)",
   );
   for (const [lineno, ln] of comments) console.log(`   L${lineno}: ${ln.trim().slice(0, 70)}`);
-  if (docType === "decision") {
-    const methods = checkDecisionStructure(body);
-    const holes = methods.filter((m) => !m.장점 || !m.단점);
-    const few =
-      methods.length === 0
-        ? " (`### 방법 N.` 꼴 헤딩을 못 찾음 — 표기가 다르면 그 꼴로 바꾸고, 방법이 없으면 사용자에게 받는다)"
-        : methods.length < 2
-          ? " (2개 미만 — 비교할 방법을 사용자에게 받는다)"
-          : "";
-    console.log(`\n[decision 비교 구조] 방법 ${methods.length}개` + few);
-    for (const m of holes) {
-      const miss = [!m.장점 && "장점", !m.단점 && "단점"].filter(Boolean).join("·");
-      console.log(`   ${m.head}  ← ${miss} 누락·공란`);
-    }
-  }
   let caseLinkHits = [];
   let caseBoldHits = [];
   if (docType === "case-study") {
     const cs = checkCaseStudy(lines);
     caseLinkHits = cs.moreLinks;
     caseBoldHits = cs.boldLeads;
-    console.log(
-      `\n[case-study 칸] 사례 ${cs.ncases}개 중 ${cs.holes.length}개 칸 누락` +
-        (cs.holes.length ? " (합계에서 뺌 — 채울 내용은 지어내지 말고 사용자에게 받는다)" : ""),
-    );
-    for (const h of cs.holes) {
-      const fromLabel = h.miss.filter((m) => h.labels.includes(m));
-      const absent = h.miss.filter((m) => !h.labels.includes(m));
-      const why = [
-        fromLabel.length && `**${fromLabel.join("**·**")}** 굵은 라벨 → ### 헤딩으로 바꾼다`,
-        absent.length && `### ${absent.join("·### ")} 없음`,
-      ].filter(Boolean);
-      console.log(`   ${h.head}  ← ${why.join(" / ")}`);
-    }
     dump("case-study [자세히 보기] 링크", caseLinkHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
     if (caseLinkHits.length) console.log("   → 지운다. 근거가 필요하면 링크 글자에 무엇이 있는지 적은 근거 링크(실제 작업 PR·원문 글)로 바꾼다.");
     dump("case-study 굵은 요약 문장", caseBoldHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
