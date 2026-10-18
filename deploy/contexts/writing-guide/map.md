@@ -8,7 +8,7 @@
 - 사용자가 반려한 낱말·문구: `rejected.md`
 - 패키지 frontmatter 형식: `package-format.md`
 - 글 종류 하나에만 거는 것: `types/<type>/`
-  - 골격·칸: `template.md`
+  - 골격 예시: `template.md` (`guide.md`에 함께 두어도 된다)
   - 그 종류의 작성 규칙: `guide.md`
-  - 그 종류의 파일이 부르는 자료: 그 type 폴더 안
-  - subtype에만 거는 규칙·자료는 `types/<type>/<subtype>/`에 같은 이름으로 둔다
+  - 그 종류의 파일이 쓰는 자료: 그 type 폴더 안
+  - subtype에만 거는 작성 규칙: `types/<type>/<subtype>/guide.md`. 골격은 subtype 폴더에 두지 않는다
