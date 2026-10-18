@@ -37,7 +37,7 @@ const CONDITIONAL = [
 
 const existing = (...rels) => rels.map((r) => path.join(GUIDE, r)).filter((f) => fs.existsSync(f));
 
-// type 폴더의 template.md·guide.md와 subtype 폴더의 guide.md. 승인본 폴더·사례 묶음은 넣지 않는다 — 승인본은 approved.mjs로 한 편만 읽는다.
+// type 폴더의 template.md·guide.md와 subtype 폴더의 guide.md. 사례 묶음(library/)은 넣지 않는다.
 function typeFiles(type, subtype, { template }) {
   const base = path.join("types", type);
   return existing(

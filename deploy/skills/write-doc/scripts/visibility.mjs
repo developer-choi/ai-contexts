@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 // 대상 레포가 public인지 private인지 낸다. AC(public)에 남의 레포 내용을 올려도 되는지 가를 때 쓴다.
 //
-// 판단 없이 명령 둘과 분기 하나라 손으로 돌리지 않는다. 손으로 틀리면 private 레포 본문이 public인 AC에
-// 올라가는데 아무 데서도 드러나지 않는다. 원격이 없거나 조회가 안 되면 private으로 낸다 — 모를 때 public으로
+// 판단 없이 명령 둘과 분기 하나라 손으로 돌리지 않는다. 손으로 틀리면 private 레포 고유의 사실이 반려 줄에 실려
+// public인 AC에 올라가는데 아무 데서도 드러나지 않는다. 원격이 없거나 조회가 안 되면 private으로 낸다 — 모를 때 public으로
 // 읽는 쪽이 위험하다.
 //
 // 사용: node visibility.mjs <레포 안 아무 경로 | owner/name>   → stdout에 public 또는 private 한 단어
 //   로컬 클론이 없는 레포(남의 PR에 다는 코멘트 등)는 owner/name으로 넘긴다.
-// approved.mjs --write도 이 판정을 import해 private 대상이면 승인본을 쓰지 않는다.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";

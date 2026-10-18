@@ -6,7 +6,6 @@
 ---
 type: pr-body
 subtype: recruitment
-kind: 성능 개선
 audience: 채용담당자
 audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
 purpose: 성능 최적화 어필
@@ -27,8 +26,6 @@ refs:
 ```
 
 - `type`·`subtype`: 이 글의 종류.
-- `kind`: 같은 type 안에서 글 모양이 갈리는 성격으로, 같은 성격 승인본을 고르는 이름입니다.
-    - `subtype`과 축이 다릅니다 — `subtype`은 누가 누구에게 쓰는 글인가를 정해 템플릿·가이드와 승인본 폴더를 고르고, `kind`는 무엇을 바꾼 글인가를 정해 그 폴더 안에서 승인본 한 편을 고릅니다.
 - `audience`: 이 글을 읽는 사람.
 - `audience_knowledge`: 그 독자가 이 글의 소재에 대해 아는 것과 모르는 것을 한 줄로 적습니다.
 - `purpose`: 이 글로 이루려는 것.

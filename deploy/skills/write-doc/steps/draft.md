@@ -6,11 +6,6 @@
 
 `node {{skill_dir}}/scripts/guide-files.mjs <type> [--subtype <subtype>] --for draft`가 낸 파일을 Read한다.
 
-재료 받기에서 재료를 읽은 뒤 승인본을 읽는다. 승인본 폴더를 Read하지 않고 스크립트로 읽는다 — 성격마다 한 편씩 쌓여, 통째로 읽으면 쓰지 않을 성격까지 실린다.
-
-1. `node {{skill_dir}}/scripts/approved.mjs <type>`로 고를 수 있는 승인본 성격 목록을 본다. subtype이 있으면 `--subtype <subtype>`을 붙인다.
-2. 목록에서 이 글과 성격이 맞는 것이 있으면 `--kind <성격>`을 붙여 다시 불러 승인본 한 편을 읽고, 패키지를 저장할 때 frontmatter `kind`에 그 이름을 적는다.
-
 ## 흐름
 
 ### [RECEIVE_STEP] 1. 재료 받기

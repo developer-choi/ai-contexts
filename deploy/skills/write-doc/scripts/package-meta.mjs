@@ -1,7 +1,7 @@
-// 패키지 frontmatter에서 스크립트가 쓸 값(type·subtype·kind)을 읽는다. 본문의 주석·코드펜스 판정도 여기 둔다.
+// 패키지 frontmatter에서 스크립트가 쓸 값(type·subtype)을 읽는다. 본문의 주석·코드펜스 판정도 여기 둔다.
 //
-// 세션이 이 값을 스크립트 인자로 손으로 넘기면, subtype을 빠뜨려도 다른 subtype의 승인본·가이드가
-// 오류 없이 나온다(채용 PR이 일반 PR 승인본을 받는다). 패키지가 생긴 뒤에는 `--from <패키지>`로 여기서 읽는다.
+// 세션이 이 값을 스크립트 인자로 손으로 넘기면, subtype을 빠뜨려도 다른 subtype의 가이드가
+// 오류 없이 나온다(채용 PR이 일반 PR 가이드를 받는다). 패키지가 생긴 뒤에는 `--from <패키지>`로 여기서 읽는다.
 import fs from "node:fs";
 
 // 본문의 `[//]: # (...)` 주석 줄 — 사용자가 남긴 지시문이다. 채점기와 리뷰어 입력 조립이 같은 판정을 쓴다.
@@ -42,7 +42,7 @@ export function readPackageMeta(file) {
     const v = fm.match(new RegExp(`^${key}:[ \\t]*(.*)$`, "m"))?.[1].trim();
     return v ? v.replace(/^(['"])(.*)\1$/, "$2") : null;
   };
-  const meta = { type: field("type"), subtype: field("subtype"), kind: field("kind") };
+  const meta = { type: field("type"), subtype: field("subtype") };
   if (!meta.type) fail(`${file}의 frontmatter에 type이 없다`);
   return meta;
 }
