@@ -8,7 +8,7 @@ export const PACKAGE_TYPES = new Set([
   "pr-body",
   "readme",
   "decision",
-  "article",
+  "approach-ladder",
   "case-study",
   "note",
 ]);

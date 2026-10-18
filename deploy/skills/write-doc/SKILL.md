@@ -20,7 +20,7 @@ argument-hint: <type> [<subtype>]
 | `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 |
 | `readme` | — | — | README (subtype 미사용) |
 | `decision` | — | — | 기술적 의사결정 문서 |
-| `article` | — | — | 기술 글·가이드 |
+| `approach-ladder` | — | — | 같은 결과를 내는 방법이 여러 개일 때, 독자를 최악 → 차악 → 최선으로 옮기는 기술 글 |
 | `case-study` | — | — | README에서 링크하는 문제→해결 사례집 |
 | `note` | — | — | 학습 필기·설명 노트. 글 종류 규칙 없이 공통 조건(common.md)만 걸린다 |
 

@@ -43,4 +43,3 @@ node {{skill_dir}}/../write-doc/scripts/score.mjs <산출물.md> [--props 명제
   - 반려된 표현 줄은 rejected.md [줄 꼴](../../../contexts/writing-guide/rejected.md#줄-꼴)을 따른다.
   - **판단이 남는 규칙은 common.md에 산문으로 둔다.** 기계가 판정 못 하는 것을 목록으로만 옮기면 적발 0건이 「통과」로 읽혀 규칙이 사라진다.
 - **출발점 오판** → write-doc 초안 단계([draft.md](../../write-doc/steps/draft.md))의 재료 받기 질문 문구를 고친다.
-- **잘 읽힌 새 글 골격** → [article/skeletons.md](../../../contexts/writing-guide/types/article/skeletons.md)에 어떤 상황에서 쓴 골격인지와 함께 누적하는 백로그 항목으로 낸다. 이 파일은 골격을 고르는 쪽만 참조하고 있어, 여기서 되돌려 쌓지 않으면 처음 만든 몇 개에 고정된다.
