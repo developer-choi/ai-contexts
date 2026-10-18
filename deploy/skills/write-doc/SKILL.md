@@ -20,7 +20,7 @@ argument-hint: <type> [<subtype>]
 | `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 |
 | `readme` | — | — | README (subtype 미사용) |
 | `decision` | — | — | 기술적 의사결정 문서 |
-| `approach-ladder` | — | — | 같은 결과를 내는 방법이 여러 개일 때, 독자를 최악 → 차악 → 최선으로 옮기는 기술 글 |
+| `approach-ladder` | — | — | 같은 결과를 내는 방법이 여러 개일 때, 최악 → 차악 → 최선으로 옮겨 가며 판단 기준을 보이는 기술 글 |
 | `case-study` | — | — | README에서 링크하는 문제→해결 사례집 |
 
 이미 쓴 글을 다듬으려면 같은 형태로 부르고 초안 단계의 재료 받기에서 그 글을 건넨다. 완성된 글이면 초안 단계를 건너뛰고 다듬기부터 한다.

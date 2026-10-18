@@ -4,7 +4,7 @@
 
 ## [SAVE_STEP] 패키지 저장
 
-추천 경로는 [template.md](../../../../contexts/writing-guide/types/decision/template.md)가 정한 경로다.
+추천 경로는 대상 레포 `plan/` 아래 `<topic>-decisions-stepN.md`다. 같은 주제가 여러 회차로 이어지면 N을 회차 번호로 둔다.
 
 ## [SCAN_STEP] 파악
 
