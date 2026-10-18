@@ -1,10 +1,8 @@
 # decision — type마다 더 도는 절차
 
-절 제목의 ID는 단계 파일의 절차 ID와 같다. 기본 절차와 부딪치면 이 절을 따른다.
+## [OUTLINE_STEP] 골격
 
-## [SAVE_STEP] 패키지 저장
-
-추천 경로는 대상 레포 `plan/` 아래 `<topic>-decisions-stepN.md`다. 같은 주제가 여러 회차로 이어지면 N을 회차 번호로 둔다.
+골격 검수 때 보일 추천 경로는 대상 레포 `plan/` 아래 `<topic>-decisions-stepN.md`다. 같은 주제가 여러 회차로 이어지면 N을 회차 번호로 둔다.
 
 ## [SCAN_STEP] 파악
 

@@ -34,7 +34,7 @@
         "deploy/skills/write-doc/scripts/score.mjs",
         "deploy/skills/write-doc/scripts/publish-file.mjs"
       ],
-      "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅 쪽(패키지 훅들이 함께 쓰는 writing-package.mjs의 PACKAGE_TYPES), 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록과 이모지 금지 type 목록. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 필수 필드 검사를 통째로 빠져나간다(훅이 PACKAGE_TYPES로 self-filter하므로 미등록 type은 검사가 아예 안 걸린다). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type을 더하거나 이름을 바꾸거나 지울 때 함께 맞춘다 — PR·커밋 링크를 근거로 싣는 새 type은 내부 작업이력 면제 목록에 더한다. check-package-frontmatter의 필수 필드(type 밖)를 바꾸면 publish-file.mjs의 PACKAGE_ONLY_FIELDS도 맞춘다 — 커밋된 원본에 패키지 필드가 섞였는지 그 목록으로 가린다."
+      "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅 쪽(패키지 훅들이 함께 쓰는 writing-package.mjs의 PACKAGE_TYPES), 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록과 이모지 금지 type 목록. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 어휘 밖으로 저장이 막힌다(check-package-frontmatter의 looksLikePackage). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type을 더하거나 이름을 바꾸거나 지울 때 함께 맞춘다 — PR·커밋 링크를 근거로 싣는 새 type은 내부 작업이력 면제 목록에 더한다. check-package-frontmatter의 필수 필드(type 밖)를 바꾸면 publish-file.mjs의 PACKAGE_ONLY_FIELDS도 맞춘다 — 커밋된 원본에 패키지 필드가 섞였는지 그 목록으로 가린다."
     },
     {
       "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 커밋 시점 검사 ↔ 회차 점검",

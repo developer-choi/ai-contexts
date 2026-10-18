@@ -14,16 +14,16 @@ argument-hint: <type> [<subtype>]
 
 `/write-doc <type> [<subtype>]` 형태로 호출한다.
 
-| type | subtype | 필수/선택 | 설명 |
-|------|---------|----------|-----|
-| `pr-body` | (없음) | 선택 | 일반 PR 본문 |
-| `pr-body` | `recruitment` | 선택 | 채용용 PR 본문 |
-| `readme` | — | — | README (subtype 미사용) |
-| `decision` | — | — | 기술적 의사결정 문서 |
-| `approach-ladder` | — | — | 같은 결과를 내는 방법이 여러 개일 때, 최악 → 차악 → 최선으로 옮겨 가며 판단 기준을 보이는 기술 글 |
-| `case-study` | — | — | README에서 링크하는 문제→해결 사례집 |
+| type | subtype | 설명 |
+|------|---------|-----|
+| `pr-body` | (없음) | 일반 PR 본문 |
+| `pr-body` | `recruitment` | 채용용 PR 본문 |
+| `readme` | — | README |
+| `decision` | — | 기술적 의사결정 문서 |
+| `approach-ladder` | — | 같은 결과를 내는 방법이 여러 개일 때, 최악 → 차악 → 최선으로 옮겨 가며 판단 기준을 보이는 기술 글 |
+| `case-study` | — | README에서 링크하는 문제→해결 사례집 |
 
-이미 쓴 글을 다듬으려면 같은 형태로 부르고 초안 단계의 재료 받기에서 그 글을 건넨다. 완성된 글이면 초안 단계를 건너뛰고 다듬기부터 한다.
+이미 쓴 글을 다듬으려면 같은 형태로 부르고 초안 단계의 재료 받기에서 그 글을 건넨다.
 
 ## 흐름
 
@@ -37,7 +37,7 @@ argument-hint: <type> [<subtype>]
 
 단계 파일의 절차 제목 앞 `[OUTLINE_STEP]` 같은 표식은 그 절차의 ID다. 모든 type이 이 절차를 돌고, type마다 더 도는 것은 이 스킬의 `types/<type>/steps.md`에 같은 ID 절로 있다. 단계마다 `guide-files.mjs`가 그 파일을 낸다.
 
-- ID가 붙은 절차에 들어갈 때마다 type 파일에 같은 ID 절이 있는지 보고, 있으면 이어서 돈다.
+- ID가 붙은 절차에 들어갈 때마다 type 파일에 같은 ID 절이 있는지 보고, 있으면 이어서 돈다. subtype 파일(`types/<type>/<subtype>/steps.md`)에도 있으면 type 절 다음에 돈다.
 - 기본 절차와 부딪치면 type 절을 따른다.
 
 ## 모든 단계에 걸리는 것
