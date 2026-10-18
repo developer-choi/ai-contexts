@@ -10,10 +10,6 @@
 - `## 검증` 또는 `## 요지 미리 보기` — 실제 동작 확인 or 핵심 메시지 미리 요약
 - `## N차 소비자 관점` — 책임 레이어가 여러 층일 때 stakeholder별 시점
 
-## length_target default
-
-방법 2개 + 장단점 + 결론 단락 = 약 300-600단어. 맞춤 섹션 추가되면 그만큼 늘어남. frontmatter `length_target` 명시 시 우선.
-
 ## 파일명 규칙 — 산출물 저장
 
 1차 소비자 프로젝트의 `plan/` 하위에 `<topic>-decisions-stepN.md` 형식. 같은 topic이 여러 회차로 이어질 수 있음 (step1, step2...). N은 회차와 1:1 매핑.
