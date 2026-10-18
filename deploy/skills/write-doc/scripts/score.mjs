@@ -603,25 +603,19 @@ function checkEmptySections(text) {
   return { empties, nheads: heads.length };
 }
 
-// case-study 사례집의 링크·굵게. 「[자세히 보기] 링크」와 「사례 앞 굵은 요약 문장」은 리터럴 매칭이라
-// 판단이 안 든다. [자세히 보기] 금지는 가이드에 없고 여기만 있다. 골격(칸 이름)은 가이드가 예시로만 주므로 보지 않는다.
-// (질문이 짧은가·굵게가 핵심 낱말뿐인가는 판단이 남아 안 본다.)
+// case-study 사례집의 「[자세히 보기] 링크」. 리터럴 매칭이라 판단이 안 든다. 이 금지는 가이드에 없고 여기만 있다.
+// 골격(칸 이름)은 가이드가 예시로만 주므로 보지 않는다.
 // 입력은 stripCodeAndQuotes를 거친 [줄번호, 줄].
 const MORE_LINK = /\[\s*자세히\s*보기\s*\]/;
-// 굵은 글이 문장으로 끝날 때만 요약 문장으로 본다 — `**바꾸기 전**` 같은 짧은 라벨은 정상이다.
-const BOLD_LEAD = /^\*\*[^*]+?(?:[.!?。]|[다요])\*\*/;
 
 function checkCaseStudy(numbered) {
   const moreLinks = [];
-  const boldLeads = [];
   for (const [lineno, ln] of numbered) {
     const s = ln.trim();
     const noCode = s.replace(/`[^`\n]*`/g, "").replace(/<!--[\s\S]*?-->/g, "");
     if (MORE_LINK.test(noCode)) moreLinks.push([lineno, s]);
-    const item = s.replace(/^(?:[-*+]|\d+\.)\s+/, "");
-    if (BOLD_LEAD.test(item)) boldLeads.push([lineno, s]);
   }
-  return { moreLinks, boldLeads };
+  return moreLinks;
 }
 
 function readFrontmatterScalar(text, key) {
@@ -872,15 +866,10 @@ function main() {
   );
   for (const [lineno, ln] of comments) console.log(`   L${lineno}: ${ln.trim().slice(0, 70)}`);
   let caseLinkHits = [];
-  let caseBoldHits = [];
   if (docType === "case-study") {
-    const cs = checkCaseStudy(lines);
-    caseLinkHits = cs.moreLinks;
-    caseBoldHits = cs.boldLeads;
+    caseLinkHits = checkCaseStudy(lines);
     dump("case-study [자세히 보기] 링크", caseLinkHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
     if (caseLinkHits.length) console.log("   → 지운다. 근거가 필요하면 링크 글자에 무엇이 있는지 적은 근거 링크(실제 작업 PR·원문 글)로 바꾼다.");
-    dump("case-study 굵은 요약 문장", caseBoldHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
-    if (caseBoldHits.length) console.log("   → 문장 전체를 굵게 하지 않는다. 굵게는 그 문장의 핵심 낱말에만 남긴다.");
   }
 
   if (args.props) {
@@ -928,8 +917,7 @@ function main() {
     emojiHits.length +
     fullNameHits.length +
     empties.length +
-    caseLinkHits.length +
-    caseBoldHits.length;
+    caseLinkHits.length;
   console.log(
     `\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건` +
       ` + 눈으로 확인 후보 ${
