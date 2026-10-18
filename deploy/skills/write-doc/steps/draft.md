@@ -18,7 +18,7 @@
 
 독자가 이 글에서 가져갈 문장 하나를 사용자와 합의한 뒤에 문단을 쓴다. 템플릿이 칸을 주는 type도 정한다 — 템플릿은 칸을 줄 뿐 골자를 주지 않는다.
 
-`audience`·`purpose`·`audience_knowledge`도 함께 확인받는다 — 다듬기 단계의 독자 리뷰어가 이 값으로 읽는다.
+`purpose`·`audience_knowledge`도 함께 확인받는다 — 다듬기 단계의 독자 리뷰어가 이 값으로 읽는다.
 
 ### [OUTLINE_STEP] 3. 골격
 

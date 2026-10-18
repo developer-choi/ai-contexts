@@ -2,12 +2,12 @@
 // 다듬기 단계의 리뷰어 팀원에게 줄 프롬프트를 패키지에서 조립한다. 출력을 그대로 Agent 프롬프트나 SendMessage에 붙인다.
 //
 // 메인이 손으로 조립하면 틀려도 아무 데서도 안 걸린다. `[//]: #` 주석이 남으면 리뷰어가 사용자 지시문을 본문 표현으로
-// 보고 문다. 독자 리뷰어에게 audience·audience_knowledge 말고 하나라도 더 넘기면(나머지 frontmatter·규칙 파일 경로)
+// 보고 문다. 독자 리뷰어에게 audience_knowledge 말고 하나라도 더 넘기면(나머지 frontmatter·규칙 파일 경로)
 // 그 리뷰어도 사정을 아는 독자가 되어, 사정을 아는 사람만 읽히는 문장을 못 본다.
 //
 // 사용: node reviewer-input.mjs --from <패키지.md> --for expression|reader
 //   expression  표현 리뷰어 지시 파일 경로, frontmatter 전체, 읽을 파일 경로, 주석을 뺀 본문
-//   reader      독자 리뷰어 지시([리뷰어에게 주는 지시](../reviewers/reader.md#리뷰어에게-주는-지시) 인용), audience·audience_knowledge, 주석을 뺀 본문
+//   reader      독자 리뷰어 지시([리뷰어에게 주는 지시](../reviewers/reader.md#리뷰어에게-주는-지시) 인용), audience_knowledge, 주석을 뺀 본문
 // 표현 리뷰어는 user_phrases 구절을 면제하므로, 출처 없는 항목이 있으면 멈춘다 — 경고만 내면 메인이 무엇을 정하든 그대로 면제된다.
 import fs from "node:fs";
 import path from "node:path";
@@ -100,10 +100,10 @@ function expression(file, fm, body) {
 }
 
 function reader(fm, body) {
-  const fields = ["audience", "audience_knowledge"].map((k) => fmField(fm, k));
-  // 키만 있고 값이 비면 리뷰어가 누구인지 모르는 독자로 읽는다.
+  const fields = ["audience_knowledge"].map((k) => fmField(fm, k));
+  // 키만 있고 값이 비면 리뷰어가 무엇을 아는 독자인지 모른 채 읽는다.
   if (fields.some((f) => !f || /^[\w-]+:\s*(""|'')?\s*$/.test(f.trim()))) {
-    console.error("패키지 frontmatter에 audience·audience_knowledge가 둘 다 값과 함께 있어야 한다");
+    console.error("패키지 frontmatter에 audience_knowledge가 값과 함께 있어야 한다");
     process.exit(1);
   }
   return [readerInstruction(), "", REPLY, "", ...fields, "", "## 본문", body].join("\n");

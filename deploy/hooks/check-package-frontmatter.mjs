@@ -20,7 +20,7 @@ import { deny, getToolName, readPayload } from "./hook-utils.mjs";
 import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
-const REQUIRED_FIELDS = ["type", "audience", "audience_knowledge", "purpose", "key_message"];
+const REQUIRED_FIELDS = ["type", "audience_knowledge", "purpose", "key_message"];
 
 const payload = readPayload();
 if (EDIT_TOOLS.has(getToolName(payload))) {

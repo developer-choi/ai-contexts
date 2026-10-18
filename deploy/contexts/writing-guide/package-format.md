@@ -6,7 +6,6 @@
 ---
 type: pr-body
 subtype: recruitment
-audience: 채용담당자
 audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
 purpose: 성능 최적화 어필
 key_message: 무한스크롤 도입으로 초기 렌더 시간 60% 단축
@@ -26,8 +25,7 @@ refs:
 ```
 
 - `type`·`subtype`: 이 글의 종류.
-- `audience`: 이 글을 읽는 사람.
-- `audience_knowledge`: 그 독자가 이 글의 소재에 대해 아는 것과 모르는 것을 한 줄로 적습니다.
+- `audience_knowledge`: 독자가 이 글의 소재에 대해 아는 것과 모르는 것을 한 줄로 적습니다. 독자는 [common.md](common.md#독자는-채용담당자)가 고정하므로 독자를 적는 필드는 없습니다.
 - `purpose`: 이 글로 이루려는 것.
 - `key_message`: 이 글에서 독자가 가져갈 한 문장.
 - `length_target`: 본문 분량 목표를 자유 서술로 적습니다.

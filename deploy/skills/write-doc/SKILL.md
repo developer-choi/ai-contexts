@@ -1,6 +1,6 @@
 ---
 name: write-doc
-description: 글(PR 본문·README·결정문·기술 글·사례집·학습 필기)을 사용자와 함께 골격부터 써서 표현을 다듬고 발행까지 한 세션에 마친다. 명시적으로 write-doc을 호출할 때만 사용.
+description: 글(PR 본문·README·결정문·기술 글·사례집)을 사용자와 함께 골격부터 써서 표현을 다듬고 발행까지 한 세션에 마친다. 명시적으로 write-doc을 호출할 때만 사용.
 argument-hint: <type> [<subtype>]
 ---
 
@@ -22,7 +22,6 @@ argument-hint: <type> [<subtype>]
 | `decision` | — | — | 기술적 의사결정 문서 |
 | `approach-ladder` | — | — | 같은 결과를 내는 방법이 여러 개일 때, 독자를 최악 → 차악 → 최선으로 옮기는 기술 글 |
 | `case-study` | — | — | README에서 링크하는 문제→해결 사례집 |
-| `note` | — | — | 학습 필기·설명 노트. 글 종류 규칙 없이 공통 조건(common.md)만 걸린다 |
 
 이미 쓴 글을 다듬으려면 같은 형태로 부르고 초안 단계의 재료 받기에서 그 글을 건넨다. 완성된 글이면 초안 단계를 건너뛰고 다듬기부터 한다.
 

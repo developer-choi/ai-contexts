@@ -68,7 +68,7 @@ README 초안은 workflow가 직접 쓰지 않는다. `/plan/`의 과제 요구�
 
 실행 방법·폴더 구조는 공통이 아니다 — 요구하는 회사와 안 하는 회사가 갈리므로 과제 요구사항에 있을 때만 넣는다. 기술 선택 근거·완성/미완성 등 다른 추가 섹션도 같다.
 
-`/write-doc readme` 패키지의 `audience`는 채용 과제 평가자, `audience_knowledge`는 「과제 요구사항은 앎, 코드를 열어 봄」으로 둔다.
+`/write-doc readme` 패키지의 `audience_knowledge`는 「과제 요구사항은 앎, 코드를 열어 봄」으로 둔다.
 
 [readme/guide.md](../../../contexts/writing-guide/types/readme/guide.md)는 비개발자 독자를 잡은 가이드라, 거기서는 톤과 1인칭 서술만 가져오고 금지 목록은 적용하지 않는다 — 과제 요구사항이 코드 구조 설명을 요구하면 그대로 쓴다.
 

@@ -10,7 +10,6 @@ export const PACKAGE_TYPES = new Set([
   "decision",
   "approach-ladder",
   "case-study",
-  "note",
 ]);
 
 // 맨 앞 frontmatter 블록의 최상위 key만 읽는다. 값이 없거나 공백뿐이면 빈 문자열로 둔다
@@ -25,7 +24,7 @@ export function parseFrontmatter(text) {
   const fields = {};
   for (const line of lines.slice(1, end)) {
     const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
-    // 따옴표로 감싼 값은 벗겨서 읽는다 — `audience: ""`가 채워진 값으로 통과하지 않게.
+    // 따옴표로 감싼 값은 벗겨서 읽는다 — `purpose: ""`가 채워진 값으로 통과하지 않게.
     if (match) fields[match[1]] = match[2].trim().replace(/^(['"])(.*)\1$/, "$2").trim();
   }
   return fields;

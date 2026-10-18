@@ -12,9 +12,10 @@
       "name": "독자 리뷰어 지시 — reader.md 인용 ↔ 입력 조립",
       "files": [
         "deploy/skills/write-doc/reviewers/reader.md",
-        "deploy/skills/write-doc/scripts/reviewer-input.mjs"
+        "deploy/skills/write-doc/scripts/reviewer-input.mjs",
+        "deploy/contexts/writing-guide/common.md"
       ],
-      "note": "reviewer-input.mjs가 reader.md 「리뷰어에게 주는 지시」 절의 > 인용을 긁어 독자 리뷰어 프롬프트로 낸다. 절 이름이나 인용 꼴을 바꾸면 스크립트가 지시를 못 찾아 멈춘다. 지시에 frontmatter 값을 더 쓰게 바꾸면 스크립트가 넘기는 필드(audience·audience_knowledge)도 맞춘다."
+      "note": "reviewer-input.mjs가 reader.md 「리뷰어에게 주는 지시」 절의 > 인용을 긁어 독자 리뷰어 프롬프트로 낸다. 절 이름이나 인용 꼴을 바꾸면 스크립트가 지시를 못 찾아 멈춘다. 지시에 frontmatter 값을 더 쓰게 바꾸면 스크립트가 넘기는 필드(audience_knowledge)도 맞춘다. 지시의 독자(채용담당자)는 common.md 「독자는 채용담당자」의 사본이다 — 리뷰어가 규칙 문서를 못 읽게 막아 두어 사본이 불가피하다. 독자를 바꾸면 지시도 맞춘다."
     },
     {
       "name": "반려 줄 꼴 — rejected.md ↔ 파서",
