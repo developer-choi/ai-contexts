@@ -273,8 +273,6 @@ function printRules() {
   console.log("   `약어 (Full Name)` 병기는 그 약어가 처음 나온 자리에만 둔다. 두 번째부터 센다.");
   console.log(`\n## 이모지  (type ${[...NO_EMOJI_TYPES].join("·")}만)`);
   console.log("   PR 본문에는 이모지를 쓰지 않는다.");
-  console.log(`\n## plain-text 마크다운  (rendering_env: plain-text만)`);
-  console.log(`   발행처에서 기호가 그대로 보인다: ${PLAIN_TEXT_MARKDOWN.map(([l]) => l).join(", ")}. 리스트 \`-\`는 안 센다.`);
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
   const ac = loadAcRejected();
@@ -308,17 +306,6 @@ const POLITE_END = /(?:습니다|입니다|됩니다|ㅂ니다|세요|어요|아
 // PR 본문에는 이모지를 쓰지 않는다(2026-10-17 사용자 결정). 다른 type은 이모지를 세지 않는다.
 const NO_EMOJI_TYPES = new Set(["pr-body"]);
 const EMOJI = /\p{Extended_Pictographic}/gu;
-
-// `rendering_env: plain-text` 발행처(텍스트 폼 등)에서 기호 그대로 보이는 마크다운. 무엇을 막는지는 이 검사가 정본이다.
-// 리스트 `-`는 텍스트 폼에서도 흔히 쓰는 꼴이라 세지 않는다.
-const PLAIN_TEXT_MARKDOWN = [
-  ["헤딩", /^\s{0,3}#{1,6}\s/],
-  ["코드펜스", /^\s*(```|~~~)/],
-  ["백틱", /`/],
-  ["굵게", /\*\*|__/],
-  ["링크", /\[[^\]]+\]\([^)]+\)/],
-  ["인용", /^\s*>/],
-];
 
 // 본문과, 본문 앞에서 뗀 줄 수를 돌려준다. 출력하는 줄 번호는 이 수를 더해 파일 기준으로 낸다 —
 // 읽는 쪽은 파일을 열어 본 줄 번호로 자리를 찾는다.
@@ -378,18 +365,6 @@ function findEmoji(lines) {
     const found = ln.match(EMOJI);
     if (found) hits.push([lineno, found.join(""), ln.trim()]);
   }
-  return hits;
-}
-
-// 코드펜스·인용도 기호로 보이므로 코드를 걷기 전 본문 줄에서 찾는다. 주석 줄은 발행 전에 지워지므로 뺀다.
-function findMarkdown(rawLines, offset) {
-  const hits = [];
-  rawLines.forEach((ln, i) => {
-    if (COMMENT_LINE.test(ln)) return;
-    const found = PLAIN_TEXT_MARKDOWN.filter(([, rx]) => rx.test(ln)).map(([label]) => label);
-    // 펜스 줄의 백틱은 펜스 하나로 센다.
-    for (const label of found.includes("코드펜스") ? ["코드펜스"] : found) hits.push([label, i + 1 + offset, ln.trim()]);
-  });
   return hits;
 }
 
@@ -875,12 +850,6 @@ function main() {
     dump("이모지", emojiHits, (h) => `'${h[1]}' (L${h[0]}): ${h[2].slice(0, 70)}`);
     if (emojiHits.length) console.log("   → PR 본문에는 이모지를 쓰지 않는다. 지우거나 말로 바꾼다.");
   }
-  const plainText = readFrontmatterScalar(raw, "rendering_env") === "plain-text";
-  const markdownHits = plainText ? findMarkdown(body.split("\n"), offset) : [];
-  if (plainText) {
-    dump("plain-text 마크다운", markdownHits, (h) => `${h[0]} (L${h[1]}): ${h[2].slice(0, 70)}`);
-    if (markdownHits.length) console.log("   → 발행처가 마크다운을 그리지 않아 기호가 그대로 보인다. 기호를 걷고 문장·줄바꿈으로 나눈다.");
-  }
   console.log(`\n[습니다체 휴리스틱] ${politeHits.length}건 (눈으로 확인 — false positive 가능)`);
   for (const [lineno, ln] of politeHits) console.log(`   L${lineno}: ${ln.slice(0, 70)}`);
   const { longHits, countHits } = printStructure(lines);
@@ -958,7 +927,6 @@ function main() {
     refHits.length +
     emojiHits.length +
     fullNameHits.length +
-    markdownHits.length +
     empties.length +
     caseLinkHits.length +
     caseBoldHits.length;
