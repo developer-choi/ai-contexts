@@ -18,7 +18,7 @@
 
 독자가 이 글에서 가져갈 문장 하나를 사용자와 합의한 뒤에 문단을 쓴다. 템플릿이 있는 type도 정한다 — 템플릿은 꼴의 예시일 뿐 골자를 주지 않는다.
 
-`purpose`·`audience_knowledge`도 함께 확인받는다. 다듬기 단계의 독자 리뷰어는 `audience_knowledge`만 받아 그만큼 아는 독자로 읽는다.
+`audience_knowledge`도 함께 확인받는다. 다듬기 단계의 독자 리뷰어는 `audience_knowledge`만 받아 그만큼 아는 독자로 읽는다.
 
 ### [OUTLINE_STEP] 3. 골격
 

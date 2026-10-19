@@ -7,7 +7,6 @@
 type: pr-body
 subtype: recruitment
 audience_knowledge: 무한스크롤 도메인 모름, 코드베이스 처음
-purpose: 성능 최적화 어필
 key_message: 무한스크롤 도입으로 초기 렌더 시간 60% 단축
 rejected:
   - '"심혈을 기울인" (자기 산출물 과장)'
@@ -24,7 +23,6 @@ refs:
 
 - `type`·`subtype`: 이 글의 종류.
 - `audience_knowledge`: 독자가 이 글의 소재에 대해 아는 것과 모르는 것을 한 줄로 적습니다. 독자는 [common.md](common.md#독자는-채용담당자)가 고정하므로 독자를 적는 필드는 없습니다.
-- `purpose`: 이 글로 이루려는 것.
 - `key_message`: 이 글에서 독자가 가져갈 한 문장.
 - `rejected`: 사용자가 이 문서에서 거부한 것을 `"원문" (거부 사유)` 한 줄씩 담습니다.
     - 낱말·문구뿐 아니라 사용자가 뺀 절·다루지 않기로 한 내용도 담고, 그때는 원문 자리에 절이면 `"절 제목" 절`로, 내용이면 그 내용을 짧게 적습니다.

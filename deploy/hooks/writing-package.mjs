@@ -24,7 +24,7 @@ export function parseFrontmatter(text) {
   const fields = {};
   for (const line of lines.slice(1, end)) {
     const match = /^([A-Za-z_][\w-]*):\s*(.*)$/.exec(line);
-    // 따옴표로 감싼 값은 벗겨서 읽는다 — `purpose: ""`가 채워진 값으로 통과하지 않게.
+    // 따옴표로 감싼 값은 벗겨서 읽는다 — `key_message: ""`가 채워진 값으로 통과하지 않게.
     if (match) fields[match[1]] = match[2].trim().replace(/^(['"])(.*)\1$/, "$2").trim();
   }
   return fields;

@@ -217,7 +217,7 @@ const CASES = [
 
 // 쓰기 시점 정책 hook은 Bash 명령이 아니라 Write/Edit payload를 본다.
 // [hook 파일, {tool_name, tool_input}, 기대 판정, 설명]
-const PKG = '---\ntype: pr-body\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n';
+const PKG = '---\ntype: pr-body\naudience_knowledge: 모름\nkey_message: 한 문장\n---\n\n# 제목\n';
 
 const WRITE_CASES = [
   [
@@ -230,7 +230,7 @@ const WRITE_CASES = [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Write',
-      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience_knowledge: 모름\npurpose: \n---\n\n# 제목\n' },
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience_knowledge: 모름\nkey_message: \n---\n\n# 제목\n' },
     },
     'deny',
     '빈 값·누락 필드가 있으면 막는다',
@@ -239,7 +239,28 @@ const WRITE_CASES = [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Write',
-      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience_knowledge: 모름\npurpose: ""\nkey_message: 한 문장\n---\n\n# 제목\n' },
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience_knowledge: \nkey_message: 한 문장\n---\n\n# 제목\n' },
+    },
+    'deny',
+    'audience_knowledge가 빈 값이면 막는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: {
+        file_path: 'C:/tmp/pkg.md',
+        content: '---\ntype: pr-body\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+      },
+    },
+    'pass',
+    '걷어낸 purpose 칸이 남은 예전 패키지도 통과 — 필수 목록 밖의 필드는 막지 않는다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\naudience_knowledge: 모름\nkey_message: ""\n---\n\n# 제목\n' },
     },
     'deny',
     '따옴표만 있는 빈 값도 빈 값으로 막는다',
@@ -248,7 +269,7 @@ const WRITE_CASES = [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Write',
-      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n' },
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: pr-body\nkey_message: 한 문장\n---\n\n# 제목\n' },
     },
     'deny',
     'audience_knowledge가 없으면 막는다 — 독자 리뷰어의 입력이다',
@@ -259,7 +280,7 @@ const WRITE_CASES = [
       tool_name: 'Write',
       tool_input: {
         file_path: 'C:/tmp/pkg.md',
-        content: '---\ntype: case-study\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+        content: '---\ntype: case-study\naudience_knowledge: 모름\nkey_message: 한 문장\n---\n\n# 제목\n',
       },
     },
     'pass',
@@ -280,7 +301,7 @@ const WRITE_CASES = [
       tool_name: 'Write',
       tool_input: {
         file_path: 'C:/tmp/pkg.md',
-        content: '---\ntype: note\naudience_knowledge: 모름\npurpose: 복습\nkey_message: 한 문장\n---\n\n# 제목\n',
+        content: '---\ntype: note\naudience_knowledge: 모름\nkey_message: 한 문장\n---\n\n# 제목\n',
       },
     },
     'deny',
@@ -310,7 +331,7 @@ const WRITE_CASES = [
       tool_name: 'Write',
       tool_input: {
         file_path: 'C:/tmp/pkg.md',
-        content: '---\ntype: pr_body\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+        content: '---\ntype: pr_body\naudience_knowledge: 모름\nkey_message: 한 문장\n---\n\n# 제목\n',
       },
     },
     'deny',
@@ -322,7 +343,7 @@ const WRITE_CASES = [
       tool_name: 'Write',
       tool_input: {
         file_path: 'C:/tmp/pkg.md',
-        content: '---\ntype: resume-item\naudience_knowledge: 모름\npurpose: 어필\nkey_message: 한 문장\n---\n\n# 제목\n',
+        content: '---\ntype: resume-item\naudience_knowledge: 모름\nkey_message: 한 문장\n---\n\n# 제목\n',
       },
     },
     'deny',
@@ -760,7 +781,7 @@ const editCases = (dir) => [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Edit',
-      tool_input: { file_path: path.join(dir, 'pkg.md'), old_string: 'purpose: 어필', new_string: 'purpose:' },
+      tool_input: { file_path: path.join(dir, 'pkg.md'), old_string: 'key_message: 한 문장', new_string: 'key_message:' },
     },
     'deny',
     '필수 필드 값을 지우는 Edit도 잡는다',
@@ -2323,7 +2344,7 @@ const SCORE_PACKAGE_HOOK = 'score-writing-package.mjs';
 const scorePackageGroup = async () => {
   const dir = await makeTempDir('hook-score-package-');
   try {
-    const fm = (type, extra = '') => `---\ntype: ${type}\naudience_knowledge: 모름\npurpose: 시험\nkey_message: 한 문장\n${extra}---\n`;
+    const fm = (type, extra = '') => `---\ntype: ${type}\naudience_knowledge: 모름\nkey_message: 한 문장\n${extra}---\n`;
     const files = {
       hit: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n✅ 토큰 갱신을 고쳤습니다.\n`,
       clean: `${fm('pr-body')}# 로그인 토큰 갱신 수정\n\n## 요약\n\n토큰 갱신을 고쳤습니다.\n`,
