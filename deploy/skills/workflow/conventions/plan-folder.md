@@ -17,7 +17,7 @@
       figma-url.md      ← requirement 「자료 받기」 수집 (figma 쓰는 모드)
       figma/            ← requirement 「자료 받기」 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
       mockup/           ← requirement 「자료 받기」 수집 (개인 모드)
-      spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택 — 화면에 안 담기는 동작을 저자가 미리 아는 경우)
+      spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택)
       cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
       domain-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/guide.md] 「산출물」 참조
