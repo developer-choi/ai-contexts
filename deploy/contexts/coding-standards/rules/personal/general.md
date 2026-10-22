@@ -9,7 +9,7 @@ tags: [file-folder-structure]
 아래 허용 목록 외 모든 주석 금지.
 
 - **JSDoc `@throws`**: 함수의 예외 상황 명시
-- **지우면 깨지는 코드의 이유**: 판정은 「이 주석이 없으면 누군가 이 코드를 지우거나 더 단순해 보이는 형태로 바꿨다가 깨뜨리는가」다. 그렇다면 깨지는 이유를 적는다. 예: 도구·브라우저·명세·외부 API의 동작 때문에 이 코드가 이 모양이어야 하는 경우, 같은 코드베이스의 다른 기능이 이 코드에 기대는 경우
+- **지우면 깨지는 코드의 이유**: 판정은 「이 주석이 없으면 누군가 이 코드를 지우거나 더 단순해 보이는 형태로 바꿨다가 깨뜨리는가」다. 그렇다면 깨지는 이유를 적는다. 예: 도구·브라우저·명세·외부 API의 동작 때문에 이 코드가 이 모양이어야 하는 경우, 같은 코드베이스의 다른 기능이 이 코드에 의존하는 경우
 - **빈 값 타입의 설명**: [advanced.md 「빈 값(Optional, Null)에 대한 주석 규칙」](../../principles/personal/typescript/advanced.md#빈-값optional-null에-대한-주석-규칙)
 - **eslint-disable**: [universal/general.md 「eslint-disable 금지」](../universal/general.md#eslint-disable-금지)의 예외 조건에 한함
 
@@ -53,4 +53,53 @@ function useProductFilter() {
     handlers: { handleSortChange, handleGenderToggle, handleFilterReset },
   };
 }
+```
+
+---
+
+## 파일 내 코드 순서
+
+컴포넌트, 훅, 유틸, 서버 route 등 모든 파일의 코드는 아래 순서를 따른다. 사람은 위에서 아래로 읽으므로, **핵심이 먼저** 오고 부수적인 것은 뒤로 보낸다.
+
+1. 타입 정의 (`interface`, `type`)
+2. export하는 함수·컴포넌트·상수
+3. 그 파일 안에서만 쓰는 상수·스키마·모듈 인스턴스
+4. 그 파일 안에서만 쓰는 함수
+
+예외: 모듈을 불러올 때 바로 평가되는 코드(`export const POST = withAuth(schema, handler)` 등)가 읽는 값은 그 코드 위에 둔다 — 선언 전에 읽으면 `ReferenceError`로 깨진다.
+
+```tsx
+// ✅ Good
+interface ProductCardProps {
+  name: string;
+  price: number;
+}
+
+export default function ProductCard({ name, price }: ProductCardProps) {
+  return <div>{name} - {formatPrice(price)}</div>;
+}
+
+const DUMMY_ITEMS = ['a', 'b', 'c'];
+
+function formatPrice(price: number): string {
+  return price.toLocaleString('ko-KR');
+}
+```
+
+```ts
+// ❌ Bad — 파일을 열면 이 route가 무엇을 하는지보다 요청 스키마가 먼저 보인다
+const exchangeRequestSchema = z.object({ idToken: z.jwt() });
+
+export async function POST(request: NextRequest) {
+  const body = exchangeRequestSchema.safeParse(await request.json());
+  ...
+}
+
+// ✅ Good
+export async function POST(request: NextRequest) {
+  const body = exchangeRequestSchema.safeParse(await request.json());
+  ...
+}
+
+const exchangeRequestSchema = z.object({ idToken: z.jwt() });
 ```
