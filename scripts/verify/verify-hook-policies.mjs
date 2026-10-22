@@ -1093,9 +1093,16 @@ function runHook(file, command, options) {
   return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } }, options);
 }
 
+// settings.json이 전역 훅을 부르는 꼴(settings-projection.mjs hookCommand)과 같게 `node -e "import(...)"`로 띄운다.
+// `node <파일>`로 띄우면 argv[1]이 차서, argv[1]로 직접 실행을 가르는 훅이 실제로는 꺼져 있어도 여기서는 돈다
+// (check-table-render가 그렇게 배포 뒤 한 번도 판정을 안 냈다).
+function hookImportArgs(file) {
+  return ['-e', `import(${JSON.stringify(pathToFileURL(path.join(hooksDir, file)).href)})`];
+}
+
 function runHookPayload(file, payload, { env } = {}) {
   return new Promise((resolve, reject) => {
-    const child = childProcess.spawn(process.execPath, [path.join(hooksDir, file)], {
+    const child = childProcess.spawn(process.execPath, hookImportArgs(file), {
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: false,
       windowsHide: true,

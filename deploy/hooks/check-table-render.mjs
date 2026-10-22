@@ -240,7 +240,9 @@ function verdict(payload) {
   return reason;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+// settings.json은 `node -e "import(...)"`로 불러 argv[1]이 비므로 그때도 본체를 돈다.
+// 테스트가 import하면 argv[1]이 러너 스크립트라 돌지 않는다.
+if (!process.argv[1] || import.meta.url === pathToFileURL(process.argv[1]).href) {
   const reason = verdict(readPayload());
   if (reason) {
     process.stdout.write(JSON.stringify({ hookSpecificOutput: { hookEventName: "Stop", additionalContext: reason } }));
