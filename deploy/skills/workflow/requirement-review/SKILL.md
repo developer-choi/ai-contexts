@@ -16,7 +16,7 @@ AI는 요구사항을 비판적으로 분석해 사용자에게 설명한다. �
 
 argument로 플래그를 받는다.
 
-- recruitment → [recruitment/guide.md](recruitment/guide.md)
+- recruitment → [recruitment/step.md](recruitment/step.md)
 - planning → [planning/guide.md](planning/guide.md)
 - design → [design/guide.md](design/guide.md)
 

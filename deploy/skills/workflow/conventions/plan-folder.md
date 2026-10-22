@@ -21,7 +21,7 @@
       code-target.md    ← requirement 「자료 받기」 수집 (코드 대용일 때만). 리뷰 대상 코드 경로
       cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
-      domain-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/guide.md] 「산출물」 참조
+      domain-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조
     consumable/
       todo.md        ← requirement의 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관(절 단위 큐). 확정 전 항목은 미분류 절에 쌓인다
       global.md         ← requirement의 requirement-review (planning·design) 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/output-template.md] 참조

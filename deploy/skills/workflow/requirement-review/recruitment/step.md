@@ -1,4 +1,4 @@
-# 채용과제 리뷰 가이드
+# 채용과제 분석 step
 
 채용 과제의 요구사항을 분석하여, 이후 PR 분할과 구현의 기반이 되는 분석 문서를 작성한다.
 
@@ -21,7 +21,7 @@
 무엇을 적는지는 괄호 안 절이 정한다.
 
 - `/plan/background/retained/cross-analysis.md` (1·2절)
-- `/plan/background/retained/service-analysis.md` (1절, [가이드](service-analysis.md))
+- `/plan/background/retained/service-analysis.md` (1절, [작성법](service-analysis.md))
 - `/plan/background/retained/domain-analysis.md` (1·5절)
 - `/plan/background/retained/tech-constraints.md` (1·3절)
 - `/plan/background/consumable/todo.md` (1·5절, 어느 절에 적을지는 [PR 몫 TODO 등록처](../../conventions/pr-split.md#pr-몫-todo-등록처))
@@ -33,7 +33,7 @@
 
 사용자가 준 자료를 모두 아래와 같이 분석한다:
 - 원본 간 교차 분석 (놓치기 쉬운 세부 스펙) — 여러 화면·기능에 걸치는 것은 domain-analysis.md에, 한 화면·기능 안에서 끝나는 것은 todo.md에 적는다
-- [service-analysis.md](service-analysis.md) 가이드에 따른 서비스 분석
+- [service-analysis.md](service-analysis.md)대로 서비스 분석
 - **API/도메인 분석** — 엔티티·규칙·에러 케이스를 domain-analysis.md에 적는다
 - **테스트 코드 분석** — 테스트 내용을 읽고 채점 기준을 역추론해 cross-analysis.md에 적는다
 - **프로젝트 파일 분석** — 제공된 프로젝트의 Dockerfile, packageManager, 빌드 설정, .gitignore, 기존 디렉토리 구조 등을 확인한다. 과제가 강제하는 제약은 tech-constraints.md에 적는다

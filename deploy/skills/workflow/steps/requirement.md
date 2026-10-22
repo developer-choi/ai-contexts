@@ -27,7 +27,7 @@ BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디
 ## 입력·산출물·작업 위치
 
 - **입력**: 사용자 제공 자료 (기획서·요구사항·채용 원본·개인 마크업 시안)
-- **산출물**: [plan-folder.md](../conventions/plan-folder.md) 트리에서 requirement 산출·수집으로 표시된 것, (낯선 작업이면) 학습 인수인계 문서, (채용) 작업 레포 — [레포 세우기](../requirement-review/recruitment/guide.md#레포-세우기)
+- **산출물**: [plan-folder.md](../conventions/plan-folder.md) 트리에서 requirement 산출·수집으로 표시된 것, (낯선 작업이면) 학습 인수인계 문서, (채용) 작업 레포 — [레포 세우기](../requirement-review/recruitment/step.md#레포-세우기)
 - **작업 위치**: main repo `/plan/background/`
 
 ---
@@ -41,7 +41,7 @@ BG 세션은 **결과물 스펙(WHAT)** 을 분석한다 — 동작·기획·디
 figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-collection.md)대로 수집 방식을 점검한다. 받은 시안·기획서에 흐린 영역·식별 어려운 텍스트가 있으면 짚어 다시 요청한다.
 흐린 곳 찾기는 메인이 직접 훑지 않고 일회성 서브에이전트에 받은 자료 경로(figma 쓰는 모드면 figma-asset-collection.md도)를 넘겨, 다시 요청할 지점(파일·영역·무엇이 안 읽히는지) 목록만 돌려받는다.
 
-채용 모드면 공고·메일·과제요구사항을 [입력 자료](../requirement-review/recruitment/guide.md#입력-자료)·[입력 자료 저장 시 제외 항목](../requirement-review/recruitment/guide.md#입력-자료-저장-시-제외-항목)대로 `/plan/background/persistent/`에 저장한다.
+채용 모드면 공고·메일·과제요구사항을 [입력 자료](../requirement-review/recruitment/step.md#입력-자료)·[입력 자료 저장 시 제외 항목](../requirement-review/recruitment/step.md#입력-자료-저장-시-제외-항목)대로 `/plan/background/persistent/`에 저장한다.
 
 **자료의 단일 수집 지점이다 — 가진 것 중 가장 완성도 높은 원본(SSOT)을 여기서 받는다.**
 
@@ -91,7 +91,7 @@ figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-co
 
 작업 레포가 생기는 사건이다.
 
-- 채용: [레포 세우기](../requirement-review/recruitment/guide.md#레포-세우기) 완료
+- 채용: [레포 세우기](../requirement-review/recruitment/step.md#레포-세우기) 완료
 - 실무: 기존 레포 — 「자료 받기」 종료 시점
 - 개인: 기존 레포면 「자료 받기」 종료 시점, 신규면 「자료 받기」를 마칠 때 레포 생성 명령을 안내하고, 사용자가 만든 뒤
 
