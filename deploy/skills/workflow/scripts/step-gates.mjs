@@ -29,7 +29,7 @@ const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readd
 
 // ── artifacts: requirement 「자료 받기」 종료 게이트 ──────────────────────────────────────────
 // 「원본 저장 + 시각 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
-// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement 「requirement-review 본체」는 그대로 굴러가고, MARKUP이
+// 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement의 요구사항 리뷰는 그대로 굴러가고, MARKUP이
 // 시각 원본·인덱스를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
