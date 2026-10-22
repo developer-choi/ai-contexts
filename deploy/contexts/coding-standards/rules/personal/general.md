@@ -10,8 +10,8 @@ tags: [file-folder-structure]
 
 - **JSDoc `@throws`**: 함수의 예외 상황 명시
 - **지우면 깨지는 코드의 이유**: 판정은 「이 주석이 없으면 누군가 이 코드를 지우거나 더 단순해 보이는 형태로 바꿨다가 깨뜨리는가」다. 그렇다면 깨지는 이유를 적는다. 예: 도구·브라우저·명세·외부 API의 동작 때문에 이 코드가 이 모양이어야 하는 경우, 같은 코드베이스의 다른 기능이 이 코드에 의존하는 경우
-- **빈 값 타입의 설명**: [advanced.md 「빈 값(Optional, Null)에 대한 주석 규칙」](../../principles/personal/typescript/advanced.md#빈-값optional-null에-대한-주석-규칙)
-- **eslint-disable**: [universal/general.md 「eslint-disable 금지」](../universal/general.md#eslint-disable-금지)의 예외 조건에 한함
+- **빈 값 타입의 설명**: [빈 값(Optional, Null)에 대한 주석 규칙](../../principles/personal/typescript/advanced.md#빈-값optional-null에-대한-주석-규칙)
+- **eslint-disable**: [eslint-disable 금지](../universal/general.md#eslint-disable-금지)의 예외 조건에 한함
 
 아래는 이유를 설명하더라도 주석으로 달지 않는다. 배경·방침 주석이 위 「지우면 깨지는 코드의 이유」에도 해당하면 그쪽을 따른다.
 
