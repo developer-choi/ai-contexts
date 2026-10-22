@@ -57,6 +57,8 @@ argument-hint: "[대상 파일/디렉토리 경로]"
 | COMPAT | 여러 CLI 호환 (**사용자가 명시적으로 지시할 때만**) | [cross-cli.md](../../contexts/prompt-standards/cross-cli.md) |
 | WORKFLOW | workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
 
+대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 상대 경로는 그 체크아웃의 `deploy/skills/prompt-review/`를 기준으로 푼다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
+
 ## 절차
 
 ### 1. 리뷰하고 대상 파일 고치기
