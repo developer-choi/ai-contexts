@@ -19,16 +19,16 @@
       mockup/           ← requirement 「자료 받기」 수집 (개인 모드)
       spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택)
       code-target.md    ← requirement 「자료 받기」 수집 (코드 대용일 때만). 리뷰 대상 코드 경로
-      cross-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 추론한 평가 기준만 담는다
-      service-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
-      domain-analysis.md ← requirement의 requirement-review (recruitment) 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조
+      cross-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 추론한 평가 기준만 담는다
+      service-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
+      domain-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조
     consumable/
-      todo.md        ← requirement의 recruitment 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관(절 단위 큐). 확정 전 항목은 미분류 절에 쌓인다
-      global.md         ← requirement의 requirement-review (planning·design) 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 본문 양식은 [requirement-review/output-template.md] 참조
-      layout.md         ← requirement의 requirement-review 「종합」 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
+      todo.md        ← requirement-review 채용과제 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관(절 단위 큐). 확정 전 항목은 미분류 절에 쌓인다
+      global.md         ← requirement-review 페이지 리뷰 step 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 담을 내용은 [requirement-review/output-template.md] 참조
+      layout.md         ← requirement-review 페이지 리뷰 「종합」 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). requirement 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
       figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
-      design-system.md  ← recruitment 「디자인 시스템 설계」 산출물 (채용 한정). COMPONENTS 종류 PR이 소비 ([conventions/pr-types/components.md])
+      design-system.md  ← requirement-review 채용과제 분석 step 「디자인 시스템 설계」 산출물 (채용 한정). COMPONENTS 종류 PR이 소비 ([conventions/pr-types/components.md])
   pr{N}/
     persistent/
       decisions.md      ← plan 산출물. 그 뒤로는 verify 「decisions.md 최신화」에서만 갱신

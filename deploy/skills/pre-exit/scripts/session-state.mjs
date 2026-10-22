@@ -1123,8 +1123,10 @@ function jsonlEntries(file) {
   return out;
 }
 
-// 적용한 체크리스트는 모드별 `checklist/`, 페이지 유형별 `page-type/`, 종합 전용 `planning/cross-page.md`에 산다.
+// 적용한 체크리스트는 기획·디자인별 `checklist/`, 페이지 유형별 `page-type/`, 종합 전용 `planning/cross-page.md`에 산다.
 const RR_CHECKLIST = /requirement-review\/((.+\/checklist|page-type)\/[^/]+|planning\/cross-page)\.md$/;
+// 절차 본문은 SKILL.md 밖 step 파일에도 산다 — 편집 감지만 쓴다(적용 판정은 체크리스트로 한다).
+const RR_STEP = /workflow\/requirement-review\/(page-review|recruitment\/step)\.md$/;
 // retrospect.md는 자유 검토 문서의 옛 이름이다 — 이름이 바뀌기 전 회차의 기록도 재료로 읽는다.
 const RR_FREE_REVIEW = /requirement-review\/(free-review|retrospect)\.md$/;
 // page는 `background/consumable/page-{슬러그}.md`로 시작해 `pr{N}/consumable/page.md`로 옮겨진다.
@@ -1189,7 +1191,7 @@ if (command === 'review-material') {
           continue;
         }
         if (block.name !== 'Write' && block.name !== 'Edit') continue;
-        if (RR_CHECKLIST.test(norm) || RR_SKILL.test(norm)) edited.add(sourcePath(norm));
+        if (RR_CHECKLIST.test(norm) || RR_SKILL.test(norm) || RR_STEP.test(norm)) edited.add(sourcePath(norm));
         if (!RR_PAGE.test(norm)) continue;
         const text = block.name === 'Write' ? block.input.content : block.input.new_string;
         // 지우기만 한 편집은 new_string이 비어 무엇이 빠졌는지 안 보인다 — 지운 쪽을 싣는다.

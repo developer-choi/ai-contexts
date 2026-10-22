@@ -47,7 +47,7 @@ figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-co
 
 - 모드의 시각 원본을 **사용 가능한 만큼 전부** 받아 [모드 매트릭스](../conventions/modes.md)의 저장 위치에 둔다
 - 개인 모드에서 화면에 안 담기는 동작을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다
-- 시안·기획서 없이 기존 구현 코드만 있으면 그 코드를 [코드 대용](../requirement-review/SKILL.md#기존-코드-코드-대용)으로 쓸지 묻고, 쓰기로 하면 리뷰 대상 코드 경로를 `retained/code-target.md`로 받는다
+- 시안·기획서 없이 기존 구현 코드만 있으면 그 코드를 [코드 대용](../requirement-review/page-review.md#준비)으로 쓸지 묻고, 쓰기로 하면 리뷰 대상 코드 경로를 `retained/code-target.md`로 받는다
 - 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 수집한다
 
 ### 컨벤션 소스 수집
@@ -71,7 +71,7 @@ figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-co
 
 ### 학습 세션 안내
 
-인수인계 문서를 쓴 직후 아래 안내를 다른 보고에 섞지 않고 따로 낸다.
+인수인계 문서를 쓴 직후 아래 안내를 따로 낸다.
 
 > 학습 인수인계 문서를 만들었습니다: `{인수인계 문서 경로}`
 > 새 세션(창)을 하나 더 띄워 이 문서를 넘기고, 그 세션에서 학습을 진행해 주세요.
@@ -83,7 +83,7 @@ figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-co
 
 ### 스킬 로드
 
-[requirement-review](../requirement-review/SKILL.md)를 호출한다. `recruitment`는 채용 모드면 켜고 그 밖엔 끈다. `planning`·`design`은 각각 켤지 사용자에게 묻는다.
+[requirement-review](../requirement-review/SKILL.md)를 호출한다.
 
 ---
 

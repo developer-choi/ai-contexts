@@ -6,11 +6,11 @@
 
 ## 재료
 
-먼저 `node {{skill_dir}}/scripts/session-state.mjs review-material --session <session_id>`로 재료를 받는다. 기억으로 재구성하지 않는다. 재료 명령이 transcript를 못 찾으면 그 사실을 보고하고 이 보강을 건너뛴다.
+먼저 `node {{skill_dir}}/scripts/session-state.mjs review-material --session <session_id>`로 재료를 받는다.
 
 ## 회고 대상
 
-재료의 「적용한 체크리스트」와 「page·global 이력」이 둘 다 없으면 체크리스트가 없는 실행(recruitment만 켬)으로 보고 건너뛴다. 체크리스트가 0건인데 page 이력이 있으면 체크리스트 없이 쓴 회차이므로 아래 「누락한 절차」로 본다.
+재료의 「적용한 체크리스트」와 「page·global 이력」이 둘 다 없으면 페이지 리뷰에 아직 들어가지 않은 회차로 보고 건너뛴다. 체크리스트가 0건인데 page 이력이 있으면 체크리스트 없이 쓴 회차이므로 아래 「누락한 절차」로 본다.
 
 - 적용한 체크리스트 파일을 다시 열어 항목마다 「page·global 이력」과 1대1로 대조한다
 - 지적이 없었던 항목: 자료가 잘 되어 있어서인지, 그 유형의 문제를 체크리스트가 아예 잡지 못하는 건지 판별한다
@@ -24,7 +24,7 @@
 
 ## 반영 위치
 
-- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다 — 해당 플래그의 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [output-template.md](../../workflow/requirement-review/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·각 플래그의 `guide.md` 중 하나
+- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다 — 해당 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [output-template.md](../../workflow/requirement-review/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·[page-review.md](../../workflow/requirement-review/page-review.md)·[recruitment/step.md](../../workflow/requirement-review/recruitment/step.md) 중 하나
 - **requirement-review 밖을 고칠 발견**(workflow의 자료 받기·게이트·폴더 규약 등)과 **일반화되는 선호**: pre-exit 본 절차 「문제 리스트업 + 규칙화」로 보낸다
 
 ## 출력
