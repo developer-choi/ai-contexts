@@ -65,8 +65,17 @@ const optOf = (name) => {
   return i >= 0 ? rest[i + 1] : undefined;
 };
 
+// md는 「이 시점에 이 하위 명령」까지만 적는다. 무엇을 대상으로 주는지는 여기서 알린다.
+const USAGE = {
+  'time-pressure': '<디렉토리> — 원본 자료를 저장한 폴더 (보통 `plan/background/persistent`)',
+  submission: '<레포 경로> — 제출할 작업 레포 루트',
+  'pr-body': '<본문.md> [--submit-remote <제출 레포 URL>] [--check-urls] — 점검할 PR 본문·README 파일',
+};
+
 if (!command || !target) {
-  console.error('사용: node <이 파일> <time-pressure|submission|pr-body> <대상> [옵션]');
+  const which = USAGE[command] ? [command] : Object.keys(USAGE);
+  console.error('사용: node <이 파일> <하위 명령> <대상> [옵션]');
+  which.forEach((name) => console.error(`  ${name} ${USAGE[name]}`));
   process.exit(1);
 }
 

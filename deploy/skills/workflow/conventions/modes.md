@@ -8,6 +8,7 @@
 |---|---|---|---|---|
 | 채용·실무 | figma | `retained/figma-url.md`·`retained/figma/` | ○ 생성 (UI 컴포넌트 PR) | figma 원본 직접 fetch·대조 |
 | 개인 | 마크업 시안 (형태 무관 — HTML/CSS·`.tsx`+`.scss` 등) | `retained/mockup/` (+선택 `retained/spec.md`) | ✗ 미생성 (figma 없어 「Figma 원본 링크 인덱스」 불성립) | 시안 대조 + 사용자 시각 확인 |
+| 코드 대용 (모드 무관) | 기존 구현 코드 | `retained/code-target.md` | ✗ 미생성 | MARKUP 없음 — 기존 코드가 이미 화면이다 |
 
 ## 세션 절차 (모드별 상세)
 

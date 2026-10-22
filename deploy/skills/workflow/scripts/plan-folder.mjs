@@ -12,6 +12,10 @@
 //     대조했다. consumable은 소비 시 즉시 폐기가 계약이라, 남은 것은 곧 아직 안 소비된 것이거나
 //     소비하고 안 지운 것이다. 둘 다 누가 세지 않으면 드러나지 않는다.
 //
+//   requirement-files — requirement-review의 종합·자유 검토가 서브에이전트에 넘길 경로를 메인이
+//     손으로 모았다. page.md는 PR이 확정되면 `pr{N}/consumable/`로 옮겨 가서, 하나가 빠져도
+//     서브에이전트는 그 페이지가 있는 줄 모른다.
+//
 // 판단은 안 한다 — 남은 것을 지울지(정말 소비됐는지)는 부르는 쪽이 정한다. 단순 읽기는
 // 소비가 아니므로 남아 있는 것이 정상인 경우가 있다.
 //
@@ -19,6 +23,7 @@
 //   node <이 파일> notice              → 안내문 블록을 표준출력으로 (파일 앞에 붙인다)
 //   node <이 파일> notice <파일>        → 그 파일 맨 앞에 붙인다 (이미 있으면 안 건드린다)
 //   node <이 파일> left <plan 루트>     → 남은 consumable 파일과 안내문 누락분
+//   node <이 파일> requirement-files <plan 루트> → background 아래 파일 전부와 PR 폴더로 옮겨진 page.md
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -35,7 +40,7 @@ const MARKER = '이 파일은 큐 모델로 운영됩니다.';
 
 const [command, target] = process.argv.slice(2);
 if (!command) {
-  console.error('사용: node <이 파일> <notice|left> [대상]');
+  console.error('사용: node <이 파일> <notice|left|requirement-files> [대상]');
   process.exit(1);
 }
 
@@ -78,6 +83,32 @@ if (command === 'left') {
   missing.forEach((f) => console.log(`  ${path.relative(target, f).replace(/\\/g, '/')}`));
 
   if (missing.length) process.exit(1);
+  process.exit(0);
+}
+
+if (command === 'requirement-files') {
+  if (!target) {
+    console.error('requirement-files 에는 plan 루트 경로가 필요합니다 (보통 메인 레포의 `plan`, 개인 모드는 `plan/<접두어>`).');
+    process.exit(1);
+  }
+  const bg = path.join(target, 'background');
+  if (!fs.existsSync(bg)) {
+    console.error(`background 폴더가 없습니다: ${bg}`);
+    process.exit(1);
+  }
+  const rel = (f) => path.relative(target, f).replace(/\\/g, '/');
+  const bgFiles = walk(bg).map(rel);
+  const prPages = fs.readdirSync(target)
+    .filter((name) => /^pr\d+$/.test(name))
+    .map((name) => path.join(target, name, 'consumable', 'page.md'))
+    .filter((f) => fs.existsSync(f))
+    .map(rel);
+
+  console.log(`[requirement 산출물·원본] plan 루트: ${target}`);
+  console.log('\n[background]');
+  bgFiles.forEach((f) => console.log(`  ${f}`));
+  console.log(`\n[PR 폴더로 옮겨진 page.md] ${prPages.length}건`);
+  prPages.forEach((f) => console.log(`  ${f}`));
   process.exit(0);
 }
 

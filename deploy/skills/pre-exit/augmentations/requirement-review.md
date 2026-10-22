@@ -10,7 +10,7 @@
 
 ## 회고 대상
 
-재료의 「적용한 체크리스트」와 「page·global 이력」이 둘 다 없으면 체크리스트 슬롯이 없는 모드(recruitment 단독)로 보고 건너뛴다. 체크리스트가 0건인데 page 이력이 있으면 체크리스트 없이 쓴 회차이므로 아래 「누락한 절차」로 본다.
+재료의 「적용한 체크리스트」와 「page·global 이력」이 둘 다 없으면 체크리스트가 없는 실행(recruitment만 켬)으로 보고 건너뛴다. 체크리스트가 0건인데 page 이력이 있으면 체크리스트 없이 쓴 회차이므로 아래 「누락한 절차」로 본다.
 
 - 적용한 체크리스트 파일을 다시 열어 항목마다 「page·global 이력」과 1대1로 대조한다
 - 지적이 없었던 항목: 자료가 잘 되어 있어서인지, 그 유형의 문제를 체크리스트가 아예 잡지 못하는 건지 판별한다
@@ -19,15 +19,14 @@
 
 ## 회고하지 않는 것
 
-- **자유 검토를 다시 돌리지 않는다.** 재료의 「자유 검토 보고」에 있는 발견만 쓴다
+- 자유 검토 발견은 재료의 「자유 검토 보고」에 있는 것만 쓴다
 - **세션이 step 절차를 밟았는지**는 workflow 보강이 본다
-- 재료에 없는 사건은 적지 않는다
 
 ## 반영 위치
 
-- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다 — 해당 모드의 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [planning/output-template.md](../../workflow/requirement-review/planning/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·각 모드의 `guide.md` 중 하나
-- **requirement-review 밖을 고칠 발견**(workflow의 자료 받기·게이트·폴더 규약 등)과 **일반화되는 선호**: 버리지 않고 pre-exit 본 절차 「문제 리스트업 + 규칙화」로 보낸다
+- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다 — 해당 플래그의 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [output-template.md](../../workflow/requirement-review/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·각 플래그의 `guide.md` 중 하나
+- **requirement-review 밖을 고칠 발견**(workflow의 자료 받기·게이트·폴더 규약 등)과 **일반화되는 선호**: pre-exit 본 절차 「문제 리스트업 + 규칙화」로 보낸다
 
 ## 출력
 
-본 보강은 별도 보고 섹션을 만들지 않는다. 제안마다 근거가 된 재료(체크리스트 파일·이력의 시각·자유 검토 발견)를 붙여 pre-exit 「문제 리스트업 + 규칙화」의 문제 목록에 흡수시키고, 그 규칙화 단계에서 위 「반영 위치」에 따라 처리한다. 제안이 0건이면 "requirement-review 체크리스트 개선 제안 없음"으로 보고하고 넘어간다.
+제안마다 근거가 된 재료(체크리스트 파일·이력의 시각·자유 검토 발견)를 붙여 pre-exit 「문제 리스트업 + 규칙화」의 문제 목록에 흡수시키고, 그 규칙화 단계에서 위 「반영 위치」에 따라 처리한다. 제안이 0건이면 "requirement-review 체크리스트 개선 제안 없음"으로 보고하고 넘어간다.

@@ -3,7 +3,7 @@ step: verify
 session: PR_{N}_IMPL
 next:
   - to: markup
-    when: 종류 FOUNDATION
+    when: 종류 FOUNDATION, 코드 대용 아님
 ---
 
 # verify: 최종 점검

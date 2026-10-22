@@ -49,14 +49,18 @@ function artifacts() {
   if (mode === '채용') {
     required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
   }
-  if (mode === '개인') {
+  // 코드 대용이면 시각 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
+  const codeTarget = path.join(bg, 'retained', 'code-target.md');
+  if (exists(codeTarget)) {
+    required.push({ label: '코드 대용 대상', p: codeTarget });
+  } else if (mode === '개인') {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
     required.push({ label: 'figma URL', p: path.join(bg, 'retained', 'figma-url.md') });
     required.push({ label: 'figma 캡처', p: path.join(bg, 'retained', 'figma'), dir: true });
   }
 
-  console.log(`[requirement 「자료 받기」 종료 게이트] 모드: ${mode}`);
+  console.log(`[requirement 「자료 받기」 종료 게이트] 모드: ${mode}${exists(codeTarget) ? ' (코드 대용 — 시각 원본은 세지 않는다)' : ''}`);
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);

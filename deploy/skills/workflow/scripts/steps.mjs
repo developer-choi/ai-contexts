@@ -507,14 +507,19 @@ function recordStage(plan, data, pr, stepName) {
   console.log(`기록: ${prLabel(pr)} → ${to}`);
 }
 
-// PR 종류로 갈리는 조건만 판정한다 — `종류 FOUNDATION`(이 PR의 종류), `FOUNDATION PR 없음`(확정된 PR 중에).
+// 파일로 판정되는 조건만 판정한다 — `종류 FOUNDATION`(이 PR의 종류), `FOUNDATION PR 없음`(확정된 PR 중에),
+// `코드 대용 아님`(background/retained/code-target.md가 없음). 쉼표로 이은 조건은 하나라도 어긋나면 어긋난다.
 // 그 밖의 when은 산문이라 그대로 찍는다.
-function typeWhenFails(edge, data, pr) {
-  const own = edge.when?.match(/^종류 ([A-Z]+)$/);
-  if (own) return Boolean(pr && pr.type !== own[1]);
-  const none = edge.when?.match(/^([A-Z]+) PR 없음$/);
-  if (none) return Boolean(data && data.prs.some((p) => p.type === none[1]));
-  return false;
+function whenFails(edge, data, pr, plan) {
+  if (!edge.when) return false;
+  return edge.when.split(/\s*,\s*/).some((cond) => {
+    const own = cond.match(/^종류 ([A-Z]+)$/);
+    if (own) return Boolean(pr && pr.type !== own[1]);
+    const none = cond.match(/^([A-Z]+) PR 없음$/);
+    if (none) return Boolean(data && data.prs.some((p) => p.type === none[1]));
+    if (cond === '코드 대용 아님') return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
+    return false;
+  });
 }
 
 // 출발 알림 대상: 아직 plan이 안 가져간 PR 중 이 사건과 관련된 것. 관련 기준은 알림을 내는 step마다 다르다.
@@ -539,7 +544,7 @@ function cmdNext(name, opt) {
   const groups = { same: [], spawn: [], go: [] };
   for (const edge of from.next) {
     target(steps, edge, from);
-    if (typeWhenFails(edge, data, pr)) continue;
+    if (whenFails(edge, data, pr, a.plan)) continue;
     groups[kindOf(from, edge, steps)].push(edge);
   }
   console.log(`[${from.step}] 세션 ${from.session}`);
