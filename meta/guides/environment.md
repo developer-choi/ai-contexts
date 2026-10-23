@@ -22,7 +22,7 @@ npm run sync:environment
   - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
   - 내용 변경 없이 이름만 바뀐 파일(git이 `R100`으로 보고하는 것)은 건드린 파일로 치지 않습니다. 재구성처럼 대량 이동하는 커밋에서 경고가 쏟아지고, "함께 정리한다"는 안내가 이동만 담아야 하는 커밋과 부딪히기 때문입니다. 내용도 바뀐 rename은 검사합니다.
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
-  - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
+  - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/dev-active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
   - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 경로를 주지 않았거나 파일이 없을 때만 exit 1입니다.
 - `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다.
   - 스테이징된 프롬프트 md에서 강조 라벨·약한 어휘·군더더기·금지 표현(사용자가 못 알아본 말)·줄바꿈 없이 길게 이어진 줄을 감지해 처방과 함께 경고합니다 — 커밋을 막지는 않습니다.

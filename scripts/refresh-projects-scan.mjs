@@ -362,7 +362,7 @@ function backlogDocs(backlogRoot) {
   const projects = join(backlogRoot, "projects");
   if (!existsSync(projects)) return [];
   return readdirSync(projects)
-    .map((p) => join(projects, p, "active"))
+    .map((p) => join(projects, p, "dev-active"))
     .filter(existsSync)
     .flatMap(listMd)
     .map((file) => ({ rel: relative(backlogRoot, file).replaceAll("\\", "/"), text: readFileSync(file, "utf8") }));

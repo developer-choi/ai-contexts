@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 전역 git pre-commit 훅. 이 커밋이 건드린 프롬프트 md를 통째로 훑어 개수 하드코딩을
-// 감지해 경고한다(차단하지 않는다) — `projects/ai-contexts/active/rules/개수-하드코딩-강제수단.md`
+// 감지해 경고한다(차단하지 않는다) — `projects/ai-contexts/dev-active/rules/개수-하드코딩-강제수단.md`
 // 확정 설계(갈래 B). ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른
 // 모듈을 import하지 않는다.
 //
@@ -27,7 +27,7 @@ const CLAUDE_LIKE = /^(CLAUDE|AGENTS|GEMINI)\.md$/i;
 // 남의 본문을 예시로 인용하는 자리 — 실측 오탐의 큰 덩어리.
 const EXCLUDE = /\/writing-guide\/types\/pr-body\/recruitment\/library\//;
 
-// backlog 레포의 백로그 데이터. `projects/{repo}/active/rules/` 처럼 경로에 `/rules/`가 들어가
+// backlog 레포의 백로그 데이터. `projects/{repo}/dev-active/rules/` 처럼 경로에 `/rules/`가 들어가
 // 프롬프트 문서로 오인되지만, 여기 적히는 개수는 그날 센 측정값(`V2 적중 40줄 / 26개 파일`)이라
 // 일반화하면 기록 자체가 망가진다. 구조적으로 정탐이 나올 수 없는 자리이므로 들어오지 않게 한다.
 // 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사한다.

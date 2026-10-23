@@ -72,7 +72,7 @@ node C:\Users\forwo\WebstormProjects\main\private-playground\local\contexts\recr
 
 4단 갈래 눈금은 이 세션에서 쓴다 — 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 눈금으로만 드러난다).
 
-그 밖에는 회고 세션이 파일을 고치지 않는다. 아래 자리를 target으로 백로그 `projects/private-playground/active/recruitment/`에 항목을 낸다.
+그 밖에는 회고 세션이 파일을 고치지 않는다. 아래 자리를 target으로 백로그 `projects/private-playground/dev-active/recruitment/`에 항목을 낸다.
 
 - 안 떠올 종류 → PP `local/contexts/recruitment/scripts/check-site-scope.mjs`의 `EXCLUDED` (+ 지난 덤프에 돌려 확인)
 - 안 옮길 공고 절 종류 → PP `local/contexts/recruitment/application/flow/step1.md` 「옮기지 않는 것」

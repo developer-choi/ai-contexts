@@ -81,7 +81,7 @@ Phase 3~4까지 완료된 프로젝트의 `hash`와 `refreshedAt`을 **그 회�
 
 ### 대상
 
-`projects/` 전체를 대상으로 한다. **AC 자기수정 트래커 `projects/ai-contexts/active/`도 포함한다**(「백로그 정비」와 다름).
+`projects/` 전체를 대상으로 한다. **AC 자기수정 트래커 `projects/ai-contexts/dev-active/`도 포함한다**(「백로그 정비」와 다름).
 
 ### 대조
 

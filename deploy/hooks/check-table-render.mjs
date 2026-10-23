@@ -8,7 +8,7 @@ import { readPayload } from "./hook-utils.mjs";
 //
 // Claude Code는 표를 박스(┌─┬─┐)로 그리다가 조건을 넘으면 행마다 「열이름: 값」을 늘어놓고 ───로 가르는
 // 세로 목록으로 바꾼다. 표로 정리해 달라는 보고가 표로 안 보여 사용자가 다시 시킨다
-// (backlog projects/ai-contexts/active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md).
+// (backlog projects/ai-contexts/dev-active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md).
 //
 // 판정식 출처: Claude Code 2.1.299 바이너리의 표 컴포넌트가 부르는 레이아웃 함수(minified 이름 `Kr`,
 // 상수 `_e=4, Ne=3, ns=4`). Claude Code가 렌더러를 바꾸면 이 파일의 judgeTable과 상수를 다시 맞춘다.
@@ -21,7 +21,7 @@ import { readPayload } from "./hook-utils.mjs";
 //
 // 훅은 터미널 폭을 못 읽는다(자식 프로세스라 COLUMNS·stdout.columns가 비고 콘솔 핸들도 없다).
 // 그래서 폭은 가정값이다. 이 가정이 실사용에서 맞는지는 걸릴 때마다 남기는 로그로 따로 판정한다
-// (backlog projects/ai-contexts/active/hooks/표-훅-실사용-5건으로-결론.md).
+// (backlog projects/ai-contexts/dev-active/hooks/표-훅-실사용-5건으로-결론.md).
 //
 // 통과시키는 것:
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 한 번만 되돌린다
@@ -235,7 +235,7 @@ function verdict(payload) {
   if (count === REPORT_AT) {
     reason +=
       `\n\n표 훅 실사용 기록이 ${REPORT_AT}건 찼습니다 — 턴을 마칠 때 사용자에게 backlog ` +
-      "`projects/ai-contexts/active/hooks/표-훅-실사용-5건으로-결론.md`를 처리할 때라고 알립니다.";
+      "`projects/ai-contexts/dev-active/hooks/표-훅-실사용-5건으로-결론.md`를 처리할 때라고 알립니다.";
   }
   return reason;
 }

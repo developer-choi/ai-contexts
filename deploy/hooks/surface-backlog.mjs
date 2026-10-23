@@ -5,7 +5,7 @@ import { readPayload, getCwd, getSessionId, addContext } from "./hook-utils.mjs"
 
 // 백로그는 AC가 아니라 별도 private 레포 `backlog`(main/backlog)에 산다.
 // 레포가 클론돼 있지 않은 기기에서는 조용히 no-op 한다.
-// 주의: 이 경로는 레포 루트다(projects 미포함). 아래 rel이 "projects/<p>/active"로 projects를
+// 주의: 이 경로는 레포 루트다(projects 미포함). 아래 rel이 "projects/<p>/dev-active"로 projects를
 // 이미 붙이므로, 여기에 projects를 더하면 projects/projects 이중경로가 돼 표면화가 무력화된다.
 const BACKLOG_ROOT = path.join(
   os.homedir(),
@@ -198,7 +198,7 @@ function skillRealUseBlock(prompt, sessionId) {
   const excluded = new Set(readExclusions("projects"));
   const lines = [];
   for (const p of projects) {
-    const rel = `projects/${p.name}/active`;
+    const rel = `projects/${p.name}/dev-active`;
     const folder = path.join(BACKLOG_ROOT, rel);
     for (const f of listMarkdownFiles(folder)) {
       const item = `${rel}/${f}`;
@@ -223,9 +223,9 @@ function folderBlock(cwd, sessionId) {
   const project = projectFromCwd(cwd);
   if (!project) return "";
 
-  // cwd 프로젝트 → 백로그 폴더. 모든 프로젝트(ai-contexts 포함)가 projects/<project>/active/.
-  // active/ 하위만 표면화한다(inactive/는 배제). 규칙은 backlog 루트 CLAUDE.md 「projects 영역」.
-  const rel = path.join("projects", project, "active");
+  // cwd 프로젝트 → 백로그 폴더. 모든 프로젝트(ai-contexts 포함)가 projects/<project>/dev-active/.
+  // dev-active/ 하위만 표면화한다(dev-inactive/는 배제). 규칙은 backlog 루트 CLAUDE.md 「projects 영역」.
+  const rel = path.join("projects", project, "dev-active");
   const folder = path.join(BACKLOG_ROOT, rel);
   if (!fs.existsSync(folder) || !hasMarkdown(folder)) return "";
 

@@ -2483,7 +2483,7 @@ const responseLanguageCases = async (dir) => {
 };
 
 // 표 렌더 훅은 실제로 세로 목록으로 깨졌던 표와, 같은 세션이 고쳐 다시 내 박스로 그려진 표로 판정을 고정한다
-// (backlog projects/ai-contexts/active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md 「발생 사례」).
+// (backlog projects/ai-contexts/dev-active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md 「발생 사례」).
 // 박스 쪽 둘(boxApproved·boxOptions)은 폭 100에서 칸이 4줄로 문턱 바로 아래다. 로그는 임시 파일로 돌리고,
 // 기록이 5건에 닿는 되돌림에서만 후속 항목 안내가 붙는지 본다.
 const TABLE_HOOK = 'check-table-render.mjs';
