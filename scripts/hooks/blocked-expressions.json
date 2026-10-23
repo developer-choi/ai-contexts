@@ -372,5 +372,41 @@
     "why": "'의존한다' 자리에 '기댄다'를 쓰면 사용자가 매우 싫어하는 표현이다",
     "instead": "의존한다",
     "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "외따로"
+    ],
+    "why": "AI가 즉석에서 만든 압축 표현이라 뜻이 바로 안 잡힌다",
+    "instead": "맥락 없이 단독으로",
+    "exclusions": []
+  },
+  {
+    "type": "substring",
+    "words": [
+      "맨몸 호출"
+    ],
+    "why": "AI가 즉석에서 만든 비유라 무슨 호출인지 바로 안 잡힌다",
+    "instead": "컴포넌트 없이 직접 호출",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "오검"
+    ],
+    "why": "오검출·오검사를 줄인 즉석 약칭이라 뜻이 안 잡힌다",
+    "instead": "잘못 걸림 · 엉뚱한 이유로 실패",
+    "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "증식"
+    ],
+    "why": "개수가 늘어나는 것을 생물 용어로 빗댄 즉석 비유라 바로 안 읽힌다",
+    "instead": "늘어남",
+    "exclusions": []
   }
 ]
