@@ -135,15 +135,6 @@ function main() {
   check(!codex.some((h) => h.file === 'check-code-review-caller.mjs'),
     'codex: Skill 매처 훅 미등록(codex 스킬 도구 이름 미실측)');
 
-  // workflow 팀원 종료를 막는 두 훅. 매처가 어긋나면 등록된 채로 한 번도 안 걸려 팀원이 조용히
-  // 끝난다. 두 도구 다 codex에 없어, 거기 실리면 '*' 매처로 모든 도구 호출에 헛돈다.
-  check(claudePre.some((h) => h.matcher === 'TaskStop' && h.file === 'check-agent-stop-policy.mjs'),
-    'claude: check-agent-stop-policy가 TaskStop 매처로 등록됨');
-  check(claudePre.some((h) => h.matcher === 'SendMessage' && h.file === 'check-team-message-policy.mjs'),
-    'claude: check-team-message-policy가 SendMessage 매처로 등록됨');
-  check(!codex.some((h) => h.file === 'check-agent-stop-policy.mjs' || h.file === 'check-team-message-policy.mjs'),
-    'codex: 에이전트 종료 훅 두 개 미등록');
-
   // 응답 언어 훅은 matcher 없는 Stop으로 걸려야 턴마다 불린다. codex에선 Stop 훅 동작을 실측하지 못해 뺀다.
   const langStop = claude.find((h) => h.file === 'check-response-language.mjs');
   check(langStop?.event === 'Stop' && langStop?.matcher === null,

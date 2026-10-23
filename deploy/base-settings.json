@@ -187,12 +187,6 @@
       "msg": "Checking worktree name slug..."
     },
     {
-      "file": "check-team-message-policy.mjs",
-      "event": "PreToolUse",
-      "on": "message",
-      "msg": "Checking team message policy..."
-    },
-    {
       "file": "check-blind-measure-prompt.mjs",
       "event": "PreToolUse",
       "on": "agent",
@@ -209,12 +203,6 @@
       "event": "PreToolUse",
       "on": "skill",
       "msg": "Checking code-review caller..."
-    },
-    {
-      "file": "check-agent-stop-policy.mjs",
-      "event": "PreToolUse",
-      "on": "taskstop",
-      "msg": "Checking agent stop policy..."
     },
     {
       "file": "check-browser-write-policy.mjs",

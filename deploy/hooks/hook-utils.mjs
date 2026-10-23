@@ -88,18 +88,6 @@ export function prose(src) {
     .replace(/`[^`\n]*`/g, " ");
 }
 
-// workflow가 띄우는 팀원은 이름이 `workflow-`로 시작한다([진행 중](deploy/skills/workflow/SKILL.md#진행-중)).
-// 종료를 막는 두 훅과 멈춤 안내가 이 판정을 함께 쓴다 — 한쪽만 고치면 막는 대상과 안내가 어긋난다.
-// 팀원은 `이름`·`이름@팀`·내부 ID `a이름-해시16자리`로 불린다. TaskStop은 앞의 둘만, SendMessage는
-// 셋 다 받는다(2026-09-30 실측). SendMessage는 ListAgents의 ` [ref]`를 덧붙인 것도 받는다.
-// 도구가 공백·대소문자를 어떻게 맞춰 찾는지는 안 쟀다 — 모르는 쪽은 막는 쪽으로 푼다.
-export function isWorkflowTeammate(target) {
-  if (typeof target !== "string") return false;
-  const name = target.trim().toLowerCase().replace(/\s*\[[^\]]*\]$/, "").split("@")[0];
-  const internal = name.match(/^a(.+)-[0-9a-f]{16}$/);
-  return (internal ? internal[1] : name).startsWith("workflow-");
-}
-
 // 커밋이 남에게 보이는 자리(보호 브랜치 머지·PR 생성) 직전에, 들어갈 커밋을 주제별로 정리했다는 한 줄을
 // description에 요구한다. 두 훅이 같은 줄·같은 기준을 써야 한쪽에서 통과한 설명이 다른 쪽에서 안 막힌다.
 // 정리가 됐는지는 훅이 판정하지 못한다 — 막는 것은 커밋 목록을 안 보고 내는 것까지라, 돌려보낼 때 목록을 보여 준다.
