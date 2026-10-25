@@ -66,7 +66,6 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--extr
 |---|---|
 | React/Next.js 컴포넌트, 데이터 페칭, 번들 최적화, 성능 | `vercel-react-best-practices` |
 | 합성 패턴 리팩토링 (boolean prop 다수, compound, render props, context) | `vercel-composition-patterns` |
-| UI 마크업, 접근성, UX | `web-design-guidelines` |
 
 메인은 고른 스킬의 본문을 읽지 않는다. 그 스킬을 맡은 리뷰어(advanced 모드면 External-Skill Reviewer, default 모드면 단일 리뷰어)에게 스킬 이름과, 형제 경로 `../<name>/SKILL.md`를 이 스킬 위치 기준 절대경로로 풀어 넘긴다. 리뷰어는 Skill tool로 그 스킬을 직접 로드하고, Skill tool이 없으면 넘겨받은 경로를 Read한다. 리뷰어는 로드한 스킬 이름을 보고 맨 앞 기준 문서 목록에 적고, 로드하지 못한 스킬은 이름 옆에 「로드 못 함」과 사유를 적는다.
 
