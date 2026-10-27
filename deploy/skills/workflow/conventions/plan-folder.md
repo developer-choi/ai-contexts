@@ -23,7 +23,7 @@
       cross-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
       domain-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조
-      figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). MARKUP과, `markup.md`를 쓰는 각 PR realize-plan이 함께 읽는다. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
+      figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). MARKUP이 읽는다. IMPL 중 디자인이 바뀌어 MARKUP에서 재검증할 때도 쓴다. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
     consumable/
       todo.md        ← requirement-review 채용과제 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관(절 단위 큐). 확정 전 항목은 미분류 절에 쌓인다
       global.md         ← requirement-review 페이지 리뷰 step 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 담을 내용은 [requirement-review/output-template.md] 참조
@@ -37,7 +37,6 @@
       overview.md       ← plan 산출물
     retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기
       implementation.md ← realize-plan 산출물. 이후 갱신 없음 — 마지막 소비는 verify 「Gap Analysis」. 소비처는 [conventions/artifact/implementation-spec.md] 참조
-      markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외). 담는 내용은 [conventions/artifact/markup-spec.md] 참조. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 대조 자체는 MARKUP 담당)
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
       user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자가 확인하도록 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비

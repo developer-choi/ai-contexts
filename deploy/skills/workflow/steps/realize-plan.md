@@ -27,7 +27,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 - **산출물**:
   - 코드 변경 + 커밋 — stub 커밋(무거운 PR) 또는 그 자리 실행·커밋(가벼운 PR)
   - `pr{N}/persistent/`: reference.md 누적
-  - `pr{N}/retained/`: implementation.md, markup.md (UI 컴포넌트 PR만, 개인 모드 제외)
+  - `pr{N}/retained/`: implementation.md
 - **작업 위치**: PR_{N} 워크트리 — 아래 [사전 준비](#사전-준비-브랜치워크트리-생성)에서 만든다(`<레포>/.claude/worktrees/pr{N}`). `/plan/` 산출물은 main repo 절대경로로 참조한다
 
 ---
@@ -56,8 +56,8 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 **페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.**
 가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [마크업 예외 (재정의)](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)).
-realize-plan은 figma를 `markup.md`(사용자 figma 시각 대조용) 작성 + 본 PR의 로직·조립 구조 참조에만 쓴다 — figma가 없는 모드는 `markup.md` 없이 로직·조립 구조 참조만 한다([modes.md](../conventions/modes.md) 매트릭스).
-PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 MARKUP이 `background/retained/figma/`에 누적한다.
+realize-plan은 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)을 본 PR의 로직·조립 구조 참조에만 쓴다.
+PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱)대로 `background/retained/figma/`에 누적한다.
 
 ---
 
@@ -109,7 +109,6 @@ overview.md 또는 PR 분할에서 파악된 파일 목록을 기준으로, 해�
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [정의·범위](../conventions/artifact/stub.md#정의범위)) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
-| `markup.md` | `pr{N}/retained/` | [markup-spec 책임·위치](../conventions/artifact/markup-spec.md#책임위치)의 담는 내용 | UI 컴포넌트가 있는 PR이면 필수. [verify 「Figma 시각 대조」](verify.md#step-641-figma-시각-대조--사용자-승인-ui-컴포넌트-pr-한정) 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. 개인 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
 | `implementation.md` | `pr{N}/retained/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
@@ -118,7 +117,7 @@ interface와 test-cases는 별도 md를 만들지 않는다. interface narrative
 
 ## 4. stub 파일 작성 룰
 
-stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact/stub.md), `markup.md` 「Figma 원본 링크 인덱스」 절 양식·검증 기준은 [conventions/artifact/markup-spec.md](../conventions/artifact/markup-spec.md)가 단일 출처다.
+stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact/stub.md)가 단일 출처다.
 
 ---
 

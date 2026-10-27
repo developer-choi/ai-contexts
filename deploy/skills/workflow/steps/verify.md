@@ -19,7 +19,7 @@ next:
   - `pr{N}/retained/implementation.md`(Gap Analysis 계획)
   - `pr{N}/persistent/reference.md`·`decisions.md`
   - `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(금지 주석·고아 disable 검사)
-  - `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
+  - 디자인 원본 — [modes.md](../conventions/modes.md) 매트릭스의 저장 위치(UI 컴포넌트 PR)
 - **산출물**
   - `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만)
   - `pr{N}/persistent/decisions.md` 갱신
@@ -169,9 +169,9 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 ### Step 6.4.1. Figma 시각 대조 + 사용자 승인 (UI 컴포넌트 PR 한정)
 
-UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더 결과를 **사용자가 직접 시각 대조**한다.
+UI 컴포넌트 PR이면, Lead가 dev 서버 URL과 이 PR 화면에 해당하는 디자인 원본을 건네고, 사용자가 렌더 결과를 **직접 시각 대조**한다.
 
-- 검증 기준: [검증 기준 — figma 원본(없으면 캡처) 대조](../conventions/artifact/markup-spec.md#검증-기준--figma-원본없으면-캡처-대조) 적용 (수행 주체만 사람으로 바뀜).
+- 검증 기준: [검증 기준 — figma 원본(없으면 캡처) 대조](../conventions/modes.md#검증-기준--figma-원본없으면-캡처-대조) 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
 - 사용자 승인으로 끝나는 단계이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
 - **개인 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려는 같다.

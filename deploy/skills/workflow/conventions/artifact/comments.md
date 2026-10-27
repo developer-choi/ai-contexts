@@ -45,7 +45,7 @@
 마커에는 출처를 붙인다. 시점 단독 표현 금지.
 
 - ❌ `// TODO [AI_IMPL]: IMPL 시점 토큰`
-- ✓ `// TODO [AI_IMPL]: 설명 — plan/{prN}/markup.md "{절명}"` 또는 `docs/...:{line}` 또는 `_fsd/.../{file}:{line}`
+- ✓ `// TODO [AI_IMPL]: 설명 — docs/...:{line}` 또는 `_fsd/.../{file}:{line}`
 
 ### 출처 인용은 영속 파일만
 

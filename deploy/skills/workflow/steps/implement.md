@@ -26,7 +26,6 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
   - realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`)
   - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
   - MARKUP 페이지 코드(페이지 코드 포함 PR)
-  - `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
 - 구현 중 생긴 결정·plan 정정은 implementation.md·decisions.md에 적지 않는다 — decisions.md 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
@@ -101,7 +100,6 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 - **디자인 변경** — 디자인 원본이 바뀐 것이다.
   - 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령한다. figma를 쓰는 모드면 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱) 절차로 받는다
   - 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다
-  - `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다
 - **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다. AI 단독으로 stub·it.todo를 뒤집지 않는다. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
 
 ---
