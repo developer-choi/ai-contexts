@@ -442,7 +442,7 @@
       "시끄럽게"
     ],
     "why": "출력이 많다는 뜻을 비유로 돌려 말해 무엇이 많은지 짐작해야 한다(사용자 지정)",
-    "instead": "출력이 많은·출력이 긴",
+    "instead": "(임시, 확정 아님) 출력이 많은·출력이 긴 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「시끄러운」 항목)도 그 말로 고친다",
     "exclusions": []
   }
 ]
