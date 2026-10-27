@@ -13,7 +13,6 @@
 
 - `pr{N}/`이나 `background/` 바로 아래에 폴더 분류 없이 놓인 산출물이 있으면, 분류하거나 왜 분류하지 않았는지 적게 한다.
 - 기본은 `consumable/`이다. 여러 step이 쓰고 그 컨텍스트(BG 또는 PR)가 끝나면 버려도 되면 `retained/`, 끝나도 가치가 있으면(회사 맥락에 의존한 결정 등) `persistent/`다.
-  위로 올린 산출물은 그 이유가 그 산출물을 정의한 곳(plan-folder 「폴더 트리」의 항목 주석이나 그 산출물 문서)에 적혀 있는지 본다.
 - `consumable/`인데 여러 step이 나눠 쓰기 어려우면 `retained/`로, `persistent/`인데 그 컨텍스트(BG 또는 PR) 안에서만 쓰이면 `retained/`로 옮기게 한다.
 
 ## realize-plan과 implement의 코드 경계
