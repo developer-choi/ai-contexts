@@ -171,7 +171,7 @@
         "deploy/skills/workflow/scripts/steps.mjs",
         "deploy/skills/pre-exit/augmentations/workflow.md"
       ],
-      "note": "회고 보강 「담당 step 절차 실행 감사」가 `steps.mjs chain <세션>`의 출력 라벨 「이 세션의 step」을 글자 그대로 인용해 진입 step 범위를 읽는다. 세션 이름을 못 얻을 때의 대안은 `workflow/steps/` 경로다. 단방향 cross-ref라 steps.mjs 쪽에는 이 인용을 알릴 자리가 없다. 그래서 chain 출력의 라벨·서브커맨드 이름·세션 이름 체계나 steps 폴더 위치를 바꾸면 보강 문구도 함께 고친다. 안 고치면 회고가 없는 라벨을 찾다가 step 범위를 기억으로 채우고, 그 누락은 감사 결과가 비어 보이는 것으로만 드러난다."
+      "note": "회고 보강 「담당 step 절차 실행 점검」이 `steps.mjs chain <세션>`의 출력 라벨 「이 세션의 step」을 글자 그대로 인용해 진입 step 범위를 읽는다. 세션 이름을 못 얻을 때의 대안은 `workflow/steps/` 경로다. 단방향 cross-ref라 steps.mjs 쪽에는 이 인용을 알릴 자리가 없다. 그래서 chain 출력의 라벨·서브커맨드 이름·세션 이름 체계나 steps 폴더 위치를 바꾸면 보강 문구도 함께 고친다. 안 고치면 회고가 없는 라벨을 찾다가 step 범위를 기억으로 채우고, 그 누락은 점검 결과가 비어 보이는 것으로만 드러난다."
     },
     {
       "name": "workflow 세션 인자 규칙 — steps.mjs resolveArgs ↔ 호출 설명·BG 인자 확정",
