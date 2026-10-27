@@ -444,5 +444,14 @@
     "why": "출력이 많다는 뜻을 비유로 돌려 말해 무엇이 많은지 짐작해야 한다(사용자 지정)",
     "instead": "(임시, 확정 아님) 출력이 많은·출력이 긴 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「시끄러운」 항목)도 그 말로 고친다",
     "exclusions": []
+  },
+  {
+    "type": "prefix",
+    "words": [
+      "곁가지"
+    ],
+    "why": "무엇에서 갈라져 나온 무슨 일인지 돌려 말해 읽는 쪽이 짐작해야 한다(사용자 지정)",
+    "instead": "(임시, 확정 아님) 주 목적에서 벗어난 작업 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「곁가지」 항목)도 그 말로 고친다",
+    "exclusions": []
   }
 ]
