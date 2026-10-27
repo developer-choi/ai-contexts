@@ -18,7 +18,7 @@ next:
   - implement가 쌓은 커밋(stub + IMPL + 리뷰 수정)
   - `pr{N}/retained/implementation.md`(Gap Analysis 계획)
   - `pr{N}/persistent/reference.md`·`decisions.md`
-  - `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(주석 게이트)
+  - `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(금지 주석·고아 disable 검사)
   - `pr{N}/retained/markup.md`(UI 컴포넌트 PR)
 - **산출물**
   - `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만)
@@ -61,7 +61,7 @@ next:
 
 ---
 
-## Step 6.1.5. 주석 게이트 (안전망 + 백스톱)
+## Step 6.1.5. 금지 주석·고아 disable 검사 (안전망 + 백스톱)
 
 > **step-6.2 진입 전 검사.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
 
@@ -167,14 +167,14 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 사용자 코드 리뷰(6.3) 통과 후, [동작 테스트](#step-622-동작-테스트)가 남긴 `user-test-cases.md`에서 아직 통과하지 않은 항목을 사용자에게 넘긴다. 파일 경로 + 테스트 진입 방법(dev 서버 URL 등) + 항목별 사유를 보고한다.
 
-### Step 6.4.1. Figma 시각 대조 + 승인 게이트 (UI 컴포넌트 PR 한정)
+### Step 6.4.1. Figma 시각 대조 + 사용자 승인 (UI 컴포넌트 PR 한정)
 
 UI 컴포넌트 PR이면, 사용자가 dev 서버 URL로 화면을 띄워 렌더 결과를 **사용자가 직접 시각 대조**한다.
 
 - 검증 기준: [검증 기준 — figma 원본(없으면 캡처) 대조](../conventions/artifact/markup-spec.md#검증-기준--figma-원본없으면-캡처-대조) 적용 (수행 주체만 사람으로 바뀜).
 - 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
 - 사용자 승인으로 끝나는 단계이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
-- **개인 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려는 같다.
+- **개인 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려는 같다.
 
 ---
 
@@ -209,7 +209,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
    - 대화 기록은 Lead가 읽지 않고 일회성 서브에이전트에 맡긴다 — 기록이 수 MB이고 Lead에는 결정만 있으면 된다.
    - Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
    - 기록 경로와 decisions-lifecycle.md 경로를 넘기고 세 가지로 나눠 돌려받는다. 받은 원문으로 쓰고 기록을 다시 열지 않는다
-     - 포함 기준에 드는 결정(결정마다 갈래, LLM 초안, 차수별 사용자 발화, 차수별 LLM 보고, 최종 채택안을 원문으로. 단발 발화에서 나온 것은 표시)
+     - 포함 기준에 드는 결정(결정마다 양식 종류, LLM 초안, 차수별 사용자 발화, 차수별 LLM 보고, 최종 채택안을 원문으로. 단발 발화에서 나온 것은 표시)
      - 포함 여부가 애매한 후보(Lead가 사용자에게 묻는다)
      - PR 분할·범위 변경 발화(TODO로 보낸다)
 2. 후임자 시각 예상 질문 — 코드를 본 후임자(히스토리 모름)가 "여기 왜 이렇게 했어요?"라고 물을 만한 질문을 PR diff + decisions.md로 뽑아 사용자에게 던진다. PR 머지 후 `/discussion` 대비
@@ -228,7 +228,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 사용자에게 다음을 요약하여 보고:
 
 - Gap Analysis 결과 (계획 ↔ 실제 차이 — 누락·추가가 있는 경우)
-- 미배정 blanket eslint-disable 고아 목록 (6.1.5 주석 게이트 — 고아가 있는 경우만)
+- 미배정 blanket eslint-disable 고아 목록 (6.1.5 금지 주석·고아 disable 검사 — 고아가 있는 경우만)
 - code-review 결과: 발견된 Critical/Minor 이슈 요약
 - 동작 테스트 결과 (AI가 돌린 시나리오 — 실패 시 수정 사항 포함)
 - 사용자 리뷰 통과 여부

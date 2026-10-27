@@ -1,16 +1,16 @@
 # MARKUP — 개인 모드
 
-figma 대신 **사용자가 워크플로우 전에 만든 마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 디자인 진실 원천인 모드([requirement 「자료 받기」](../requirement.md#자료-받기)에서 `retained/mockup/`에 수집). figma 자리를 시안이 대체한다. 본 파일은 개인 모드 고유 부분만 담는다.
+figma 대신 **사용자가 워크플로우 전에 만든 마크업 시안**(형태 무관 — HTML/CSS·`.tsx`+`.scss` 등)이 디자인 원본인 모드([requirement 「자료 받기」](../requirement.md#자료-받기)에서 `retained/mockup/`에 수집). figma 자리를 시안이 대체한다. 본 파일은 개인 모드 고유 부분만 담는다.
 
-커버리지 원천·공통 컴포넌트 판정(공통 절차의 「공통 컴포넌트 확정」)의 직독 대상은 **마크업 시안 전 페이지**다 — todo.md·page.md를 되읽지 않는다.
+커버리지 출처·공통 컴포넌트 판정(공통 절차의 「공통 컴포넌트 확정」)의 직독 대상은 **마크업 시안 전 페이지**다 — todo.md·page.md를 되읽지 않는다.
 
 ## 재료
 
 - 마크업 시안(`retained/mockup/`, +선택 `retained/spec.md`) + 디자인시스템 소스(MP `packages/design-system`). figma 없음
 
-## 진실검사 A — 시안 대조 + 사용자 시각 승인
+## 정답 대조 A — 시안 대조 + 사용자 시각 승인
 
-구현 결과를 **마크업 시안과 대조**하고, Lead가 렌더 결과를 사용자에게 보여줘 최종 승인받는다(사람 오라클). 자동 Reviewer↔구현자 루프는 시안 대조를, 규칙검사 B는 code-review를 0건까지 수렴시키고, **디자인 충실도의 종료 조건은 사용자 승인**이다.
+구현 결과를 **마크업 시안과 대조**하고, Lead가 렌더 결과를 사용자에게 보여줘 최종 승인받는다(사람이 판정). 자동 Reviewer↔구현자 루프는 시안 대조를, 규칙검사 B는 code-review를 0건까지 수렴시키고, **시안 대조는 사용자 승인으로 끝난다**.
 
 엄격한 픽셀 대조가 아니다.
 
@@ -20,7 +20,9 @@ figma 대신 **사용자가 워크플로우 전에 만든 마크업 시안**(형
 
 ### 디자인시스템 스타일 수치 — simplified radix 직접 대조
 
-MP `packages/design-system` 컴포넌트를 신설하거나 스타일 수치를 정할 때, 로컬 simplified 레포 `~/WebstormProjects/simplify/simplified-radix-ui-themes/packages/radix-ui-themes/src/components/*.css`에서 해당 컴포넌트의 패딩·높이·radius·font-weight·gap을 직접 읽고 매핑한다. GitHub 원본이 아니라 simplified 레포가 기준이다.
+MP `packages/design-system` 컴포넌트를 신설하거나 스타일 수치를 정할 때,
+로컬 simplified 레포 `~/WebstormProjects/simplify/simplified-radix-ui-themes/packages/radix-ui-themes/src/components/*.css`에서 해당 컴포넌트의 패딩·높이·radius·font-weight·gap을 직접 읽고 매핑한다.
+GitHub 원본이 아니라 simplified 레포가 기준이다.
 
 - 토큰 스케일 밖 중간값이 필요한 자리에서 가장 가까운 토큰 조합으로 근사하지 않는다 — `calc()`나 로컬 커스텀 프로퍼티로 radix 수치를 그대로 재현한다.
 - 산출물에는 대조한 radix css의 수치 인용 흔적을 남긴다.

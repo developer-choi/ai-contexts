@@ -1,6 +1,6 @@
 # 코드 주석 컨벤션
 
-워크플로우에서 stub·구현 코드의 주석 양식·라이프사이클·종료 게이트 단일 출처.
+워크플로우에서 stub·구현 코드의 주석 양식·라이프사이클·TODO 잔존 검사 단일 출처.
 
 ## 적용 대상
 
@@ -52,7 +52,7 @@
 - ✓ `docs/conventions/*`, `docs/ARCHITECTURE.md`, `_fsd/.../*`, `plan/{prN}/persistent/*`
 - ❌ `plan/{prN}/consumable/*`, `plan/{prN}/retained/*`, 분배 후 삭제될 1차 입력 (사용자 작성 `page.md`, BG AI 산출물)
 
-## PR 이연 마커 — 코드 안 금지
+## 다른 PR로 미루는 마커 — 코드 안 금지
 
 본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
 
@@ -65,7 +65,8 @@
 
 ## file-level(blanket) eslint-disable 라이프사이클
 
-파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 미리팩토링 코드를 격리할 때), 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR 몫 TODO 등록처](../pr-split.md#pr-몫-todo-등록처)).
+파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 리팩토링 전 코드를 격리할 때),
+격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR 몫 TODO 등록처](../pr-split.md#pr-몫-todo-등록처)).
 
 - 격리 마커에 **`미리팩토링 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
 
@@ -79,7 +80,7 @@
 - **기존 stub 파일 갱신 시 재추가 금지** — 사용자가 정리한 TODO 주석 보존
 - `system-reminder` "modified, intentional, don't revert" 안내된 파일은 재추가 절대 금지
 
-### IMPL 시작 게이트 (구현 진입 시)
+### 구현 전 미검토 TODO 검사
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로> --marker USER_REVIEW`.
 
@@ -87,7 +88,7 @@
 
 - `TODO [AI_IMPL]`은 코드로 채우며 같은 커밋에서 즉시 삭제한다. 별도 정리 커밋 X
 
-### 종료 게이트 (구현 마무리)
+### 구현 종료 TODO 잔존 검사
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로>`. 형태를 가리지 않고 0건이어야 하며, 잔존 시 종료 불가. 결과를 보고에 싣는다.
 

@@ -22,7 +22,11 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 ## 입력·산출물·작업 위치
 
-- **입력**: realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`) + `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md` + MARKUP 페이지 코드(페이지 코드 포함 PR) + `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
+- **입력**:
+  - realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`)
+  - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
+  - MARKUP 페이지 코드(페이지 코드 포함 PR)
+  - `pr{N}/retained/markup.md`(디자인 변경 시 갱신 대상)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
 - 구현 중 생긴 결정·plan 정정은 implementation.md·decisions.md에 적지 않는다 — decisions.md 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
@@ -39,7 +43,9 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
 
 세션이 워크트리 밖에서 시작했으면 `EnterWorktree`에 그 워크트리 경로를 줘 들어간다.
 
-realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다. 5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다. 5.2.0 IMPL 시작 게이트와 5.4 마무리의 게이트도 그대로 돈 뒤 [verify](verify.md)로 간다.
+realize-plan에서 구현이 끝났으면 팀 spawn·구현(5.1, 5.2.1, 5.2.3)은 할 것이 없다고 판단하고 넘긴다.
+5.3 리뷰 파이프라인은 건너뛰지 않는다 — realize-plan이 만든 커밋 범위(이 PR 브랜치의 base 이후 커밋)를 대상으로 Lead가 그대로 돌린다.
+5.2.0 구현 전 미검토 TODO 검사와 5.4 마무리의 점검도 그대로 돈 뒤 [verify](verify.md)로 간다.
 
 ---
 
@@ -64,15 +70,15 @@ Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라
 |----------|--------------------------|
 | Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰·테스트 범위 룰 |
 
-**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR도 설치·설정·위반 수정을 Feature Implementer에게 맡기되, 주입 재료·진실검사 A·증분 단위는 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)을 따른다.
+**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR도 설치·설정·위반 수정을 Feature Implementer에게 맡기되, 주입 재료·정답 대조 A·커밋 단위는 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)을 따른다.
 
 ---
 
 ## Step 5.2. 구현 중 공통 룰
 
-### Step 5.2.0. IMPL 시작 게이트 — TODO 잔존 검사
+### Step 5.2.0. 구현 전 미검토 TODO 검사
 
-implement 진입 직후 본 PR 영역에서 [IMPL 시작 게이트](../conventions/artifact/comments.md#impl-시작-게이트-구현-진입-시)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가. `pr{N}/persistent/overview.md`의 `## TODO`도 읽는다 — plan 뒤에 다른 PR이 이 PR 몫으로 넣은 항목이 거기 있다.
+implement 진입 직후 본 PR 영역에서 [구현 전 미검토 TODO 검사](../conventions/artifact/comments.md#구현-전-미검토-todo-검사)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가. `pr{N}/persistent/overview.md`의 `## TODO`도 읽는다 — plan 뒤에 다른 PR이 이 PR 몫으로 넣은 항목이 거기 있다.
 
 ### Step 5.2.1. TODO 주석 처리
 
@@ -92,22 +98,28 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 
 IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용자 통보 또는 figma·요구사항 원본 갱신), 캐시된 산출물(stub·it.todo, 마크업의 figma 자료)을 그대로 두고 진행하지 않는다.
 
-- **디자인 변경** — 마크업의 진실 원천이 바뀐 것이다. 그 모드의 시각 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령하고 — figma를 쓰는 모드면 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱) 절차로 — 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다. `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다.
+- **디자인 변경** — 디자인 원본이 바뀐 것이다.
+  - 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스) 변경분을 재수령한다. figma를 쓰는 모드면 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱) 절차로 받는다
+  - 해당 컴포넌트를 MARKUP에서 재검증한 뒤 본 PR로 다시 가져온다
+  - `markup.md`를 쓰는 모드는 본 PR의 `markup.md`(사용자 시각 대조용)도 새 원본으로 갱신한다
 - **기획 변경** — 계획(요구사항·명세)이 바뀐 것이다. 즉시 사용자에게 보고하고 변경 범위를 함께 확정한다. AI 단독으로 stub·it.todo를 뒤집지 않는다. 범위가 it.todo·외부 공개 시그니처·PR 경계에 미치면 해당 단계 재진입이 필요할 수 있다.
 
 ---
 
 ## Step 5.3. 리뷰 파이프라인
 
-구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md) 엔진을 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조). 두 축의 순서·병렬은 엔진이 A 메커니즘으로 정하므로 호출자가 지시하지 않는다.
+구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조). 축 A·B의 순서·병렬은 impl-review-loop가 A 메커니즘으로 정하므로 호출자가 지시하지 않는다.
 
-> **엔진 호출 전 우회 게이트.** 엔진을 건너뛰기 전에 [impl-review-loop의 우회](../impl-review-loop/SKILL.md#우회-호출자의-사전-점검--입력-아님) 절의 두 조건을 **기계 판정**한다. 두 조건의 판정 근거(어느 진실원천 아티팩트가 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다. 둘 다 참이면 엔진 대신 [code-review](../../code-review/SKILL.md)를 advanced 모드로 호출한다. 하나라도 거짓이면 엔진을 호출한다. 판정 없이 또는 주관 판단("간단해 보임")으로 엔진을 건너뛰지 않는다.
+> **impl-review-loop 호출 전 우회 점검.**
+> - impl-review-loop를 건너뛰기 전에 [impl-review-loop의 우회](../impl-review-loop/SKILL.md#우회-호출자의-사전-점검--입력-아님) 절의 두 조건을 **기계 판정**한다. 판정 근거(어느 정답 파일이 선언/부재인지, 어느 자동 검사 도구 스코프로 변경 파일 전부가 매칭되는지)를 명시한다.
+> - 둘 다 참이면 impl-review-loop 대신 [code-review](../../code-review/SKILL.md)를 advanced 모드로 호출한다. 하나라도 거짓이면 impl-review-loop를 호출한다.
+> - 판정 없이 또는 주관 판단("간단해 보임")으로 impl-review-loop를 건너뛰지 않는다.
 
 **계획 밖 테스트 제안** — 구현자의 제안(리뷰 이슈로 온 것 포함)이 오면 Lead는 제안마다 일회성 서브에이전트를 띄워 MP `docs/patterns/testing/WhatToTest.md` 판정 4문항을 대게 하고, 판정 · 걸린 문항 · 근거만 돌려받는다. 넣기로 한 것만 구현자에게 다시 맡긴다.
 
-| 구현자 | 진실검사 A (메커니즘) | 규칙검사 B | 증분 단위 |
+| 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 커밋 단위 |
 |---|---|---|---|
-| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 실행 결과로 판정. 종료 커버리지는 [`it.todo` 매칭 게이트](../conventions/artifact/implementation-spec.md#ittodo-매칭-게이트) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
+| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 실행 결과로 판정. 종료 커버리지는 [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 
@@ -118,11 +130,11 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 ## Step 5.4. 마무리
 
 - [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo) 적용
-- **TODO 잔존 점검** — [종료 게이트](../conventions/artifact/comments.md#종료-게이트-구현-마무리) 실행. 인라인 마커·상단 출처 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
+- **TODO 잔존 점검** — [구현 종료 TODO 잔존 검사](../conventions/artifact/comments.md#구현-종료-todo-잔존-검사) 실행. 인라인 마커·상단 출처 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
-  - **작성한 `it` 수 / stub의 `it.todo` 수** — `it.todo`를 바꾸지 않고 지워도 게이트는 통과하므로 두 수를 나란히 보인다. Lead가 들인 계획 밖 테스트가 있으면 수와 무관하게 그 목록(파일 · `it` 이름 · 판정 문항)을 함께 낸다
+  - **작성한 `it` 수 / stub의 `it.todo` 수** — `it.todo`를 바꾸지 않고 지워도 잔존 점검은 통과하므로 두 수를 나란히 보인다. Lead가 들인 계획 밖 테스트가 있으면 수와 무관하게 그 목록(파일 · `it` 이름 · 판정 문항)을 함께 낸다
   - 수정 사항 (있는 경우)
 - 사용자가 verify에서 코드 리뷰 수행
 

@@ -12,7 +12,7 @@ argument-hint: (인자 없음 — 전 PR 커밋 정리·머지 준비가 끝난 
 
 `/plan/`에서 과제 요구사항을, `/write-doc pr-body recruitment`로 쓴 각 PR 본문 패키지와 함께 찾아 참조한다.
 
-아래 어느 절에서든 **PR 본문의 진실 원천은 GitHub 게시본이다** — 로컬 패키지는 게시 시점 이전 판일 수 있다.
+아래 어느 절에서든 **PR 본문의 정본은 GitHub 게시본이다** — 로컬 패키지는 게시 시점 이전 판일 수 있다.
 
 PR 분할 안내·최종 제출 QA체크리스트·어필·회고 양식은 완성본 라이브러리의 `meta-submission` 주제에 재사용 자산으로 모은다 — 있으면 [recruitment/library/](../../../contexts/writing-guide/types/pr-body/recruitment/library/)에서 글롭해 복사 기점으로 삼는다.
 

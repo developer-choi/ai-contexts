@@ -27,7 +27,7 @@ next:
 자료를 받아 저장하는 데까지만 한다. 가진 것 중 가장 완성도 높은 원본을 여기서 받는다.
 
 1. 채용 모드면 공고·메일·과제요구사항을 [입력 자료](../requirement-review/recruitment/step.md#입력-자료)·[입력 자료 저장 시 제외 항목](../requirement-review/recruitment/step.md#입력-자료-저장-시-제외-항목)대로 `/plan/background/persistent/`에 저장한다.
-2. 모드의 시각 원본을 사용 가능한 만큼 전부 받아 [모드 매트릭스](../conventions/modes.md)의 저장 위치에 둔다.
+2. 모드의 디자인 원본을 사용 가능한 만큼 전부 받아 [모드 매트릭스](../conventions/modes.md)의 저장 위치에 둔다.
    - 개인 모드에서 화면에 안 담기는 동작을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다
    - 시안·기획서 없이 기존 구현 코드만 있으면 그 코드를 [코드 대용](../requirement-review/page-review.md#준비)으로 쓸지 묻고, 쓰기로 하면 리뷰 대상 코드 경로를 `retained/code-target.md`로 받는다
    - 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 받는다. 디자인시스템 원본 레포 경로는 `retained/tech-constraints.md`에 적는다

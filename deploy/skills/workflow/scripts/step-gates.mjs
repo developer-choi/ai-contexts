@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-// step 게이트 넷 — 산출물 존재, 리뷰 엔진 우회 조건, `it.todo` 커버리지, 테스트 이름 대조 이후 변경.
+// step 점검들 — 산출물 존재, impl-review-loop 우회 조건, `it.todo` 커버리지, 테스트 이름 대조 이후 변경.
 //
 // 넷 다 산문이 "센다"·"확인한다"·"기계 판정"·"돌 때마다"라 적어놓고 세는 주체가 사람이었다.
-// 게이트를 아예 안 돈 세션과 돌아서 0건인 세션은 산출물상 구분되지 않는다.
+// 점검을 아예 안 돈 세션과 돌아서 0건인 세션은 산출물상 구분되지 않는다.
 //
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
@@ -27,10 +27,10 @@ const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
-// ── artifacts: requirement 「자료 받기」 종료 게이트 ──────────────────────────────────────────
-// 「원본 저장 + 시각 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
+// ── artifacts: requirement 「자료 받기」 산출물 존재 검사 ──────────────────────────────────────────
+// 「원본 저장 + 디자인 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
 // 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement의 요구사항 리뷰는 그대로 굴러가고, MARKUP이
-// 시각 원본·인덱스를 못 찾는 시점에야 드러난다 — 그 시차가 이 게이트를 코드로 내리는 이유다.
+// 디자인 원본·인덱스를 못 찾는 시점에야 드러난다 — 그 시차가 이 검사를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
   const mode = optOf('mode');
@@ -49,7 +49,7 @@ function artifacts() {
   if (mode === '채용') {
     required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
   }
-  // 코드 대용이면 시각 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
+  // 코드 대용이면 디자인 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
   const codeTarget = path.join(bg, 'retained', 'code-target.md');
   let figmaUrl;
   if (exists(codeTarget)) {
@@ -57,12 +57,12 @@ function artifacts() {
   } else if (mode === '개인') {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
-    // figma가 없으면 캡처가 시각 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.
+    // figma가 없으면 캡처가 디자인 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.
     required.push({ label: 'figma 캡처', p: path.join(bg, 'retained', 'figma'), dir: true });
     figmaUrl = exists(path.join(bg, 'retained', 'figma-url.md'));
   }
 
-  console.log(`[requirement 「자료 받기」 종료 게이트] 모드: ${mode}${exists(codeTarget) ? ' (코드 대용 — 시각 원본은 세지 않는다)' : ''}`);
+  console.log(`[requirement 「자료 받기」 산출물 존재 검사] 모드: ${mode}${exists(codeTarget) ? ' (코드 대용 — 디자인 원본은 세지 않는다)' : ''}`);
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);
@@ -75,9 +75,9 @@ function artifacts() {
 
 // ── review-bypass: impl-review-loop 우회 조건 ────────────────────────────────
 // 문서가 "둘 다 **기계 판정** — 런타임 의견 금지"라 못박아 놓고 판정 수단이 없었다.
-// 이 스위치는 리뷰 엔진을 통째로 끄는 것이고, 느슨한 쪽으로 틀리면 생략됐다는 사실조차 안 남는다.
+// 이 스위치는 impl-review-loop를 통째로 끄는 것이고, 느슨한 쪽으로 틀리면 생략됐다는 사실조차 안 남는다.
 //
-// 판정 못 한 것은 통과가 아니라 **엔진 강제**로 낸다 — 문서가 정한 fails-safe다.
+// 판정 못 한 것은 통과가 아니라 **impl-review-loop 호출 강제**로 낸다 — 문서가 정한 fails-safe다.
 function globToRegExp(glob) {
   let re = '';
   for (let i = 0; i < glob.length; i += 1) {
@@ -133,7 +133,7 @@ function reviewBypass() {
   // 판정 재료가 없으면 스코프를 모른다 — 모르는 것은 「스코프 안」이 아니다.
   if (!lintStaged.length && !tsconfig) {
     console.log('[우회 조건 ②] 판정 불가 — lint-staged·tsconfig 어느 쪽도 못 읽었다');
-    console.log('  → 엔진 강제 (fails-safe). 스코프를 모르는 것은 스코프 안이 아니다.');
+    console.log('  → impl-review-loop 호출 강제 (fails-safe). 스코프를 모르는 것은 스코프 안이 아니다.');
     problems.push('검사 도구 스코프를 판정할 수 없다');
     return;
   }
@@ -151,8 +151,8 @@ function reviewBypass() {
   const outside = changed.filter((f) => !inScope(f));
   console.log(`[우회 조건 ②] 변경 ${changed.length}건 중 스코프 밖 ${outside.length}건`);
   outside.forEach((f) => console.log(`  ${f}`));
-  if (outside.length) problems.push('변경 파일 중 자동 검사 스코프 밖이 있다 — 엔진 강제');
-  console.log('\n  조건 ①(진실원천 아티팩트 선언 여부)은 계획 문서를 봐야 하므로 여기서 안 본다.');
+  if (outside.length) problems.push('변경 파일 중 자동 검사 스코프 밖이 있다 — impl-review-loop 호출 강제');
+  console.log('\n  조건 ①(정답 파일 선언 여부)은 계획 문서를 봐야 하므로 여기서 안 본다.');
 }
 
 // ── todo-coverage: 표 빈 행 + 남은 it.todo ────────────────────────────────────

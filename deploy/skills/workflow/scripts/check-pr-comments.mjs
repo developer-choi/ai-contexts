@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-// PR diff의 주석 게이트 — 금지 주석 잔존과 미배정 blanket disable 고아를 함께 본다.
+// PR diff의 금지 주석·고아 disable 검사 — 금지 주석 잔존과 미배정 blanket disable 고아를 함께 본다.
 //
 // 이 파일이 존재하는 이유: 두 점검 다 정규식인데 산문이 **서브에이전트에게** 시키고 있었다.
-// 당시 step-6.1.5(지금 verify 「주석 게이트」)는 "sonnet 리뷰어를 spawn해 금지 주석이 잔존하는지 재점검"이라 적혀 있는데,
+// 당시 step-6.1.5(지금 verify 「금지 주석·고아 disable 검사」)는 "sonnet 리뷰어를 spawn해 금지 주석이 잔존하는지 재점검"이라 적혀 있는데,
 // 리뷰어가 "0건"이라고 말하면 그걸로 끝난다 — 확인할 방법이 없고, 놓친 마커는 머지된 코드에
 // 남아 나중에 드러난다. 판단이 1도 없는 대조에 판단하는 도구를 쓰면 그 결과도 판단이 된다.
 //
-// 고아 점검(당시 step-6.1.6, 지금 같은 게이트에 합쳐짐)은 「마커 문구는 comments.md가 단일 출처」라고 적혀 있었지만 정작
+// 고아 점검(당시 step-6.1.6, 지금 같은 검사에 합쳐짐)은 「마커 문구는 comments.md가 단일 출처」라고 적혀 있었지만 정작
 // 그쪽은 문구를 *예시*로만 들고 있었다("추적 가능한 고정 문구를 남긴다 (예: …)"). 고정이
 // 아니면 탐지가 설 수 없으므로 여기서 문구를 못박고, comments.md가 이 파일을 가리킨다.
 //
@@ -15,8 +15,8 @@
 // 사용:
 //   node <이 파일> --base <기준 ref>                     → 금지 주석 잔존 점검 (PR diff)
 //   node <이 파일> --base <기준 ref> --plan <plan 루트>     → 미배정 blanket disable 고아까지
-//   node <이 파일> --paths <경로,경로> --marker USER_REVIEW  → IMPL 시작 게이트 (구현 대상 경로)
-//   node <이 파일> --paths <경로,경로>                     → 종료 게이트 (TODO 전부 0건)
+//   node <이 파일> --paths <경로,경로> --marker USER_REVIEW  → 구현 전 미검토 TODO 검사 (구현 대상 경로)
+//   node <이 파일> --paths <경로,경로>                     → 구현 종료 TODO 잔존 검사 (TODO 전부 0건)
 //
 // 어느 모드든 `TODO [AI_IMPL]`이 인용한 출처가 소멸 버킷을 가리키면 함께 짚는다.
 //
@@ -72,7 +72,7 @@ function walk(dir, out = []) {
 }
 
 // 볼 줄을 모은다. diff 모드는 **추가된 줄만** 본다 — 지워지는 줄의 마커는 이 PR이 걷어내는
-// 중인 것이라 걸 일이 아니다. paths 모드는 그 경로의 현재 내용을 통째로 본다(게이트는 잔존을 센다).
+// 중인 것이라 걸 일이 아니다. paths 모드는 그 경로의 현재 내용을 통째로 본다(이 검사는 잔존을 센다).
 const added = [];
 if (args.paths) {
   for (const root of args.paths.split(',').map((s) => s.trim()).filter(Boolean)) {
@@ -105,7 +105,7 @@ if (args.paths) {
 
 const problems = [];
 
-// `--marker USER_REVIEW`는 IMPL 시작 게이트라 그 마커만 센다. 종료 게이트는 TODO 전부가 대상이다.
+// `--marker USER_REVIEW`는 구현 전 미검토 TODO 검사라 그 마커만 센다. 구현 종료 TODO 잔존 검사는 TODO 전부가 대상이다.
 const gate = args.marker ? [new RegExp(`TODO\\s*\\[${args.marker}\\]`)] : FORBIDDEN;
 const label = args.marker ? `TODO [${args.marker}] 잔존` : '금지 주석 잔존';
 const forbidden = added.filter((l) => gate.some((re) => re.test(l.text)));

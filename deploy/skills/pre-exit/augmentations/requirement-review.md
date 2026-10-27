@@ -24,8 +24,9 @@
 
 ## 반영 위치
 
-- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다 — 해당 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [output-template.md](../../workflow/requirement-review/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·[page-review.md](../../workflow/requirement-review/page-review.md)·[recruitment/step.md](../../workflow/requirement-review/recruitment/step.md) 중 하나
-- **requirement-review 밖을 고칠 발견**(workflow의 자료 받기·게이트·폴더 규약 등)과 **일반화되는 선호**: pre-exit 본 절차 「문제 리스트업 + 규칙화」로 보낸다
+- **requirement-review 고유 — 체크리스트 개선**: 제안마다 고칠 파일을 지목한다.
+  후보: 해당 `checklist/`([planning](../../workflow/requirement-review/planning/checklist/)·[design](../../workflow/requirement-review/design/checklist/)), [page-type/](../../workflow/requirement-review/page-type/), [planning/cross-page.md](../../workflow/requirement-review/planning/cross-page.md), [output-template.md](../../workflow/requirement-review/output-template.md), requirement-review [SKILL.md](../../workflow/requirement-review/SKILL.md)·[page-review.md](../../workflow/requirement-review/page-review.md)·[recruitment/step.md](../../workflow/requirement-review/recruitment/step.md) 중 하나
+- **requirement-review 밖을 고칠 발견**(workflow의 자료 받기·단계 사이 검사·폴더 규약 등)과 **일반화되는 선호**: pre-exit 본 절차 「문제 리스트업 + 규칙화」로 보낸다
 
 ## 출력
 

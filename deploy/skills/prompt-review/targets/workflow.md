@@ -11,7 +11,7 @@
 `persistent/`·`retained/`·`consumable/` 폴더가 곧 그 산출물을 언제 지울지를 나타낸다(정의는 workflow `conventions/plan-folder.md`). 그래서 본문에 「어느 step 뒤에 지운다」를 따로 적지 않고, 폴더 분류가 맞는지를 본다.
 
 - `pr{N}/`이나 `background/` 바로 아래에 폴더 분류 없이 놓인 산출물이 있으면, 분류하거나 왜 분류하지 않았는지 적게 한다.
-- 기본은 `consumable/`이다. 여러 step이 쓰고 PR이 끝나면 버려도 되면 `retained/`, PR이 끝나도 가치가 있으면(회사 맥락에 기댄 결정, 컨벤션 인덱스 등) `persistent/`다. 위로 올린 산출물은 그 이유가 정의에 적혀 있는지 본다.
+- 기본은 `consumable/`이다. 여러 step이 쓰고 PR이 끝나면 버려도 되면 `retained/`, PR이 끝나도 가치가 있으면(회사 맥락에 의존한 결정, 컨벤션 인덱스 등) `persistent/`다. 위로 올린 산출물은 그 이유가 정의에 적혀 있는지 본다.
 - `consumable/`인데 여러 step이 나눠 쓰기 어려우면 `retained/`로, `persistent/`인데 PR 안에서만 쓰이면 `retained/`로 옮기게 한다.
 
 ## realize-plan과 implement의 코드 경계
@@ -39,7 +39,7 @@ step·세션을 더하거나 옮기거나 순서를 바꿀 때, 「X 다음에 Y
 
 ## impl-review-loop 연결
 
-- 구현자를 부르는 step이 구현자마다 구현자·재료·축 A 검사(원본과 맞는지)·축 B 검사(규칙)·증분 단위를 넘기는가
+- 구현자를 부르는 step이 구현자마다 구현자·재료·정답 대조 A·규칙검사 B·커밋 단위를 넘기는가
 - 축 A 없이 끝나는 호출이 없는가. 축 B가 원본과 맞는지를 직접 판정하지 않고 축 A로 넘기는가
 - 리뷰어가 code-review SKILL.md 절차를 따르고, 계획과 달라지면 사용자에게 알리는가
 

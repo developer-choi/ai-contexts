@@ -1,8 +1,8 @@
 # MARKUP — figma 모드 (채용·실무)
 
-figma 원본(없으면 캡처)이 디자인 진실 원천인 모드.
+figma 원본(없으면 캡처)이 디자인 원본인 모드.
 
-커버리지 원천·공통 컴포넌트 판정(공통 절차의 「공통 컴포넌트 확정」)의 직독 대상은 아래 「재료」에 누적된 figma URL·캡처 전부다.
+커버리지 출처·공통 컴포넌트 판정(공통 절차의 「공통 컴포넌트 확정」)의 직독 대상은 아래 「재료」에 누적된 figma URL·캡처 전부다.
 
 ## 재료
 
@@ -13,7 +13,7 @@ figma 원본(없으면 캡처)이 디자인 진실 원천인 모드.
 
 ## (채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리
 
-워크트리에 이미 있는 코드는 시각 진실 원천이 아니다. 아래처럼 갈라 다룬다:
+워크트리에 이미 있는 코드는 디자인 원본이 아니다. 아래처럼 갈라 다룬다:
 
 - **FOUNDATION PR이 만든 코드**(폴더 구조·코딩 스탠다드·폰트) — 코드 스타일 기준이다. 따른다
 - **회사 제공 부분 마크업**([회사 제공 베이스라인](../../conventions/pr-types/foundation.md#회사-제공-베이스라인-커밋) 중 화면 마크업) — 베이스다. 남은 화면만 채운다
@@ -21,22 +21,22 @@ figma 원본(없으면 캡처)이 디자인 진실 원천인 모드.
 
 **디자인시스템 컴포넌트가 필요하면 MP `packages/design-system`의 컴포넌트를 복사해 온다.**
 
-가져올 때는 **이 스펙에 필요한 만큼만 차감**한다(쓰지 않는 variant·prop은 들이지 않는다). 시각 토큰은 디자인 진실 원천에 맞게 restyle한다.
+가져올 때는 **이 스펙에 필요한 만큼만 차감**한다(쓰지 않는 variant·prop은 들이지 않는다). 시각 토큰은 디자인 원본에 맞게 restyle한다.
 
 markup 워크트리 진입 직후 셋팅([입력·산출물·작업 위치](index.md#입력산출물작업-위치)) 전에, `background/retained/tech-constraints.md`에 BG가 확정한 스타일링 라이브러리가 없을 때만 **스타일링 라이브러리를 사용자에게 질문**한다.
 기본값은 **scss**다.
 워크트리에 이미 Tailwind로 작성된 스타터 코드가 있어도 그것만으로 결정된 사실로 보지 않는다.
 
-## 진실검사 A — figma 원본(없으면 캡처) 대조
+## 정답 대조 A — figma 원본(없으면 캡처) 대조
 
-impl-review-loop의 대조형 — Figma Reviewer ↔ 구현자 대조 루프. 검증 기준은 [검증 기준](../../conventions/artifact/markup-spec.md#검증-기준--figma-원본없으면-캡처-대조).
+impl-review-loop의 리뷰어 대조형 — Figma Reviewer ↔ 구현자 대조 루프. 검증 기준은 [검증 기준](../../conventions/artifact/markup-spec.md#검증-기준--figma-원본없으면-캡처-대조).
 
 ## Markup Implementer 필수 지침
 
 [impl-review-loop](../../impl-review-loop/SKILL.md)에 Markup Implementer를 주입할 때 함께 전달한다:
 
 1. **(매칭표가 있을 때) "`get_design_context` 응답 코드의 CSS 토큰을 매칭표와 대조하라"**
-2. **구현 후 디자인 진실 원천과 다시 대조** — 토큰/레이아웃/props를 비교한 뒤 Figma Reviewer에게 넘긴다
+2. **구현 후 디자인 원본과 다시 대조** — 토큰/레이아웃/props를 비교한 뒤 Figma Reviewer에게 넘긴다
 3. **피그마 MCP 연결인 경우** — 색은 [figma-color-tokens-guide.md](../../conventions/figma-color-tokens-guide.md)대로 확정한다
 4. **(채용)** 위 「(채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리」 절의 코드 취급·MP 복사 규칙과 확정된 스타일링 라이브러리
 
