@@ -54,8 +54,7 @@ overview.md(의도)·decisions.md(기술 결정·근거)·reference.md(참조 �
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)·「소비→삭제 메커니즘 SSOT」).
 
-**페이지 마크업**(페이지 단위 `.tsx` JSX·`.module.scss` 디자인 값)은 MARKUP 완성본을 가져오므로 **realize-plan의 전면 stub 대상이 아니다.**
-가져오기·공통 지정 컴포넌트 껍데기·로직 합성의 재정의는 [마크업 예외 (재정의)](../conventions/artifact/stub.md#마크업-예외-재정의) 참조(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)).
+페이지 마크업·공통 지정 컴포넌트를 stub에서 어떻게 다루는지는 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)를 따른다(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)).
 realize-plan은 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)을 본 PR의 로직·조립 구조 참조에만 쓴다.
 PR 단위 `pr{N}/retained/page*.png`는 만들지 않는다 — figma 자료는 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱)대로 `background/retained/figma/`에 누적한다.
 
@@ -108,7 +107,7 @@ overview.md 또는 PR 분할에서 파악된 파일 목록을 기준으로, 해�
 
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
-| stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [정의·범위](../conventions/artifact/stub.md#정의범위)) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
+| stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 | 소스 디렉토리 | [정의·범위](../conventions/artifact/stub.md#정의범위)의 두 원칙대로 | 항상 |
 | `implementation.md` | `pr{N}/retained/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
@@ -136,7 +135,6 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
      - 그 밖에 실행을 미뤄야 하면 md엔 **탐색 패턴 하나**만 남긴다 — "grep `<찾을 패턴>` → 새 이름으로 치환" 형태. 각 매치의 before→after 쌍(식별자·경로·줄번호)은 어느 md에도 적지 않는다 — 개별 치환은 implement가 파일 보고 수행한다.
 
    **md 산출물 전체**에는 **코드로 표현 못 하는 narrative만** 남긴다 (의도·커밋 분할·gotcha·근거). 코드로 표현 가능한 것은 *어느 산출물에도* 산문으로 넣지 않는다.
-   impl/plan 역할 경계가 희미해져도 무방. stub 상세도(granularity)는 [conventions/artifact/stub.md](../conventions/artifact/stub.md)의 공개 API 수준 예시를 따른다.
 2. **사용자에게 제안**: "이번 PR stub [필요/불필요]. 동의?" — 조건 2까지 따져서 판단한다(deps·설정·it.todo가 있으면 *필요*).
 3. **사용자 동의·수정 후 진행** — 두 종류: (a) stub 만들어 본체를 IMPL로 분해(무거운 PR) / (b) stub 없이 **그 자리에서 실행·커밋**(가벼운 PR — 구현은 realize-plan에서 끝낸다)
 
@@ -146,7 +144,7 @@ stub 파일 작성 룰은 [conventions/artifact/stub.md](../conventions/artifact
 
 stub 만들기로 동의되면, 모든 stub을 하나의 커밋으로 묶는다.
 
-- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 base 위에서 제거된다 ([verify 「커밋 정리 — 사용자 리뷰 전」](verify.md#step-625-커밋-정리--사용자-리뷰-전))
+- 이 커밋은 IMPL이 본체를 채울 기반이며(무거워서 분해한 경우), 구현이 끝나면 [verify 「커밋 정리 — 사용자 리뷰 전」](verify.md#step-625-커밋-정리--사용자-리뷰-전)에서 [stub 정리](../conventions/artifact/stub.md#정리)의 케이스대로 처리된다
 - stub 파일만 담는다 — 잔존 md(`/plan/pr{N}/` 하위)는 별도 커밋. 두 종류를 한 커밋에 섞지 않는다
 - stub 커밋이 lint·tsc·prettier·테스트 명령을 통과하는지 확인 후 커밋한다
 
@@ -181,7 +179,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - **`reference.md`에 컨벤션 경로가 누적 명시되어 있는지** 확인한다 ([plan 「산출물: overview.md」](plan.md#산출물-planprnpersistentoverviewmd) 절의 산출물 분담 표 참조)
 - 「코딩 스탠다드 · 베스트프랙티스」 1번의 모드별 범위에 맞는 경로만 포함되었는지 확인한다
 - stub 파일의 컨벤션 위반 (네이밍, 파일 구조, import 순서 등)을 reviewer가 직접 검증
-- **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: `.module.scss` layout vs 디자인 값 분리, Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
+- **stub 작성 룰 준수** ([conventions/artifact/stub.md](../conventions/artifact/stub.md)) — lint가 못 잡는 항목 직접 점검: Hook 시그니처·throw 패턴, `.tsx` placeholder 변수 패턴, 주석 양식 (comments.md cross-ref)
 - **코드-narrative 오배치 검출** — **모든 md 산출물**에 *코드로 표현 가능한 내용*(deps·설정·`it.todo`·시그니처)이 산문으로 들어가 있지 않은지 점검. 있으면 stub 코드로 옮기도록 지적(§5 조건 2).
   **단 `implementation.md` 「행동 결정 커버리지」 표의 `it.todo`는 예외** — 상위 결정과의 대조표라 코드에 대응물이 없다 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 참조).
   특히 "판정 전 단일출처(`stub.md`) 미독으로 stub을 통째 생략"한 흔적이 없는지 확인.
@@ -191,7 +189,7 @@ Lead (메인 세션) — 리뷰 결과 종합 + 사용자 보고
 - 결정된 설계 방향과 모순되는 구현 계획·stub 코드 구조가 없는지 확인한다
 
 **산출물 간 정합성**
-- stub `.tsx`의 props 타입을 `.module.scss`/hook stub이 일관되게 소비하는지 대조한다
+- stub `.tsx`의 props 타입을 hook stub·컨테이너가 일관되게 소비하는지 대조한다
 - hook stub의 API 응답 placeholder가 호출자 타입과 일치하는지 확인한다
 - `it.todo` 주석이 logic stub의 에러/엣지 시나리오를 커버하는지 확인한다
 - implementation.md의 각 컴포넌트/모듈 커밋에 해당 테스트가 포함되어 있는지 확인한다

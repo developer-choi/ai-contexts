@@ -1,26 +1,26 @@
 # Stub 코드 컨벤션
 
-PR 골조 코드(stub)의 정의·범위·양식·라이프사이클 단일 출처.
-
 ## 정의·범위
 
 stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·구조·결정 사항을 미리 박은 코드.
 
 두 원칙:
 
-1. **PR이 만들 모든 파일·함수·컴포넌트는 stub 필수** — 외부 공개 여부 무관. 내부 헬퍼·내부 컴포넌트도 시그니처 + `throw new Error('not implemented')`
-2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 결정·코드 표현 가능 → 별도 narrative가 아닌 stub 코드. 코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
+1. **PR이 만들 모든 파일·함수·컴포넌트는 stub 필수** — 외부 공개 여부 무관. 내부 헬퍼도 시그니처 + `throw new Error('not implemented')`. 컴포넌트는 아래 「`.tsx`」 양식을 따른다
+2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 코드 분량이 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
 
-### 마크업 예외 (재정의)
+### 마크업 예외
 
-마크업의 stub 처리는 두 갈래로 갈린다 — 삭제가 아니라 재정의다.
+마크업의 stub 처리는 두 종류로 갈린다.
 
-- **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 figma 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다**(재작성 X) — realize-plan 전면 stub 대상이 아니다.
-- **공통 지정 컴포넌트** (MARKUP이 [공통 컴포넌트 확정](../../steps/markup/index.md#공통-컴포넌트-확정)으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다. 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다(재작성 금지). props도 PR 소유이되(MARKUP props는 임시 비계), realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.
+- **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 디자인 원본 대조 지적 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다** — realize-plan 전면 stub 대상이 아니다.
+- **공통 지정 컴포넌트** (MARKUP이 [공통 컴포넌트 확정](../../steps/markup/index.md#공통-컴포넌트-확정)으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다.
+  - 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다.
+  - props도 PR 소유다(MARKUP props는 임시값). realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.
 
 PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. realize-plan의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
-### 함수 호출 그래프 예시
+### 내부 헬퍼 예시
 
 ```ts
 export function add(a: unknown, b: unknown) {
@@ -36,7 +36,7 @@ function validateAdd(a: unknown, b: unknown) {  // 내부 헬퍼도 시그니처
 
 ```ts
 export function paginate<T>(items: T[], cursor: string | null) {
-  // TODO [AI_IMPL]: cursor null이면 첫 페이지(0~20), 아니면 cursor 위치+1부터 20개
+  // TODO [AI_IMPL]: cursor null이면 첫 페이지(0~20), 아니면 cursor 위치+1부터 20개 — plan/pr{N}/persistent/decisions.md:{line}
   throw new Error('not implemented');
 }
 ```
@@ -68,12 +68,11 @@ export type UserListResponse = {
 - Props 타입 + 컴포넌트 선언
 - 합성 안 하면 `return null` (leaf)
 - 합성하면 트리 골조 + 조건부 렌더링 골조
-- 조건은 placeholder 변수 (`const isLoading = false; // TODO [AI_IMPL]: 로딩 상태 — useUserQuery isLoading 결합`)
-- 책임 설명은 함수명 충분하면 생략, 아니면 1줄 JSDoc
+- 조건은 placeholder 변수 (`const isLoading = false; // TODO [AI_IMPL]: 로딩 상태 — useUserQuery isLoading 결합 — plan/pr{N}/persistent/decisions.md:{line}`)
 
-### Hook · 페이지
+### Hook · 라우트 파일(`page.tsx` 등)
 
-- 시그니처 + Flow 주석 + placeholder 변수 + `throw new Error('not implemented')`
+- 시그니처 + 처리 순서 주석(무엇을 받아 → 무엇을 호출하고 → 무엇을 반환하는지) + placeholder 변수 + `throw new Error('not implemented')`
 - 결정된 사항(useMutation 사용, API endpoint 등)은 코드로 적음
 
 ### `*.test.tsx`
@@ -87,41 +86,24 @@ export type UserListResponse = {
 
 ### Fixture
 
-- 컨벤션 위치, **logic 영역 분류** (mock = API 응답)
+- 프로젝트 컨벤션이 정한 위치에 두고, 마크업이 아니라 로직 쪽으로 분류한다(API 응답 mock이다)
 - test 파일은 import만
 
 ### 파일 분리 단위
 
 - 분리 단위는 프로젝트 컨벤션
-- 컨벤션 부재 시 사용자 질문 (디폴트 안 박음)
+- 컨벤션 부재 시 사용자 질문
 
-## 라이프사이클
+## 정리
 
-### 생성
+stub 커밋 뒤에 IMPL 커밋이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 IMPL 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
 
-- 주석은 [comments.md 생성](./comments.md#생성-신규-stub-작성-시) 적용
+어느 케이스든 계획 변경으로 안 쓰게 된 stub 파일은 지운다.
 
-### 보존
+### 케이스 A — IMPL 커밋이 따로 쌓임
 
-- stub 커밋이 base 위에 쌓여 있음. verify 「커밋 정리 — 사용자 리뷰 전」까지 보존
-- Lead가 stub 파일들을 탐색·분류해서 Implementer에게 컨텍스트 주입. Implementer가 직접 탐색 X
-- 보존 단계 안에서 squash 금지
+stub 커밋을 파일별로 나눠, 각 조각을 그 파일을 처음 고친 IMPL 커밋 바로 앞에 두고 그 IMPL 커밋과 합친다(메시지는 IMPL 커밋 것). type·fixture·설정처럼 IMPL이 고치지 않은 조각은 첫 IMPL 커밋과 합친다.
 
-### 비판적 검토
+### 케이스 B — stub 커밋 하나에 구현까지 들어 있음
 
-구현 진입 시 stub 결정·구조를 무비판 수용하지 않고 비판적으로 검토. 더 나은 방법·문제 발견 시 사용자에게 보고.
-
-### 정리
-
-케이스 분기:
-
-#### 케이스 A — stub이 빈 껍데기
-
-stub 파일에 TODO 마커 + 빈 본문만. 슬라이스별 IMPL 커밋이 본문을 다 가짐. stub 커밋을 drop한다.
-
-#### 케이스 B — stub이 본문 안고 있음
-
-stub 생성 단계에서 사용자가 검토 후 본문까지 채워 사실상 단일 IMPL 커밋. soft reset으로 풀어 슬라이스별 재분할.
-
-stub만 만들고 구현에서 한 번도 건드리지 않은 파일(계획 변경으로 사용 안 된 utility stub 등)은 재분할 대상에서 빼 사라지게 둔다.
-
+soft reset으로 풀어 슬라이스별 재분할.
