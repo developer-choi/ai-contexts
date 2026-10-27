@@ -320,6 +320,15 @@ const WRITE_CASES = [
     'check-package-frontmatter.mjs',
     {
       tool_name: 'Write',
+      tool_input: { file_path: 'C:/tmp/pkg.md', content: '---\ntype: general\n---\n\n# 제목\n' },
+    },
+    'deny',
+    'type 없이 부른 글의 general도 필수 필드 검사를 받는다 — 어휘에서 빠지면 이 케이스가 통과로 바뀐다',
+  ],
+  [
+    'check-package-frontmatter.mjs',
+    {
+      tool_name: 'Write',
       tool_input: { file_path: 'C:/tmp/note.md', content: '---\ntype: guide\n---\n\n# 제목\n' },
     },
     'pass',

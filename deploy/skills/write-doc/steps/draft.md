@@ -4,7 +4,7 @@
 
 ## 읽을 파일
 
-`node {{skill_dir}}/scripts/guide-files.mjs <type> [--subtype <subtype>] --for draft`가 낸 파일을 Read한다.
+`node {{skill_dir}}/scripts/guide-files.mjs <type> [--subtype <subtype>] --for draft`가 낸 파일을 Read한다. `<type>`·`<subtype>`에는 [SKILL.md 「입력」](../SKILL.md#입력)대로 정한 값을 넣는다. type 없이 불렀으면 「1. 재료 받기」에서 건넨 글을 본 뒤 정해서 돌리고, 낸 type·subtype 파일의 재료 받기 절을 이어서 돈다.
 
 ## 흐름
 

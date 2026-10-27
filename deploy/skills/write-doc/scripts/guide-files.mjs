@@ -17,7 +17,7 @@
 // 단계 문서에 type 이름을 박은 분기를 두면 type이 늘 때마다 모든 세션이 남의 type 분기까지 읽는다.
 // steps.md의 `## [OUTLINE_STEP] …` 절은 단계 파일에 같은 절차 ID가 있어야 읽힌다.
 // 단계 파일에서 ID를 바꾸거나 지우면 type 절이 조용히 안 읽히므로, 낼 때마다 대조해 어긋나면 멈춘다.
-//   node guide-files.mjs --check   스킬 types/의 steps.md를 모두 대조하고, writing-guide subtype 폴더에 둔 template.md를 잡는다
+//   node guide-files.mjs --check   스킬 types/의 steps.md를 모두 대조하고, writing-guide subtype 폴더에 둔 template.md와 general 폴더를 잡는다
 //
 // 조건부 경로는 판단이 드는 조건(본문에 수치가 있는가 등)이라 고르지 않고 조건과 함께 낸다. 고르는 것은 메인이다.
 import fs from "node:fs";
@@ -110,6 +110,13 @@ const subdirs = (dir) => fs.existsSync(dir) ? fs.readdirSync(dir, { withFileType
 function check() {
   const typesDir = path.join(GUIDE, "types");
   let failed = false;
+  // general은 어느 type에도 안 맞는 글을 다 받는 칸이라, 한 글에서 나온 규칙을 두면 성격이 다른 다음 general 글에 조용히 걸린다.
+  for (const dir of [typesDir, TYPE_STEPS_DIR]) {
+    if (fs.existsSync(path.join(dir, "general"))) {
+      console.error(`${path.join(dir, "general")}를 두지 않는다 — general은 공통 조건만 건다. 되풀이될 규칙이면 새 type을 제안한다`);
+      failed = true;
+    }
+  }
   for (const t of subdirs(TYPE_STEPS_DIR)) {
     for (const sub of [null, ...subdirs(path.join(TYPE_STEPS_DIR, t))]) {
       try { typeSteps(t, sub); } catch (e) { console.error(e.message); failed = true; }

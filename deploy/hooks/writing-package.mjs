@@ -10,6 +10,7 @@ export const PACKAGE_TYPES = new Set([
   "decision",
   "approach-ladder",
   "case-study",
+  "general",
 ]);
 
 // 맨 앞 frontmatter 블록의 최상위 key만 읽는다. 값이 없거나 공백뿐이면 빈 문자열로 둔다
