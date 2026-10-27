@@ -20,7 +20,7 @@ next:
 
 ### 입력·산출물·작업 위치
 
-- **입력**: `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
+- **입력**: `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + (공통 컴포넌트를 받는 PR) `background/retained/component-list.md` + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
 - **산출물**: `pr{N}/persistent/`: overview.md, decisions.md, reference.md
 - **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — realize-plan이 만든다
 

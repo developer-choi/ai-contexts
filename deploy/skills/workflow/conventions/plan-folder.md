@@ -18,6 +18,7 @@
       figma/            ← requirement 「자료 받기」 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
       mockup/           ← requirement 「자료 받기」 수집 (개인 모드)
       spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택)
+      component-list.md ← MARKUP 「공통 컴포넌트 확정」 산출. 전 컴포넌트 목록(공통 여부·범용/도메인). MARKUP 「마크업 구현·검사」의 재료, 공통 컴포넌트를 받는 PR의 plan이 소비
       code-target.md    ← requirement 「자료 받기」 수집 (코드 대용일 때만). 리뷰 대상 코드 경로
       cross-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
