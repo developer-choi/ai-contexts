@@ -8,10 +8,19 @@
 
 ### 서브에이전트에 맡기는 일
 
-아래 절들의 읽기·대조는 메인이 하지 않고 일회성 서브에이전트 둘에 맡긴다 — 메인에는 문제 목록에 넣을 항목만 있으면 되고, 이 대조는 메인이 한 일을 검사하는 일이라 메인이 하면 자기가 안 본 것을 없는 것으로 넘긴다. 둘은 서로 기다리지 않으므로 한 메시지로 함께 띄운다. 둘 다 이 파일 경로와 맡는 절 이름을 받고, 걸린 항목마다 근거 `파일:줄`·원문 줄을 붙여 돌려준다.
+아래 절들의 읽기·대조는 메인이 하지 않고 일회성 서브에이전트 둘에 맡긴다 — 메인에는 문제 목록에 넣을 항목만 있으면 되고, 이 대조는 메인이 한 일을 검사하는 일이라 메인이 하면 자기가 안 본 것을 없는 것으로 넘긴다.
+둘은 서로 기다리지 않으므로 한 메시지로 함께 띄운다.
+둘 다 이 파일 경로와 맡는 절 이름을 받고, 걸린 항목마다 근거 `파일:줄`·원문 줄을 붙여 돌려준다.
 
-- **「미탐색 cross-ref 추적」 + 「담당 step 절차 실행 점검」** — 두 절이 같은 workflow 문서를 읽으므로 하나에 묶는다. session id와 「담당 step 절차 실행 점검」 1에서 정한 세션 이름을 넘기고, `steps.mjs chain` 실행부터 5까지 맡긴다. 세션이 연 문서는 `session-state.mjs read-files`로, 실행 여부는 그 출력 첫 줄의 transcript로 본다 — `read-files`는 메인 기록만 보므로 세션이 띄운 서브에이전트가 연 문서는 그 transcript 옆 `subagents/` 기록에서 확인하고 미탐색으로 치지 않는다. 단일 출처 미독은 표시해 받는다. 이 서브에이전트의 지시문에는 아래 「출력」의 생략 금지(가벼운 버전으로 대체 금지)를 그대로 싣는다
-- **「첫 사용자 요청 vs 산출물 1:1 대조」 + 「보고 vs 실제 변경 대조」 + 「cross-ref 적합성 점검」** — 셋 다 `plan/pr{N}/**`를 읽으므로 하나에 묶는다. 메인은 `session-state.mjs user-turns` 출력을 거르지 않고 넘기고, 자기가 한 보고 문장은 대화 맥락이 있어야 고르므로 직접 뽑아 넘긴다. 이 세션이 고친 레포 경로, 세션 시작 ref(또는 커밋 목록), `plan/pr{N}/` 경로도 넘긴다 — 어느 커밋이 이 세션 작업인지는 메인이 정한다. 대응 없는 요구사항, 실제 diff에 없는 보고, 행선지 부적합·단방향 원칙 위반·인용 불일치·양방향 결합을 돌려받는다
+- **「미탐색 cross-ref 추적」 + 「담당 step 절차 실행 점검」** — 두 절이 같은 workflow 문서를 읽으므로 하나에 묶는다.
+  session id와 「담당 step 절차 실행 점검」 1에서 정한 세션 이름을 넘기고, `steps.mjs chain` 실행부터 5까지 맡긴다.
+  세션이 연 문서는 `session-state.mjs read-files`로, 실행 여부는 그 출력 첫 줄의 transcript로 본다 — `read-files`는 메인 기록만 보므로 세션이 띄운 서브에이전트가 연 문서는 그 transcript 옆 `subagents/` 기록에서 확인하고 미탐색으로 치지 않는다.
+  단일 출처 미독은 표시해 받는다.
+  이 서브에이전트의 지시문에는 아래 「출력」의 생략 금지(가벼운 버전으로 대체 금지)를 그대로 싣는다
+- **「첫 사용자 요청 vs 산출물 1:1 대조」 + 「보고 vs 실제 변경 대조」 + 「cross-ref 적합성 점검」** — 셋 다 `plan/pr{N}/**`를 읽으므로 하나에 묶는다.
+  메인은 `session-state.mjs user-turns` 출력을 거르지 않고 넘기고, 자기가 한 보고 문장은 대화 맥락이 있어야 고르므로 직접 뽑아 넘긴다.
+  이 세션이 고친 레포 경로, 세션 시작 ref(또는 커밋 목록), `plan/pr{N}/` 경로도 넘긴다 — 어느 커밋이 이 세션 작업인지는 메인이 정한다.
+  대응 없는 요구사항, 실제 diff에 없는 보고, 행선지 부적합·단방향 원칙 위반·인용 불일치·양방향 결합을 돌려받는다
 
 메인은 돌려받은 원문 줄로 문제 목록에 넣고 대상 문서를 열지 않는다. 메인에 남는 것은 「담당 step 절차 실행 점검」 1의 세션 이름 판정(값이 둘 이상이면 사용자에게 묻는다)과 넘길 보고·범위 뽑기다.
 
@@ -40,7 +49,9 @@
 「미탐색 cross-ref 추적」이 '안 읽은 링크 문서'를 잡는다면, 본 절차는 **진입한 step.md 본문에 인라인으로 박힌 강제 절차의 *실행 여부***까지 본다. 특히 "판정·결론을 내리기 전에 읽어야 하는 단일 출처 문서"를 안 읽고 판정한 경우를 잡는다.
 
 절차:
-1. 본 세션에서 **진입한 step** 식별 (`node {{skill_dir}}/../workflow/scripts/steps.mjs chain <세션>` 출력 「이 세션의 step」으로 자기 세션의 step 범위 확인). `<세션>`은 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`가 낸 `/workflow` 발화의 첫 인자다. 그 발화가 없거나(자동 발동 등) 첫 인자가 workflow 세션 이름이 아니면 `node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>`가 낸 `workflow/steps/` 파일들의 frontmatter `session:` 값을 쓰고, 값이 둘 이상이면 사용자에게 묻는다.
+1. 본 세션에서 **진입한 step** 식별 (`node {{skill_dir}}/../workflow/scripts/steps.mjs chain <세션>` 출력 「이 세션의 step」으로 자기 세션의 step 범위 확인).
+   `<세션>`은 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`가 낸 `/workflow` 발화의 첫 인자다.
+   그 발화가 없거나(자동 발동 등) 첫 인자가 workflow 세션 이름이 아니면 `node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>`가 낸 `workflow/steps/` 파일들의 frontmatter `session:` 값을 쓰고, 값이 둘 이상이면 사용자에게 묻는다.
 2. 각 step.md를 처음부터 끝까지 Read + step.md가 가리키는 **하위 문서**(`conventions/artifact/*`, `*-spec.md`, `stub.md` 등)도 전부 Read.
 3. step.md·하위 문서에서 강제 절차를 항목으로 추출 — "필수"·"~한다"·"~전에 …한다"(판정 전 선행 읽기) 형태. 예: Plan mode 진입, 배치·네이밍 결정 전 컨벤션 본문 확인, stub 필요성 판정 전 `stub.md` 참조, 종료 시퀀스 각 항목.
 4. 각 절차를 세션에서 **실제 실행**했는지 대조 — 미실행분을 「문제 리스트업 + 규칙화」의 문제 목록에 추가.
