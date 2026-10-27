@@ -12,7 +12,7 @@
       prs.json          ← PR 진행 상태(번호·이름·종류·의존·단계·브랜치·base). `scripts/steps.mjs`가 쓰고 읽는다 — 손으로 고치지 않고 `pr add`·`pr set`·`next … --pr`으로
     retained/
       folder-structure.md ← FOUNDATION PR 산출 (채용만)
-      tech-constraints.md ← BG의 requirement 산출
+      tech-constraints.md ← 기술 제약·확정 스택·디자인시스템 원본 레포 경로. 쓰는 곳은 [steps/requirement.md] 「자료 받기」·[requirement-review/recruitment/step.md] 「산출물」·[steps/markup/figma.md] 「재료」
       conventions-index.md ← requirement 「자료 받기」 수집. 양식·수집은 [conventions/artifact/conventions-index.md] 참조
       figma-url.md      ← requirement 「자료 받기」 수집 (figma 쓰는 모드)
       figma/            ← requirement 「자료 받기」 수집 캡처 이미지 (figma 쓰는 모드). `[meaningful-name].[이미지확장자]` 단위
@@ -23,12 +23,12 @@
       cross-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
       domain-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조
+      figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). MARKUP과, `markup.md`를 쓰는 각 PR realize-plan이 함께 읽는다. 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
     consumable/
       todo.md        ← requirement-review 채용과제 분석 중 직접 기록 시작(없으면 이 시점에 생성). requirement 진행 중 PR이 확정될 때마다 그 PR 섹션을 append (일괄 분할 없음 — [conventions/pr-split.md]). PR별 섹션은 각 PR의 plan에서 overview로 이관(절 단위 큐). 확정 전 항목은 미분류 절에 쌓인다
       global.md         ← requirement-review 페이지 리뷰 step 산출물. realize-plan 「잔여 산출물 소비」에서 소비. 담을 내용은 [requirement-review/output-template.md] 참조
       layout.md         ← requirement-review 페이지 리뷰 「종합」 산출물 (조건부 — 여러 페이지가 공유하는 레이아웃이 식별된 경우만)
       page-{페이지명}.md ← 페이지명은 영문 슬러그(소문자 + 하이픈). requirement 페이지별 분석 결과의 **PR 확정 전** 자리. 그 페이지를 담을 PR이 확정되면 `pr{N}/consumable/page.md`로 이동
-      figma-component-mapping.md ← MARKUP Lead 산출물 (실무 한정). 양식은 [template/figma-component-mapping.md], 생성 절차는 [conventions/figma-component-mapping-guide.md] 참조
       design-system.md  ← requirement-review 채용과제 분석 step 「디자인 시스템 설계」 산출물 (채용 한정). COMPONENTS 종류 PR이 소비 ([conventions/pr-types/components.md])
   pr{N}/
     persistent/
@@ -37,7 +37,7 @@
       overview.md       ← plan 산출물
     retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기
       implementation.md ← realize-plan 산출물. 이후 갱신 없음 — 마지막 소비는 verify 「Gap Analysis」. 소비처는 [conventions/artifact/implementation-spec.md] 참조
-      markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외: figma 없음). **Figma 원본 링크 인덱스(컴포넌트 종류별 × 상태별, 사용자 입력)** + 토큰 매핑표·매칭표. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 충실도 검증 자체는 MARKUP 담당)
+      markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외). 담는 내용은 [conventions/artifact/markup-spec.md] 참조. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 충실도 검증 자체는 MARKUP 담당)
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
       user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자 몫으로 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비

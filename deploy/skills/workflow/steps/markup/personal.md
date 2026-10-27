@@ -6,7 +6,7 @@ figma 대신 **사용자가 워크플로우 전에 만든 마크업 시안**(형
 
 ## 재료
 
-- 마크업 시안(`retained/mockup/`, +선택 `retained/spec.md`) + 디자인시스템 소스. figma 없음
+- 마크업 시안(`retained/mockup/`, +선택 `retained/spec.md`) + 디자인시스템 소스(MP `packages/design-system`). figma 없음
 
 ## 진실검사 A — 시안 대조 + 사용자 시각 승인
 

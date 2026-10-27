@@ -51,13 +51,15 @@ function artifacts() {
   }
   // 코드 대용이면 시각 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
   const codeTarget = path.join(bg, 'retained', 'code-target.md');
+  let figmaUrl;
   if (exists(codeTarget)) {
     required.push({ label: '코드 대용 대상', p: codeTarget });
   } else if (mode === '개인') {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
-    required.push({ label: 'figma URL', p: path.join(bg, 'retained', 'figma-url.md') });
+    // figma가 없으면 캡처가 시각 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.
     required.push({ label: 'figma 캡처', p: path.join(bg, 'retained', 'figma'), dir: true });
+    figmaUrl = exists(path.join(bg, 'retained', 'figma-url.md'));
   }
 
   console.log(`[requirement 「자료 받기」 종료 게이트] 모드: ${mode}${exists(codeTarget) ? ' (코드 대용 — 시각 원본은 세지 않는다)' : ''}`);
@@ -66,6 +68,7 @@ function artifacts() {
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);
     if (!ok) problems.push(`없음: ${r.label}`);
   }
+  if (figmaUrl !== undefined) console.log(`  figma: ${figmaUrl ? '있음 (figma 원본 대조)' : '없음 (캡처 대조)'}`);
   // 레포가 아직 없어 인덱스를 미룬 경우는 파일로 판별할 수 없어, 넘어갈지는 사람이 판정한다.
   if (problems.includes('없음: 컨벤션 인덱스')) console.log('\n  (레포가 아직 없어 인덱스를 미뤘으면 컨벤션 인덱스 ✗는 넘어간다 — 「레포 확보」에서 만든다)');
 }

@@ -30,7 +30,7 @@ next:
 2. 모드의 시각 원본을 사용 가능한 만큼 전부 받아 [모드 매트릭스](../conventions/modes.md)의 저장 위치에 둔다.
    - 개인 모드에서 화면에 안 담기는 동작을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다
    - 시안·기획서 없이 기존 구현 코드만 있으면 그 코드를 [코드 대용](../requirement-review/page-review.md#준비)으로 쓸지 묻고, 쓰기로 하면 리뷰 대상 코드 경로를 `retained/code-target.md`로 받는다
-   - 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 받는다
+   - 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 받는다. 디자인시스템 원본 레포 경로는 `retained/tech-constraints.md`에 적는다
 3. 받은 자료를 점검한다. figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-collection.md)대로 수집 방식을 점검한다.
    흐린 영역·식별 어려운 텍스트는 메인이 직접 훑지 않고 일회성 서브에이전트에 받은 자료 경로(figma 쓰는 모드면 figma-asset-collection.md도)를 넘겨, 다시 요청할 지점(파일·영역·무엇이 안 읽히는지) 목록만 돌려받아 다시 요청한다.
 4. 작업 레포가 있으면 [conventions-index.md](../conventions/artifact/conventions-index.md)대로 컨벤션 소스를 모아 `retained/conventions-index.md`를 만든다. 레포가 아직 없으면 「레포 확보」로 미루고, 개인 모드 신규 레포면 레포 생성 명령을 안내한다.
