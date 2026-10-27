@@ -69,7 +69,7 @@ Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라
 |----------|--------------------------|
 | Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead가 하므로 제외), Step 5.2.2의 코드블록 재배치 룰·테스트 범위 룰 |
 
-**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR도 설치·설정·위반 수정을 Feature Implementer에게 맡기되, 주입 재료·정답 대조 A·커밋 단위는 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)을 따른다.
+**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 구현자·주입 재료·정답 대조 A·규칙검사 B·커밋 단위를 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)대로 정한다.
 
 ---
 
