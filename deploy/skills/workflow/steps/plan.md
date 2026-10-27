@@ -37,13 +37,13 @@ next:
 - 완료 PR은 `node {{skill_dir}}/scripts/steps.mjs pr list`와 `/plan/` 폴더 목록으로 가린다 — 서브에이전트가 읽을 파일을 메인이 열지 않기 위해서다.
 - 인덱스가 없으면(이전 단계 스킵 등) 사용자에게 프로젝트별 컨벤션(회사 컨벤션 등)이 있는지 먼저 묻고, 그 답을 2번 서브에이전트에 넘긴다 — 서브에이전트는 사용자에게 묻지 못한다.
 
-그다음 아래 서브에이전트를 한 메시지로 나란히 띄운다. 모두 이번 PR 범위(todo.md 절·`/plan/pr{N}/` 경로)를 받고, 돌려주는 항목마다 출처 파일·원문 인용을 붙인다. 띄워 둔 동안 메인은 `/plan/pr{N}/` 하위(이번 PR 몫 분석이라 걸러 낼 것이 없다)를 직접 읽는다.
+그다음 아래 서브에이전트를 한 메시지로 나란히 띄운다. 모두 이번 PR 범위(todo.md 절·`/plan/pr{N}/` 경로)를 받고, 돌려주는 항목마다 출처 파일·원문 인용을 붙인다. 띄워 둔 동안 메인은 `/plan/pr{N}/` 하위(이번 PR 분석이라 걸러 낼 것이 없다)를 직접 읽는다.
 
 1. 이전 PR 결정 — 완료 PR이 없으면 띄우지 않는다
    - 넘기는 것: 메인이 가린 완료 PR들의 `pr{M}/persistent/` 경로
    - 돌려받는 것: 이번 PR이 이어받을 결정·컨벤션, 그리고 이번 PR이 전제를 바꿔 다시 열어야 할 결정
 2. 컨벤션 매칭
-   - 맡기는 것: [code-map.md](../../../contexts/code-map.md)의 탐색 절차 중 후보 선별과 Read까지(reference.md 기록과 사용자 확인은 메인 몫) + conventions-index.md 선별
+   - 맡기는 것: [code-map.md](../../../contexts/code-map.md)의 탐색 절차 중 후보 선별과 Read까지(reference.md 기록과 사용자 확인은 메인이 한다) + conventions-index.md 선별
    - 넘기는 것: code-map 범주(모드에서 [realize-plan의 대응](realize-plan.md#코딩-스탠다드--베스트프랙티스)대로 고른다)
    - 돌려받는 것: 이번 PR에 매칭된 규칙 행·경로·라인 범위, 이번 PR이 건드리는데 인덱스 트리거에 안 걸리는 영역 목록. 인덱스가 없어 메인이 먼저 물었으면 영역 목록은 받지 않는다
    - 인덱스에 [표준 참고처](../conventions/artifact/conventions-index.md#표준-참고처--개인실무-모드) 레포가 올라 있으면 레포마다 이번 PR 컴포넌트에 대응하는 파일 경로도 돌려받는다. 레포 경로만으로는 받지 않는다
@@ -81,7 +81,7 @@ plan 종료 직전(사용자 승인·토론 마무리 후) 각 종류를 분배�
 | 의사결정 근거·트레이드오프·거부 대안·발화 흐름 | `pr{N}/persistent/decisions.md` |
 | 외부 자료 링크·회사·프로젝트 컨벤션·베스트프랙티스 경로·라이브러리별 공식 가이드 확인 결과(아래 「라이브러리에 의존하는 기술 선택은 공식 가이드부터 찾는다」) | `pr{N}/persistent/reference.md` |
 | 기술 선택 결과 (채택안) | `pr{N}/persistent/decisions.md` 채택안 절 — overview에 안 남김 |
-| 의도(목표·범위·열려있는 질문) + (있으면) PR 종류 + 이 PR 몫 TODO | `pr{N}/persistent/overview.md`에 남김 |
+| 의도(목표·범위·열려있는 질문) + (있으면) PR 종류 + 이 PR의 TODO | `pr{N}/persistent/overview.md`에 남김 |
 
 분배 완료 시점부터 overview.md는 의도만 가진 단순 산출물이 된다. realize-plan부터 다른 step은 분배 완료 상태를 가정한다.
 
@@ -122,9 +122,9 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 - 의존 — `todo.md` 이 PR 절의 「의존」을 그대로 옮긴다(realize-plan이 base 브랜치 판단거리로 읽는다). 없으면 `- 없음`
 - 범위 요약 (뭘 만드는지의 경계)
 - **열려있는 질문** — 본 PR **외부 의존성** (백엔드 합의·디자인 검수·인프라 결정 등 본 PR 안에서 해소 안 되지만 다른 PR로 옮기지도 않는 항목)
-- `## TODO` — 고정 헤딩. `todo.md` 이 PR 절의 TODO를 옮겨 오고, 소비 뒤에 생기는 이 PR 몫 TODO도 여기 쌓인다. 없으면 `- 없음`
+- `## TODO` — 고정 헤딩. `todo.md` 이 PR 절의 TODO를 옮겨 오고, 소비 뒤에 생기는 이 PR의 TODO도 여기 쌓인다. 없으면 `- 없음`
 
-**다른 PR로 넘긴 항목은 「열려있는 질문」이 아니라 그 PR의 TODO로 적는다** ([PR 몫 TODO 등록처](../conventions/pr-split.md#pr-몫-todo-등록처)).
+**다른 PR로 넘긴 항목은 「열려있는 질문」이 아니라 그 PR의 TODO로 적는다** ([PR별 TODO 등록처](../conventions/pr-split.md#pr별-todo-등록처)).
 
 외부 참조 자료 링크는 overview.md에 적지 않고 reference.md(아래)에 누적한다.
 
@@ -132,10 +132,10 @@ PR별로 아래 항목을 포함한다. **의도 수준만 기술**한다 — �
 
 | 산출물 | 책임 | 코드 블록 |
 |---|---|---|
-| `overview.md` | **의도만** — 목표·의존·범위·열려있는 질문 + 이 PR 몫 TODO. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
+| `overview.md` | **의도만** — 목표·의존·범위·열려있는 질문 + 이 PR의 TODO. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
 | `decisions.md` | **기록 대상 결정의 근거** + 의사결정 흐름 (사용자 발화 단계 + 거부/채택 사유) | 사용자 발화 인용은 그대로. 코드는 시그니처 수준만 |
 | `reference.md` | 외부 자료 링크 + 회사·프로젝트 컨벤션·베스트프랙티스 경로 인덱스 + 라이브러리별 공식 가이드 확인 결과 | 코드 없음 |
-| `markup.md` | markup-spec.md [책임·위치](../conventions/artifact/markup-spec.md#책임위치)의 담는 내용 (개인 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
+| `markup.md` | [markup-spec 책임·위치](../conventions/artifact/markup-spec.md#책임위치)의 담는 내용 (개인 모드는 N/A — [modes.md](../conventions/modes.md)) | 코드 블록 없음 (링크·도표만) |
 | `implementation.md` | **구현 계획** ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 신설 시그니처·함수명 OK (rename류 기존 식별자 전사 X — grep 일괄치환 지시로) |
 
 ### 산출물: `/plan/pr{N}/persistent/reference.md`

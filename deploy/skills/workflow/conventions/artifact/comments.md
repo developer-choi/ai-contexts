@@ -57,7 +57,7 @@
 본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
 
 - ❌ `// TODO: PR4에서 X 추가`, `// TODO [PR4]: ...`
-- ✓ 그 PR의 TODO에 등록 ([PR 몫 TODO 등록처](../pr-split.md#pr-몫-todo-등록처))
+- ✓ 그 PR의 TODO에 등록 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처))
 
 본 PR 외부 의존성(백엔드 합의·디자인 검수·인프라 등):
 
@@ -66,7 +66,7 @@
 ## file-level(blanket) eslint-disable 라이프사이클
 
 파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 리팩토링 전 코드를 격리할 때),
-격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR 몫 TODO 등록처](../pr-split.md#pr-몫-todo-등록처)).
+격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)).
 
 - 격리 마커에 **`미리팩토링 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
 

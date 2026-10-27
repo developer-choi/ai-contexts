@@ -120,7 +120,7 @@ console.log(`\n[소멸 버킷을 인용한 AI_IMPL] ${ephemeral.length}건 — c
 for (const l of ephemeral) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
 if (ephemeral.length) problems.push('AI_IMPL 출처가 영속 파일이 아니다 — 소비되면 출처를 잃는다');
 
-// PR 몫 TODO의 등록처는 둘이다 — plan이 소비하기 전 PR은 todo.md 그 PR 절, 소비한 뒤는 그 PR의 overview.md.
+// PR별 TODO의 등록처는 둘이다 — plan이 소비하기 전 PR은 todo.md 그 PR 절, 소비한 뒤는 그 PR의 overview.md.
 function registries(plan) {
   const out = [path.join(plan, 'background/consumable/todo.md')];
   if (fs.existsSync(plan)) {

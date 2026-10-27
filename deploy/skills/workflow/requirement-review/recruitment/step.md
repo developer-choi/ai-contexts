@@ -24,7 +24,7 @@
 - `/plan/background/retained/service-analysis.md` (1절, [작성법](service-analysis.md))
 - `/plan/background/retained/domain-analysis.md` (1·5절)
 - `/plan/background/retained/tech-constraints.md` (1·3절)
-- `/plan/background/consumable/todo.md` (1·5절, 어느 절에 적을지는 [PR 몫 TODO 등록처](../../conventions/pr-split.md#pr-몫-todo-등록처))
+- `/plan/background/consumable/todo.md` (1·5절, 어느 절에 적을지는 [PR별 TODO 등록처](../../conventions/pr-split.md#pr별-todo-등록처))
 - `/plan/background/consumable/design-system.md` (4절)
 
 ## 분석 과정

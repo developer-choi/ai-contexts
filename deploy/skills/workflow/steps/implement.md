@@ -68,7 +68,7 @@ Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라
 
 | 에이전트 | Lead가 주입하는 컨텍스트 |
 |----------|--------------------------|
-| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead 몫이라 제외), Step 5.2.2의 코드블록 재배치 룰·테스트 범위 룰 |
+| Feature Implementer | hook·페이지 stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거 (커밋 분할은 Lead가 하므로 제외), Step 5.2.2의 코드블록 재배치 룰·테스트 범위 룰 |
 
 **프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR도 설치·설정·위반 수정을 Feature Implementer에게 맡기되, 주입 재료·정답 대조 A·커밋 단위는 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)을 따른다.
 
@@ -78,7 +78,7 @@ Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라
 
 ### Step 5.2.0. 구현 전 미검토 TODO 검사
 
-implement 진입 직후 본 PR 영역에서 [구현 전 미검토 TODO 검사](../conventions/artifact/comments.md#구현-전-미검토-todo-검사)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가. `pr{N}/persistent/overview.md`의 `## TODO`도 읽는다 — plan 뒤에 다른 PR이 이 PR 몫으로 넣은 항목이 거기 있다.
+implement 진입 직후 본 PR 영역에서 [구현 전 미검토 TODO 검사](../conventions/artifact/comments.md#구현-전-미검토-todo-검사)를 실행한다. realize-plan에서 사용자가 미검토한 항목이 있으면 IMPL 진입 불가. `pr{N}/persistent/overview.md`의 `## TODO`도 읽는다 — plan 뒤에 다른 PR이 이 PR이 할 일로 넣은 항목이 거기 있다.
 
 ### Step 5.2.1. TODO 주석 처리
 

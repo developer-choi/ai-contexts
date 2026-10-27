@@ -40,7 +40,7 @@
       markup.md         ← realize-plan 산출물 (조건부 — UI 컴포넌트 PR만, 개인 모드 제외). 담는 내용은 [conventions/artifact/markup-spec.md] 참조. 마지막 소비자는 verify 「Figma 시각 대조」 (figma 대조 자체는 MARKUP 담당)
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
-      user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자 몫으로 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비
+      user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자가 확인하도록 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비
 ```
 
 realize-plan의 stub 코드는 `/plan/` 하위가 아닌 **소스 디렉토리(`src/...`) 하위**에 실제 파일로 생성된다.
