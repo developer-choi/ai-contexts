@@ -68,7 +68,7 @@
 파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 리팩토링 전 코드를 격리할 때),
 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)).
 
-- 격리 마커에 **`미리팩토링 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 미리팩토링 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
+- 격리 마커에 **`리팩토링 전 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 리팩토링 전 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
 
 인라인 disable(`// eslint-disable-next-line`)은 본 소절 대상이 아니다 — file-level blanket 블록만.
 

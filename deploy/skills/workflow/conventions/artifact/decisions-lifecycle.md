@@ -29,7 +29,7 @@
   단 stub 유무는 여기 해당하지 않는다 — [realize-plan 「realize-plan 커밋」](../../steps/realize-plan.md#5-realize-plan-커밋-stub-또는-실행) 판정 소관이라 plan에서 stub 없음으로 단정하지 않는다.
 - **non-issue 확인 (걱정거리 해소)**: "우려했으나 확인해보니 문제 없음"으로 닫힌 항목은 결정이 아니다 (채택한 대안도 기각한 대안도 없음) → 적지 않는다. plan 작성 때 필요하면 implementation.md 메모로.
 - **PR 분할·범위 변경**: 그 PR의 TODO로 적는다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처))
-- **단순 합의**: 트레이드오프 없이 사용자가 그냥 동의 (선택지가 사실상 하나)
+- **단순 합의**: 트레이드오프 없이 사용자가 그냥 동의 (선택지가 하나)
 
 ### 경계 사례 — AI 단독 판단 금지
 

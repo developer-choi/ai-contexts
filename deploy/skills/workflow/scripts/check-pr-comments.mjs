@@ -10,7 +10,7 @@
 // 그쪽은 문구를 *예시*로만 들고 있었다("추적 가능한 고정 문구를 남긴다 (예: …)"). 고정이
 // 아니면 탐지가 설 수 없으므로 여기서 문구를 못박고, comments.md가 이 파일을 가리킨다.
 //
-// 판단은 안 한다 — 걸린 것을 어떻게 처리할지(해소·이연·어느 PR에 배정)는 부르는 쪽이 정한다.
+// 판단은 안 한다 — 걸린 것을 어떻게 처리할지(해소·미룸·어느 PR에 배정)는 부르는 쪽이 정한다.
 //
 // 사용:
 //   node <이 파일> --base <기준 ref>                     → 금지 주석 잔존 점검 (PR diff)
@@ -26,11 +26,11 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// 코드 안에 남으면 안 되는 마커. comments.md 「PR 이연 마커 — 코드 안 금지」와
-// 「코드 안 TODO는 본 PR 안 모두 해소. IMPL 종료 시 0건」이 그 근거다.
+// 코드 안에 남으면 안 되는 마커. comments.md 「다른 PR로 미루는 마커 — 코드 안 금지」와
+// 「구현 종료 TODO 잔존 검사」가 그 근거다.
 const FORBIDDEN = [/\bTODO\b/, /\bFIXME\b/, /\bAI_IMPL\b/];
-// 미리팩토링 격리 blanket disable의 추적 문구. 이 문자열이 정본이다 — 바꾸면 고아 탐지가 멈춘다.
-const ISOLATION_MARKER = '미리팩토링 코드(정적 분석 도입 PR)';
+// 리팩토링 전 코드를 격리하는 blanket disable의 추적 문구. 이 문자열이 정본이다 — 바꾸면 고아 탐지가 멈춘다.
+const ISOLATION_MARKER = '리팩토링 전 코드(정적 분석 도입 PR)';
 // md는 대상이 아니다 — 계획 문서에는 `### TODO` 같은 절 이름이 정상적으로 들어 있다.
 const SKIP = /\.(md|mdx)$/;
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next']);
