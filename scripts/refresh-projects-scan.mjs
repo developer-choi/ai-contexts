@@ -2,7 +2,7 @@
 // `/refresh-projects` 회차 시작 점검 — Phase 1(커밋 탐색·짝꿍 드리프트)의
 // 기계 파트를 낸다. Phase 2 계획을 짜려면 이것들이 한 화면에 있어야 한다.
 //
-// 왜 스크립트인가: 회차마다 AI가 프로젝트 4개에 git을 여러 번 걸어 범위를 조회하고, 해시가
+// 왜 스크립트인가: 회차마다 AI가 레지스트리의 각 프로젝트에 git을 여러 번 걸어 범위를 조회하고, 해시가
 // 아직 조상인지 눈으로 확인하고, coupling.json 그룹마다 변경 파일 목록과 손으로 교집합을 냈다.
 // 판정에 LLM 몫이 없다.
 //
@@ -115,7 +115,7 @@ if (argv.includes("--worktrees")) {
   process.exit(0);
 }
 
-// | 약어 | 경로 | Phase 3: Maintain | Phase 4-kq: Deploy |
+// | 약어 | 경로 | Phase 3: Maintain |
 const registry = tableRows(skillMd, "약어")
   .map(([abbr, path]) => ({ abbr, dir: AT.get(abbr) ?? expandHome(unquote(path)), at: AT.has(abbr) }))
   .filter((p) => p.abbr && p.dir);
@@ -142,9 +142,7 @@ for (const { abbr, dir } of registry) {
     // 프로젝트를 새로 등록한 회차에만 필요한 판단이라 SKILL.md가 아니라 여기서 그때만 낸다.
     out.push(`  ${abbr}: state.json 엔트리 없음 — 역할별 초기 해시를 정해 넣는다`);
     out.push("      Readme 지배(AC/MP 등): README.md 마지막 실내용 변경 커밋 — 포맷팅·리네이밍 같은 메타 커밋(style/chore)은 커밋 메시지로 걸러 뺀다");
-    out.push("      Deploy 원천(KA): KQ의 최근 「KA 변환」 커밋 시점 직전의 원천 HEAD");
-    out.push("      Deploy 자체(KQ): 자체 최근 변환 커밋");
-    out.push("      역할 불명확·Maintain·Deploy 스킬 모두 없음: 현재 HEAD");
+    out.push("      그 밖(역할 불명확 포함): 현재 HEAD");
     continue;
   }
   const head = git(dir, ["rev-parse", "HEAD"]);
