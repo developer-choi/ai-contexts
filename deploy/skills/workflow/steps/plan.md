@@ -20,7 +20,11 @@ next:
 
 ### 입력·산출물·작업 위치
 
-- **입력**: `background/consumable/todo.md` 해당 PR 섹션 + BG 산출물 + (공통 컴포넌트를 받는 PR) `background/retained/component-list.md` + 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
+- **입력**:
+  - `background/consumable/todo.md` 해당 PR 섹션
+  - BG 산출물
+  - (공통 컴포넌트를 받는 PR) `background/retained/component-list.md`
+  - 이미 끝난 PR들의 `persistent/` (decisions, reference, implementation — 번호상 앞선 PR이 아니라 실제로 완료된 PR)
 - **산출물**: `pr{N}/persistent/`: overview.md, decisions.md, reference.md
 - **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다 — realize-plan이 만든다
 
@@ -70,12 +74,12 @@ plan 진행 중에는 overview.md가 **단일 작업 캔버스** 역할을 한�
 - AI는 결정 후보를 나열하고 각 후보 옆에 비어 있는 trade-off 칸만 만들어 둔 뒤 "이 결정의 trade-off를 적어 주십시오"라고 질문하며, 임의로 trade-off를 채우지 않는다.
 - 사용자가 채운 trade-off 위에서 AI는 빠진 축·과장된 축을 검증·보강한다.
 
-plan 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분배한다:
+plan 종료 직전(사용자 승인·토론 마무리 후) 각 종류를 분배한다:
 
-| 갈래 | 분배 대상 |
+| 종류 | 분배 대상 |
 |---|---|
 | 의사결정 근거·트레이드오프·거부 대안·발화 흐름 | `pr{N}/persistent/decisions.md` |
-| 외부 자료 링크·회사·프로젝트 컨벤션·베스트프랙티스 경로·라이브러리별 공식 가이드 확인 결과(아래 「라이브러리에 기대는 기술 선택은 공식 가이드부터 찾는다」) | `pr{N}/persistent/reference.md` |
+| 외부 자료 링크·회사·프로젝트 컨벤션·베스트프랙티스 경로·라이브러리별 공식 가이드 확인 결과(아래 「라이브러리에 의존하는 기술 선택은 공식 가이드부터 찾는다」) | `pr{N}/persistent/reference.md` |
 | 기술 선택 결과 (채택안) | `pr{N}/persistent/decisions.md` 채택안 절 — overview에 안 남김 |
 | 의도(목표·범위·열려있는 질문) + (있으면) PR 종류 + 이 PR 몫 TODO | `pr{N}/persistent/overview.md`에 남김 |
 
@@ -83,9 +87,9 @@ plan 종료 직전(사용자 승인·토론 마무리 후) 각 갈래를 분배�
 
 plan 진행 중에 overview.md가 비대해도 무방 — 작업 캔버스 시점이므로 짧은 코드 블록·근거 본문이 일시 공존. 분배 직전이 정리 시점.
 
-#### 라이브러리에 기대는 기술 선택은 공식 가이드부터 찾는다
+#### 라이브러리에 의존하는 기술 선택은 공식 가이드부터 찾는다
 
-라이브러리 API·패턴에 기대는 기술 선택을 사용자에게 내기 전에, 같은 문제를 다룬 가이드를 아래 찾을 곳에서 모두 찾는다. 한 곳에서 답이 나왔다고 나머지를 건너뛰지 않고, 선택이 기대는 라이브러리마다 본다.
+라이브러리 API·패턴에 의존하는 기술 선택을 사용자에게 내기 전에, 같은 문제를 다룬 가이드를 아래 찾을 곳에서 모두 찾는다. 한 곳에서 답이 나왔다고 나머지를 건너뛰지 않고, 라이브러리마다 본다.
 
 - 그 라이브러리의 공식 문서: 설치 버전 판과 최신 stable 판 둘 다.
   - 최신 stable이 몇인지는 레지스트리(`npm view <패키지> version`)로 먼저 확인한다.
@@ -100,13 +104,13 @@ plan 진행 중에 overview.md가 비대해도 무방 — 작업 캔버스 시�
 
 찾은 가이드·예시가 같은 문제를 서로 다른 방식으로 풀고 있으면 — 서로를 반대한다고 적혀 있지 않아도 — 하나를 골라 채택안으로 내지 않고, 각각을 원문과 함께 선택지로 낸다.
 
-기술 선택을 낼 때는 그 선택이 기대는 라이브러리를 행으로, 위에서 찾을 곳을 열로 둔 표를 먼저 낸다. 칸마다 확인 결과를 적고, 빈칸을 남기지 않는다.
+기술 선택을 낼 때는 그 선택이 의존하는 라이브러리를 행으로, 위에서 찾을 곳을 열로 둔 표를 먼저 낸다. 칸마다 확인 결과를 적고, 빈칸을 남기지 않는다.
 
 확인 결과는 근거가 된 가이드의 원문 인용(문장만 옮기고 코드는 링크로 가리킨다)이거나, 찾지 못했으면 「찾아봤는데 없음」과 찾아본 곳(검색어·사이트·파일)이다. 「조회하지 않았다」는 확인 결과가 아니라서, 한 칸이라도 그렇게 남기지 않는다.
 
 원문 인용은 요약을 거치지 않은 본문에서 옮긴다. 공식 문서 페이지가 요약으로 돌아오거나 열리지 않으면(응답 오류·페이지 없음) 그 칸의 찾아본 곳에 실패한 URL을 적고, 같은 판(설치 버전 칸은 그 버전 태그)의 공식 저장소 docs 폴더·README 원본 파일(raw)에서 다시 가져온다.
 
-프로젝트가 쓰지만 이 선택이 기대지 않는 라이브러리는 표의 행에서 빼고, 표 아래에 왜 기대지 않는지 한 줄 적는다.
+프로젝트가 쓰지만 이 선택이 의존하지 않는 라이브러리는 표의 행에서 빼고, 표 아래에 그 이유를 한 줄 적는다.
 
 ### 산출물: `/plan/pr{N}/persistent/overview.md`
 
@@ -156,7 +160,7 @@ overview.md 작성 후, 토론할 의사결정 항목을 식별하여 사용자�
 
 ### 산출물: `/plan/pr{N}/persistent/decisions.md`
 
-본 step에서 초기 작성. 책임·포함·제외 기준·갈래별 양식·만들어도 되는지 확인하는 조건(단발 발화 확인)은 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
+본 step에서 초기 작성. 책임·포함·제외 기준·종류별 양식·만들어도 되는지 확인하는 조건(단발 발화 확인)은 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
 
 ---
 
