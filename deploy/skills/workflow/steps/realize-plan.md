@@ -104,7 +104,7 @@ stub의 외부 공개 컴포넌트 prop을 설계할 때, **HTML 표준 속성�
 | 산출물 | 위치 | 형태 | 작성 조건 |
 |--------|------|------|---------|
 | stub 파일들 — 로직·조립 `.tsx`, hook, `*.test.tsx`, fixture, types 등 (범위는 [정의·범위](../conventions/artifact/stub.md#정의범위)) | 소스 디렉토리 | 결정 가능하고 코드로 표현 가능한 모든 설계 (코드 분량 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약) | 항상 |
-| `markup.md` | `pr{N}/retained/` | [markup-spec.md](../conventions/artifact/markup-spec.md) 「책임·위치」의 담는 내용 | UI 컴포넌트가 있는 PR이면 필수. [verify 「Figma 시각 대조」](verify.md#step-641-figma-시각-대조--승인-게이트-ui-컴포넌트-pr-한정) 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. 개인 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
+| `markup.md` | `pr{N}/retained/` | markup-spec.md [책임·위치](../conventions/artifact/markup-spec.md#책임위치)의 담는 내용 | UI 컴포넌트가 있는 PR이면 필수. [verify 「Figma 시각 대조」](verify.md#step-641-figma-시각-대조--승인-게이트-ui-컴포넌트-pr-한정) 사용자 figma 시각 대조의 기준. 그 외 PR은 생성 안 함. 개인 모드는 생성 안 함 ([modes.md](../conventions/modes.md)) |
 | `implementation.md` | `pr{N}/retained/` | 구현 계획 ([conventions/artifact/implementation-spec.md](../conventions/artifact/implementation-spec.md) 단일 출처) | 대부분 작성됨 |
 
 interface와 test-cases는 별도 md를 만들지 않는다. interface narrative가 필요하면 다른 산출물 또는 stub 파일의 JSDoc에 적는다.
