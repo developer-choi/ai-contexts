@@ -21,7 +21,7 @@
 
 - **폴더 구조 마이그레이션** + `background/retained/folder-structure.md` 작성 (디렉토리 골격 + 폴더 마이그레이션 항목). 후속 PR이 참조한다.
 - **코딩 스탠다드 마이그레이션** — `/code-review --mode only-standards`에 아래 둘을 넘겨 받은 이슈대로 기존 코드를 고친다
-  - coding-standards 경로: [realize-plan 「코딩 스탠다드 · 베스트프랙티스」](../../steps/realize-plan.md#코딩-스탠다드--베스트프랙티스)에서 고른 coding-standards 파일
+  - coding-standards 경로: 그 PR reference.md에 모인 coding-standards 파일
   - 리뷰 대상: 폴더 구조 마이그레이션을 마친 뒤의 기존 파일
 - **전역 폰트 셋업**
 

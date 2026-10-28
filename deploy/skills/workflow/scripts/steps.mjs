@@ -321,7 +321,10 @@ function cmdPr(sub, opt) {
     fail(
       'pr 명령은 --plan <plan 폴더>가 필요하다. 사용:\n' +
         '  pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]\n' +
-        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]',
+        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]\n' +
+        '  pr list --plan <plan 폴더>\n' +
+        '  pr branches --plan <plan 폴더> --repo <레포>\n' +
+        '  pr links --plan <plan 폴더> --repo <레포> --n <N> --body <PR 본문 md>',
     );
   }
   const data = readPrs(opt.plan);
@@ -404,6 +407,11 @@ function cmdBranches(data, opt) {
   if (!data.prs.length) console.log('확정된 PR 없음');
   let broken = 0;
   for (const pr of data.prs) {
+    // 브랜치는 realize-plan에서 기록한다 — 그 전 PR은 아직 브랜치가 없는 것이 정상이다.
+    if (!pr.branch && pr.stage !== 'realized') {
+      console.log(`${prLabel(pr)} | 브랜치 아직 없음 (${pr.stage})`);
+      continue;
+    }
     if (!pr.branch) {
       console.log(`${prLabel(pr)} | 브랜치 미기록 — pr set --n ${pr.n} --branch <브랜치> --base <ref>로 기록한다`);
       broken += 1;
@@ -423,7 +431,7 @@ function cmdBranches(data, opt) {
     commits.forEach((commit) => console.log(`    ${commit}`));
     // 아래 브랜치가 다른 워크트리에 체크아웃돼 있으면 `rebase --update-refs`가 건너뛰어 옛 커밋에 남는데, git은 에러를 내지 않는다.
     if (below && git(opt.repo, ['merge-base', '--is-ancestor', pr.base, pr.branch]) === null) {
-      console.log(`  어긋남: ${pr.base}의 tip이 ${pr.branch}에 없다 — 아래 브랜치가 안 따라왔거나 이 브랜치가 옛 base 위에 있다`);
+      console.log(`  어긋남: PR ${below.n}(${pr.base})의 tip이 ${pr.branch}에 없다 — 아래 브랜치가 안 따라왔거나 이 브랜치가 옛 base 위에 있다`);
       broken += 1;
     }
     const baseMatchesDeps = below ? pr.deps.includes(below.n) : pr.deps.length === 0;

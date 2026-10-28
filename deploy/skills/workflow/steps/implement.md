@@ -24,8 +24,8 @@ next:
   - realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`)
   - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
   - MARKUP 페이지 코드(페이지 코드 포함 PR, 코드 대용 제외)
-- **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)대로). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다(정리는 [verify 「커밋 정리 — 사용자 리뷰 전」](verify.md#step-625-커밋-정리--사용자-리뷰-전))
-- 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
+- **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)대로). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
+- 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 verify에서 한 번에 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 
 ---
@@ -117,4 +117,4 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
   - 띄운 구현자·서브에이전트의 모델과 근거 (이 문서가 적은 근거를 옮기고, 다르게 띄웠으면 바꾼 이유)
   - 수정 사항 (있는 경우)
 
-> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 [최종 점검 단계](verify.md)에 진입한다. (implement는 세션 경계가 아니며 후속 안내는 verify에서 낸다.)
+> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 최종 점검 단계(verify)에 진입한다.

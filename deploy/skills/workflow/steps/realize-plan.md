@@ -62,7 +62,7 @@ figma 자료는 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피
 
 ### 코딩 스탠다드 · 베스트프랙티스
 
-code-map.md의 [탐색 절차](../../../contexts/code-map.md#critical-탐색-절차)를 따른다. 로드 규칙의 회사/개인은 모드로 고르고(`실무` → 회사 프로젝트, `채용`·`개인` → 개인 프로젝트), `file-folder-structure` 태그 파일을 포함한다.
+coding-standards·MP 베스트프랙티스는 reference.md에 모인 것을 쓴다.
 매칭되는 MP 베스트프랙티스가 없으면 따를 패턴을 사용자에게 묻는다. stub과의 분담은 [reference-curation.md](../conventions/artifact/reference-curation.md#stub과의-분담) 참조.
 
 ### 배치·네이밍은 컨벤션 본문으로 정한다
@@ -94,7 +94,7 @@ interface narrative가 필요하면 stub 파일의 JSDoc에 적는다.
 
 ### 코드로 옮길 것과 IMPL로 넘길 것
 
-무엇을 stub으로 만드는지는 stub.md의 [정의·범위](../conventions/artifact/stub.md#정의범위)를 따른다 — 외부 공개 시그니처가 없다고 건너뛰지 않는다. md 산출물에는 코드로 표현 못 하는 것만 남긴다 — implementation.md에 무엇을 담는지는 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)를 따른다.
+무엇을 stub으로 만드는지는 stub.md의 [정의·범위](../conventions/artifact/stub.md#정의범위)를 따른다. md 산출물에는 코드로 표현 못 하는 것만 남긴다 — implementation.md에 무엇을 담는지는 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)를 따른다.
 
 이미 있는 코드를 고치는 편집(rename·이동·설정 치환)도 md에 옮겨 적지 않고 그 자리에서 실행·커밋한다. 미뤄야 하면 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)를 따라 적는다. 이 PR에 의존하는 PR이 있으면 미루지 않는다.
 
@@ -108,24 +108,21 @@ stub 커밋 뒤 본체를 IMPL로 넘길지(무거운 PR), 이 자리에서 구�
 
 ## 종료 시퀀스
 
-산출물 작성 완료 + 사용자 OK 발화 직후, 후속 세션 spawn 안내·보고 출력 전에 아래 단계를 **순서대로 모두** 수행한다.
+산출물 작성 완료 + 사용자 OK 발화 직후, 후속 세션 spawn 안내 전에 아래 단계를 **순서대로 모두** 수행한다.
 
 가벼운 PR이라 구현을 이 자리에서 끝냈어도, 아래 종료 단계를 마치면 PR_{N}_IMPL을 안내한다 — 리뷰·사용자 테스트·커밋 정리는 IMPL 세션이 돈다.
 
 ### 1. 산출물 리뷰
 
-리뷰어 서브에이전트에게 산출물이 결정·의도·컨벤션과 맞고 서로 어긋나지 않는지 리뷰를 맡긴다. `pr{N}/persistent/`의 overview.md·decisions.md·reference.md, `pr{N}/retained/implementation.md`, 모드, realize-plan 커밋 범위를 넘기고 아래를 짚어 준다.
+리뷰어 서브에이전트에게 산출물이 결정·의도·컨벤션과 맞고 서로 어긋나지 않는지 리뷰를 맡긴다.
+`pr{N}/persistent/`의 overview.md·decisions.md·reference.md, `pr{N}/retained/implementation.md`, 모드, realize-plan 커밋 범위를 넘기고 아래를 짚어 준다. 지적마다 어느 기준에서 나왔는지와 `파일:줄`·원문 인용을 붙여 돌려받는다.
 
 - [stub.md](../conventions/artifact/stub.md)·[comments.md](../conventions/artifact/comments.md) 양식도 기준이다. reference.md가 reference-curation.md의 [포함 항목](../conventions/artifact/reference-curation.md#포함-항목)대로 쌓였는지도 본다
 - 코드로 표현할 수 있는 것이 md 산문에 들어간 곳, stub 대상인데 stub이 통째 빠진 곳을 찾는다. implementation.md는 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)가 담으라고 한 것이면 지적하지 않는다
 - 채용과제면 평가자 시선으로 감점 요인과, 과잉 설계가 아닌 가점 요인을 낸다
 
+리뷰 결과와 그에 따라 고친 것을 사용자에게 보고한다.
+
 ### 2. `it.todo` 매칭 점검 (PLAN 시점)
 
-산출물 리뷰와 별개로 매번 직접 수행한다. [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검)의 **PLAN 시점 매칭**을 적용하고, 그 절의 `todo-coverage`가 통과해야 종료한다. 이 자리에서 구현까지 한 PR은 표를 stub 커밋의 `it.todo`로 채운다.
-
-### 3. 보고 내용
-
-- 파생된 산출물 핵심 요약
-- 산출물 리뷰 결과 (1단계)
-- `it.todo` 매칭 점검 결과 (2단계 — 행동 결정 커버리지 표)
+산출물 리뷰와 별개로 매번 직접 수행한다. [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검)의 **PLAN 시점 매칭**을 적용하고, 그 절의 `todo-coverage`가 통과해야 종료한다. 이 자리에서 구현까지 한 PR은 표를 stub 커밋의 `it.todo`로 채운다. 통과한 커버리지 표를 사용자에게 보인다.

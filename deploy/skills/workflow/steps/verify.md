@@ -8,7 +8,7 @@ next:
 
 # verify: 최종 점검
 
-모든 기능 구현 및 커밋 완료 후, **PR 생성 직전** 코드 품질을 최종 점검하는 단계입니다.
+구현 커밋을 마친 뒤 **PR 생성 직전** 코드 품질을 최종 점검하는 단계다.
 
 ---
 
@@ -16,7 +16,6 @@ next:
 
 - **입력**
   - implement가 쌓은 커밋(stub + IMPL + 리뷰 수정)
-  - `pr{N}/retained/implementation.md`(Gap Analysis 계획)
   - `pr{N}/persistent/reference.md`·`decisions.md`
   - `background/consumable/todo.md`·`pr*/persistent/overview.md` 「TODO」(금지 주석·고아 disable 검사)
   - 디자인 원본 — [modes.md](../conventions/modes.md) 매트릭스의 저장 위치(UI 컴포넌트 PR)
@@ -25,66 +24,33 @@ next:
   - `pr{N}/persistent/decisions.md` 갱신
   - 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
+- **PR 기준 ref**: `node {{skill_dir}}/scripts/steps.mjs pr list`가 이 PR의 `브랜치 ← base`로 찍은 base
 
 ---
 
-## Step 6.1. Gap Analysis (계획 ↔ 실제 차이 검사)
+## Step 6.1. 금지 주석·고아 disable 검사
 
-`pr{N}/retained/implementation.md`의 `### N.` 계획 커밋 항목 목록과 실제 `git log`를 대조하여 차이를 식별한다.
-
-대조 기준:
-
-- **계획**: `implementation.md`의 `### N. ...` 항목 목록 (각 항목 = 한 커밋)
-- **실제**: `git log` 커밋 목록
-
-차이 분류:
-
-- **계획에 있는데 git에 없음** = 누락. 사용자에게 보고
-- **git에 있는데 계획에 없음** = 추가 (버그 수정, 엣지 케이스, 임의 리팩토링 등). 다음을 검증해 사용자에게 보고:
-  - 추가 사유 (왜 계획 밖으로 갔는지)
-  - 본 PR 범위인지, 다른 PR로 넘길지 판단
-  - 테스트 커버리지 (추가된 코드 테스트)
-  - 글로벌 룰 「내 작업 외 변경은 커밋하지 않는다」 위반 가능성
-
-`pr{N}/persistent/overview.md` `## TODO`에 남은 항목도 계획·커밋과 대조해 보고한다 — implement 시작 뒤에 도착한 항목이 여기서 잡힌다.
-
-위 대조는 Lead가 직접 하지 않고 일회성 서브에이전트에 맡긴다 — Lead에는 차이 목록만 있으면 된다.
-
-- 두 파일 경로와 PR 기준 ref를 넘기고, 아래만 돌려받는다.
-  - 누락된 계획 항목
-  - 추가 커밋(SHA·제목, 테스트가 함께 들어왔는지, 이 PR 범위 밖 파일을 건드렸는지와 그 파일 경로)
-  - 남은 TODO 항목
-- 추가 사유와 본 PR 범위인지·다른 PR로 넘길지의 판단은 Lead가 붙인다.
-- implement가 앞 세션에서 돌았으면 그 세션 대화 기록 경로(찾는 법은 Step 6.6)도 넘겨 추가 커밋마다 사유가 된 대화 원문을 함께 받고, 거기서도 안 나오면 사용자에게 묻는다.
-
-보고 기준: 차이가 있을 때만 기재. 차이가 없으면 섹션 생략.
-
----
-
-## Step 6.1.5. 금지 주석·고아 disable 검사 (안전망 + 백스톱)
-
-> **step-6.2 진입 전 검사.** step-6.1 직후 자동 실행한다. 통과한 뒤에만 step-6.2로 진입한다. 생략 불가 — "implement 종료에서 0건이 보장됐으니 건너뛴다"는 판단 금지.
+통과해야 6.2로 넘어간다. "implement 종료에서 0건이 보장됐으니 건너뛴다"며 생략하지 않는다.
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan <plan>`
 
 둘을 함께 본다.
 
-- **금지 주석 잔존** — 걸리면 implement Implementer 흐름으로 처리하고 이 검사를 다시 돌린다. 리뷰어에게 시키지 않는다.
-- **미배정 blanket disable 고아** — 생성 시 등록([file-level(blanket) eslint-disable 라이프사이클](../conventions/artifact/comments.md#file-levelblanket-eslint-disable-라이프사이클))을 빠뜨려 어느 PR에도 배정 안 된 것만 뜬다. 여기서 제거하지 않고 표면화만 한다. 목록을 사용자에게 명시 보고하고, 어느 PR에 넣을지는 사용자가 정해 [PR별 TODO 등록처](../conventions/pr-split.md#pr별-todo-등록처)에 등록한다.
+- **금지 주석 잔존** — 걸리면 Implementer가 고치고 이 검사를 다시 돌린다.
+- **미배정 blanket disable 고아** — 여기서 제거하지 않고 목록을 사용자에게 보고하고, 사용자가 고른 PR에 [PR별 TODO 등록처](../conventions/pr-split.md#pr별-todo-등록처)대로 등록한다.
 
 ---
 
 ## Step 6.2. 리뷰 파이프라인
 
-Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md#1-컨텍스트-준비)가 소유한다.
+Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md)가 소유한다.
 
 ```
-code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
+code-review(advanced) → 이슈 목록을 Implementer에게 한번에 → Implementer 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
 
 - code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
-- code-review가 이슈 목록을 반환하면, Implementer에게 한번에 전달
-- 수정은 implement의 Implementer 흐름이 수행한다 (마크업 수정이면 그 모드에서 원본(피그마 등)과 맞는지 보는 검사 기준 — [modes.md](../conventions/modes.md) 매트릭스)
+- 마크업을 고쳤으면 Implementer가 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
 
 ---
 
@@ -92,7 +58,7 @@ code-review(advanced) → 이슈 목록 → Implementer 수정 → code-review(a
 
 Step 6.2가 0건으로 수렴할 때마다(다시 돈 수렴 포함) 다음 단계로 넘어가기 전에 돈다. IMPL에서 구현했든 realize-plan에서 구현까지 마쳤든 같다.
 
-Lead는 직접 대조하지 않고 서브에이전트를 띄운다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다.
+Lead는 서브에이전트를 띄운다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다.
 
 서브에이전트가 하는 일:
 
@@ -100,9 +66,9 @@ Lead는 직접 대조하지 않고 서브에이전트를 띄운다. 테스트 �
 - 이 PR에서 새로 생기거나 이름이 바뀐 테스트 이름(`it`·`test`. 템플릿·`each`로 만든 이름은 펼친 값마다)을 감싼 `describe` 경로와 함께 한 행씩 표에 올린다. 리뷰에서 반영한 대안 이름도 대상이다.
 - 행마다 그 절의 규칙을 하나씩 대보고 걸린 규칙 원문과 고칠 이름을 적는다. 걸린 규칙이 없으면 「없음」으로 적는다.
 
-걸린 이름은 Implementer가 고치고 이 대조를 다시 돌린다. 「네이밍」 절에 맞는 이름을 정하지 못하면 고치지 않고 사용자에게 올린다.
+걸린 이름은 Implementer가 고치고 이 대조를 다시 돌린다. 「네이밍」 절에 맞는 이름을 정하지 못하면 사용자에게 올린다.
 
-걸린 이름이 없거나 남은 걸린 이름을 모두 사용자에게 올려 정했으면 서브에이전트가 낸 표를 파일로 두고 `node {{skill_dir}}/scripts/step-gates.mjs name-check record --repo <레포 경로> --base <PR 기준 ref> --table <표 파일>`로 남긴다.
+걸린 이름이 없거나 남은 걸린 이름을 모두 사용자에게 올려 정했으면 서브에이전트가 낸 표를 파일로 두고 `node {{skill_dir}}/scripts/step-gates.mjs name-check record`로 남긴다.
 
 ---
 
@@ -112,22 +78,18 @@ Lead는 직접 대조하지 않고 서브에이전트를 띄운다. 테스트 �
 
 처음에는 뽑은 시나리오를 전부 돌린다. 수정 뒤 다시 돌 때는 고친 코드가 닿는 시나리오만 돌린다.
 
-시나리오 뽑기 — stub의 `it.todo`(자동화 단위 테스트)와는 별개다:
-
-- 범위: 구현 단계의 모든 코드 변경분을 훑어 TC를 뽑는다
-- 케이스 종류: 성공 경로, 실패 경로, 엣지 케이스 모두 뽑는다
-- 단위: 사용자 인터랙션 시나리오. 함수 인자·반환 단위는 적지 않는다
+시나리오 뽑기는 일회성 서브에이전트에 맡긴다 — PR diff 전체를 훑는 일이다. PR 기준 ref와 화면 PR이면 디자인 원본 경로를 넘기고, 사용자 인터랙션 단위 시나리오마다 `<시나리오>: <조건>일 때 <기대 동작>`과 닿는 `파일:줄`만 돌려받는다. stub의 `it.todo`(자동화 단위 테스트)와는 별개다.
 
 AI 실행:
 
-- 뽑은 TC는 아래 사유에 걸리는 것만 빼고 전부 실제 크롬으로 돌린다. 조합이 폭발하는 매트릭스는 크롬에서 대표 1경우만 돌리고, 나머지는 이미 돌린 자동 검증 이름을 보고에 싣는다
+- 뽑은 시나리오는 아래 사유에 걸리는 것만 빼고 전부 실제 크롬으로 돌린다. 조합이 폭발하는 매트릭스는 크롬에서 대표 1경우만 돌리고, 나머지는 이미 돌린 자동 검증 이름을 보고에 싣는다
 - 크롬으로 돌릴 시나리오가 여럿이면 에이전트 하나에 몰지 않고, [여러 에이전트에 나눠 동시에 확인할 때](../../../contexts/browser-verification.md#여러-에이전트에-나눠-동시에-확인할-때)대로 나눠 동시에 돌린다
 - 판정은 화면이 뜨는지가 아니라, 화면에 나온 문구·값 하나하나가 그 시나리오의 조건(어느 기간인지, 어떤 상태인지)에서 맞는 말인지로 한다. 시점·상태를 가리키는 낱말(「이번」·「지난」·「벌써」·「처음」 같은 것)은 조건을 바꿔 가며(진행 중·끝남, 처음·다시 생김 등) 화면마다 하나씩 대본다
-- 사용자에게 넘기는 사유는 셋 중 하나다: `실기기`(기기가 있어야 함) / `사람 판정`(값은 재도 판정이 감각) / `도구 불능`(도구가 실제로 동작하지 않음 — 무엇이 어떻게 안 됐는지 한 줄을 붙인다). 이 밖의 사유로 넘기지 않는다
+- 사용자에게 넘기는 사유는 셋 중 하나다: `실기기`(기기가 있어야 함) / `사람 판정`(값은 재도 판정이 감각) / `도구 불능`(도구가 실제로 동작하지 않음 — 무엇이 어떻게 안 됐는지 한 줄을 붙인다)
 
 결과에는 AI가 돌린 시나리오마다 판정 근거가 된 측정값 한 줄과, 돌리지 못해 사용자가 확인하도록 남긴 시나리오 건수(0건이어도 적는다)·항목별 사유를 남긴다.
 
-산출물: 사용자가 확인할 항목은 `/plan/pr{N}/consumable/user-test-cases.md`에 적는다. 그런 항목이 없으면 파일을 만들지 않는다. 다시 돌아 그 항목이 바뀌면 이 파일을 고친다.
+산출물: 사용자가 확인할 항목은 `/plan/pr{N}/consumable/user-test-cases.md`에 적는다. 다시 돌면 다시 돈 시나리오의 항목만 고친다.
 
 ```
 - [ ] (사용자 · <사유>) <시나리오>: <조건>일 때 <기대 동작>
@@ -137,13 +99,13 @@ AI 실행:
 
 ## Step 6.2.5. 커밋 정리 — 사용자 리뷰 전
 
-verify에서 6.2부터 6.2.2까지를 **처음** 모두 통과하면, 사용자 리뷰에 앞서 커밋을 정리한다. 한 번만 한다.
+6.2부터 6.2.2까지를 **처음** 모두 통과하면, 사용자 리뷰에 앞서 커밋을 정리한다.
 
 - stub 커밋은 [stub 정리](../conventions/artifact/stub.md#정리)의 케이스대로 처리한다
 - 서로 상쇄되는 커밋은 없앤다
 - 리뷰·동작 테스트 수정 커밋은 고친 대상 커밋에 합친다
 
-verify의 커밋 정리는 본 PR 슬라이스 정리에만 집중한다. 메시지 최종화·오배치 재배치 등 2차 정리는 전 PR IMPL 완료 후 FINALIZE로 미룬다.
+커밋 메시지 최종화와 다른 PR로 옮길 커밋의 재배치는 여기서 하지 않는다.
 
 ---
 
@@ -153,7 +115,7 @@ Step 6.2.5에서 정리된 커밋으로 **사용자가 직접 코드 리뷰**한
 
 이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — 모르는 코드는 여기서 모두 짚어 해소한다.
 
-안내 전에 `node {{skill_dir}}/scripts/step-gates.mjs name-check verify --repo <레포 경로>`를 돌린다. exit 1이면 [테스트 이름 대조](#step-621-테스트-이름-대조)를 다시 돌고 이 확인을 다시 돌린다.
+안내 전에 `node {{skill_dir}}/scripts/step-gates.mjs name-check verify`를 돌린다.
 
 Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
@@ -171,72 +133,47 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 UI 컴포넌트 PR이면, Lead가 dev 서버 URL과 이 PR 화면에 해당하는 디자인 원본을 건네고, 사용자가 렌더 결과를 **직접 시각 대조**한다.
 
-- 검증 기준: [검증 기준 — figma 원본(없으면 캡처) 대조](../conventions/modes.md#검증-기준--figma-원본없으면-캡처-대조) 적용 (수행 주체만 사람으로 바뀜).
-- 불일치는 **사용자가 직접 보고 승인/반려**한다. AI가 figma 차이를 자동으로 정답 처리해 반영하지 않는다.
-- 사용자 승인으로 끝나는 단계이므로 별도 산출물을 만들지 않는다 (user-test-cases.md는 동작 테스트 전용 유지).
-- **개인 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다. 승인/반려는 같다.
+- 검증 기준: [검증 기준 — figma 원본(없으면 캡처) 대조](../conventions/modes.md#검증-기준--figma-원본없으면-캡처-대조) 적용. 수행 주체만 사람이다.
+- 불일치는 **사용자가 직접 보고 승인/반려**한다.
+- **개인 모드**: *조립된 PR 렌더(로직·실데이터 반영)*를 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 사용자가 대조한다.
 
 ---
 
 ## 수정이 생기면
 
-동작 테스트에서 실패하거나, 사용자 리뷰에서 수정을 요청받거나, 사용자 동작 테스트에서 실패하거나, 시각 대조에서 반려되면 implement의 Implementer가 고치고 다시 6.2부터 순서대로 진행한다. 다시 도는 범위는 각 절을 따른다.
+동작 테스트에서 실패하거나, 사용자 리뷰에서 수정을 요청받거나, 사용자 동작 테스트에서 실패하거나, 시각 대조에서 반려되면 Implementer가 고치고 다시 6.1부터 순서대로 진행한다. 다시 도는 범위는 각 절을 따른다.
 
 - 커밋 정리(6.2.5) 뒤의 수정은 모두 고친 대상 커밋을 가리키는 `git commit --fixup=<대상>`으로 쌓고 정리한 커밋을 다시 묶지 않는다
-- 사용자 리뷰에서 사용자가 정한 테스트 이름이 다시 도는 이름 대조에 걸리면 고치지 않고 사용자에게 올린다
+- 사용자 리뷰에서 사용자가 정한 테스트 이름이 다시 도는 이름 대조에 걸리면 사용자에게 올린다
 
 ---
 
 ## Step 6.5. fixup 합치기
 
-사용자 리뷰·동작 테스트 통과 후, Step 6.2.5 뒤에 쌓인 fixup 커밋을 대상 커밋에 합친다. 이 환경은 대화형 편집기를 못 띄우므로 시퀀스 편집기를 비워 비대화형으로 돌린다:
+사용자 리뷰·동작 테스트 통과 후, `pr{N}/retained/`를 지우고 Step 6.2.5 뒤에 쌓인 fixup 커밋을 대상 커밋에 합친다. 이 환경은 대화형 편집기를 못 띄우므로 시퀀스 편집기를 비워 비대화형으로 돌린다:
 
 ```
-GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
+GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <PR 기준 ref>
 ```
 
-합친 뒤 사용자에게 force-push를 요청한다. 이 PR 브랜치의 커밋을 딛고 뻗은 다른 브랜치가 있으면 새 tip 위로 옮기도록 함께 요청한다 — 의존 PR은 이 PR의 realize-plan 커밋 위에서 뻗으므로 Step 6.2.5와 이 단계가 그 밑을 바꾼다.
+합친 뒤 `node {{skill_dir}}/scripts/steps.mjs pr branches`를 돌리고, 사용자에게 force-push와 함께, 이 PR을 아래 브랜치로 두고 어긋났다고 나온 PR 브랜치를 새 tip 위로 옮기도록 요청한다.
 
 ---
 
 ## Step 6.6. decisions.md 최신화
 
-구현·리뷰 과정에서 새로 발생하거나 plan 작성 시점과 달라진 의사결정을 반영한다. 결정을 쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다.
+구현·리뷰 과정에서 새로 생기거나 plan 시점과 달라진 결정을 decisions.md에 반영한다. 쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다.
 
-결정은 두 곳에서 모은 뒤 decisions.md에 한 번에 쓴다.
+결정은 두 곳에서 모은다.
 
-1. 이 PR의 implement·verify 대화 — 앞 세션에서 나온 결정은 그 세션 대화 기록에서 모은다
-   - 대화 기록은 Lead가 읽지 않고 일회성 서브에이전트에 맡긴다 — 기록이 수 MB이고 Lead에는 결정만 있으면 된다.
+1. 이 PR의 implement·verify 대화. 앞 세션 기록은 일회성 서브에이전트에 맡긴다 — 기록이 수 MB다.
+   - 기록 경로와 decisions-lifecycle.md 경로를 넘겨 그 문서 기준대로 가른 원문을 돌려받는다. 사용자에게 물어야 하는 것(애매한 후보·단발 발화에서 나온 항목)과 TODO로 보낼 PR 분할·범위 변경 발화는 표시해 받는다. 기록은 다시 열지 않는다.
    - Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
-   - 기록 경로와 decisions-lifecycle.md 경로를 넘기고 세 가지로 나눠 돌려받는다. 받은 원문으로 쓰고 기록을 다시 열지 않는다
-     - 포함 기준에 드는 결정(결정마다 LLM 초안, 차수별 사용자 발화, 차수별 LLM 보고, 최종 채택안, 기각한 대안을 원문으로. 단발 발화에서 나온 것은 표시)
-     - 포함 여부가 애매한 후보(Lead가 사용자에게 묻는다)
-     - PR 분할·범위 변경 발화(TODO로 보낸다)
-2. 후임자 시각 예상 질문 — 코드를 본 후임자(히스토리 모름)가 "여기 왜 이렇게 했어요?"라고 물을 만한 질문을 PR diff + decisions.md로 뽑아 사용자에게 던진다. PR 머지 후 `/discussion` 대비
-   - 뽑기는 Lead가 하지 않고 일회성 서브에이전트에 맡긴다 — PR diff 전체를 훑는 일이고 Lead에는 질문만 있으면 된다.
-   - PR 기준 ref, decisions.md 경로, 1에서 모은 결정 목록을 넘기고, decisions.md에 이미 있는 결정과 1에서 모은 결정에 닿는 질문은 서브에이전트가 뺀 뒤 질문 목록(질문마다 닿는 `파일:줄`과 그 원문 줄)만 돌려받는다.
-   - Lead는 받은 줄로 사용자에게 던지고 diff·코드를 다시 열지 않는다
-   - 사용자가 답할 수 있으면 → decisions.md에 결정 항목으로 추가할지 사용자가 선택
-   - 답하기 어려운 항목은 [/discussion](../../discussion/SKILL.md) 스킬로 토론
+2. 후임자가 코드를 보고 "여기 왜 이렇게 했어요?"라고 물을 만한 질문. PR diff 전체를 훑는 일이라 일회성 서브에이전트에 맡긴다.
+   - PR 기준 ref, decisions.md 경로, 1에서 모은 결정을 넘기고, 이미 있는 결정에 닿는 질문은 뺀 뒤 질문마다 `파일:줄`과 원문 줄만 돌려받는다.
+   - Lead는 그 줄로 사용자에게 묻고 diff를 다시 열지 않는다. 답하기 어려운 질문은 [/discussion](../../discussion/SKILL.md)으로 토론한다.
 
 **6.5와 의존 없음 — 병렬 진행 가능.**
-
----
-
-## 보고 내용
-
-사용자에게 다음을 요약하여 보고:
-
-- Gap Analysis 결과 (계획 ↔ 실제 차이 — 누락·추가가 있는 경우)
-- 미배정 blanket eslint-disable 고아 목록 (6.1.5 금지 주석·고아 disable 검사 — 고아가 있는 경우만)
-- code-review 결과: 발견된 Critical/Minor 이슈 요약
-- 동작 테스트 결과 (AI가 돌린 시나리오 — 실패 시 수정 사항 포함)
-- 사용자 리뷰 통과 여부
-- 사용자 동작 테스트 결과 (사용자에게 넘긴 시나리오 — 실패 시 수정 사항 포함)
-- 사용자 Figma 시각 대조 승인 여부 (UI 컴포넌트 PR — 반려·수정분 포함)
-- 커밋 정리 결과 (사용자 리뷰 전 정리 후 커밋 목록, fixup 합치기 후 커밋 목록)
-- decisions.md 최신화 항목 (변경·추가된 결정만)
-- 수정 사항
 
 ---
 
@@ -248,4 +185,4 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash <base>
 
 ## IMPL 종료
 
-verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 implement가 아닌 여기서 낸다(SKILL.md 「후속 세션 안내」).
+verify 완료 = **PR_{N}_IMPL 세션 종료**. 후속 안내는 여기서 낸다(SKILL.md 「후속 세션 안내」).

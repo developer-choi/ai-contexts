@@ -54,4 +54,3 @@ description: 구현 대상을 채우고 [정답 대조 + 코딩 스탠다드] �
 ## 관련 컨벤션
 
 - 주석·TODO 처리: [conventions/artifact/comments.md](../conventions/artifact/comments.md)
-- 커밋 양식: [conventions/commits.md](../conventions/commits.md)
