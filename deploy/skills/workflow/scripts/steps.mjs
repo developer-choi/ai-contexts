@@ -22,7 +22,7 @@
 //         (PR_3_IMPL도 받는다 — 이름의 번호를 PR로 쓴다). PR에 종류가 있으면 읽을 종류 문서. BG가 아니면 plan 폴더가 있어야 한다
 //   node <이 파일> chain <세션>         → 세션의 step 순서만 (인자 없이)
 //   node <이 파일> pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps 1,2]   → PR 확정. 번호를 매겨 출력
-//   node <이 파일> pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]
+//   node <이 파일> pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref> [--repo <레포>]]
 //   node <이 파일> pr list --plan <plan 폴더>
 //   node <이 파일> pr branches --plan <plan 폴더> --repo <레포>
 //       → PR마다 형태(스택·독립)·범위 커밋. 스택인데 아래 브랜치 tip이 안 들어 있으면 어긋남으로 exit 1
@@ -321,7 +321,7 @@ function cmdPr(sub, opt) {
     fail(
       'pr 명령은 --plan <plan 폴더>가 필요하다. 사용:\n' +
         '  pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]\n' +
-        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]\n' +
+        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref> [--repo <레포>]]\n' +
         '  pr list --plan <plan 폴더>\n' +
         '  pr branches --plan <plan 폴더> --repo <레포>\n' +
         '  pr links --plan <plan 폴더> --repo <레포> --n <N> --body <PR 본문 md>',
@@ -369,6 +369,7 @@ function cmdPr(sub, opt) {
       if (opt.branch === opt.base) fail('--branch와 --base가 같다');
       const owner = data.prs.find((other) => other.n !== pr.n && other.branch === opt.branch);
       if (owner) fail(`${opt.branch}는 이미 ${prLabel(owner)}의 브랜치다`);
+      assertBaseFitsDeps(data, pr, opt.branch, opt.base, opt.repo ?? process.cwd());
       pr.branch = opt.branch;
       pr.base = opt.base;
     }
@@ -389,6 +390,29 @@ function cmdPr(sub, opt) {
     cmdLinks(data, opt);
   } else {
     fail('사용: pr (add | set | list | branches | links) --plan <plan 폴더> …');
+  }
+}
+
+// 의존 PR 위에 쌓인 브랜치인데 base를 의존 PR 브랜치가 아닌 값(선행 PR의 커밋 SHA 등)으로 적으면, pr branches가
+// 스택으로 못 알아봐 verify에서 옮길 의존 브랜치를 조용히 놓친다. 그래서 브랜치가 의존 PR 고유 커밋을 품고 있으면 막는다.
+// 의존 PR이 머지된 뒤 기본 브랜치 위로 옮긴 PR(채용 순차 게시)은 통과한다 — 머지 커밋이면 의존 PR 고유 범위가 비고,
+// squash·rebase 머지면 옮겨 붙인 브랜치에 옛 커밋이 없다.
+function assertBaseFitsDeps(data, pr, branch, base, repo) {
+  const deps = pr.deps.map((d) => findPr(data, d));
+  if (!deps.length || deps.some((dep) => dep.branch === base)) return;
+  if (git(repo, ['rev-parse', '--git-dir']) === null) fail(`base 확인에 git 레포가 필요하다 — PR 브랜치가 있는 레포에서 돌리거나 --repo <레포>를 준다`);
+  const missing = [branch, base].filter((ref) => git(repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === null);
+  if (missing.length) fail(`레포에 없음: ${missing.join(', ')}`);
+  for (const dep of deps) {
+    if (!dep.branch) {
+      console.log(`  직접 확인: 의존 ${prLabel(dep)}의 브랜치가 기록돼 있지 않아 base가 맞는지 가리지 못했다`);
+      continue;
+    }
+    const depOwn = (git(repo, ['rev-list', `${dep.base}..${dep.branch}`]) ?? '').split('\n').filter(Boolean);
+    const shared = depOwn.filter((sha) => git(repo, ['merge-base', '--is-ancestor', sha, branch]) !== null).length;
+    if (shared) {
+      fail(`${branch}가 의존 ${prLabel(dep)}의 커밋 ${shared}개를 품고 있다 — 그 PR 위에 쌓인 브랜치면 --base ${dep.branch}로 기록한다`);
+    }
   }
 }
 
