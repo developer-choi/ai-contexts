@@ -27,7 +27,7 @@ Lead(메인 세션)가 팀을 구성하고, Markup/Feature Implementer가 코드
   - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
   - MARKUP 페이지 코드(페이지 코드 포함 PR)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 MARKUP 완성본 import). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
-- 구현 중 생긴 결정·plan 정정은 implementation.md·decisions.md에 적지 않는다 — decisions.md 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
+- 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 [verify 「decisions.md 최신화」](verify.md#step-66-decisionsmd-최신화)에서 한 번에 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 
 ---
@@ -117,7 +117,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 
 | 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 커밋 단위 |
 |---|---|---|---|
-| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 실행 결과로 판정. 종료 커버리지는 [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
+| Feature Implementer | 테스트 실행 green + `it.todo` 커버리지. 실행 결과로 판정. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.tsx`의 `it.todo` | 로직 커밋 |
 
 ### Step 5.3.1. 슬라이스 사이클 종료
 

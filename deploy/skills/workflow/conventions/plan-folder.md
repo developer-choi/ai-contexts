@@ -36,7 +36,7 @@
       reference.md      ← plan·realize-plan 누적
       overview.md       ← plan 산출물
     retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기
-      implementation.md ← realize-plan 산출물. 이후 갱신 없음 — 마지막 소비는 verify 「Gap Analysis」. 소비처는 [conventions/artifact/implementation-spec.md] 참조
+      implementation.md ← realize-plan 산출물. 이후 갱신 없음 — 소비처는 [conventions/artifact/implementation-spec.md] 참조
     consumable/
       page.md           ← requirement의 requirement-review 페이지별 분석 결과 (PR 확정 시 `background/consumable/page-{페이지명}.md`에서 이동). realize-plan 「잔여 산출물 소비」에서 분배·소비
       user-test-cases.md ← verify 「동작 테스트」에서 AI가 돌리지 못해 사용자가 확인하도록 남긴 항목만 (조건부 — 남긴 항목이 없으면 만들지 않음). verify 자체 소비

@@ -7,7 +7,7 @@
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
 //   node <이 파일> review-bypass --repo <레포 경로> --base <기준 ref>
-//   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로>]
+//   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로…>]
 //   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
 //   node <이 파일> name-check verify --repo <레포 경로>
 //
@@ -155,26 +155,45 @@ function reviewBypass() {
   console.log('\n  조건 ①(정답 파일 선언 여부)은 계획 문서를 봐야 하므로 여기서 안 본다.');
 }
 
-// ── todo-coverage: 표 빈 행 + 남은 it.todo ────────────────────────────────────
-// 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 사람이 한다. 여기서 세는 것은
-// 채워진 표에 빈 행이 있는지와, 테스트 경로에 `it.todo`가 남았는지뿐이다.
+// ── todo-coverage: 안내문 + 표 빈 행 + 남은 it.todo ───────────────────────────
+// 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 사람이 한다. 여기서 보는 것은
+// 안내문이 첫 줄에 있는지, 채워진 표에 빈 행이 있는지, 테스트 경로에 `it.todo`가 남았는지뿐이다.
 // `it.todo` 이름은 PLAN이 고정 문구로 두고 IMPL이 새로 지으므로 문구로 짝을 맞추지 않는다.
 function todoCoverage() {
   const impl = optOf('impl');
-  const tests = optOf('tests');
+  // stub이 여러 곳에 흩어지므로 `--tests` 뒤의 경로를 다음 옵션 전까지 모두 받는다.
+  const ti = rest.indexOf('--tests');
+  const testPaths = [];
+  for (let i = ti + 1; ti >= 0 && i < rest.length && !rest[i].startsWith('--'); i++) testPaths.push(rest[i]);
   if (!impl) {
     console.error('todo-coverage 에는 --impl 이 필요합니다.');
     process.exit(1);
   }
 
   const lines = fs.readFileSync(impl, 'utf8').split('\n');
-  const rows = lines
+
+  // 안내문이 빠져도 그 자리에선 아무것도 안 깨지고, 문서만 받는 리뷰어가 계획을 고쳐도 되는 파일로 읽는다.
+  // 문구의 정본은 [양식](../conventions/artifact/implementation-spec.md#양식)의 코드 블록이다. 사본을 두지 않고 거기서 읽는다.
+  const spec = fs.readFileSync(new URL('../conventions/artifact/implementation-spec.md', import.meta.url), 'utf8').split(/\r?\n/);
+  const BANNER = spec.slice(spec.findIndex((l) => l.startsWith('## 양식'))).find((l) => l.startsWith('> '));
+  if (lines.find((l) => l.trim())?.replace(/^﻿/, '').trim() !== BANNER) {
+    console.log(`[안내문] 첫 내용 줄이 아래 안내문이 아니다 — 제목 헤딩보다도 앞에 둔다\n  ${BANNER}`);
+    problems.push('implementation.md 첫 줄이 안내문이 아니다');
+  }
+
+  // 다른 절의 표까지 읽으면 커버리지 표를 빠뜨려도 통과한다. 「행동 결정 커버리지」 헤딩부터 다음 헤딩 전까지만 읽는다.
+  const start = lines.findIndex((l) => /^#+\s.*행동 결정 커버리지/.test(l));
+  const end = lines.findIndex((l, i) => start >= 0 && i > start && /^#+\s/.test(l));
+  const section = start < 0 ? [] : lines.slice(start + 1, end < 0 ? undefined : end);
+  const tableRows = section
     .filter((l) => l.trim().startsWith('|'))
-    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()))
-    .filter((c) => c.length >= 3 && !/^-{2,}$/.test(c[0].replace(/\s/g, '')) && !c[0].startsWith('행동 결정'));
+    .map((l) => l.split('|').slice(1, -1).map((c) => c.trim()));
+  // 헤더는 구분선 앞 행이다. 첫 칸 글자로 거르면 「행동 결정 없음」 행까지 헤더로 빠진다.
+  const sep = tableRows.findIndex((c) => /^:?-{2,}:?$/.test(c[0].replace(/\s/g, '')));
+  const rows = tableRows.slice(sep + 1).filter((c) => c.length >= 3);
 
   if (!rows.length) {
-    console.log('[행동 결정 커버리지] 표가 없다 — 표 미산출은 PLAN 종료 금지 사유다');
+    console.log('[행동 결정 커버리지] 「행동 결정 커버리지」 절에 표 행이 없다 — 표 미산출은 PLAN 종료 금지 사유다. 행동 결정이 하나도 없으면 「행동 결정 없음」 행 하나에 면제 사유를 적는다');
     problems.push('행동 결정 커버리지 표가 없다');
     return;
   }
@@ -184,10 +203,10 @@ function todoCoverage() {
   empty.forEach((c) => console.log(`  ${c[0]}`));
   if (empty.length) problems.push('커버 it.todo도 면제 사유도 없는 행이 있다 — PLAN 종료 금지');
 
-  if (!tests) return;
-  const files = fs.statSync(tests).isDirectory()
-    ? fs.readdirSync(tests, { recursive: true }).map((f) => path.join(tests, f))
-    : [tests];
+  if (!testPaths.length) return;
+  const files = testPaths.flatMap((t) =>
+    fs.statSync(t).isDirectory() ? fs.readdirSync(t, { recursive: true }).map((f) => path.join(t, f)) : [t],
+  );
   const source = files
     .filter((f) => fs.existsSync(f) && fs.statSync(f).isFile() && /\.(test|spec)\.[jt]sx?$/.test(f))
     .map((f) => fs.readFileSync(f, 'utf8'))
