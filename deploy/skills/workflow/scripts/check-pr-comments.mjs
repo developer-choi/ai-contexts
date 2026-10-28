@@ -18,7 +18,7 @@
 //   node <이 파일> --paths <경로,경로> --marker USER_REVIEW  → 구현 전 미검토 TODO 검사 (구현 대상 경로)
 //   node <이 파일> --paths <경로,경로>                     → 구현 종료 TODO 잔존 검사 (TODO 전부 0건)
 //
-// 어느 모드든 `TODO [AI_IMPL]`이 인용한 출처가 소멸 버킷을 가리키면 함께 짚는다.
+// 어느 모드든 `TODO [AI_IMPL]`·`TODO [USER_REVIEW]`(상단 블록 항목 포함)가 인용한 출처가 소멸 버킷을 가리키거나 `TODO [AI_IMPL]`에 출처가 없으면 함께 짚는다.
 //
 // 걸린 것이 있으면 exit 1.
 
@@ -35,11 +35,15 @@ const ISOLATION_MARKER = '리팩토링 전 코드(정적 분석 도입 PR)';
 const SKIP = /\.(md|mdx)$/;
 const SKIP_DIRS = new Set(['.git', 'node_modules', 'dist', 'build', '.next']);
 
-// `TODO [AI_IMPL]: 설명 — <출처>` 의 출처는 영속 파일만 된다. consumable·retained는 소비되면
+// `TODO [AI_IMPL]: 설명 — <출처>` 의 출처는 마커가 사라질 때까지 남는 파일만 된다. consumable·BG retained는 소비되면
 // 사라지므로, 그때 이 TODO를 채우러 온 사람이 출처를 잃는다 — 이 규칙이 막으려던 바로 그 상황이다.
+// PR retained는 verify에서야 지워지고 마커는 그 전에 0건이 되므로 인용해도 된다.
 // 인용 시점엔 경로가 실존하므로 아무 신호가 없어, 시차를 두고 조용히 터진다.
+// 출처를 아예 안 붙인 AI_IMPL도 같다 — 쓰는 순간엔 티가 안 나고, 채우러 온 쪽이 추측한다.
 const AI_IMPL_LINE = /TODO\s*\[AI_IMPL\]/;
-const EPHEMERAL_SOURCE = /(^|[\s(`'"])[^\s`'")]*\/(consumable|retained)\//;
+const SOURCED_LINE = /TODO\s*\[(AI_IMPL|USER_REVIEW)\]/;
+const EPHEMERAL_SOURCE = /(^|[\s(`'"])[^\s`'")]*\/(consumable|background\/retained)\//;
+const SOURCE_REF = /[^\s`'"()]+:\d+/;
 
 function parseArgs(argv) {
   const args = {};
@@ -112,13 +116,31 @@ const forbidden = added.filter((l) => gate.some((re) => re.test(l.text)));
 console.log(`[${label}] ${forbidden.length}건`);
 for (const l of forbidden) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
 if (forbidden.length) {
-  problems.push(args.marker ? `${label} — IMPL을 중단하고 사용자에게 보고한다` : '금지 주석이 남아 있다 — implement의 Implementer 흐름으로 해소한다');
+  // paths 모드는 경로를 통째로 보므로 이 PR 전부터 있던 TODO도 걸린다 — 그건 지우면 안 된다.
+  const residual = args.paths
+    ? '금지 주석이 남아 있다 — 이 PR이 만든 것은 해소하고, 이 PR 전부터 있던 것은 지우지 말고 사용자에게 보고한다'
+    : '금지 주석이 남아 있다 — implement의 Implementer 흐름으로 해소한다';
+  problems.push(args.marker ? `${label} — IMPL을 중단하고 사용자에게 보고한다` : residual);
 }
 
-const ephemeral = added.filter((l) => AI_IMPL_LINE.test(l.text) && EPHEMERAL_SOURCE.test(l.text));
-console.log(`\n[소멸 버킷을 인용한 AI_IMPL] ${ephemeral.length}건 — consumable·retained는 소비되면 사라진다`);
+// 상단 출처 블록은 `/* TODO [USER_REVIEW]`로 열고 출처 항목을 다음 줄들에 적으므로, `*/`까지를 마커 줄로 친다.
+let blockFile = null;
+for (const l of added) {
+  const file = l.file.replace(/:\d+$/, '');
+  if (blockFile !== null && blockFile !== file) blockFile = null;
+  l.sourced = blockFile !== null || SOURCED_LINE.test(l.text);
+  if (blockFile === null && SOURCED_LINE.test(l.text) && l.text.includes('/*') && !l.text.includes('*/')) blockFile = file;
+  else if (blockFile !== null && l.text.includes('*/')) blockFile = null;
+}
+const ephemeral = added.filter((l) => l.sourced && EPHEMERAL_SOURCE.test(l.text));
+console.log(`\n[소멸 버킷을 인용한 마커] ${ephemeral.length}건 — consumable·BG retained는 소비되면 사라진다`);
 for (const l of ephemeral) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
-if (ephemeral.length) problems.push('AI_IMPL 출처가 영속 파일이 아니다 — 소비되면 출처를 잃는다');
+if (ephemeral.length) problems.push('마커 출처가 마커보다 먼저 지워지는 파일이다 — 소비되면 출처를 잃는다');
+
+const unsourced = added.filter((l) => AI_IMPL_LINE.test(l.text) && !SOURCE_REF.test(l.text));
+console.log(`\n[출처 없는 AI_IMPL] ${unsourced.length}건 — \`설명 — 경로:라인\` 꼴의 출처가 없다`);
+for (const l of unsourced) console.log(`  ${l.file}: ${l.text.trim().slice(0, 120)}`);
+if (unsourced.length) problems.push('AI_IMPL에 출처가 없다 — 채우러 온 쪽이 추측하게 된다');
 
 // PR별 TODO의 등록처는 둘이다 — plan이 소비하기 전 PR은 todo.md 그 PR 절, 소비한 뒤는 그 PR의 overview.md.
 function registries(plan) {

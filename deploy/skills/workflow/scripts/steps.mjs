@@ -275,11 +275,15 @@ function findPr(data, n) {
 }
 
 // 파일 목록과 이름이 정확히 같아야 한다 — 존재 여부로 보면 경로가 섞인 값(`../../skill`)도 통과한다.
-function parseType(raw) {
-  const known = fs
+function knownTypes() {
+  return fs
     .readdirSync(PR_TYPES_DIR)
     .filter((f) => f.endsWith('.md'))
     .map((f) => f.replace(/\.md$/, '').toUpperCase());
+}
+
+function parseType(raw) {
+  const known = knownTypes();
   const type = raw.toUpperCase();
   if (!known.includes(type)) fail(`모르는 PR 종류: ${raw} (${known.join(', ')})`);
   return type;
@@ -313,10 +317,16 @@ const isRealized = (data, n) => findPr(data, n).stage === 'realized';
 const waitingOn = (data, pr) => pr.deps.filter((d) => !isRealized(data, d));
 
 function cmdPr(sub, opt) {
-  if (!opt.plan) fail('pr 명령은 --plan <plan 폴더>가 필요하다');
+  if (!opt.plan) {
+    fail(
+      'pr 명령은 --plan <plan 폴더>가 필요하다. 사용:\n' +
+        '  pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]\n' +
+        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref>]',
+    );
+  }
   const data = readPrs(opt.plan);
   if (sub === 'add') {
-    if (!opt.name) fail('pr add는 --name이 필요하다');
+    if (!opt.name) fail('pr add는 --name이 필요하다: --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]');
     const n = Math.max(0, ...data.prs.map((p) => p.n)) + 1;
     const pr = {
       n,
@@ -328,6 +338,11 @@ function cmdPr(sub, opt) {
     data.prs.push(pr);
     writePrs(opt.plan, data);
     console.log(`${prLabel(pr)} 확정 (번호 ${n})`);
+    // 종류·의존은 빠뜨려도 에러가 아니라 조용히 「없음」으로 기록된다 — 의존은 출발 판정이 이 값으로 하므로 여기서 짚는다.
+    const set = `pr set --plan ${JSON.stringify(opt.plan)} --n ${n}`;
+    if (!pr.type) console.log(`  종류 미기록 — 종류가 있으면 ${set} --type <${knownTypes().join('|')}>로 기록한다`);
+    if (!pr.deps.length) console.log(`  의존 없음으로 기록 — 선행 PR이 있으면 ${set} --deps <선행 번호들>로 기록한다(출발 판정이 이 값을 본다)`);
+    console.log(`  todo.md에 「## PR ${n}. ${pr.name}」 절을 붙인다`);
   } else if (sub === 'set') {
     const pr = findPr(data, parseNum(opt.n, '--n'));
     if (!['name', 'type', 'deps', 'branch', 'base'].some((k) => opt[k] !== undefined)) {
@@ -356,6 +371,8 @@ function cmdPr(sub, opt) {
     }
     writePrs(opt.plan, data);
     console.log(`${prLabel(pr)} 갱신`);
+    // todo.md 양식에는 종류 자리가 없다 — 이름(헤딩)·의존을 바꿀 때만 md도 고친다.
+    if (opt.name || opt.deps !== undefined) console.log('  todo.md 쪽(헤딩·「의존」 줄)도 함께 고친다');
   } else if (sub === 'list') {
     if (!data.prs.length) console.log('확정된 PR 없음');
     for (const pr of data.prs) {

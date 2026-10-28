@@ -10,7 +10,7 @@
 
 ## PR 확정 기준 — "다른 문서를 더 안 봐도 확정 가능한가"
 
-확정은 `node {{skill_dir}}/scripts/steps.mjs pr add --plan <plan> --name <이름> [--type <종류>] [--deps <선행 번호들>]`로 기록하고, 출력된 번호로 `<plan>/background/consumable/todo.md`에 PR 절을 붙인다.
+확정은 `node {{skill_dir}}/scripts/steps.mjs pr add`로 기록하고, 출력된 번호로 `<plan>/background/consumable/todo.md`에 PR 절을 붙인다.
 
 아직 안 읽은 자료가 이 PR의 경계를 바꿀 수 없으면 확정하고 append한다. 그 PR은 곧바로 출발 후보가 된다.
 
@@ -79,9 +79,8 @@ PR을 확정하면 아래 양식으로 PR 절을 `## 미분류` 절 바로 앞�
 ```
 
 - 양식의 하위 절을 그 순서로 모두 둔다. 적을 것이 없는 절엔 `- 없음`을 둔다.
-- 「의존」은 위 「의존 — 판단거리 노출」대로 적는다. 선행 번호는 `pr add --deps`에도 준다 — 출발 판정은 그쪽으로 한다.
-- PR 종류는 `pr add --type`(값 = `pr-types/` 파일 이름)으로 기록한다.
-- 선행·종류·이름을 바꾸면 `pr set --plan <plan> --n <N> [--deps …] [--type …] [--name …]`과 md 쪽(「의존」 줄·헤딩)을 함께 고친다.
+- 「의존」은 위 「의존 — 판단거리 노출」대로 적는다.
+- 선행·종류·이름을 바꾸면 `pr set`으로 기록한다.
 
 ### PR별 TODO 등록처
 

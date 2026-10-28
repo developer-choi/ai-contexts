@@ -8,27 +8,25 @@
 
 ### 적용 조건 해석
 
-모드만으로 판단. 자체 변수 도입 금지:
+적용 여부는 모드만으로 정한다. 모드 말고 다른 조건을 세워 적용에서 빼지 않는다:
 
 - "컨벤션 문서 부재 → 출처 명시 가치 낮음" — **금지**
-- "PR 크기 작음·위반 risk 낮음" — **금지**
 
 ## 상단 출처 블록 (실무 모드 한정)
 
-신규 stub 파일 상단에 `TODO [USER_REVIEW]` 블록 주석으로 첨부한다. 항목마다 `설명 — 경로:라인번호` 한 줄.
+신규 stub 파일 상단에 `TODO [USER_REVIEW]` 블록 주석으로 첨부한다. 항목마다 `설명 — 경로:라인번호` 한 줄. 경로는 [마커보다 오래 남는 파일만](#출처-인용은-마커보다-오래-남는-파일만) 인용한다.
 
 - `[Convention]`: 컨벤션 문서 경로 + 라인 범위
-- `[Reference]`: 컨벤션에 없을 때만, 기존 코드 평행 사례 경로
-- 둘 다 해당하면 둘 다 (Convention 우선)
-- 사용자가 PLAN 종료 직전 검토 후 블록 삭제 또는 IMPL 진입 승인
+- `[Reference]`: 그 항목이 컨벤션에 없을 때만, 기존 코드 평행 사례 경로
+- 사용자가 검토하고 블록을 지운다 — 남아 있으면 [구현 전 미검토 TODO 검사](#구현-전-미검토-todo-검사)에서 IMPL에 들어가지 못한다
 
 ### 상단 vs 인라인 분리 기준
 
-상단 출처 블록: 파일 경로·폴더 구조·파일명 컨벤션, 파일 전체 평행 사례
-
-인라인 마커: 함수/변수 위 동작 설명, 호출·분기 패턴, placeholder 의도, scss 토큰 매핑
+파일 전체에 걸린 근거(경로·폴더 구조·파일명 컨벤션, 파일 전체의 평행 사례)는 상단 출처 블록에, 특정 코드에 걸린 것(함수·변수 동작, 호출·분기 패턴, placeholder 의도, scss 토큰 매핑)은 인라인 마커에 둔다.
 
 ## 본문 인라인 마커
+
+stub 본문 주석은 최소로 두고, 사용자 검토나 IMPL의 구체화가 필요한 자리에만 아래 마커를 단다.
 
 | 마커 | 처리자 |
 |---|---|
@@ -42,43 +40,34 @@
 
 ### 출처 명시 의무 — `TODO [AI_IMPL]`
 
-마커에는 출처를 붙인다. 시점 단독 표현 금지.
+마커에는 IMPL이 채울 정보의 출처를 `설명 — 경로:라인` 꼴로 붙인다. 아직 정해지지 않은 값이면 IMPL이 값을 정할 때 볼 자료를 인용한다.
 
-- ❌ `// TODO [AI_IMPL]: IMPL 시점 토큰`
-- ✓ `// TODO [AI_IMPL]: 설명 — docs/...:{line}` 또는 `_fsd/.../{file}:{line}`
+### 출처 인용은 마커보다 오래 남는 파일만
 
-### 출처 인용은 영속 파일만
+출처는 그 TODO를 처리하러 올 때까지 남아 있는 파일만 인용한다 — 소비·분배 뒤 지워지는 파일을 가리키면 처리하러 온 쪽이 출처를 잃는다.
 
-- ✓ `docs/conventions/*`, `docs/ARCHITECTURE.md`, `_fsd/.../*`, `plan/{prN}/persistent/*`
-- ❌ `plan/{prN}/consumable/*`, `plan/{prN}/retained/*`, 분배 후 삭제될 1차 입력 (사용자 작성 `page.md`, BG AI 산출물)
+- ✓ `docs/conventions/*`, `docs/ARCHITECTURE.md`, `_fsd/.../*`, `plan/{prN}/persistent/*`, `plan/{prN}/retained/*`(verify에서 지워지지만 마커는 그 전에 사라진다)
+- ❌ `plan/{prN}/consumable/*`, `plan/background/consumable/*`, `plan/background/retained/*`, 분배 후 삭제될 1차 입력 (사용자 작성 `page.md`, BG AI 산출물)
 
 ## 다른 PR로 미루는 마커 — 코드 안 금지
 
-본 PR 아닌 다른 PR에서 처리할 작업은 코드 안 TODO 금지.
-
-- ❌ `// TODO: PR4에서 X 추가`, `// TODO [PR4]: ...`
-- ✓ 그 PR의 TODO에 등록 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처))
-
-본 PR 외부 의존성(백엔드 합의·디자인 검수·인프라 등):
-
-- ✓ `plan/{prN}/persistent/overview.md` 「열려있는 질문」
+다른 PR에서 처리할 작업은 코드에 TODO로 남기지 않고 그 PR의 TODO에 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)). 다른 PR로도 옮기지 않는 본 PR 외부 의존성은 [PR 개요](../../steps/plan.md#산출물-planprnpersistentoverviewmd)의 열려있는 질문에 적는다.
 
 ## file-level(blanket) eslint-disable 라이프사이클
 
 파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 리팩토링 전 코드를 격리할 때),
 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)).
 
-- 격리 마커에 **`리팩토링 전 코드(정적 분석 도입 PR)`를 그대로 포함**시킨다 (예: `/* eslint-disable -- 리팩토링 전 코드(정적 분석 도입 PR). 후속 리팩토링 PR에서 규칙 준수 후 이 disable 제거 */`). 문자열의 정본은 `scripts/check-pr-comments.mjs`다.
-
-인라인 disable(`// eslint-disable-next-line`)은 본 소절 대상이 아니다 — file-level blanket 블록만.
+- 격리 마커에 `리팩토링 전 코드(정적 분석 도입 PR)`를 그대로 넣는다. 정본은 `{{skill_dir}}/scripts/check-pr-comments.mjs`의 `ISOLATION_MARKER`다.
+- `{파일}`은 git diff에 나오는 레포 루트 기준 경로 그대로 적는다.
+- verify의 고아 탐지는 둘을 문자열 그대로 대조한다 — 마커가 어긋나면 그 파일이 탐지에서 조용히 빠지고, 경로가 어긋나면 등록한 파일도 고아로 뜬다.
 
 ## 라이프사이클
 
 ### 생성 (신규 stub 작성 시)
 
 - 상단 출처 블록(실무 모드) + 인라인 마커 적용
-- **기존 stub 파일 갱신 시 재추가 금지** — 사용자가 정리한 TODO 주석 보존
-- `system-reminder` "modified, intentional, don't revert" 안내된 파일은 재추가 절대 금지
+- 기존 stub 파일을 갱신할 때는 마커를 다시 달지 않는다 — 사용자가 검토하고 지운 TODO 주석이 되살아난다
 
 ### 구현 전 미검토 TODO 검사
 
@@ -86,18 +75,9 @@
 
 ### 처리 (구현 중)
 
-- `TODO [AI_IMPL]`은 코드로 채우며 같은 커밋에서 즉시 삭제한다. 별도 정리 커밋 X
+- `TODO [AI_IMPL]`은 코드로 채우는 커밋에서 함께 지운다
+- `TODO [USER_REVIEW]`는 사용자가 지운다. 구현 중 만나면 IMPL을 멈추고 사용자에게 보고한다
 
 ### 구현 종료 TODO 잔존 검사
 
-`node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로>`. 형태를 가리지 않고 0건이어야 하며, 잔존 시 종료 불가. 결과를 보고에 싣는다.
-
-## 제외 대상
-
-본 컨벤션 인라인 마커 룰 대상 아님:
-
-- 상단 출처 블록(파일 최상단 `/* TODO [USER_REVIEW] ... */`) — 위 「상단 출처 블록」 별도 룰
-- 코드 카테고리 마커 (`// 404`, `// 400` 등)
-- 컨벤션상 명시된 JSDoc (`@param`, `@returns`)
-
-원칙: stub 단계 본문 주석 최소화. placeholder 의도가 의도적으로 비명확한 경우만 마커 사용.
+`node {{skill_dir}}/scripts/check-pr-comments.mjs --paths <구현 대상 경로>`에 걸리는 것이 없어야 구현을 끝낸다. 걸린 것이 이 PR 전부터 있던 TODO면 지우지 말고 목록을 사용자에게 보고해 처리를 정하고, 사용자가 남기기로 한 것만 남았으면 끝낼 수 있다. 결과(남긴 TODO 목록 포함)를 보고에 싣는다.

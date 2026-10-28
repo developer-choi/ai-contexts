@@ -81,7 +81,7 @@ implement 진입 직후 본 PR 영역에서 [구현 전 미검토 TODO 검사](.
 
 ### Step 5.2.1. TODO 주석 처리
 
-IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#처리-구현-중) 룰을 따른다. 마커 종류별 처리(즉시 삭제·사용자 보고·블록 삭제)와 다른 PR로 미루는 마커를 코드에 두지 않는 룰은 컨벤션이 단일 출처.
+IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#처리-구현-중) 룰을 따른다. 마커 종류별 처리와 다른 PR로 미루는 마커를 코드에 두지 않는 룰은 컨벤션이 단일 출처.
 
 ### Step 5.2.2. gotchas
 
@@ -128,7 +128,7 @@ IMPL 진행 중 디자인 또는 기획이 바뀐 사실을 감지하면(사용�
 ## Step 5.4. 마무리
 
 - [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo) 적용
-- **TODO 잔존 점검** — [구현 종료 TODO 잔존 검사](../conventions/artifact/comments.md#구현-종료-todo-잔존-검사) 실행. 인라인 마커·상단 출처 블록·기타 `// TODO:` 형태 모두 0건 필수. 잔존 시 종료 불가
+- **TODO 잔존 점검** — [구현 종료 TODO 잔존 검사](../conventions/artifact/comments.md#구현-종료-todo-잔존-검사) 실행. 종료 조건은 그 절을 따른다
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
