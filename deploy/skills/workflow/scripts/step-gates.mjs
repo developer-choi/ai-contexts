@@ -7,7 +7,7 @@
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
 //   node <이 파일> review-bypass --repo <레포 경로> --base <기준 ref>
-//   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로…>]
+//   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로…> --stub <stub 커밋>]
 //   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
 //   node <이 파일> name-check verify --repo <레포 경로>
 //
@@ -169,6 +169,11 @@ function todoCoverage() {
     console.error('todo-coverage 에는 --impl 이 필요합니다.');
     process.exit(1);
   }
+  const stub = optOf('stub');
+  if (testPaths.length && !stub) {
+    console.error('--tests 를 줄 때는 --stub <stub 커밋> 도 필요합니다 — 지운 it.todo를 세는 기준입니다.');
+    process.exit(1);
+  }
 
   const lines = fs.readFileSync(impl, 'utf8').split('\n');
 
@@ -212,10 +217,34 @@ function todoCoverage() {
     .map((f) => fs.readFileSync(f, 'utf8'))
     .join('\n');
 
-  const left = (source.match(/\bit\.todo\s*\(/g) ?? []).length;
+  const left = (source.match(TODO_CALL) ?? []).length;
   console.log(`\n[남은 it.todo] ${left}건`);
   if (left) problems.push('실제 it(...)로 바꾸지 않은 it.todo가 남았다 — IMPL 종료 금지');
+
+  // 남은 수만 세면 it.todo를 채우지 않고 지워도 0건이라 통과한다. it.todo 이름은 PLAN이 고정 문구로
+  // 두어 짝을 맞출 수 없으니, stub 커밋의 it.todo + 기존 it 수만큼 지금 it이 있는지로 본다.
+  const absFirst = path.resolve(testPaths[0]);
+  const repo = git(fs.statSync(absFirst).isDirectory() ? absFirst : path.dirname(absFirst), ['rev-parse', '--show-toplevel']).trim();
+  const rels = testPaths.map((t) => path.relative(repo, path.resolve(t)).replace(/\\/g, '/') || '.');
+  const stubFiles = git(repo, ['ls-tree', '-r', '--name-only', stub, '--', ...rels])
+    .split('\n')
+    .filter((f) => TEST_FILE.test(f));
+  const count = (src, re) => (src.match(re) ?? []).length;
+  let stubTodo = 0;
+  let stubIt = 0;
+  let nowIt = 0;
+  for (const f of stubFiles) {
+    const before = git(repo, ['show', `${stub}:${f}`]);
+    stubTodo += count(before, TODO_CALL);
+    stubIt += count(before, IT_CALL);
+    const now = path.join(repo, f);
+    if (exists(now)) nowIt += count(fs.readFileSync(now, 'utf8'), IT_CALL);
+  }
+  console.log(`[stub 대비] stub 커밋의 it.todo ${stubTodo}건 + 기존 it ${stubIt}건 → 지금 it ${nowIt}건 + 남은 it.todo ${left}건`);
+  if (nowIt + left < stubTodo + stubIt) problems.push('it(...)로 채우지 않고 지운 it.todo가 있다 — IMPL 종료 금지');
 }
+const TODO_CALL = /\bit\.todo\s*\(/g;
+const IT_CALL = /\b(?:it|test)(?:\.only|\.skip)?\s*\(/g;
 
 // ── name-check: verify 테스트 이름 대조 뒤 이름이 바뀌었는가 ─────────────────────
 // 문서가 "6.2가 수렴할 때마다(다시 돈 수렴 포함) 대조한다"고 적어놓고, 다시 돈 수렴 뒤

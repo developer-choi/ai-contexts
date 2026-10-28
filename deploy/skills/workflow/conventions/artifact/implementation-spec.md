@@ -49,4 +49,4 @@ IMPL에 들어간 뒤로는 고치지 않는다. 계획을 실제에 맞춰 고�
 ### IMPL 종료 시점 — 남은 `it.todo`
 
 남은 `it.todo`는 MP `docs/patterns/testing/TestWriting.md` 「네이밍」대로 이름을 지어 실제 `it(...)`로 바꾼다.
-IMPL을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <stub 커밋이 it.todo를 넣은 테스트 파일…>`를 돌려 통과시킨다.
+IMPL을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <stub 커밋이 it.todo를 넣은 테스트 파일…> --stub <stub 커밋>`를 돌려 통과시킨다.
