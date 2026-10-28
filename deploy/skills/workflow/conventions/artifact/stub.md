@@ -2,12 +2,12 @@
 
 ## 정의·범위
 
-stub = PR 골조 코드. IMPL이 본문만 채울 수 있도록 시그니처·구조·결정 사항을 미리 박은 코드.
+stub = PR 골조 코드. 구현이 본문만 채울 수 있도록 시그니처·구조·결정 사항을 미리 박은 코드.
 
 두 원칙:
 
 1. **PR이 만들 모든 파일·함수·컴포넌트는 stub 필수** — 외부 공개 여부 무관. 내부 헬퍼도 시그니처 + `throw new Error('not implemented')`. 컴포넌트는 아래 「`.tsx`」 양식을 따른다
-2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 코드 분량이 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
+2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 의존성 추가(`package.json` + 설치)·설정 파일도 든다. 코드 분량이 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
 
 ### 마크업 예외
 
@@ -69,6 +69,7 @@ export type UserListResponse = {
 - 합성 안 하면 `return null` (leaf)
 - 합성하면 트리 골조 + 조건부 렌더링 골조
 - 조건은 placeholder 변수 (`const isLoading = false; // TODO [AI_IMPL]: 로딩 상태 — useUserQuery isLoading 결합 — plan/pr{N}/persistent/decisions.md:{line}`)
+- 외부 공개 prop이 HTML 표준 속성의 별칭이면 래퍼 prop을 만들지 않고 `ComponentProps<'element'>`를 extend해 그 속성을 직접 노출한다(필수로 받아야 하면 필수로 override)
 
 ### Hook · 라우트 파일(`page.tsx` 등)
 
@@ -96,13 +97,13 @@ export type UserListResponse = {
 
 ## 정리
 
-stub 커밋 뒤에 IMPL 커밋이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 IMPL 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
+stub 커밋 뒤에 구현 커밋(IMPL에서든 realize-plan에서든)이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 구현 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
 
 어느 케이스든 계획 변경으로 안 쓰게 된 stub 파일은 지운다.
 
-### 케이스 A — IMPL 커밋이 따로 쌓임
+### 케이스 A — 구현 커밋이 따로 쌓임
 
-stub 커밋을 파일별로 나눠, 각 조각을 그 파일을 처음 고친 IMPL 커밋 바로 앞에 두고 그 IMPL 커밋과 합친다(메시지는 IMPL 커밋 것). type·fixture·설정처럼 IMPL이 고치지 않은 조각은 첫 IMPL 커밋과 합친다.
+stub 커밋을 파일별로 나눠, 각 조각을 그 파일을 처음 고친 구현 커밋 바로 앞에 두고 그 구현 커밋과 합친다(메시지는 구현 커밋 것). type·fixture·설정처럼 구현 커밋이 고치지 않은 조각은 첫 구현 커밋과 합친다.
 
 ### 케이스 B — stub 커밋 하나에 구현까지 들어 있음
 

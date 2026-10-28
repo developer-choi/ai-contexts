@@ -42,11 +42,11 @@
 절차:
 1. 본 세션에서 **진입한 step** 식별 (`node {{skill_dir}}/../workflow/scripts/steps.mjs chain <세션>` 출력 「이 세션의 step」으로 자기 세션의 step 범위 확인). `<세션>`은 `node {{skill_dir}}/scripts/session-state.mjs user-turns --session <session_id>`가 낸 `/workflow` 발화의 첫 인자다. 그 발화가 없거나(자동 발동 등) 첫 인자가 workflow 세션 이름이 아니면 `node {{skill_dir}}/scripts/session-state.mjs read-files --session <session_id>`가 낸 `workflow/steps/` 파일들의 frontmatter `session:` 값을 쓰고, 값이 둘 이상이면 사용자에게 묻는다.
 2. 각 step.md를 처음부터 끝까지 Read + step.md가 가리키는 **하위 문서**(`conventions/artifact/*`, `*-spec.md`, `stub.md` 등)도 전부 Read.
-3. step.md·하위 문서에서 강제 절차를 항목으로 추출 — "필수"·"~한다"·"~전에 …한다"(판정 전 선행 읽기) 형태. 예: Plan mode 진입, 컨벤션 1차 소스 직접 grep, stub 필요성 판정 전 `stub.md` 참조, 종료 시퀀스 각 항목.
+3. step.md·하위 문서에서 강제 절차를 항목으로 추출 — "필수"·"~한다"·"~전에 …한다"(판정 전 선행 읽기) 형태. 예: Plan mode 진입, 배치·네이밍 결정 전 컨벤션 본문 확인, stub 필요성 판정 전 `stub.md` 참조, 종료 시퀀스 각 항목.
 4. 각 절차를 세션에서 **실제 실행**했는지 대조 — 미실행분을 「문제 리스트업 + 규칙화」의 문제 목록에 추가.
 5. 특히 **"X를 판정/결정하기 전에 단일 출처 문서 Y를 읽는다"**는 절차를 Y 미독 상태로 판정한 경우를 핵심 누락으로 분류한다.
 
-사례: realize-plan §4가 stub 룰 단일 출처로 `conventions/artifact/stub.md`를 가리키는데, 안 읽고 "stub 불필요"로 판정 → it.todo가 코드 stub으로 안 가고 `implementation.md` 산문으로 샘.
+사례: realize-plan이 stub 룰 단일 출처로 `conventions/artifact/stub.md`를 가리키는데, 안 읽고 "stub 불필요"로 판정 → it.todo가 코드 stub으로 안 가고 `implementation.md` 산문으로 샘.
 
 ## 출력
 
