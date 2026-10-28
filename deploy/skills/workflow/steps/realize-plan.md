@@ -5,17 +5,16 @@ next:
   - to: implement
   - to: plan
     notice: go
-    on: realize-plan 커밋
     when: 이 PR에 의존하는 PR이 있을 때
 ---
 
 # realize-plan: 구현
 
-> **Plan mode 필수**. [과제 정의 단계](plan.md)에서 승인된 과제에 대해서만 진행한다.
+[과제 정의 단계](plan.md)에서 승인된 과제에 대해서만 진행한다.
 
-이 단계는 그 과제를 **구현한다**. 기본은 실행이다 — stub 커밋 뒤 그 자리에서 구현까지 커밋한다. 무거운(한 세션에 다 못 끝냄) PR만 본체를 다음 IMPL 세션으로 넘긴다.
+이 단계는 그 과제를 코드로 옮긴다 — 코드로 표현할 수 있는 것은 stub으로 박거나 그 자리에서 실행해 커밋하고, 본체 구현은 다음 IMPL 세션이 한다.
 
-이 PR에 의존하는 PR은 이 단계의 커밋을 딛고 출발한다. 그래서 이 단계에서 커밋한 외부 공개 시그니처는 이후 바꾸지 않는다(freeze) — 바꿔야 하면 사용자에게 영향을 알리고 정한다.
+이 PR에 의존하는 PR은 이 단계가 끝난 뒤 그 커밋을 딛고 출발한다. 그래서 이 단계를 마친 뒤로는 커밋한 외부 공개 시그니처를 바꾸지 않는다(freeze) — 바꿔야 하면 사용자에게 영향을 알리고 정한다.
 
 ---
 
@@ -53,7 +52,7 @@ figma 자료는 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피
 
 ## 2. 구현 컨텍스트 수집
 
-착수 전에 구현 컨텍스트를 수집한다. 본체를 IMPL로 넘기면 IMPL 세션 Lead가 산출물에 적힌 경로로 팀에게 컨텍스트를 분배한다.
+착수 전에 구현 컨텍스트를 수집한다.
 
 [과제 정의 단계의 컨벤션 사전 참조](plan.md#컨벤션-사전-참조)에서 파악한 컨벤션과 reference.md에 없는 것만 사용자에게 질문해 수집한다:
 - 관련 컨벤션 경로
@@ -90,27 +89,23 @@ interface narrative가 필요하면 stub 파일의 JSDoc에 적는다.
 
 ## 4. realize-plan 커밋
 
-이 절의 커밋이 모두 끝난 시점(종료 시퀀스 전)이 「realize-plan 커밋」 사건이다.
-
 ### 코드로 옮길 것과 IMPL로 넘길 것
 
 무엇을 stub으로 만드는지는 stub.md의 [정의·범위](../conventions/artifact/stub.md#정의범위)를 따른다. md 산출물에는 코드로 표현 못 하는 것만 남긴다 — implementation.md에 무엇을 담는지는 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)를 따른다.
 
-이미 있는 코드를 고치는 편집(rename·이동·설정 치환)도 md에 옮겨 적지 않고 그 자리에서 실행·커밋한다. 미뤄야 하면 implementation-spec.md의 [책임·위치](../conventions/artifact/implementation-spec.md#책임위치)를 따라 적는다. 이 PR에 의존하는 PR이 있으면 미루지 않는다.
-
-stub 커밋 뒤 본체를 IMPL로 넘길지(무거운 PR), 이 자리에서 구현까지 할지(가벼운 PR) 사용자에게 묻는다. 이 자리에서 구현하면 [구현 전 미검토 TODO 검사](../conventions/artifact/comments.md#구현-전-미검토-todo-검사)를 통과한 뒤 구현한다.
+이미 있는 코드를 고치는 편집(rename·이동·설정 치환)도 md에 옮겨 적지 않고 그 자리에서 실행·커밋한다.
 
 ### stub 커밋 작성
 
-모든 stub을 하나의 커밋으로 묶고, 커밋 전에 lint·tsc·테스트가 통과하는지 확인한다 — 의존 PR이 이 커밋에서 출발한다. 포맷터는 본 PR 파일 경로를 인자로 줘 돌린다 — 프로젝트 전역 포맷팅은 하지 않는다.
+stub이 있으면 모두 하나의 커밋으로 묶어 이 단계의 마지막 커밋으로 두고(stub이 없는 PR은 이 커밋을 만들지 않는다), 커밋 전에 lint·tsc·테스트가 통과하는지 확인한다 — 의존 PR이 이 커밋에서 출발한다.
+종료 시퀀스에서 stub을 고치면 이 커밋을 고쳐 하나로 둔다. 포맷터는 본 PR 파일 경로를 인자로 줘 돌린다 — 프로젝트 전역 포맷팅은 하지 않는다.
 
 ---
 
 ## 종료 시퀀스
 
-산출물 작성 완료 + 사용자 OK 발화 직후, 후속 세션 spawn 안내 전에 아래 단계를 **순서대로 모두** 수행한다.
-
-가벼운 PR이라 구현을 이 자리에서 끝냈어도, 아래 종료 단계를 마치면 PR_{N}_IMPL을 안내한다 — 리뷰·사용자 테스트·커밋 정리는 IMPL 세션이 돈다.
+산출물을 다 작성하면 아래 단계를 **순서대로 모두** 수행한다.
+마친 뒤 stub 커밋(있으면)과 implementation.md를 사용자에게 보여 승인받는다. stub에 남은 [`TODO [USER_REVIEW]`](../conventions/artifact/comments.md#구현-전-미검토-todo-검사)도 이때 사용자가 검토해 지운다. 승인 과정에서 둘 중 하나라도 고치면 아래 단계를 다시 돌고 다시 승인받는다. 승인받은 뒤에 후속 안내를 낸다.
 
 ### 1. 산출물 리뷰
 
@@ -125,4 +120,4 @@ stub 커밋 뒤 본체를 IMPL로 넘길지(무거운 PR), 이 자리에서 구�
 
 ### 2. `it.todo` 매칭 점검 (PLAN 시점)
 
-산출물 리뷰와 별개로 매번 직접 수행한다. [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검)의 **PLAN 시점 매칭**을 적용하고, 그 절의 `todo-coverage`가 통과해야 종료한다. 이 자리에서 구현까지 한 PR은 표를 stub 커밋의 `it.todo`로 채운다. 통과한 커버리지 표를 사용자에게 보인다.
+산출물 리뷰와 별개로 매번 직접 수행한다. [`it.todo` 매칭 점검](../conventions/artifact/implementation-spec.md#ittodo-매칭-점검)의 **PLAN 시점 매칭**을 적용하고, 그 절의 `todo-coverage`가 통과해야 종료한다. 통과한 커버리지 표를 사용자에게 보인다.

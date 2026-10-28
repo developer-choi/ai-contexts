@@ -6,11 +6,8 @@
 
 implementation.md는 PLAN 시점의 구현 계획이다. 코드·커밋에서 알 수 있는 것은 담지 않는다 — 옮겨 적은 값은 코드가 바뀌어도 따라가지 않아 틀린 채 남는다.
 
-담는 것은 커밋 분할(`### N` 순번이 곧 구현 순서)·**행동 결정 커버리지 표**(「`it.todo` 매칭 점검 > PLAN 시점」)·gotcha·근거다. 표의 `it.todo` 주석 요지는 stub에도 있지만 예외로 담는다 — `it.todo` 이름이 고정 문구라([stub.md](stub.md#testtsx)) 요지 없이는 행과 짝을 맞출 수 없다.
-
-IMPL로 미룬 rename·이동·설정치환은 바꿀 자리를 늘어놓지 않고, 하나마다 "grep `<패턴>` → 일괄 치환" 지시로 적는다.
-
-IMPL에 들어간 뒤로는 고치지 않는다. 계획을 실제에 맞춰 고치면 IMPL 종료 「`it.todo` 매칭 점검」이 대조할 기준이 사라진다.
+담는 것은 커밋 분할(`### N` 순번이 곧 구현 순서)·**행동 결정 커버리지 표**(「`it.todo` 매칭 점검 > PLAN 시점」)·gotcha·근거, 그리고 도구 설정 PR이면 적용을 구현에 미룬 설정값([SETUP 「설정값과 격리」](../pr-types/setup.md#설정값과-격리))이다.
+표의 `it.todo` 주석 요지는 stub에도 있지만 예외로 담는다 — `it.todo` 이름이 고정 문구라([stub.md](stub.md#testtsx)) 요지 없이는 행과 짝을 맞출 수 없다.
 
 ## 양식
 
@@ -44,9 +41,9 @@ IMPL에 들어간 뒤로는 고치지 않는다. 계획을 실제에 맞춰 고�
   | 행동 결정 (출처: decisions·요구사항 원본 위치·사용자 발화) | 커버 `it.todo` (파일 · 주석 요지) | 면제 사유 |
   |---|---|---|
 
-- PLAN을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md>`를 돌려 통과시킨다.
+- PLAN을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage plan`을 돌려 통과시킨다.
 
 ### IMPL 종료 시점 — 남은 `it.todo`
 
 남은 `it.todo`는 MP `docs/patterns/testing/TestWriting.md` 「네이밍」대로 이름을 지어 실제 `it(...)`로 바꾼다.
-IMPL을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage --impl <implementation.md> --tests <stub 커밋이 it.todo를 넣은 테스트 파일…> --stub <stub 커밋>`를 돌려 통과시킨다.
+IMPL을 마치기 전에 `node {{skill_dir}}/scripts/step-gates.mjs todo-coverage impl`을 돌려 통과시킨다.

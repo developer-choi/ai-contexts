@@ -29,7 +29,7 @@ markup 워크트리 진입 직후 셋팅([입력·산출물·작업 위치](inde
 
 ## 정답 대조 A — figma 원본(없으면 캡처) 대조
 
-impl-review-loop의 리뷰어 대조형 — Figma Reviewer ↔ 구현자 대조 루프. 검증 기준은 [검증 기준](../../conventions/modes.md#검증-기준--figma-원본없으면-캡처-대조).
+impl-review-loop의 리뷰어 대조형 — Figma Reviewer ↔ 구현자 대조 루프. 검증 기준은 [검증 기준](../../conventions/modes.md#검증-기준--렌더-결과와-디자인-원본-대조).
 
 ## Markup Implementer 필수 지침
 

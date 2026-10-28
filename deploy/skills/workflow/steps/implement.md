@@ -12,9 +12,9 @@ next:
 
 # implement: 구현
 
-> **이 단계의 목표: 팀을 spawn하고 PLAN이 세운 구현 계획대로 코드를 작성한다**
+> **이 단계의 목표: PLAN이 세운 구현 계획대로 Lead가 코드를 작성한다**
 
-구현 중 계획(stub·잔존 md)보다 나은 방법이나 계획의 문제가 Lead에게 보고되거나 Lead가 발견하면, 계획을 고치지 않고 사용자에게 올린다.
+구현 중 계획(stub·잔존 md)보다 나은 방법이나 계획의 문제를 발견하면, 계획을 고치지 않고 사용자에게 올린다.
 
 ---
 
@@ -32,7 +32,7 @@ next:
 
 ## Step 5.0. 워크트리 진입
 
-이전 단계에서 만든 워크트리에서 작업한다. 워크트리·브랜치를 새로 만들지 않는다.
+이전 단계에서 만든 워크트리에서 작업한다.
 
 세션이 워크트리 밖에서 시작했으면 `EnterWorktree`에 그 워크트리 경로를 줘 들어간다.
 
@@ -41,30 +41,19 @@ next:
 
 ---
 
-## Step 5.1. 팀 Spawn
+## Step 5.1. 구현 준비
 
-[team-agent](../../../contexts/team-agent.md)의 규칙을 따른다.
+구현은 Lead가 직접 한다.
 
-Feature Implementer(로직 구현 + 테스트 작성 + React.memo 등 성능 최적화) 하나만 spawn한다. 모델은 sonnet이다 — 할 일이 stub과 계획으로 정해져 있어 채우기만 한다.
-MARKUP 결과물은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)의 두 종류에 따라 Feature Implementer가 가져온다.
+MARKUP 결과물은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)의 두 종류에 따라 가져온다.
 
-- **페이지 마크업** — 가져와 따로 커밋하고, Lead가 MARKUP 완성본과 파일 diff가 없는지 확인한다. 디자인 원본 대조와 코드 리뷰는 MARKUP에서 마쳤으므로 이 커밋은 impl-review-loop에 넣지 않는다.
-  Lead는 이 일을 첫 커밋 단위보다 먼저 맡긴다 — 로직이 이 파일을 import한다. 로직 커밋이 이미 있으면 지금 위에 커밋한다.
-- **공통 지정 컴포넌트** — stub 껍데기에 MARKUP 시각 본문을 옮겨 넣는 일은 그 컴포넌트를 다루는 커밋 단위에 넣어 Step 5.3 리뷰를 거친다. 옮긴 시각 본문(CSS 수치·HTML 구조)이 MARKUP 완성본과 같은지는 Lead가 diff로 확인한다.
+- **페이지 마크업** — 가져와 따로 커밋하고, MARKUP 완성본과 파일 diff가 없는지 확인한다. 디자인 원본 대조와 코드 리뷰는 MARKUP에서 마쳤으므로 이 커밋은 impl-review-loop에 넣지 않는다.
+  첫 커밋 단위보다 먼저 가져온다 — 로직이 이 파일을 import한다. 로직 커밋이 이미 있으면 지금 위에 커밋한다.
+- **공통 지정 컴포넌트** — stub 껍데기에 MARKUP 시각 본문을 옮겨 넣는 일은 그 컴포넌트를 다루는 커밋 단위에 넣어 Step 5.3 리뷰를 거친다. 옮긴 시각 본문(CSS 수치·HTML 구조)이 MARKUP 완성본과 같은지 diff로 확인한다.
 
-나머지 리뷰는 Step 5.3에서 [impl-review-loop](../impl-review-loop/SKILL.md)가 맡는다.
+Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라 읽지 않는다 — 규칙 준수는 Step 5.3 리뷰가 맡는다.
 
-### Step 5.1.1. Spawn 시 컨텍스트 주입
-
-**Lead가 아래 표의 컨텍스트를 주입한다.**
-
-Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라 넘기지 않는다. `/plan/` 산출물과 workflow 문서가 경로로 짚은 문서는 그대로 넘긴다. 규칙 준수는 Step 5.3 리뷰가 맡는다 — 같은 문서를 구현자까지 들면 컨텍스트가 두 벌로 든다.
-
-| 에이전트 | Lead가 주입하는 컨텍스트 |
-|----------|--------------------------|
-| Feature Implementer | stub 파일들 (`// TODO [AI_IMPL]:` 주석으로 채울 항목 포함), 가져올 MARKUP 완성본 경로(있으면), 참조할 기존 코드 경로, `pr{N}/persistent/reference.md`, `pr{N}/retained/implementation.md`의 gotcha·근거, Step 5.2.2의 룰, 「커밋 단위는 Lead가 하나씩 맡긴다」, 「계획보다 나은 방법이나 계획의 문제를 발견하면 계획을 고치지 않고 Lead에게 보고한다」 |
-
-**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 구현자·주입 재료·정답 대조 A·규칙검사 B·커밋 단위를 위 표와 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)대로 정한다.
+**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 재료·정답 대조 A·규칙검사 B·커밋 단위를 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)대로 정한다.
 
 ---
 
@@ -78,10 +67,10 @@ IMPL 중 만나는 TODO 마커는 [처리](../conventions/artifact/comments.md#�
 
 - **계획에 없던 작업** — 지금 커밋 단위 없이도 독립적으로 설명되면 별도 커밋, 아니면 지금 커밋에 넣는다.
 - **계획에 없는 파일·모듈** — 만들기 전에 같은 역할의 코드(API·타입·컴포넌트)가 이미 있는지 찾아 재사용한다.
-- 이미 있는 코드블록을 옮기거나 쪼개는 편집(컴포넌트 추출, 코드블록 분리, 공용 위치로 승격)은 경계를 정하는 것도 옮기는 것도 사용자가 한다(구현자는 멈추고 Lead에게 보고한다). AI는 옮겨진 코드에 이름 후보를 낸다.
-  새 코드를 처음 쓰면서 나누는 것과, [implementation-spec](../conventions/artifact/implementation-spec.md#책임위치)이 일괄 치환 지시로 적게 한 rename·이동·설정치환은 해당하지 않는다.
-- realize-plan이 커밋한 외부 공개 시그니처는 바꾸지 않는다 — 의존 PR이 그 커밋을 딛는다. 바꿔야 하면 구현자는 Lead에게 영향을 보고하고, Lead가 사용자와 정한다.
-- **테스트 범위: stub의 `it.todo`만 채운다** — 더 필요해 보이거나 리뷰 이슈가 `it.todo` 밖 테스트를 요구해도 새로 쓰지 않고, Lead에게 「계획 밖 테스트 제안: 파일 · 테스트 이름 · 필요한 이유」로 보고한다. Lead가 넣기로 해 다시 맡긴 테스트만 쓴다.
+- 이미 있는 코드블록을 옮기거나 쪼개는 편집(컴포넌트 추출, 코드블록 분리, 공용 위치로 승격)은 경계를 정하는 것도 옮기는 것도 사용자가 한다. AI는 옮겨진 코드에 이름 후보를 낸다.
+  새 코드를 처음 쓰면서 나누는 것은 해당하지 않는다.
+- realize-plan이 커밋한 외부 공개 시그니처는 바꾸지 않는다(freeze) — 바꿔야 하면 사용자에게 영향을 알리고 정한다.
+- **테스트 범위: stub의 `it.todo`만 채운다** — 더 필요해 보이거나 리뷰 이슈가 `it.todo` 밖 테스트를 요구하면, 쓰기 전에 Step 5.3 「계획 밖 테스트 제안」으로 판정해 넣기로 한 것만 쓴다.
 
 ### Step 5.2.3. IMPL 중 디자인·기획 변경 감지
 
@@ -91,30 +80,26 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
 
 ## Step 5.3. 리뷰 파이프라인
 
-구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료·팀 컨텍스트는 Step 5.1·5.1.1 참조).
+구현·리뷰는 [impl-review-loop](../impl-review-loop/SKILL.md)를 호출해 0건까지 수렴시킨다. Lead는 아래 인자를 주입한다 (재료는 입력·Step 5.1 참조).
 
-**계획 밖 테스트 제안** — 구현자의 제안(리뷰 이슈로 온 것 포함)이 오면 Lead는 제안마다 일회성 서브에이전트(sonnet — 정해진 문항에 답만 대는 판정이다)를 띄워 MP `docs/patterns/testing/WhatToTest.md` 판정 4문항을 대게 하고, 판정 · 걸린 문항 · 근거만 돌려받는다.
-넣기로 한 것만 구현자에게 다시 맡긴다.
+**계획 밖 테스트 제안** — 계획 밖 테스트가 필요해 보이면 Lead는 테스트마다 일회성 서브에이전트(sonnet — 정해진 문항에 답만 대는 판정이다)를 띄운다 — 테스트를 쓰려는 쪽이 자기 제안을 판정하지 않게 한다.
+파일 · 테스트 이름 · 필요한 이유를 넘기고, MP `docs/patterns/testing/WhatToTest.md` 판정 4문항을 대게 해 판정 · 걸린 문항 · 근거만 돌려받는다.
 
 | 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 커밋 단위 |
 |---|---|---|---|
-| Feature Implementer | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo) | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | `implementation.md`의 `### N` 항목 하나. 구현을 끝낸 PR은 [아래 절](#realize-plan에서-구현을-끝낸-pr) |
-
-### realize-plan에서 구현을 끝낸 PR
-
-이 PR 브랜치의 base 이후 변경 파일에 `it.todo`·`TODO [AI_IMPL]`·`not implemented`가 하나도 남지 않았으면 realize-plan에서 구현을 끝낸 PR이다.
-채울 것이 없으므로 구현자는 리뷰 지적을 고치는 일만 하고, 리뷰 파이프라인은 base 이후 커밋 범위(가져온 페이지 마크업 커밋은 뺀다)를 커밋 단위 하나로 보고 돈다.
+| Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | `implementation.md`의 `### N` 항목 하나 |
 
 ---
 
 ## Step 5.4. 마무리
 
 - **TODO 잔존 점검** — [구현 종료 TODO 잔존 검사](../conventions/artifact/comments.md#구현-종료-todo-잔존-검사) 실행. 종료 조건은 그 절을 따른다
+- **이 PR의 TODO 자리 다시 읽기** — Step 5.0에서 읽은 뒤 다른 PR이 넣은 항목이 있으면 이 세션에서 처리한다
 - Lead가 사용자에게 결과 보고
   - 커밋 목록 (stub + IMPL + 리뷰 수정 그대로)
   - 리뷰 결과 요약 (각 단계별 이슈 수 + 해결 내용)
   - Lead가 들인 계획 밖 테스트가 있으면 그 목록(파일 · `it` 이름 · 판정 문항)
-  - 띄운 구현자·서브에이전트의 모델과 근거 (이 문서가 적은 근거를 옮기고, 다르게 띄웠으면 바꾼 이유)
+  - 띄운 서브에이전트·팀원의 모델과 근거 (이 문서가 적은 근거를 옮기고, 다르게 띄웠으면 바꾼 이유)
   - 수정 사항 (있는 경우)
 
 > 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 즉시 최종 점검 단계(verify)에 진입한다.

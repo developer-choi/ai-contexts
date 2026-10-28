@@ -230,7 +230,7 @@ function chainOf(steps, session) {
 }
 
 // `on` 간선은 세션 도중 사건이라 그때 부르고 세션은 이어진다.
-// 사건은 여러 번(PR 확정)일 수도 한 번(realize-plan 커밋)일 수도 있어 횟수는 적지 않는다.
+// 사건은 여러 번(PR 확정)일 수 있어 횟수는 적지 않는다.
 function describe(edge) {
   const parts = [edge.on ? `세션 도중 사건: ${edge.on} (사건이 일어나면 — 세션은 계속)` : 'step 종료 시점'];
   if (edge.when) parts.push(`조건: ${edge.when}`);
@@ -416,6 +416,16 @@ function assertBaseFitsDeps(data, pr, branch, base, repo) {
   }
 }
 
+// 브랜치를 체크아웃한 워크트리 경로. 어디에도 체크아웃돼 있지 않으면 null.
+function worktreeOf(repo, branch) {
+  let path = null;
+  for (const line of (git(repo, ['worktree', 'list', '--porcelain']) ?? '').split('\n')) {
+    if (line.startsWith('worktree ')) path = line.slice('worktree '.length);
+    else if (line === `branch refs/heads/${branch}`) return path;
+  }
+  return null;
+}
+
 // git이 실패하면 null — 없는 브랜치·조상 아님을 오류가 아니라 판정 결과로 쓴다.
 function git(repo, args) {
   try {
@@ -456,6 +466,17 @@ function cmdBranches(data, opt) {
     // 아래 브랜치가 다른 워크트리에 체크아웃돼 있으면 `rebase --update-refs`가 건너뛰어 옛 커밋에 남는데, git은 에러를 내지 않는다.
     if (below && git(opt.repo, ['merge-base', '--is-ancestor', pr.base, pr.branch]) === null) {
       console.log(`  어긋남: PR ${below.n}(${pr.base})의 tip이 ${pr.branch}에 없다 — 아래 브랜치가 안 따라왔거나 이 브랜치가 옛 base 위에 있다`);
+      // verify가 아래 PR의 stub 커밋을 구현 커밋에 합쳐 다시 쓰면, 그냥 rebase는 옛 stub을 구현 위에 다시 얹어 충돌한다.
+      // 이 브랜치가 갈라진 옛 지점은 아래 브랜치의 reflog로 찾는다.
+      // 브랜치가 다른 워크트리에 체크아웃돼 있으면 git은 그 워크트리 밖에서의 rebase를 거부한다 — 그 워크트리에서 돌리게 찍는다.
+      const forkPoint = git(opt.repo, ['merge-base', '--fork-point', pr.base, pr.branch]);
+      const where = worktreeOf(opt.repo, pr.branch);
+      const run = `git${where ? ` -C "${where}"` : ''} rebase --onto ${pr.base}`;
+      console.log(
+        forkPoint
+          ? `  옮길 명령: ${run} ${forkPoint.slice(0, 12)} ${pr.branch}${where ? '' : ' (어느 워크트리에도 체크아웃돼 있지 않아 돌린 곳이 이 브랜치로 바뀐다 — 돌린 뒤 원래 브랜치로 되돌린다)'}`
+          : `  직접 확인: ${pr.base}의 reflog에서 갈라진 지점을 못 찾았다 — 이 브랜치가 딛던 옛 커밋을 찾아 ${run} <옛 커밋> ${pr.branch}로 옮긴다`,
+      );
       broken += 1;
     }
     const baseMatchesDeps = below ? pr.deps.includes(below.n) : pr.deps.length === 0;
@@ -631,7 +652,7 @@ function cmdNext(name, opt) {
         .map((p) => {
           const wait = waitingOn(data, p);
           const call = launchCommand(t.session.replace('{N}', p.n), model, a);
-          return wait.length ? `대기 — ${call} (PR ${wait.join(', ')}의 realize-plan 커밋 전)` : call;
+          return wait.length ? `대기 — ${call} (PR ${wait.join(', ')}의 realize-plan 종료 전)` : call;
         });
       if (!calls.length) continue;
     }
@@ -651,7 +672,7 @@ function cmdNext(name, opt) {
   const goLines = [];
   for (const e of groups.go) {
     if (from.step === 'realize-plan' && !pr) {
-      goLines.push('  (알릴 PR은 --pr <방금 커밋한 PR>을 주면 찍힌다)');
+      goLines.push('  (알릴 PR은 --pr <realize-plan을 마친 PR>을 주면 찍힌다)');
       continue;
     }
     const before = goLines.length;
@@ -724,7 +745,7 @@ function cmdStart(raw, opt) {
   }
   const wait = waitingOn(data, pr);
   if (session === 'PR_{N}_PLAN' && wait.length) {
-    console.log(`대기: PR ${wait.join(', ')}의 realize-plan 커밋 전 — 아직 시작하지 않는다`);
+    console.log(`대기: PR ${wait.join(', ')}의 realize-plan 종료 전 — 아직 시작하지 않는다`);
   }
   if (pr.type) console.log(`읽을 종류 문서: ${rel(path.join(PR_TYPES_DIR, `${pr.type.toLowerCase()}.md`))}`);
 }

@@ -7,18 +7,18 @@ stub = PR 골조 코드. 구현이 본문만 채울 수 있도록 시그니처·
 두 원칙:
 
 1. **PR이 만들 모든 파일·함수·컴포넌트는 stub 필수** — 외부 공개 여부 무관. 내부 헬퍼도 시그니처 + `throw new Error('not implemented')`. 컴포넌트는 아래 「`.tsx`」 양식을 따른다
-2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 의존성 추가(`package.json` + 설치)·설정 파일도 든다. 코드 분량이 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
+2. **코드로 표현 가능한 결정은 모두 stub에 박는다** — 의존성 추가(`package.json` + 설치)·설정 파일도 든다(도구 설정 PR은 [SETUP 「설정값과 격리」](../pr-types/setup.md#설정값과-격리)를 따른다). 코드 분량이 크거나 한글 명세가 더 명확하면 `// TODO [AI_IMPL]:` 주석에 한글 요약
 
 ### 마크업 예외
 
 마크업의 stub 처리는 두 종류로 갈린다.
 
-- **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 디자인 원본 대조 지적 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다** — realize-plan 전면 stub 대상이 아니다.
-- **공통 지정 컴포넌트** (MARKUP이 [공통 컴포넌트 확정](../../steps/markup/index.md#공통-컴포넌트-확정)으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 realize-plan stub으로 노출**한다.
+- **페이지 마크업** (페이지 단위 `.tsx` 시각 구조·`.module.scss`): MARKUP 세션이 디자인 원본 대조 지적 0건으로 완성한 뒤 **검증본 그대로 PR로 가져온다** — 전면 stub 대상이 아니다.
+- **공통 지정 컴포넌트** (MARKUP이 [공통 컴포넌트 확정](../../steps/markup/index.md#공통-컴포넌트-확정)으로 추출한 재사용 단위): PR이 **껍데기(위치·이름·시그니처·props)를 stub으로 노출**한다.
   - 시각 본문(CSS 수치·HTML 구조)은 MARKUP에서 **이동**한다.
-  - props도 PR 소유다(MARKUP props는 임시값). realize-plan stub 공표 후엔 다운스트림 계약이라 freeze.
+  - props도 PR 소유다(MARKUP props는 임시값).
 
-PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. realize-plan의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
+PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
 코드 대용이면 MARKUP이 없으므로([모드 매트릭스](../modes.md)) 위 내용 대신, 화면을 바꾸는 부분도 로직과 같은 일반 변경으로 stub하고 구현한다.
 
@@ -61,10 +61,6 @@ export type UserListResponse = {
 
 ## 양식
 
-### 주석
-
-[comments.md](./comments.md) 단일 출처 참조.
-
 ### `.tsx`
 
 - Props 타입 + 컴포넌트 선언
@@ -98,14 +94,4 @@ export type UserListResponse = {
 
 ## 정리
 
-stub 커밋 뒤에 구현 커밋이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 구현 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
-
-어느 케이스든 계획 변경으로 안 쓰게 된 stub 파일은 지운다.
-
-### 케이스 A — 구현 커밋이 따로 쌓임
-
-stub 커밋을 파일별로 나눠, 각 조각을 그 파일을 처음 고친 구현 커밋 바로 앞에 두고 그 구현 커밋과 합친다(메시지는 구현 커밋 것). type·fixture·설정처럼 구현 커밋이 고치지 않은 조각은 첫 구현 커밋과 합친다.
-
-### 케이스 B — stub 커밋 하나에 구현까지 들어 있음
-
-soft reset으로 풀어 슬라이스별 재분할.
+stub 커밋을 파일별로 나눠, 각 조각을 그 파일을 처음 고친 구현 커밋 바로 앞에 두고 그 구현 커밋과 합친다(메시지는 구현 커밋 것). type·fixture·설정처럼 구현 커밋이 고치지 않은 조각은 첫 구현 커밋과 합친다. 계획 변경으로 안 쓰게 된 stub 파일은 지운다.

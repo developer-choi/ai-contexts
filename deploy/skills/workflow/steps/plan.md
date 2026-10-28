@@ -4,7 +4,7 @@ session: PR_{N}_PLAN
 scope: per-pr
 entry: >-
   BG 「레포 확보」 + (종류 COMPONENTS) MARKUP 「공통 컴포넌트 확정」 완료. BG가 학습 인수인계 문서를 썼으면 그 학습을 마친 뒤 진입한다
-  (채용 모드의 FOUNDATION PR은 학습을 기다리지 않는다). PR 확정과 의존 PR의 realize-plan 커밋은 스크립트가 판정한다
+  (채용 모드의 FOUNDATION PR은 학습을 기다리지 않는다). PR 확정과 의존 PR의 realize-plan 종료는 스크립트가 판정한다
 model: Opus
 next:
   - to: realize-plan

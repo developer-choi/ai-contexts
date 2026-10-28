@@ -6,13 +6,14 @@
 //
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
-//   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로…> --stub <stub 커밋>]
+//   node <이 파일> todo-coverage (plan | impl) … — 인자는 `todo-coverage`만 부르면 사용 안내가 알린다
 //   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
 //   node <이 파일> name-check verify --repo <레포 경로>
 //
 // 걸린 것이 있으면 exit 1.
 
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -76,24 +77,115 @@ function artifacts() {
 // 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 사람이 한다. 여기서 보는 것은
 // 안내문이 첫 줄에 있는지, 채워진 표에 빈 행이 있는지, 테스트 경로에 `it.todo`가 남았는지뿐이다.
 // `it.todo` 이름은 PLAN이 고정 문구로 두고 IMPL이 새로 지으므로 문구로 짝을 맞추지 않는다.
+const TODO_COVERAGE_USAGE = [
+  '사용:',
+  '  PLAN 종료: todo-coverage plan --impl <implementation.md> --plan <plan 폴더> [--repo <PR 워크트리>]',
+  '  IMPL 종료: todo-coverage impl --impl <implementation.md> [--stub <stub 커밋>] [--repo <PR 워크트리>]',
+  '  --repo를 빼면 지금 폴더의 레포로 본다. --stub을 빼면 PLAN 종료 때 기록한 커밋(그때의 마지막 커밋)을 쓴다',
+].join('\n');
+
+// 시점을 옵션 유무로 가르면 IMPL 종료에서 --stub을 빠뜨렸을 때 오류 없이 PLAN 모드로 돌아,
+// 남은 it.todo·계획 고정 검사를 건너뛰고 고정 기준까지 지금 내용으로 덮어쓴다. 그래서 시점을 하위 명령으로 받는다.
 function todoCoverage() {
+  const phase = rest[0];
   const impl = optOf('impl');
-  // stub이 여러 곳에 흩어지므로 `--tests` 뒤의 경로를 다음 옵션 전까지 모두 받는다.
-  const ti = rest.indexOf('--tests');
-  const testPaths = [];
-  for (let i = ti + 1; ti >= 0 && i < rest.length && !rest[i].startsWith('--'); i++) testPaths.push(rest[i]);
-  if (!impl) {
-    console.error('todo-coverage 에는 --impl 이 필요합니다.');
-    process.exit(1);
-  }
   const stub = optOf('stub');
-  if (testPaths.length && !stub) {
-    console.error('--tests 를 줄 때는 --stub <stub 커밋> 도 필요합니다 — 지운 it.todo를 세는 기준입니다.');
+  const usageError = (why) => {
+    console.error(`${why}\n${TODO_COVERAGE_USAGE}`);
+    process.exit(1);
+  };
+  if (phase !== 'plan' && phase !== 'impl') usageError(`todo-coverage 의 하위 명령은 plan 또는 impl 이다: ${phase ?? '(없음)'}`);
+  if (!impl) usageError('todo-coverage 에는 --impl 이 필요하다.');
+  if (!exists(impl)) usageError(`implementation.md가 없다: ${impl}`);
+  if (phase === 'plan' && stub) usageError('todo-coverage plan 은 --stub 을 받지 않는다 — IMPL 종료면 impl 로 부른다.');
+  if (phase === 'plan' && !optOf('plan')) usageError('todo-coverage plan 에는 --plan 이 필요하다 — 이 PR의 base를 prs.json에서 읽는다.');
+  const repo = optOf('repo') ?? process.cwd();
+  try {
+    execFileSync('git', ['rev-parse', '--git-dir'], { cwd: repo, stdio: 'ignore' });
+  } catch {
+    console.error(`git 레포가 아니다: ${repo} — PR 워크트리에서 돌리거나 --repo를 준다\n${TODO_COVERAGE_USAGE}`);
     process.exit(1);
   }
 
-  const lines = fs.readFileSync(impl, 'utf8').split('\n');
+  const text = fs.readFileSync(impl, 'utf8');
+  coverageTable(text.split('\n'));
+  if (phase === 'impl') {
+    const record = implFrozen(repo, text);
+    const stubRef = stub ?? record?.stub;
+    if (stubRef) stubTodos(repo, stubRef);
+    else if (record && record.stub === null) console.log('\n[stub 테스트 파일] PLAN 종료 때 stub 커밋이 없었다 — 셀 it.todo 없음');
+    else problems.push('stub 커밋을 모른다 — PLAN 종료 기록이 없으니 --stub <stub 커밋>으로 준다');
+  } else if (!problems.length) {
+    recordImpl(repo, text, optOf('plan'));
+  }
+}
 
+// implementation.md는 IMPL에 들어간 뒤로는 고치지 않는다 — IMPL 종료 대조의 기준이 계획이라서다.
+// PLAN 종료 통과 때의 해시를 워크트리 git 디렉토리에 브랜치와 함께 남기고, IMPL 종료에서 지금 파일과 비교한다.
+// stub 커밋도 남긴다 — IMPL 종료가 it.todo를 셀 기준이다. 이 PR의 커밋(prs.json에 기록한 base..HEAD) 중
+// stub 흔적을 더한 것이 stub 커밋이다. 다른 브랜치 목록으로 범위를 가리면 백업 브랜치·원격에만 있는 base에서
+// 틀려 범위는 base로 정한다. 하나도 없으면 stub 커밋이 없는 PR(설정값만 정하는 SETUP 등)이라 null로 남긴다.
+// stub 커밋 뒤에 다른 커밋이 있으면 막는다 — realize-plan은 stub 커밋을 마지막에 둔다.
+const STUB_MARK = /not implemented|TODO \[AI_IMPL\]|\bit\.todo\s*\(/;
+const implRecordPath = (repo) => path.resolve(repo, git(repo, ['rev-parse', '--git-path', 'workflow-impl-plan.json']).trim());
+const hashOf = (text) => createHash('sha256').update(text.replace(/\r\n/g, '\n')).digest('hex');
+
+function recordImpl(repo, text, plan) {
+  const branch = git(repo, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
+  const prsPath = path.join(plan, 'background', 'persistent', 'prs.json');
+  const pr = exists(prsPath) ? (JSON.parse(fs.readFileSync(prsPath, 'utf8')).prs ?? []).find((p) => p.branch === branch) : null;
+  if (!pr?.base) {
+    problems.push(`${branch}의 base가 ${prsPath}에 없다 — steps.mjs pr set으로 이 PR의 브랜치·base를 기록한 뒤 다시 돌린다`);
+    return;
+  }
+  try {
+    execFileSync('git', ['rev-parse', '--verify', '--quiet', `${pr.base}^{commit}`], { cwd: repo, stdio: 'ignore' });
+  } catch {
+    problems.push(`prs.json에 기록한 base ${pr.base}가 이 레포에 없다 — 원격에만 있으면 받아 오고, 기록이 틀렸으면 steps.mjs pr set으로 고친 뒤 다시 돌린다`);
+    return;
+  }
+  // 아래 PR이 verify에서 stub을 합쳐 다시 써졌으면 base..HEAD에 아래 PR의 옛 stub 커밋이 든다.
+  // 이 브랜치가 실제로 갈라진 지점은 base의 reflog로 찾는다(pr branches와 같은 방식). 못 찾으면 base를 쓴다.
+  let start = pr.base;
+  try {
+    start = execFileSync('git', ['merge-base', '--fork-point', pr.base, 'HEAD'], { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim() || pr.base;
+  } catch {}
+  const own = git(repo, ['rev-list', `${start}..HEAD`]).split('\n').filter(Boolean);
+  const addsStub = (sha) =>
+    git(repo, ['show', '--format=', '-U0', sha])
+      .split('\n')
+      .some((l) => l.startsWith('+') && !l.startsWith('+++') && STUB_MARK.test(l));
+  const stub = own.find(addsStub) ?? null;
+  if (stub && stub !== own[0]) {
+    const after = own.indexOf(stub);
+    problems.push(`stub 커밋(${stub.slice(0, 12)}) 뒤에 커밋이 ${after}개 있다 — stub 커밋을 이 단계의 마지막 커밋으로 옮긴 뒤 다시 돌린다`);
+    return;
+  }
+  fs.writeFileSync(implRecordPath(repo), JSON.stringify({ branch, hash: hashOf(text), stub }, null, 2));
+  console.log(
+    `\n[implementation.md 기록] ${branch} — PLAN 종료 시점 내용과 ` +
+      (stub ? `stub 커밋(${stub.slice(0, 12)})을 남겼다` : `「stub 커밋 없음」을 남겼다(${pr.base}에서 갈라진 뒤의 커밋에 stub 흔적이 없다)`) +
+      '. IMPL 종료에서 이것으로 대조한다',
+  );
+}
+
+function implFrozen(repo, text) {
+  const recordPath = implRecordPath(repo);
+  const record = exists(recordPath) ? JSON.parse(fs.readFileSync(recordPath, 'utf8')) : null;
+  const branch = git(repo, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
+  if (!record || record.branch !== branch) {
+    console.log(`\n[implementation.md 고정] ${record ? `기록이 다른 브랜치(${record.branch}) 것이다` : 'PLAN 종료 기록이 없다'} — 계획이 IMPL 중에 바뀌었는지 가릴 수 없다`);
+    problems.push('implementation.md의 PLAN 종료 기록이 없다 — 사용자에게 알리고 처리를 정한다');
+    return null;
+  }
+  if (record.hash !== hashOf(text)) {
+    console.log('\n[implementation.md 고정] PLAN 종료 뒤 implementation.md가 바뀌었다 — 계획은 IMPL에 들어간 뒤 고치지 않는다');
+    problems.push('implementation.md가 PLAN 종료 뒤 바뀌었다 — 고친 것을 되돌리고, 계획을 바꿔야 했으면 사용자에게 올린다');
+  }
+  return record;
+}
+
+function coverageTable(lines) {
   // 안내문이 빠져도 그 자리에선 아무것도 안 깨지고, 문서만 받는 리뷰어가 계획을 고쳐도 되는 파일로 읽는다.
   // 문구의 정본은 [양식](../conventions/artifact/implementation-spec.md#양식)의 코드 블록이다. 사본을 두지 않고 거기서 읽는다.
   const spec = fs.readFileSync(new URL('../conventions/artifact/implementation-spec.md', import.meta.url), 'utf8').split(/\r?\n/);
@@ -124,39 +216,39 @@ function todoCoverage() {
   console.log(`[행동 결정 커버리지] ${rows.length}행 중 커버·면제가 모두 빈 행 ${empty.length}건`);
   empty.forEach((c) => console.log(`  ${c[0]}`));
   if (empty.length) problems.push('커버 it.todo도 면제 사유도 없는 행이 있다 — PLAN 종료 금지');
+}
 
-  if (!testPaths.length) return;
-  const files = testPaths.flatMap((t) =>
-    fs.statSync(t).isDirectory() ? fs.readdirSync(t, { recursive: true }).map((f) => path.join(t, f)) : [t],
-  );
-  const source = files
-    .filter((f) => fs.existsSync(f) && fs.statSync(f).isFile() && /\.(test|spec)\.[jt]sx?$/.test(f))
-    .map((f) => fs.readFileSync(f, 'utf8'))
-    .join('\n');
-
-  const left = (source.match(TODO_CALL) ?? []).length;
-  console.log(`\n[남은 it.todo] ${left}건`);
-  if (left) problems.push('실제 it(...)로 바꾸지 않은 it.todo가 남았다 — IMPL 종료 금지');
+// stub 커밋이 it.todo를 넣은 테스트 파일을 그 커밋 diff에서 뽑는다. implementation.md 목록은 출처로 쓰지 않는다 —
+// 커버리지 표에 안 걸린 it.todo와, 커밋 항목에 안 적히는 기존 테스트 파일에 넣은 it.todo가 빠진다.
+function stubTodos(repo, stub) {
+  const top = git(repo, ['rev-parse', '--show-toplevel']).trim();
+  git(top, ['rev-parse', '--verify', '--quiet', `${stub}^{commit}`]);
+  const count = (src, re) => (src.match(re) ?? []).length;
+  // `diff stub^ stub`는 stub이 루트 커밋이면 부모가 없어 실패한다. show는 루트 커밋도 다룬다.
+  const stubFiles = git(top, ['show', '--name-only', '-z', '--format=', '--diff-filter=AM', stub])
+    .split('\0')
+    .filter((f) => TEST_FILE.test(f) && count(git(top, ['show', `${stub}:${f}`]), TODO_CALL));
+  console.log(`\n[stub 테스트 파일] stub 커밋이 it.todo를 넣은 파일 ${stubFiles.length}개`);
+  stubFiles.forEach((f) => console.log(`  ${f}`));
 
   // 남은 수만 세면 it.todo를 채우지 않고 지워도 0건이라 통과한다. it.todo 이름은 PLAN이 고정 문구로
   // 두어 짝을 맞출 수 없으니, stub 커밋의 it.todo + 기존 it 수만큼 지금 it이 있는지로 본다.
-  const absFirst = path.resolve(testPaths[0]);
-  const repo = git(fs.statSync(absFirst).isDirectory() ? absFirst : path.dirname(absFirst), ['rev-parse', '--show-toplevel']).trim();
-  const rels = testPaths.map((t) => path.relative(repo, path.resolve(t)).replace(/\\/g, '/') || '.');
-  const stubFiles = git(repo, ['ls-tree', '-r', '--name-only', stub, '--', ...rels])
-    .split('\n')
-    .filter((f) => TEST_FILE.test(f));
-  const count = (src, re) => (src.match(re) ?? []).length;
   let stubTodo = 0;
   let stubIt = 0;
   let nowIt = 0;
+  let left = 0;
   for (const f of stubFiles) {
-    const before = git(repo, ['show', `${stub}:${f}`]);
+    const before = git(top, ['show', `${stub}:${f}`]);
     stubTodo += count(before, TODO_CALL);
     stubIt += count(before, IT_CALL);
-    const now = path.join(repo, f);
-    if (exists(now)) nowIt += count(fs.readFileSync(now, 'utf8'), IT_CALL);
+    const now = path.join(top, f);
+    if (!exists(now)) continue;
+    const src = fs.readFileSync(now, 'utf8');
+    nowIt += count(src, IT_CALL);
+    left += count(src, TODO_CALL);
   }
+  console.log(`[남은 it.todo] ${left}건`);
+  if (left) problems.push('실제 it(...)로 바꾸지 않은 it.todo가 남았다 — IMPL 종료 금지');
   console.log(`[stub 대비] stub 커밋의 it.todo ${stubTodo}건 + 기존 it ${stubIt}건 → 지금 it ${nowIt}건 + 남은 it.todo ${left}건`);
   if (nowIt + left < stubTodo + stubIt) problems.push('it(...)로 채우지 않고 지운 it.todo가 있다 — IMPL 종료 금지');
 }

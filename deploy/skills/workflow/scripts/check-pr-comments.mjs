@@ -119,7 +119,7 @@ if (forbidden.length) {
   // paths 모드는 경로를 통째로 보므로 이 PR 전부터 있던 TODO도 걸린다 — 그건 지우면 안 된다.
   const residual = args.paths
     ? '금지 주석이 남아 있다 — 이 PR이 만든 것은 해소하고, 이 PR 전부터 있던 것은 지우지 말고 사용자에게 보고한다'
-    : '금지 주석이 남아 있다 — implement의 Implementer 흐름으로 해소한다';
+    : '금지 주석이 남아 있다 — 고치고 이 검사를 다시 돌린다';
   problems.push(args.marker ? `${label} — IMPL을 중단하고 사용자에게 보고한다` : residual);
 }
 
