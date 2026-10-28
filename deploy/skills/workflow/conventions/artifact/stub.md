@@ -20,6 +20,8 @@ stub = PR 골조 코드. 구현이 본문만 채울 수 있도록 시그니처·
 
 PR 로직은 가져온 페이지 마크업 파일을 수정하지 않고 **별도 파일**(hook·컨테이너)에서 import·합성한다. realize-plan의 stub 대상은 그 **로직**(hook·test·type·fixture·컨테이너) + **공통 지정 컴포넌트의 껍데기**다.
 
+코드 대용이면 MARKUP이 없으므로([모드 매트릭스](../modes.md)) 위 내용 대신, 화면을 바꾸는 부분도 로직과 같은 일반 변경으로 stub하고 구현한다.
+
 ### 내부 헬퍼 예시
 
 ```ts
@@ -96,7 +98,7 @@ export type UserListResponse = {
 
 ## 정리
 
-stub 커밋 뒤에 구현 커밋(IMPL에서든 realize-plan에서든)이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 구현 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
+stub 커밋 뒤에 구현 커밋이 따로 쌓여 stub의 `not implemented`·`TODO [AI_IMPL]`·`it.todo` 자리를 채웠으면 케이스 A, 그런 구현 커밋 없이 stub 커밋 하나에 구현까지 들어 있으면 케이스 B다.
 
 어느 케이스든 계획 변경으로 안 쓰게 된 stub 파일은 지운다.
 
