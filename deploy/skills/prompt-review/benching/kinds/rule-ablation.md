@@ -4,6 +4,15 @@
 
 ## 시나리오 시드 — 규칙 rationale에서 직접 추출
 
+### 앞선 eval-set부터 찾는다
+
+`bench-ablation.mjs`는 돌 때마다 eval-set에서 변형을 뺀 사본을 `%TEMP%\prompt-review-evals\<rule_id>.json`에 남긴다.
+`rule_id`는 `<스킬·문서 이름>-<절 이름>`으로 지어, 다른 문서의 같은 이름 절과 겹치지 않고 파일명만으로 찾게 한다.
+eval-set을 꾸리기 전에 그 폴더에서 그 이름의 파일을 찾는다.
+
+- 있으면: 채점 축(`grader`·시나리오별 축)과 `inheritance_signatures`가 지금 대상 문안과 맞는지 대조해 낡은 것을 고친 뒤, 이번 변형만 끼워 쓴다
+- 없으면: 아래 절차대로 새로 만든다
+
 ### 절차
 
 - 규칙 본문의 rationale·예시·"이 규칙이 방어하려는 상황" 맥락을 먼저 추출한다

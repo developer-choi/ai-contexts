@@ -452,6 +452,26 @@ function readJson(file) {
   return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, ''));
 }
 
+// 같은 절을 다시 잴 때 쓰도록 eval-set에서 변형만 뺀 사본을 세션과 무관한 고정 경로에 남긴다.
+// eval-set은 세션 scratchpad에 만들어 벤치 정리 때 지우므로, 남기지 않으면 다음 세션이
+// 시나리오·채점 축을 옛 세션 기록에서 거슬러 다시 조립해야 한다(세션 55242f00 실측).
+// 변형은 빼는 이유: 비교할 문안은 매번 바뀌고, 남기면 다음 벤치에 옛 문안이 섞인다.
+// 명세 점검을 통과한 뒤, call을 쓰기 전에 남긴다 — 틀린 명세가 앞선 사본을 덮지 않고,
+// 발사가 죽어도 재료는 남는다.
+const KEPT_EVAL_DIR = path.join(os.tmpdir(), 'prompt-review-evals');
+
+function keepEvalSet(spec) {
+  if (!spec.rule_id) {
+    process.stderr.write('rule_id가 없어 eval-set 사본을 남기지 않는다\n');
+    return;
+  }
+  const { variants, variant_cwds, ...kept } = spec;
+  const file = path.join(KEPT_EVAL_DIR, `${String(spec.rule_id).replace(/[\\/:*?"<>|]+/g, '_')}.json`);
+  fs.mkdirSync(KEPT_EVAL_DIR, { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(kept, null, 2));
+  process.stderr.write(`eval-set 사본(변형 제외): ${file}\n`);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help || args.h) { process.stdout.write(USAGE); return; }
@@ -558,6 +578,7 @@ async function main() {
       throw new Error(`ZERO 비교군 텍스트에 남은 어휘라 상속 신호가 아니다: ${leaked.join(', ')}`);
     }
   }
+  keepEvalSet(spec);
   for (const [variant, target] of Object.entries(variants)) {
     const cwd = spec.variant_cwds?.[variant];
     process.stderr.write(`주입 ${variant}: 시스템 프롬프트 ${target.length}자`
