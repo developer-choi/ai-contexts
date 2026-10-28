@@ -291,11 +291,11 @@ function render(blocks, tz) {
     .join('\n');
 }
 
-// 로그 디렉토리 이름은 cwd의 경로 구분자를 `-`로 바꾼 것이다 (`C:\Users\…` → `C--Users-…`).
+// 로그 디렉토리 이름은 cwd의 영숫자 아닌 글자를 모두 `-`로 바꾼 것이다 (`C:\Users\…\.claude` → `C--Users-…--claude`).
 // 이 변환과 후보 훑기를 산문에 적어두면 매번 사람이 슬러그를 짓고 jsonl을 하나씩 열어
 // 첫/끝 timestamp를 읽어 표를 만들게 된다 — 엉뚱한 세션을 골라도 타임라인을 다 뽑고 나서야 드러난다.
 function listSessions(cwd, tz) {
-  const slug = path.resolve(cwd).replace(/[:\\/]/g, '-');
+  const slug = path.resolve(cwd).replace(/[^a-zA-Z0-9]/g, '-');
   const dir = path.join(os.homedir(), '.claude', 'projects', slug);
   if (!fs.existsSync(dir)) {
     console.error(`로그 디렉토리 없음: ${dir}`);

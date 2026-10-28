@@ -1,13 +1,6 @@
 #!/usr/bin/env node
 // 채용과제 제출물을 빈 GitHub Actions 러너에서 설치→빌드→실행→홈페이지 응답까지 돌리고, 흔적을 모두 지운다.
-//
-//   node clean-env-check.mjs --github <owner/repo> [옵션]
-//   node clean-env-check.mjs --zip <제출 zip 경로> [옵션]
-//
-// 옵션: --env-file <파일>   repo secret ENV_LOCAL로 넣고 러너에서 --env-name 파일로 써 준다
-//       --env-name <이름>   러너에 쓸 env 파일명 (기본 .env.local)
-//       --node <버전>       기본 24
-//       --port <포트>       기본 3000
+// 인자는 아래 USAGE. --env-file 내용은 repo secret ENV_LOCAL로 넣는다.
 //
 // 종료 코드: 0 = run 성공, 1 = run 실패, 2 = 절차 오류(인자·gh 권한·push 등), 3 = 정리 실패(흔적 남음),
 // 130 = 중단 후 정리 완료. 어느 쪽이든 끝나면 임시 브랜치·run·secret·임시 레포를 지운다(Ctrl+C로 끊어도).
@@ -22,17 +15,24 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const BRANCH = 'ci-check';
 const WORKFLOW_PATH = '.github/workflows/clean-install.yml';
 
+const USAGE = `사용: node clean-env-check.mjs --github <owner/repo> | --zip <제출 zip 경로> [옵션]
+  --env-file <파일>   메일로 따로 보낼 env 파일. 러너에서 --env-name 이름으로 써 준다
+  --env-name <이름>   러너에 쓸 env 파일명 (기본 .env.local)
+  --node <버전>       기본 24
+  --port <포트>       기본 3000`;
+
 class ProcedureError extends Error {}
+class UsageError extends ProcedureError {}
 
 function parseArgs(argv) {
   const opts = { envName: '.env.local', node: '24', port: '3000' };
   const keys = { '--github': 'github', '--zip': 'zip', '--env-file': 'envFile', '--env-name': 'envName', '--node': 'node', '--port': 'port' };
   for (let i = 0; i < argv.length; i += 2) {
     const key = keys[argv[i]];
-    if (!key || argv[i + 1] === undefined) throw new ProcedureError(`알 수 없는 인자: ${argv[i]}`);
+    if (!key || argv[i + 1] === undefined) throw new UsageError(`알 수 없는 인자: ${argv[i]}`);
     opts[key] = argv[i + 1];
   }
-  if (!opts.github === !opts.zip) throw new ProcedureError('--github <owner/repo> 또는 --zip <경로> 중 하나만 준다');
+  if (!opts.github === !opts.zip) throw new UsageError('--github 또는 --zip 중 하나만 준다');
   return opts;
 }
 
@@ -60,11 +60,12 @@ function checkDeleteScope() {
   }
 }
 
-// push 직후엔 run이 아직 등록 전일 수 있어, headSha가 push한 커밋과 같아질 때까지 다시 조회한다
+// push 직후엔 run이 아직 등록 전일 수 있어, headSha가 push한 커밋과 같아질 때까지 다시 조회한다.
+// 제출 레포에 원래 있던 on: push 워크플로도 같은 커밋에 run을 만들므로 워크플로 이름으로 거른다
 async function findRun(repo, sha) {
   for (let i = 0; i < 60; i++) {
-    const out = run('gh', ['run', 'list', '-R', repo, '-b', BRANCH, '-L', '5', '--json', 'databaseId,headSha']);
-    const hit = JSON.parse(out).find((r) => r.headSha === sha);
+    const out = run('gh', ['run', 'list', '-R', repo, '-b', BRANCH, '-L', '5', '--json', 'databaseId,headSha,workflowName']);
+    const hit = JSON.parse(out).find((r) => r.headSha === sha && r.workflowName === 'clean-install');
     if (hit) return hit.databaseId;
     await sleep(3000);
   }
@@ -176,6 +177,8 @@ for (const sig of ['SIGINT', 'SIGTERM', 'SIGBREAK']) {
     interrupted = true;
     log('중단 — 정리한다');
     const ok = cleanup();
+    if (ok) log('중단돼 판정이 없다 — 다시 돌린다');
+    else log('흔적이 남았다 — 위 정리 실패 항목을 사용자에게 그대로 보고한다. 손으로 지우지 않는다');
     process.exit(ok ? 130 : 3);
   });
 }
@@ -185,9 +188,10 @@ try {
   code = await main();
 } catch (e) {
   log(e instanceof ProcedureError ? e.message : `절차 오류: ${e.message}`);
+  if (e instanceof UsageError) console.error(USAGE);
   code = 2;
 }
 if (!interrupted) {
-  if (!cleanup()) { log('흔적이 남았다 — 위 정리 실패 항목을 손으로 지운다'); code = 3; }
+  if (!cleanup()) { log('흔적이 남았다 — 위 정리 실패 항목을 사용자에게 그대로 보고한다. 손으로 지우지 않는다'); code = 3; }
   process.exit(code);
 }

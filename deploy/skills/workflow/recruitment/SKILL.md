@@ -96,7 +96,7 @@ README는 `/plan/`의 과제 요구사항, 각 PR의 GitHub 게시본, 아래 �
 - [클린 환경 실행 확인](#클린-환경-실행-확인) 통과
 - GitHub 제출이면 Private 확인 뒤 collaborator 초대
 - README.md의 이미지·링크는 `check-submission.mjs pr-body <README.md> --check-urls`로 확인
-- 과제가 AI 세션 대화 내역 제출을 요구하면 [session-timeline/SKILL.md](../session-timeline/SKILL.md)로 대화록을 만들어 제출물에 넣는다
+- 과제가 AI 세션 대화 내역 제출을 요구하면 [session-timeline/SKILL.md](../session-timeline/SKILL.md)로 대화록을 만들고, 그 파일을 `plan/` 밖 제출물 안으로 옮겨 넣는다
 
 ### 클린 환경 실행 확인
 

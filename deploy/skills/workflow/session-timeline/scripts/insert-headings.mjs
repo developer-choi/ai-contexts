@@ -12,10 +12,7 @@
 // 「이걸 이 시간만큼 써서 했다고?」를 드러내는 것이라, 조용히 틀린 숫자가 결론을 오염시킨다.
 // 이제 넘기는 것은 구간의 시작 시각과 한 일 요약뿐이고 나머지는 계산된다.
 //
-// 사용: node <이 파일> <타임라인.md> --segs <구간.json> [--out <파일>] [--note "집계 한 줄"]
-// 구간.json: [{ "start": "8/16 15:31", "summary": "한 일 요약" }, ...]
-//   start = 그 구간 첫 블록의 시각. 블록 헤더 `**{시각} · `와 정확히 일치해야 한다.
-//   (블록 시각 목록은 `inspect-blocks.mjs`가 낸다 — md를 통독해 옮겨 적지 않는다.)
+// 사용법과 구간.json 꼴은 인자 없이 부르면 나온다.
 
 import fs from 'node:fs';
 
@@ -36,7 +33,8 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 if (!args.input || !args.segs) {
-  console.error('사용: node <이 파일> <타임라인.md> --segs <구간.json> [--out <파일>] [--note "집계 한 줄"]');
+  console.error('사용: node <이 파일> <타임라인.md> --segs <구간.json> [--out <파일>(기본: 타임라인.md를 고쳐 쓴다)] [--note "집계 한 줄"]');
+  console.error('구간.json: [{ "start": "8/16 15:31", "summary": "한 일 요약" }, ...] — start는 그 구간 첫 블록의 이름(inspect-blocks.mjs --stamps, 같은 분 두 번째부터 "8/16 15:31 #2")과 정확히 같다');
   process.exit(1);
 }
 
@@ -44,9 +42,32 @@ const source = fs.readFileSync(args.input, 'utf8');
 const segments = JSON.parse(fs.readFileSync(args.segs, 'utf8'));
 
 const BLOCK_HEADER = /^\*\*(\d+\/\d+ \d+:\d+) · /;
-const lines = source.split('\n');
+// 이 스크립트가 앞서 넣은 합계·상단 조망·구간 헤딩을 먼저 걷는다. 입력 파일을 고쳐 쓰므로, 사용자 검토 뒤 구간을 고쳐
+// 다시 돌리면 그대로는 조망이 두 벌·헤딩이 두 겹 쌓이는데 블록 수 검증은 통과한다.
+const GENERATED_HEADING = /^## \d+\/\d+ \d+:\d+ ~ /;
+const lines = (() => {
+  const raw = source.split('\n');
+  const firstHeader = raw.findIndex((line) => BLOCK_HEADER.test(line));
+  const summaryAt = raw.findIndex((line, i) => i < firstHeader && line.startsWith('> **합계**'));
+  const kept = summaryAt === -1 ? raw : [...raw.slice(0, summaryAt), ...raw.slice(firstHeader)];
+  return kept.filter((line, i) => !GENERATED_HEADING.test(line) && !(line === '' && GENERATED_HEADING.test(kept[i - 1] ?? '')));
+})();
 const stamps = lines.map((line) => line.match(BLOCK_HEADER)).filter(Boolean).map((m) => m[1]);
 const before = stamps.length;
+
+// 시각은 분 단위라 같은 분에 블록이 여럿일 수 있다. 블록 이름은 inspect-blocks.mjs --stamps와 같은 꼴로,
+// 같은 분의 두 번째 블록부터 ` #n`을 붙인다 — 안 그러면 구간 헤딩이 그 분의 첫 블록 앞에 꽂힌다.
+function namer() {
+  const seen = new Map();
+  return (stamp) => {
+    const n = (seen.get(stamp) ?? 0) + 1;
+    seen.set(stamp, n);
+    return n === 1 ? stamp : `${stamp} #${n}`;
+  };
+}
+const keys = stamps.map(namer());
+const indexOf = new Map(keys.map((k, i) => [k, i]));
+const baseOf = (key) => key.replace(/ #\d+$/, '');
 
 // `M/DD HH:MM`에는 연도가 없다. 블록은 시간 순이므로, 값이 뒤로 가면 해를 넘긴 것으로 본다.
 // 이렇게 해야 12/31 → 1/1 세션에서 소요분이 음수가 되지 않는다.
@@ -80,20 +101,21 @@ function fail(messages) {
   process.exit(1);
 }
 
-const unknown = segments.filter((s) => !minutesAt.has(s.start));
-if (unknown.length) fail([`블록에 없는 시작 시각 ${unknown.length}건: ${unknown.map((s) => s.start).join(', ')}`]);
+const unknown = segments.filter((s) => !indexOf.has(s.start));
+if (unknown.length) fail([`블록에 없는 시작 시각 ${unknown.length}건: ${unknown.map((s) => s.start).join(', ')} — inspect-blocks.mjs --stamps의 이름을 그대로 쓴다`]);
 
 const dupes = segments.map((s) => s.start).filter((s, i, all) => all.indexOf(s) !== i);
 if (dupes.length) fail([`구간 시작 시각이 중복이다: ${dupes.join(', ')} — 어느 블록에 붙일지 갈리지 않는다`]);
 
-const ordered = [...segments].sort((a, b) => minutesAt.get(a.start) - minutesAt.get(b.start));
+const ordered = [...segments].sort((a, b) => indexOf.get(a.start) - indexOf.get(b.start));
 const lastStamp = stamps[stamps.length - 1];
 
 // 끝시각 = 다음 구간의 시작. 마지막 구간만 문서의 마지막 블록으로 닫는다.
 const spans = ordered.map((seg, i) => {
-  const end = i + 1 < ordered.length ? ordered[i + 1].start : lastStamp;
-  const minutes = minutesAt.get(end) - minutesAt.get(seg.start);
-  return { ...seg, end, minutes, label: `${rangeOf(seg.start, end)} (${minutes}분)` };
+  const start = baseOf(seg.start);
+  const end = i + 1 < ordered.length ? baseOf(ordered[i + 1].start) : lastStamp;
+  const minutes = minutesAt.get(end) - minutesAt.get(start);
+  return { ...seg, end, minutes, label: `${rangeOf(start, end)} (${minutes}분)` };
 });
 
 const pending = new Map(spans.map((s) => [s.start, `${s.label} — ${s.summary}`]));
@@ -101,8 +123,10 @@ const pending = new Map(spans.map((s) => [s.start, `${s.label} — ${s.summary}`
 const body = [];
 let inserted = 0;
 let firstHeaderSeen = false;
+const nameOf = namer();
 for (const line of lines) {
   const match = line.match(BLOCK_HEADER);
+  const key = match && nameOf(match[1]);
   if (match && !firstHeaderSeen) {
     firstHeaderSeen = true;
     // 상단 조망은 첫 블록 바로 앞에 둔다 — 그 앞은 전부 메타 인용이라, 이 자리가 곧 「메타 인용 아래」다.
@@ -112,9 +136,9 @@ for (const line of lines) {
     for (const s of spans) body.push(`- **${s.label}** — ${s.summary}`);
     body.push('');
   }
-  if (match && pending.has(match[1])) {
-    body.push(`## ${pending.get(match[1])}`, '');
-    pending.delete(match[1]);
+  if (match && pending.has(key)) {
+    body.push(`## ${pending.get(key)}`, '');
+    pending.delete(key);
     inserted += 1;
   }
   body.push(line);
@@ -130,7 +154,7 @@ if (pending.size > 0) problems.push(`매칭 실패 ${pending.size}건: ${[...pen
 if (inserted !== segments.length) problems.push(`삽입 ${inserted}개 ≠ 구간 ${segments.length}개`);
 if (problems.length > 0) fail(problems);
 
-if (args.out) fs.writeFileSync(args.out, result, 'utf8');
-else process.stdout.write(result);
+// --out이 없으면 입력 파일을 고쳐 쓴다 — 절차가 한 파일을 고쳐 가는데 stdout으로만 내면 파일에 헤딩이 안 남는다
+fs.writeFileSync(args.out ?? args.input, result, 'utf8');
 
 console.error(`blocks=${after} headings=${inserted} miss=0 총 ${minutesAt.get(lastStamp) - minutesAt.get(stamps[0])}분`);
