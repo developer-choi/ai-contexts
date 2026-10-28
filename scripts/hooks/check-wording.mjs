@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 전역 git pre-commit 훅. 이 커밋이 건드린 프롬프트 md를 통째로 훑어 강조 라벨·약한 어휘·군더더기·
-// 금지 표현(사용자가 못 알아본 말)을 감지해 처방과 함께 경고한다(차단하지 않는다).
+// 영어 먼저 한글 풀이 헤딩·금지 표현(사용자가 못 알아본 말)을 감지해 처방과 함께 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 // 경로 판정·staged 읽기는 check-count-hardcoding.mjs와 같은 모양이다.
 //
@@ -135,6 +135,22 @@ function frontmatterEnd(content) {
   return close === -1 ? 0 : close + 1;
 }
 
+// 영어 용어를 먼저 쓰고 괄호로 한글 풀이를 단 헤딩(`## Gap Analysis (계획 ↔ 실제 차이 검사)`).
+// 사용자가 이 꼴을 싫어해 짚었다. 헤딩만 본다 — 실측(2026-10-29, AC·PP·BL 프롬프트 md)에서 헤딩은
+// 3건 모두 이 꼴이었고, 본문은 62건 중 대부분이 `API(export, props, 타입)`처럼 괄호가 풀이가 아니라
+// 내용을 덧붙이는 정상 쓰임이었다. 앞을 막아 `page.md (페이지마다)` 같은 파일 이름은 뺀다.
+const GLOSS_HEADING = /(?<![\w./-])[A-Za-z][A-Za-z -]*[A-Za-z]\s*\([^)]*[가-힣][^)]*\)/g;
+const GLOSS = {
+  kind: "gloss",
+  tag: "[영어 먼저 한글 풀이 헤딩 의심]",
+  noun: "영어 용어 뒤에 괄호로 한글 풀이를 단 헤딩이",
+  advice: [
+    "판단: 한글 이름만 남긴다 (예: `## Gap Analysis (계획 ↔ 실제 차이 검사)` → `## 계획 ↔ 실제 차이 검사`).",
+    "      영어가 코드·파일·명령 이름이면 백틱으로 감싼다 — 백틱 안은 보지 않는다.",
+    "      괄호가 풀이가 아니라 범위·조건을 덧붙이는 자리면 그대로 둔다.",
+  ],
+};
+
 // 사용자가 못 알아본 말. 낱말은 금지 표현 목록 행에서 오고, 처방도 행마다 다르다(걸린 줄 아래에 찍힌다).
 const BLOCKED = {
   kind: "blocked",
@@ -198,7 +214,7 @@ export function blockedHits(rows, line) {
 const MAX_REPORTS = 20;
 
 function main() {
-  const categories = [...CATEGORIES, BLOCKED, LONG];
+  const categories = [...CATEGORIES, GLOSS, BLOCKED, LONG];
   const reports = new Map(categories.map((c) => [c.kind, []]));
   const rows = loadBlockedRows();
 
@@ -341,6 +357,11 @@ function detectInFile(file, content, rows) {
       if (hits.length > 0) found.push({ kind: category.kind, file, lineNo, line: raw.trim(), hits });
     }
 
+    if (lineNo > bodyStart && trimmed.startsWith("#")) {
+      const hits = [...clean.matchAll(GLOSS_HEADING)].map((m) => m[0]);
+      if (hits.length > 0) found.push({ kind: GLOSS.kind, file, lineNo, line: trimmed, hits });
+    }
+
     const blocked = blockedHits(rows, clean);
     if (blocked.length > 0) {
       const matchedRows = [...new Set(blocked.map((hit) => hit.row))];
@@ -380,7 +401,7 @@ function reportFile(target) {
 
   const found = detectInFile(target, fs.readFileSync(abs, "utf8"), loadBlockedRows());
   const where = target;
-  for (const category of [...CATEGORIES, BLOCKED, LONG]) {
+  for (const category of [...CATEGORIES, GLOSS, BLOCKED, LONG]) {
     const reports = found.filter((r) => r.kind === category.kind);
     if (reports.length > 0) printReports(category, reports, where);
   }
