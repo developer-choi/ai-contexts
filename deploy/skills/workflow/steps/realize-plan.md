@@ -45,7 +45,7 @@ next:
 
 `/plan/pr{N}/` 하위와 `/plan/background/`를 탐색하여 기존 AI 산출물을 읽고, **stub 코드(결정·코드 표현 가능 영역)와 잔존 md(narrative)로 분배**하며 소비한다. 소비 후 원본 정리는 각 산출물의 라이프사이클 폴더 규칙을 따른다 ([라이프사이클 규칙](../conventions/plan-folder.md#라이프사이클-규칙)).
 
-페이지 마크업·공통 지정 컴포넌트를 stub에서 어떻게 다루는지는 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)를 따른다(재수령은 [IMPL 중 디자인·기획 변경 감지](implement.md#step-523-impl-중-디자인기획-변경-감지)).
+페이지 마크업·공통 지정 컴포넌트를 stub에서 어떻게 다루는지는 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)를 따른다.
 realize-plan은 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)을 본 PR의 로직·조립 구조 참조에만 쓴다.
 figma 자료는 [피그마 URL·캡처 캐싱](../conventions/plan-folder.md#피그마-url캡처-캐싱)대로 `background/retained/figma/`에 누적한다.
 

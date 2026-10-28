@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-// step 점검들 — 산출물 존재, impl-review-loop 우회 조건, `it.todo` 커버리지, 테스트 이름 대조 이후 변경.
+// step 점검들 — 산출물 존재, `it.todo` 커버리지, 테스트 이름 대조 이후 변경.
 //
-// 넷 다 산문이 "센다"·"확인한다"·"기계 판정"·"돌 때마다"라 적어놓고 세는 주체가 사람이었다.
+// 셋 다 산문이 "센다"·"확인한다"·"돌 때마다"라 적어놓고 세는 주체가 사람이었다.
 // 점검을 아예 안 돈 세션과 돌아서 0건인 세션은 산출물상 구분되지 않는다.
 //
 // 사용:
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
-//   node <이 파일> review-bypass --repo <레포 경로> --base <기준 ref>
 //   node <이 파일> todo-coverage --impl <implementation.md> [--tests <경로…> --stub <stub 커밋>]
 //   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
 //   node <이 파일> name-check verify --repo <레포 경로>
@@ -71,88 +70,6 @@ function artifacts() {
   if (figmaUrl !== undefined) console.log(`  figma: ${figmaUrl ? '있음 (figma 원본 대조)' : '없음 (캡처 대조)'}`);
   // 레포가 아직 없어 인덱스를 미룬 경우는 파일로 판별할 수 없어, 넘어갈지는 사람이 판정한다.
   if (problems.includes('없음: 컨벤션 인덱스')) console.log('\n  (레포가 아직 없어 인덱스를 미뤘으면 컨벤션 인덱스 ✗는 넘어간다 — 「레포 확보」에서 만든다)');
-}
-
-// ── review-bypass: impl-review-loop 우회 조건 ────────────────────────────────
-// 문서가 "둘 다 **기계 판정** — 런타임 의견 금지"라 못박아 놓고 판정 수단이 없었다.
-// 이 스위치는 impl-review-loop를 통째로 끄는 것이고, 느슨한 쪽으로 틀리면 생략됐다는 사실조차 안 남는다.
-//
-// 판정 못 한 것은 통과가 아니라 **impl-review-loop 호출 강제**로 낸다 — 문서가 정한 fails-safe다.
-function globToRegExp(glob) {
-  let re = '';
-  for (let i = 0; i < glob.length; i += 1) {
-    const c = glob[i];
-    if (c === '*') {
-      if (glob[i + 1] === '*') {
-        re += '.*';
-        i += 1;
-        if (glob[i + 1] === '/') i += 1; // `**/`는 0개 디렉토리도 매칭한다
-      } else re += '[^/]*';
-    } else if (c === '?') re += '[^/]';
-    else if (c === '{') re += '(';
-    else if (c === '}') re += ')';
-    else if (c === ',') re += '|';
-    else re += c.replace(/[.+^$()|[\]\\]/g, '\\$&');
-  }
-  return new RegExp(`^${re}$`);
-}
-
-function readJson(p) {
-  if (!exists(p)) return null;
-  try {
-    // tsconfig는 주석을 허용한다. 값 안의 `//`(URL 등)를 안 건드리게 줄 끝 주석만 지운다.
-    return JSON.parse(fs.readFileSync(p, 'utf8').replace(/^\s*\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, ''));
-  } catch {
-    return null;
-  }
-}
-
-function reviewBypass() {
-  const repo = optOf('repo') ?? process.cwd();
-  const base = optOf('base');
-  if (!base) {
-    console.error('review-bypass 에는 --base 가 필요합니다.');
-    process.exit(1);
-  }
-
-  let changed;
-  try {
-    changed = execFileSync('git', ['diff', '--name-only', `${base}...HEAD`], { cwd: repo, encoding: 'utf8' })
-      .split('\n')
-      .filter(Boolean);
-  } catch (e) {
-    console.error(`git diff 실패: ${`${e.stderr || e.message}`.trim().split('\n').pop()}`);
-    process.exit(1);
-  }
-
-  const pkg = readJson(path.join(repo, 'package.json'));
-  const rc = readJson(path.join(repo, '.lintstagedrc.json')) ?? readJson(path.join(repo, '.lintstagedrc'));
-  const lintStaged = Object.keys(rc ?? pkg?.['lint-staged'] ?? {});
-  const tsconfig = readJson(path.join(repo, 'tsconfig.json'));
-
-  // 판정 재료가 없으면 스코프를 모른다 — 모르는 것은 「스코프 안」이 아니다.
-  if (!lintStaged.length && !tsconfig) {
-    console.log('[우회 조건 ②] 판정 불가 — lint-staged·tsconfig 어느 쪽도 못 읽었다');
-    console.log('  → impl-review-loop 호출 강제 (fails-safe). 스코프를 모르는 것은 스코프 안이 아니다.');
-    problems.push('검사 도구 스코프를 판정할 수 없다');
-    return;
-  }
-  if (tsconfig?.extends) {
-    console.log(`[주의] tsconfig가 "${tsconfig.extends}"를 extends 한다 — 상속된 include/exclude는 안 따라간다`);
-  }
-
-  const lintRes = lintStaged.map(globToRegExp);
-  const include = (tsconfig?.include ?? (tsconfig ? ['**/*'] : [])).map(globToRegExp);
-  const exclude = (tsconfig?.exclude ?? ['node_modules']).map(globToRegExp);
-  const inScope = (f) =>
-    lintRes.some((re) => re.test(f) || re.test(path.basename(f))) ||
-    (include.some((re) => re.test(f)) && !exclude.some((re) => re.test(f)));
-
-  const outside = changed.filter((f) => !inScope(f));
-  console.log(`[우회 조건 ②] 변경 ${changed.length}건 중 스코프 밖 ${outside.length}건`);
-  outside.forEach((f) => console.log(`  ${f}`));
-  if (outside.length) problems.push('변경 파일 중 자동 검사 스코프 밖이 있다 — impl-review-loop 호출 강제');
-  console.log('\n  조건 ①(정답 파일 선언 여부)은 계획 문서를 봐야 하므로 여기서 안 본다.');
 }
 
 // ── todo-coverage: 안내문 + 표 빈 행 + 남은 it.todo ───────────────────────────
@@ -434,7 +351,6 @@ function nameCheck() {
 }
 
 if (command === 'artifacts') artifacts();
-else if (command === 'review-bypass') reviewBypass();
 else if (command === 'todo-coverage') todoCoverage();
 else if (command === 'name-check') nameCheck();
 else {
