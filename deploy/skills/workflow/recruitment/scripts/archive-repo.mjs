@@ -15,9 +15,11 @@
 //   node <이 파일> create <작업폴더> <recruitment-{slug}-{YYYYMMDD}> [--remote-url <url>]
 //   node <이 파일> push <복사본>
 //   node <이 파일> recreate-prs <복사본> [--title <번호>=<제목>]...
-//   node <이 파일> relink <복사본> <파일>...
+//   node <이 파일> relink <복사본> [<파일>...]
 //
-// 순서: collect → create → (사람이 git remote -v 확인) → push → recreate-prs → relink.
+// 순서: collect → create → (사람이 git remote -v 확인) → push → relink → recreate-prs.
+// relink를 recreate-prs 앞에 두는 이유: recreate-prs는 회수한 본문 파일을 그대로 PR 본문으로 쓴다.
+// 그 파일의 제출 레포 링크를 먼저 바꾸지 않으면 제출 레포가 지워질 때 아카이브 PR의 링크가 죽는다.
 // create와 push를 가른 이유: 사이의 확인은 사람 몫인데, 한 명령에 넣으면 대화형 입력이 되고
 // 에이전트 실행 환경은 그것을 받을 수 없다.
 //
@@ -132,7 +134,7 @@ function create(workdir, name) {
   if (!loadCollected(workdir)) {
     fail('회수 산출물(plan/archive/prs.json)이 없다 — collect를 먼저 돌린다. 복사부터 하면 그사이 제출 레포가 지워졌을 때 PR 본문을 되살릴 수 없다');
   }
-  if (!name || !ARCHIVE_NAME.test(name)) fail(`아카이브 이름은 recruitment-{slug}-{YYYYMMDD} 꼴이어야 한다: ${name ?? '(없음)'}`);
+  if (!name || !ARCHIVE_NAME.test(name)) fail(`아카이브 이름은 recruitment-{slug}-{YYYYMMDD} 꼴이어야 한다(slug는 영문 소문자·숫자·하이픈 — 한글 회사명은 로마자로): ${name ?? '(없음)'}`);
   const dest = path.join(path.dirname(path.resolve(workdir)), name);
   if (fs.existsSync(dest)) fail(`복사 대상이 이미 있다: ${dest}`);
 
@@ -184,6 +186,7 @@ function create(workdir, name) {
   console.log(`  제외한 재생성 폴더 ${skipped.length}개${skipped.length ? `: ${skipped.slice(0, 10).join(', ')}` : ''}`);
   console.log(`\n[원격]\n${run('git', ['remote', '-v'], dest)}`);
   console.log('\n→ 여기서 멈춘다. origin이 제출 레포가 아니라 새 아카이브 레포인지 사용자 확인을 받은 뒤 push를 돌린다.');
+  console.log('  그 뒤 relink를 돌린다 — 회수한 PR 본문은 relink가 알아서 넣는다. 제출 레포를 링크하는 README 등 복사본 안 문서를 넘긴다.');
 }
 
 function guardArchiveOrigin(copy) {
@@ -284,13 +287,16 @@ function recreatePrs(copy) {
     mismatches += bad.length;
     console.log(`  #${c.number} ${c.base} <- ${c.head} ${bad.length ? `불일치: ${bad.join(', ')}` : '일치'}`);
   }
-  if (mismatches) fail('게시본과 회수 파일이 어긋난 PR이 있다');
+  if (mismatches) fail('만든 PR과 회수 파일이 어긋난 PR이 있다');
 }
 
-function relink(copy, files) {
+function relink(copy, extra) {
   const { collected, slug } = guardArchiveOrigin(copy);
   if (!slug) fail('relink는 GitHub 아카이브 레포에서만 돈다');
-  if (!files.length) fail('치환할 파일을 넘긴다');
+  // recreate-prs가 PR 본문으로 쓰는 회수 파일은 늘 넣는다. 넘긴 파일은 cwd가 아니라 복사본 기준으로
+  // 푼다 — 세션 cwd는 보통 원본 작업폴더라 같은 상대 경로가 원본의 회수 파일을 가리킨다.
+  const bodies = collected.prs.map((pr) => path.join(copy, COLLECT_DIR, `pr${pr.number}.md`));
+  const files = [...bodies, ...extra.map((file) => path.resolve(copy, file))];
   // PR 번호·커밋 SHA·브랜치 이름이 아카이브에서 같으므로 레포 경로만 바꾸면 링크가 산다.
   const from = new RegExp(`https://github\\.com/${collected.submitSlug.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}(?=[/)#?\\s"'>]|$)`, 'gim');
   for (const file of files) {
@@ -313,6 +319,7 @@ function relink(copy, files) {
     }
   }
   if (leftovers) fail('제출 레포 링크가 남은 파일이 있다');
+  console.log('\n→ 바뀐 파일 중 추적되는 것(README 등)은 기본 브랜치에 커밋하고 push를 다시 돌린다. 그다음 recreate-prs를 돌린다.');
 }
 
 function optOf(name) {
@@ -320,7 +327,21 @@ function optOf(name) {
   return i >= 0 ? rest[i + 1] : undefined;
 }
 
-if (!command || !target) fail('사용: node <이 파일> <collect|create|push|recreate-prs|relink> <대상> [인자]');
+// md는 「이 시점에 이 하위 명령」까지만 적는다. 무엇을 넘기는지는 여기서 알린다.
+const USAGE = {
+  collect: '<작업폴더> — 브랜치 전부가 든 원본 저장소. 제출 레포의 PR 본문·커밋을 회수한다',
+  create: '<작업폴더> <recruitment-{slug}-{YYYYMMDD}> [--remote-url <url>] — slug는 영문 소문자·숫자·하이픈',
+  push: '<복사본> — create가 만든 폴더. origin이 아카이브 레포인지 다시 보고 브랜치 전부를 올린다',
+  'recreate-prs': '<복사본> [--title <번호>=<제목>]... — 서술형으로 바꿀 PR 제목을 번호마다 넘긴다',
+  relink: '<복사본> [<파일>...] — 회수한 PR 본문은 늘 넣는다. 그 밖에 제출 레포 링크를 바꿀 복사본 안 파일(복사본 기준 경로)',
+};
+if (!command || !target || !USAGE[command]) {
+  const which = USAGE[command] ? [command] : Object.keys(USAGE);
+  console.error('사용: node <이 파일> <하위 명령> <대상> [인자]');
+  which.forEach((name) => console.error(`  ${name} ${USAGE[name]}`));
+  console.error('순서: collect → create → (출력된 git remote -v를 사용자가 확인) → push → relink → recreate-prs');
+  process.exit(1);
+}
 if (!fs.existsSync(target)) fail(`대상이 없다: ${target}`);
 
 try {

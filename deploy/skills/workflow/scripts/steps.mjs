@@ -475,12 +475,14 @@ function cmdLinks(data, opt) {
   const missing = [pr.branch, pr.base].filter((ref) => git(opt.repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === null);
   if (missing.length) fail(`${prLabel(pr)} | 레포에 없음: ${missing.join(', ')}`);
   // 아래 브랜치가 메시지 최종화를 안 따라왔으면 새 SHA가 위 PR 범위로 잡혀 맞는 링크가 어긋남으로 나온다.
-  const lagging = data.prs.filter((p) => {
+  // 이 PR의 범위만 보면 된다 — 채용 순차 게시는 아래 PR부터 하나씩 옮겨 위 PR은 아직 옛 브랜치 위에 있다.
+  const isLagging = (p) => {
     const below = p.branch && data.prs.find((other) => other.n !== p.n && other.branch === p.base);
     return below && git(opt.repo, ['merge-base', '--is-ancestor', p.base, p.branch]) === null;
-  });
+  };
+  const lagging = [pr].filter(isLagging);
   if (lagging.length) {
-    fail(`스택이 어긋나 범위를 믿을 수 없다(${lagging.map(prLabel).join(', ')}) — pr branches로 확인하고 아래 브랜치를 맞춘 뒤 다시 돌린다`);
+    fail(`스택이 어긋나 범위를 믿을 수 없다(${lagging.map(prLabel).join(', ')}) — pr branches로 확인하고 아래 브랜치를 맞춘 뒤 다시 돌린다. 아래 PR이 이미 머지돼 기본 브랜치 위로 옮겼으면 pr set --n ${pr.n} --branch ${pr.branch} --base <기본 브랜치>로 base를 옮긴다`);
   }
 
   // 업스트림 라이브러리 커밋처럼 다른 레포를 인용한 링크는 이 PR과 무관하다.
@@ -502,7 +504,8 @@ function cmdLinks(data, opt) {
       console.log(`  ok: ${sha} ${git(opt.repo, ['log', '-1', '--format=%s', full])}`);
       continue;
     }
-    const owner = data.prs.find((other) => other.n !== pr.n && other.branch && inRange(opt.repo, full, other));
+    // 아직 옮기지 않은 위 PR의 범위에는 rebase 전 커밋이 들어 있어 소속을 가릴 수 없다.
+    const owner = data.prs.find((other) => other.n !== pr.n && other.branch && !isLagging(other) && inRange(opt.repo, full, other));
     if (owner) {
       console.log(`  어긋남: ${sha} — ${prLabel(owner)}의 범위에 있다`);
       broken += 1;
@@ -514,7 +517,13 @@ function cmdLinks(data, opt) {
       continue;
     }
     // 메시지 최종화 전 SHA는 커밋 객체가 남아 있어도 어느 브랜치에도 안 든다.
-    console.log(`  어긋남: ${sha} — 어느 PR 범위에도 없다(옛 SHA)`);
+    // rebase만 거친 옛 SHA는 제목이 그대로라, 이 PR 범위에서 같은 제목 커밋이 하나면 그것이 새 SHA다.
+    const subject = git(opt.repo, ['log', '-1', '--format=%s', full]);
+    const same = (git(opt.repo, ['log', '--format=%h%x09%s', `${pr.base}..${pr.branch}`]) ?? '')
+      .split('\n')
+      .filter((line) => line.split('\t')[1] === subject);
+    const hint = same.length === 1 ? ` → 새 SHA ${same[0].split('\t')[0]}` : ' — 제목으로 새 SHA를 못 가림';
+    console.log(`  어긋남: ${sha} — 어느 PR 범위에도 없다(옛 SHA)${hint}`);
     broken += 1;
   }
   if (broken) {
