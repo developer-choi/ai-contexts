@@ -6,9 +6,9 @@
 
 단계마다 메인이 할지, 서브에이전트나 팀원에게 맡길지를 아래 공식 자료로 판단한다.
 
-결과를 받은 뒤 같은 에이전트에게 다시 시킬 일이 있으면 이름 있는 팀원으로 띄운다([team-agent](../team-agent.md#claude-code)).
+이름 있는 팀원으로 띄울지는 [team-agent](../team-agent.md#claude-code)를 따른다.
 
-서브에이전트·팀원에게 맡긴 일마다 더 가벼운 모델로 낮춰도 되는지 판단하고, 낮추는 게 합리적이면 근거와 함께 제안한다.
+서브에이전트·팀원에게 맡긴 일마다 더 가벼운 모델로 낮춰도 되는지 판단하고, 낮추는 게 합리적이면 낮춰 띄우고 고른 모델과 근거를 사용자에게 알린다.
 
 ### 공식 자료 (확인: 2026-10-15)
 
@@ -24,10 +24,6 @@
 > * The task produces verbose output you don't need in your main context
 > * You want to enforce specific tool restrictions or permissions
 > * The work is self-contained and can return a summary
-
-같은 문서 첫머리
-
-> Use one when a side task would flood your main conversation with search results, logs, or file contents you won't reference again: the subagent does that work in its own context and returns only the summary.
 
 같은 문서 「Run parallel research」 절
 
