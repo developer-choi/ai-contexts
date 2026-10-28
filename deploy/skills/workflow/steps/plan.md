@@ -137,7 +137,7 @@ PR별로 아래 항목을 **의도 수준으로만** 적는다.
 |---|---|---|
 | `overview.md` | **의도만** — 위 본문 항목. 기술 선택·근거는 decisions.md | 코드 블록 없음 |
 | `decisions.md` | **기록 대상 결정의 근거** + 의사결정 흐름 (사용자 발화 단계 + 거부/채택 사유) + 채택안(채택안 절) | 사용자 발화 인용은 그대로. 코드는 시그니처 수준만 |
-| `reference.md` | PR이 참조하는 자료 인덱스 — 담을 항목은 [reference-curation.md 「포함 항목」](../conventions/artifact/reference-curation.md#포함-항목) | 코드 없음 |
+| `reference.md` | PR이 참조하는 자료 인덱스 — 담을 항목은 reference-curation.md의 [포함 항목](../conventions/artifact/reference-curation.md#포함-항목) | 코드 없음 |
 | `implementation.md` | **구현 계획** — realize-plan이 쓴다 ([implementation-spec.md](../conventions/artifact/implementation-spec.md)) | — |
 
 ### 산출물: `/plan/pr{N}/persistent/decisions.md`

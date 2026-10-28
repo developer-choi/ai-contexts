@@ -17,7 +17,7 @@
 
 ## realize-plan과 implement의 코드 경계
 
-둘 다 코드를 쓰므로 경계가 흐려지기 쉽다. 경계는 [stub.md 「정의·범위」](../../workflow/conventions/artifact/stub.md#정의범위)가 정한다. realize-plan·implement step 파일이 stub.md와 다른 경계를 시키는 곳이 없는지 본다.
+둘 다 코드를 쓰므로 경계가 흐려지기 쉽다. 경계는 stub.md의 [정의·범위](../../workflow/conventions/artifact/stub.md#정의범위)가 정한다. realize-plan·implement step 파일이 stub.md와 다른 경계를 시키는 곳이 없는지 본다.
 
 ## step 순서와 의존
 
