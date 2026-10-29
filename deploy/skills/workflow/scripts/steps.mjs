@@ -619,6 +619,13 @@ function cmdNext(name, opt) {
   if (!fs.existsSync(a.plan)) askFail([`plan 폴더가 없다: ${a.plan}`]);
   const data = readPrs(a.plan);
   const pr = opt.pr !== undefined ? findPr(data, parseNum(opt.pr, '--pr')) : null;
+  // plan 종료를 기록하기 전에 산출물을 본다 — 빠지면 realize-plan이 입력을 못 찾을 때에야 드러난다.
+  // decisions.md는 포함 기준에 걸린 결정이 있을 때만 생겨 파일 유무로 가리지 않는다.
+  if (from.step === 'plan' && pr) {
+    const dir = path.join(a.plan, `pr${pr.n}`, 'persistent');
+    const missing = ['overview.md', 'reference.md'].map((f) => path.join(dir, f)).filter((p) => !fs.existsSync(p));
+    if (missing.length) fail(`plan 산출물이 없다: ${missing.join(', ')} — 만들고 다시 돌린다`);
+  }
 
   const groups = { same: [], spawn: [], go: [] };
   for (const edge of from.next) {

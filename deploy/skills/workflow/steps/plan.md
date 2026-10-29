@@ -25,7 +25,7 @@ next:
   - BG 산출물
   - (공통 컴포넌트를 받는 PR) `background/retained/component-list.md`
   - `pr list` 단계가 realized인 다른 PR들의 `persistent/`
-- **산출물**: `pr{N}/persistent/`: overview.md, reference.md, decisions.md(아래 「산출물 파일 존재 확인」의 조건일 때)
+- **산출물**: `pr{N}/persistent/`: overview.md, reference.md, decisions.md([포함 기준](../conventions/artifact/decisions-lifecycle.md#포함제외-기준)에 걸린 결정이 있을 때)
 - **작업 위치**: main repo `/plan/`. PR_{N} 워크트리는 아직 없다
 
 ## 읽기 위임
@@ -143,9 +143,3 @@ PR별로 아래 항목을 **의도 수준으로만** 적는다.
 ## 산출물: `/plan/pr{N}/persistent/decisions.md`
 
 목적·포함·제외 기준·적는 법은 [conventions/artifact/decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md) 참조.
-
----
-
-## 산출물 파일 존재 확인
-
-plan을 끝내기 전에 산출물 파일이 실제로 생성되었는지 확인한다 (`/plan/pr{N}/persistent/overview.md` 필수, `/plan/pr{N}/persistent/reference.md` 필수, `/plan/pr{N}/persistent/decisions.md`는 [포함 기준](../conventions/artifact/decisions-lifecycle.md#포함제외-기준)에 걸린 결정이 있는 경우).
