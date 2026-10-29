@@ -41,6 +41,21 @@ next:
 
 ---
 
+## Step 6.1.5. 리뷰 전 결정 반영
+
+6.2에 들어갈 때마다(처음, 그리고 [수정이 생기면](#수정이-생기면) 다시 들어올 때) 그때까지 이 PR의 implement·verify 대화에서 나온 결정을 decisions.md에 반영한다. 결정 기록이 리뷰어에게 넘어가, 정리된 주제를 다시 지적하지 않게 한다.
+
+**6.1과 의존 없음 — 병렬 진행 가능.**
+
+쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다.
+
+앞 세션 기록은 일회성 서브에이전트(sonnet — 문서 기준대로 원문을 가려 모으는 일이다)에 맡기고 모델과 근거를 사용자에게 알린다 — 기록이 수 MB다.
+
+- 기록 경로, decisions.md 경로, decisions-lifecycle.md 경로를 넘겨, decisions.md에 이미 있는 결정은 뺀 채 그 문서 기준대로 가른 원문을 돌려받는다. 사용자에게 물어야 하는 것(애매한 후보·단발 발화에서 나온 항목)과 TODO로 보낼 PR 분할·범위 변경 발화는 표시해 받는다. 기록은 다시 열지 않는다.
+- Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
+
+---
+
 ## Step 6.2. 리뷰 파이프라인
 
 Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md)가 소유한다.
@@ -51,7 +66,7 @@ Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별�
 code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
 
-- code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 리뷰 모드(advanced)
+- code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 결정 기록 `/plan/pr{N}/persistent/decisions.md`, 리뷰 모드(advanced)
 - 마크업을 고쳤으면 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
 
 ---
@@ -162,9 +177,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash --exec '<그 레포의 타입 �
 
 결정은 두 곳에서 모은다.
 
-1. 이 PR의 implement·verify 대화. 앞 세션 기록은 일회성 서브에이전트(sonnet — 문서 기준대로 원문을 가려 모으는 일이다)에 맡기고 모델과 근거를 사용자에게 알린다 — 기록이 수 MB다.
-   - 기록 경로와 decisions-lifecycle.md 경로를 넘겨 그 문서 기준대로 가른 원문을 돌려받는다. 사용자에게 물어야 하는 것(애매한 후보·단발 발화에서 나온 항목)과 TODO로 보낼 PR 분할·범위 변경 발화는 표시해 받는다. 기록은 다시 열지 않는다.
-   - Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
+1. 이 PR의 implement·verify 대화. [Step 6.1.5](#step-615-리뷰-전-결정-반영)대로 모은다.
 2. 후임자가 코드를 보고 "여기 왜 이렇게 했어요?"라고 물을 만한 질문. PR diff 전체를 훑는 일이라 일회성 서브에이전트에 맡긴다.
    - PR 기준 ref, decisions.md 경로, 1에서 모은 결정을 넘기고, 이미 있는 결정에 닿는 질문은 뺀 뒤 질문마다 `파일:줄`과 원문 줄만 돌려받는다.
    - Lead는 그 줄로 사용자에게 묻고 diff를 다시 열지 않는다. 답하기 어려운 질문은 [/discussion](../../discussion/SKILL.md)으로 토론한다.

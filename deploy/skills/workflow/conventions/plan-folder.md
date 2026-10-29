@@ -32,7 +32,7 @@
       design-system.md  ← requirement-review 채용과제 분석 step 「디자인 시스템 설계」 산출물 (채용 한정). COMPONENTS 종류 PR이 소비 ([conventions/pr-types/components.md])
   pr{N}/
     persistent/
-      decisions.md      ← plan 산출물. 그 뒤로는 verify 「decisions.md 최신화」에서만 갱신
+      decisions.md      ← plan 산출물. 그 뒤로는 verify에서만 갱신
       reference.md      ← plan·realize-plan 누적
       overview.md       ← plan 산출물
     retained/           ← verify 「fixup 합치기」 진입 시 일괄 폐기

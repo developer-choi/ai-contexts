@@ -25,7 +25,7 @@ next:
   - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
   - MARKUP 페이지 코드(페이지 코드 포함 PR, 코드 대용 제외)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)대로). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
-- 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 verify에서 한 번에 한다
+- 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 verify가 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
 
 ---
