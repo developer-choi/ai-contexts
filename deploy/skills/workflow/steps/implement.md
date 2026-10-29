@@ -89,6 +89,8 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
 |---|---|---|---|
 | Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | `implementation.md`의 `### N` 항목 하나 |
 
+**리뷰어 유지** — Lead는 code-review의 리뷰어를 모두 이름 있는 팀원으로 띄우고, 커밋 단위·재검 라운드 내내 같은 팀원에게 맡긴다.
+
 ---
 
 ## Step 5.4. 마무리
@@ -102,4 +104,4 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
   - 띄운 서브에이전트·팀원의 모델과 근거 (이 문서가 적은 근거를 옮기고, 다르게 띄웠으면 바꾼 이유)
   - 수정 사항 (있는 경우)
 
-> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 사용자 승인을 받은 뒤 같은 세션에서 최종 점검 단계(verify)로 넘어간다.
+> 이 보고가 끝나도 PR_{N}_IMPL 세션은 종료되지 않는다. 사용자 승인을 받으면 Step 5.3의 리뷰어 팀원을 모두 끝내고 같은 세션에서 최종 점검 단계(verify)로 넘어간다.

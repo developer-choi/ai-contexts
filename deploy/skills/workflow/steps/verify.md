@@ -45,6 +45,8 @@ next:
 
 Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md)가 소유한다.
 
+리뷰어는 모두 이름 있는 팀원으로 띄워, 재검 라운드와 [수정이 생기면](#수정이-생기면) 다시 도는 6.2까지 같은 팀원에게 맡긴다.
+
 ```
 code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
