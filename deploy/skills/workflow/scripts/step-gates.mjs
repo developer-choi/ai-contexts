@@ -223,7 +223,7 @@ function coverageTable(lines) {
 function stubTodos(repo, stub) {
   const top = git(repo, ['rev-parse', '--show-toplevel']).trim();
   git(top, ['rev-parse', '--verify', '--quiet', `${stub}^{commit}`]);
-  const count = (src, re) => (src.match(re) ?? []).length;
+  const count = (src, re) => (codeOnly(src).match(re) ?? []).length;
   // `diff stub^ stub`는 stub이 루트 커밋이면 부모가 없어 실패한다. show는 루트 커밋도 다룬다.
   const stubFiles = git(top, ['show', '--name-only', '-z', '--format=', '--diff-filter=AM', stub])
     .split('\0')
@@ -305,6 +305,23 @@ function skipComment(src, i) {
     return end < 0 ? src.length : end + 2;
   }
   return -1;
+}
+
+// 문자열·주석을 같은 길이의 공백으로 바꾼 소스. it.todo 고정 문구 안의 「it(...)」를 호출로 세지 않게 한다.
+function codeOnly(src) {
+  let out = '';
+  for (let i = 0; i < src.length; i += 1) {
+    const c = src[i];
+    const comment = skipComment(src, i);
+    const end = comment >= 0 ? comment : c === '"' || c === "'" || c === '`' ? skipString(src, i) : -1;
+    if (end < 0) {
+      out += c;
+      continue;
+    }
+    out += ' '.repeat(end - i);
+    i = end - 1;
+  }
+  return out;
 }
 
 // 짝이 맞는 닫는 글자(`)`·`}`) 다음 위치. 문자열·주석 안 괄호는 세지 않는다.
