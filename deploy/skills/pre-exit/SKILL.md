@@ -9,46 +9,36 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 
 ## 목적
 
-세션을 회고한다. 잘못된 것은 다음에 안 하고, 잘된 것은 다음에도 하게 만든다.
+세션을 회고한다. 이 세션에서 겪은 문제가 다음 세션에서 반복되지 않게 만든다.
 
 ## 왜 필요한가
 
-회고에서 건진 것은 대화와 함께 사라지고 다음 세션은 아무것도 모르는 채 시작한다. 그래서 세션이 닫히기 전에, 남겨야 할 것을 골라 백로그 항목으로 남긴다.
+회고에서 건진 것은 대화와 함께 사라진다. 그래서 세션이 닫히기 전에 남겨야 할 것을 골라 백로그 항목으로 남긴다.
 
 ## 회고 항목
 
-표의 순서가 실행 순서다. 보강과 시간·순서 표가 건진 것이 「문제 리스트업 + 규칙화」의 문제 목록으로 흘러 들어가므로 그쪽이 뒤에 온다.
+표의 순서가 실행 순서다 — 앞 항목이 건진 것은 「문제 리스트업 + 규칙화」의 문제 목록에 합류한다.
 
-| 항목 | 무엇을 하는가 | 상세 |
-|---|---|---|
-| 시간·순서 표 | 무엇이 오래 걸렸고 지시가 어떤 순서로 왔는지 한 표로 만들어 브라우저로 연다 | [timeline.md](timeline.md) |
-| workflow 보강 | 안 따라간 cross-ref와 첫 요청을 `plan/pr{N}/**` 산출물에 맞대 누락을 건진다 | [augmentations/workflow.md](augmentations/workflow.md) |
-| requirement-review 보강 | 적용한 체크리스트가 이번 요구사항 리뷰에서 무엇을 놓쳤는지 재료로 대조해 체크리스트 개선안을 낸다 | [augmentations/requirement-review.md](augmentations/requirement-review.md) |
-| digest 보강 | 저장·해설·버림 판정이 번복된 자리를 모은다 | [augmentations/digest.md](augmentations/digest.md) |
-| write-doc 보강 | 채점기를 돌리고 쌓이지 않은 반려·놓친 결함·과교정을 회수한다 | [augmentations/write-doc.md](augmentations/write-doc.md) |
-| routine 보강 | 루틴 데이터를 스크립트 우회로 다뤘는지, 그날 루틴을 굴린 방식 자체가 어땠는지 본다 | [augmentations/routine.md](augmentations/routine.md) |
-| recruitment 보강 | 떠온 원문 중 안 쓰인 것과 뒤에서 다시 판 조사를 세어, 다음에 무엇을 떠올지 정한다 | [augmentations/recruitment.md](augmentations/recruitment.md) |
-| 문제 리스트업 + 규칙화 | 세션에서 문제만 추출해 백로그 항목으로 낸다 | [step-1.md](step-1.md) |
-| 오답노트 | 몰라서 물어본 질문을 모아 남긴다. 위 항목과 함께 부른다 | [error-notebook.md](error-notebook.md) |
+| 항목 | 상세 |
+|---|---|
+| 시간·순서 표 | [timeline.md](timeline.md) |
+| requirement-review 보강 | [augmentations/requirement-review.md](augmentations/requirement-review.md) |
+| digest 보강 | [augmentations/digest.md](augmentations/digest.md) |
+| recruitment 보강 | [augmentations/recruitment.md](augmentations/recruitment.md) |
+| 오답노트 | [error-notebook.md](error-notebook.md) |
+| 문제 리스트업 + 규칙화 | [step-1.md](step-1.md) |
 
 ## 무엇을 돌릴지 고른다
 
-상세 파일을 열기 **전에** 고른다. 회고 항목에는 세션에 따라 아무 소득이 없는 것이 섞이는데, 상세를 먼저 열면 소득 없는 항목의 절차까지 다 읽은 뒤에야 그걸 알게 된다.
+상세 파일을 끝까지 읽기 **전에** 고른다. 세션에 따라 소득 없는 항목이 섞여 있어서, 상세를 먼저 열면 절차를 다 읽은 뒤에야 그걸 알게 된다.
 
-1. `node {{skill_dir}}/scripts/session-state.mjs menu --session <session_id> --repo <레포 경로> --cwd <이 세션 cwd>`로 이 세션에 해당하는 항목을 받는다.
-   - 기억으로 답하지 않는다 — 회고는 세션이 길어진 뒤에 도는지라 앞머리가 요약으로 접혀 있기도 하고, 안 떠올라 항목을 건너뛰면 건너뛰었다는 것도 아무 데도 안 남는다
-2. `해당`·`항상`·`미확인`으로 나온 항목만 위 표의 이름으로 번호를 매겨 한 번에 내고, **돌릴 번호**를 회신받는다. 항목마다 위 표의 「무엇을 하는가」를 한 줄로 붙이고, 그 안의 「위 항목」은 메뉴 번호로 바꿔 쓴다
-3. 고른 항목의 상세 파일을 **그때** 연다
-4. 여러 개를 골랐으면 위 표의 순서로 돈다. 앞 항목이 건진 것은 「문제 리스트업 + 규칙화」의 문제 목록에 합류한다 — 순서를 뒤집으면 이미 만든 목록에 나중에 덧붙이게 된다
+1. `node {{skill_dir}}/scripts/session-state.mjs menu --session <session_id> --repo <레포 경로> --cwd <이 세션 cwd>`로 이 세션에 해당하는 항목을 받는다. 기억으로 고르지 않는다 — 앞머리가 요약으로 접혀 있으면 건너뛴 항목이 아무 데도 안 남는다.
+2. `해당`·`항상`·`미확인` 항목에 번호를 매기고 각 상세 파일의 첫 문단을 한 줄로 붙여 한 번에 내고, **돌릴 번호**를 받는다.
 
-`해당없음`은 메뉴에 올리지 않는다. **다만 스크립트는 「불렀다」만 증명하고 「안 불렀다」는 증명하지 못한다** — 스킬이 자동 발동된 회차는 호출 기록이 안 생기므로, 그 스킬을 돌린 기억이 있으면 `해당없음`이어도 메뉴에 올린다.
+`해당없음`은 올리지 않는다. 다만 자동 발동된 스킬은 호출 기록에 안 남으므로, 보강 항목의 스킬을 이 세션에서 돌린 기억이 있으면 올린다 — 기억은 항목을 더할 때만 쓴다.
 
-`미확인`은 재료가 없어 못 본 것이라 `해당없음`과 다르게 처리한다. 그 항목은 메뉴에 올리고, 사유(transcript 없음·git 실패)와 스크립트가 이미 본 절반을 함께 적는다 — 고르는 쪽이 무엇을 모르는 채 고르는지 알아야 한다.
+`미확인`은 재료가 없어 못 본 것이라 올리고, 스크립트가 낸 사유를 붙인다 — 고르는 쪽이 무엇을 모르는 채 고르는지 알아야 한다.
 
 ## 세션이 남긴 것 정리
 
 회고에서 무엇을 골랐는지와 무관하게 이어서 돈다 — 이쪽은 골라 받지 않는다. 절차는 [cleanup.md](cleanup.md)를 따른다.
-
-## 회고 항목을 새로 만들 때
-
-[new-retro.md](new-retro.md)를 따른다. 회고를 도는 세션은 열지 않는다.

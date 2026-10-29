@@ -10,7 +10,7 @@
 //   tasks — 세션 도중 "이건 회고 때 보자"로 적어둔 task. 적을 때는 회고에서 볼 생각이었는데 회고는
 //     대화 끝에서 돌아 그 대목이 요약에 접혀 있고, 그러면 사용자가 매번 말로 다시 꺼내야 한다.
 //     description까지 봐야 재료가 나오므로 한 번에 덤프한다 — 목록만 받으면 항목 수만큼 더 물어야 한다.
-//   changed — 보강 매칭 조건의 파일 쪽 절반(plan/pr{N}/**·knowledge/**)을
+//   changed — 보강 매칭 조건의 파일 쪽 절반(knowledge/** 등)을
 //     세션 변경 목록과 눈으로 대조했다. 놓치면 보강이 통째로 안 돌고, 안 돈 사실은 아무 데도 안 남는다.
 //   menu — 「이번 세션에 해당하는 회고 항목」. changed와 달리 파일·대화·cwd 조건을 한 번에 돌려
 //     골라 받을 목록까지 낸다. 압축 횟수도 함께 낸다 — 정리 단계가 압축이 있었던 세션의 기억 의존
@@ -26,7 +26,7 @@
 //     38분이 한 턴이었고 그 안의 도구 하나가 12분 40초를 멈춰 있었다 — 그 수치는 기록에만 있다.
 //   read-files — 「읽었는데 안 쓴 문서」. 문서가 잘못 놓였다는 것은 그 문서를 연 세션만 알고,
 //     나중에 파일을 뜯어봐도 "그날 이게 쓰였나"는 안 나온다. 회고가 기억으로 목록을 만들면
-//     인상에 남은 두어 개만 올라온다 — 한 세션이 몇 개를 여는지의 실측은 read-usage.md에 있다.
+//     인상에 남은 두어 개만 올라온다.
 //   review-material — requirement-review 보강의 재료(적용한 체크리스트·page 이력·자유 검토 보고·
 //     사용자 발화). 체크리스트는 서브에이전트가 읽어 메인 대화에 안 남고(실측 2026-09-07 헬로디지털
 //     BG: 메인 Read 0건, 서브에이전트 5건), page는 도중에 옮겨져 plan/ 파일로는 이력이 안 이어진다.
@@ -313,14 +313,11 @@ const RR_SKILL = /workflow\/requirement-review\/SKILL\.md$/;
 
 const RETRO_ITEMS = [
   { key: 'timeline', when: 'timeline' },
-  { key: 'workflow', file: /(^|\/)plan\/pr\d+\//, slash: [/^\/workflow$/] },
   { key: 'requirement-review', read: [RR_SKILL] },
   { key: 'digest', file: /(^|\/)knowledge\//, slash: [/^\/digest$/] },
-  { key: 'write-doc', slash: [/^\/write-doc$/] },
-  { key: 'routine', slash: [/^\/routine-/], cwd: 'private-playground' },
-  { key: 'recruitment', slash: [/^\/recruit-(application|motivation)$/], cwd: 'private-playground' },
-  { key: 'step-1', when: 'always' },
+  { key: 'recruitment', slash: [/^\/recruit-motivation$/], cwd: 'private-playground' },
   { key: 'error-notebook', when: 'always' },
+  { key: 'step-1', when: 'always' },
 ];
 
 // changed가 쓰는 파일 쪽 절반. 레지스트리에서 뽑아 쓴다 — 두 벌로 두면 한쪽만 늘어난다.
@@ -422,23 +419,6 @@ function transcriptOrDie(session, who) {
     process.exit(1);
   }
   return file;
-}
-
-// 압축이 끝나면 transcript에 `type: system, subtype: compact_boundary` 줄이 남는다. 취소됐거나
-// 끝나기 전에 세션이 닫힌 압축은 이 줄이 없으므로 셈에 안 든다. 낱말로 찾지 않고 줄을 파싱한다 —
-// 도구 출력에 이 낱말이 실린 세션이 있다.
-function countCompactions(file) {
-  let n = 0;
-  for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
-    if (!line.includes('compact_boundary')) continue;
-    try {
-      const o = JSON.parse(line);
-      if (o.type === 'system' && o.subtype === 'compact_boundary') n++;
-    } catch {
-      // 깨진 줄은 셈에서 뺀다
-    }
-  }
-  return n;
 }
 
 if (command === 'user-turns') {
@@ -785,8 +765,20 @@ if (command === 'menu') {
   for (const line of lines) console.log(`  ${line}`);
   console.log('\n라벨과 상세 파일은 SKILL.md 「회고 항목」 표에서 읽는다 — 여기는 해당 여부만 낸다.');
   console.log('슬래시 호출은 사용자가 직접 부른 것만 남는다. 자동 발동은 안 잡히므로 「해당없음」은 안 불렀다는 증거가 아니다.');
-  // 정리 단계가 고른 항목과 무관하게 이 줄을 본다 — 메뉴는 매 회차 맨 먼저 돈다.
-  console.log(`\n[압축] ${file ? `${countCompactions(file)}회` : '미확인 — transcript 없음'}`);
+
+  // SKILL.md 표에 행을 더하고 여기 등록을 빠뜨리면 그 항목은 메뉴에 안 올라오고, 안 올라온 사실은
+  // 아무 데도 안 남는다. 표의 링크 파일 이름과 키를 맞대 어긋난 것을 낸다.
+  const skillMd = fs.readFileSync(path.resolve(import.meta.dirname, '..', 'SKILL.md'), 'utf8');
+  const section = skillMd.split(/^## /m).find((s) => s.startsWith('회고 항목')) ?? '';
+  const tableKeys = [...section.matchAll(/^\|[^|]+\|\s*\[[^\]]*\]\(([^)]+)\.md\)/gm)].map((m) => path.basename(m[1]));
+  const itemKeys = RETRO_ITEMS.map((i) => i.key);
+  const notRegistered = tableKeys.filter((k) => !itemKeys.includes(k));
+  const notInTable = itemKeys.filter((k) => !tableKeys.includes(k));
+  if (notRegistered.length || notInTable.length) {
+    console.log('\n[등록 어긋남] SKILL.md 「회고 항목」 표와 session-state.mjs RETRO_ITEMS가 다르다 — 회고 전에 사용자에게 알린다');
+    if (notRegistered.length) console.log(`  표에만 있음(메뉴에 안 뜸): ${notRegistered.join(', ')}`);
+    if (notInTable.length) console.log(`  RETRO_ITEMS에만 있음: ${notInTable.join(', ')}`);
+  }
   process.exit(0);
 }
 
@@ -1083,7 +1075,7 @@ if (command === 'read-files') {
     process.exit(0);
   }
   console.log('여기에 세션이 두 칸을 채운다 — **어느 진입점(스킬·역할)이 이 문서를 물었는가**와 **썼는가**.');
-  console.log('둘 다 기계가 못 낸다. 진입점은 스킬이 자동으로 붙으면 기록에 안 남고(실측 20세션 중 6건만 남았다),');
+  console.log('둘 다 기계가 못 낸다. 진입점은 스킬이 자동으로 붙으면 기록에 안 남고,');
   console.log('사용 여부는 애초에 파일에 안 적힌다.');
   console.log('판정 문장은 「참고했나」가 아니라 **「이 문서가 없었으면 결과가 달라졌나」**다 — 앞의 문장으로 물으면');
   console.log('열어본 것이 전부 "썼다"로 답해진다.\n');
@@ -1399,7 +1391,7 @@ if (command === 'read-usage') {
   if (mine.length) {
     console.log(`\n[배치 의심] 이번 세션이 연 문서 중 선(${state.threshold.read}회 이상, 안 쓴 비율 ${state.threshold.unusedRatio} 이상)을 넘은 것:`);
     for (const row of mine) console.log(rowLine(row));
-    console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 [선을 넘은 것](read-usage.md#4-선을-넘은-것).');
+    console.log('회고 문제 목록에 올린다 — 무엇을 적고 무엇을 고르게 하는지는 [선을 넘은 것](read-usage.md#선을-넘은-것).');
   }
   process.exit(0);
 }
@@ -1569,7 +1561,7 @@ if (command === 'source-usage') {
   process.exit(0);
 }
 
-// 「문제 추출」 표가 발화 전수를 실제로 다 받았는지 맞대 본다. 산문이 "빈칸이 하나라도 있으면
+// 「발화 표」가 발화 전수를 실제로 다 받았는지 맞대 본다. 산문이 "빈칸이 하나라도 있으면
 // 산출물 실패다"라고 적고 있지만, 빠뜨린 쪽이 자기가 빠뜨린 것을 세는 구조라 아무도 못 막는다.
 // user-turns가 낸 번호가 정답지고, 표는 채점 대상이다.
 if (command === 'retro-table') {
