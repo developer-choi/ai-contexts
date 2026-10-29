@@ -8,7 +8,7 @@
 //   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
 //   node <이 파일> todo-coverage (plan | impl) … — 인자는 `todo-coverage`만 부르면 사용 안내가 알린다
 //   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
-//   node <이 파일> name-check verify --repo <레포 경로>
+//   node <이 파일> name-check verify --repo <레포 경로> [--base <기준 ref>]
 //
 // 걸린 것이 있으면 exit 1.
 
@@ -255,10 +255,16 @@ function stubTodos(repo, stub) {
 const TODO_CALL = /\bit\.todo\s*\(/g;
 const IT_CALL = /\b(?:it|test)(?:\.only|\.skip)?\s*\(/g;
 
-// ── name-check: verify 테스트 이름 대조 뒤 이름이 바뀌었는가 ─────────────────────
+// ── name-check: 테스트 이름 대조 뒤 이름이 바뀌었는가 ─────────────────────
 // 문서가 "6.2가 수렴할 때마다(다시 돈 수렴 포함) 대조한다"고 적어놓고, 다시 돈 수렴 뒤
 // 대조 없이 사용자 리뷰로 넘어간 세션이 있었다. 대조를 마친 시점의 이름을 record로 남기고,
-// 사용자 리뷰 안내 직전에 verify가 지금 이름과 비교한다.
+// verify가 지금 이름과 비교한다. verify가 찍은 이름이 다음 대조의 대상이다.
+//
+// 대조는 implement 커밋 단위마다 돌아 record가 여러 번 불린다. 같은 브랜치 기록이 있으면
+// 대조 표를 덮어쓰지 않고 뒤에 잇는다 — 앞 단위의 표가 사용자 리뷰 안내에서 사라지지 않게.
+// 기록이 없을 때 --base를 주면 그 기준 뒤의 이름을 전부 대상으로 찍는다(첫 단위). 그 이름이 0건이면
+// (설정만 다루는 PR 등) 대조할 것이 없어 통과시킨다.
+// `it.todo` 이름은 stub 고정 문구라 세지 않는다 — `it(...)`로 바뀔 때 새 이름으로 찍힌다.
 //
 // 이름은 감싼 `describe` 경로를 붙인 `describe`·`it`·`test` 첫 인자의 원문 글자다(`f() > 가`).
 // 템플릿·`each` 이름을 펼쳐 규칙에 대보는 일은 대조 서브에이전트가 하고, 여기서는
@@ -362,9 +368,11 @@ function testCalls(src) {
     if (!fn || /[\w$.]/.test(src[i - 1] ?? '') || /[\w$]/.test(src[i + fn.length] ?? '')) continue;
 
     let j = i + fn.length;
+    let todo = false;
     while (src[j] === '.' && /[\w$]/.test(src[j + 1] ?? '')) {
-      j += 1;
+      const from = (j += 1);
       while (/[\w$]/.test(src[j] ?? '')) j += 1;
+      todo ||= src.slice(from, j) === 'todo';
     }
     j = skipSpace(src, j);
     if (src[j] === '`') j = skipSpace(src, skipString(src, j));
@@ -374,7 +382,7 @@ function testCalls(src) {
     if (!/['"`]/.test(src[q] ?? '')) continue;
 
     const nameEnd = skipString(src, q);
-    calls.push({ fn, name: src.slice(q + 1, nameEnd - 1), start: i, end: skipCode(src, j + 1, ')') });
+    calls.push({ fn, todo, name: src.slice(q + 1, nameEnd - 1), start: i, end: skipCode(src, j + 1, ')') });
   }
   return calls;
 }
@@ -388,7 +396,7 @@ function testNames(repo, base) {
   for (const file of files) {
     const src = git(repo, ['show', `HEAD:${file}`]);
     const calls = testCalls(src);
-    for (const call of calls) {
+    for (const call of calls.filter((c) => !c.todo)) {
       const scope = calls.filter((d) => d.fn === 'describe' && d.start < call.start && call.start < d.end);
       const key = [...scope.map((d) => d.name), call.name].join(' > ');
       names.push({ key, at: `${file}:${src.slice(0, call.start).split('\n').length}` });
@@ -402,8 +410,31 @@ const countOf = (keys) => keys.reduce((m, k) => m.set(k, (m.get(k) ?? 0) + 1), n
 function nameCheck() {
   const sub = rest[0];
   const repo = optOf('repo') ?? process.cwd();
-  const recordPath = path.resolve(repo, git(repo, ['rev-parse', '--git-path', 'workflow-name-check.json']).trim());
+  const gitPath = (name) => path.resolve(repo, git(repo, ['rev-parse', '--git-path', name]).trim());
+  const recordPath = gitPath('workflow-name-check.json');
+  // verify가 이름을 찍은 시점의 HEAD. record는 이 HEAD에서만 받는다 — 찍은 뒤 쌓인 커밋의 이름이
+  // 대조 없이 「대조 끝」으로 기록되지 않게.
+  const seenPath = gitPath('workflow-name-check-seen.json');
   const branch = git(repo, ['rev-parse', '--abbrev-ref', 'HEAD']).trim();
+  const head = git(repo, ['rev-parse', 'HEAD']).trim();
+
+  // 이름은 HEAD 커밋에서 뽑으므로, 커밋 안 된 테스트 변경이 있으면 찍은 이름이 실제와 다르다.
+  // `-z`에서 rename·copy 항목은 `XY 새 경로` 뒤에 접두 없는 옛 경로가 한 항목 더 붙는다.
+  // 새 폴더 안의 새 파일도 낱낱이 보게 `--untracked-files=all` — 기본값은 폴더 한 줄로 접는다.
+  const entries = git(repo, ['status', '--porcelain', '-z', '--untracked-files=all']).split('\0');
+  const changed = [];
+  for (let k = 0; k < entries.length; k += 1) {
+    if (!entries[k]) continue;
+    changed.push(entries[k].slice(3));
+    if (/^[RC]/.test(entries[k])) changed.push(entries[(k += 1)] ?? '');
+  }
+  const dirty = changed.filter((f) => TEST_FILE.test(f));
+  if (dirty.length) {
+    console.log(`[테스트 이름 대조] 커밋 안 된 테스트 변경이 있다 — 커밋한 뒤 다시 돌린다`);
+    dirty.forEach((f) => console.log(`  ${f}`));
+    problems.push('커밋 안 된 테스트 변경이 있다');
+    return;
+  }
 
   if (sub === 'record') {
     const base = optOf('base');
@@ -416,25 +447,49 @@ function nameCheck() {
       console.error(`대조 표 파일이 없다: ${table}`);
       process.exit(1);
     }
+    const seen = exists(seenPath) ? JSON.parse(fs.readFileSync(seenPath, 'utf8')) : null;
+    if (seen?.branch !== branch || seen?.head !== head) {
+      console.log(
+        seen
+          ? '[테스트 이름 대조 기록] verify가 이름을 찍은 뒤 커밋이 바뀌었다 — verify부터 다시 돈다'
+          : '[테스트 이름 대조 기록] verify를 먼저 돌려 대조할 이름을 찍는다',
+      );
+      problems.push('지금 HEAD에서 verify를 돌린 기록이 없다');
+      return;
+    }
     // 기준 ref가 나중에 움직여도(fetch 등) 같은 범위를 보게 갈라진 지점 SHA로 남긴다.
     const forkPoint = git(repo, ['merge-base', base, 'HEAD']).trim();
     const names = testNames(repo, forkPoint);
+    const prev = exists(recordPath) ? JSON.parse(fs.readFileSync(recordPath, 'utf8')) : null;
+    const added = fs.readFileSync(table, 'utf8').trimEnd();
+    const joined = prev?.branch === branch ? `${prev.table.trimEnd()}\n\n${added}` : added;
     fs.writeFileSync(
       recordPath,
-      JSON.stringify({ branch, base: forkPoint, names: names.map((n) => n.key), table: fs.readFileSync(table, 'utf8') }, null, 2),
+      JSON.stringify({ branch, base: forkPoint, names: names.map((n) => n.key), table: `${joined}\n` }, null, 2),
     );
     console.log(`[테스트 이름 대조 기록] ${branch} — describe·it·test 이름 ${names.length}건을 기록했다 — ${recordPath}`);
     return;
   }
 
   if (sub === 'verify') {
+    fs.writeFileSync(seenPath, JSON.stringify({ branch, head }));
     const record = exists(recordPath) ? JSON.parse(fs.readFileSync(recordPath, 'utf8')) : null;
     if (!record || record.branch !== branch) {
+      const base = optOf('base');
+      const all = base ? testNames(repo, git(repo, ['merge-base', base, 'HEAD']).trim()) : null;
+      if (all?.length === 0) {
+        console.log('[테스트 이름 대조 확인] 대조할 테스트 이름이 없다');
+        return;
+      }
       console.log(
         record
           ? `[테스트 이름 대조 확인] 기록이 다른 브랜치(${record.branch}) 것이다 — 이 브랜치에서 테스트 이름 대조를 돌리고 record로 남긴다`
           : '[테스트 이름 대조 확인] 기록이 없다 — 테스트 이름 대조를 돌리고 record로 남긴다',
       );
+      if (all) {
+        console.log(`  대조할 이름 ${all.length}건`);
+        all.forEach((n) => console.log(`  ${n.key} — ${n.at}`));
+      }
       problems.push('이 브랜치의 테스트 이름 대조 기록이 없다');
       return;
     }

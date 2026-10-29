@@ -24,7 +24,7 @@ next:
   - `pr{N}/persistent/decisions.md` 갱신
   - 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
-- **PR 기준 ref**: `node {{skill_dir}}/scripts/steps.mjs pr list`가 이 PR의 `브랜치 ← base`로 찍은 base
+- **PR 기준 ref**: [implement와 같다](implement.md#입력산출물작업-위치)
 
 ---
 
@@ -67,7 +67,7 @@ code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced
 ```
 
 - code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 결정 기록 `/plan/pr{N}/persistent/decisions.md`, 리뷰 모드(advanced)
-- 마크업을 고쳤으면 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
+- 6.2에서 마크업을 고쳤으면 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
 
 ---
 
@@ -75,17 +75,7 @@ code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced
 
 Step 6.2가 0건으로 수렴할 때마다(다시 돈 수렴 포함) 다음 단계로 넘어가기 전에 돈다.
 
-Lead는 서브에이전트(sonnet — 정해진 규칙에 이름을 대보는 일이다)를 띄운다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다.
-
-서브에이전트가 하는 일:
-
-- MP `docs/patterns/testing/TestWriting.md` 「네이밍」 절을 Read 도구로 끝까지 읽는다.
-- 이 PR에서 새로 생기거나 이름이 바뀐 테스트 이름(`it`·`test`. 템플릿·`each`로 만든 이름은 펼친 값마다)을 감싼 `describe` 경로와 함께 한 행씩 표에 올린다. 리뷰에서 반영한 대안 이름도 대상이다.
-- 행마다 그 절의 규칙을 하나씩 대보고 걸린 규칙 원문과 고칠 이름을 적는다. 걸린 규칙이 없으면 「없음」으로 적는다.
-
-걸린 이름은 고치고 이 대조를 다시 돌린다. 「네이밍」 절에 맞는 이름을 정하지 못하면 사용자에게 올린다.
-
-걸린 이름이 없거나 남은 걸린 이름을 모두 사용자에게 올려 정했으면 서브에이전트가 낸 표를 파일로 두고 `node {{skill_dir}}/scripts/step-gates.mjs name-check record`로 남긴다.
+이름은 implement에서 커밋 단위마다 대조를 마쳤다. 여기서는 그 뒤 리뷰 수정으로 새로 생기거나 바뀐 이름만 [implement 테스트 이름 대조](implement.md#step-531-테스트-이름-대조) 절차대로 대조한다 — 그 절차의 `name-check verify`가 그 이름만 찍는다. 6.2.5 뒤라면 걸린 이름을 고친 커밋은 [수정이 생기면](#수정이-생기면)대로 `--fixup`으로 쌓는다.
 
 ---
 
@@ -135,7 +125,7 @@ Step 6.2.5에서 정리된 커밋으로 **사용자가 직접 코드 리뷰**하
 
 이 시점까지 사용자가 PR의 **모든 커밋을 이해한 상태**여야 한다 — 모르는 코드는 여기서 모두 짚어 해소한다.
 
-안내 전에 `node {{skill_dir}}/scripts/step-gates.mjs name-check verify`를 돌린다.
+안내 전에 `node {{skill_dir}}/scripts/step-gates.mjs name-check verify --base <PR 기준 ref>`를 돌린다. 걸리면 6.2.1로 돌아간다.
 
 Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 

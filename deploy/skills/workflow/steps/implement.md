@@ -27,6 +27,7 @@ next:
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)대로). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
 - 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 verify가 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
+- **PR 기준 ref**: `node {{skill_dir}}/scripts/steps.mjs pr list`가 이 PR의 `브랜치 ← base`로 찍은 base
 
 ---
 
@@ -85,11 +86,26 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
 **계획 밖 테스트 제안** — 계획 밖 테스트가 필요해 보이면 Lead는 테스트마다 일회성 서브에이전트(sonnet — 정해진 문항에 답만 대는 판정이다)를 띄운다 — 테스트를 쓰려는 쪽이 자기 제안을 판정하지 않게 한다.
 파일 · 테스트 이름 · 필요한 이유를 넘기고, MP `docs/patterns/testing/WhatToTest.md` 판정 4문항을 대게 해 판정 · 걸린 문항 · 근거만 돌려받는다.
 
-| 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 커밋 단위 |
-|---|---|---|---|
-| Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | `implementation.md`의 `### N` 항목 하나 |
+| 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 추가 검사 | 커밋 단위 |
+|---|---|---|---|---|
+| Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 마크업을 고친 단위는 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 [검증 기준](../conventions/modes.md#검증-기준--렌더-결과와-디자인-원본-대조)대로 대조한다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | [테스트 이름 대조](#step-531-테스트-이름-대조) | `implementation.md`의 `### N` 항목 하나 |
 
 **리뷰어 유지** — Lead는 code-review의 리뷰어를 모두 이름 있는 팀원으로 띄우고, 커밋 단위·재검 라운드 내내 같은 팀원에게 맡긴다.
+
+### Step 5.3.1. 테스트 이름 대조
+
+커밋 단위마다 도는 추가 검사다. code-review 리뷰어와 기준이 달라 규칙검사 B에 섞지 않는다.
+
+1. `node {{skill_dir}}/scripts/step-gates.mjs name-check verify --base <PR 기준 ref>`를 돌린다. exit 0이면 통과다.
+2. 찍힌 이름을 서브에이전트(sonnet — 정해진 규칙에 이름을 대보는 일이다)에 넘긴다. 테스트 파일과 함께 테스트 대상 소스의 경로를, 화면 부품이면 그 화면 문구(목업·시안)도 넘긴다.
+3. 걸린 이름은 고쳐 커밋하고 1부터 다시 돈다. 「네이밍」 절에 맞는 이름을 정하지 못하면 걸린 규칙을 보이고 사용자에게 올린다. 사용자가 정한 이름도 고쳐 커밋하고 1부터 다시 돌되, 다시 걸린 것이 그 이름뿐이면 묻지 않고 표에 「사용자 결정」으로 적는다.
+4. 걸린 이름이 없거나 남은 것이 모두 「사용자 결정」이면 서브에이전트가 낸 표를 파일로 두고 `node {{skill_dir}}/scripts/step-gates.mjs name-check record --base <PR 기준 ref> --table <표 파일>`로 남긴다.
+
+서브에이전트가 하는 일:
+
+- MP `docs/patterns/testing/TestWriting.md` 「네이밍」 절을 Read 도구로 끝까지 읽는다.
+- 받은 이름(템플릿·`each`로 만든 이름은 펼친 값마다)을 감싼 `describe` 경로와 함께 한 행씩 표에 올린다.
+- 행마다 그 절의 규칙을 하나씩 대보고 걸린 규칙 원문과 고칠 이름을 적는다. 걸린 규칙이 없으면 「없음」으로 적는다.
 
 ---
 
