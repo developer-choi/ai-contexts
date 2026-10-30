@@ -9,6 +9,9 @@
 | 채용·실무 | figma (`retained/figma-url.md`가 없으면 캡처) | `retained/figma-url.md`(figma 있을 때)·`retained/figma/` | figma 원본 직접 fetch·대조 (figma 없으면 캡처 대조) |
 | 개인 | 마크업 시안 (형태 무관 — HTML/CSS·`.tsx`+`.scss` 등) | `retained/mockup/` (+선택 `retained/spec.md`) | 시안 대조 + 사용자 시각 확인 |
 | 코드 대용 (모드 무관) | 기존 구현 코드 | `retained/code-target.md` | MARKUP 없음 — 기존 코드가 이미 화면이다 |
+| 마크업 생략 (모드 무관) | 그 모드의 디자인 원본 | `retained/no-markup.md`(생략 이유) | MARKUP 없음 — 웹 마크업이 쓰이지 않는다 |
+
+「MARKUP 없음」은 코드 대용·마크업 생략 행이다. 마크업 생략은 이번 작업에 웹 마크업(DOM + `.module.scss`)으로 짜이는 화면이 없을 때다(React Native 앱 등).
 
 ## 검증 기준 — 렌더 결과와 디자인 원본 대조
 

@@ -20,6 +20,7 @@
       spec.md           ← requirement 「자료 받기」 수집 (개인 모드, 선택)
       component-list.md ← MARKUP 「공통 컴포넌트 확정」 산출. 전 컴포넌트 목록(공통 여부·범용/도메인). MARKUP 「마크업 구현·검사」의 재료, 공통 컴포넌트를 받는 PR의 plan이 소비
       code-target.md    ← requirement 「자료 받기」 수집 (코드 대용일 때만). 리뷰 대상 코드 경로
+      no-markup.md      ← requirement 「자료 받기」(미뤘으면 「레포 확보」) 산출 (마크업 생략일 때만). 그 이유 한 줄
       cross-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 추론한 평가 기준만 담는다
       service-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). [requirement-review/recruitment/service-analysis.md] 참조
       domain-analysis.md ← requirement-review 채용과제 분석 step 산출물 (채용 한정). 담는 것은 [requirement-review/recruitment/step.md] 「산출물」 참조

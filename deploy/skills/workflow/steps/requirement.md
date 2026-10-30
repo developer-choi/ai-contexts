@@ -8,7 +8,7 @@ model: Opus
 next:
   - to: markup
     on: 레포 확보
-    when: FOUNDATION PR 없음, 코드 대용 아님
+    when: FOUNDATION PR 없음, 코드 대용 아님, 마크업 생략 아님
   - to: plan
     on: PR 확정
 ---
@@ -30,6 +30,7 @@ next:
 2. 모드의 디자인 원본을 사용 가능한 만큼 전부 받아 [모드 매트릭스](../conventions/modes.md)의 저장 위치에 둔다.
    - 개인 모드에서 화면에 안 담기는 동작을 저자가 미리 알고 있으면 `retained/spec.md`로 함께 받는다
    - 시안·기획서 없이 기존 구현 코드만 있으면 그 코드를 [코드 대용](../requirement-review/page-review.md#준비)으로 쓸지 묻고, 쓰기로 하면 리뷰 대상 코드 경로를 `retained/code-target.md`로 받는다
+   - 코드 대용이 아니면 [마크업 생략](../conventions/modes.md)인지 가린다. 생략이면 이유 한 줄을 `retained/no-markup.md`에 쓴다. 자료로 못 가리면 「레포 확보」로 미룬다
    - 사용자가 이미 가진 참고 자료(디자인시스템 소스 등)도 함께 받는다. 디자인시스템 원본 레포 경로는 `retained/tech-constraints.md`에 적는다
 3. 받은 자료를 점검한다. figma 쓰는 모드면 [figma-asset-collection.md](../conventions/figma-asset-collection.md)대로 수집 방식을 점검한다.
    흐린 영역·식별 어려운 텍스트는 메인이 직접 훑지 않고 일회성 서브에이전트에 받은 자료 경로(figma 쓰는 모드면 figma-asset-collection.md도)를 넘겨, 다시 요청할 지점(파일·영역·무엇이 안 읽히는지) 목록만 돌려받아 다시 요청한다.
@@ -74,7 +75,8 @@ next:
 레포를 확보하면:
 
 1. 컨벤션 소스 수집을 미뤄 뒀으면 지금 한다. 이때 나가는 후속 안내(MARKUP·FOUNDATION PR)보다 conventions-index.md를 먼저 만든다.
-2. FOUNDATION PR 유무를 정하고, 있으면 그 PR을 확정한다(적용 모드는 [PR 종류](../conventions/pr-split.md#pr-종류)).
+2. 마크업 생략 판정을 미뤄 뒀으면 MARKUP 안내보다 먼저 가린다(그때도 못 가리면 화면을 무엇으로 짜는지 사용자에게 묻는다). 생략이면 `retained/no-markup.md`를 쓴다.
+3. FOUNDATION PR 유무를 정하고, 있으면 그 PR을 확정한다(적용 모드는 [PR 종류](../conventions/pr-split.md#pr-종류)).
 
 ### PR 확정
 
@@ -84,7 +86,7 @@ PR은 [pr-split.md](../conventions/pr-split.md)대로 확정·기록한다. 확�
 
 ### 후속 세션 안내 전 리뷰
 
-후속 세션을 안내하기 전에 사용자 리뷰를 먼저 받는다. 「레포 확보」로 MARKUP만 안내할 때는 하지 않는다.
+후속 세션을 안내하기 전에 사용자 리뷰를 먼저 받는다. 「레포 확보」로 MARKUP만 안내할 때(띄우지 않는다는 안내 포함)는 하지 않는다.
 
 - `node {{skill_dir}}/scripts/review-ledger.mjs pending`이 빌 때까지, 이번까지 정한 핵심을 요약한 뒤 나온 파일을 출력대로 하나씩 보여 주며 리뷰받는다
 - 확인받은 파일은 `mark`로 기록한다

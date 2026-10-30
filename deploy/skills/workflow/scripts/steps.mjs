@@ -606,19 +606,31 @@ function recordStage(plan, data, pr, stepName) {
   console.log(`기록: ${prLabel(pr)} → ${to}`);
 }
 
+// MARKUP을 띄우지 않기로 한 판정과 이유. requirement 「자료 받기」가 남긴다.
+const NO_MARKUP_FILE = ['background', 'retained', 'no-markup.md'];
+
 // 파일로 판정되는 조건만 판정한다 — `종류 FOUNDATION`(이 PR의 종류), `FOUNDATION PR 없음`(확정된 PR 중에),
-// `코드 대용 아님`(background/retained/code-target.md가 없음). 쉼표로 이은 조건은 하나라도 어긋나면 어긋난다.
-// 그 밖의 when은 산문이라 그대로 찍는다.
+// `코드 대용 아님`(background/retained/code-target.md가 없음), `마크업 생략 아님`(background/retained/no-markup.md가 없음).
+// 쉼표로 이은 조건은 하나라도 어긋나면 어긋난다. 그 밖의 when은 산문이라 그대로 찍는다.
+// 어긋난 첫 조건을 돌려준다(없으면 null).
 function whenFails(edge, data, pr, plan) {
-  if (!edge.when) return false;
-  return edge.when.split(/\s*,\s*/).some((cond) => {
+  if (!edge.when) return null;
+  return edge.when.split(/\s*,\s*/).find((cond) => {
     const own = cond.match(/^종류 ([A-Z]+)$/);
     if (own) return Boolean(pr && pr.type !== own[1]);
     const none = cond.match(/^([A-Z]+) PR 없음$/);
     if (none) return Boolean(data && data.prs.some((p) => p.type === none[1]));
     if (cond === '코드 대용 아님') return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
+    if (cond === '마크업 생략 아님') return fs.existsSync(path.join(plan, ...NO_MARKUP_FILE));
     return false;
-  });
+  }) ?? null;
+}
+
+// no-markup.md에서 이유 한 줄을 뽑는다 — 제목·빈 줄을 건너뛴 첫 줄.
+function noMarkupReason(plan) {
+  const line = fs.readFileSync(path.join(plan, ...NO_MARKUP_FILE), 'utf8')
+    .split(/\r?\n/).map((l) => l.trim()).find((l) => l && !l.startsWith('#'));
+  return line ?? `(이유가 비었다 — ${NO_MARKUP_FILE.join('/')}에 적는다)`;
 }
 
 // 출발 알림 대상: 아직 plan이 안 가져간 PR 중 이 사건과 관련된 것. 관련 기준은 알림을 내는 step마다 다르다.
@@ -648,13 +660,20 @@ function cmdNext(name, opt) {
   }
 
   const groups = { same: [], spawn: [], go: [] };
+  const skippedMarkup = [];
   for (const edge of from.next) {
     target(steps, edge, from);
-    if (whenFails(edge, data, pr, a.plan)) continue;
+    const failed = whenFails(edge, data, pr, a.plan);
+    if (failed === '마크업 생략 아님') skippedMarkup.push(edge);
+    if (failed) continue;
     groups[kindOf(from, edge, steps)].push(edge);
   }
   console.log(`[${from.step}] 세션 ${from.session}`);
   if (pr) recordStage(a.plan, data, pr, from.step);
+  // 조건으로 빠진 세션은 보통 말없이 빠지지만, MARKUP 생략은 사용자가 띄울지 되묻는 자리라 결론과 이유를 찍는다.
+  for (const e of skippedMarkup) {
+    console.log(`띄우지 않음: ${e.to} · 세션 ${steps.get(e.to).session} — ${noMarkupReason(a.plan)} (${NO_MARKUP_FILE.join('/')})`);
+  }
 
   if (groups.same.length) {
     console.log('같은 세션에서 이어서:');

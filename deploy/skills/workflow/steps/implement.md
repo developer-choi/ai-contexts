@@ -3,7 +3,7 @@ step: implement
 session: PR_{N}_IMPL
 scope: per-pr
 entry: >-
-  PR_{N}_PLAN의 realize-plan 종료 + (페이지 코드 포함 PR이고 코드 대용이 아니면) MARKUP의 해당 페이지 코드
+  PR_{N}_PLAN의 realize-plan 종료 + (페이지 코드 포함 PR이고 MARKUP 없음이 아니면) MARKUP의 해당 페이지 코드
   + (종류 COMPONENTS) MARKUP의 공통 컴포넌트 마크업 완료
 model: Sonnet — stub에 `// TODO [AI_IMPL]` 한글 명세가 남아 있으면 Opus
 next:
@@ -23,7 +23,7 @@ next:
 - **입력**:
   - realize-plan stub 커밋(`// TODO [AI_IMPL]:` 주석·`it.todo`)
   - `pr{N}/retained/implementation.md`·`pr{N}/persistent/reference.md`
-  - MARKUP 페이지 코드(페이지 코드 포함 PR, 코드 대용 제외)
+  - MARKUP 페이지 코드(페이지 코드 포함 PR, [MARKUP 없음](../conventions/modes.md) 제외)
 - **산출물**: 코드 변경 + 커밋 (로직 stub 위에 본체 채움; 마크업은 [마크업 예외](../conventions/artifact/stub.md#마크업-예외)대로). stub 커밋부터 IMPL·리뷰 수정 커밋까지 정리하지 않고 쌓인 채로 verify에 넘긴다
 - 구현 중 생긴 결정·plan 정정은 decisions.md에 적지 않는다 — 반영은 verify가 한다
 - **작업 위치**: PR_{N} 워크트리 (realize-plan이 만든 것). 본 PR 하나에 집중
