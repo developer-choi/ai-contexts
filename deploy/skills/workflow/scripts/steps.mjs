@@ -351,6 +351,7 @@ function cmdPr(sub, opt) {
     if (!['name', 'type', 'deps', 'branch', 'base'].some((k) => opt[k] !== undefined)) {
       fail('pr set은 바꿀 값이 필요하다: --name <이름> | --type <종류> | --deps 1,2 | --branch <브랜치> --base <ref>');
     }
+    let mismatch = null;
     if (opt.name) pr.name = opt.name;
     // 종류·의존은 plan이 이 PR을 가져가기 전에만 바꾼다 — 뒤 step은 가져간 시점의 값으로 이미 진행 중이다.
     if ((opt.type || opt.deps !== undefined) && pr.stage !== 'confirmed') {
@@ -369,12 +370,21 @@ function cmdPr(sub, opt) {
       if (opt.branch === opt.base) fail('--branch와 --base가 같다');
       const owner = data.prs.find((other) => other.n !== pr.n && other.branch === opt.branch);
       if (owner) fail(`${opt.branch}는 이미 ${prLabel(owner)}의 브랜치다`);
-      assertBaseFitsDeps(data, pr, opt.branch, opt.base, opt.repo ?? process.cwd());
+      const undecided = assertBaseFitsDeps(data, pr, opt.branch, opt.base, opt.repo ?? process.cwd());
+      // 의존과 base 대조는 realize-plan의 첫 기록에서만 알린다 — FINALIZE까지 미루면 뒤 PR이 이미 그 base 위에 쌓여 있다.
+      // 이미 기록된 base를 옮기는 것(의존 PR 머지 뒤 기본 브랜치로 — 채용 순차 게시)은 의존이 남아 있어도 정상이다.
+      // 기록은 막지 않는다 — base는 사용자가 일부러 다르게 고를 수 있다.
+      const first = !pr.branch;
       pr.branch = opt.branch;
       pr.base = opt.base;
+      // 의존 PR 브랜치가 미기록이라 가리지 못했다고 이미 찍었으면 같은 원인을 두 번 알리지 않는다.
+      // base가 의존 아닌 PR의 브랜치면 미기록과 무관하게 어긋나므로 그대로 찍는다.
+      const onPrBranch = data.prs.some((other) => other.n !== pr.n && other.branch === pr.base);
+      if (first && !(undecided && !onPrBranch)) mismatch = baseMismatch(data, pr);
     }
     writePrs(opt.plan, data);
     console.log(`${prLabel(pr)} 갱신`);
+    if (mismatch) console.log(mismatch);
     // todo.md 양식에는 종류 자리가 없다 — 이름(헤딩)·의존을 바꿀 때만 md도 고친다.
     if (opt.name || opt.deps !== undefined) console.log('  todo.md 쪽(헤딩·「의존」 줄)도 함께 고친다');
   } else if (sub === 'list') {
@@ -397,15 +407,18 @@ function cmdPr(sub, opt) {
 // 스택으로 못 알아봐 verify에서 옮길 의존 브랜치를 조용히 놓친다. 그래서 브랜치가 의존 PR 고유 커밋을 품고 있으면 막는다.
 // 의존 PR이 머지된 뒤 기본 브랜치 위로 옮긴 PR(채용 순차 게시)은 통과한다 — 머지 커밋이면 의존 PR 고유 범위가 비고,
 // squash·rebase 머지면 옮겨 붙인 브랜치에 옛 커밋이 없다.
+// 의존 PR 브랜치가 미기록이라 가리지 못했다고 찍었으면 true.
 function assertBaseFitsDeps(data, pr, branch, base, repo) {
   const deps = pr.deps.map((d) => findPr(data, d));
-  if (!deps.length || deps.some((dep) => dep.branch === base)) return;
+  if (!deps.length || deps.some((dep) => dep.branch === base)) return false;
   if (git(repo, ['rev-parse', '--git-dir']) === null) fail(`base 확인에 git 레포가 필요하다 — PR 브랜치가 있는 레포에서 돌리거나 --repo <레포>를 준다`);
   const missing = [branch, base].filter((ref) => git(repo, ['rev-parse', '--verify', '--quiet', `${ref}^{commit}`]) === null);
   if (missing.length) fail(`레포에 없음: ${missing.join(', ')}`);
+  let undecided = false;
   for (const dep of deps) {
     if (!dep.branch) {
       console.log(`  직접 확인: 의존 ${prLabel(dep)}의 브랜치가 기록돼 있지 않아 base가 맞는지 가리지 못했다`);
+      undecided = true;
       continue;
     }
     const depOwn = (git(repo, ['rev-list', `${dep.base}..${dep.branch}`]) ?? '').split('\n').filter(Boolean);
@@ -414,6 +427,16 @@ function assertBaseFitsDeps(data, pr, branch, base, repo) {
       fail(`${branch}가 의존 ${prLabel(dep)}의 커밋 ${shared}개를 품고 있다 — 그 PR 위에 쌓인 브랜치면 --base ${dep.branch}로 기록한다`);
     }
   }
+  return undecided;
+}
+
+// base가 어느 PR 브랜치면 그 PR에 의존해야 하고, 아니면 의존이 없어야 한다. 맞으면 null, 다르면 찍을 줄.
+// pr set(기록할 때)과 pr branches(FINALIZE)가 같은 PR을 다르게 판정하지 않게 둘 다 이것을 부른다.
+function baseMismatch(data, pr) {
+  const below = data.prs.find((other) => other.n !== pr.n && other.branch === pr.base);
+  if (below ? pr.deps.includes(below.n) : pr.deps.length === 0) return null;
+  const deps = pr.deps.length ? pr.deps.map((dep) => `PR ${dep}`).join(', ') : '없음';
+  return `  직접 확인: 의존(${deps})과 base(${below ? `PR ${below.n}` : pr.base})가 다르다`;
 }
 
 // 브랜치를 체크아웃한 워크트리 경로. 어디에도 체크아웃돼 있지 않으면 null.
@@ -479,11 +502,8 @@ function cmdBranches(data, opt) {
       );
       broken += 1;
     }
-    const baseMatchesDeps = below ? pr.deps.includes(below.n) : pr.deps.length === 0;
-    if (!baseMatchesDeps) {
-      const deps = pr.deps.length ? pr.deps.map((dep) => `PR ${dep}`).join(', ') : '없음';
-      console.log(`  직접 확인: 의존(${deps})과 base(${below ? `PR ${below.n}` : pr.base})가 다르다`);
-    }
+    const mismatch = baseMismatch(data, pr);
+    if (mismatch) console.log(mismatch);
   }
   if (broken) {
     console.log(`[pr branches] 확인할 PR ${broken}건`);
