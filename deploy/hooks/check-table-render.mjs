@@ -21,7 +21,7 @@ import { readPayload } from "./hook-utils.mjs";
 //
 // 훅은 터미널 폭을 못 읽는다(자식 프로세스라 COLUMNS·stdout.columns가 비고 콘솔 핸들도 없다).
 // 그래서 폭은 가정값이다. 이 가정이 실사용에서 맞는지는 걸릴 때마다 남기는 로그로 따로 판정한다
-// (backlog projects/ai-contexts/dev-active/hooks/표-훅-실사용-5건으로-결론.md).
+// (backlog projects/ai-contexts/dev-active/hooks/check-table-render-훅이-실사용에서-걸린-사례-5건을-보고-유지·폭-조정·규칙-추가·철회-중-하나로-정한다.md).
 //
 // 통과시키는 것:
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 한 번만 되돌린다
@@ -235,7 +235,7 @@ function verdict(payload) {
   if (count === REPORT_AT) {
     reason +=
       `\n\n표 훅 실사용 기록이 ${REPORT_AT}건 찼습니다 — 턴을 마칠 때 사용자에게 backlog ` +
-      "`projects/ai-contexts/dev-active/hooks/표-훅-실사용-5건으로-결론.md`를 처리할 때라고 알립니다.";
+      "`projects/ai-contexts/dev-active/hooks/check-table-render-훅이-실사용에서-걸린-사례-5건을-보고-유지·폭-조정·규칙-추가·철회-중-하나로-정한다.md`를 처리할 때라고 알립니다.";
   }
   return reason;
 }
