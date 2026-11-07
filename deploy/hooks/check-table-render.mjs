@@ -27,7 +27,10 @@ import { readPayload } from "./hook-utils.mjs";
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 한 번만 되돌린다
 //   - 코드블록 안의 표 모양 텍스트, 목록·인용 안의 표(렌더러가 박스로 그리지 않는다)
 
-export const WIDTH = 100;
+// 사용자가 쓰는 가장 좁은 창(1920 모니터 반 분할)에 맞춘 값이다. 넓은 창(2560 반 분할)은 이보다 넓어
+// 좁은 창에서 안 깨지는 표는 거기서도 안 깨진다. 2026-11-07에 그 창에서 판정 경계가 87·89·91칸인 표는 박스로,
+// 93칸인 표는 세로 목록으로 보여 91~92칸으로 좁혔고, 놓치는 쪽보다 한 번 더 쓰게 하는 쪽이 싸서 91로 둔다.
+export const WIDTH = 91;
 const MARGIN = 4;
 const MIN_COL = 3;
 const MAX_LINES = 4;
