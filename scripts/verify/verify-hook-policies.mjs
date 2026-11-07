@@ -2413,8 +2413,7 @@ const responseLanguageCases = async (dir) => {
 
 // 표 렌더 훅은 실제로 세로 목록으로 깨졌던 표와, 같은 세션이 고쳐 다시 내 박스로 그려진 표로 판정을 고정한다
 // (backlog projects/ai-contexts/dev-active/hooks/세로로-깨질-표를-Stop-훅이-다시-쓰게-한다.md 「발생 사례」).
-// 박스 쪽 둘(boxApproved·boxOptions)은 폭 100에서 칸이 4줄로 문턱 바로 아래다. 로그는 임시 파일로 돌리고,
-// 기록이 5건에 닿는 되돌림에서만 후속 항목 안내가 붙는지 본다.
+// 박스 쪽 둘(boxApproved·boxOptions)은 칸이 4줄로 문턱 바로 아래다.
 const TABLE_HOOK = 'check-table-render.mjs';
 const TABLE_FIXTURES = {
   brokenUrl: [
@@ -2493,14 +2492,6 @@ const tableRenderCases = async (dir) => {
   const report = (text) => `보고입니다.\n\n${text}\n\n끝입니다.`;
   const stop = (message, active = false) =>
     ({ hook_event_name: 'Stop', session_id: 'verify', cwd: dir, last_assistant_message: message, stop_hook_active: active });
-  let logSeq = 0;
-  // 케이스마다 제 로그 파일을 쓴다 — 케이스가 겹쳐 돌아도 줄 수가 섞이지 않는다.
-  const logWith = (lines) => {
-    const file = path.join(dir, `log-${++logSeq}.jsonl`);
-    if (lines > 0) fs.writeFileSync(file, `${Array.from({ length: lines }, () => '{}').join('\n')}\n`);
-    return file;
-  };
-  const countLines = (file) => (fs.existsSync(file) ? fs.readFileSync(file, 'utf8').split('\n').filter((l) => l.trim()).length : 0);
   const fenced = `\`\`\`markdown\n${TABLE_FIXTURES.brokenSource}\n\`\`\``;
   const unclosed = `\`\`\`markdown\n${TABLE_FIXTURES.brokenSource}`;
   // 파이프로 시작하는 긴 문장 아래 수평선 — 표처럼 재면 칸이 7줄이라 되돌린다.
@@ -2508,41 +2499,33 @@ const tableRenderCases = async (dir) => {
   // 구분행 칸 수가 머리행과 다르면 GFM 표가 아니다.
   const [srcHead, , ...srcRows] = TABLE_FIXTURES.brokenSource.split('\n');
   const mismatched = [srcHead, '|---|---|', ...srcRows].join('\n');
-  // [payload, 기대 판정, 메모, 사유에 있어야 할 말, 시작 로그 줄 수, 끝난 뒤 로그 줄 수, 「5건」 안내 여부]
+  // [payload, 기대 판정, 메모, 사유에 있어야 할 말]
   const cases = [
-    [stop(report(TABLE_FIXTURES.brokenUrl)), 'context', '실제로 깨진 5열 표', "'후' 칸", 0, 1, false],
-    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '실제로 깨진 4열 표', "'승인받은 것' 칸", 0, 1, false],
-    [stop(report(`${TABLE_FIXTURES.boxScreens}\n\n${TABLE_FIXTURES.boxStates}`)), 'pass', '고쳐 다시 낸 2열·4열 표', null, 0, 0, false],
-    [stop(report(TABLE_FIXTURES.boxApproved)), 'pass', '문턱 바로 아래 3열 표(4줄)', null, 0, 0, false],
-    [stop(report(TABLE_FIXTURES.boxOptions)), 'pass', '문턱 바로 아래 3열 표(4줄) 둘째', null, 0, 0, false],
-    [stop(report(fenced)), 'pass', '코드블록 안의 깨질 표', null, 0, 0, false],
-    [stop(report(unclosed)), 'pass', '닫히지 않은 코드블록 안의 깨질 표', null, 0, 0, false],
-    [stop(report(pipeProse)), 'pass', '파이프로 시작하는 긴 문장 아래 수평선', null, 0, 0, false],
-    [stop(report(mismatched)), 'pass', '구분행 칸 수가 머리행과 다른 표 모양', null, 0, 0, false],
-    [stop(report(`${TABLE_FIXTURES.brokenUrl}\n\n${TABLE_FIXTURES.brokenSource}`)), 'context', '깨질 표 둘 — 로그는 응답 하나에 한 줄', '표 2', 0, 1, false],
-    [stop(report(TABLE_FIXTURES.brokenSource), true), 'pass', '어느 Stop 훅이든 이어가는 중이면 반복하지 않는다', null, 0, 0, false],
-    [stop('표 없는 보고입니다.'), 'pass', '표 없는 응답', null, 0, 0, false],
-    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '기록이 5건에 닿는 되돌림', '5건 찼습니다', 4, 5, true],
-    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '기록이 4건이 되는 되돌림', "'승인받은 것' 칸", 3, 4, false],
-    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '이미 5건을 넘긴 뒤의 되돌림', "'승인받은 것' 칸", 5, 6, false],
+    [stop(report(TABLE_FIXTURES.brokenUrl)), 'context', '실제로 깨진 5열 표', "'후' 칸"],
+    [stop(report(TABLE_FIXTURES.brokenSource)), 'context', '실제로 깨진 4열 표', "'승인받은 것' 칸"],
+    [stop(report(`${TABLE_FIXTURES.boxScreens}\n\n${TABLE_FIXTURES.boxStates}`)), 'pass', '고쳐 다시 낸 2열·4열 표', null],
+    [stop(report(TABLE_FIXTURES.boxApproved)), 'pass', '문턱 바로 아래 3열 표(4줄)', null],
+    [stop(report(TABLE_FIXTURES.boxOptions)), 'pass', '문턱 바로 아래 3열 표(4줄) 둘째', null],
+    [stop(report(fenced)), 'pass', '코드블록 안의 깨질 표', null],
+    [stop(report(unclosed)), 'pass', '닫히지 않은 코드블록 안의 깨질 표', null],
+    [stop(report(pipeProse)), 'pass', '파이프로 시작하는 긴 문장 아래 수평선', null],
+    [stop(report(mismatched)), 'pass', '구분행 칸 수가 머리행과 다른 표 모양', null],
+    [stop(report(`${TABLE_FIXTURES.brokenUrl}\n\n${TABLE_FIXTURES.brokenSource}`)), 'context', '깨질 표 둘', '표 2'],
+    [stop(report(TABLE_FIXTURES.brokenSource), true), 'pass', '어느 Stop 훅이든 이어가는 중이면 반복하지 않는다', null],
+    [stop('표 없는 보고입니다.'), 'pass', '표 없는 응답', null],
   ];
-  const table = await runCases(cases, async ([payload, expected, note, needle, before, after, notice]) => {
-    const log = logWith(before);
-    const { decision, reason = '', stderr } = await runHookPayload(TABLE_HOOK, payload, { env: { CHECK_TABLE_RENDER_LOG: log } });
-    const lines = countLines(log);
+  const table = await runCases(cases, async ([payload, expected, note, needle]) => {
+    const { decision, reason = '', stderr } = await runHookPayload(TABLE_HOOK, payload);
     const label = `${TABLE_HOOK} :: Stop → ${expected} (${note})`;
-    const ok = decision === expected
-      && (!needle || reason.includes(needle))
-      && reason.includes('5건 찼습니다') === notice
-      && lines === after;
+    const ok = decision === expected && (!needle || reason.includes(needle));
     return judge(label, decision, expected, stderr, {
       ok,
-      failLine: `  FAIL  ${label} — 실제: ${decision}, 로그 ${before}→${lines}줄(기대 ${after}), 사유: ${reason.slice(0, 120) || '(없음)'}`,
+      failLine: `  FAIL  ${label} — 실제: ${decision}, 사유: ${reason.slice(0, 120) || '(없음)'}`,
     });
   });
   // 필드 이름이 바뀌면 훅이 영영 꺼진다. 통과는 하되 stderr로 소리를 내는지 본다.
   const missing = await (async () => {
-    const { decision, stderr } = await runHookPayload(TABLE_HOOK, { hook_event_name: 'Stop', stop_hook_active: false }, { env: { CHECK_TABLE_RENDER_LOG: logWith(0) } });
+    const { decision, stderr } = await runHookPayload(TABLE_HOOK, { hook_event_name: 'Stop', stop_hook_active: false });
     const label = `${TABLE_HOOK} :: Stop → pass + 경고 (last_assistant_message 없음)`;
     const ok = decision === 'pass' && /last_assistant_message/.test(stderr);
     return toReport([{ ok, label, failLine: `  FAIL  ${label} — 실제: ${decision}, stderr: ${stderr.trim() || '(없음)'}` }]);

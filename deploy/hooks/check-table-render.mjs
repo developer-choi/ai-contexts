@@ -1,6 +1,3 @@
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { readPayload } from "./hook-utils.mjs";
 
@@ -20,8 +17,7 @@ import { readPayload } from "./hook-utils.mjs";
 // 줄바꿈은 렌더러의 wrap-ansi를 단어 단위로 흉내 낸 것이라 문턱(정확히 4~5줄) 근처에서 한 줄 어긋날 수 있다.
 //
 // 훅은 터미널 폭을 못 읽는다(자식 프로세스라 COLUMNS·stdout.columns가 비고 콘솔 핸들도 없다).
-// 그래서 폭은 가정값이다. 이 가정이 실사용에서 맞는지는 걸릴 때마다 남기는 로그로 따로 판정한다
-// (backlog projects/ai-contexts/dev-active/hooks/check-table-render-훅이-실사용에서-걸린-사례-5건을-보고-유지·폭-조정·규칙-추가·철회-중-하나로-정한다.md).
+// 그래서 폭은 가정값이다(아래 WIDTH).
 //
 // 통과시키는 것:
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 한 번만 되돌린다
@@ -34,11 +30,6 @@ export const WIDTH = 91;
 const MARGIN = 4;
 const MIN_COL = 3;
 const MAX_LINES = 4;
-const REPORT_AT = 5;
-
-const LOG_FILE =
-  process.env.CHECK_TABLE_RENDER_LOG ||
-  path.join(os.homedir(), "WebstormProjects", "main", "ai-contexts", "cache", "hooks", "check-table-render.jsonl");
 
 function charWidth(ch) {
   const c = ch.codePointAt(0);
@@ -193,18 +184,6 @@ export function judgeTable(header, rows, width = WIDTH) {
   return { vertical: false, column, lines };
 }
 
-// 로그에 한 줄 덧붙이고 덧붙인 뒤 줄 수를 돌려준다. 실패하면 null — 판정은 그대로 낸다.
-function appendLog(entry) {
-  try {
-    fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
-    fs.appendFileSync(LOG_FILE, `${JSON.stringify(entry)}\n`);
-    return fs.readFileSync(LOG_FILE, "utf8").split("\n").filter((l) => l.trim()).length;
-  } catch (e) {
-    process.stderr.write(`check-table-render: 로그를 못 남겼다 — ${e.message}\n`);
-    return null;
-  }
-}
-
 function verdict(payload) {
   if (payload.stop_hook_active) return null;
   // 필드가 없으면 판정할 게 없어 통과하지만, 이름이 바뀐 것이면 이 훅이 영영 꺼진 것이다 — 조용히 넘기지 않는다.
@@ -223,24 +202,12 @@ function verdict(payload) {
       ? `- 표 ${t.index}(${t.header.join(" | ")})의 '${t.column}' 칸이 ${t.lines}줄`
       : `- 표 ${t.index}(${t.header.join(" | ")})의 폭이 ${t.boxWidth}칸`,
   );
-  // 응답 하나에 한 줄 — 실사용 「5건」은 표 수가 아니라 되돌린 응답 수다.
-  const count = appendLog({
-    ts: new Date().toISOString(),
-    session_id: payload.session_id ?? "",
-    cwd: payload.cwd ?? "",
-    tables: broken.map((t) => ({ header: t.header, column: t.column, lines: t.lines })),
-  });
-  let reason =
+  return (
     `방금 응답의 마크다운 표가 터미널에서 박스 표가 아니라 「열이름: 값」 세로 목록으로 깨져 보입니다(폭 ${width}칸 기준, 칸 하나가 줄바꿈 뒤 ${MAX_LINES}줄을 넘으면 깨짐).\n` +
     `${lines.join("\n")}\n` +
     "칸을 짧게 줄이거나, 표를 둘로 나누거나, 긴 문구를 표 밖 각주(①②…)로 빼서 같은 내용을 다시 내고 턴을 마치세요. " +
-    "정보는 빼지 않습니다. 사과나 경위 설명은 붙이지 않습니다.";
-  if (count === REPORT_AT) {
-    reason +=
-      `\n\n표 훅 실사용 기록이 ${REPORT_AT}건 찼습니다 — 턴을 마칠 때 사용자에게 backlog ` +
-      "`projects/ai-contexts/dev-active/hooks/check-table-render-훅이-실사용에서-걸린-사례-5건을-보고-유지·폭-조정·규칙-추가·철회-중-하나로-정한다.md`를 처리할 때라고 알립니다.";
-  }
-  return reason;
+    "정보는 빼지 않습니다. 사과나 경위 설명은 붙이지 않습니다."
+  );
 }
 
 // settings.json은 `node -e "import(...)"`로 불러 argv[1]이 비므로 그때도 본체를 돈다.
