@@ -20,7 +20,7 @@ import { deny, getToolName, readPayload } from "./hook-utils.mjs";
 import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
-const REQUIRED_FIELDS = ["type", "audience_knowledge", "key_message"];
+const REQUIRED_FIELDS = ["type", "key_message"];
 
 const payload = readPayload();
 if (EDIT_TOOLS.has(getToolName(payload))) {
@@ -52,10 +52,11 @@ if (EDIT_TOOLS.has(getToolName(payload))) {
 }
 process.exit(0);
 
-// type 말고 나머지 필수 필드가 둘 이상 있으면 글쓰기 패키지로 본다. 하나만으로는
-// 무관한 md(`key_message:` 하나 쓰는 문서 등)가 걸리므로 둘을 요구한다.
+// type 말고 나머지 필수 필드(key_message)가 있으면 글쓰기 패키지로 본다. 한 필드만 요구하므로
+// 패키지가 아닌 md가 frontmatter에 `key_message:`를 쓰면 막힌다 — 2026-11-08 WebstormProjects 전체에서
+// 그런 md는 없었다.
 function looksLikePackage(fields) {
-  return REQUIRED_FIELDS.filter((f) => f !== "type" && fields[f]).length >= 2;
+  return REQUIRED_FIELDS.some((f) => f !== "type" && fields[f]);
 }
 
 // 저장 후 파일이 갖게 될 텍스트. Edit은 new_string이 본문 조각일 수 있어 디스크 내용에
