@@ -45,7 +45,7 @@ function loadAcRejected() {
   if (problems.length) throw new Error(`${AC_REJECTED} 꼴이 어긋남:\n${problems.join("\n")}`);
   const entries = rejectedEntries(data);
   const n = (lane) => entries.filter((e) => e.lane === lane).length;
-  return { entries, note: `읽음 ${AC_REJECTED} — 항상금지 ${n("항상금지")} · 수정필요 ${n("수정필요")}` };
+  return { entries, note: `읽음 ${AC_REJECTED} — ALWAYS_BANNED ${n("ALWAYS_BANNED")} · NEEDS_REVIEW ${n("NEEDS_REVIEW")}` };
 }
 
 // PR 제목 기계 기준. pr-body 가이드 「PR 제목」과 짝이다.
@@ -123,7 +123,7 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 //
 // `warn: true`는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만 위반 등)이다. 매칭은 하되
 // 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라, 정상 문장이 걸릴 수 있는 항목을
-// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.json의 `항상금지`·`수정필요` 레인이 같은 갈림이다.
+// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.json의 `ALWAYS_BANNED`·`NEEDS_REVIEW` 레인이 같은 갈림이다.
 const RULES = {
   "딱딱한 한자어 회피": {
     words: ["유사", "파편화", "구조화", "이원화", "직렬화", "명세"],
@@ -268,7 +268,7 @@ function printRules() {
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
   const ac = loadAcRejected();
-  console.log(`\n## 모든 글 반려 표현  (항목마다 항상금지·수정필요 레인)`);
+  console.log(`\n## 모든 글 반려 표현  (항목마다 ALWAYS_BANNED·NEEDS_REVIEW 레인)`);
   console.log(`   ${ac.note}`);
   for (const e of ac.entries) console.log(`   ${e.lane}: '${e.word}' 대신: ${e.swap}`);
   console.log(`\n## 이 글 반려  (경고 — 합계에서 뺌)`);
@@ -654,7 +654,7 @@ function readRejectedWords(text) {
     const head = item.match(/^(.*?")\s*\(/)?.[1] ?? item.trim();
     if (!/^"[^"]+"(?:\s*[/,·|+&]?\s*"[^"]+")*$/.test(head)) return [];
     const why = item.slice(head.length).trim().replace(/^\((.*)\)$/, "$1") || "(사유 없음)";
-    return [...head.matchAll(/"([^"]+)"/g)].map((m) => ({ word: m[1], lane: "수정필요", swap: why }));
+    return [...head.matchAll(/"([^"]+)"/g)].map((m) => ({ word: m[1], lane: "NEEDS_REVIEW", swap: why }));
   });
 }
 
@@ -767,10 +767,10 @@ function main() {
   dumpByRule("문맥 확인 필요", contextHits, " (합계에서 뺌 — 쓰임을 보고 실제 위반만 고른다)");
   const LANE_NOTE = " (합계에서 뺌 — 눈으로 확인, 쓰임이 반려된 뜻일 때만 고친다)";
   const acHits = findRejectedHits(lines, acRejected.entries);
-  const rejectedBanned = acHits.filter((h) => h.lane === "항상금지");
-  const rejectedWarn = acHits.filter((h) => h.lane === "수정필요");
+  const rejectedBanned = acHits.filter((h) => h.lane === "ALWAYS_BANNED");
+  const rejectedWarn = acHits.filter((h) => h.lane === "NEEDS_REVIEW");
   dumpRejectedHits("모든 글 반려 표현", rejectedBanned);
-  dumpRejectedHits("모든 글 반려 표현 — 수정필요", rejectedWarn, LANE_NOTE);
+  dumpRejectedHits("모든 글 반려 표현 — NEEDS_REVIEW", rejectedWarn, LANE_NOTE);
   const pkgRejectedHits = findRejectedHits(lines, readRejectedWords(raw));
   dumpRejectedHits(
     "이 글 반려(frontmatter rejected)",

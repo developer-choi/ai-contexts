@@ -118,8 +118,8 @@ const CASES = [
   ['check-git-commit-policy.mjs', "git commit a.txt -sF- <<'MSG'\nfix: x\nMSG", 'pass', '짧은 옵션 묶음(-sF-)도 메시지로 본다'],
 
   // --- 반려 표현(writing-guide/rejected.json): 두 레인 다 막는다. 낱말은 지금 목록의 항목이다 ---
-  ['check-git-commit-policy.mjs', 'git commit a.txt -m "docs: 세 갈래로 나눈다"', 'deny', '항상금지 레인 표현을 막는다'],
-  ['check-git-commit-policy.mjs', 'git commit a.txt -m "fix: 스크립트를 불러 쓴다"', 'deny', '수정필요 레인 표현도 막는다'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "docs: 세 갈래로 나눈다"', 'deny', 'ALWAYS_BANNED 레인 표현을 막는다'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "fix: 스크립트를 불러 쓴다"', 'deny', 'NEEDS_REVIEW 레인 표현도 막는다'],
   ['check-git-commit-policy.mjs', "git commit a.txt -F - <<'MSG'\nfix: x\n\n본문의 갈래\nMSG", 'deny', 'heredoc 본문도 본다'],
   ['check-git-commit-policy.mjs', "git commit a.txt -m @'\nfix: 갈래\n'@", 'deny', 'here-string 본문도 본다'],
   ['check-git-commit-policy.mjs', 'git commit 갈래.md -m "docs: x"', 'pass', '경로 인자의 낱말은 메시지가 아니다'],

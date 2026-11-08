@@ -22,7 +22,7 @@ const USAGE = `사용 (파일 경로는 늘 적는다 — 기본값을 두면 �
 --remove가 낸 JSON을 고쳐 --add로 다시 넣는다.
 --add·--remove는 한 번에 하나만 받는다 — 여러 건이면 건마다 돌린다.`;
 
-export const LANES = ["항상금지", "수정필요"];
+export const LANES = ["ALWAYS_BANNED", "NEEDS_REVIEW"];
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // 채점기가 쓰는 꼴: 찾는 말 하나마다 {word, lane, swap}. 대신 쓸 말이 찾는 말과 같은 수의 배열이면 꼴마다 짝짓는다.
