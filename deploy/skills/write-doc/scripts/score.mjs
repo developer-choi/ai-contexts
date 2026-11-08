@@ -6,14 +6,14 @@
 //
 // 이미 굳힌 금지어 목록과 그 규칙의 상세는 아래 RULES가 함께 든다. 문서에는 사본을 두지 않는다 —
 // 기계가 100% 잡는 규칙을 문서에 적으면 그 규칙을 어길 글이든 아니든 매 회차 통째로 실린다.
-// 앞으로 새로 막을 낱말은 RULES가 아니라 writing-guide/rejected.md에 레인과 함께 올린다(아래).
+// 앞으로 새로 막을 낱말은 RULES가 아니라 writing-guide/rejected.json에 레인과 함께 올린다(아래).
 //
 // PR 제목(pr-body의 H1)도 여기서 본다: 끝 마침표·conventional commit 접두사·공백 포함 60자 초과는 합계에 든다.
 // 기준은 pr-body 가이드 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
 // pr-body 본문의 `#숫자` 중 GitHub가 PR 링크로 바꾸지 못하는 꼴(`#47에서`)도 합계에 든다.
 //
 // 사용자가 반려한 낱말·문구도 쌓인 두 곳에서 함께 잡는다.
-// - 모든 글: writing-guide/rejected.md(줄 꼴은 그 파일 머리). 배포본을 읽어서, 원본에 새로 올린 줄은 배포 뒤에 잡힌다.
+// - 모든 글: writing-guide/rejected.json(항목 꼴은 rejected.md). 배포본을 읽어서, 원본에 새로 올린 항목은 배포 뒤에 잡힌다.
 //   읽은 자리나 건너뛴 까닭을 출력 첫머리에 한 줄 남긴다.
 // - 이 글만: 패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 사유가 쓰임에 걸린 것이 많아 경고로만 낸다.
 //   절·내용 항목은 리뷰어 몫이라 안 잡는다.
@@ -34,25 +34,18 @@
 // 반객관 매칭은 한국어 단어 경계가 없어 false positive가 날 수 있다(예: '유사' in '유사성').
 // 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
 import fs from "node:fs";
-import path from "node:path";
-import { COMMENT_LINE, fenceTracker } from "./package-meta.mjs";
-import { parseRejectedLines } from "./rejected-lines.mjs";
-
-// 소스(deploy/skills/write-doc/scripts)와 배포본(<타겟>/skills/write-doc/scripts) 둘 다 세 단계 위가 contexts의 부모다.
-const AC_REJECTED = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide", "rejected.md");
+import { COMMENT_LINE, fenceTracker, stripCodeAndQuotes } from "./package-meta.mjs";
+import { AC_REJECTED, checkRejected, findRejectedHits, loadRejected, rejectedEntries } from "./rejected.mjs";
 
 function loadAcRejected() {
   if (!fs.existsSync(AC_REJECTED)) return { entries: [], note: `건너뜀 — 파일 없음 (${AC_REJECTED})` };
-  const { entries, unreadable, noLane, badLane } = parseRejectedLines(fs.readFileSync(AC_REJECTED, "utf8"));
+  const data = loadRejected(AC_REJECTED);
+  // 커밋 훅이 꼴을 막지만 배포본은 손으로 고쳐질 수 있다 — 어긋난 항목이 조용히 안 잡히지 않게 멈춘다.
+  const problems = checkRejected(data);
+  if (problems.length) throw new Error(`${AC_REJECTED} 꼴이 어긋남:\n${problems.join("\n")}`);
+  const entries = rejectedEntries(data);
   const n = (lane) => entries.filter((e) => e.lane === lane).length;
-  return {
-    entries,
-    note:
-      `읽음 ${AC_REJECTED} — 합계 ${n("합계")} · 경고 ${n("경고")}` +
-      (unreadable ? ` · 따옴표 표현이 없어 기계가 안 찾는 줄 ${unreadable}` : "") +
-      (noLane ? ` · 레인 없음 ${noLane}(경고로 읽음)` : "") +
-      (badLane ? ` · 알 수 없는 레인 ${badLane}(경고로 읽음 — 합계:·경고: 중 하나로 고친다)` : ""),
-  };
+  return { entries, note: `읽음 ${AC_REJECTED} — 합계 ${n("합계")} · 경고 ${n("경고")}` };
 }
 
 // PR 제목 기계 기준. pr-body 가이드 「PR 제목」과 짝이다.
@@ -126,11 +119,11 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 // 못 내리는 것: 반려가 안 오는 규칙. 기계가 판정 못 하는 규칙을 문서에서 걷으면 적발 0건이
 // 「통과」로 읽혀 규칙이 그냥 사라진다. 그래서 common.md에는 판단이 드는 절만 남아 있다.
 // 「외래어 음차 회피」는 아는 낱말만 여기서 잡고, 처음 보는 음차는 독자 리뷰어가 「모르는 말」로 낸다 —
-// 그렇게 걸린 낱말은 반려 적재로 rejected.md에 쌓여 다음부터 여기서 잡힌다.
+// 그렇게 걸린 낱말은 반려 적재로 rejected.json에 쌓여 다음부터 여기서 잡힌다.
 //
 // `warn: true`는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만 위반 등)이다. 매칭은 하되
 // 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라, 정상 문장이 걸릴 수 있는 항목을
-// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.md의 `합계:`·`경고:` 레인이 같은 갈림이다.
+// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.json의 `합계`·`경고` 레인이 같은 갈림이다.
 const RULES = {
   "딱딱한 한자어 회피": {
     words: ["유사", "파편화", "구조화", "이원화", "직렬화", "명세"],
@@ -275,19 +268,11 @@ function printRules() {
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
   const ac = loadAcRejected();
-  console.log(`\n## 모든 글 반려 표현  (줄마다 합계·경고 레인)`);
+  console.log(`\n## 모든 글 반려 표현  (항목마다 합계·경고 레인)`);
   console.log(`   ${ac.note}`);
   for (const e of ac.entries) console.log(`   ${e.lane}: '${e.word}' 대신: ${e.swap}`);
   console.log(`\n## 이 글 반려  (경고 — 합계에서 뺌)`);
   console.log("   패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 절·내용 항목은 안 잡는다.");
-}
-
-function findRejectedHits(lines, entries) {
-  const hits = [];
-  for (const e of entries) {
-    for (const [lineno, ln] of lines) if (ln.includes(e.word)) hits.push({ ...e, lineno, line: ln.trim() });
-  }
-  return hits;
 }
 
 function dumpRejectedHits(name, hits, note = "", label = "대신") {
@@ -319,25 +304,6 @@ function splitFrontmatter(text) {
     }
   }
   return { body: text, offset: 0 };
-}
-
-// 코드펜스 안·인용블록(>)·`[//]: #` 주석 줄을 뺀 본문 줄을 [파일 줄 번호, 줄]로 돌려준다.
-// 주석 줄은 AI가 사용자에게 묻거나 사용자가 남긴 지시라, 그 안의 낱말을 고치면 사용자 글자를 고치게 된다.
-// 남은 주석은 따로 센다(comments).
-function stripCodeAndQuotes(rawLines, offset = 0) {
-  const out = [];
-  const comments = [];
-  const inFence = fenceTracker();
-  rawLines.forEach((ln, i) => {
-    if (inFence(ln)) return;
-    if (ln.trim().startsWith(">")) return;
-    if (COMMENT_LINE.test(ln)) {
-      comments.push([i + 1 + offset, ln]);
-      return;
-    }
-    out.push([i + 1 + offset, ln]);
-  });
-  return { lines: out, comments };
 }
 
 // 같은 약어에 풀네임을 두 번 이상 병기한 자리. 풀네임은 첫 등장에만 붙인다는 규칙을 여기서 잡는다(common.md에는 없다) —

@@ -29,6 +29,25 @@ export function fenceTracker() {
   return track;
 }
 
+// 코드펜스 안·인용블록(>)·`[//]: #` 주석 줄을 뺀 본문 줄을 [파일 줄 번호, 줄]로 돌려준다.
+// 주석 줄은 AI가 사용자에게 묻거나 사용자가 남긴 지시라, 그 안의 낱말을 고치면 사용자 글자를 고치게 된다.
+// 남은 주석은 따로 센다(comments). 채점기와 리뷰어 입력 조립이 같은 기준으로 거르도록 여기 둔다.
+export function stripCodeAndQuotes(rawLines, offset = 0) {
+  const out = [];
+  const comments = [];
+  const inFence = fenceTracker();
+  rawLines.forEach((ln, i) => {
+    if (inFence(ln)) return;
+    if (ln.trim().startsWith(">")) return;
+    if (COMMENT_LINE.test(ln)) {
+      comments.push([i + 1 + offset, ln]);
+      return;
+    }
+    out.push([i + 1 + offset, ln]);
+  });
+  return { lines: out, comments };
+}
+
 // 읽을 수 없으면 까닭을 내고 멈춘다 — 빈 값으로 이어 가면 엉뚱한 type의 파일이 조용히 나온다.
 export function readPackageMeta(file) {
   const fail = (why) => {

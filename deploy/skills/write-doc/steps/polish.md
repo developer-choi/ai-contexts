@@ -39,7 +39,7 @@
 - bullet·섹션·헤딩 개수는 기본 보존한다. 통합·삭제·분할이 필요하면 고치지 않고 「4. 보고」에서 시안과 함께 묻는다.
 - 리뷰어가 물지 않을 구절은 frontmatter `user_phrases`에 적는다([package-format.md](../../../contexts/writing-guide/package-format.md)).
 - AI가 쓴 문장을 고쳤으면, 고친 낱말·문구(문장 전체 말고) 중 이 글의 소재와 상관없이 다른 글에서도 되풀이될 것을 앞뒤 글자 그대로 모아 두었다가 「4. 보고」에서 표로 낸다. AI가 쓴 표현이라 다음 글의 초안에도 다시 나온다.
-  - 이미 [rejected.md](../../../contexts/writing-guide/rejected.md)나 룰에 올라 있어 고친 것은 뺀다.
+  - 채점기가 잡아 고친 것과 룰에 올라 있어 고친 것은 뺀다.
   - 사용자가 건넨 글·`user_phrases`는 사용자 말투라 모으지 않고, 누가 쓴 문장인지 가려지지 않아도 모으지 않는다.
 
 ### [CHECK_STEP] 3. 검수

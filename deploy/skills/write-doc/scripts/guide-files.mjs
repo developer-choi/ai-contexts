@@ -8,7 +8,7 @@
 // 사용:
 //   node guide-files.mjs <type> [--subtype <subtype>] --for draft      초안 단계가 Read할 공통 조건·type 템플릿·가이드
 //   node guide-files.mjs <type> [--subtype <subtype>] --for polish     다듬기 단계 메인이 Read할 공통 조건·가이드
-//   node guide-files.mjs <type> [--subtype <subtype>] --for finish     마무리 단계 메인이 Read할 반려 줄 꼴·type 단계 파일
+//   node guide-files.mjs <type> [--subtype <subtype>] --for finish     마무리 단계 메인이 Read할 반려 항목 꼴·type 단계 파일
 //   node guide-files.mjs <type> [--subtype <subtype>] --for reviewer   표현 리뷰어가 읽을 경로 (늘 + 조건부, reviewer-input.mjs가 쓴다)
 //   node guide-files.mjs --from <패키지.md> --for <단계>                type·subtype을 패키지 frontmatter에서 읽는다
 //                                                                     (패키지가 생긴 뒤 단계는 이쪽을 쓴다 — 손으로 넘기면 subtype을 빠뜨린다)
@@ -84,7 +84,9 @@ export function guideFiles(type, subtype, step) {
   if (step === "finish") return { always: [...existing("rejected.md"), ...typeSteps(type, subtype)], conditional: [] };
   return {
     // 템플릿은 메인이 골격을 세울 때 보는 예시라 표현 판정 기준이 아니다 — 넘기면 리뷰어가 본문을 골격과 견준다.
-    always: [...existing("common.md", "rejected.md"), ...typeFiles(type, subtype, { template: false })],
+    // 모든 글 반려 표현 목록은 넘기지 않는다 — 넘기면 반려가 쌓일수록 라운드마다 맥락이 는다.
+    // 본문에 걸린 항목만 reviewer-input.mjs가 프롬프트에 싣는다.
+    always: [...existing("common.md"), ...typeFiles(type, subtype, { template: false })],
     conditional: CONDITIONAL.flatMap(([when, rel]) => existing(rel).map((file) => ({ when, file }))),
   };
 }
