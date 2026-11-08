@@ -37,6 +37,18 @@ const noPinnedModelId = [
   },
 ];
 
+// 비교하는 상수 값을 한국어로 지으면 화면에 보일 말과 코드가 찾는 값이 한 문자열에 묶인다. 2026-11-09 write-doc
+// 반려 목록의 레인 값이 한국어로 들어가 `h.lane === "경고"` 꼴로 비교됐다. 비교·case 자리만 본다 —
+// includes·object key는 문장 속 낱말 찾기·낱말 사전 같은 정당한 데이터가 대부분이라 걸지 않는다. 한글만 보는 것은
+// `ch === "—"` 같은 문자 비교를 거르지 않기 위해서다.
+const HANGUL = "/[가-힣ㄱ-ㆎ]/";
+const ENUM_MESSAGE =
+  "비교하는 상수 값을 한국어로 짓지 마세요. 영어 UPPER_SNAKE 상수로 두고, 사람에게 보일 말은 따로 매핑하세요.";
+const noHangulEnum = [
+  { selector: `BinaryExpression[operator=/^[!=]==?$/] > Literal[value=${HANGUL}]`, message: ENUM_MESSAGE },
+  { selector: `SwitchCase > Literal.test[value=${HANGUL}]`, message: ENUM_MESSAGE },
+];
+
 export default [
   {
     ignores: ["node_modules/**", ".claude/**", ".agents/**", ".codex/**", ".gemini/**"],
@@ -48,7 +60,7 @@ export default [
       sourceType: "module",
     },
     rules: {
-      "no-restricted-syntax": [...noCjs, ...noPinnedModelId],
+      "no-restricted-syntax": [...noCjs, ...noPinnedModelId, ...noHangulEnum],
     },
   },
 ];

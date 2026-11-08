@@ -61,6 +61,7 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 | AGENT | 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) |
 | COMPAT | 여러 CLI 호환 (**사용자가 명시적으로 지시할 때만**) | [cross-cli.md](../../contexts/prompt-standards/cross-cli.md) |
 | WORKFLOW | workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
+| CODE | 스킬·규칙이 쓰는 코드·데이터의 이름 (대상 md가 부르는 스크립트·json 중 작업 브랜치에서 바뀐 것이 있을 때. 리뷰어가 직접 골라 그 파일만 본다) | [naming.md](../../contexts/coding-standards/rules/personal/naming.md) |
 
 대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 상대 경로는 그 체크아웃의 `deploy/skills/prompt-review/`를 기준으로 푼다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
 
