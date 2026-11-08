@@ -17,7 +17,7 @@
         "deploy/skills/write-doc/scripts/rejected.mjs",
         "deploy/skills/write-doc/steps/finish.md"
       ],
-      "note": "rejected.md 「항목 꼴」이 정본이고 rejected.mjs가 rejected.json을 그 꼴로 읽고(채점기·리뷰어 입력 조립) 검사한다(pre-commit). 꼴을 바꾸면 rejected.mjs의 검사·짝짓기와 rejected.json의 기존 항목을 함께 맞춘다 — 검사만 고치면 기존 항목이 커밋에서 막히고, 짝짓기만 고치면 대신 쓸 말이 엉뚱한 꼴에 붙는다. finish.md 「반려 적재」의 화면 꼴(레인을 「쓰면 게시 막힘 | 경고만」으로 옮긴 말)과 근거를 source에 적는 지시도 이 꼴의 사본이라 레인이나 evidence 꼴을 바꾸면 함께 고친다."
+      "note": "rejected.md 「항목 꼴」이 정본이고 rejected.mjs가 rejected.json을 그 꼴로 읽고(채점기·리뷰어 입력 조립) 검사한다(pre-commit). 꼴을 바꾸면 rejected.mjs의 검사·짝짓기와 rejected.json의 기존 항목을 함께 맞춘다 — 검사만 고치면 기존 항목이 커밋에서 막히고, 짝짓기만 고치면 대신 쓸 말이 엉뚱한 꼴에 붙는다. finish.md 「반려 적재」의 화면 꼴(레인을 「항상 막음 | 쓰임을 보고 고침」으로 옮긴 말)과 근거를 source에 적는 지시도 이 꼴의 사본이라 레인이나 evidence 꼴을 바꾸면 함께 고친다."
     },
     {
       "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅 ↔ 채점기",

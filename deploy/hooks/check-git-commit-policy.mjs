@@ -5,8 +5,10 @@ import {
   COMMIT_VALUED_FLAGS,
   commitShortFlagChars,
   findGitInvocations,
+  invocationCwd,
   normalizeCwd,
   partitionArgs,
+  splitSegments,
   stripRedirections,
 } from "./git-command-parser.mjs";
 import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
@@ -132,6 +134,82 @@ for (const inv of commits) {
       );
     }
   }
+}
+
+// 사용자가 반려한 표현(writing-guide/rejected.json)이 AI가 쓴 커밋 메시지에 남는 것을 막는다.
+// 글 게시와 달리 레인을 가리지 않는다 — 수정필요 레인도 막는다(2026-11-09 사용자 결정: "커밋에서는 둘다 막게 하자").
+//
+// 메시지를 볼 수 있는 자리는 둘이다. 명령 글자(`-m "…"`, heredoc, here-string)는 첫 `git … commit` 호출부터
+// 명령 끝까지에서 찾되 경로 인자는 지우고 본다 — 백로그 파일명처럼 한국어 경로가 반려 표현을 품을 수 있다.
+// 앞부분을 안 보는 것은 같은 체인의 `git add <경로>` 등을 잡지 않기 위해서다. `-F <파일>`은 파일을 열어 찾는다.
+//
+// 보지 못하는 것: 다른 명령이 넘겨주는 메시지(`--message "$(cat x)"`, `-F - < x`), 셸 변수로 쓴 파일 경로,
+// `-c`/`-C`로 재사용하는 기존 커밋 메시지.
+const MESSAGE_FILE_FLAGS = new Set(["-F", "--file"]);
+
+function messageFiles(args) {
+  const files = [];
+  args.forEach((t, i) => {
+    if (MESSAGE_FILE_FLAGS.has(t) && args[i + 1]) files.push(args[i + 1]);
+    else if (t.startsWith("--file=")) files.push(t.slice("--file=".length));
+    else if (/^-[^-]*F./.test(t) && commitShortFlagChars(t).includes("F")) files.push(t.slice(t.indexOf("F") + 1));
+  });
+  return files.filter((f) => f !== "-");
+}
+
+async function rejectedInMessage() {
+  let entries;
+  let findRejectedHits;
+  try {
+    // 소스(deploy/hooks)와 배포본(<타겟>/hooks) 둘 다 한 단계 위가 skills의 부모다. 정적 import로 두면 write-doc이
+    // 없는 기기에서 훅 전체가 죽어 위의 커밋 정책까지 함께 꺼진다 — 그래서 이 검사만 건너뛰게 동적으로 읽는다.
+    const mod = await import("../skills/write-doc/scripts/rejected.mjs");
+    entries = mod.rejectedEntries(mod.loadRejected(mod.AC_REJECTED));
+    findRejectedHits = mod.findRejectedHits;
+  } catch {
+    // 목록이 없는 기기(배포 전)에서 커밋을 통째로 막지 않는다. 꼴 검사는 AC pre-commit이 맡는다.
+    return [];
+  }
+  // 세그먼트는 명령 글자를 그대로 자른 조각이라 indexOf로 자리를 되찾는다. 같은 줄의 `git add … && git commit`에서
+  // 정규식으로 찾으면 앞의 `git add`부터 잡힌다.
+  let callAt = -1;
+  let cursor = 0;
+  for (const seg of splitSegments(cmd)) {
+    const at = cmd.indexOf(seg, cursor);
+    if (findGitInvocations(seg, "commit").length > 0) {
+      callAt = at;
+      break;
+    }
+    cursor = at + seg.length;
+  }
+  let scope = callAt < 0 ? cmd : cmd.slice(callAt);
+  const texts = [];
+  for (const inv of commits) {
+    const { positionals } = partitionArgs(stripRedirections(inv.args), COMMIT_VALUED_FLAGS);
+    for (const p of positionals) scope = scope.split(p).join(" ");
+    const base = invocationCwd(inv, getCwd(payload)) || getCwd(payload);
+    for (const file of messageFiles(inv.args)) {
+      const normalized = normalizeCwd(file);
+      const full = path.isAbsolute(normalized) || !base ? normalized : path.resolve(base, normalized);
+      try {
+        texts.push(fs.readFileSync(full, "utf8"));
+      } catch {
+        // 못 읽는 파일은 git도 못 읽어 커밋이 실패하므로 여기서 막을 것이 없다.
+      }
+    }
+  }
+  texts.unshift(scope);
+  const lines = texts.flatMap((t) => t.split(/\r?\n|\\n|`n/)).map((ln, i) => [i + 1, ln]);
+  return findRejectedHits(lines, entries);
+}
+
+const rejectedHits = await rejectedInMessage();
+if (rejectedHits.length > 0) {
+  const shown = [...new Map(rejectedHits.map((h) => [h.word, `「${h.word}」 → ${h.swap}`])).values()];
+  deny(
+    `커밋 메시지에 사용자가 반려한 표현이 있습니다: ${shown.join(", ")}. ` +
+      "대신 쓸 말로 바꾸거나 문장을 고쳐 같은 명령을 다시 실행하세요. 메시지 파일이면 파일을 고친 뒤 다시 실행합니다.",
+  );
 }
 
 // U+FFFD는 인코딩이 깨진 흔적이라 메시지·경로 어디에 있든 커밋에 남으면 안 된다 — 명령 전체를 본다.
