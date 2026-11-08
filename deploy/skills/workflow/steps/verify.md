@@ -22,7 +22,7 @@ next:
 - **산출물**
   - `pr{N}/consumable/`: user-test-cases.md(사용자에게 넘긴 동작 테스트가 있을 때만)
   - `pr{N}/persistent/decisions.md` 갱신
-  - 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋 + force-push 요청
+  - 사용자 리뷰 전 정리된 커밋 → fixup 합치기까지 끝난 커밋
 - **작업 위치**: PR_{N} 워크트리. 본 PR 하나에 집중
 - **PR 기준 ref**: [implement와 같다](implement.md#입력산출물작업-위치)
 
@@ -158,7 +158,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash --exec '<그 레포의 타입 �
 
 멈추면 Step 6.2.5와 같이 처리한다.
 
-합친 뒤 `node {{skill_dir}}/scripts/steps.mjs pr branches`를 돌리고, 사용자에게 force-push와 함께, 이 PR을 아래 브랜치로 두고 어긋났다고 나온 PR 브랜치를 그 출력의 명령으로 옮기도록 요청한다.
+합친 뒤 `node {{skill_dir}}/scripts/steps.mjs pr branches`를 돌린다. 어긋났다고 나온 PR 브랜치가 있으면, 이 PR을 아래 브랜치로 삼아 그 출력의 명령으로 옮기도록 사용자에게 요청한다.
 옮기면 그 위에 쌓인 PR이 새로 어긋나므로, 이 PR 위로 쌓인 PR(위의 위 포함)에 어긋남이 없을 때까지 `pr branches`를 다시 돌린다.
 
 ---
