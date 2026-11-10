@@ -5,7 +5,7 @@
 ### Template Literal Types 활용
 문자열이지만 특정한 패턴(숫자 등)만 허용해야 할 때, `string` 대신 템플릿 리터럴 타입을 사용하여 정확도를 높입니다.
 
-**기본: 숫자로만 이루어진 문자열**
+**기본: 숫자로 읽히는 문자열** (`'-1.5'`·`'1e3'`도 포함)
 ```typescript
 // ❌ Less Safe
 export type NumericString = string;
@@ -27,7 +27,7 @@ export type TwoDigitNumberString = `${OneToNine}${ZeroToNine}`;
 ```
 
 ### 빈 문자열 명시적 구분
-값이 "없음"을 나타낼 때, `string` 타입 안에 묵시적으로 빈 문자열(`''`)을 포함시키기보다 명시적으로 유니온을 사용하여 의도를 드러냅니다.
+값이 "없음"을 나타낼 때, `string` 타입 안에 묵시적으로 빈 문자열(`''`)을 포함시키기보다 명시적으로 유니온을 사용하여 의도를 드러냅니다. `'' | string`은 컴파일러에서 `string`으로 합쳐지므로 타입 검사는 그대로다.
 
 ```typescript
 // ❌ Ambiguous
