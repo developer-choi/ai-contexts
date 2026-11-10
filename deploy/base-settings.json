@@ -205,6 +205,12 @@
       "msg": "Checking code-review caller..."
     },
     {
+      "file": "check-added-comments-caller.mjs",
+      "event": "PreToolUse",
+      "on": "shell",
+      "msg": "Checking added-comments caller..."
+    },
+    {
       "file": "check-browser-write-policy.mjs",
       "event": "PreToolUse",
       "on": "browser-write",
