@@ -7,7 +7,11 @@
 //
 // 사용: node plan-materials.mjs <대상 레포 안 아무 경로>
 //
-// todo는 파일 이름이나 내용에 todo가 든 md(대소문자 무시)다. md만 본다 — 코드의 TODO 주석은 노이즈다.
+// todo는 파일 이름에 todo가 든 md(대소문자 무시), 곧 메모 바구니다. 내용은 보지 않는다 — 내용에 낱말이 한 번 나온
+// 계획 문서·회고까지 섞여, 이름 목록만 보고 추론하려던 것이 깨진다.
+//
+// node_modules와 점으로 시작하는 폴더(.reviewed 리뷰 장부, .expo 등)는 이름만 내고 안으로 들어가지 않는다. plan/ 안에 실험용 앱을 두면
+// 의존 패키지의 README·CHANGELOG까지 수만 줄이 나와, 「이름 목록만 보고 추론한다」가 출력 단계에서 깨진다.
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
@@ -16,16 +20,20 @@ import { pathToFileURL } from "node:url";
 // `git worktree list --porcelain`의 첫 worktree가 메인 체크아웃이다.
 function mainCheckout(anyPath) {
   const out = execFileSync("git", ["-C", anyPath, "worktree", "list", "--porcelain"], { encoding: "utf8" });
-  const first = out.split(/\r?\n/).find((ln) => ln.startsWith("worktree "));
+  const first = out.split(/\r?\n/).find((line) => line.startsWith("worktree "));
   return path.resolve(first.slice("worktree ".length));
 }
 
+const isSkippedDir = (name) => name === "node_modules" || name.startsWith(".");
+
 function walk(dir, rel = "") {
   const out = [];
-  for (const e of fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
-    const r = rel ? `${rel}/${e.name}` : e.name;
-    if (e.isDirectory()) out.push(`${r}/`, ...walk(path.join(dir, e.name), r));
-    else out.push(r);
+  const dirents = fs.readdirSync(dir, { withFileTypes: true }).sort((left, right) => left.name.localeCompare(right.name));
+  for (const dirent of dirents) {
+    const relPath = rel ? `${rel}/${dirent.name}` : dirent.name;
+    if (!dirent.isDirectory()) out.push(relPath);
+    else if (isSkippedDir(dirent.name)) out.push(`${relPath}/ (안 들어감)`);
+    else out.push(`${relPath}/`, ...walk(path.join(dir, dirent.name), relPath));
   }
   return out;
 }
@@ -45,13 +53,11 @@ function main() {
   }
   const entries = walk(plan);
   console.log(`\n## plan/ 아래 이름 (${entries.length}개)`);
-  console.log(entries.map((e) => `- ${e}`).join("\n") || "- 없음");
+  console.log(entries.map((entry) => `- ${entry}`).join("\n") || "- 없음");
 
-  const todos = entries.filter(
-    (e) => e.endsWith(".md") && (/todo/i.test(path.basename(e)) || /todo/i.test(fs.readFileSync(path.join(plan, e), "utf8"))),
-  );
-  console.log("\n## todo가 든 md (이름이나 내용)");
-  console.log(todos.map((e) => `- plan/${e}`).join("\n") || "- 없음");
+  const todos = entries.filter((relPath) => relPath.endsWith(".md") && /todo/i.test(path.basename(relPath)));
+  console.log("\n## todo md");
+  console.log(todos.map((relPath) => `- plan/${relPath}`).join("\n") || "- 없음");
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) main();
