@@ -10,9 +10,7 @@ argument-hint: (인자 없음 — 전 PR 커밋 정리·머지 준비가 끝난 
 
 채용 과제를 제출하고, 제출 레포가 사라져도 남을 자산으로 회수한다.
 
-`/plan/`에서 과제 요구사항을, `/write-doc pr-body recruitment`로 쓴 각 PR 본문 패키지와 함께 찾아 참조한다.
-
-아래 어느 절에서든 **PR 본문의 정본은 GitHub 게시본이다** — 로컬 패키지는 게시 시점 이전 판일 수 있다.
+`/plan/`에서 과제 요구사항을 찾는다. 아래 어느 절에서든 **PR 본문은 GitHub 게시본을 정본으로 본다**(아직 게시하지 않은 PR은 `/write-doc pr-body recruitment` 패키지).
 
 ## 1. 바뀐 코드 점검 — AI + 사용자
 
@@ -41,9 +39,11 @@ PR 본문을 올릴 때마다 실제 올라간 본문을 파일로 받아 검증
 
 기계가 보는 것:
 - `node {{skill_dir}}/recruitment/scripts/check-submission.mjs pr-body <본문.md> --check-urls` — 플레이스홀더 잔존, 내부 문서 링크, 이미지 URL 유효성. 짚힌 내부 문서 링크는 지운다.
-- `node {{skill_dir}}/scripts/steps.mjs pr links` — 커밋 링크가 그 PR의 커밋을 가리키는지. 기본 브랜치 위로 옮기는 rebase로 SHA가 바뀌어 미리 써 둔 링크가 어긋난다. 어긋난 링크는 고쳐 다시 올린다.
+- `node {{skill_dir}}/scripts/steps.mjs pr links` — 커밋 링크가 그 PR의 커밋을 가리키는지. 기본 브랜치 위로 옮기는 rebase로 SHA가 바뀌어 미리 써 둔 링크가 어긋난다. 어긋난 링크는 고친다.
 
 사람이 보는 것 — 원본 프로젝트 용어 잔재(상품, product, 과제 등), 다른 레포를 가리키는 커밋 링크가 맞는 레포인지, 수치 불일치(제목의 수치와 본문의 수치).
+
+기계·사람 어느 쪽에서든 고칠 것이 나오면 write-doc pr-body 「재료 받기」의 게시한 PR 경로로 패키지를 다시 만들어 고친 뒤 [발행](../../write-doc/types/pr-body/steps.md#publish_step-발행)대로 다시 올린다.
 
 ## 3. README.md 작성 — AI 작업
 
