@@ -26,7 +26,7 @@ const inputLines = input.split(/\r?\n/);
 // 앞 명령(git diff 등)이 실패하면 파이프에는 빈 입력만 온다. 「후보 없음」으로 끝내면 리뷰어가
 // 주석이 없다고 판정하므로, diff가 아니면 실패로 끝낸다.
 if (!inputLines.some((raw) => raw.startsWith("diff --git "))) {
-  console.error("diff 입력이 비었다 — base·head를 바꿔 다시 돌리지 말고, 받은 명령과 이 오류를 그대로 보고한다");
+  console.error("diff 입력이 비었다 — diff 명령을 바꿔 다시 돌리지 말고, 받은 명령과 이 오류를 그대로 보고한다");
   process.exit(1);
 }
 
@@ -161,15 +161,19 @@ function unquote(quoted) {
   return Buffer.from(bytes).toString("utf8");
 }
 
-if (rows.length === 0) {
-  console.log("추가된 주석 후보 없음");
-} else {
-  console.log("| # | 위치 | 줄 |");
-  console.log("|---|---|---|");
+if (rows.length === 0) console.log("추가된 주석 후보 없음");
+// 건너뛴 파일의 주석은 리뷰어가 이 표에 직접 채우므로, 후보가 없어도 그런 파일이 있으면 표 머리를 찍는다.
+if (rows.length > 0 || skippedFiles.size > 0) {
+  console.log("| # | 위치 | 주석 원문 | 판정 |");
+  console.log("|---|---|---|---|");
   rows.forEach((row, index) => {
-    console.log(`| ${index + 1} | ${row.file}:${row.line} | ${row.text.replaceAll("|", "\\|")} |`);
+    console.log(`| ${index + 1} | ${row.file}:${row.line} | ${row.text.replaceAll("|", "\\|")} | |`);
   });
 }
 if (skippedFiles.size > 0) {
-  console.log(`\n주석을 뽑지 않은 파일 ${skippedFiles.size}개: ${[...skippedFiles].join(", ")}`);
+  console.log(
+    `\n주석을 뽑지 않은 파일 ${skippedFiles.size}개: ${[...skippedFiles].join(", ")}\n` +
+      "파일마다 허용 목록 규칙이 그 파일 종류에 걸리는지 먼저 본다. 걸리지 않으면 그 사유를 표 위에 한 줄 적고 넘긴다. " +
+      "걸리면 그 파일의 diff를 직접 읽어 추가된 주석을 같은 표에 행으로 추가하고, 위치 칸 끝에 「(직접 추출)」을 붙인다.",
+  );
 }
