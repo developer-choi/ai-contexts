@@ -50,11 +50,11 @@ MARKUP 결과물은 [마크업 예외](../conventions/artifact/stub.md#마크업
 
 - **페이지 마크업** — 가져와 따로 커밋하고, MARKUP 완성본과 파일 diff가 없는지 확인한다. 디자인 원본 대조와 코드 리뷰는 MARKUP에서 마쳤으므로 이 커밋은 impl-review-loop에 넣지 않는다.
   첫 커밋 단위보다 먼저 가져온다 — 로직이 이 파일을 import한다. 로직 커밋이 이미 있으면 지금 위에 커밋한다.
-- **공통 지정 컴포넌트** — stub 껍데기에 MARKUP 시각 본문을 옮겨 넣는 일은 그 컴포넌트를 다루는 커밋 단위에 넣어 Step 5.3 리뷰를 거친다. 옮긴 시각 본문(CSS 수치·HTML 구조)이 MARKUP 완성본과 같은지 diff로 확인한다.
+- **공통 지정 컴포넌트** — stub 껍데기에 MARKUP 시각 본문을 옮겨 넣는 일은 그 컴포넌트를 고치는 커밋 단위에 넣어 Step 5.3 리뷰를 거친다. 옮긴 시각 본문(CSS 수치·HTML 구조)이 MARKUP 완성본과 같은지 diff로 확인한다.
 
 Lead는 code-map 탐색으로 coding-standards rules·MP 패턴 문서를 골라 읽지 않는다 — 규칙 준수는 Step 5.3 리뷰가 맡는다.
 
-**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 다루는 PR은 재료·정답 대조 A·규칙검사 B·커밋 단위를 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)대로 정한다.
+**프로젝트 세팅 PR** — 린트, 포맷터 등 설정만 바꾸는 PR은 재료·정답 대조 A·규칙검사 B·커밋 단위를 Step 5.3 표가 아니라 [SETUP 「구현 분담」](../conventions/pr-types/setup.md#구현-분담)대로 정한다.
 
 ---
 
@@ -88,7 +88,7 @@ IMPL 중 디자인·기획이 바뀌었다는 것을 알게 되면, 앞 단계 �
 
 | 구현자 | 정답 대조 A (메커니즘) | 규칙검사 B | 추가 검사 | 커밋 단위 |
 |---|---|---|---|---|
-| Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 다루는 단위는 Step 5.1의 시각 본문 diff도 본다. 마크업을 고친 단위는 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 [검증 기준](../conventions/modes.md#검증-기준--렌더-결과와-디자인-원본-대조)대로 대조한다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | 추가 컨벤션 `pr{N}/persistent/reference.md`, Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | [테스트 이름 대조](#step-531-테스트-이름-대조) | `implementation.md`의 `### N` 항목 하나 |
+| Lead | 정답 위치는 stub 커밋 `*.test.ts(x)`의 `it.todo`, 테스트 실행 green으로 판정. 공통 지정 컴포넌트를 고치는 단위는 Step 5.1의 시각 본문 diff도 본다. 마크업을 고친 단위는 그 모드의 디자인 원본([modes.md](../conventions/modes.md) 매트릭스)과 [검증 기준](../conventions/modes.md#검증-기준--렌더-결과와-디자인-원본-대조)대로 대조한다. 종료 커버리지는 [IMPL 종료 시점](../conventions/artifact/implementation-spec.md#impl-종료-시점--남은-ittodo)과 `implementation.md`의 `### N`마다 커밋 단위가 있는지 | Advanced Reviewer 참고 자료: stub `*.test.ts(x)`의 `it.todo` | [테스트 이름 대조](#step-531-테스트-이름-대조) | `implementation.md`의 `### N` 항목 하나 |
 
 **리뷰어 유지** — Lead는 code-review의 리뷰어를 모두 이름 있는 팀원으로 띄우고, 커밋 단위·재검 라운드 내내 같은 팀원에게 맡긴다.
 

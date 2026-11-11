@@ -21,7 +21,7 @@
 
 ## step 순서와 의존
 
-step·세션을 더하거나 옮기거나 순서를 바꿀 때, 「X 다음에 Y」로 적힌 것이 정말 산출물 의존인지 본다. 산출물 파일 단위로 따져서, 의존이 없는데 순서가 박혀 있으면 병렬로 풀게 한다. 새 step이 기존 앞뒤 관계를 깨지 않는지도 본다.
+step·세션을 추가하거나 옮기거나 순서를 바꿀 때, 「X 다음에 Y」로 적힌 것이 정말 산출물 의존인지 본다. 산출물 파일 단위로 따져서, 의존이 없는데 순서가 박혀 있으면 병렬로 풀게 한다. 새 step이 기존 앞뒤 관계를 깨지 않는지도 본다.
 
 ## 다른 절·다른 step 파일의 일을 미리 정하는 곳
 
@@ -45,4 +45,4 @@ step·세션을 더하거나 옮기거나 순서를 바꿀 때, 「X 다음에 Y
 ## 컨벤션
 
 - `contexts/coding-standards/{rules,principles}/` 아래 규칙마다 realize-plan이나 code-review 중 한 곳에서는 걸리는가. implement에 규칙 참조가 없는 것은 지적하지 않는다.
-- workflow가 만드는 코드(stub·구현)의 컨벤션은 `deploy/skills/workflow/conventions/` 한 곳에 두고, step·다른 스킬은 링크만 두는가. `/code-review`가 그 컨벤션을 받아 읽는가.
+- workflow가 만드는 코드(stub·구현)의 컨벤션은 `deploy/skills/workflow/conventions/` 한 곳에 두고, step·다른 스킬은 링크만 두는가.

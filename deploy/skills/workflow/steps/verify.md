@@ -66,7 +66,7 @@ Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별�
 code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
 ```
 
-- code-review에 전달하는 입력: PR diff, `/plan/pr{N}/persistent/reference.md` ([conventions/artifact/reference-curation.md](../conventions/artifact/reference-curation.md) 참조), 결정 기록 `/plan/pr{N}/persistent/decisions.md`, 리뷰 모드(advanced)
+- code-review에 전달하는 입력: PR diff, 결정 기록 `/plan/pr{N}/persistent/decisions.md`, 리뷰 모드(advanced)
 - 6.2에서 마크업을 고쳤으면 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
 
 ---
@@ -180,7 +180,7 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash --exec '<그 레포의 타입 �
 
 ## 산출물 정리
 
-`user-test-cases.md`는 사용자가 넘겨받은 항목을 모두 통과시키면 소비한다. 소비 후 정리는 consumable 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
+`user-test-cases.md`는 사용자에게 넘긴 항목을 모두 통과시키면 소비한다. 소비 후 정리는 consumable 큐 모델을 따른다 ([소비→삭제 메커니즘 SSOT](../conventions/plan-folder.md#소비삭제-메커니즘-ssot--소비처-step은-소비만-선언)).
 
 ---
 
