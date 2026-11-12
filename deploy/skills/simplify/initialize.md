@@ -139,7 +139,7 @@ simplified-[라이브러리명]/
 
 - **스캐폴딩**: SIMPLIFY_SOURCE `format/keep-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 예상되는 유지 패턴을 초안으로 작성
-- 라이브러리 종류와 무관한 공통 유지 패턴은 SIMPLIFY_SOURCE `common-keep-patterns.md`에 있으므로 중복 작성하지 않음
+- 라이브러리 종류와 무관한 공통 유지 패턴은 SIMPLIFY_SOURCE `common-patterns.md`에 있으므로 중복 작성하지 않음
 
 ### `instructions/simplification-patterns.md`
 
@@ -148,7 +148,7 @@ simplified-[라이브러리명]/
 - **스캐폴딩**: SIMPLIFY_SOURCE `format/simplification-patterns.md` 양식을 기반으로 생성
 - 초기에는 라이브러리 소스를 탐색하여 **예상되는 반복 패턴**을 초안으로 작성
 - 단순화 작업을 진행하면서 **패턴별로 실제 적용 예시** 추가
-- 라이브러리 종류와 무관한 공통 패턴은 SIMPLIFY_SOURCE `common-simplification-patterns.md`에 있으므로 중복 작성하지 않음
+- 라이브러리 종류와 무관한 공통 패턴은 SIMPLIFY_SOURCE `common-patterns.md`에 있으므로 중복 작성하지 않음
 
 > 🔎 **검수**: keep/simplification 패턴 문서 — `init-review.md` 패턴 유형.
 

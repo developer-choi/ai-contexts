@@ -25,8 +25,8 @@
 **계획 작성 절차**
 1. **기능·서브시스템 전수 나열** — 이 대상의 기능/하위 컴포넌트/서브시스템/prop 그룹을 빠짐없이 적는다(제거 후보 목록). 구조적/기계적 패턴(Scope, forwardRef, 합성 헬퍼 등)도 별도로 적는다.
 2. **각 항목 제거/유지 판정** — SKILL.md 학습 범위 테스트(+delta-over-sibling)를 항목마다 적용해 제거/유지와 근거를 적는다.
-   - 유지 판정: SIMPLIFY_SOURCE `common-keep-patterns.md`, SIMPLIFY_TARGET `instructions/keep-patterns.md` 대조
-   - 삭제 패턴: SIMPLIFY_SOURCE `common-simplification-patterns.md`·SIMPLIFY_TARGET `instructions/simplification-patterns.md`는 **검증된 패턴의 체크리스트일 뿐 제거 범위의 상한이 아니다.** 이 대상 고유의 기능 제거 후보는 1.에서 새로 발굴한다.
+   - SIMPLIFY_SOURCE `common-patterns.md`와 SIMPLIFY_TARGET `instructions/keep-patterns.md`·`instructions/simplification-patterns.md`를 대조한다
+   - 삭제 패턴은 **검증된 패턴의 체크리스트일 뿐 제거 범위의 상한이 아니다.** 이 대상 고유의 기능 제거 후보는 1.에서 새로 발굴한다.
 3. **커밋 계획 작성** — 양식: `format/commit.md`. 기능 제거 커밋과 구조적 리팩터 커밋을 모두 포함한다. 기능 제거가 0건이면 1~2를 다시 검토한다(구조적 변환만 남는 계획은 예외적 결과다).
 
 > 기능·서브시스템이 여럿이고 학습가치 판단이 모호한 복잡한 대상은 `plan.md`의 서브에이전트 분석 절차를 따른다.
@@ -57,8 +57,7 @@
 
 단순화 문서 커밋 후, 아래 체크리스트를 순회하며 업데이트 필요 여부를 확인한다. 이번 작업에서 발견한 새 패턴·변경사항을 각 문서에 반영한다.
 
-- [ ] SIMPLIFY_SOURCE `common-keep-patterns.md` — 새로운 공통 유지 패턴 발견?
-- [ ] SIMPLIFY_SOURCE `common-simplification-patterns.md` — 새로운 공통 삭제 패턴 발견?
+- [ ] SIMPLIFY_SOURCE `common-patterns.md` — 새로운 공통 유지·삭제 패턴 발견?
 - [ ] SIMPLIFY_TARGET `instructions/keep-patterns.md` — 라이브러리 특화 유지 패턴 추가/수정?
 - [ ] SIMPLIFY_TARGET `instructions/simplification-patterns.md` — **여러 대상에서 반복되는** 삭제 패턴 추가/수정?
 
