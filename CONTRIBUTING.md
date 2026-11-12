@@ -66,15 +66,6 @@ argument-hint: 인자 힌트 (선택)
 
 미해결 사항은 해당 문서와 가장 가까운 경로의 `TODO.md`에 적으세요.
 
-```
-coding-standards/
-├── TODO.md          ← coding-standards 하위 문서의 미결 사항은 여기에
-├── coding/
-│   └── zod.md
-└── testing/
-    └── convention.md
-```
-
 ---
 
 ## 문서 작성 규칙
