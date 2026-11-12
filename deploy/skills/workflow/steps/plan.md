@@ -48,7 +48,7 @@ next:
    - 넘기는 것: 메인이 가린 PR들의 `pr{M}/persistent/` 아래 파일 경로
    - 돌려받는 것: 이번 PR이 이어받을 결정·컨벤션, 그리고 이번 PR이 전제를 바꿔 다시 열어야 할 결정
 2. 컨벤션 매칭
-   - 맡기는 것: [code-map.md 「기준 문서 고르기」](../../../contexts/code-map.md#기준-문서-고르기)(고른 문서 적용은 메인이 한다) + conventions-index.md 선별
+   - 맡기는 것: code-map.md의 [기준 문서 고르기](../../../contexts/code-map.md#기준-문서-고르기)(고른 문서 적용은 메인이 한다) + conventions-index.md 선별
    - 넘기는 것: code-map 범주(`실무` → 회사 프로젝트, `채용`·`개인` → 개인 프로젝트. `file-folder-structure` 태그 파일을 포함한다), conventions-index.md 경로 또는 인덱스가 없어 메인이 받은 사용자 답
    - 돌려받는 것: 이번 PR에 매칭된 규칙 행·경로·라인 범위, 그리고 인덱스를 넘겼으면 이번 PR이 건드리는데 인덱스 트리거에 안 걸리는 영역 목록
    - 인덱스에 [표준 참고처](../conventions/artifact/conventions-index.md#표준-참고처--개인실무-모드) 레포가 올라 있으면 레포마다 이번 PR 컴포넌트에 대응하는 파일 경로도 돌려받는다. 레포 경로만으로는 받지 않는다
