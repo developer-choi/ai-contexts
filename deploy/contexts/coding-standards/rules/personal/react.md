@@ -1,4 +1,16 @@
-# React 컴포넌트 작성 패턴
+# React·API 함수 작성 패턴
+
+## 수정 API 시그니처
+
+pk를 별도 인자가 아닌 body에 포함시킵니다.
+
+```typescript
+// ❌
+patchLessonApi(lesson.pk, data)
+
+// ✅
+patchLessonApi(data)
+```
 
 ## useRef로 임시 값 저장 시 네이밍
 
@@ -14,3 +26,8 @@ const isFirstRenderCache = useRef(true);
 const inputRef = useRef<HTMLInputElement>(null);
 const containerRef = useRef<HTMLDivElement>(null);
 ```
+
+## react-hook-form: watch 대신 useWatch()
+
+- `watch()`를 직접 사용하지 않는다.
+- 대신 `useWatch()`를 사용한다.

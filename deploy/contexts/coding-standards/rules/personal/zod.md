@@ -8,7 +8,7 @@ tags: [file-folder-structure]
 
 ### 원본 스키마는 모든 필드를 required, non-nullable로 정의합니다
 
-깨끗한 단일 원천을 유지하고, 파생 스키마에서만 `.pick()`과 `.extend()`로 제약을 변경합니다.
+원본은 그대로 두고, 파생 스키마에서만 `.pick()`과 `.extend()`로 제약을 변경합니다.
 
 ```typescript
 const LessonOriginalSchema = z.object({
@@ -22,7 +22,7 @@ const LessonOriginalSchema = z.object({
 
 ### 원본 스키마는 export하지 않습니다
 
-위에서 만든 `LessonOriginalSchema`는 파생용 단일 원천일 뿐, 상세 API 응답 타입과 일치하지 않을 수 있습니다.
+위에서 만든 `LessonOriginalSchema`는 파생용 원본일 뿐, 상세 API 응답 타입과 일치하지 않을 수 있습니다.
 외부에서 직접 사용하면 실제 API 형태와 다른 타입을 참조하게 됩니다.
 
 ### `.partial()` 금지
@@ -59,17 +59,9 @@ tagList: z.array(tagSchema)
   .max(10, '태그는 최대 10개까지 가능합니다'),
 ```
 
-안쪽에 메서드가 없으면 분리할 필요 없습니다.
-
-```typescript
-// 분리 불필요 — 헷갈릴 게 없음
-z.array(z.string())
-z.array(z.string()).max(10)
-```
-
 ### `z.string()`은 자유 텍스트 전용입니다
 
-형식이 정해진 문자열에 `z.string()`만 쓰면 아무 문자열이나 통과합니다. 대응하는 Zod 메서드가 있으면 반드시 사용합니다.
+형식이 정해진 문자열에 `z.string()`만 쓰면 아무 문자열이나 통과합니다. 대응하는 Zod 메서드가 있으면 그것을 사용합니다.
 
 string format 검증은 `z.string().email()` 같은 체이닝이 아닌 **top-level API**를 사용합니다.
 
@@ -90,11 +82,9 @@ profileUrl: z.url()
 userId: z.uuid()
 ```
 
-`z.string()`에 `.min()/.max()`만 붙이는 것은 `postTitle`, `postContent`처럼 형식 제약이 없는 자유 텍스트에만 사용합니다.
+### 에러 메시지 지정
 
-### 에러 메시지 반드시 지정
-
-`z.enum()`, `z.string()`, `.min()`, `.max()` 등에 사용자 & 개발자가 볼 메시지를 명시합니다.
+`z.enum()`, `.min()`, `.max()` 등에 사용자 & 개발자가 볼 메시지를 명시합니다.
 
 ```typescript
 // ❌
@@ -119,14 +109,12 @@ z.string()
 `.pick()`은 포함할 필드를 명시하므로 결과 타입을 바로 알 수 있습니다.
 반면 `.omit()`은 제외할 필드를 보고 나머지를 머릿속으로 계산해야 합니다.
 
-TypeScript에서도 `Omit`과 `Pick`을 중첩하면 읽기 어려운 것과 같은 이유입니다.
-
 특히 아래처럼 omit 대상을 변수로 분리하면, 스키마 정의만 보고는 어떤 필드가 남는지 파악하기 더 어려워집니다.
 
 ```typescript
 // ❌
-const serverGeneratedFields = {pk: true, createdAt: true, updatedAt: true, viewCount: true} as const;
-export const CreateLessonSchema = LessonOriginalSchema.omit(serverGeneratedFields);
+const excludedFields = {pk: true, description: true} as const;
+export const CreateLessonSchema = LessonOriginalSchema.omit(excludedFields);
 
 // ✅
 export const CreateLessonSchema = LessonOriginalSchema.pick({
