@@ -51,7 +51,7 @@ stub 본문 주석은 최소로 두고, 사용자 검토나 IMPL의 구체화가
 
 ## 다른 PR로 미루는 마커 — 코드 안 금지
 
-다른 PR에서 처리할 작업은 코드에 TODO로 남기지 않고 그 PR의 TODO에 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)). 다른 PR로도 옮기지 않는 본 PR 외부 의존성은 [PR 개요](../../steps/plan.md#산출물-planprnpersistentoverviewmd)의 열려있는 질문에 적는다.
+다른 PR에서 처리할 작업은 코드에 TODO로 남기지 않고 그 PR의 TODO에 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)). 본 PR 외부 의존성은 [PR 개요](overview.md#본문-항목)의 열려있는 질문에 적는다.
 
 ## file-level(blanket) eslint-disable 라이프사이클
 
