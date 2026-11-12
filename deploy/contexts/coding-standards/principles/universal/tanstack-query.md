@@ -1,4 +1,4 @@
-# React 컴포넌트 작성 원칙
+# TanStack Query 사용 원칙
 
 ## mutationKey는 소비처가 있을 때만 사용
 
