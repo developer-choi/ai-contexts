@@ -19,10 +19,6 @@ export type NumericString = `${number}`;
 type OneToNine = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9;
 type ZeroToNine = 0 | OneToNine;
 
-/**
- * 계산 가능한 2자리 숫자 문자열 (00 ~ 99 아님, 10 ~ 99)
- * 예: "10", "99" (O) / "1", "100" (X)
- */
 export type TwoDigitNumberString = `${OneToNine}${ZeroToNine}`;
 ```
 
@@ -37,7 +33,7 @@ interface InquiryArticle {
 
 // ✅ Explicit & Intuitive
 interface InquiryArticle {
-  /* 빈 문자열: 서버에서 값이 없음을 빈 문자열로 응답하는 경우 */
+  /** 빈 문자열: 서버에서 값이 없음을 빈 문자열로 응답하는 경우 */
   img1: '' | string;
 }
 ```
@@ -46,6 +42,4 @@ interface InquiryArticle {
 
 `?`, `null`, `undefined`가 포함된 타입 정의 시, 값이 비는 것이 데이터 상태(아직 고르지 않음, 받지 못함, 서버가 값 없이 응답함 등)이면 그 상황을 주석으로 설명한다.
 
-함수 반환 타입의 `null`·`undefined`도 빈 값 타입 정의로 본다. 데이터 상태인지와 상관없이 어떤 경우에 비어 돌아오는지를 함수 JSDoc(`/** */`)에 `null: …`·`undefined: …` 중 해당하는 한 줄로 적는다.
-
-호출하는 쪽이 생략할 수 있는 입력(prop·함수 매개변수·옵션 객체 필드)은, 생략했을 때 기본값이 쓰이거나 그 입력에 의존하는 부분을 그리지(하지) 않으면 달지 않는다. 기본값·조건 처리를 하는 코드가 그 동작을 이미 보여 주기 때문이다. 다만 호출하는 쪽이 「아직 고르지 않음」 같은 데이터 상태를 그대로 넘겨서 비는 것이면 그래도 단다.
+함수 반환 타입의 `null`·`undefined`도 빈 값 타입 정의로 본다. 데이터 상태인지와 상관없이 어떤 경우에 비어 돌아오는지를 함수 JSDoc(`/** */`)에 `null: …`·`undefined: …` 중 해당하는 것마다 한 줄로 적는다.
