@@ -37,7 +37,7 @@ impl-review-loop의 리뷰어 대조형 — Figma Reviewer ↔ 구현자 대조 
 
 1. **(매칭표가 있을 때) "`get_design_context` 응답 코드의 CSS 토큰을 매칭표와 대조하라"**
 2. **구현 후 디자인 원본과 다시 대조** — 토큰/레이아웃/props를 비교한 뒤 Figma Reviewer에게 넘긴다
-3. **피그마 MCP 연결인 경우** — 색은 [figma-color-tokens-guide.md](../../conventions/figma-color-tokens-guide.md)대로 확정한다
+3. **피그마 MCP 연결인 경우 아이콘·이미지 색** — 아이콘·일러스트·로고 등 컴포넌트 인스턴스는 이미지 에셋으로 export 되며 fill 변수가 응답에서 누락된다. 해당 노드 id로 `get_variable_defs`를 호출해 색을 확정한다
 4. **(채용)** 위 「(채용 전용) 스타터 코드·MP 재사용·스타일링 라이브러리」 절의 코드 취급·MP 복사 규칙과 확정된 스타일링 라이브러리
 
 ## 매칭표 생성 (실무 프로젝트만)
