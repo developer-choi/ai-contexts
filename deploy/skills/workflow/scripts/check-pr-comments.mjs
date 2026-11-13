@@ -20,8 +20,8 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// 코드 안에 남으면 안 되는 마커. comments.md 「다른 PR로 미루는 마커 — 코드 안 금지」와
-// 「구현 종료 TODO 잔존 검사」가 그 근거다.
+// 코드 안에 남으면 안 되는 마커. [다른 PR로 미루는 마커 — 코드 안 금지](../conventions/artifact/comments.md#다른-pr로-미루는-마커--코드-안-금지)와
+// [구현 종료 TODO 잔존 검사](../conventions/artifact/comments.md#구현-종료-todo-잔존-검사)가 그 근거다.
 const FORBIDDEN = [/\bTODO\b/, /\bFIXME\b/, /\bAI_IMPL\b/];
 // 리팩토링 전 코드를 격리하는 blanket disable의 추적 문구. 이 문자열이 정본이다 — 바꾸면 고아 탐지가 멈춘다.
 const ISOLATION_MARKER = '리팩토링 전 코드(정적 분석 도입 PR)';

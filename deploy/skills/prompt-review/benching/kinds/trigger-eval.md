@@ -2,7 +2,7 @@
 
 스킬 description의 트리거 정확도(false negative/positive)를 측정한다.
 
-frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 아니다 — 그 description은 모델 컨텍스트에 올라가지 않아 측정할 트리거가 없다. 사용자만 부르게 하려는 스킬은 재려 하지 말고 그 필드를 켠다.
+frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 아니다. 그 description은 모델 컨텍스트에 올라가지 않아 측정할 트리거가 없다. 사용자만 호출하게 하려는 스킬은 재려 하지 말고 그 필드를 켠다.
 
 ## 현재 상태 (2026-10-17 재확인)
 
@@ -12,9 +12,9 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 | 문제 | 영향 | 출처 |
 |---|---|---|
-| `claude -p`가 `.claude/commands/` 로드 안 함 (architectural) | 모든 OS — 모든 should-trigger 쿼리 0% recall | [anthropics/skills#556](https://github.com/anthropics/skills/issues/556) OPEN. [anthropics/claude-code#36570](https://github.com/anthropics/claude-code/issues/36570)은 `NOT_PLANNED`로 닫힘(미수정) |
-| Parallel worker UUID 충돌 (`--num-workers 10` default) | 모든 OS — `--num-workers 1`은 100%, default는 11% | [PR #794 OPEN](https://github.com/anthropics/skills/pull/794) |
-| 윈도우 `select.select` pipe fd 비호환 (WinError 10038) | 윈도우만 — 모든 쿼리 실패 | 미보고 |
+| `claude -p`가 `.claude/commands/` 로드 안 함 (architectural) | 모든 OS: 모든 should-trigger 쿼리 0% recall | [anthropics/skills#556](https://github.com/anthropics/skills/issues/556) OPEN. [anthropics/claude-code#36570](https://github.com/anthropics/claude-code/issues/36570)은 `NOT_PLANNED`로 닫힘(미수정) |
+| Parallel worker UUID 충돌 (`--num-workers 10` default) | 모든 OS: `--num-workers 1`은 100%, default는 11% | [PR #794 OPEN](https://github.com/anthropics/skills/pull/794) |
+| 윈도우 `select.select` pipe fd 비호환 (WinError 10038) | 윈도우만: 모든 쿼리 실패 | 미보고 |
 
 **근거**: 공식 docs https://code.claude.com/docs/en/headless 원문.
 
@@ -30,7 +30,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 입력 eval set
 
-쿼리를 어떻게 쓰고 양쪽을 몇 개씩 담는지는 skill-creator 「Description Optimization」의 eval 쿼리 생성 단계를 그대로 따른다. 파일 모양(키 이름·배열)도 같다.
+쿼리를 어떻게 작성하고 양쪽을 몇 개씩 담는지는 skill-creator "Description Optimization"의 eval 쿼리 생성 단계를 그대로 따른다. 파일 모양(키 이름·배열)도 같다.
 
 ## 호출
 
@@ -40,7 +40,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 결과 해석
 
-FAIL이 **추상 쿼리**(예: "description 너무 길어")에서 났으면 description보다 eval set을 먼저 의심한다 — skill-creator 「How skill triggering works」.
+FAIL이 **추상 쿼리**(예: "description 너무 길어")에서 났으면 description보다 eval set을 먼저 의심한다(skill-creator "How skill triggering works").
 
 ## 함정
 

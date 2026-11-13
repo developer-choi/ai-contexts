@@ -637,7 +637,7 @@ async function main() {
   const runs = jobs.filter((job) => job.done).map((job) => ({ job, result: job.done }));
 
   // 축 하나의 판정. 사람이 표를 눈으로 읽고 정하던 것을 여기서 찍는다
-  // ([한 패스로 닫는다](benching/kinds/rule-ablation.md#한-패스로-닫는다--안-갈린-것은-다시-재지-않는다)).
+  // ([한 패스로 닫는다](benching/kinds/rule-ablation.md#한-패스로-닫는다-안-갈린-것은-다시-재지-않는다)).
   //
   // 경계 수치는 여기에만 둔다 — 차이가 반복의 2/3 이상이고 최소 2. 문서는 판정 라벨별 처리만
   // 정한다. 같은 수를 두 곳에 두면 한쪽만 바뀌어 손판정과 이 출력이 모르는 채로 갈라진다.
