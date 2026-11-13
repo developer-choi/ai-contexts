@@ -14,7 +14,7 @@ disable-model-invocation: true
 
 ## 인자 라우팅
 
-호출 인자의 **첫 토큰**으로 진입 흐름을 가른다. 첫 토큰이 아래 예약어가 아니면(또는 인자가 없으면) 기본 캡처 흐름이다.
+호출 인자의 **첫 토큰**으로 진입 흐름을 가른다.
 
 | 첫 토큰 | 진입 흐름 |
 |---|---|
@@ -46,8 +46,7 @@ AC `~/WebstormProjects/main/ai-contexts/deploy/skills/` 하위 SKILL.md들의 de
 
 ## 입력 수집
 
-- **구두 덤프**: 사용자가 말하는 대로 전부 받는다. 중간에 정리하지 않고 다 받은 뒤 한 번에 정리한다.
-- **텍스트 파일**: 경로를 받으면 읽는다.
+사용자가 말하는 대로 전부 받는다. 중간에 정리하지 않고 다 받은 뒤 한 번에 정리한다. 파일 경로를 받았으면 그 파일을 읽어 입력으로 삼는다.
 
 ---
 
@@ -61,10 +60,7 @@ projects 안에서 어느 프로젝트로 갈지는 백로그 레포 CLAUDE.md �
 
 ### 2. 기존 스킬·프로젝트 연결
 
-`projects/` 항목은 아래 중 하나로 분류한다:
-
-- **기존 스킬·프로젝트 개선**: `deploy/skills/` 또는 등록된 프로젝트의 개선. 반영 위치는 frontmatter `target`에 적는다 (표기 규격은 백로그 레포 `projects/item-format.md` 「frontmatter 규칙」).
-- **신규**: 기존에 없는 새로운 스킬·작업.
+`projects/` 항목이 `deploy/skills/`나 등록된 프로젝트의 개선이면 반영 위치를 frontmatter `target`에 적는다(표기 규격은 백로그 레포 `projects/item-format.md` 「frontmatter 규칙」).
 
 ### 3. 기존 항목 대조
 
