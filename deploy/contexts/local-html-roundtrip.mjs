@@ -9,12 +9,8 @@
 // 붙여넣으므로, 클립보드를 뒤지던 `collect`는 걷어냈다. 마커(`__skill`)·신선도(`ts`) 검증은
 // 각 스킬의 저장 스크립트가 한다 (본보기: PP `routine/scripts/cli/saveWeeklyForm.ts`).
 //
-// 환경 분기를 두지 않는다. 2026-08-29 실측:
-//   Start-Process <로컬 .html>  → Claude Code 뜸 / Antigravity 안 뜸(종료코드는 0)
-//   schtasks /it + .cmd 래퍼    → 양쪽 다 뜸
-// 양쪽 다 통하는 칸이 하나 있으므로 그것만 쓴다. 분기를 두면 아는 환경변수 목록에 없는
-// 제3의 에이전트가 Start-Process 쪽으로 떨어져 "종료코드 0인데 창만 안 뜨는" 조용한 실패를
-// 한다 — Antigravity에서 실제로 관측된 모양이다.
+// 환경 분기를 두지 않고 schtasks /it + .cmd 래퍼 한 길만 쓴다. 환경에 따라 Start-Process
+// 쪽으로 떨어지면 "종료코드 0인데 창만 안 뜨는" 조용한 실패가 나기 때문이다(2026-08-29 실측).
 //
 // 따옴표 함정(같은 실측):
 //   cmd /c start "" "<경로>" 를 작업 명령에 직접 넣으면 인자 파싱에서 깨진다.
@@ -31,8 +27,7 @@
 //   schtasks.exe에는 배터리 설정을 켜는 스위치가 없어 등록을 PowerShell 쪽으로 옮겼다.
 //
 // 사용:
-// (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 그 에이전트의 절대경로로
-//  채운다. 여기 홈 경로를 박아두면 codex·gemini에서 그대로 따라 친 사람이 없는 경로를 친다.)
+// (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 절대경로로 채운다.)
 //   node <이 파일> open <마커> <html경로|-> [--slug <슬러그>]
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";

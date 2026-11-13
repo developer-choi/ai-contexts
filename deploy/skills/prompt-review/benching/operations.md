@@ -12,4 +12,3 @@ rule-ablation의 eval-set 사본은 다음 벤치가 다시 쓰는 재료라 지
 일반 세션·서브에이전트로 돌린 실행이면, 스킬이 읽으라고 한 문서를 실제로 열었는지는 CLI가 남기는 대화 기록의 도구 호출로 확인한다.
 
 - Claude Code — `~/.claude/projects/<인코딩된 경로>/<세션 id>.jsonl`, 서브에이전트는 `<세션 id>/subagents/agent-<id>.jsonl`
-- Antigravity — `~/.gemini/antigravity-cli/conversations/<대화 id>.db` (SQLite `steps` 테이블)

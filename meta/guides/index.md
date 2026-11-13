@@ -3,7 +3,7 @@
 > 이 가이드는 AI 에이전트가 읽고 따라 실행하는 것을 전제로 작성되었습니다.
 
 - [환경 동기화](environment.md): 현재 사용자 환경을 AC 기준으로 맞춥니다.
-- [시스템 자산 동기화](system.md): Claude/Codex/Gemini 등 에이전트 시스템 자산을 AC 기준으로 맞춥니다.
+- [시스템 자산 동기화](system.md): Claude Code 전역 시스템 자산을 AC 기준으로 맞춥니다.
 - [로컬 시스템 동기화](local-system.md): 로컬 스킬(cross-repo)과 AC settings/hooks를 한 명령으로 맞춥니다.
 
 ## 명령 이름 기준

@@ -35,7 +35,7 @@
 | 수단 | 쓰는 곳 | 예시 | 언제 도나 | 누구에게 걸리나 | 한계 |
 |---|---|---|---|---|---|
 | 공식 설정 | 둘 다 | `tsconfig.json` 컴파일 옵션, Claude Code `settings.json` 권한 규칙 | 도구가 돌 때 | 그 도구를 거치는 전부 | 켜고 끄는 범위를 도구가 정한다 |
-| 코드 생성 | 둘 다 | AC `sync:*`(`deploy/`→`~/.claude/`, `CLAUDE.md`→`AGENTS.md`), PandaCSS `panda codegen` | 원본에서 만들 때 | 전부 | 한쪽을 다른 쪽에서 만들 수 있을 때만 |
+| 코드 생성 | 둘 다 | AC `sync:*`(`deploy/`→`~/.claude/`), PandaCSS `panda codegen` | 원본에서 만들 때 | 전부 | 한쪽을 다른 쪽에서 만들 수 있을 때만 |
 | 타입·스키마 | 둘 다 | TS 타입, zod, 데이터 접근 함수의 시그니처 | 코드를 쓰는 중 | 전부 | 타입으로 나타낼 수 있는 것만 |
 | 데이터 접근 스크립트 | 데이터 | PP `routine/scripts/`, `tools/block-sites/lookup.js` | 데이터를 읽고 쓸 때 | 에이전트만 | 호출하지 않고 파일을 직접 열면 비켜 간다 |
 | 에이전트 hook | 규칙 | AC `deploy/hooks/`의 PreToolUse 정책 검사 | 도구 호출 직전·직후 | 에이전트만 | 막는 건 직전에만 되고, 명령을 못 읽으면 안 걸린다 |

@@ -1,12 +1,12 @@
 # System Sync
 
-AC의 전역 에이전트 시스템 자산을 Claude/Codex/Gemini 홈에 동기화합니다.
+AC의 전역 에이전트 시스템 자산을 Claude 홈(`~/.claude`)에 동기화합니다.
 
 ```bash
 npm run sync:system
 ```
 
-기본 타겟은 `~/.claude`입니다. 다른 Claude 타겟으로 동기화하려면 인자로 경로를 넘깁니다.
+기본 타겟은 `~/.claude`입니다. 다른 타겟으로 동기화하려면 인자로 경로를 넘깁니다.
 
 ```bash
 npm run sync:system -- <target>
@@ -18,10 +18,8 @@ npm run sync:system -- <target>
 - 생성·판정 계약도 함께 확인합니다: settings 생성 계약(`verify:settings`), git 정책 hook의 판정(`verify:hook-policies`), AC 안 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose` — 남의 레포 `local/skills`는 `sync:local-system`이 본다), 배포본 md 렌더링의 멱등(`verify:skill-render`), 배포가 바뀐 파일만 쓰는지(`verify:incremental-deploy`), 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`), 3단 종류 누계의 집계·거부·알림 판정(`verify:source-usage`). 깨져도 조용하기 때문에 배포 전에 막습니다. 이 검사들은 서로 독립인 읽기 전용이라 위의 hook 준비 확인과 겹쳐 돌지만, 출력은 위 순서대로 모아서 냅니다. 하나라도 실패하면 배포를 시작하기 전에 끊고, 첫 실패에서 멈추지 않으므로 실패한 검사를 한 번에 모두 보여줍니다.
 - 배포본을 지우고 다시 쓰지 않습니다. 배포할 내용을 메모리에서 만든 뒤 기존 파일과 비교해, 내용이 다른 파일만 쓰고 원본에서 사라진 AC 관리 파일만 지웁니다. 스킬 하나만 고쳤으면 그 스킬의 바뀐 파일만 다시 쓰여, 열려 있던 다른 세션에도 그 스킬만 새로 뜹니다. 바뀐 것이 없으면 `변경 없음`을 출력합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`는 폴더 전체가 AC 관리 대상입니다.
-- `deploy/skills`는 외부 스킬과 공존해야 하므로 보존 목록(`SKILLS_PRESERVE`)의 스킬은 건드리지 않습니다. 각 스킬의 md는 배포본 형태로 렌더합니다 — frontmatter에 `name`이 없으면 폴더명을 주입하고(Antigravity는 `name`이 있어야 스킬을 인식), 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다(Antigravity는 스킬 위치를 모델에게 알려주지 않아 본문의 상대 경로가 안 풀립니다). 검증도 이 결과를 기준으로 대조합니다.
-- 각 타겟 설정은 공통 `deploy/base-settings.json`(정책 hook)과 타겟 override(`deploy/claude-settings.json` 등)를 합쳐 생성합니다(`scripts/settings/settings-projection.mjs`, override 우선). claude·gemini는 결과를 각자의 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존하고, codex는 hook만 `~/.codex/hooks.json`으로 통째 씁니다. hook 등록 구조(matcher·이벤트)는 타겟별 어댑터가 변환합니다.
-- 기본 타겟으로 실행하면 Codex 전역 자산도 `~/.codex`에, Gemini 전역 자산도 `~/.gemini`에 함께 동기화합니다.
-- Codex hook trust 갱신을 시도하고, Desktop 환경 제약으로 실패하면 경고 후 자산 검증은 계속합니다.
+- `deploy/skills`는 외부 스킬과 공존해야 하므로 보존 목록(`SKILLS_PRESERVE`)의 스킬은 건드리지 않습니다. 각 스킬의 md는 배포본 형태로 렌더합니다. frontmatter에 `name`이 없으면 폴더명을 주입하고, 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다. 검증도 이 결과를 기준으로 대조합니다.
+- 설정은 공통 `deploy/base-settings.json`(정책 hook)과 override(`deploy/claude-settings.json`)를 합쳐 생성합니다(`scripts/settings/settings-projection.mjs`, override 우선). 결과는 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존합니다.
 - 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
 
 ## 제거
@@ -36,7 +34,7 @@ npm run unsync:system
 npm run unsync:system -- <target>
 ```
 
-제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 구버전 `wt-add` alias를 제거합니다. 기본 Claude 타겟을 제거할 때는 Codex 및 Gemini 전역 자산도 함께 제거합니다.
+제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 구버전 `wt-add` alias를 제거합니다.
 
 ## 반복 실행 기준
 

@@ -18,22 +18,19 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ### 1. 로컬 자산 (cross-repo)
 
-- `local/` 하위 디렉토리(`skills` 등, `hooks` 제외)를 `.claude/<X>`와 `.agents/<X>` **양쪽**에 맞춥니다. claude·codex가 같은 자산을 쓰므로 같은 내용이며, hooks만 2)에서 타겟별로 따로 투영합니다.
+- `local/` 하위 디렉토리(`skills` 등, `hooks` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다.
 - 지우고 다시 쓰지 않습니다. 내용이 다른 파일만 쓰고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 스킬만 새로 뜹니다(1·2 공통).
-- 예외: `skills`의 각 SKILL.md는 배포본 형태로 렌더합니다 — frontmatter에 `name`이 없으면 폴더명을 주입하고(Antigravity는 `name`이 있어야 스킬을 인식합니다), 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다(Antigravity는 스킬 위치를 모델에게 알려주지 않아 본문의 상대 경로가 안 풀립니다).
-- 레포 루트 `CLAUDE.md`가 있으면 `AGENTS.md` 및 `GEMINI.md`에 같은 내용을 씁니다(다를 때만).
-- 원본은 `local/`이며, `.claude/<X>`·`.agents/<X>`는 배포 산출물로 봅니다(gitignore).
+- 예외: `skills`의 각 SKILL.md는 배포본 형태로 렌더합니다. frontmatter에 `name`이 없으면 폴더명을 주입하고, 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다.
+- 원본은 `local/`이며, `.claude/<X>`는 배포 산출물로 봅니다(gitignore).
 
 ### 2. settings/hooks (per-repo)
 
 전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다. 소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
 
 - `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
-- 같은 논리 hook → `.codex/hooks.json`에 **whole-file** 기록(codex 정책). 단 **Stop 이벤트는 claude에만 싣습니다** — codex에서 Stop 훅 동작을 실측하지 못해 codex 투영에서 빠지며, codex hook이 하나도 없는 레포(Stop-only, 예: KA)는 `.codex/` 산출물을 만들지 않습니다.
-- `local/hooks/*.mjs` → `.claude/hooks/`(+codex hook이 있으면 `.codex/hooks/`)에 맞춤. codex hook이 없어졌으면 `.codex/hooks/`·`.codex/hooks.json`을 지웁니다.
-- codex 프로젝트-로컬 훅은 trusted여야 발화합니다. 배포 시 best-effort로 trust를 시도하고, 실패하면 codex 세션에서 `/hooks`로 `.codex/hooks.json`을 수동 신뢰하세요.
+- `local/hooks/*.mjs` → `.claude/hooks/`에 맞춥니다.
 
-산출물(`.claude/settings.json`·`.claude/hooks/`·`.codex/`)은 **gitignore**되며 트래킹하지 않습니다. 소스(`local/`)만 커밋합니다.
+산출물(`.claude/settings.json`·`.claude/hooks/`)은 **gitignore**되며 트래킹하지 않습니다. 소스(`local/`)만 커밋합니다.
 
 ## 제거
 
@@ -41,12 +38,16 @@ npm run sync:local-system -- ~/WebstormProjects/main
 npm run unsync:local-system
 ```
 
-- **로컬 자산**: `.claude/<X>`·`.agents/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 스킬도 함께 청소). `AGENTS.md`·`GEMINI.md`는 `CLAUDE.md`가 있는 레포에서만 삭제합니다. 원본은 `local/<X>`·`CLAUDE.md`에 남아 있어 re-sync로 복구됩니다.
-- **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.codex/hooks.json`·`.codex/hooks`·`.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
+- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 스킬도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
+- **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
 
 ## 반복 실행 기준
 
-여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다. 로컬 자산은 `local/<X>`·`CLAUDE.md` 기준으로, settings/hooks는 `local/` 기준으로 맞춥니다(원본에서 사라진 파일은 지우고, settings의 고아 키는 `.ac-keys`로 걷음). 원본이 그대로면 두 번째 실행에서 아무 파일도 쓰지 않습니다(`verify:incremental-deploy`가 고정). 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 `.claude/<X>`·`.agents/<X>` 카테고리 통째(gitignore 산출물)에 적용합니다.
+여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다.
+
+- 로컬 자산은 `local/<X>` 기준으로, settings/hooks는 `local/` 기준으로 맞춥니다(원본에서 사라진 파일은 지우고, settings의 고아 키는 `.ac-keys`로 걷음).
+- 원본이 그대로면 두 번째 실행에서 아무 파일도 쓰지 않습니다(`verify:incremental-deploy`가 고정).
+- 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 `.claude/<X>` 카테고리 통째(gitignore 산출물)에 적용합니다.
 
 ## 생성 계약 검증
 
@@ -54,4 +55,10 @@ npm run unsync:local-system
 npm run verify:local-system
 ```
 
-base-settings를 가진 각 레포(AC + KA 등)에 대해, hooks가 claude·codex(지원 이벤트)에 등록되는지, command가 claude는 `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`·codex는 `node .codex/hooks/`인지, codex 매처가 `run_command`+`Bash`인지, Stop이 claude에선 매처 없이·codex에선 미등록인지 검증합니다. 이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
+base-settings를 가진 각 레포(AC + KA 등)에 대해 아래를 검증합니다.
+
+- hooks가 claude에 등록되는지
+- command가 `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`인지
+- Stop이 매처 없이 등록되는지
+
+이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.

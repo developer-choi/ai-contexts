@@ -1,4 +1,4 @@
-# Claude/Codex 배포 산출물·로컬 설정·워크트리 (소스는 local/·deploy/, 트래킹 안 함)
+# Claude 배포 산출물·로컬 설정·워크트리 (소스는 local/·deploy/, 트래킹 안 함)
 .claude/
 .codex/
 .idea
