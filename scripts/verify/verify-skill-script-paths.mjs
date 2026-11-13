@@ -13,12 +13,11 @@ import path from 'node:path';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const ROOT = 'deploy/skills';
-// contexts·rules도 배포돼 여러 에이전트가 읽는다. 스킬만 보던 시절 `deploy/contexts/`의
-// 사용법 주석이 `~/.claude/...`를 박아둔 채 남아 있었고(codex·gemini에서 없는 경로),
-// 검사기는 `~`를 앵커로 쳐서 통과시켰다.
+// contexts·rules도 배포돼 스킬과 같이 읽힌다. 스킬만 보던 시절 `deploy/contexts/`의
+// 사용법 주석이 `~/.claude/...`를 박아둔 채 남아 있었고, 검사기는 `~`를 앵커로 쳐서 통과시켰다.
 const EXTRA_ROOTS = ['deploy/contexts', 'deploy/rules'];
-// 특정 에이전트의 홈을 박은 경로. 자리표시자로 적어야 각 타겟의 실제 경로로 채워진다.
-const AGENT_HOME = /^~[\\/]\.(claude|codex|gemini)\b/;
+// 배포 홈을 박은 경로. 자리표시자로 적어야 배포가 실제 위치로 채운다.
+const AGENT_HOME = /^~[\\/]\.claude\b/;
 
 // 인터프리터 + (옵션들) + 스크립트 파일 경로. 산문에 나온 파일 이름은 잡지 않는다.
 const INVOCATION = /(?:^|[\s(`"'&|])(?:node|python3?|python\.exe|tsx|bash|sh|npx)\s+(?:--?[\w-]+\s+)*([^\s`"'|;)]+\.(?:mjs|cjs|js|ts|mts|py|sh))/g;
@@ -92,11 +91,11 @@ if (missing.length > 0) {
 }
 
 if (agentHome.length > 0) {
-  console.error(`${offenders.length + missing.length ? '\n' : ''}특정 에이전트의 홈 경로를 박은 호출:`);
+  console.error(`${offenders.length + missing.length ? '\n' : ''}배포 홈 경로를 박은 호출:`);
   for (const { file, lineNo, line } of agentHome) console.error(`  ${file}:${lineNo}: ${line}`);
   console.error('');
-  console.error('배포는 claude·codex·gemini 셋 다에 깔린다 — `~/.claude/...`는 나머지 둘에서 없는 경로다.');
-  console.error('`{{contexts}}/<파일>`·`{{skill_dir}}/<경로>`로 적으면 배포가 각 타겟의 절대경로로 채운다.');
+  console.error('스킬이 깔리는 자리는 `~/.claude/skills/`만이 아니다(레포 로컬 `.claude/`, plugin 설치 폴더).');
+  console.error('`{{contexts}}/<파일>`·`{{skill_dir}}/<경로>`로 적으면 배포가 실제 절대경로로 채운다.');
 }
 
 if (offenders.length + missing.length + agentHome.length > 0) process.exit(1);

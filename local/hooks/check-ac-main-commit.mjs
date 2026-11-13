@@ -4,9 +4,8 @@
 // 리뷰 회차가 「master이고 깨끗하면 워크트리 불필요」 조건을 따라 메인 master에 커밋 27개를 바로 넣은 적이
 // 있다(2026-10-09). 커밋은 되돌릴 수 있어도 사용자가 그 사이 master를 기준으로 다른 일을 시작하면 엉킨다.
 //
-// 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local `.claude/hooks/`·
-// `.codex/hooks/`로 배포한다. 두 자리 모두 `../../deploy/hooks`가 같은 레포의 공용 파서를 가리킨다.
-// codex 호출은 description이 없어 늘 막힌다 — codex를 안 쓰기로 한 결정(check-git-merge-policy 주석)과 같다.
+// 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local `.claude/hooks/`로
+// 배포한다. 배포본의 `../../deploy/hooks`는 같은 레포의 공용 파서를 가리킨다.
 import { execSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 // 로컬 배포 제거(전역 unsync:system의 로컬판). sync:local-system이 만든 산출물을 되돌린다:
-//   1) 로컬 자산: .claude/<X>·.agents/<X>는 카테고리 통째 제거(gitignore 산출물, orphan 포함),
-//      AGENTS.md·GEMINI.md는 CLAUDE.md 있는 레포에서만 제거
+//   1) 로컬 자산: .claude/<X>는 카테고리 통째 제거(gitignore 산출물, orphan 포함)
 //   2) settings/hooks: base-settings를 가진 각 레포에서 .claude/settings.json은 AC 키만
-//      부분 제거(사용자 키 보존), .codex/hooks.json·.codex/hooks·.claude/hooks는 통째 제거, .ac-keys 정리
+//      부분 제거(사용자 키 보존), .claude/hooks는 통째 제거, .ac-keys 정리
 import { unsyncLocalSkills } from './unsync-local-skills.mjs';
 import { repoDir } from '../lib/deploy-lib.mjs';
 import { hasLocalSettings, listLocalRepos, uninstallLocal } from './local-deploy-lib.mjs';

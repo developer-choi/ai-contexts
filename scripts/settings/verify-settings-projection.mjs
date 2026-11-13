@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // settings-projection.js의 생성 계약을 회귀 검증한다.
 //
-// base-settings.json의 타겟별 소스를 단일화하면서, 타겟 간 hook 구조 차이(런타임 제약)는
-// 어댑터가 보존해야 한다. 어댑터를 잘못 건드리면 배포본이 조용히 달라지므로, 생성 결과의
-// 핵심 불변식을 기계로 확인한다. sync:system 시작 시 fail-fast로 돌아 깨진 채 배포되는 것을 막는다.
+// base-settings.json의 논리 hook 목록을 Claude의 matcher·이벤트 구조로 바꾸는 것은 어댑터다.
+// 어댑터를 잘못 건드리면 배포본이 조용히 달라지므로, 생성 결과의 핵심 불변식을 기계로
+// 확인한다. sync:system 시작 시 fail-fast로 돌아 깨진 채 배포되는 것을 막는다.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { CLAUDE_ONLY_ALIASES, buildHooks } from './settings-projection.mjs';
+import { buildHooks } from './settings-projection.mjs';
 
 const baseSettingsSource = path.join(import.meta.dirname, '..', '..', 'deploy', 'base-settings.json');
 
@@ -44,7 +44,6 @@ function main() {
   check(Array.isArray(base.hooks), 'base.hooks는 논리 hook 배열');
 
   const claude = flatten(buildHooks(base.hooks, 'claude'));
-  const codex = flatten(buildHooks(base.hooks, 'codex'));
   const baseFiles = base.hooks.map((h) => h.file);
 
   // 파일 존재 정합 (deploy/hooks/ ↔ base-settings.json 등록)
@@ -128,62 +127,23 @@ function main() {
   // 등록된 모습 그대로 한 번도 발동하지 않는다.
   check(claudePre.some((h) => h.matcher === 'Agent' && h.file === 'check-company-analysis-agent.mjs'),
     'claude: check-company-analysis-agent가 Agent 매처로 등록됨');
-  // code-review 호출자 훅은 Skill 매처에 걸려야 스킬 이름을 본다. codex의 스킬 도구 이름은
-  // 실측하지 못해, 거기 실리면 '*' 매처로 모든 도구 호출에 헛돈다.
+  // code-review 호출자 훅은 Skill 매처에 걸려야 스킬 이름을 본다.
   check(claudePre.some((h) => h.matcher === 'Skill' && h.file === 'check-code-review-caller.mjs'),
     'claude: check-code-review-caller가 Skill 매처로 등록됨');
-  check(!codex.some((h) => h.file === 'check-code-review-caller.mjs'),
-    'codex: Skill 매처 훅 미등록(codex 스킬 도구 이름 미실측)');
 
-  // 응답 언어 훅은 matcher 없는 Stop으로 걸려야 턴마다 불린다. codex에선 Stop 훅 동작을 실측하지 못해 뺀다.
+  // 응답 언어 훅은 matcher 없는 Stop으로 걸려야 턴마다 불린다.
   const langStop = claude.find((h) => h.file === 'check-response-language.mjs');
   check(langStop?.event === 'Stop' && langStop?.matcher === null,
     'claude: check-response-language가 matcher 없는 Stop으로 등록됨');
   const tableStop = claude.find((h) => h.file === 'check-table-render.mjs');
   check(tableStop?.event === 'Stop' && tableStop?.matcher === null,
     'claude: check-table-render가 matcher 없는 Stop으로 등록됨');
-  check(!codex.some((h) => h.event === 'Stop'), 'codex: Stop hook 미등록');
 
-  // codex: UserPromptSubmit 없음, PreToolUse 전부 단일 '*'
-  check(!codex.some((h) => h.event === 'UserPromptSubmit'), 'codex: UserPromptSubmit 없음');
-  const codexPre = codex.filter((h) => h.event === 'PreToolUse');
-  check(codexPre.length > 0 && codexPre.every((h) => h.matcher === '*'), 'codex: PreToolUse 전부 단일 * 매처');
-  check(JSON.stringify(buildHooks(base.hooks, 'codex')).includes("'.codex','hooks'"), 'codex: command dir 토큰 .codex');
-  // codex는 UserPromptSubmit 이벤트 hook(surface-backlog), EnterWorktree 전용 hook
-  // (codex엔 그 tool이 없음), PreCompact hook(codex엔 compaction hook 없음), claude 전용
-  // 도구를 보는 hook(browser-*: claude-in-chrome은 Claude Code 전용)만 빠지고 나머지는 전부 등록
-  const codexExcluded = base.hooks
-    .filter((h) =>
-      h.event === 'UserPromptSubmit' ||
-      h.event === 'PreCompact' ||
-      h.event === 'Stop' ||
-      h.on === 'enterworktree' ||
-      CLAUDE_ONLY_ALIASES.has(h.on))
-    .map((h) => h.file);
-  check(baseFiles.filter((f) => !codexExcluded.includes(f)).every((f) => codex.some((h) => h.file === f)),
-    'codex: UserPromptSubmit·EnterWorktree 외 모든 hook 등록됨');
-  check(!codex.some((h) => h.file === 'post-enterworktree-install.mjs'),
-    'codex: EnterWorktree 전용 hook 미등록');
-  check(!codex.some((h) => h.event === 'PreCompact'),
-    'codex: PreCompact hook 미등록');
-  // read(on)는 claude에서 Read 매처로만 걸리고, codex에선 매처 없는 그룹으로 새어 모든 PostToolUse에
-  // 걸리지 않도록 빠져야 한다.
   check(claude.some((h) => h.event === 'PostToolUse' && h.matcher === 'Read' && h.file === 'surface-skill-creator.mjs'),
     'claude: surface-skill-creator가 PostToolUse Read 매처로 등록됨');
-  check(!codex.some((h) => h.file === 'surface-skill-creator.mjs'),
-    'codex: Read 매처 훅 미등록(codex 읽기 도구 이름 미실측)');
-  // 서브에이전트 감시기는 Agent를 띄운 직후에도 살아 있어야 한다. codex에 실리면 매처 없는
-  // PostToolUse로 새어 모든 도구 호출마다 돈다.
+  // 서브에이전트 감시기는 Agent를 띄운 직후에도 살아 있어야 한다.
   check(claude.some((h) => h.event === 'PostToolUse' && h.matcher === 'Agent' && h.file === 'surface-subagent-status.mjs'),
     'claude: surface-subagent-status가 PostToolUse Agent 매처로 등록됨');
-  check(!codex.some((h) => h.file === 'surface-subagent-status.mjs'),
-    'codex: 서브에이전트 상태 훅 미등록');
-  check(!codex.some((h) => ['check-browser-write-policy.mjs', 'record-browser-tab-url.mjs', 'hint-browser-disconnect.mjs'].includes(h.file)),
-    'codex: claude-in-chrome 훅 미등록(codex엔 그 도구가 없음)');
-  // codex엔 PowerShell·Monitor tool이 없다. claude에서 세 매처로 fan-out되는 shell 항목이
-  // codex에선 '*' 한 그룹으로 접혀야 하므로, check-git-push-policy는 정확히 1번만 등록된다.
-  check(codex.filter((h) => h.file === 'check-git-push-policy.mjs').length === 1,
-    'codex: check-git-push-policy 중복 없이 1회 등록됨');
 
   // permissions.ask는 호출자를 가르지 못해 서브에이전트에게도 승인 창을 낸다. 서브에이전트를 가르는
   // 훅의 ask()(hook-utils.mjs)로 옮긴다.

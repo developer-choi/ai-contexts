@@ -34,8 +34,8 @@
 // 순서는 뒤가 앞에 기대므로 고정이다:
 //   1. environment — 전역 git 훅 배선을 건다. 2·3이 시작하자마자 `ensureHooksReady()`로 이 배선을
 //      확인하고 없으면 멈추므로, 새 기기·새 이벤트 추가 회차에서는 이것이 먼저여야 나머지가 산다
-//   2. system      — `deploy/`를 `~/.claude`·`~/.codex`·`~/.gemini`로. 전역 contexts가 여기서 채워진다
-//   3. local-system — 각 레포 `local/`을 그 레포 `.claude/`·`.agents/`로. 로컬 스킬의 `{{contexts}}`가
+//   2. system      — `deploy/`를 `~/.claude`로. 전역 contexts가 여기서 채워진다
+//   3. local-system — 각 레포 `local/`을 그 레포 `.claude/`로. 로컬 스킬의 `{{contexts}}`가
 //      2가 채우는 전역 contexts를 가리키므로 뒤에 온다
 //
 // 앞이 실패해도 뒤를 건너뛰지 않는다 — 한 벌이 깨졌을 때 나머지도 낡았는지를 한 번에 봐야 하고,

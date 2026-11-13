@@ -1,15 +1,10 @@
 #!/usr/bin/env node
-import path from 'node:path';
 import readline from 'node:readline';
 
 import {
-  defaultCodexDir,
   defaultClaudeDir,
-  defaultGeminiDir,
   ensureDeploySource,
   resolveUserPath,
-  uninstallCodexGlobals,
-  uninstallGeminiGlobals,
   uninstallTarget,
 } from '../lib/deploy-lib.mjs';
 
@@ -23,21 +18,7 @@ async function main() {
   console.log(`타겟: ${targetDir}`);
   console.log('---');
 
-  let removed = uninstallTarget(targetDir);
-
-  if (!explicitTarget && targetDir === defaultClaudeDir()) {
-    const codexTargetDir = defaultCodexDir();
-    console.log('');
-    console.log(`Codex 타겟: ${codexTargetDir}`);
-    console.log('---');
-    removed += uninstallCodexGlobals(codexTargetDir);
-
-    const geminiTargetDir = defaultGeminiDir();
-    console.log('');
-    console.log(`Gemini 타겟: ${geminiTargetDir}`);
-    console.log('---');
-    removed += uninstallGeminiGlobals(geminiTargetDir);
-  }
+  const removed = uninstallTarget(targetDir);
 
   console.log('---');
   console.log(`완료: ${removed}개 제거`);

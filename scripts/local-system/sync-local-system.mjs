@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 // 로컬 배포(전역 sync:system의 로컬판). 한 명령으로 로컬 산출물 전부를 배포한다:
-//   1) 로컬 자산(스킬 등): 각 레포 local/<X> → .claude/<X>·.agents/<X> (claude·codex 공통),
-//      CLAUDE.md → AGENTS.md·GEMINI.md. hooks는 2)가 따로 투영하므로 제외.
+//   1) 로컬 자산(스킬 등): 각 레포 local/<X> → .claude/<X>. hooks는 2)가 따로 투영하므로 제외.
 //   2) settings/hooks: base-settings를 가진 각 레포의 local/ 소스 → 그 레포의 repo-local
-//      .claude/settings.json·.codex/hooks.json (AC + KA 등 per-repo).
+//      .claude/settings.json·.claude/hooks/ (AC + KA 등 per-repo).
 //
 // settings/hooks는 전역 sync:system과 동일한 메커니즘(부분키 머지·생성 계약 fail-fast·배포
 // 후 대조)을 repo-local로 적용한다. 산출물은 gitignore된다.
@@ -41,7 +40,7 @@ async function main() {
     console.log('');
     console.log(`로컬 settings/hooks 배포 중: ${repo}`);
     console.log('---');
-    const repoFailures = await projectRepoLocalSettings(repo, { log: console.log, trust: true });
+    const repoFailures = await projectRepoLocalSettings(repo, { log: console.log });
     failures.push(...repoFailures);
   }
 

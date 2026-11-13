@@ -622,12 +622,6 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
-    mdWrite('{}', homeDeploy('.codex', 'hooks.json')),
-    'ask',
-    'codex 홈도 같다',
-  ],
-  [
-    'check-artifact-write-policy.mjs',
     mdWrite('# 계획\n', homeDeploy('.claude', 'plans', 'x.md')),
     'pass',
     'plan mode 계획 파일은 산출물이 아니다',
@@ -640,12 +634,6 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
-    mdWrite('# 스킬\n', 'C:/repo/.agents/skills/a/SKILL.md'),
-    'ask',
-    '레포 안 .agents 세그먼트',
-  ],
-  [
-    'check-artifact-write-policy.mjs',
     mdWrite('# 스킬\n', 'C:/repo/.claude/skills/a/SKILL.md'),
     'ask',
     '.claude 다음이 skills면 산출물',
@@ -653,14 +641,8 @@ WRITE_CASES.push(
   [
     'check-artifact-write-policy.mjs',
     mdWrite('# 규칙\n', 'C:/repo/AGENTS.md'),
-    'ask',
-    'CLAUDE.md가 원본이라 AGENTS.md는 위치 불문 산출물',
-  ],
-  [
-    'check-artifact-write-policy.mjs',
-    mdWrite('# 규칙\n', 'C:/repo/GEMINI.md'),
-    'ask',
-    'GEMINI.md도 같다',
+    'pass',
+    'AGENTS.md는 더 이상 배포 산출물이 아니다(레포가 손수 쓴 파일일 수 있다)',
   ],
   // AC 워크트리는 `…/ai-contexts/.claude/worktrees/<name>/…` 라, `.claude`가 경로에 있다는
   // 이유로 막으면 워크트리 작업 전체가 막힌다. 다음 세그먼트로 갈리는 것을 고정한다.

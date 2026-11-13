@@ -6,7 +6,6 @@
 // 이 훅이 막으려는 사고가 그것이다.
 //
 // 파일 전체를 채점하므로 아직 안 다듬은 단위의 적발도 섞여 나온다. 다듬기는 단위마다 그 단위 줄의 적발만 닫는다.
-// codex는 PostToolUse를 '*'로 통합하므로 tool_name으로 스스로 거른다.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

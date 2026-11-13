@@ -1,10 +1,10 @@
 // 로컬판 settings/hooks 배포 라이브러리.
 //
-// 전역 배포(deploy/ → ~/.claude·~/.codex)와 **동일한 메커니즘**을 repo-local 산출물
-// (.claude/settings.json·.codex/hooks.json)에 적용한다. 소스는 local/(전역 deploy/의
+// 전역 배포(deploy/ → ~/.claude)와 **동일한 메커니즘**을 repo-local 산출물
+// (.claude/settings.json·.claude/hooks/)에 적용한다. 소스는 local/(전역 deploy/의
 // 로컬판). settings.json은 통째 덮어쓰지 않고 deploy-lib의 부분키 머지(mergeSettings,
 // .ac-keys 매니페스트)를 그대로 재사용한다. 분기점은 settings-projection의 LOCAL_ADAPTERS
-// (repo-relative command, codex run_command+Bash 매처)뿐이다.
+// (repo-relative command)뿐이다.
 //
 // **per-repo 일반화**: 경로는 repo를 인자로 받는 localPaths(repo)에서 파생한다. 인자를
 // 생략하면 AC(repoDir)로 흘러 기존 호출부·AC 산출물이 불변이다. base-settings를 가진 임의
@@ -24,10 +24,7 @@ import {
   settingsManifestPath,
   splitSettings,
   syncTree,
-  trustCodexHooks,
-  verifyJsonExact,
   verifySettings,
-  writeIfChanged,
   writeJson,
 } from '../lib/deploy-lib.mjs';
 
@@ -35,17 +32,13 @@ import {
 function localPaths(repo) {
   const localSourceDir = path.join(repo, 'local');
   const localClaudeDir = path.join(repo, '.claude');
-  const localCodexDir = path.join(repo, '.codex');
   return {
     localSourceDir,
     localBaseSettingsSource: path.join(localSourceDir, 'base-settings.json'),
     localClaudeDir,
-    localCodexDir,
     localClaudeSettingsPath: path.join(localClaudeDir, 'settings.json'),
-    localCodexHooksPath: path.join(localCodexDir, 'hooks.json'),
     localHooksSource: path.join(localSourceDir, 'hooks'),
     localClaudeHooksDir: path.join(localClaudeDir, 'hooks'),
-    localCodexHooksDir: path.join(localCodexDir, 'hooks'),
   };
 }
 
@@ -53,12 +46,9 @@ function localPaths(repo) {
 const {
   localSourceDir,
   localClaudeDir,
-  localCodexDir,
   localClaudeSettingsPath,
-  localCodexHooksPath,
   localHooksSource,
   localClaudeHooksDir,
-  localCodexHooksDir,
 } = localPaths(repoDir);
 
 const buildOpts = { adapters: LOCAL_ADAPTERS, makeCommand: localHookCommand };
@@ -81,47 +71,26 @@ function localClaudeSettingsObject(repo = repoDir) {
   return { hooks: buildHooks(loadLocalBaseSettings(repo).hooks, 'claude', buildOpts), ...loadLocalOverride('claude-settings.json', repo) };
 }
 
-// .codex/hooks.json에 whole-file로 쓰일 객체(codex는 override 없이 hook만).
-function localCodexHooksObject(repo = repoDir) {
-  return { hooks: buildHooks(loadLocalBaseSettings(repo).hooks, 'codex', buildOpts) };
-}
-
 // base-settings.json이 있는가 = 로컬 settings/hooks 배포 대상 레포인가.
 function hasLocalSettings(repo) {
   const { localBaseSettingsSource } = localPaths(repo);
   return fs.existsSync(localBaseSettingsSource) && fs.statSync(localBaseSettingsSource).isFile();
 }
 
-// codex로 투영되는 hook이 하나라도 있는가. Stop-only base(KA)면 false → codex 산출물 미생성.
-function codexHasHooks(repo = repoDir) {
-  return Object.keys(localCodexHooksObject(repo).hooks).length > 0;
-}
-
-// local/hooks/*.mjs를 .claude/hooks/·(codex hook이 있으면).codex/hooks/에 맞춘다. 내용이 바뀐
-// 파일만 쓰고, 소스에서 사라진 hook(고아)은 지운다. codex hook이 없어졌으면 .codex 쪽 산출물을 지운다.
+// local/hooks/*.mjs를 .claude/hooks/에 맞춘다. 내용이 바뀐 파일만 쓰고, 소스에서 사라진
+// hook(고아)은 지운다.
 function copyLocalHooks(log = console.log, repo = repoDir) {
   const p = localPaths(repo);
   if (!fs.existsSync(p.localHooksSource) || !fs.statSync(p.localHooksSource).isDirectory()) {
     throw new Error(`local/hooks/를 찾을 수 없습니다: ${p.localHooksSource}`);
   }
   const entries = readTreeEntries(p.localHooksSource);
-  const hooksDirs = [p.localClaudeHooksDir];
-  if (codexHasHooks(repo)) {
-    hooksDirs.push(p.localCodexHooksDir);
-  } else {
-    for (const stale of [p.localCodexHooksDir, p.localCodexHooksPath]) {
-      if (!fs.existsSync(stale)) continue;
-      removePath(stale);
-      log(`  DEL   ${path.relative(repo, stale).replaceAll(path.sep, '/')}`);
-    }
-  }
-  for (const hooksDir of hooksDirs) {
-    logTreeChanges(log, `${path.relative(repo, hooksDir).replaceAll(path.sep, '/')}/`, syncTree(hooksDir, entries));
-  }
+  const hooksDir = p.localClaudeHooksDir;
+  logTreeChanges(log, `${path.relative(repo, hooksDir).replaceAll(path.sep, '/')}/`, syncTree(hooksDir, entries));
 }
 
 // AC가 생성한 로컬 산출물만 제거한다. .claude/settings.json은 splitSettings로 AC 키만
-// 부분 제거(사용자 키 보존), codex hooks.json·hooks 디렉토리는 AC 전유라 통째 제거.
+// 부분 제거(사용자 키 보존), .claude/hooks 디렉토리는 AC 전유라 통째 제거.
 function uninstallLocal(log = console.log, repo = repoDir) {
   const p = localPaths(repo);
   let removed = 0;
@@ -135,24 +104,13 @@ function uninstallLocal(log = console.log, repo = repoDir) {
     log('  DEL   .claude/hooks/');
     removed += 1;
   }
-  if (fs.existsSync(p.localCodexHooksPath)) {
-    removePath(p.localCodexHooksPath);
-    log('  DEL   .codex/hooks.json');
-    removed += 1;
-  }
-  if (fs.existsSync(p.localCodexHooksDir)) {
-    removePath(p.localCodexHooksDir);
-    log('  DEL   .codex/hooks/');
-    removed += 1;
-  }
   return removed;
 }
 
 // 한 레포의 로컬 settings/hooks를 투영한다(sync-local-system part-2를 추출·일반화).
-// hook 맞추기(고아 제거 포함) → claude 부분키 머지 → codex whole-file(있을 때만) →
-// 배포 후 검증. codex hook이 없는 레포(KA)는 codex write/verify/trust를 건너뛴다.
+// hook 맞추기(고아 제거 포함) → claude 부분키 머지 → 배포 후 검증.
 // 반환: 실패 메시지 배열(빈 배열이면 성공).
-async function projectRepoLocalSettings(repo, { log = console.log, trust = true } = {}) {
+async function projectRepoLocalSettings(repo, { log = console.log } = {}) {
   const p = localPaths(repo);
   const failures = [];
 
@@ -164,38 +122,11 @@ async function projectRepoLocalSettings(repo, { log = console.log, trust = true 
     log('  MERGE .claude/settings.json');
   }
 
-  const hasCodex = codexHasHooks(repo);
-  if (hasCodex && writeIfChanged(p.localCodexHooksPath, `${JSON.stringify(localCodexHooksObject(repo), null, 2)}\n`)) {
-    log('  WRITE .codex/hooks.json');
-  }
-
   if (verifySettings(localClaudeSettingsObject(repo), p.localClaudeSettingsPath)) {
     log('  PASS  .claude/settings.json (merged)');
   } else {
     failures.push(`${repo}: .claude/settings.json 머지 결과 키 불일치`);
     console.error('  FAIL  .claude/settings.json 머지 결과 키 불일치');
-  }
-
-  if (hasCodex) {
-    if (verifyJsonExact(localCodexHooksObject(repo), p.localCodexHooksPath)) {
-      log('  PASS  .codex/hooks.json');
-    } else {
-      failures.push(`${repo}: .codex/hooks.json 내용 불일치`);
-      console.error('  FAIL  .codex/hooks.json 내용 불일치');
-    }
-
-    // codex 프로젝트-로컬 훅은 trusted여야 발화한다. best-effort로 trust 시도.
-    if (trust) {
-      try {
-        const trusted = await trustCodexHooks(p.localCodexDir, log, repo);
-        if (trusted === 0) {
-          console.warn('  WARN  codex hook trust 항목 없음 — codex 세션에서 `/hooks`로 신뢰가 필요할 수 있습니다.');
-        }
-      } catch (error) {
-        console.warn(`  WARN  codex hook trust 건너뜀: ${error instanceof Error ? error.message : String(error)}`);
-        console.warn('  WARN  codex 세션에서 `/hooks`로 .codex/hooks.json을 수동 신뢰하세요.');
-      }
-    }
   }
 
   return failures;
@@ -229,7 +160,6 @@ function listLocalRepos(scanRoots = defaultLocalRoots) {
 
 export {
   buildOpts,
-  codexHasHooks,
   copyLocalHooks,
   defaultLocalRoots,
   hasLocalSettings,
@@ -239,9 +169,6 @@ export {
   localClaudeHooksDir,
   localClaudeSettingsObject,
   localClaudeSettingsPath,
-  localCodexDir,
-  localCodexHooksObject,
-  localCodexHooksPath,
   localHooksSource,
   localPaths,
   localSourceDir,

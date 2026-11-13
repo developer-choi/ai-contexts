@@ -93,7 +93,7 @@ function cleanupStaleMarkers() {
 
 try {
   const payload = readPayload();
-  // codex는 PreToolUse를 '*'로 통합 등록하므로 대상 도구가 아니면 self-skip.
+  // 대상 도구가 아니면 건너뛴다.
   if (payload.tool_name !== "Edit" && payload.tool_name !== "Write") process.exit(0);
   const input = payload.tool_input || {};
   if (typeof input.file_path !== "string" || !input.file_path) process.exit(0);

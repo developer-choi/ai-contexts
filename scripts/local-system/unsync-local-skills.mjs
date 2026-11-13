@@ -39,7 +39,7 @@ function main() {
 }
 
 // 배포 디렉토리 판정은 sync-local-skills.mjs와 같은 제외 집합을 쓴다. hooks는 settings projection이
-// .claude/hooks·.codex/hooks로 따로 처리하므로 제외.
+// .claude/hooks로 따로 처리하므로 제외.
 const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
 
 function localDeployDirs(repo) {
@@ -57,36 +57,16 @@ function unsyncRepo(repo) {
     const removed = [];
     const deployDirs = localDeployDirs(repo);
     const claudeDir = path.join(repo, '.claude');
-    const agentsDir = path.join(repo, '.agents');
 
-    // .claude/<X>·.agents/<X>는 local/<X>에서 배포된 gitignore 산출물이다. 동일성 비교 없이
+    // .claude/<X>는 local/<X>에서 배포된 gitignore 산출물이다. 동일성 비교 없이
     // 카테고리 단위로 통째 제거한다 — 원본에서 사라진 스킬(orphan)도 함께 청소된다. 원본은
     // local/에 남아 re-sync로 복구되므로 사용자 데이터 손실 위험이 없다. (경로 자체가 AC 관리
     // 산출물임을 보장하므로 deploy-conventions의 "AC 관리 여부 확인"을 경로로 충족한다.)
     for (const name of deployDirs) {
-      for (const [label, base] of [['.claude', claudeDir], ['.agents', agentsDir]]) {
-        const target = path.join(base, name);
-        if (!existsDir(target)) continue;
-        fs.rmSync(target, { recursive: true, force: true });
-        removed.push(`${label}/${name}`);
-      }
-    }
-
-    // AGENTS.md·GEMINI.md는 CLAUDE.md의 투영이다. CLAUDE.md가 있는(=AC 투영 대상) 레포에서만
-    // 제거한다 — CLAUDE.md 없는 비-AC 레포의 사용자 AGENTS.md는 건드리지 않는다.
-    const claudeAgents = path.join(repo, 'CLAUDE.md');
-    if (isFile(claudeAgents)) {
-      for (const projected of ['AGENTS.md', 'GEMINI.md']) {
-        const file = path.join(repo, projected);
-        if (!isFile(file)) continue;
-        fs.rmSync(file, { force: true });
-        removed.push(projected);
-      }
-    }
-
-    if (existsDir(agentsDir) && fs.readdirSync(agentsDir).length === 0) {
-      fs.rmSync(agentsDir, { recursive: true, force: true });
-      removed.push('.agents/');
+      const target = path.join(claudeDir, name);
+      if (!existsDir(target)) continue;
+      fs.rmSync(target, { recursive: true, force: true });
+      removed.push(`.claude/${name}`);
     }
 
     if (removed.length === 0) {
@@ -127,10 +107,6 @@ function isGitWorktree(repo) {
 
 function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
-}
-
-function isFile(target) {
-  return fs.existsSync(target) && fs.statSync(target).isFile();
 }
 
 export { main as unsyncLocalSkills };

@@ -627,14 +627,14 @@ function knownCommands(root) {
   if (commandCache && commandCache.root === root) return commandCache.names;
   const names = new Set(BUILTIN_COMMANDS);
   const home = process.env.USERPROFILE || process.env.HOME || "";
-  const roots = [root, ...(home ? [path.join(home, ".claude"), path.join(home, ".codex")] : [])];
+  const roots = [root, ...(home ? [path.join(home, ".claude")] : [])];
   for (const base of roots) {
-    for (const dir of ["commands", ".claude/commands", ".agents/commands"]) {
+    for (const dir of ["commands", ".claude/commands"]) {
       for (const f of listDir(path.join(base, ...dir.split("/")))) {
         if (f.toLowerCase().endsWith(".md")) names.add(f.replace(/\.md$/i, ""));
       }
     }
-    for (const dir of ["skills", ".claude/skills", ".agents/skills", "local/skills", "deploy/skills"]) {
+    for (const dir of ["skills", ".claude/skills", "local/skills", "deploy/skills"]) {
       for (const f of listDir(path.join(base, ...dir.split("/")))) names.add(f);
     }
   }

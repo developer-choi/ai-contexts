@@ -30,10 +30,7 @@ function verifyBase(base, label, check) {
   check(Array.isArray(base.hooks), `${label}: local base.hooks는 논리 hook 배열`);
 
   const claude = flatten(buildHooks(base.hooks, 'claude', buildOpts));
-  const codex = flatten(buildHooks(base.hooks, 'codex', buildOpts));
   const baseFiles = base.hooks.map((h) => h.file);
-  // codex는 지원 이벤트(supports)만 투영된다 — Stop-only base면 빈 집합.
-  const codexFiles = base.hooks.filter((h) => LOCAL_ADAPTERS.codex.supports(h.event, h.on)).map((h) => h.file);
 
   // claude: 모든 논리 hook 등록, command가 ${CLAUDE_PROJECT_DIR} 기준 .claude/hooks
   // (상대 경로면 워크트리 cwd에서 깨진다 — settings-projection의 localHookCommand 주석 참고)
@@ -41,23 +38,11 @@ function verifyBase(base, label, check) {
   check(claude.every((h) => h.command.includes('${CLAUDE_PROJECT_DIR}/.claude/hooks/') && h.command.startsWith('node ')),
     `${label} claude: command가 \${CLAUDE_PROJECT_DIR} 기준 node .claude/hooks/`);
 
-  // codex: codex-지원 subset만 등록, command가 repo-relative .codex/hooks, Stop·UserPromptSubmit 없음
-  check(codexFiles.every((f) => codex.some((h) => h.file === f)), `${label} codex: codex-지원 hook 등록됨`);
-  check(codex.every((h) => h.command.includes('.codex/hooks/') && h.command.startsWith('node ')),
-    `${label} codex: command가 repo-relative node .codex/hooks/`);
-  check(!codex.some((h) => h.event === 'Stop'), `${label} codex: Stop 없음`);
-  check(!codex.some((h) => h.event === 'UserPromptSubmit'), `${label} codex: UserPromptSubmit 없음`);
-
   // 이벤트별 단언(해당 이벤트가 있을 때만).
   // PreToolUse는 매처가 없으면 모든 도구 호출에 걸린다. base의 `on` 토큰이 어댑터 맵에 없으면
   // matcher()가 undefined를 내며 조용히 그 상태가 되므로, 특정 값이 아니라 "좁혀졌는가"를 본다.
   const claudePre = claude.filter((h) => h.event === 'PreToolUse');
   if (claudePre.length > 0) check(claudePre.every((h) => h.matcher !== null), `${label} claude: PreToolUse 매처 좁혀짐`);
-  const codexPre = codex.filter((h) => h.event === 'PreToolUse');
-  if (codexPre.length > 0) {
-    check(codexPre.some((h) => h.matcher === 'run_command') && codexPre.some((h) => h.matcher === 'Bash'),
-      `${label} codex: PreToolUse가 run_command+Bash로 분리됨`);
-  }
   const claudeStop = claude.filter((h) => h.event === 'Stop');
   if (claudeStop.length > 0) check(claudeStop.every((h) => h.matcher === null), `${label} claude: Stop 매처 없음`);
 }

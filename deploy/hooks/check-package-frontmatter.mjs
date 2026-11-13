@@ -13,8 +13,7 @@
 // 「입력」 표, 필드 목록은 package-format.md. 둘이 바뀌면 여기도 함께 고친다.
 //
 // deny(ask 아님)인 이유: 필수 필드가 빈 패키지는 다음 세션에서 write-doc으로 이 패키지를 다시 다듬을 때 출발할 수 없어
-// 어떤 맥락에서도 정상이 아니다. codex는 PreToolUse를 '*'로 통합하므로 tool_name으로
-// self-filter한다.
+// 어떤 맥락에서도 정상이 아니다.
 import fs from "node:fs";
 import { deny, getToolName, readPayload } from "./hook-utils.mjs";
 import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";

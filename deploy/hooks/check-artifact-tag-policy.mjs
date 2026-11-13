@@ -8,8 +8,7 @@
 // 문서는 안 막힌다. 막히면 그 줄을 지우거나 백틱으로 감싸 인라인으로 쓰면 통과한다.
 //
 // deny(ask 아님)인 이유: 이 태그는 어떤 맥락에서도 파일에 정상적으로 홀로 있을 수 없다.
-// codex는 PreToolUse를 '*'로 통합하므로 EDIT_TOOLS로 self-filter한다(MultiEdit는 edit 어댑터가
-// 라우팅하지 않아 미포함).
+// EDIT_TOOLS의 도구 호출만 본다(MultiEdit는 미포함).
 import { deny, readPayload } from "./hook-utils.mjs";
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);

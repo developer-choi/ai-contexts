@@ -51,7 +51,6 @@ const MERGE_NEEDS_SUMMARY =
   "무엇을 왜 바꿨는지, 어떻게 확인했는지처럼 머지를 정하는 데 필요한 것을 담습니다.";
 // description 키가 없어도 빈 문자열로 보고 요구한다. 모델이 description을 생략하면 키가 빠져 들어오는데,
 // 그때 검사를 건너뛰었더니 한 줄 승인 창이 떴다(2026-10-03 MP 머지).
-// codex도 Bash로 들어오는 호출은 함께 거부된다 — codex를 안 쓰기로 해 받아들였다(2026-10-03 결정).
 const DESCRIBED_TOOLS = new Set(["Bash", "PowerShell"]);
 const lacksSummary = (payload) => {
   const input = payload.tool_input ?? {};

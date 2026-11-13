@@ -1,9 +1,9 @@
-// AC 프로젝트 로컬 정책 훅: 에이전트(Claude·Codex)가 `npm run sync:*`를 직접 실행하지
+// AC 프로젝트 로컬 정책 훅: 에이전트가 `npm run sync:*`를 직접 실행하지
 // 못하게 막는다. sync 스크립트는 사용자만 실행한다. 사용자는 `! npm run sync:...`로
 // 직접 실행할 수 있다.
 //
 // 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local
-// `.claude/hooks/`·`.codex/hooks/`로 배포한다. 직접 산출물을 수정하지 말 것.
+// `.claude/hooks/`로 배포한다. 직접 산출물을 수정하지 말 것.
 import fs from "node:fs";
 
 function readInput() {
@@ -14,17 +14,8 @@ function readInput() {
   }
 }
 
-// Claude(tool_input.command) / Codex(toolCall.args.CommandLine 등) 페이로드 모양을 모두 커버.
 function getCommand(payload) {
-  if (!payload) return "";
-
-  return (
-    payload?.tool_input?.command ??
-    payload?.tool_input?.args?.command ??
-    payload?.toolCall?.args?.CommandLine ??
-    payload?.toolCall?.args?.command ??
-    ""
-  );
+  return payload?.tool_input?.command ?? "";
 }
 
 const cmd = getCommand(readInput());

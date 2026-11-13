@@ -138,7 +138,7 @@ function cleanupStaleMarkers() {
 
 try {
   const payload = readPayload();
-  // codex는 PreToolUse를 '*'로 통합 등록하므로 대상 도구가 아니면 self-skip.
+  // 대상 도구가 아니면 건너뛴다.
   if (!["Glob", "Grep", "Write", "Edit"].includes(payload.tool_name)) process.exit(0);
   const cwd = getCwd(payload);
   if (!cwd) process.exit(0);

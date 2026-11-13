@@ -5,7 +5,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
-import { readTreeEntries, resolveUserPath, skillEntries, syncTree, writeIfChanged } from '../lib/deploy-lib.mjs';
+import { readTreeEntries, resolveUserPath, skillEntries, syncTree } from '../lib/deploy-lib.mjs';
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),
@@ -45,8 +45,8 @@ function main(opts = {}) {
   }
 }
 
-// local/ 하위에서 claude·codex 공통으로 배포하는 디렉토리. hooks는 settings projection이
-// .claude/hooks·.codex/hooks로 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
+// local/ 하위에서 .claude/로 배포하는 디렉토리. hooks는 settings projection이 .claude/hooks로
+// 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
 // contexts는 배포한다 — 스킬 본문의 `../../contexts/...`가 풀리는 자리가 배포본 옆이기 때문이다.
 // 한때 사본이 세 벌 되는 것을 피하려 제외했는데, 제외해도 그전에 배포된 사본은 남고 sync가 더는
 // 덮어쓰지 않아 조용히 낡는다. KA가 그 상태로 2026-06-14자 규칙을 두 달간 읽었다(2026-08-14 발견).
@@ -65,41 +65,28 @@ function localDeployDirs(repo) {
 
 function syncRepo(repo) {
   const deployDirs = localDeployDirs(repo);
-  const claudeAgents = resolveClaudeAgents(repo);
-  const hasAgents = claudeAgents !== null;
 
-  if (deployDirs.length === 0 && !hasAgents) {
-    return { repo, status: 'skipped', detail: 'no local/ deploy dirs or CLAUDE.md' };
+  if (deployDirs.length === 0) {
+    return { repo, status: 'skipped', detail: 'no local/ deploy dirs' };
   }
 
   try {
     const synced = [];
     const claudeDir = path.join(repo, '.claude');
-    const agentsDir = path.join(repo, '.agents');
-    // 로컬 스킬이 `{{contexts}}`로 부르는 공용 스크립트는 레포가 아니라 그 에이전트의 전역
-    // contexts에 산다. `.claude/`는 Claude가, `.agents/`는 Codex가 읽으므로 각자의 홈으로 푼다.
-    const globalContextsFor = (targetDir) =>
-      path.join(resolveUserPath(targetDir === agentsDir ? '~/.codex' : '~/.claude'), 'contexts');
+    // 로컬 스킬이 `{{contexts}}`로 부르는 공용 스크립트는 레포가 아니라 전역 contexts에 산다.
+    const globalContexts = path.join(resolveUserPath('~/.claude'), 'contexts');
     // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
     let changed = 0;
     for (const name of deployDirs) {
       const source = path.join(repo, 'local', name);
-      for (const targetDir of [claudeDir, agentsDir]) {
-        const dest = path.join(targetDir, name);
-        // 스킬 md는 렌더해 배포한다(폴더명 name 주입 등 — deploy-lib의 renderSkillMd 참고).
-        const entries = name === 'skills'
-          ? skillEntries(source, dest, () => globalContextsFor(targetDir))
-          : readTreeEntries(source);
-        const { written, removed } = syncTree(dest, entries);
-        changed += written.length + removed.length;
-      }
-      synced.push(`local/${name} -> .claude/${name}, .agents/${name}`);
-    }
-    if (hasAgents) {
-      const content = fs.readFileSync(claudeAgents);
-      changed += Number(writeIfChanged(path.join(repo, 'AGENTS.md'), content));
-      changed += Number(writeIfChanged(path.join(repo, 'GEMINI.md'), content));
-      synced.push(`${shortSource(repo, claudeAgents)} -> AGENTS.md, GEMINI.md`);
+      const dest = path.join(claudeDir, name);
+      // 스킬 md는 렌더해 배포한다(폴더명 name 주입 등 — deploy-lib의 renderSkillMd 참고).
+      const entries = name === 'skills'
+        ? skillEntries(source, dest, () => globalContexts)
+        : readTreeEntries(source);
+      const { written, removed } = syncTree(dest, entries);
+      changed += written.length + removed.length;
+      synced.push(`local/${name} -> .claude/${name}`);
     }
     if (changed === 0) return { repo, status: 'unchanged', detail: synced.join(', ') };
     return { repo, status: 'synced', detail: synced.join(', ') };
@@ -133,15 +120,6 @@ function isGitWorktree(repo) {
 
 function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
-}
-
-function resolveClaudeAgents(repo) {
-  const candidate = path.join(repo, 'CLAUDE.md');
-  return fs.existsSync(candidate) && fs.statSync(candidate).isFile() ? candidate : null;
-}
-
-function shortSource(repo, file) {
-  return path.relative(repo, file).replaceAll(path.sep, '/');
 }
 
 export { main as syncLocalSkills };

@@ -7,7 +7,8 @@
 import path from 'node:path';
 import { renderSkillMd, renderSkillSubMd } from '../lib/deploy-lib.mjs';
 
-const GEMINI_DIR = path.join('C:', 'Users', 'tester', '.gemini', 'skills', 'sample');
+// 같은 스킬이 깔리는 두 자리(레포 로컬 .claude, 전역 ~/.claude). 타겟이 바뀌면 렌더 결과도 따라가야 한다.
+const REPO_DIR = path.join('C:', 'repo', '.claude', 'skills', 'sample');
 const CLAUDE_DIR = path.join('C:', 'Users', 'tester', '.claude', 'skills', 'sample');
 
 const SOURCES = {
@@ -39,8 +40,8 @@ function check(label, condition) {
 }
 
 for (const [label, source] of Object.entries(SOURCES)) {
-  const once = renderSkillMd(source, GEMINI_DIR);
-  const twice = renderSkillMd(once, GEMINI_DIR);
+  const once = renderSkillMd(source, REPO_DIR);
+  const twice = renderSkillMd(once, REPO_DIR);
   const moved = renderSkillMd(once, CLAUDE_DIR);
   // 본문이 마커를 인용하고 있으면 그 개수만큼 더 나오는 것이 맞다 — 인용은 본문이다.
   const expected = 1 + anchorCount(source);
@@ -49,10 +50,10 @@ for (const [label, source] of Object.entries(SOURCES)) {
   // 이미 배포된 산출물에 다시 적용해도 같아야 sync가 "변경 없음"으로 수렴한다.
   check('재적용해도 동일(멱등)', once === twice);
   check('심은 앵커는 하나만', anchorCount(once) === expected && anchorCount(twice) === expected);
-  // 타겟이 바뀌면 앵커도 그 타겟을 가리켜야 한다 — 남은 옛 경로는 다른 CLI를 가리킨다.
-  check('타겟이 바뀌면 앵커도 바뀜', anchorLine(moved).includes(CLAUDE_DIR) && !anchorLine(moved).includes(GEMINI_DIR));
+  // 타겟이 바뀌면 앵커도 그 타겟을 가리켜야 한다 — 남은 옛 경로는 다른 자리를 가리킨다.
+  check('타겟이 바뀌면 앵커도 바뀜', anchorLine(moved).includes(CLAUDE_DIR) && !anchorLine(moved).includes(REPO_DIR));
   check('타겟을 바꿔도 심은 앵커는 하나만', anchorCount(moved) === expected);
-  check('경로가 잘리지 않고 들어감', once.includes(GEMINI_DIR));
+  check('경로가 잘리지 않고 들어감', once.includes(REPO_DIR));
   check('폴더명이 name으로 들어감', /^name: sample$/m.test(once));
   // 앵커가 frontmatter 안에 들어가면 YAML이 깨져 스킬이 인식되지 않는다.
   check('앵커가 frontmatter 바깥', once.indexOf('<!-- deploy-anchor -->') > once.lastIndexOf('\n---'));
@@ -61,7 +62,7 @@ for (const [label, source] of Object.entries(SOURCES)) {
   check('인용된 마커 주변 본문 보존', source.includes('인용된 예시 줄') ? once.includes('인용된 예시 줄') : true);
   // 자리표시자가 남아 있으면 배포본을 읽는 쪽이 그것을 경로로 착각한다.
   if (source.includes('{{skill_dir}}')) {
-    check('자리표시자가 타겟 경로로 채워짐', !once.includes('{{skill_dir}}') && once.includes(`${GEMINI_DIR}${path.sep}scripts/x.mjs`));
+    check('자리표시자가 타겟 경로로 채워짐', !once.includes('{{skill_dir}}') && once.includes(`${REPO_DIR}${path.sep}scripts/x.mjs`));
     // 앵커와 달리 채워진 경로는 배포본에서 되돌릴 표시가 없다. 배포는 항상 소스에서 렌더하므로
     // 타겟이 갈리는 기준도 소스다 — 배포본을 다시 렌더해 타겟을 바꾸는 경로는 존재하지 않는다.
     check('타겟이 바뀌면 채워진 경로도 바뀜', renderSkillMd(source, CLAUDE_DIR).includes(`${CLAUDE_DIR}${path.sep}scripts/x.mjs`));
@@ -71,11 +72,11 @@ for (const [label, source] of Object.entries(SOURCES)) {
   // 배포본을 읽는 쪽이 `{{contexts}}`를 실제 경로로 착각해 그대로 실행한다.
   if (source.includes('{{contexts}}')) {
     check('contexts 자리표시자가 채워짐',
-      !once.includes('{{contexts}}') && once.includes(`${contextsOf(GEMINI_DIR)}${path.sep}shared.mjs`));
+      !once.includes('{{contexts}}') && once.includes(`${contextsOf(REPO_DIR)}${path.sep}shared.mjs`));
     check('타겟이 바뀌면 contexts 경로도 바뀜',
       renderSkillMd(source, CLAUDE_DIR).includes(`${contextsOf(CLAUDE_DIR)}${path.sep}shared.mjs`));
     // 스킬 폴더 안이 아니라 형제 폴더를 가리킨다 — skill_dir로 채워지면 없는 경로가 된다.
-    check('스킬 폴더 안을 가리키지 않음', !once.includes(`${GEMINI_DIR}${path.sep}shared.mjs`));
+    check('스킬 폴더 안을 가리키지 않음', !once.includes(`${REPO_DIR}${path.sep}shared.mjs`));
   }
 }
 

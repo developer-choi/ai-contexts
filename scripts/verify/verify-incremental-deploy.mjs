@@ -12,8 +12,6 @@ import {
   CATEGORIES,
   copyPath,
   deployCategory,
-  deployCodexGlobals,
-  deployGeminiGlobals,
   deploySkills,
   injectSkillName,
   listEntries,
@@ -122,15 +120,6 @@ try {
   check('rules·contexts·hooks가 사라짐', CATEGORIES.every((category) => !fs.existsSync(path.join(target, category))));
   check('스킬은 외부 스킬만 남음', listEntries(path.join(target, 'skills')).map((entry) => entry.name).join() === 'vercel-react-best-practices');
 
-  for (const [label, deploy] of [['Codex', deployCodexGlobals], ['Gemini', deployGeminiGlobals]]) {
-    console.log(`${label} 배포 — 다시 돌리면 아무것도 안 씀`);
-    const dir = path.join(root, label.toLowerCase());
-    deploy(dir, quiet);
-    const first = snapshotMtimes(dir);
-    check('바꾼 파일 0개', deploy(dir, quiet) === 0);
-    check('모든 파일의 수정 시각이 그대로', changedMtimes(first, snapshotMtimes(dir)).length === 0);
-  }
-
   console.log('로컬 스킬 배포 — 다시 돌리면 아무것도 안 씀');
   const repo = path.join(root, 'repo');
   fs.mkdirSync(path.join(repo, '.git'), { recursive: true });
@@ -156,8 +145,10 @@ try {
     }
   };
   runLocal();
-  check('로컬 스킬이 .claude·.agents에 렌더돼 배포됨',
-    ['.claude', '.agents'].every((dir) => /^name: sample$/m.test(fs.readFileSync(path.join(repo, dir, 'skills', 'sample', 'SKILL.md'), 'utf8'))));
+  check('로컬 스킬이 .claude에 렌더돼 배포됨',
+    /^name: sample$/m.test(fs.readFileSync(path.join(repo, '.claude', 'skills', 'sample', 'SKILL.md'), 'utf8')));
+  check('.agents·AGENTS.md·GEMINI.md를 만들지 않음',
+    ['.agents', 'AGENTS.md', 'GEMINI.md'].every((name) => !fs.existsSync(path.join(repo, name))));
   check('로컬 hook이 배포됨', fs.existsSync(path.join(repo, '.claude', 'hooks', 'h.mjs')));
   const localBefore = snapshotMtimes(repo);
   runLocal();
@@ -167,7 +158,7 @@ try {
   runLocal();
   // 고친 것은 원본(local/)이다 — 배포본 쪽 변화만 센다.
   const localTouched = changedMtimes(localBefore, snapshotMtimes(repo)).filter((rel) => !rel.startsWith(`local${path.sep}`));
-  check('고친 스킬과 지운 contexts만 바뀜(.claude·.agents 각각)', localTouched.length === 4
+  check('고친 스킬과 지운 contexts만 바뀜', localTouched.length === 2
     && localTouched.every((rel) => rel.endsWith(path.join('skills', 'sample', 'SKILL.md')) || rel.endsWith(path.join('contexts', 'a.md'))));
 } finally {
   fs.rmSync(root, { recursive: true, force: true });

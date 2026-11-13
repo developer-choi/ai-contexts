@@ -3,10 +3,9 @@
 // 다음 sync에 덮여 사라진다.
 //
 // 차단 대상:
-//   - 홈 배포 루트 하위: ~/.claude, ~/.codex, ~/.gemini
-//   - 레포 배포 산출물 세그먼트: .agents, .codex, .claude/skills, .claude/hooks,
-//     .claude/contexts, .claude/settings.json
-//   - 투영 산출물 파일명: AGENTS.md, GEMINI.md (CLAUDE.md가 원본, 이 둘은 항상 산출물)
+//   - 홈 배포 루트 하위: ~/.claude
+//   - 레포 배포 산출물 세그먼트: .claude/skills, .claude/hooks, .claude/contexts,
+//     .claude/settings.json
 //
 // 예외: ~/.claude/plans는 plan mode가 계획 파일을 쓰는 자리라 sync 산출물이 아니다.
 //
@@ -20,10 +19,10 @@ import os from "node:os";
 import path from "node:path";
 import { ask, readPayload } from "./hook-utils.mjs";
 
-// 파일을 생성·수정하는 도구. codex는 PreToolUse를 '*'로 통합하므로 여기서 self-filter한다.
+// 파일을 생성·수정하는 도구만 본다.
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
-const HOME_DEPLOY_DIRS = [".claude", ".codex", ".gemini"].map((d) => norm(path.join(os.homedir(), d)));
+const HOME_DEPLOY_DIRS = [".claude"].map((d) => norm(path.join(os.homedir(), d)));
 // plan mode가 계획 파일을 쓰는 자리. sync 산출물이 아니라 막으면 계획을 고칠 때마다 승인 창이 뜬다.
 const PLANS_DIR = norm(path.join(os.homedir(), ".claude", "plans"));
 
@@ -47,13 +46,8 @@ function isArtifact(file) {
     if (abs === root || abs.startsWith(root + path.sep)) return true;
   }
   const segs = abs.split(path.sep);
-  // 투영 산출물 파일명(norm으로 소문자화됨). CLAUDE.md가 원본이고 이 둘은 항상 산출물이라
-  // 위치 불문 차단한다. 손수 쓴 AGENTS.md가 필요하면 ask라 사용자가 승인하면 통과한다.
-  const base = segs[segs.length - 1];
-  if (base === "agents.md" || base === "gemini.md") return true;
   for (let i = 0; i < segs.length; i++) {
     const seg = segs[i];
-    if (seg === ".agents" || seg === ".codex") return true;
     if (seg === ".claude") {
       const next = segs[i + 1];
       if (next === "skills" || next === "hooks" || next === "contexts" || next === "settings.json") return true;
