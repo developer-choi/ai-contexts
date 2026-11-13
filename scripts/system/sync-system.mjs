@@ -11,12 +11,13 @@ import {
   SOURCE_ONLY_ROOT_FILES,
   claudeSettingsObject,
   comparePaths,
-  compareSkillPaths,
   defaultClaudeDir,
   deployCategory,
   deployRootFiles,
-  deploySkills,
   removeLegacyCategories,
+  removePluginSkillCopies,
+  pluginSkillCopies,
+  acPluginInstalled,
   ensureDeploySource,
   ensureDir,
   listEntries,
@@ -46,7 +47,7 @@ const VERIFY_STEPS = [
   // 잘못 세는 눈금은 그 자리에서 정상으로 보이고 몇 달 뒤 안 차는 것으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
   { file: path.join(scriptsDir, 'verify', 'verify-source-usage.mjs') },
   // 사용법 짝 md가 빠진 스크립트가 배포되면, 인자만 알고 싶은 AI가 그 스크립트 소스를 통째로 연다.
-  { file: path.join(scriptsDir, 'verify', 'verify-cli-usage.mjs'), args: ['deploy', 'scripts', 'local'] },
+  { file: path.join(scriptsDir, 'verify', 'verify-cli-usage.mjs'), args: ['deploy', 'plugins', 'scripts', 'local'] },
 ];
 
 async function main() {
@@ -66,7 +67,8 @@ async function main() {
   for (const category of CATEGORIES) {
     changed += deployCategory(targetDir, category, console.log);
   }
-  changed += deploySkills(targetDir, console.log);
+  // 전역 스킬은 plugin `ac`가 맡는다. 예전 sync가 배포해 둔 같은 이름의 사본만 지운다.
+  changed += removePluginSkillCopies(targetDir, console.log);
   changed += deployRootFiles(targetDir, console.log);
 
   console.log('---');
@@ -90,19 +92,12 @@ async function main() {
     }
   }
 
-  const srcSkills = path.join(sourceDir, 'skills');
-  if (existsDir(srcSkills)) {
-    for (const entry of listEntries(srcSkills)) {
-      const src = path.join(srcSkills, entry.name);
-      const target = path.join(targetDir, 'skills', entry.name);
-      if (!pathExists(target)) {
-        fail(failures, `skills/${entry.name} 존재하지 않음`);
-      } else if (compareSkillPaths(src, target)) {
-        console.log(`  PASS  skills/${entry.name}`);
-      } else {
-        fail(failures, `skills/${entry.name} 내용 불일치`);
-      }
-    }
+  const leftCopies = pluginSkillCopies(targetDir);
+  if (leftCopies.length > 0) {
+    const why = acPluginInstalled(targetDir) ? '' : ' — plugin ac가 설치되지 않아 두었다(meta/INSTALLATION_GUIDE.md의 plugin 등록 명령)';
+    fail(failures, `plugin ac 스킬의 옛 사본이 남음: ${leftCopies.map((name) => `skills/${name}`).join(', ')}${why}`);
+  } else {
+    console.log('  PASS  skills/ (plugin ac 스킬의 옛 사본 없음)');
   }
 
   for (const entry of listEntries(sourceDir)) {

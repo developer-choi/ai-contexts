@@ -15,9 +15,9 @@ import {
   copyPath,
   deployCategory,
   deployClaudeImports,
-  deploySkills,
-  injectSkillName,
   listEntries,
+  pluginSkillsDir,
+  removePluginSkillCopies,
   sourceDir,
   uninstallClaudeImports,
   uninstallTarget,
@@ -56,32 +56,27 @@ function sameBytes(left, right) {
   return true;
 }
 
-// 지금까지의 배포 방식(통째로 복사한 뒤 그 자리에서 렌더)과 같은 결과를 만든다. 비교 기준이다.
+// 통째로 복사한 뒤 그 자리에서 렌더하는 방식과 같은 결과를 만든다. 비교 기준이다.
 function legacyDeploy(targetDir) {
   for (const category of CATEGORIES) copyPath(path.join(sourceDir, category), path.join(targetDir, category));
-  for (const entry of listEntries(path.join(sourceDir, 'skills'))) {
-    const dest = path.join(targetDir, 'skills', entry.name);
-    copyPath(path.join(sourceDir, 'skills', entry.name), dest);
-    if (entry.isDirectory()) injectSkillName(dest);
-  }
 }
 
 function deployAll(targetDir, srcRoot = sourceDir) {
   let changed = 0;
   for (const category of CATEGORIES) changed += deployCategory(targetDir, category, quiet, srcRoot);
-  changed += deploySkills(targetDir, quiet, srcRoot);
+  changed += removePluginSkillCopies(targetDir, quiet);
   return changed;
 }
 
 try {
   const target = path.join(root, 'claude');
 
-  console.log('전역 배포 — 기존 방식과 같은 결과');
+  console.log('전역 배포 — 통째 복사와 같은 결과');
   legacyDeploy(target);
   const legacy = snapshotBytes(target);
   fs.rmSync(target, { recursive: true, force: true });
   deployAll(target);
-  check('파일 목록과 내용이 기존 방식과 바이트 단위로 같음', sameBytes(legacy, snapshotBytes(target)));
+  check('파일 목록과 내용이 통째 복사와 바이트 단위로 같음', sameBytes(legacy, snapshotBytes(target)));
 
   console.log('전역 배포 — 다시 돌리면 아무것도 안 씀');
   const before = snapshotMtimes(target);
@@ -90,38 +85,48 @@ try {
 
   console.log('전역 배포 — 원본 하나만 바꾸면 그 파일만');
   const src = path.join(root, 'src');
-  for (const category of [...CATEGORIES, 'skills']) copyPath(path.join(sourceDir, category), path.join(src, category));
-  const skillName = listEntries(path.join(src, 'skills')).find((entry) => entry.isDirectory()).name;
-  const editedSkill = path.join('skills', skillName, 'SKILL.md');
-  fs.appendFileSync(path.join(src, editedSkill), '\n추가 줄\n');
-  const removedContext = path.join('contexts', listFiles(path.join(src, 'contexts'))[0]);
+  for (const category of CATEGORIES) copyPath(path.join(sourceDir, category), path.join(src, category));
+  const contextFiles = listFiles(path.join(src, 'contexts'));
+  const editedContext = path.join('contexts', contextFiles[0]);
+  fs.appendFileSync(path.join(src, editedContext), '\n추가 줄\n');
+  const removedContext = path.join('contexts', contextFiles[1]);
   fs.rmSync(path.join(src, removedContext));
-  // 배포본 폴더로 렌더되므로 원본 폴더가 달라도 경로가 같다 — 바뀐 것은 고친 두 파일뿐이어야 한다.
   const beforeEdit = snapshotMtimes(target);
   const editChanged = deployAll(target, src);
   const touched = changedMtimes(beforeEdit, snapshotMtimes(target));
-  check('바꾼 파일 2개(고친 스킬 md 1, 지운 contexts 1)', editChanged === 2);
-  check('수정 시각이 바뀐 것은 그 둘뿐', touched.length === 2 && touched.includes(editedSkill) && touched.includes(removedContext));
+  check('바꾼 파일 2개(고친 contexts 1, 지운 contexts 1)', editChanged === 2);
+  check('수정 시각이 바뀐 것은 그 둘뿐', touched.length === 2 && touched.includes(editedContext) && touched.includes(removedContext));
   check('지운 원본은 배포본에서도 사라짐', !fs.existsSync(path.join(target, removedContext)));
-
-  console.log('전역 배포 — 고아는 지우고 외부 스킬은 둠');
-  const preserved = path.join(target, 'skills', 'vercel-react-best-practices', 'SKILL.md');
-  const staleSkill = path.join(target, 'skills', 'stale-skill', 'SKILL.md');
-  const staleContext = path.join(target, 'contexts', 'stale', 'x.md');
-  for (const file of [preserved, staleSkill, staleContext]) {
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, 'x');
-  }
   deployAll(target);
-  check('원본에 없는 스킬 폴더가 지워짐', !fs.existsSync(path.dirname(staleSkill)));
+
+  console.log('전역 배포 — plugin 스킬의 옛 사본은 지우고 다른 스킬은 둠');
+  const [pluginSkill, otherPluginSkill] = listEntries(pluginSkillsDir).filter((entry) => entry.isDirectory()).map((entry) => entry.name);
+  const oldSkillCopy = path.join(target, 'skills', pluginSkill, 'SKILL.md');
+  const userSkill = path.join(target, 'skills', otherPluginSkill, 'SKILL.md');
+  const synced = path.join(target, 'skills', 'synced', 'x', 'SKILL.md');
+  const staleContext = path.join(target, 'contexts', 'stale', 'x.md');
+  const writeFile = (file, text) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, text); };
+  // 예전 sync가 렌더해 둔 사본은 앵커를 갖는다. 같은 이름이어도 앵커가 없으면 사용자가 만든 스킬이다.
+  writeFile(oldSkillCopy, '---\nname: x\n---\n\n<!-- deploy-anchor -->\n이 파일은 ...\n');
+  writeFile(userSkill, '---\nname: mine\n---\n');
+  writeFile(synced, 'x');
+  writeFile(staleContext, 'x');
+  deployAll(target);
+  check('plugin이 설치되지 않은 타겟이면 옛 사본을 지우지 않음', fs.existsSync(oldSkillCopy));
+  writeFile(path.join(target, 'plugins', 'installed_plugins.json'), JSON.stringify({ plugins: { 'ac@ac': [{ scope: 'user' }] } }));
+  deployAll(target);
+  check('plugin에 있는 이름의 옛 사본이 지워짐', !fs.existsSync(path.dirname(oldSkillCopy)));
+  check('이름이 같아도 앵커가 없는(사용자가 만든) 스킬은 남음', fs.existsSync(userSkill));
   check('원본에 없는 contexts 하위 폴더가 지워짐', !fs.existsSync(path.dirname(staleContext)));
-  check('보존 목록의 외부 스킬은 남음', fs.existsSync(preserved));
-  check('원래 원본으로 되돌리면 기존 방식과 다시 같음', sameBytes(new Map([...snapshotBytes(target)].filter(([rel]) => !rel.startsWith(path.join('skills', 'vercel-react-best-practices')))), legacy));
+  check('AC 것이 아닌 스킬(synced/)은 남음', fs.existsSync(synced));
+  check('원래 원본으로 되돌리면 통째 복사와 다시 같음', sameBytes(new Map([...snapshotBytes(target)].filter(([rel]) => !rel.startsWith('skills') && !rel.startsWith('plugins'))), legacy));
 
   console.log('전역 배포 — unsync 뒤 잔여 없음');
+  writeFile(oldSkillCopy, '<!-- deploy-anchor -->\n');
+  fs.rmSync(path.join(target, 'plugins'), { recursive: true, force: true });
   uninstallTarget(target, { log: quiet, removeAlias: false });
   check('contexts·hooks가 사라짐', CATEGORIES.every((category) => !fs.existsSync(path.join(target, category))));
-  check('스킬은 외부 스킬만 남음', listEntries(path.join(target, 'skills')).map((entry) => entry.name).join() === 'vercel-react-best-practices');
+  check('plugin이 없어도 unsync는 옛 사본을 지우고 AC 것이 아닌 것만 남김', listEntries(path.join(target, 'skills')).map((entry) => entry.name).sort().join() === [otherPluginSkill, 'synced'].sort().join());
 
   console.log('전역 CLAUDE.md — 복사본을 import 줄로 바꾸고 unsync는 그 줄만 걷음');
   const home = path.join(root, 'home');

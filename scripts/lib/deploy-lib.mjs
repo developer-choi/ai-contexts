@@ -5,17 +5,14 @@ import path from 'node:path';
 
 const CATEGORIES = ['contexts', 'hooks'];
 const LEGACY_CATEGORIES = ['agents'];
-const SKILLS_PRESERVE = new Set([
-  '.system',
-  'vercel-composition-patterns',
-  'vercel-react-best-practices',
-  'web-design-guidelines',
-]);
 
 import { buildHooks } from '../settings/settings-projection.mjs';
 
 const repoDir = path.resolve(import.meta.dirname, '..', '..');
 const sourceDir = path.join(repoDir, 'deploy');
+// 전역 스킬은 Claude Code plugin `ac`로 설치된다(meta/deploy-conventions.md 「plugin으로 옮긴 스킬」). sync는 스킬을
+// 배포하지 않고, 예전 sync가 `<타겟>/skills/`에 배포해 둔 같은 이름의 사본만 지운다.
+const pluginSkillsDir = path.join(repoDir, 'plugins', 'ac', 'skills');
 const baseSettingsSource = path.join(sourceDir, 'base-settings.json');
 // 직접 복사하지 않고 settings 생성의 재료로만 쓰는 root 파일들.
 // base-settings.json(공통 hook)과 Claude 전용 override(claude-settings.json).
@@ -453,21 +450,8 @@ function anchorExcluded(skillDir, filePath) {
     .some((segment) => ANCHOR_EXCLUDED_DIRS.has(segment));
 }
 
-// 배포된 스킬 디렉토리의 md를 배포본 형태로 고친다. 산출물만 고치고 소스는 건드리지 않는다.
-function injectSkillName(skillDir, contextsDir = contextsDirForSkill(skillDir)) {
-  for (const file of collectMarkdown(skillDir)) {
-    if (anchorExcluded(skillDir, file)) continue;
-
-    const raw = fs.readFileSync(file, 'utf8');
-    const updated = path.basename(file) === 'SKILL.md' && path.dirname(file) === skillDir
-      ? renderSkillMd(raw, skillDir, contextsDir)
-      : renderSkillSubMd(raw, path.dirname(file), skillDir, contextsDir);
-    if (updated !== raw) fs.writeFileSync(file, updated, 'utf8');
-  }
-}
-
-// 배포할 skills/ 내용(skills 폴더 기준 상대 경로). 복사한 뒤 injectSkillName을 돌린 결과와
-// 같은 것을 파일에 쓰기 전에 만든다. 최상위의 스킬 폴더가 아닌 파일은 그대로 둔다.
+// 배포할 skills/ 내용(skills 폴더 기준 상대 경로). 스킬 폴더의 md는 렌더한 결과로 만든다.
+// 최상위의 스킬 폴더가 아닌 파일은 그대로 둔다.
 function skillEntries(srcSkillsDir, targetSkillsDir, contextsFor = contextsDirForSkill) {
   const entries = new Map();
   for (const entry of listEntries(srcSkillsDir)) {
@@ -499,38 +483,6 @@ function collectMarkdown(dir, found = []) {
     else if (entry.name.endsWith('.md')) found.push(full);
   }
   return found;
-}
-
-// 스킬 항목 대조: 앵커가 붙는 md는 렌더 결과와, 나머지 파일은 원본과 일치해야 한다.
-function compareSkillPaths(src, target, roots = { src, target }) {
-  if (!fs.existsSync(src) || !fs.existsSync(target)) return false;
-  if (!fs.statSync(src).isDirectory() || !fs.statSync(target).isDirectory()) return comparePaths(src, target);
-
-  const leftEntries = listEntries(src);
-  const rightEntries = listEntries(target);
-  if (leftEntries.length !== rightEntries.length) return false;
-
-  for (let i = 0; i < leftEntries.length; i += 1) {
-    if (leftEntries[i].name !== rightEntries[i].name) return false;
-    const left = path.join(src, leftEntries[i].name);
-    const right = path.join(target, rightEntries[i].name);
-
-    if (leftEntries[i].isDirectory()) {
-      if (!compareSkillPaths(left, right, roots)) return false;
-      continue;
-    }
-    if (!leftEntries[i].name.endsWith('.md') || anchorExcluded(roots.src, left)) {
-      if (!comparePaths(left, right)) return false;
-      continue;
-    }
-
-    const source = fs.readFileSync(left, 'utf8');
-    const expected = leftEntries[i].name === 'SKILL.md' && src === roots.src
-      ? renderSkillMd(source, roots.target)
-      : renderSkillSubMd(source, target, roots.target);
-    if (expected !== fs.readFileSync(right, 'utf8')) return false;
-  }
-  return true;
 }
 
 function comparePaths(left, right) {
@@ -602,24 +554,44 @@ function removeLegacyCategories(targetDir, log) {
   return removed;
 }
 
-function deploySkills(targetDir, log, srcRoot = sourceDir) {
-  const srcSkills = path.join(srcRoot, 'skills');
-  if (!fs.existsSync(srcSkills) || !fs.statSync(srcSkills).isDirectory()) return 0;
-
-  const targetSkills = path.join(targetDir, 'skills');
-  // 보존 목록의 스킬은 AC가 배포한 것이 아니라 건드리지 않는다.
-  const keep = (rel) => SKILLS_PRESERVE.has(rel.split(path.sep)[0]);
-  return logTreeChanges(log, 'skills/', syncTree(targetSkills, skillEntries(srcSkills, targetSkills), { keep }));
+// 그 타겟 홈의 Claude Code에 plugin `ac`가 설치돼 있는가(`plugins/installed_plugins.json`의 `ac@ac`).
+function acPluginInstalled(targetDir) {
+  try {
+    const installed = readJson(path.join(targetDir, 'plugins', 'installed_plugins.json'));
+    return Boolean(installed.plugins?.['ac@ac']?.length);
+  } catch {
+    return false;
+  }
 }
 
-function uninstallSkills(targetDir, log) {
-  const skillsDir = path.join(targetDir, 'skills');
-  let removed = 0;
-  for (const entry of listEntries(skillsDir)) {
-    if (SKILLS_PRESERVE.has(entry.name)) continue;
+// 예전 sync가 `<타겟>/skills/`에 배포해 둔 사본 중 plugin `ac`에 같은 이름이 있는 것을 지운다. 남겨 두면 plugin 스킬
+// (`ac:<이름>`)과 같은 스킬이 두 번 뜬다.
+// - AC가 배포한 사본인지는 SKILL.md의 렌더 앵커(ANCHOR_MARK)로 가린다. 예전 sync는 모든 SKILL.md에 이것을 심었다.
+//   같은 이름이어도 앵커가 없는 폴더(사용자가 만든 스킬)와 다른 폴더(claude.ai에서 받은 `synced/` 등)는 둔다.
+// - sync는 plugin이 설치되지 않은 타겟이면 지우지 않고 알린다. 그 기기에서 사본을 지우면 스킬이 아무 신호 없이 사라진다.
+//   unsync(`requirePlugin: false`)는 AC 산출물을 걷는 것이 목적이라 설치 여부와 무관하게 지운다.
+function pluginSkillCopies(targetDir, pluginSkills = pluginSkillsDir) {
+  return listEntries(pluginSkills)
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .filter((name) => {
+      const skillMd = path.join(targetDir, 'skills', name, 'SKILL.md');
+      return fs.existsSync(skillMd) && fs.readFileSync(skillMd, 'utf8').includes(ANCHOR_MARK);
+    });
+}
 
-    removePath(path.join(skillsDir, entry.name));
-    log(`  DEL   skills/${entry.name}`);
+function removePluginSkillCopies(targetDir, log, { pluginSkills = pluginSkillsDir, requirePlugin = true } = {}) {
+  const skillsDir = path.join(targetDir, 'skills');
+  const copies = pluginSkillCopies(targetDir, pluginSkills);
+  if (copies.length > 0 && requirePlugin && !acPluginInstalled(targetDir)) {
+    log(`  SKIP  skills/ 옛 사본 ${copies.length}개를 두었다 — plugin ac가 설치되지 않았다. meta/INSTALLATION_GUIDE.md의 plugin 등록 명령을 실행한 뒤 다시 sync한다`);
+    return 0;
+  }
+  let removed = 0;
+  for (const name of copies) {
+    const copy = path.join(skillsDir, name);
+    removePath(copy);
+    log(`  DEL   skills/${name} (plugin ac로 설치됨)`);
     removed += 1;
   }
   return removed;
@@ -639,7 +611,7 @@ function uninstallTarget(targetDir, options = {}) {
     }
   }
 
-  removed += uninstallSkills(targetDir, log);
+  removed += removePluginSkillCopies(targetDir, log, { requirePlugin: false });
   removed += uninstallClaudeImports(targetDir, log);
 
   for (const entry of listEntries(sourceDir)) {
@@ -690,15 +662,12 @@ export {
   verifyClaudeImports,
   claudeSettingsObject,
   comparePaths,
-  compareSkillPaths,
   copyPath,
   defaultClaudeDir,
   deployCategory,
   deployRootFiles,
-  deploySkills,
   ensureDeploySource,
   ensureDir,
-  injectSkillName,
   listEntries,
   mergeSettings,
   logTreeChanges,
@@ -706,6 +675,10 @@ export {
   readManagedKeys,
   readTreeEntries,
   removeLegacyCategories,
+  removePluginSkillCopies,
+  pluginSkillCopies,
+  pluginSkillsDir,
+  acPluginInstalled,
   skillEntries,
   syncTree,
   writeIfChanged,

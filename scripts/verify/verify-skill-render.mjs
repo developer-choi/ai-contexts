@@ -26,7 +26,7 @@ const SOURCES = {
   'contexts 자리표시자 있음': '---\ndescription: 설명\n---\n\n# 제목\n\n`node {{contexts}}/shared.mjs open x`\n',
 };
 
-// 전역 스킬은 `<타겟>/skills/<이름>`에 깔리므로 contexts는 두 단계 위 형제다.
+// 기본값(deploy-lib `contextsDirForSkill`)은 `<타겟>/skills/<이름>`의 두 단계 위 형제 contexts다. 로컬 스킬은 부르는 쪽이 전역 contexts를 넘긴다.
 const contextsOf = (skillDir) => path.resolve(skillDir, '..', '..', 'contexts');
 
 const anchorCount = (text) => (text.match(/<!-- deploy-anchor -->/g) || []).length;
