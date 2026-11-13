@@ -1,6 +1,6 @@
 ---
 name: prompt-review
-description: 스킬·규칙·프롬프트 문서를 기준으로 리뷰하고 지적을 반영해 고친다. 대상 md를 고친 뒤나 리뷰를 청할 때 쓴다.
+description: 스킬·규칙·프롬프트 문서를 기준 문서에 비춰 리뷰하고 지적을 반영해 고친다. 대상 md를 고친 뒤나 리뷰를 청할 때 쓴다.
 argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 ---
 
@@ -8,7 +8,7 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 ## 목적
 
-스킬·규칙·프롬프트 문서를 기준으로 리뷰하고 지적을 반영해 고친다.
+스킬·규칙·프롬프트 문서를 기준 문서에 비춰 리뷰하고 지적을 반영해 고친다.
 
 ## 입력
 
@@ -59,7 +59,7 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 | STRUCTURE | 정본과 참조 | [sources-and-links.md](~/.claude/contexts/prompt-standards/sources-and-links.md) |
 | STRUCTURE | 파일·폴더 나누기, 크기 | [file-layout.md](~/.claude/contexts/prompt-standards/file-layout.md) |
 | AGENT | 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](~/.claude/contexts/prompt-standards/skill-structure.md) |
-| WORKFLOW | workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
+| WORKFLOW | workflow 특화 (대상이 workflow 스킬일 때) | [targets/workflow.md](targets/workflow.md) |
 | CODE | 스킬·규칙이 사용하는 코드·데이터의 이름 (대상 md가 호출하는 스크립트·json 중 작업 브랜치에서 바뀐 것이 있을 때. 리뷰어가 직접 선택해 그 파일만 본다) | [naming.md](~/.claude/contexts/coding-standards/rules/personal/naming.md) |
 
 대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 경로를 아래처럼 그 체크아웃 안으로 바꿔 읽는다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
@@ -72,14 +72,14 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 ### 1. 리뷰하고 대상 파일 고치기
 
-1. 기계 검사를 돌린다. 처음 돌린 크기 출력과 대상의 파일 목록은 크기 변화의 "전" 값으로 남겨 둔다.
+1. 기계 검사를 돌린다. 처음 돌린 크기 출력과 대상의 파일 트리는 크기 변화의 "전" 값으로 남겨 둔다.
    - 크기: `node ~/.ai-contexts/check-md-size.mjs --report <대상 경로>`. 잰 값은 STRUCTURE 리뷰어에게 넘긴다.
    - 낱말·긴 줄: `node ~/.ai-contexts/check-wording.mjs --report <대상 경로>`. 걸린 줄은 리뷰어 지적에 추가한다.
 2. 리뷰어를 띄운다.
    - [기준](#기준) 표에서 조건에 맞는 리뷰어마다 이름 있는 팀원을 하나씩 띄워([team-agent](~/.claude/contexts/team-agent.md#claude-code)) 그 리뷰어가 붙은 행의 기준을 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어 팀원을 하나 더 둔다.
    - 리뷰 대상(입력으로 받은 파일·폴더)이 바뀌면 팀원을 모두 끝내고 새로 띄운다. 앞 대상을 본 맥락이 새 대상 판정에 섞이지 않게 하기 위해서다.
    - 이 절차에서 띄우는 팀원·서브에이전트의 모델은 [에이전트 나누기](~/.claude/contexts/prompt-standards/skill-structure.md#에이전트-설계)대로 선택한다.
-   - BODY는 [how 최소화 원칙](~/.claude/contexts/prompt-standards/trimming.md#how-최소화-원칙)대로 절마다 찾은 목적 문장과 나머지 줄의 판정을 표로 결과에 넣는다. 지적이 0건이어도 표가 없으면 다시 맡긴다. 표를 요구하지 않으면 리뷰어가 명령 없는 이 원칙을 건너뛰고 "0건"만 보고한다.
+   - BODY는 [how 최소화 원칙](~/.claude/contexts/prompt-standards/trimming.md#how-최소화-원칙)을 적용한 판정을 절마다 표로 결과에 넣는다. 지적이 0건이어도 표가 없으면 다시 맡긴다. 표를 요구하지 않으면 리뷰어가 명령 없는 이 원칙을 건너뛰고 "0건"만 보고한다.
    - 회차마다 리뷰어에게 보내는 말에 무엇을 바꿨는지, 어디를 의심하는지, 어디만 볼지는 넣지 않는다. 리뷰어가 그 대목에 쏠려 나머지를 덜 본다.
 3. 지적을 모아 [지적 판단](#지적-판단)대로 처리한다.
 4. 반영하며 사람이 처음 읽어도 바로 이해되게 다듬은 뒤, 기계 검사를 다시 돌리고, 넣지 않기로 했거나 사용자에게 가져갈 지적과 그 근거를 추가해 같은 팀원들에게 다시 리뷰를 맡긴다. 새 지적이 0건이 될 때까지, 최대 10회 돈다.
@@ -94,7 +94,6 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 1. 같은 대화에서 리뷰한 대상에 사용자가 문제를 짚었고 그것을 반영하기로 했으면, 그 문제를 맡았어야 할 리뷰어에게 그 대목에 기준을 다시 적용하게 한다.
    - "왜 못 봤나"는 묻지 않는다. 받을 답은 적용될 기준 문장 원문, 그 문장대로의 판정, 지적하지 않는 쪽으로 판정을 민 문장 원문이다. 민 문장이 없으면 실제로 어떤 단위로 비교했는지 받는다
-   - 맡을 기준이 없으면 "기준 없음"을 원인으로 삼는다
 2. 답을 모아 원인과 고칠 안을 사용자에게 제시한다. 고칠 안은 [지적 판단](#지적-판단)대로 선택하되, 사실을 몰라서 놓쳤으면 그 사실을 스크립트·훅이 알려 주게 한다. 기준 문서에 문장을 추가하는 안은 넣기 전에 [벤치](benching/SKILL.md)로 효과를 확인한다.
 
 ## 지적 판단
@@ -110,5 +109,4 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 ## 후속 작업
 
-- 고친 스킬이 실제로 잘 도는지 벤치로 본다 → [benching/SKILL.md](benching/SKILL.md)
-- description이 제대로 트리거되는지 본다 → [benching/SKILL.md](benching/SKILL.md)
+- 고친 스킬·규칙의 효과를 벤치로 확인한다 → [benching/SKILL.md](benching/SKILL.md)
