@@ -25,12 +25,16 @@ npm run sync:system -- <target>
   - AC 안 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose`). 남의 레포 `local/skills`는 `sync:local-system`이 봅니다.
   - 배포본 md 렌더링의 멱등(`verify:skill-render`)
   - 배포가 바뀐 파일만 쓰는지(`verify:incremental-deploy`)
-  - 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`)
+  - 전역 스킬의 스크립트 호출이 실행 위치에 의존하지 않는지, import로 읽히는 전역 `CLAUDE.md`·rules에 자리표시자가 없는지(`verify:skill-script-paths`)
   - 3단 종류 누계의 집계·거부·알림 판정(`verify:source-usage`)
 
   이 검사들은 서로 독립인 읽기 전용이라 위의 hook 준비 확인과 겹쳐 돌지만, 출력은 위 순서대로 모아서 냅니다. 하나라도 실패하면 배포를 시작하기 전에 끊고, 첫 실패에서 멈추지 않으므로 실패한 검사를 한 번에 모두 보여줍니다.
 - 배포본을 지우고 다시 쓰지 않습니다. 배포할 내용을 메모리에서 만든 뒤 기존 파일과 비교해, 내용이 다른 파일만 쓰고 원본에서 사라진 AC 관리 파일만 지웁니다. 스킬 하나만 고쳤으면 그 스킬의 바뀐 파일만 다시 쓰여, 열려 있던 다른 세션에도 그 스킬만 새로 뜹니다. 바뀐 것이 없으면 `변경 없음`을 출력합니다.
-- `deploy/rules`, `deploy/contexts`, `deploy/hooks`는 폴더 전체가 AC 관리 대상입니다.
+- `deploy/contexts`, `deploy/hooks`는 폴더 전체가 AC 관리 대상입니다.
+- `deploy/CLAUDE.md`와 `deploy/rules/`는 복사하지 않습니다. 타겟 `CLAUDE.md`에 원본 파일마다 `@` import 줄을 두어 Claude Code가 원본을 직접 읽게 합니다.
+  - 기존 파일의 내용을 고치면 sync 없이 다음 세션에 실립니다. 규칙 파일을 추가·삭제·개명하면 import 줄 목록이 달라지므로 sync를 돌려야 합니다.
+  - import 줄과 그 목록은 워크트리에서 돌려도 본 체크아웃의 `deploy/` 기준입니다. 워크트리를 지워도 전역 규칙이 사라지지 않게 하기 위해서이고, 그래서 워크트리에서 고친 규칙은 본 체크아웃에 병합되기 전에는 실리지 않습니다.
+  - 타겟 `CLAUDE.md`에 사용자가 적은 줄은 import 줄 아래에 남깁니다. 기존 사본을 알아내 걷는 방식은 `deploy-lib.mjs`의 `deployClaudeImports`·`uninstallClaudeImports`가 정본입니다. 그 밖의 타겟 `rules/` 파일은 사용자 영역이라 건드리지 않습니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 보존 목록(`SKILLS_PRESERVE`)의 스킬은 건드리지 않습니다. 각 스킬의 md는 배포본 형태로 렌더합니다. frontmatter에 `name`이 없으면 폴더명을 주입하고, 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다. 검증도 이 결과를 기준으로 대조합니다.
 - 설정은 공통 `deploy/base-settings.json`(정책 hook)과 override(`deploy/claude-settings.json`)를 합쳐 생성합니다(`scripts/settings/settings-projection.mjs`, override 우선). 결과는 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존합니다.
 - 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
@@ -47,7 +51,7 @@ npm run unsync:system
 npm run unsync:system -- <target>
 ```
 
-제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 구버전 `wt-add` alias를 제거합니다.
+제거 명령은 `sync:system`이 배포한 전역 시스템 자산과 구버전 `wt-add` alias를 제거합니다. 타겟 `CLAUDE.md`에서는 AC import 줄만 걷고 사용자가 적은 줄은 남깁니다. 타겟 `rules/`의 사용자 파일은 건드리지 않습니다. 기존 사본을 걷는 기준은 `uninstallClaudeImports`가 정본입니다.
 
 ## 반복 실행 기준
 

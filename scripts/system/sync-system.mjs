@@ -7,10 +7,10 @@ import { runVerifications } from '../lib/verify-runner.mjs';
 
 import {
   CATEGORIES,
+  IMPORTED_ROOT_FILES,
   SOURCE_ONLY_ROOT_FILES,
   claudeSettingsObject,
   comparePaths,
-  compareRulePaths,
   compareSkillPaths,
   defaultClaudeDir,
   deployCategory,
@@ -23,6 +23,7 @@ import {
   unsetWtAddAlias,
   resolveUserPath,
   sourceDir,
+  verifyClaudeImports,
   verifySettings,
 } from '../lib/deploy-lib.mjs';
 
@@ -82,7 +83,7 @@ async function main() {
     const target = path.join(targetDir, category);
     if (!existsDir(target)) {
       fail(failures, `${category}/ 존재하지 않음`);
-    } else if (category === 'rules' ? compareRulePaths(src, target, targetDir) : comparePaths(src, target)) {
+    } else if (comparePaths(src, target)) {
       console.log(`  PASS  ${category}/`);
     } else {
       fail(failures, `${category}/ 내용 불일치`);
@@ -106,7 +107,7 @@ async function main() {
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (SOURCE_ONLY_ROOT_FILES.has(entry.name)) continue;
+    if (SOURCE_ONLY_ROOT_FILES.has(entry.name) || IMPORTED_ROOT_FILES.has(entry.name)) continue;
 
     const src = path.join(sourceDir, entry.name);
     const target = path.join(targetDir, entry.name);
@@ -117,6 +118,12 @@ async function main() {
     } else {
       fail(failures, `${entry.name} 내용 불일치`);
     }
+  }
+
+  if (verifyClaudeImports(targetDir)) {
+    console.log('  PASS  CLAUDE.md (import)');
+  } else {
+    fail(failures, 'CLAUDE.md의 ai-contexts import 줄이 원본 목록과 다름');
   }
 
   const targetSettings = path.join(targetDir, 'settings.json');

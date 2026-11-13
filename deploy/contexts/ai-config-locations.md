@@ -6,7 +6,8 @@ AI 설정(규칙·스킬·hook·settings)은 아래 원본에서 고친다. 배�
 
 | 구분 | 원본 수정 위치 | 배포 위치 | 반영 명령 |
 |---|---|---|---|
-| 글로벌 규칙·컨텍스트·hooks·설정 | AC `deploy/CLAUDE.md`, `deploy/rules/`, `deploy/contexts/`, `deploy/hooks/`, `deploy/base-settings.json`(공통), `deploy/claude-settings.json`(override) | `~/.claude/` | AC에서 `npm run sync:system` |
+| 글로벌 규칙 | AC `deploy/CLAUDE.md`, `deploy/rules/` | 없음(`~/.claude/CLAUDE.md`의 `@` import로 원본을 그대로 읽는다) | 내용 수정은 명령 없음(바로 반영). 규칙 파일 추가·삭제·개명은 AC에서 `npm run sync:system` |
+| 글로벌 컨텍스트·hooks·설정 | AC `deploy/contexts/`, `deploy/hooks/`, `deploy/base-settings.json`(공통), `deploy/claude-settings.json`(override) | `~/.claude/` | AC에서 `npm run sync:system` |
 | 글로벌 스킬 | AC `deploy/skills/` | `~/.claude/skills/` | AC에서 `npm run sync:system` |
 | 로컬 규칙 | 각 프로젝트의 `CLAUDE.md` | 없음(Claude Code가 원본을 그대로 읽는다) | 없음 |
 | 로컬 자산 (스킬·컨텍스트 등) | 각 프로젝트의 `local/<자산>/` (`hooks` 제외) | 각 프로젝트의 `.claude/<자산>/` | AC에서 `npm run sync:local-system` |

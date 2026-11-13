@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const CATEGORIES = ['rules', 'contexts', 'hooks'];
+const CATEGORIES = ['contexts', 'hooks'];
 const LEGACY_CATEGORIES = ['agents'];
 const SKILLS_PRESERVE = new Set([
   '.system',
@@ -156,49 +156,139 @@ function writeJson(file, value) {
   fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
 }
 
-// 규칙 본문이 contexts 파일을 가리킬 때 쓰는 자리표시자.
-//
-// 소스 기준 경로(`deploy/contexts/...`)를 적으면 cwd가 AC일 때만 우연히 맞는다. 배포
-// 시점에는 타겟이 확정되므로 여기서 절대 경로로 채운다.
-const CONTEXTS_TOKEN = '{{contexts}}';
+// 전역 CLAUDE.md·rules는 복사하지 않는다. 타겟 `CLAUDE.md`에 AC 원본을 가리키는 `@` import 줄을 두어
+// Claude Code가 원본을 직접 읽게 한다(공식 기능, https://code.claude.com/docs/en/memory). 그래서 원본을
+// 고치면 sync 없이 다음 세션에 실리고, 타겟 `rules/`는 사용자 영역으로 남는다.
+const IMPORTED_ROOT_FILES = new Set(['CLAUDE.md']);
 
-function withContextsPath(content, targetDir) {
-  const contextsDir = path.join(targetDir, 'contexts');
-  // 자리표시자 뒤의 `/`까지 함께 바꿔 구분자가 섞이지 않게 한다.
-  return content
-    .split(`${CONTEXTS_TOKEN}/`).join(`${contextsDir}${path.sep}`)
-    .split(CONTEXTS_TOKEN).join(contextsDir);
+// AC가 넣은 import 줄. 체크아웃 위치가 달라도 같은 줄로 알아보게 경로 꼬리로 가른다.
+const AC_IMPORT_LINE = /^@\S*\/deploy\/(?:CLAUDE\.md|rules\/\S+\.md)$/;
+
+// import 줄이 가리킬 원본은 본 체크아웃의 `deploy/`다. 워크트리에서 sync해도 워크트리 경로를 박으면,
+// 워크트리를 지우는 순간 전역 규칙이 조용히 사라진다.
+function importSourceDir() {
+  const result = childProcess.spawnSync('git', ['-C', repoDir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' });
+  if (result.status !== 0) return sourceDir;
+  return path.join(path.dirname(path.resolve(result.stdout.trim())), 'deploy');
 }
 
-// 배포된 rules/ 하위 md의 자리표시자를 채운다. 산출물만 고치고 소스는 건드리지 않는다.
-function resolveRulePaths(targetDir) {
-  for (const file of collectMarkdown(path.join(targetDir, 'rules'))) {
-    const raw = fs.readFileSync(file, 'utf8');
-    const updated = withContextsPath(raw, targetDir);
-    if (updated !== raw) fs.writeFileSync(file, updated, 'utf8');
+// 홈 아래 경로는 `~/`로 적는다. 기기마다 사용자 이름이 달라도 같은 줄이 된다.
+function importPath(file) {
+  const rel = path.relative(os.homedir(), file);
+  const inHome = rel !== '' && !rel.startsWith('..') && !path.isAbsolute(rel);
+  return inHome ? `~/${rel.split(path.sep).join('/')}` : file.split(path.sep).join('/');
+}
+
+function claudeImportLines(srcRoot = importSourceDir()) {
+  const files = [...IMPORTED_ROOT_FILES]
+    .map((name) => path.join(srcRoot, name))
+    .filter((file) => fs.existsSync(file));
+  files.push(...collectMarkdown(path.join(srcRoot, 'rules')));
+  return files.map((file) => `@${importPath(file)}`);
+}
+
+function hasAcImportLine(content) {
+  return content.split(/\r?\n/).some((row) => AC_IMPORT_LINE.test(row.trim()));
+}
+
+// 예전 sync가 통째로 복사해 둔 사본인가. 지금 원본만이 아니라 git 이력의 모든 버전과 대조한다 —
+// pull로 원본이 함께 바뀐 기기에는 옛 버전 사본이 남아 있다. 어느 것과도 다르면 사용자가 쓴 파일이다.
+function isPastClaudeMdCopy(content) {
+  const normalize = (text) => text.replace(/\r\n/g, '\n');
+  const target = normalize(content);
+  const current = path.join(sourceDir, 'CLAUDE.md');
+  if (fs.existsSync(current) && normalize(fs.readFileSync(current, 'utf8')) === target) return true;
+  const git = (args) => childProcess.spawnSync('git', ['-C', repoDir, ...args], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
+  const history = git(['log', '--format=%H', '--', 'deploy/CLAUDE.md']);
+  if (history.status !== 0) return false;
+  return history.stdout.split('\n').filter(Boolean).some((sha) => {
+    const shown = git(['show', `${sha}:deploy/CLAUDE.md`]);
+    return shown.status === 0 && normalize(shown.stdout) === target;
+  });
+}
+
+function trimBlankEdges(rows) {
+  let start = 0;
+  let end = rows.length;
+  while (start < end && rows[start].trim() === '') start += 1;
+  while (end > start && rows[end - 1].trim() === '') end -= 1;
+  return rows.slice(start, end);
+}
+
+// AC import 줄을 뺀 나머지(사용자가 적은 줄).
+function userRows(content) {
+  return trimBlankEdges(content.split(/\r?\n/).filter((row) => !AC_IMPORT_LINE.test(row.trim())));
+}
+
+// 타겟 CLAUDE.md의 새 내용. 예전 사본이면 import 줄로 바꾸고(남기면 같은 규칙이 두 번 실린다),
+// 사용자가 쓴 줄은 import 줄 아래에 남긴다.
+function claudeMdContent(current, lines) {
+  const head = `${lines.join('\n')}\n`;
+  if (current === null) return head;
+  const kept = hasAcImportLine(current) ? userRows(current)
+    : isPastClaudeMdCopy(current) ? []
+      : trimBlankEdges(current.split(/\r?\n/));
+  return kept.length > 0 ? `${head}\n${kept.join('\n')}\n` : head;
+}
+
+// 예전 sync가 타겟 `rules/`에 복사한 원본 이름의 파일을 지운다. 남기면 import와 함께 두 번 실린다.
+// 타겟 CLAUDE.md에 AC import 줄이 없을 때(첫 전환, 사용자가 줄을 지운 뒤 다시 sync)만 부른다.
+// import 줄이 있는 동안 사용자가 같은 이름으로 만든 파일은 사용자 것이다.
+function retireRuleCopies(targetDir, log, srcRoot = sourceDir) {
+  const srcRules = path.join(srcRoot, 'rules');
+  const targetRules = path.join(targetDir, 'rules');
+  let removed = 0;
+  for (const file of collectMarkdown(srcRules)) {
+    const rel = path.relative(srcRules, file);
+    const copy = path.join(targetRules, rel);
+    if (!fs.existsSync(copy)) continue;
+    removePath(copy);
+    log(`  DEL   rules/${rel.replaceAll(path.sep, '/')}`);
+    removed += 1;
   }
-}
-
-// 배포할 rules/ 내용. resolveRulePaths와 같은 결과를 파일에 쓰기 전에 만든다.
-function ruleEntries(srcDir, targetDir) {
-  return readTreeEntries(srcDir, (rel, buf) => (
-    rel.endsWith('.md') ? Buffer.from(withContextsPath(buf.toString('utf8'), targetDir), 'utf8') : buf
-  ));
-}
-
-// rules/ 대조: 자리표시자를 채운 결과와 일치해야 한다.
-function compareRulePaths(src, target, targetDir) {
-  if (!fs.existsSync(src) || !fs.existsSync(target)) return false;
-  const sources = collectMarkdown(src);
-  if (sources.length !== collectMarkdown(target).length) return false;
-
-  for (const file of sources) {
-    const mirrored = path.join(target, path.relative(src, file));
-    if (!fs.existsSync(mirrored)) return false;
-    const expected = withContextsPath(fs.readFileSync(file, 'utf8'), targetDir);
-    if (expected !== fs.readFileSync(mirrored, 'utf8')) return false;
+  if (fs.existsSync(targetRules) && fs.statSync(targetRules).isDirectory() && listFilesRelative(targetRules).length === 0) {
+    removePath(targetRules);
   }
-  return true;
+  return removed;
+}
+
+function deployClaudeImports(targetDir, log, srcRoot = importSourceDir()) {
+  const file = path.join(targetDir, 'CLAUDE.md');
+  const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+  const transition = current === null || !hasAcImportLine(current);
+  const changed = writeFileLogged(file, claudeMdContent(current, claudeImportLines(srcRoot)), log, 'CLAUDE.md (import)');
+  return changed + (transition ? retireRuleCopies(targetDir, log) : 0);
+}
+
+// 대조: AC import 줄이 원본 목록과 같은 순서로 다 있다.
+function verifyClaudeImports(targetDir, srcRoot = importSourceDir()) {
+  const file = path.join(targetDir, 'CLAUDE.md');
+  if (!fs.existsSync(file)) return false;
+  const actual = fs.readFileSync(file, 'utf8').split(/\r?\n/).map((row) => row.trim()).filter((row) => AC_IMPORT_LINE.test(row));
+  return actual.join('\n') === claudeImportLines(srcRoot).join('\n');
+}
+
+// AC import 줄만 걷는다. 사용자가 적은 줄이 남으면 파일을 두고, 없으면 지운다. import 줄 없는 파일은
+// 예전 사본일 때만 지우고(그 사본이 둔 rules 사본도 함께), 사용자가 쓴 파일이면 손대지 않는다.
+function uninstallClaudeImports(targetDir, log) {
+  const file = path.join(targetDir, 'CLAUDE.md');
+  if (!fs.existsSync(file)) return 0;
+  const content = fs.readFileSync(file, 'utf8');
+  if (!hasAcImportLine(content)) {
+    if (!isPastClaudeMdCopy(content)) return 0;
+    removePath(file);
+    log('  DEL   CLAUDE.md');
+    return 1 + retireRuleCopies(targetDir, log);
+  }
+  const rest = userRows(content);
+  if (rest.length > 0) {
+    fs.writeFileSync(file, `${rest.join('\n')}\n`, 'utf8');
+    log('  EDIT  CLAUDE.md (ai-contexts가 넣은 import 줄만 걷음)');
+    return 0;
+  }
+  removePath(file);
+  log('  DEL   CLAUDE.md');
+  return 1;
 }
 
 // 머지된 settings.json 옆에 AC가 넣은 top-level 키 목록을 기록하는 사이드카.
@@ -331,6 +421,8 @@ function withSkillDirPath(content, skillDir) {
 function contextsDirForSkill(skillDir) {
   return path.resolve(skillDir, '..', '..', 'contexts');
 }
+
+const CONTEXTS_TOKEN = '{{contexts}}';
 
 // 여러 스킬이 함께 쓰는 contexts 스크립트를 부를 때 쓴다. `{{skill_dir}}`은 자기 폴더와 형제 스킬
 // 폴더만 가리킬 수 있어 이 경우를 못 덮는다.
@@ -477,10 +569,11 @@ function deployRootFiles(targetDir, log) {
   let changed = 0;
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (SOURCE_ONLY_ROOT_FILES.has(entry.name)) continue;
+    if (SOURCE_ONLY_ROOT_FILES.has(entry.name) || IMPORTED_ROOT_FILES.has(entry.name)) continue;
 
     changed += writeFileLogged(path.join(targetDir, entry.name), fs.readFileSync(path.join(sourceDir, entry.name)), log, entry.name);
   }
+  changed += deployClaudeImports(targetDir, log);
 
   if (mergeSettings(claudeSettingsObject(), path.join(targetDir, 'settings.json'))) {
     log('  MERGE settings.json');
@@ -489,12 +582,11 @@ function deployRootFiles(targetDir, log) {
   return changed;
 }
 
-// rules·contexts·hooks 중 하나를 원본 상태로 맞춘다. 폴더 전체가 AC 소유라 원본에 없는 파일은 지운다.
+// contexts·hooks 중 하나를 원본 상태로 맞춘다. 폴더 전체가 AC 소유라 원본에 없는 파일은 지운다.
 function deployCategory(targetDir, category, log, srcRoot = sourceDir) {
   const src = path.join(srcRoot, category);
   if (!fs.existsSync(src) || !fs.statSync(src).isDirectory()) return 0;
-  const entries = category === 'rules' ? ruleEntries(src, targetDir) : readTreeEntries(src);
-  return logTreeChanges(log, `${category}/`, syncTree(path.join(targetDir, category), entries));
+  return logTreeChanges(log, `${category}/`, syncTree(path.join(targetDir, category), readTreeEntries(src)));
 }
 
 // 예전 배포에만 있던 카테고리가 남아 있으면 지운다.
@@ -548,10 +640,11 @@ function uninstallTarget(targetDir, options = {}) {
   }
 
   removed += uninstallSkills(targetDir, log);
+  removed += uninstallClaudeImports(targetDir, log);
 
   for (const entry of listEntries(sourceDir)) {
     if (!entry.isFile()) continue;
-    if (SOURCE_ONLY_ROOT_FILES.has(entry.name)) continue;
+    if (SOURCE_ONLY_ROOT_FILES.has(entry.name) || IMPORTED_ROOT_FILES.has(entry.name)) continue;
 
     const target = path.join(targetDir, entry.name);
     if (fs.existsSync(target) && fs.statSync(target).isFile()) {
@@ -588,8 +681,13 @@ function unsetWtAddAlias(log = console.log) {
 
 export {
   CATEGORIES,
+  IMPORTED_ROOT_FILES,
   SOURCE_ONLY_ROOT_FILES,
   baseSettingsSource,
+  claudeImportLines,
+  deployClaudeImports,
+  uninstallClaudeImports,
+  verifyClaudeImports,
   claudeSettingsObject,
   comparePaths,
   compareSkillPaths,
@@ -611,10 +709,8 @@ export {
   skillEntries,
   syncTree,
   writeIfChanged,
-  compareRulePaths,
   renderSkillMd,
   renderSkillSubMd,
-  resolveRulePaths,
   withAnchor,
   removePath,
   unsetWtAddAlias,

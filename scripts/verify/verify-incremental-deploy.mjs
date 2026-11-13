@@ -4,20 +4,24 @@
 // 바뀌지 않은 파일까지 다시 쓰면 열려 있던 다른 세션이 그 스킬·문서를 모두 새로 받은 것으로
 // 알림받아 다시 읽는다. 배포 로그로는 드러나지 않으므로 임시 폴더에 실제 배포 함수를 돌려
 // 고정한다. 모든 쓰기는 자기 mkdtemp 폴더 안에서만 한다.
+import childProcess from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
 import {
   CATEGORIES,
+  claudeImportLines,
   copyPath,
   deployCategory,
+  deployClaudeImports,
   deploySkills,
   injectSkillName,
   listEntries,
-  resolveRulePaths,
   sourceDir,
+  uninstallClaudeImports,
   uninstallTarget,
+  verifyClaudeImports,
 } from '../lib/deploy-lib.mjs';
 import { copyLocalHooks } from '../local-system/local-deploy-lib.mjs';
 import { syncLocalSkills } from '../local-system/sync-local-skills.mjs';
@@ -55,7 +59,6 @@ function sameBytes(left, right) {
 // 지금까지의 배포 방식(통째로 복사한 뒤 그 자리에서 렌더)과 같은 결과를 만든다. 비교 기준이다.
 function legacyDeploy(targetDir) {
   for (const category of CATEGORIES) copyPath(path.join(sourceDir, category), path.join(targetDir, category));
-  resolveRulePaths(targetDir);
   for (const entry of listEntries(path.join(sourceDir, 'skills'))) {
     const dest = path.join(targetDir, 'skills', entry.name);
     copyPath(path.join(sourceDir, 'skills', entry.name), dest);
@@ -117,8 +120,55 @@ try {
 
   console.log('전역 배포 — unsync 뒤 잔여 없음');
   uninstallTarget(target, { log: quiet, removeAlias: false });
-  check('rules·contexts·hooks가 사라짐', CATEGORIES.every((category) => !fs.existsSync(path.join(target, category))));
+  check('contexts·hooks가 사라짐', CATEGORIES.every((category) => !fs.existsSync(path.join(target, category))));
   check('스킬은 외부 스킬만 남음', listEntries(path.join(target, 'skills')).map((entry) => entry.name).join() === 'vercel-react-best-practices');
+
+  console.log('전역 CLAUDE.md — 복사본을 import 줄로 바꾸고 unsync는 그 줄만 걷음');
+  const home = path.join(root, 'home');
+  const homeRules = path.join(home, 'rules');
+  const USER_LINE = 'user line';
+  const USER_NOTE = '# user note';
+  const imports = claudeImportLines();
+  const ruleNames = listEntries(path.join(sourceDir, 'rules')).filter((entry) => entry.isFile()).map((entry) => entry.name);
+  fs.mkdirSync(homeRules, { recursive: true });
+  fs.copyFileSync(path.join(sourceDir, 'CLAUDE.md'), path.join(home, 'CLAUDE.md'));
+  for (const name of ruleNames) fs.copyFileSync(path.join(sourceDir, 'rules', name), path.join(homeRules, name));
+  fs.writeFileSync(path.join(homeRules, 'mine.md'), '# 내 규칙\n');
+  deployClaudeImports(home, quiet);
+  check('예전 사본이 import 줄로 바뀜', fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n`);
+  check('import 줄이 원본 CLAUDE.md와 rules를 모두 가리킴', imports.length === 1 + ruleNames.length);
+  check('import 줄이 워크트리가 아니라 본 체크아웃을 가리킴', imports.every((line) => !line.includes('/.claude/worktrees/')));
+  check('rules/의 원본 이름 사본만 지워지고 사용자 rule은 남음',
+    ruleNames.every((name) => !fs.existsSync(path.join(homeRules, name))) && fs.existsSync(path.join(homeRules, 'mine.md')));
+  check('대조 통과', verifyClaudeImports(home));
+  fs.appendFileSync(path.join(home, 'CLAUDE.md'), `\n${USER_LINE}\n`);
+  const homeBefore = snapshotMtimes(home);
+  check('다시 돌리면 아무것도 안 씀(사용자 줄 포함)', deployClaudeImports(home, quiet) === 0
+    && changedMtimes(homeBefore, snapshotMtimes(home)).length === 0);
+  uninstallClaudeImports(home, quiet);
+  check('unsync 뒤 사용자 줄만 남음', fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${USER_LINE}\n`);
+  check('unsync 뒤 사용자 rule이 남음', fs.existsSync(path.join(homeRules, 'mine.md')));
+  fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${imports.join('\n')}\n`);
+  uninstallClaudeImports(home, quiet);
+  check('import 줄뿐이면 unsync가 파일을 지움', !fs.existsSync(path.join(home, 'CLAUDE.md')));
+
+  console.log('전역 CLAUDE.md — 사본인지는 원본 이력으로 가르고, 사용자 파일은 지우지 않음');
+  const firstSha = childProcess.execFileSync('git', ['-C', sourceDir, 'log', '--reverse', '--format=%H', '--', 'CLAUDE.md'], { encoding: 'utf8' }).split('\n')[0];
+  const oldCopy = childProcess.execFileSync('git', ['-C', sourceDir, 'show', `${firstSha}:deploy/CLAUDE.md`], { encoding: 'utf8' });
+  fs.writeFileSync(path.join(home, 'CLAUDE.md'), oldCopy);
+  deployClaudeImports(home, quiet);
+  check('옛 버전 사본도 import 줄로 바뀜', fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n`);
+  const ownRule = path.join(homeRules, ruleNames[0]);
+  fs.writeFileSync(ownRule, '# 전환 뒤 사용자가 만든 같은 이름 rule\n');
+  deployClaudeImports(home, quiet);
+  check('전환 뒤 만든 같은 이름 rule은 지우지 않음', fs.existsSync(ownRule));
+  fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${USER_NOTE}\n`);
+  deployClaudeImports(home, quiet);
+  check('사용자가 쓴 CLAUDE.md는 import 줄 아래에 남음',
+    fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n\n${USER_NOTE}\n`);
+  fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${USER_NOTE}\n`);
+  uninstallClaudeImports(home, quiet);
+  check('import 줄 없는 사용자 CLAUDE.md는 unsync가 지우지 않음', fs.existsSync(path.join(home, 'CLAUDE.md')));
 
   console.log('로컬 스킬 배포 — 다시 돌리면 아무것도 안 씀');
   const repo = path.join(root, 'repo');

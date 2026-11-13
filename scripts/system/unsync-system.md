@@ -2,7 +2,7 @@
 
 `node scripts/system/unsync-system.mjs [<타겟 폴더>]` 또는 `npm run unsync:system` — ai-contexts 레포 루트 기준 경로다.
 
-`sync-system.mjs`가 배포한 자산을 타겟에서 지운다.
+`sync-system.mjs`가 배포한 자산을 타겟에서 지운다. `CLAUDE.md`·`rules/`를 어떻게 다루는지는 [system.md](../../meta/guides/system.md)의 「제거」를 본다.
 
 ## 인자
 

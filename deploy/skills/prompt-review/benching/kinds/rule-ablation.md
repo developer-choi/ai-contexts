@@ -33,8 +33,8 @@ ZERO 비교군 워커가 제거한 규칙의 특징 어휘·구절을 응답에�
 
 ### 상속 경로 (구체 메커니즘)
 
-일반 세션·서브에이전트 워커는 `~/.claude/rules/`와 cwd `CLAUDE.md`를 자동 로드해 ZERO가 성립하지 않는다.
-배포된 규칙은 `{{skill_dir}}/benching/scripts/bench-ablation.mjs`로 잰다. 격리는 스크립트가 맡고, 인자·eval-set 스키마는 [../scripts/bench-ablation.md](../scripts/bench-ablation.md)를 본다.
+일반 세션·서브에이전트 워커는 사용자 메모리(`~/.claude/CLAUDE.md`와 그 import, `~/.claude/rules/`)와 cwd `CLAUDE.md`를 자동 로드해 ZERO가 성립하지 않는다.
+전역 규칙은 `{{skill_dir}}/benching/scripts/bench-ablation.mjs`로 잰다. 격리는 스크립트가 맡고, 인자·eval-set 스키마는 [../scripts/bench-ablation.md](../scripts/bench-ablation.md)를 본다.
 배포본을 비교군마다 갈아끼우지 않는다(다른 세션까지 오염).
 
 ### 단일 측정만으로는 확정 불가

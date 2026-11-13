@@ -13,11 +13,14 @@ import path from 'node:path';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const ROOT = 'deploy/skills';
-// contexts·rules도 배포돼 스킬과 같이 읽힌다. 스킬만 보던 시절 `deploy/contexts/`의
+// contexts·rules도 스킬과 같이 읽힌다. 스킬만 보던 시절 `deploy/contexts/`의
 // 사용법 주석이 `~/.claude/...`를 박아둔 채 남아 있었고, 검사기는 `~`를 앵커로 쳐서 통과시켰다.
 const EXTRA_ROOTS = ['deploy/contexts', 'deploy/rules'];
 // 배포 홈을 박은 경로. 자리표시자로 적어야 배포가 실제 위치로 채운다.
 const AGENT_HOME = /^~[\\/]\.claude\b/;
+// rules는 렌더링 없이 `~/.claude/CLAUDE.md`의 import로 원본 그대로 읽혀 자리표시자를 쓸 수 없다.
+// 그래서 배포 홈 경로 검사에서만 뺀다(실행 위치 상대경로 검사는 받는다).
+const NO_PLACEHOLDER_ROOTS = new Set(['deploy/rules']);
 
 // 인터프리터 + (옵션들) + 스크립트 파일 경로. 산문에 나온 파일 이름은 잡지 않는다.
 const INVOCATION = /(?:^|[\s(`"'&|])(?:node|python3?|python\.exe|tsx|bash|sh|npx)\s+(?:--?[\w-]+\s+)*([^\s`"'|;)]+\.(?:mjs|cjs|js|ts|mts|py|sh))/g;
@@ -58,7 +61,7 @@ for (const root of roots) {
       for (const match of line.matchAll(INVOCATION)) {
         const raw = match[1];
         const where = { file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() };
-        if (AGENT_HOME.test(raw)) {
+        if (AGENT_HOME.test(raw) && !NO_PLACEHOLDER_ROOTS.has(root)) {
           agentHome.push(where);
           continue;
         }
@@ -74,8 +77,24 @@ for (const root of roots) {
   }
 }
 
+// import로 원본 그대로 읽히는 곳에 자리표시자가 있으면 채워지지 않고 문자 그대로 읽힌다.
+const unrendered = [];
+for (const file of [path.join(repoRoot, 'deploy', 'CLAUDE.md'), ...[...NO_PLACEHOLDER_ROOTS].flatMap((root) => collect(path.join(repoRoot, root)))]) {
+  if (!fs.existsSync(file)) continue;
+  fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach((line, index) => {
+    if (/\{\{\w+\}\}/.test(line)) unrendered.push({ file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() });
+  });
+}
+
+if (unrendered.length > 0) {
+  console.error('렌더링되지 않는 곳의 자리표시자:');
+  for (const { file, lineNo, line } of unrendered) console.error(`  ${file}:${lineNo}: ${line}`);
+  console.error('');
+  console.error('전역 CLAUDE.md·rules는 `@` import로 원본 그대로 읽혀 자리표시자가 채워지지 않는다. contexts는 `~/.claude/contexts/<파일>`로 적는다.');
+}
+
 if (offenders.length > 0) {
-  console.error('실행 위치에 따라 달라지는 스크립트 호출:');
+  console.error(`${unrendered.length ? '\n' : ''}실행 위치에 따라 달라지는 스크립트 호출:`);
   for (const { file, lineNo, line } of offenders) console.error(`  ${file}:${lineNo}: ${line}`);
   console.error('');
   console.error('스크립트가 스킬 폴더에 있으면 `{{skill_dir}}/<경로>`로 적는다 — 배포가 절대경로로 채운다.');
@@ -98,6 +117,6 @@ if (agentHome.length > 0) {
   console.error('`{{contexts}}/<파일>`·`{{skill_dir}}/<경로>`로 적으면 배포가 실제 절대경로로 채운다.');
 }
 
-if (offenders.length + missing.length + agentHome.length > 0) process.exit(1);
+if (unrendered.length + offenders.length + missing.length + agentHome.length > 0) process.exit(1);
 
 console.log(`${roots.join('·')} 스크립트 호출 모두 실행 위치 무관, 가리키는 파일 실재`);

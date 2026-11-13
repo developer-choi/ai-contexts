@@ -25,7 +25,7 @@ npm run sync:local-system
 
 | 디렉터리 | 역할 | 배포 여부 |
 |-----------|------|-----------|
-| `deploy/rules/` | 전역 AI 행동 규칙 | 배포됨 |
+| `deploy/rules/` | 전역 AI 행동 규칙 | 배포 안 됨(`@` import로 읽힘, [system.md](meta/guides/system.md)) |
 | `deploy/skills/` | 스킬 정의 (workflow, code-review 등) | 배포됨 |
 | `deploy/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | 배포됨 |
 | `meta/` | 프로젝트 관리 문서 (설치 가이드, 아키텍처 결정) | 배포 안 됨 |

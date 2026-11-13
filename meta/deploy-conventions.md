@@ -34,9 +34,11 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 `local/<X>`를 `.claude/<
 
 - 예외로 스킬 폴더의 md는 렌더링해 배포한다(`deploy-lib.mjs`의 `renderSkillMd`·`renderSkillSubMd` — 전역 `sync:system`도 같다). 무엇을 바꾸는지와 그 이유는 그 함수 주석이 정본이고, 배포 검증은 렌더 결과와 대조한다.
 
-## 스킬·규칙 md의 자리표시자 렌더링
+## 스킬 md의 자리표시자 렌더링
 
-배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`와 규칙 md의 `{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`·`withContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`·`compareRulePaths`가 고정한다. 렌더링을 바꾸면 그 검사를 함께 맞춘다.
+배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`가 고정한다. 렌더링을 바꾸면 그 검사를 함께 맞춘다.
+
+전역 `CLAUDE.md`·`deploy/rules/`는 `@` import로 원본 그대로 읽혀([system.md](guides/system.md)) 렌더링 단계가 없다.
 
 ## plugin으로 옮긴 스킬
 
