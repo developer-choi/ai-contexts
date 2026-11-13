@@ -62,7 +62,11 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 | WORKFLOW | workflow 특화 (대상이 workflow일 때) | [targets/workflow.md](targets/workflow.md) |
 | CODE | 스킬·규칙이 쓰는 코드·데이터의 이름 (대상 md가 부르는 스크립트·json 중 작업 브랜치에서 바뀐 것이 있을 때. 리뷰어가 직접 골라 그 파일만 본다) | [naming.md](~/.claude/contexts/coding-standards/rules/personal/naming.md) |
 
-대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 상대 경로는 그 체크아웃의 `plugins/ac/skills/prompt-review/`를 기준으로 풀고, `~/.claude/contexts/`로 적힌 링크는 그 체크아웃의 `deploy/contexts/`로, `~/.ai-contexts/<스크립트>`는 그 체크아웃의 `scripts/hooks/<스크립트>`로 바꿔 읽는다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
+대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 경로를 아래처럼 그 체크아웃 안으로 바꿔 읽는다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
+
+- 상대 경로: 그 체크아웃의 `plugins/ac/skills/prompt-review/` 기준
+- `~/.claude/contexts/`: 그 체크아웃의 `deploy/contexts/`
+- `~/.ai-contexts/<스크립트>`: 그 체크아웃의 `scripts/hooks/<스크립트>`
 
 ## 절차
 
