@@ -9,7 +9,7 @@ const LEGACY_CATEGORIES = ['agents', 'contexts', 'hooks'];
 
 const repoDir = path.resolve(import.meta.dirname, '..', '..');
 const sourceDir = path.join(repoDir, 'deploy');
-// 전역 스킬은 Claude Code plugin `ac`로 설치된다(meta/deploy-conventions.md 「plugin ac로 옮긴 스킬·hook·contexts」). sync는 스킬을
+// 전역 스킬은 Claude Code plugin `ac`로 설치된다([plugin ac로 옮긴 스킬·hook·contexts](meta/deploy-conventions.md#plugin-ac로-옮긴-스킬hookcontexts)). sync는 스킬을
 // 배포하지 않고, 예전 sync가 `<타겟>/skills/`에 배포해 둔 같은 이름의 사본만 지운다.
 const pluginSkillsDir = path.join(repoDir, 'plugins', 'ac', 'skills');
 const claudeSettingsSource = path.join(sourceDir, 'claude-settings.json');
