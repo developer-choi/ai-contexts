@@ -1,366 +1,467 @@
 [
   {
-    "type": "substring",
     "words": [
       "오라클"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "영어 oracle을 음역한 은어라 무엇이 합격·불합격을 정하는지 떠오르지 않는다",
-    "instead": "판정 기준 — 실행 결과로 가르면 「실행 결과로 판정」, 사람이 가르면 「사람이 판정」, 벤치면 「채점 정답 기준」",
-    "exclusions": []
+    "instead": "판정 기준 — 실행 결과로 가르면 「실행 결과로 판정」, 사람이 가르면 「사람이 판정」, 벤치면 「채점 정답 기준」"
   },
   {
-    "type": "prefix",
     "words": [
       "진실검사"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇이 진실인지 안 적힌 조어라 무엇과 대조하는 검사인지 모른다",
-    "instead": "원본(figma·테스트 결과)과 맞는지 보는 검사",
-    "exclusions": []
+    "instead": "원본(figma·테스트 결과)과 맞는지 보는 검사"
   },
   {
-    "type": "prefix",
     "words": [
       "미리팩토링"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "「미리 팩토링」으로 잘못 읽히는 조어다",
-    "instead": "리팩토링 전 코드",
-    "exclusions": []
+    "instead": "리팩토링 전 코드"
   },
   {
-    "type": "prefix",
     "words": [
       "이연"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "이연법인세"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "회계 용어라 개발 문서 독자가 뜻을 못 떠올린다",
-    "instead": "미룬다 / 다른 PR로 넘긴다",
-    "exclusions": []
+    "instead": "미룬다 / 다른 PR로 넘긴다"
   },
   {
-    "type": "prefix",
     "words": [
       "이설"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "토목 용어라 개발 문서 독자가 뜻을 못 떠올린다",
-    "instead": "옮긴다 / 옮겨 담는다",
-    "exclusions": []
+    "instead": "옮긴다 / 옮겨 담는다"
   },
   {
-    "type": "prefix",
     "words": [
       "비계"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "건설 현장 용어 비유라 뜻이 바로 안 온다",
-    "instead": "임시값 / 임시로 두는 것",
-    "exclusions": []
+    "instead": "임시값 / 임시로 두는 것"
   },
   {
-    "type": "prefix",
     "words": [
       "seam"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "seamless",
+      "(seam)"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 비유라 무엇과 무엇의 경계인지 안 보인다",
-    "instead": "책임 경계 (누가 무엇을 정하는지 갈리는 자리)",
-    "exclusions": []
+    "instead": "책임 경계 (누가 무엇을 정하는지 갈리는 자리)"
   },
   {
-    "type": "prefix",
     "words": [
       "굽지",
       "굽는"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "파일을 만든다는 뜻의 비유라 처음 읽는 사람은 뜻을 못 떠올린다",
-    "instead": "만든다 / 생성한다 / 미리 정해 박아 둔다",
-    "exclusions": []
+    "instead": "만든다 / 생성한다 / 미리 정해 박아 둔다"
   },
   {
-    "type": "prefix",
     "words": [
       "폴드"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 fold 음역이라 커밋을 어떻게 한다는 건지 모른다",
-    "instead": "원래 커밋에 합친다",
-    "exclusions": []
+    "instead": "원래 커밋에 합친다"
   },
   {
-    "type": "prefix",
     "words": [
       "재스택"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 restack 음역이라 무엇을 다시 한다는 건지 모른다",
-    "instead": "커밋 히스토리를 다시 쌓는다",
-    "exclusions": []
+    "instead": "커밋 히스토리를 다시 쌓는다"
   },
   {
-    "type": "prefix",
     "words": [
       "팔"
     ],
-    "why": "실험 설계의 arm을 직역한 은어라 신체 부위로 읽힌다",
-    "instead": "비교군 (규칙 있는 쪽·없는 쪽)",
+    "match": "PREFIX",
     "exclusions": [
       "팔아",
       "팔지",
       "팔고",
       "팔리",
-      "팔로우"
-    ]
+      "팔로우",
+      "팔았",
+      "팔린",
+      "팔려",
+      "팔렸",
+      "팔면",
+      "팔거",
+      "팔 시점"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "실험 설계의 arm을 직역한 은어라 신체 부위로 읽힌다",
+    "instead": "비교군 (규칙 있는 쪽·없는 쪽)"
   },
   {
-    "type": "prefix",
     "words": [
       "발사"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "실행을 발사로 부른 비유라 무엇을 몇 번 돌린다는 건지 모른다",
-    "instead": "실행 1회 / 본 실행",
-    "exclusions": []
+    "instead": "실행 1회 / 본 실행"
   },
   {
-    "type": "prefix",
     "words": [
       "눈금"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "누계를 눈금으로 부른 비유라 무엇이 차오르는지 모른다",
-    "instead": "누계 횟수",
-    "exclusions": []
+    "instead": "누계 횟수"
   },
   {
-    "type": "prefix",
     "words": [
       "그레인"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 grain 음역이라 뜻이 바로 안 온다",
-    "instead": "단위 (파일 단위·기능 단위)",
-    "exclusions": []
+    "instead": "단위 (파일 단위·기능 단위)"
   },
   {
-    "type": "prefix",
     "words": [
       "harvest"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "harvested"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 비유라 무엇을 거둔다는 건지 모른다",
-    "instead": "직전 단계를 실제로 돌려 그 출력을 받아 쓴다",
-    "exclusions": []
+    "instead": "직전 단계를 실제로 돌려 그 출력을 받아 쓴다"
   },
   {
-    "type": "prefix",
     "words": [
       "자기증명 루프"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "조어라 무엇이 무엇을 증명하는 순환인지 모른다",
-    "instead": "검증 대상이 스스로 정답을 정해 스스로 통과시키는 순환",
-    "exclusions": []
+    "instead": "검증 대상이 스스로 정답을 정해 스스로 통과시키는 순환"
   },
   {
-    "type": "prefix",
     "words": [
       "사문"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "한자어(死文)라 뜻이 바로 안 온다",
-    "instead": "아무도 안 부르는 문장",
-    "exclusions": []
+    "instead": "아무도 안 부르는 문장"
   },
   {
-    "type": "prefix",
     "words": [
       "진입 무게"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "조어라 무엇이 무거워진다는 건지 모른다",
-    "instead": "미리 읽어 두어 늘어나는 컨텍스트",
-    "exclusions": []
+    "instead": "미리 읽어 두어 늘어나는 컨텍스트"
   },
   {
-    "type": "prefix",
     "words": [
       "발행 청결"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "조어라 무엇이 깨끗해야 한다는 건지 모른다",
-    "instead": "발행본에 frontmatter 같은 작업 흔적이 남지 않은 상태",
-    "exclusions": []
+    "instead": "발행본에 frontmatter 같은 작업 흔적이 남지 않은 상태"
   },
   {
-    "type": "prefix",
     "words": [
       "표면 교정"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "조어라 무엇을 고친다는 건지 모른다",
-    "instead": "오탈자·띄어쓰기 수정",
-    "exclusions": []
+    "instead": "오탈자·띄어쓰기 수정"
   },
   {
-    "type": "prefix",
     "words": [
       "lede"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "저널리즘 용어라 개발 문서 독자가 모른다",
-    "instead": "제목 아래 첫 줄",
-    "exclusions": []
+    "instead": "제목 아래 첫 줄"
   },
   {
-    "type": "prefix",
     "words": [
       "ceremony"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 비유라 무엇을 가리키는지 모른다",
-    "instead": "형식적으로 붙는 부수 절차",
-    "exclusions": []
+    "instead": "형식적으로 붙는 부수 절차"
   },
   {
-    "type": "prefix",
     "words": [
       "무는 자리",
       "무는 시점"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "「물다」를 비용을 치른다는 뜻으로 쓴 비유라 「깨문다」로 읽힌다",
-    "instead": "문서를 불러와 비용을 치르는 자리 / 시점",
-    "exclusions": []
+    "instead": "문서를 불러와 비용을 치르는 자리 / 시점"
   },
   {
-    "type": "prefix",
     "words": [
       "판정하는 쪽이 진다"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "「짐을 진다」가 「패배한다」로 읽힌다",
-    "instead": "판정 재료는 판정하는 쪽이 맡는다",
-    "exclusions": []
+    "instead": "판정 재료는 판정하는 쪽이 맡는다"
   },
   {
-    "type": "prefix",
     "words": [
       "결을 읽"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "「결」 비유라 무엇을 읽는다는 건지 모른다",
-    "instead": "뉘앙스를 읽",
-    "exclusions": []
+    "instead": "뉘앙스를 읽"
   },
   {
-    "type": "substring",
     "words": [
       "기계 층"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇이 「기계」인지 안 드러나 채점 스크립트가 세는 단계인 줄 못 알아본다",
-    "instead": "하는 일을 적는다 — score.mjs 같은 채점 스크립트가 세는 단계면 「채점 스크립트 검사」",
-    "exclusions": []
+    "instead": "하는 일을 적는다 — score.mjs 같은 채점 스크립트가 세는 단계면 「채점 스크립트 검사」"
   },
   {
-    "type": "substring",
     "words": [
       "판정 층"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "누가 판정하는지 안 적힌 조어다",
-    "instead": "판정 주체를 적는다 — 리뷰어 서브에이전트가 판정하면 「리뷰어 판정」",
-    "exclusions": []
+    "instead": "판정 주체를 적는다 — 리뷰어 서브에이전트가 판정하면 「리뷰어 판정」"
   },
   {
-    "type": "prefix",
     "words": [
       "자족성",
       "자족적"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "한자어라 문서 독자가 뜻을 바로 못 잡는다",
-    "instead": "그 글만 읽고 이해되는지(다른 맥락 없이)",
-    "exclusions": []
+    "instead": "그 글만 읽고 이해되는지(다른 맥락 없이)"
   },
   {
-    "type": "prefix",
     "words": [
       "등재"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "한자어라 문서 독자가 뜻을 바로 못 잡는다",
-    "instead": "목록에 올린다",
-    "exclusions": []
+    "instead": "목록에 올린다"
   },
   {
-    "type": "prefix",
     "words": [
       "게이트"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "게이트웨이",
+      "게이트키퍼"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 확인하는 관문인지 안 적힌 외래어라 뜻을 바로 못 잡는다",
-    "instead": "ready를 달기 전 채워야 하는 문항이란 뜻이면 「Ready 요건」으로 정해 두었다(backlog projects/ready.md 「Ready 요건 — 자가검증」). 그 밖의 뜻이면 무엇을 확인하는지 풀어 쓴다 (예: rules-as-code의 두 게이트 → 두 가지 물음)",
-    "exclusions": []
+    "instead": "ready를 달기 전 채워야 하는 문항이란 뜻이면 「Ready 요건」으로 정해 두었다(backlog projects/ready.md 「Ready 요건 — 자가검증」). 그 밖의 뜻이면 무엇을 확인하는지 풀어 쓴다 (예: rules-as-code의 두 게이트 → 두 가지 물음)"
   },
   {
-    "type": "prefix",
     "words": [
       "엔진"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "무엇을 돌리는 장치인지 안 적힌 비유라 뜻을 바로 못 잡는다",
-    "instead": "가리키는 것의 실제 이름을 쓴다 (예: 리뷰 엔진 → impl-review-loop 스킬)",
-    "exclusions": []
+    "instead": "가리키는 것의 실제 이름을 쓴다 (예: 리뷰 엔진 → impl-review-loop 스킬)"
   },
   {
-    "type": "prefix",
     "words": [
       "렌즈"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 보는 관점인지 안 적힌 비유라 뜻을 바로 못 잡는다",
-    "instead": "관점 또는 무엇을 보는지 풀어 쓴다",
-    "exclusions": []
+    "instead": "관점 또는 무엇을 보는지 풀어 쓴다"
   },
   {
-    "type": "prefix",
     "words": [
       "코퍼스"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "외래어라 문서 독자가 뜻을 바로 못 잡는다",
-    "instead": "모아 둔 예문 묶음",
-    "exclusions": []
+    "instead": "모아 둔 예문 묶음"
   },
   {
-    "type": "prefix",
     "words": [
       "감사"
     ],
-    "why": "점검(audit)이라는 뜻의 한자어라 뜻을 바로 못 잡는다",
-    "instead": "점검",
+    "match": "PREFIX",
     "exclusions": [
       "감사합니다",
       "감사드립니다",
       "감사해",
       "감사히",
       "감사 구조",
-      "감사하죠"
-    ]
+      "감사하죠",
+      "감사하겠",
+      "감사자",
+      "감사 보고",
+      "이사·감사"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "점검(audit)이라는 뜻의 한자어라 뜻을 바로 못 잡는다",
+    "instead": "점검"
   },
   {
-    "type": "prefix",
     "words": [
       "갈래"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "사용자가 「갈래는 종류가맞아. 다 종류로 통일」로 정한 말 — 리뷰/실행 선택·항목 출신·지적 분류 등 여러 뜻으로 흩어져 쓰였다",
-    "instead": "「종류」로 쓴다",
-    "exclusions": []
+    "instead": "「종류」로 쓴다"
   },
   {
-    "type": "prefix",
     "words": [
       "브리프"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "영어 brief 음차라 사용자가 못 알아봄",
-    "instead": "「워커에게 주는 작업 지시」처럼 풀어 쓴다",
-    "exclusions": []
+    "instead": "「워커에게 주는 작업 지시」처럼 풀어 쓴다"
   },
   {
-    "type": "prefix",
     "words": [
       "누설"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇이 누구에게 새는지 안 드러나 사용자가 못 알아봄",
-    "instead": "「워커가 무엇을 재는지 알아챈다」처럼 무엇이 누구에게 드러나는지 풀어 쓴다",
-    "exclusions": []
+    "instead": "「워커가 무엇을 재는지 알아챈다」처럼 무엇이 누구에게 드러나는지 풀어 쓴다"
   },
   {
-    "type": "substring",
     "words": [
       "가드"
     ],
-    "why": "영어 guard를 소리대로 옮긴 말이라 무엇을 막는 규칙인지 바로 안 잡힌다(날조가드·상속 가드·[가드1] 같은 꼴 포함)",
-    "instead": "무엇을 막는지 풀어 쓴 이름(지어내지 않는다·리서치 사례를 저자 경험으로 쓰지 않는다 등)",
+    "match": "SUBSTRING",
     "exclusions": [
-      "타입 가드"
-    ]
+      "타입 가드",
+      "뱅가드",
+      "가드레일",
+      "라우트 가드",
+      "인증 가드",
+      "로그인 가드"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "영어 guard를 소리대로 옮긴 말이라 무엇을 막는 규칙인지 바로 안 잡힌다(날조가드·상속 가드·[가드1] 같은 꼴 포함)",
+    "instead": "무엇을 막는지 풀어 쓴 이름(지어내지 않는다·리서치 사례를 저자 경험으로 쓰지 않는다 등)"
   },
   {
-    "type": "prefix",
     "words": [
       "기댄",
       "기댈",
@@ -368,59 +469,74 @@
       "기대고",
       "기댔",
       "기대는",
-      "기대야"
+      "기대야",
+      "기대기"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "'의존한다' 자리에 '기댄다'를 쓰면 사용자가 매우 싫어하는 표현이다",
-    "instead": "의존한다",
-    "exclusions": []
+    "instead": "의존한다"
   },
   {
-    "type": "prefix",
     "words": [
       "외따로"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "AI가 즉석에서 만든 압축 표현이라 뜻이 바로 안 잡힌다",
-    "instead": "맥락 없이 단독으로",
-    "exclusions": []
+    "instead": "맥락 없이 단독으로"
   },
   {
-    "type": "substring",
     "words": [
       "맨몸 호출"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "AI가 즉석에서 만든 비유라 무슨 호출인지 바로 안 잡힌다",
-    "instead": "컴포넌트 없이 직접 호출",
-    "exclusions": []
+    "instead": "컴포넌트 없이 직접 호출"
   },
   {
-    "type": "prefix",
     "words": [
       "오검"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "오검출·오검사를 줄인 즉석 약칭이라 뜻이 안 잡힌다",
-    "instead": "잘못 걸림 · 엉뚱한 이유로 실패",
-    "exclusions": []
+    "instead": "잘못 걸림 · 엉뚱한 이유로 실패"
   },
   {
-    "type": "prefix",
     "words": [
       "증식"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "자산 증식"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "개수가 늘어나는 것을 생물 용어로 빗댄 즉석 비유라 바로 안 읽힌다",
-    "instead": "늘어남",
-    "exclusions": []
+    "instead": "늘어남"
   },
   {
-    "type": "prefix",
     "words": [
       "몫"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 해야 한다는 건지 가리키는 대상이 흐린 추상어라 읽는 쪽이 뜻을 짐작해야 한다",
-    "instead": "해야 하는 일·담당·책임",
-    "exclusions": []
+    "instead": "해야 하는 일·담당·책임"
   },
   {
-    "type": "prefix",
     "words": [
       "싸게",
       "싼",
@@ -429,105 +545,142 @@
       "싸서",
       "싸고"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "구어체라 글 톤에 맞지 않는다(사용자 지정)",
-    "instead": "저렴하게·저렴한·저렴하다",
-    "exclusions": []
+    "instead": "저렴하게·저렴한·저렴하다"
   },
   {
-    "type": "prefix",
     "words": [
       "시끄러운",
       "시끄럽다",
       "시끄러워",
       "시끄럽게"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "시끄럽게 드러"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "출력이 많다는 뜻을 비유로 돌려 말해 무엇이 많은지 짐작해야 한다(사용자 지정)",
-    "instead": "(임시, 확정 아님) 출력이 많은·출력이 긴 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「시끄러운」 항목)도 그 말로 고친다",
-    "exclusions": []
+    "instead": "(임시, 확정 아님) 출력이 많은·출력이 긴 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「시끄러운」 항목)도 그 말로 고친다"
   },
   {
-    "type": "prefix",
     "words": [
       "곁가지"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇에서 갈라져 나온 무슨 일인지 돌려 말해 읽는 쪽이 짐작해야 한다(사용자 지정)",
-    "instead": "(임시, 확정 아님) 주 목적에서 벗어난 작업 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「곁가지」 항목)도 그 말로 고친다",
-    "exclusions": []
+    "instead": "(임시, 확정 아님) 주 목적에서 벗어난 작업 — 문맥에 더 맞는 말이 떠오르면 그 말을 쓰고, 이 instead 값(ai-contexts/scripts/hooks/blocked-expressions.json의 「곁가지」 항목)도 그 말로 고친다"
   },
   {
-    "type": "substring",
     "words": [
       "원천"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [
+      "원천징수",
+      "원천 차단",
+      "원천적",
+      "단일 원천",
+      "진실 원천"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇의 출처인지 안 적힌 한자어라 figma인지 시안인지 테스트인지 떠오르지 않는다",
-    "instead": "가리키는 원본의 실제 이름을 쓴다 (예: figma, 마크업 시안, 테스트 실행 결과)",
-    "exclusions": []
+    "instead": "가리키는 원본의 실제 이름을 쓴다 (예: figma, 마크업 시안, 테스트 실행 결과)"
   },
   {
-    "type": "prefix",
     "words": [
       "충실"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "에 충실"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇과 얼마나 맞는지가 안 적힌 한자어라 뜻을 바로 못 잡는다",
-    "instead": "무엇과 맞는지를 풀어 쓴다 (예: figma와 맞는가, 시안과 같은가)",
-    "exclusions": []
+    "instead": "무엇과 맞는지를 풀어 쓴다 (예: figma와 맞는가, 시안과 같은가)"
   },
   {
-    "type": "prefix",
     "words": [
       "증분"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "증분 정적"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 한 번에 얼마만큼 하는지 안 적힌 한자어라 뜻을 바로 못 잡는다",
-    "instead": "한 번에 구현·리뷰하는 단위의 실제 이름을 쓴다 (예: 컴포넌트 하나, 로직 커밋 하나)",
-    "exclusions": []
+    "instead": "한 번에 구현·리뷰하는 단위의 실제 이름을 쓴다 (예: 컴포넌트 하나, 로직 커밋 하나)"
   },
   {
-    "type": "prefix",
     "words": [
       "아티팩트"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 가리키는지 안 적힌 외래어라 뜻을 바로 못 잡는다",
-    "instead": "그 파일·산출물의 실제 이름을 쓴다 (예: figma URL 파일, stub 파일)",
-    "exclusions": []
+    "instead": "그 파일·산출물의 실제 이름을 쓴다 (예: figma URL 파일, stub 파일)"
   },
   {
-    "type": "prefix",
     "words": [
       "전사"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "옮겨 적기를 뜻하는 한자어라 무엇을 하지 말라는지 바로 떠오르지 않는다",
-    "instead": "옮겨 적기",
-    "exclusions": []
+    "instead": "옮겨 적기"
   },
   {
-    "type": "prefix",
     "words": [
       "구어"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "사용자가 「구어 예시 일반화」를 듣고 무슨 말인지 못 알아봤다",
-    "instead": "말투, 입말",
-    "exclusions": []
+    "instead": "말투, 입말"
   },
   {
-    "type": "prefix",
     "words": [
       "상위어"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "언어학 용어라 무엇을 말하는지 바로 안 잡힌다",
-    "instead": "더 넓은 말·뭉뚱그린 말",
-    "exclusions": []
+    "instead": "더 넓은 말·뭉뚱그린 말"
   },
   {
-    "type": "prefix",
     "words": [
       "되감"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "되감기",
+      "되감을"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 어디로 되돌린다는 건지 비유가 안 잡힌다",
-    "instead": "바꿔 부르다·도로 넓히다",
-    "exclusions": []
+    "instead": "바꿔 부르다·도로 넓히다"
   },
   {
-    "type": "prefix",
     "words": [
       "짜다",
       "짜고",
@@ -539,14 +692,17 @@
       "짜면",
       "짜야",
       "짜둔",
-      "짜놓은"
+      "짜놓은",
+      "짜던"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "코드를 짠다는 말을 사용자가 낯설어하고 거부했다(PR 본문에서 지적)",
-    "instead": "만들다·구현하다·작성하다 중 뜻에 맞는 말",
-    "exclusions": []
+    "instead": "만들다·구현하다·작성하다 중 뜻에 맞는 말"
   },
   {
-    "type": "prefix",
     "words": [
       "다루다",
       "다루고",
@@ -555,12 +711,14 @@
       "다루는",
       "다룬"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 한다는 건지 흐릿해 사용자가 거부했다(PR 본문에서 지적)",
-    "instead": "처리하다·조회하다·저장하다처럼 실제로 하는 일을 가리키는 말",
-    "exclusions": []
+    "instead": "처리하다·조회하다·저장하다처럼 실제로 하는 일을 가리키는 말"
   },
   {
-    "type": "prefix",
     "words": [
       "넘겨받다",
       "넘겨받는",
@@ -569,12 +727,14 @@
       "넘겨받아",
       "넘겨받고"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 받는다는 건지 흐릿해 사용자가 거부했다(PR 제목에서 지적)",
-    "instead": "옮기다·이전하다처럼 실제로 일어나는 일을 가리키는 말",
-    "exclusions": []
+    "instead": "옮기다·이전하다처럼 실제로 일어나는 일을 가리키는 말"
   },
   {
-    "type": "prefix",
     "words": [
       "옮겨 가다",
       "옮겨 갈",
@@ -582,26 +742,28 @@
       "옮겨 간",
       "옮겨 가고"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "어색한 표현이라 사용자가 거부했다(PR 제목에서 지적)",
-    "instead": "옮기다·이전하다",
-    "exclusions": []
+    "instead": "옮기다·이전하다"
   },
   {
-    "type": "prefix",
     "words": [
-      "견주어",
-      "견주고",
-      "견주다",
       "견준",
       "견줘",
-      "견주었"
+      "견줬",
+      "견주"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "사용자가 일상에서 안 쓰는 말이라 바로 읽히지 않음(api-base PR 본문 코멘트)",
-    "instead": "비교하다",
-    "exclusions": []
+    "instead": "비교하다"
   },
   {
-    "type": "prefix",
     "words": [
       "잇는",
       "잇다",
@@ -610,23 +772,29 @@
       "잇습니다",
       "이으",
       "이은",
-      "이을"
+      "이을",
+      "잇거나",
+      "이어진"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "무엇을 어떻게 연결한다는 건지 바로 읽히지 않음(api-base PR 본문 코멘트)",
-    "instead": "연결하다",
-    "exclusions": []
+    "instead": "연결하다"
   },
   {
-    "type": "prefix",
     "words": [
       "엶"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "열다의 명사형 「엶」은 낯설어 낱말로 알아보지 못한다",
-    "instead": "열기 / 엽니다",
-    "exclusions": []
+    "instead": "열기 / 엽니다"
   },
   {
-    "type": "prefix",
     "words": [
       "더하",
       "더한",
@@ -635,43 +803,54 @@
       "더해",
       "더했"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "기능·항목을 넣는 일을 「더하다」로 쓰면 사용자가 어색하게 읽는다. 사용자가 「추가」로 쓰라고 지정함",
-    "instead": "추가하다(추가했습니다·추가한·추가해)",
-    "exclusions": []
+    "instead": "추가하다(추가했습니다·추가한·추가해)"
   },
   {
-    "type": "prefix",
     "words": [
       "틈"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "틈틈",
+      "틈새"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "조회와 넣기 사이처럼 시간 간격을 틈으로 쓰면 사용자가 어색하게 읽는다(사용자 지정)",
-    "instead": "그 사이에 다른 요청이 끼어들 수 있다 / 결과를 기다리는 동안",
-    "exclusions": []
+    "instead": "그 사이에 다른 요청이 끼어들 수 있다 / 결과를 기다리는 동안"
   },
   {
-    "type": "prefix",
     "words": [
       "다녀오",
       "다녀온",
       "다녀와",
       "다녀올"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "DB에 요청하고 결과를 받는 일을 다녀오다로 쓰면 사용자가 거부감을 느낀다(사용자 지정)",
-    "instead": "결과를 기다리는 동안 / 요청하고 결과를 받는다",
-    "exclusions": []
+    "instead": "결과를 기다리는 동안 / 요청하고 결과를 받는다"
   },
   {
-    "type": "substring",
     "words": [
       "「",
       "」"
     ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "낫표는 사용자가 쓰지 말라고 지정한 문장부호다. write-doc 글과 스킬·규칙 문서 모두에서 쓰지 않는다",
-    "instead": "화면 문구·인용은 큰따옴표, 버튼·UI 이름은 [대괄호], 강조는 굵게",
-    "exclusions": []
+    "instead": "화면 문구·인용은 큰따옴표, 버튼·UI 이름은 [대괄호], 강조는 굵게"
   },
   {
-    "type": "prefix",
     "words": [
       "깔리",
       "깔린",
@@ -679,24 +858,36 @@
       "깔아",
       "깔았"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "앱·도구가 설치된 것을 깔리다로 쓰면 사용자가 거부감을 느낀다(사용자 지정)",
-    "instead": "설치하다·설치된",
-    "exclusions": []
+    "instead": "설치하다·설치된"
   },
   {
-    "type": "prefix",
     "words": [
       "부르",
       "부른",
       "부릅",
       "불러"
     ],
+    "match": "PREFIX",
+    "exclusions": [
+      "라 부르",
+      "라고 부르",
+      "라 불러",
+      "라고 불러",
+      "불러오",
+      "불러온",
+      "불러올"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
     "why": "함수·서버를 부르다로 쓰면 사용자가 어색하게 읽는다(사용자 지정)",
-    "instead": "호출하다·호출한",
-    "exclusions": []
+    "instead": "호출하다·호출한"
   },
   {
-    "type": "prefix",
     "words": [
       "고르다",
       "고르는",
@@ -707,8 +898,380 @@
       "골랐",
       "고릅"
     ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
     "why": "고르다로 쓰면 사용자가 어색하게 읽는다(사용자 지정)",
-    "instead": "선택하다·선택한·선택했",
-    "exclusions": []
+    "instead": "선택하다·선택한·선택했"
+  },
+  {
+    "words": [
+      "빌려오",
+      "빌리기",
+      "바탕으로 삼"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "남의 것을 빌려 온다는 비유라 어색하고 오글거린다(사용자 지정)",
+    "instead": [
+      "참고하",
+      "참고",
+      "따르"
+    ]
+  },
+  {
+    "words": [
+      "두었으니"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "해 줬다는 시혜적인 어감으로 읽힌다",
+    "instead": "했었는데"
+  },
+  {
+    "words": [
+      "학습해",
+      "학습하",
+      "학습했"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "AI가 읽고 파악한 일을 학습으로 쓰면 모델 학습으로 오해된다",
+    "instead": [
+      "분석해",
+      "분석하",
+      "분석했"
+    ]
+  },
+  {
+    "words": [
+      "드러나",
+      "드러난",
+      "드러났",
+      "드러날"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇이 어디에 보인다는 건지 흐려 사용자가 금지했다",
+    "instead": "보이다 또는 알 수 있다"
+  },
+  {
+    "words": [
+      "가립니다",
+      "가리고",
+      "가려"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [
+      "가려는"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "판단한다는 뜻으로 가리다를 쓰면 숨긴다로 읽힌다",
+    "instead": [
+      "알아냅니다",
+      "알아내고",
+      "알아내"
+    ]
+  },
+  {
+    "words": [
+      "그릇"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "그릇 비유라 무엇을 담는 대상인지 이름이 안 보인다",
+    "instead": "비유 없이 대상 이름 그대로"
+  },
+  {
+    "words": [
+      "떨어지",
+      "떨어짐",
+      "떨어진"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "값을 받는 일을 떨어진다고 쓰면 구어라 PR 본문에 맞지 않는다(사용자 지정)",
+    "instead": "받다 또는 주어지다"
+  },
+  {
+    "words": [
+      "내주다",
+      "내주는",
+      "내주려",
+      "내주고",
+      "내준",
+      "내줘"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "제공한다는 뜻을 구어로 돌려 말해 사용자가 거부했다",
+    "instead": [
+      "제공하다",
+      "제공하는",
+      "제공하려",
+      "제공하고",
+      "제공한",
+      "제공해"
+    ]
+  },
+  {
+    "words": [
+      "쓰다",
+      "쓰는",
+      "쓰면",
+      "쓰지",
+      "쓰고",
+      "쓰게",
+      "쓰려",
+      "씁니다",
+      "써야",
+      "써서",
+      "썼"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "쓰다는 뜻이 여럿이라 사용인지 작성인지 문장에서 바로 안 갈린다(사용자 지정)",
+    "instead": "쓰다는 뜻이 여럿이니 문장에서 어느 뜻인지 먼저 판단한다. 사용의 뜻이면 사용하다로 바꾼다(쓰는 → 사용하는, 써야 → 사용해야). 글을 적는 뜻이면 작성하다 또는 적다로, 그 밖의 뜻(돈·시간을 들이다, 모자를 쓰다 등)이면 그 뜻을 바로 가리키는 말로 바꾼다"
+  },
+  {
+    "words": [
+      "갖추",
+      "갖춘",
+      "갖췄",
+      "갖출"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇을 했는지가 안 보이는 말이라 사용자가 어색하게 읽었다",
+    "instead": "만들다 또는 넣다처럼 한 일이 보이는 말"
+  },
+  {
+    "words": [
+      "걸립니다",
+      "걸린다"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "적용된다는 뜻으로 쓰면 '에러가 걸린다'처럼 오독된다",
+    "instead": [
+      "적용됩니다",
+      "적용된다"
+    ]
+  },
+  {
+    "words": [
+      "냅니다",
+      "낸다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "API·응답이 무엇을 한다는 건지 흐려 사용자가 못 알아봤다",
+    "instead": "처리합니다·반환합니다·응답합니다 중 실제로 하는 일"
+  },
+  {
+    "words": [
+      "업무 API"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무슨 API인지 안 보이는 말이라 사용자가 못 알아봤다",
+    "instead": [
+      "실제 기능 API"
+    ]
+  },
+  {
+    "words": [
+      "붙습니다",
+      "붙는"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "DB·서버에 연결한다는 뜻을 구어로 써서 어색하다",
+    "instead": "연결합니다·연결된다·연결되는"
+  },
+  {
+    "words": [
+      "입구"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "코드 진입점을 입구로 부르면 사용자가 매우 어색하게 읽는다",
+    "instead": "진입점(코드·패키지의 import 경로나 index 파일을 가리킬 때. 화면의 「소개 입구」 같은 UI 쓰임은 그대로)"
+  },
+  {
+    "words": [
+      "이음"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [
+      "이음새"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "연결을 억지로 명사형으로 만든 말이라 어색하다",
+    "instead": [
+      "연결"
+    ]
+  },
+  {
+    "words": [
+      "심어 준",
+      "심어준",
+      "심어 주"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "쿠키·토큰 발급을 심다로 빗대 뜻이 바로 안 온다",
+    "instead": "발급한·발급하(쿠키·토큰을 내줄 때)"
+  },
+  {
+    "words": [
+      "붙이는"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "경로·라우트를 만드는 일을 붙인다고 해 뜻이 흐리다",
+    "instead": "만드는(경로·라우트·컨트롤러를 만들 때. 라벨·헤더에 붙이는 쓰임은 그대로)"
+  },
+  {
+    "words": [
+      "~"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "DOC",
+    "lane": "NEEDS_REVIEW",
+    "why": "GitHub 마크다운에서 물결표 두 개 사이가 취소선이 된다",
+    "instead": "범위는 '1/5부터 2/5까지'처럼 풀어 쓴다"
+  },
+  {
+    "words": [
+      "켰습니다",
+      "켜서",
+      "켜면",
+      "켰다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "기능을 켠다는 구어라 활성화가 더 정확하다(사용자 지정)",
+    "instead": [
+      "활성화했습니다",
+      "활성화해서",
+      "활성화하면",
+      "활성화했다"
+    ]
+  },
+  {
+    "words": [
+      "한 벌",
+      "두 벌",
+      "세 벌"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "벌로 세는 비유라 하나로 모은 것인지 나뉜 것인지 안 보인다(사용자 지정)",
+    "instead": "한 곳에 둔·함께 사용하는(하나로 모은 것), 따로 두 곳에 있는(나뉜 것) 중 뜻에 맞게"
+  },
+  {
+    "words": [
+      "숫자 한계"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "한계로 쓰면 무엇이 모자란다는 건지 흐리다. 범위가 맞는 말이다",
+    "instead": [
+      "숫자 범위"
+    ]
+  },
+  {
+    "words": [
+      "가 나면",
+      "이 나면",
+      "가 나서",
+      "이 나서",
+      "가 났",
+      "이 났"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "에러가 난다는 구어라 발생한다가 더 정확하다(사용자 지정)",
+    "instead": [
+      "가 발생하면",
+      "이 발생하면",
+      "가 발생해서",
+      "이 발생해서",
+      "가 발생했",
+      "이 발생했"
+    ]
+  },
+  {
+    "words": [
+      "돌려주다",
+      "돌려주면",
+      "돌려준",
+      "돌려줍니다",
+      "을 주면",
+      "를 주면"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "함수·HTTP가 하는 일을 주다로 쓰면 반환인지 응답인지 흐리다(사용자 지정)",
+    "instead": "반환하다 또는 응답하다 — 함수가 값을 내면 반환, HTTP 응답이면 응답(예: 401로 응답하면)"
+  },
+  {
+    "words": [
+      "—",
+      "–"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "대시(em dash·en dash)는 사용자가 보기 싫어하는 문장부호다. AI가 쓴 흔적으로 읽히고 한국어 구두점 관습에도 어긋난다",
+    "instead": "자리에 맞게 쉼표·쌍점·괄호로 바꾸거나 문장을 나눈다. 헤딩·링크·리스트 라벨은 쌍점"
   }
 ]

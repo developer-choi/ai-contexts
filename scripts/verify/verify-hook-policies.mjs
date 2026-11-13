@@ -117,9 +117,12 @@ const CASES = [
   ['check-git-commit-policy.mjs', "git commit a.txt -m'x'", 'pass', "-m'msg'도 메시지로 본다"],
   ['check-git-commit-policy.mjs', "git commit a.txt -sF- <<'MSG'\nfix: x\nMSG", 'pass', '짧은 옵션 묶음(-sF-)도 메시지로 본다'],
 
-  // --- 반려 표현(writing-guide/rejected.json): 두 레인 다 막는다. 낱말은 지금 목록의 항목이다 ---
-  ['check-git-commit-policy.mjs', 'git commit a.txt -m "docs: 세 갈래로 나눈다"', 'deny', 'ALWAYS_BANNED 레인 표현을 막는다'],
+  // --- 금지 표현 목록(scripts/hooks/blocked-expressions.json의 DOC·BOTH 행): 두 레인 다 막는다. 낱말은 지금 목록의 행이다 ---
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "docs: 두 안을 견줬다"', 'deny', 'ALWAYS_BANNED 레인 표현을 막는다'],
   ['check-git-commit-policy.mjs', 'git commit a.txt -m "fix: 스크립트를 불러 쓴다"', 'deny', 'NEEDS_REVIEW 레인 표현도 막는다'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "fix: 목록 — 대시"', 'deny', '대시도 막는다'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "fix: API 게이트웨이 주소를 고친다"', 'pass', '행의 exclusions에 든 꼴은 통과'],
+  ['check-git-commit-policy.mjs', 'git commit a.txt -m "docs: 1~3단계를 고친다"', 'deny', 'scope가 DOC인 행(물결표)도 커밋 메시지에 건다'],
   ['check-git-commit-policy.mjs', "git commit a.txt -F - <<'MSG'\nfix: x\n\n본문의 갈래\nMSG", 'deny', 'heredoc 본문도 본다'],
   ['check-git-commit-policy.mjs', "git commit a.txt -m @'\nfix: 갈래\n'@", 'deny', 'here-string 본문도 본다'],
   ['check-git-commit-policy.mjs', 'git commit 갈래.md -m "docs: x"', 'pass', '경로 인자의 낱말은 메시지가 아니다'],

@@ -81,7 +81,7 @@ function typeSteps(type, subtype) {
 export function guideFiles(type, subtype, step) {
   if (step === "draft") return { always: [...existing("common.md"), ...typeFiles(type, subtype, { template: true }), ...typeSteps(type, subtype)], conditional: [] };
   if (step === "polish") return { always: [...existing("common.md"), ...typeFiles(type, subtype, { template: false }), ...typeSteps(type, subtype)], conditional: [] };
-  if (step === "finish") return { always: [...existing("rejected.md"), ...typeSteps(type, subtype)], conditional: [] };
+  if (step === "finish") return { always: [...typeSteps(type, subtype)], conditional: [] };
   return {
     // 템플릿은 메인이 골격을 세울 때 보는 예시라 표현 판정 기준이 아니다 — 넘기면 리뷰어가 본문을 골격과 견준다.
     // 모든 글 반려 표현 목록은 넘기지 않는다 — 넘기면 반려가 쌓일수록 라운드마다 맥락이 는다.

@@ -136,7 +136,7 @@ for (const inv of commits) {
   }
 }
 
-// 사용자가 반려한 표현(writing-guide/rejected.json)이 AI가 쓴 커밋 메시지에 남는 것을 막는다.
+// 사용자가 반려한 표현(금지 표현 목록 중 scope가 DOC·BOTH인 행)이 AI가 쓴 커밋 메시지에 남는 것을 막는다.
 // 글 게시와 달리 레인을 가리지 않는다 — NEEDS_REVIEW 레인도 막는다(2026-11-09 사용자 결정: "커밋에서는 둘다 막게 하자").
 //
 // 메시지를 볼 수 있는 자리는 둘이다. 명령 글자(`-m "…"`, heredoc, here-string)는 첫 `git … commit` 호출부터
@@ -158,18 +158,19 @@ function messageFiles(args) {
 }
 
 async function rejectedInMessage() {
-  let entries;
-  let findRejectedHits;
+  let rows;
+  let findListHits;
   try {
     // 소스(deploy/hooks)와 배포본(<타겟>/hooks) 둘 다 한 단계 위가 skills의 부모다. 정적 import로 두면 write-doc이
     // 없는 기기에서 훅 전체가 죽어 위의 커밋 정책까지 함께 꺼진다 — 그래서 이 검사만 건너뛰게 동적으로 읽는다.
     const mod = await import("../skills/write-doc/scripts/rejected.mjs");
-    entries = mod.rejectedEntries(mod.loadRejected(mod.AC_REJECTED));
-    findRejectedHits = mod.findRejectedHits;
+    rows = mod.loadDocRows().rows;
+    findListHits = mod.findListHits;
   } catch {
-    // 목록이 없는 기기(배포 전)에서 커밋을 통째로 막지 않는다. 꼴 검사는 AC pre-commit이 맡는다.
-    return [];
+    rows = null;
   }
+  // 목록이 없는 기기(배포 전)에서 커밋을 통째로 막지 않는다. 꼴 검사는 AC pre-commit이 맡는다.
+  if (!rows) return [];
   // 세그먼트는 명령 글자를 그대로 자른 조각이라 indexOf로 자리를 되찾는다. 같은 줄의 `git add … && git commit`에서
   // 정규식으로 찾으면 앞의 `git add`부터 잡힌다.
   let callAt = -1;
@@ -200,7 +201,7 @@ async function rejectedInMessage() {
   }
   texts.unshift(scope);
   const lines = texts.flatMap((t) => t.split(/\r?\n|\\n|`n/)).map((ln, i) => [i + 1, ln]);
-  return findRejectedHits(lines, entries);
+  return findListHits(lines, rows);
 }
 
 const rejectedHits = await rejectedInMessage();

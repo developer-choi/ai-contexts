@@ -6,14 +6,15 @@
 //
 // 이미 굳힌 금지어 목록과 그 규칙의 상세는 아래 RULES가 함께 든다. 문서에는 사본을 두지 않는다 —
 // 기계가 100% 잡는 규칙을 문서에 적으면 그 규칙을 어길 글이든 아니든 매 회차 통째로 실린다.
-// 앞으로 새로 막을 낱말은 RULES가 아니라 writing-guide/rejected.json에 레인과 함께 올린다(아래).
+// 앞으로 새로 막을 낱말은 RULES가 아니라 금지 표현 목록(AC scripts/hooks/blocked-expressions.json)에 레인과 함께 올린다(아래).
 //
 // PR 제목(pr-body의 H1)도 여기서 본다: 끝 마침표·conventional commit 접두사·공백 포함 60자 초과는 합계에 든다.
 // 기준은 pr-body 가이드 「PR 제목」과 짝이다. 게시 때가 아니라 다듬기에서 잡혀야 제목을 다시 묻지 않는다.
 // pr-body 본문의 `#숫자` 중 GitHub가 PR 링크로 바꾸지 못하는 꼴(`#47에서`)도 합계에 든다.
 //
 // 사용자가 반려한 낱말·문구도 쌓인 두 곳에서 함께 잡는다.
-// - 모든 글: writing-guide/rejected.json(항목 꼴은 rejected.md). 배포본을 읽어서, 원본에 새로 올린 항목은 배포 뒤에 잡힌다.
+// - 모든 글: 금지 표현 목록 중 scope가 DOC·BOTH인 행(읽는 자리와 행 꼴은 rejected.mjs·blocked-expressions.mjs 머리 주석).
+//   대시·물결표도 이 목록의 행이다.
 //   읽은 자리나 건너뛴 까닭을 출력 첫머리에 한 줄 남긴다.
 // - 이 글만: 패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 사유가 쓰임에 걸린 것이 많아 경고로만 낸다.
 //   절·내용 항목은 리뷰어 몫이라 안 잡는다.
@@ -35,18 +36,7 @@
 // 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
 import fs from "node:fs";
 import { COMMENT_LINE, fenceTracker, stripCodeAndQuotes } from "./package-meta.mjs";
-import { AC_REJECTED, checkRejected, findRejectedHits, loadRejected, rejectedEntries } from "./rejected.mjs";
-
-function loadAcRejected() {
-  if (!fs.existsSync(AC_REJECTED)) return { entries: [], note: `건너뜀 — 파일 없음 (${AC_REJECTED})` };
-  const data = loadRejected(AC_REJECTED);
-  // 커밋 훅이 꼴을 막지만 배포본은 손으로 고쳐질 수 있다 — 어긋난 항목이 조용히 안 잡히지 않게 멈춘다.
-  const problems = checkRejected(data);
-  if (problems.length) throw new Error(`${AC_REJECTED} 꼴이 어긋남:\n${problems.join("\n")}`);
-  const entries = rejectedEntries(data);
-  const n = (lane) => entries.filter((e) => e.lane === lane).length;
-  return { entries, note: `읽음 ${AC_REJECTED} — ALWAYS_BANNED ${n("ALWAYS_BANNED")} · NEEDS_REVIEW ${n("NEEDS_REVIEW")}` };
-}
+import { findListHits, findRejectedHits, loadDocRows } from "./rejected.mjs";
 
 // PR 제목 기계 기준. pr-body 가이드 「PR 제목」과 짝이다.
 const CONVENTIONAL_PREFIX = /^(feat|fix|chore|refactor|docs|style|test|perf|build|ci|revert)(\([^)]*\))?!?:/i;
@@ -108,8 +98,6 @@ function internalCounts(type, subtype) {
   return !INTERNAL_AS_EVIDENCE.has(type) && subtype !== "recruitment";
 }
 
-const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
-
 // 낱말 목록과 규칙 상세(무엇이 문제이고 무엇으로 바꾸는가)가 여기 함께 산다.
 //
 // 왜 문서가 아니라 여기인가: 기계가 100% 잡는 규칙은 문서에 두면 그 규칙을 어길 글이든 아니든
@@ -119,11 +107,11 @@ const DASHES = { "—": "em-dash(U+2014)", "–": "en-dash(U+2013)" };
 // 못 내리는 것: 반려가 안 오는 규칙. 기계가 판정 못 하는 규칙을 문서에서 걷으면 적발 0건이
 // 「통과」로 읽혀 규칙이 그냥 사라진다. 그래서 common.md에는 판단이 드는 절만 남아 있다.
 // 「외래어 음차 회피」는 아는 낱말만 여기서 잡고, 처음 보는 음차는 독자 리뷰어가 「모르는 말」로 낸다 —
-// 그렇게 걸린 낱말은 반려 적재로 rejected.json에 쌓여 다음부터 여기서 잡힌다.
+// 그렇게 걸린 낱말은 반려 적재로 금지 표현 목록에 쌓여 다음부터 여기서 잡힌다.
 //
 // `warn: true`는 낱말이 아니라 쓰임이 걸리는 규칙(주어가 글쓴이일 때만 위반 등)이다. 매칭은 하되
 // 적발 합계에 넣지 않는다 — 합계는 0까지 밀어야 하는 값이라, 정상 문장이 걸릴 수 있는 항목을
-// 넣으면 멀쩡한 문장을 깎아야 0이 된다. rejected.json의 `ALWAYS_BANNED`·`NEEDS_REVIEW` 레인이 같은 갈림이다.
+// 넣으면 멀쩡한 문장을 깎아야 0이 된다. 금지 표현 목록의 `ALWAYS_BANNED`·`NEEDS_REVIEW` 레인이 같은 갈림이다.
 const RULES = {
   "딱딱한 한자어 회피": {
     words: ["유사", "파편화", "구조화", "이원화", "직렬화", "명세"],
@@ -149,45 +137,6 @@ const RULES = {
   "외래어 음차 회피": {
     words: ["디프리케이트"],
     what: "영어 기술 용어를 한글 음차로 옮기지 않는다. 원문 영어(`Soft Deprecated`)나 의미 번역(`신규 생성 차단`) 중 하나를 고른다.",
-  },
-  // 낱말 훅(`scripts/hooks/blocked-expressions.json`)의 금지 표현 중 독자용 글에서도 못 알아보는 것을
-  // 옮겨 왔다. 두 목록을 하나로 합치기 전까지는 사본이라, 그쪽에 행이 늘어도 여기는 안 따라온다.
-  // 뺀 것: `오라클`(Oracle DB)·`seam`(seamless)·`팔`(팔로우 등)은 substring 매칭이라 정상 낱말에 걸리고,
-  // `발사`·`눈금`은 KA 설명글에서 정상 비유로 쓰인다.
-  "은어·조어 회피": {
-    words: [
-      "진실검사", "미리팩토링", "이연", "이설", "비계", "굽지", "굽는", "폴드", "재스택", "그레인",
-      "harvest", "자기증명 루프", "사문", "날조가드", "상속 가드", "진입 무게", "인용 게이트",
-      "발행 청결", "표면 교정", "lede", "ceremony", "무는 자리", "무는 시점", "판정하는 쪽이 진다", "결을 읽",
-    ],
-    what: "작성 세션 안에서만 통하는 은어·조어·비유·음역이라 처음 읽는 사람이 뜻을 못 떠올린다. 풀어 쓴 말로 바꾼다.",
-    swap: {
-      진실검사: "원본(figma·테스트 결과)과 맞는지 보는 검사",
-      미리팩토링: "리팩토링 전 코드",
-      이연: "미룬다 · 다른 PR로 넘긴다",
-      이설: "옮긴다 · 옮겨 담는다",
-      비계: "임시값 · 임시로 두는 것",
-      굽지: "만든다 · 생성한다 · 미리 정해 박아 둔다",
-      굽는: "만든다 · 생성한다 · 미리 정해 박아 둔다",
-      폴드: "원래 커밋에 합친다",
-      재스택: "커밋 히스토리를 다시 쌓는다",
-      그레인: "단위 (파일 단위·기능 단위)",
-      harvest: "직전 단계를 실제로 돌려 그 출력을 받아 쓴다",
-      "자기증명 루프": "검증 대상이 스스로 정답을 정해 스스로 통과시키는 순환",
-      사문: "아무도 안 부르는 문장",
-      날조가드: "근거가 없으면 빈칸으로 두는 [지어내지 않는다] 규칙",
-      "상속 가드": "앞 단계의 제약을 다듬기에서도 그대로 지키는 것",
-      "진입 무게": "미리 읽어 두어 늘어나는 컨텍스트",
-      "인용 게이트": "그 절차의 실제 단계 이름",
-      "발행 청결": "발행본에 frontmatter 같은 작업 흔적이 남지 않은 상태",
-      "표면 교정": "오탈자·띄어쓰기 수정",
-      lede: "제목 아래 첫 줄",
-      ceremony: "형식적으로 붙는 부수 절차",
-      "무는 자리": "비용을 치르는 자리",
-      "무는 시점": "비용을 치르는 시점",
-      "판정하는 쪽이 진다": "판정 재료는 판정하는 쪽이 맡는다",
-      "결을 읽": "뉘앙스를 읽",
-    },
   },
   // 낱말 훅의 군더더기 범주 중 독자용 글에서도 늘어지는 꼴만 옮겼다. `기본적으로`·`사실상`·`또한`·`의 경우`는
   // KA 설명글에 정상 쓰임이 많아 넣지 않는다. 지우면 뜻이 바뀌는 자리도 있어 합계에서 뺀다.
@@ -220,14 +169,6 @@ const RULES = {
       "자기가 쓴 코드·구조를 두고 「~을 발견했습니다」·「~이 폭발합니다」처럼 과장해 서술하지 않는다. " +
       "**남의 산출물이나 외부 사실을 가리키는 자리면 정상이다** — 주어가 글쓴이 자신인지 보고 고른다.",
   },
-  // 낱말이 아니라 문자라 words가 없다. 검출은 DASHES가 하고 키를 그 라벨과 맞춘다.
-  "em-dash(U+2014)": {
-    what:
-      "직접 쓰는 본문·제목·헤딩·리스트·frontmatter 어디에도 쓰지 않는다. AI가 쓴 흔적으로 읽히고 " +
-      "한국어 구두점 관습(콜론·쉼표·마침표)에도 어긋난다. 대체는 자리에 맞게 — 헤딩·링크·리스트 라벨·코드 주석은 콜론, " +
-      "본문 인라인 강조는 마침표로 문장을 나눈다. 외부 인용 블록(`> `)은 원문 보존이라 검사에서 이미 빠져 있다.",
-  },
-  "en-dash(U+2013)": { what: "em dash와 같은 원칙으로 피한다. 대체도 같다." },
   "낫표 금지": {
     words: ["「", "」"],
     what: "낫표(「」)를 쓰지 않는다. 화면 문구는 큰따옴표로, 버튼·UI 요소 이름은 [대괄호]로 바꾼다.",
@@ -267,10 +208,13 @@ function printRules() {
   console.log("   PR 본문에는 이모지를 쓰지 않는다.");
   console.log(`\n## 「~화」 한자어  (경고 — 합계에서 뺌)`);
   console.log(`   패턴: 「명사 + 화」. 그 자체로 한 낱말인 것은 뺀다: ${[...HANJA_SUFFIX_ALLOW].join(", ")}`);
-  const ac = loadAcRejected();
-  console.log(`\n## 모든 글 반려 표현  (항목마다 ALWAYS_BANNED·NEEDS_REVIEW 레인)`);
-  console.log(`   ${ac.note}`);
-  for (const e of ac.entries) console.log(`   ${e.lane}: '${e.word}' 대신: ${e.swap}`);
+  const shared = loadDocRows();
+  console.log(`\n## 금지 표현 목록  (행마다 ALWAYS_BANNED·NEEDS_REVIEW 레인)`);
+  console.log(`   ${shared.note}`);
+  for (const row of shared.rows ?? []) {
+    const instead = Array.isArray(row.instead) ? row.instead.join("·") : row.instead;
+    console.log(`   ${row.lane}: ${row.words.map((word) => `'${word}'`).join("·")} 대신: ${instead}`);
+  }
   console.log(`\n## 이 글 반려  (경고 — 합계에서 뺌)`);
   console.log("   패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 절·내용 항목은 안 잡는다.");
 }
@@ -367,17 +311,6 @@ function findInternal(lines) {
       for (const m of shown.matchAll(new RegExp(rx.source, rx.flags))) {
         hits.push([cat, m[0], lineno, ln.trim()]);
       }
-    }
-  }
-  return hits;
-}
-
-function findDashes(lines) {
-  const hits = [];
-  for (const [ch, label] of Object.entries(DASHES)) {
-    for (const [lineno, ln] of lines) {
-      const c = ln.split(ch).length - 1;
-      if (c) hits.push([label, ch, lineno, ln.trim()]);
     }
   }
   return hits;
@@ -721,14 +654,14 @@ function main() {
   if (args.residual) {
     // 발행 직전 확인: 남은 주석이 있으면 줄을 내고 1로 끝난다. publish-pr를 안 거치는 발행처(README 등)가 쓴다.
     for (const [lineno, ln] of comments) console.log(`L${lineno}: ${ln.trim()}`);
-    console.log(comments.length ? `남은 주석 ${comments.length}건 — 처리하거나 지운 뒤 발행한다` : "남은 주석 없음");
+    console.log(comments.length ? `남은 주석 ${comments.length}건. 반영한 주석은 그 자리에서 지우므로 남은 것은 처리 안 된 요청이다. 처리하거나 사용자 확인을 받아 지운 뒤 다시 돌린다` : "남은 주석 없음");
     process.exit(comments.length ? 1 : 0);
   }
   const docType = readFrontmatterScalar(raw, "type");
   const docSubtype = readFrontmatterScalar(raw, "subtype");
   const { banned, contextual } = wordLists();
-  const acRejected = loadAcRejected();
-  console.log(`모든 글 반려: ${acRejected.note}`);
+  const shared = loadDocRows();
+  console.log(`금지 표현 목록: ${shared.note}`);
 
   section("객관 (자동 계측)");
   const { chars, sents, words } = objective(body);
@@ -740,7 +673,6 @@ function main() {
   const bannedHits = findBanned(lines, banned);
   const contextHits = findBanned(lines, contextual);
   const internalHits = findInternal(lines);
-  const dashHits = findDashes(lines);
   const politeHits = checkPoliteness(lines);
   const { empties, nheads } = checkEmptySections(body);
   const internalInTotal = internalCounts(docType, docSubtype);
@@ -767,11 +699,11 @@ function main() {
   dumpByRule("금지어", bannedHits);
   dumpByRule("문맥 확인 필요", contextHits, " (합계에서 뺌 — 쓰임을 보고 실제 위반만 고른다)");
   const LANE_NOTE = " (합계에서 뺌 — 눈으로 확인, 쓰임이 반려된 뜻일 때만 고친다)";
-  const acHits = findRejectedHits(lines, acRejected.entries);
+  const acHits = findListHits(lines, shared.rows);
   const rejectedBanned = acHits.filter((h) => h.lane === "ALWAYS_BANNED");
   const rejectedWarn = acHits.filter((h) => h.lane === "NEEDS_REVIEW");
-  dumpRejectedHits("모든 글 반려 표현", rejectedBanned);
-  dumpRejectedHits("모든 글 반려 표현 — NEEDS_REVIEW", rejectedWarn, LANE_NOTE);
+  dumpRejectedHits("금지 표현", rejectedBanned);
+  dumpRejectedHits("금지 표현 NEEDS_REVIEW", rejectedWarn, LANE_NOTE);
   const pkgRejectedHits = findRejectedHits(lines, readRejectedWords(raw));
   dumpRejectedHits(
     "이 글 반려(frontmatter rejected)",
@@ -786,7 +718,6 @@ function main() {
     internalHits,
     (h) => `${h[0]} · '${h[1]}' (L${h[2]}): ${h[3].slice(0, 70)}`,
   );
-  dumpByRule("em/en dash", dashHits);
   const questionHits = checkQuestionMark(lines);
   dump("의문형에 물음표 없음", questionHits, (h) => `L${h[0]}: ${h[1].slice(0, 70)}`);
   const h1 = docType === "pr-body" ? firstH1(body.split("\n"), offset) : null;
@@ -876,7 +807,6 @@ function main() {
     bannedHits.length +
     rejectedBanned.length +
     (internalInTotal ? internalHits.length : 0) +
-    dashHits.length +
     questionHits.length +
     titleHits.length +
     refHits.length +

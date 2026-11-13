@@ -5,10 +5,10 @@
 글쓰기 자산을 둘 자리를 정한다.
 
 - 모든 글에 거는 규칙: `common.md`. 따로 서는 주제면 루트에 새 파일
-- 사용자가 반려한 낱말·문구: `rejected.json` (항목 꼴은 `rejected.md`)
+- 사용자가 반려한 낱말·문구: AC 금지 표현 목록(`scripts/hooks/blocked-expressions.json`)에 같은 폴더 `blocked-expressions.mjs`로 올린다
 - 패키지 frontmatter 형식: `package-format.md`
 - 글 종류 하나에만 거는 것: `types/<type>/`
   - 골격 예시: `template.md` (`guide.md`에 함께 두어도 된다)
   - 그 종류의 작성 규칙: `guide.md`
   - 그 종류의 파일이 쓰는 자료: 그 type 폴더 안
-  - subtype에만 거는 작성 규칙: `types/<type>/<subtype>/guide.md`. 골격은 subtype 폴더에 두지 않는다
+  - subtype에만 거는 작성 규칙: `types/<type>/<subtype>/guide.md`

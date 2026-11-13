@@ -10,14 +10,15 @@
       "note": "reviewer-input.mjs가 reader.md 「리뷰어에게 주는 지시」 절의 > 인용을 긁어 독자 리뷰어 프롬프트로 낸다. 절 이름이나 인용 꼴을 바꾸면 스크립트가 지시를 못 찾아 멈춘다. 지시에 frontmatter 값을 쓰게 바꾸면 스크립트가 그 필드도 넘기게 맞춘다. 지시의 독자(채용담당자)는 common.md 「독자는 채용담당자」의 사본이다 — 리뷰어가 규칙 문서를 못 읽게 막아 두어 사본이 불가피하다. 독자를 바꾸면 지시도 맞춘다."
     },
     {
-      "name": "반려 항목 꼴 — rejected.md ↔ rejected.json ↔ 스크립트",
+      "name": "금지 표현 행 꼴 — 등록 스크립트 ↔ 목록 ↔ 읽는 쪽",
       "files": [
-        "deploy/contexts/writing-guide/rejected.md",
-        "deploy/contexts/writing-guide/rejected.json",
+        "scripts/hooks/blocked-expressions.mjs",
+        "scripts/hooks/blocked-expressions.json",
+        "scripts/hooks/check-wording.mjs",
         "deploy/skills/write-doc/scripts/rejected.mjs",
         "deploy/skills/write-doc/steps/finish.md"
       ],
-      "note": "rejected.md 「항목 꼴」이 정본이고 rejected.mjs가 rejected.json을 그 꼴로 읽고(채점기·리뷰어 입력 조립) 검사한다(pre-commit). 꼴을 바꾸면 rejected.mjs의 검사·짝짓기와 rejected.json의 기존 항목을 함께 맞춘다 — 검사만 고치면 기존 항목이 커밋에서 막히고, 짝짓기만 고치면 대신 쓸 말이 엉뚱한 꼴에 붙는다. finish.md 「반려 적재」의 화면 꼴(레인을 「항상 막음 | 쓰임을 보고 고침」으로 옮긴 말)과 근거를 source에 적는 지시도 이 꼴의 사본이라 레인이나 evidence 꼴을 바꾸면 함께 고친다."
+      "note": "blocked-expressions.mjs 머리 주석의 행 꼴이 정본이고 같은 스크립트가 목록을 검사한다(pre-commit). 커밋 훅(check-wording.mjs)은 scope PROMPT·BOTH 행을, rejected.mjs는 DOC·BOTH 행을 같은 매칭(blockedHits)으로 읽는다. 키나 값(scope·lane·match)을 바꾸면 검사·두 읽는 쪽·기존 행을 함께 맞춘다. 검사만 고치면 기존 행이 커밋에서 막히고, 읽는 쪽만 고치면 행이 조용히 안 걸린다. finish.md 반려 적재의 화면 꼴(레인을 항상 막음과 쓰임을 보고 고침으로 옮긴 말)도 이 꼴의 사본이라 레인을 바꾸면 함께 고친다."
     },
     {
       "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅 ↔ 채점기",

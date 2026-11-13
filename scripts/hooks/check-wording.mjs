@@ -18,10 +18,11 @@
 // `--report <md 또는 폴더>`로 지목해 물을 수도 있다. 커밋 없이 문서를 훑는 회차는 훅이 안 뜨는데
 // 낱말 목록은 이 스크립트에만 있어서, 이 출구가 없으면 대조할 재료가 없다.
 //
-// 「금지 표현」 범주만은 낱말이 이 파일이 아니라 옆의 `blocked-expressions.json`에 있다. 사용자가 못
-// 알아본 말을 세션이 그때그때 등재하는 목록이라 코드 수정 없이 늘어나야 하고, 등재는
-// `blocked-expressions.mjs`로만 한다. 그 스크립트가 등재 전에 이 파일의 매칭으로 실제로 대 보므로
-// 매칭·판별 함수를 export한다 — 등재 때 대 본 결과와 훅이 짚는 결과가 같은 코드에서 나와야 한다.
+// 「금지 표현」 범주만은 낱말이 이 파일이 아니라 옆의 `blocked-expressions.json`에 있다. 사용자가 반려한
+// 말을 세션이 그때그때 등재하는 목록이라 코드 수정 없이 늘어나야 하고, 등재는
+// `blocked-expressions.mjs`로만 한다. 같은 목록을 write-doc 채점과 커밋 메시지 훅도 읽는다(행의 `scope`로
+// 가른다). 그쪽들과 등재 스크립트가 이 파일의 매칭을 그대로 가져다 쓰므로 매칭·판별 함수를 export한다
+// — 등재 때 대 본 결과, 훅이 짚는 결과, 채점 결과가 같은 코드에서 나와야 한다.
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
@@ -151,14 +152,17 @@ const GLOSS = {
   ],
 };
 
-// 사용자가 못 알아본 말. 낱말은 금지 표현 목록 행에서 오고, 처방도 행마다 다르다(걸린 줄 아래에 찍힌다).
+// 사용자가 반려한 말. 낱말은 금지 표현 목록 행에서 오고, 처방도 행마다 다르다(걸린 줄 아래에 찍힌다).
+// 레인이 NEEDS_REVIEW인 행은 쓰임에 따라 맞기도 한 말이라 이번 커밋에서 추가·수정한 줄에서만 짚는다.
+// 파일 전체에서 짚으면 원래 있던 정상 쓰임까지 매 커밋 끌려 나온다.
 const BLOCKED = {
   kind: "blocked",
   tag: "[금지 표현 의심]",
-  noun: "사용자가 못 알아본 말이",
+  noun: "사용자가 반려한 말이",
   advice: [
-    "판단: 걸린 말을 줄 아래 「대신」의 풀어 쓴 말로 바꾼다. 바로 옆에 이미 풀려 있으면 그 말만 지운다.",
-    "      다른 뜻으로 멀쩡히 쓴 자리면 그대로 두고, 같은 꼴이 또 걸릴 것 같으면 그 꼴을 예외로 올린다:",
+    "판단: 걸린 말을 줄 아래 「대신」의 말로 바꾼다. 바로 옆에 이미 풀려 있으면 그 말만 지운다.",
+    "      NEEDS_REVIEW 줄은 쓰임을 보고, 다른 뜻으로 멀쩡히 쓴 자리면 그대로 둔다.",
+    "      같은 꼴이 또 걸릴 것 같으면 그 꼴을 예외로 올린다:",
     "      node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --exclude --word <말> --exclusions <꼴>",
   ],
 };
@@ -166,27 +170,34 @@ const BLOCKED = {
 // 원본(AC `scripts/hooks/`)에서 돌든 사본(`~/.ai-contexts/`)에서 돌든 금지 표현 목록은 바로 옆에 있다.
 export const LIST_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "blocked-expressions.json");
 
-export const MATCH_TYPES = ["prefix", "substring"];
+export const MATCH_TYPES = ["PREFIX", "SUBSTRING"];
+export const SCOPES = ["PROMPT", "BOTH", "DOC"];
+export const LANES = ["ALWAYS_BANNED", "NEEDS_REVIEW"];
+
+// 행이 그 글 종류에 걸리는지. 이 훅은 프롬프트 md라 "PROMPT", write-doc 채점·커밋 메시지는 "DOC"으로 묻는다.
+export function inScope(row, kind) {
+  return row.scope === "BOTH" || row.scope === kind;
+}
 
 // 파일이 없으면(sync 전·unsync 뒤) 이 범주만 건너뛴다 — 나머지 범주는 계속 돌아야 한다.
 // 깨졌으면 조용히 넘기지 않고 한 줄 알린다. 조용히 넘기면 경고가 사라진 것을 아무도 모른다.
-function loadBlockedRows() {
-  if (!fs.existsSync(LIST_FILE)) return [];
+export function loadBlockedRows(file = LIST_FILE) {
+  if (!fs.existsSync(file)) return [];
   try {
-    const rows = JSON.parse(fs.readFileSync(LIST_FILE, "utf8"));
+    const rows = JSON.parse(fs.readFileSync(file, "utf8"));
     if (!Array.isArray(rows)) throw new Error("배열이 아니다");
     return rows;
   } catch (error) {
-    console.log(`[금지 표현 목록을 못 읽어 그 범주만 건너뜀] ${LIST_FILE}: ${error.message}`);
+    console.log(`[금지 표현 목록을 못 읽어 그 범주만 건너뜀] ${file}: ${error.message}`);
     return [];
   }
 }
 
-// `prefix`는 낱말 앞만 막는다 — 뒤를 막으면 「눈금이」·「팔의」처럼 조사가 붙은 꼴을 다 놓친다.
-// `substring`은 앞도 안 막아 「실행오라클」처럼 붙여 쓴 꼴까지 잡는다.
+// `PREFIX`는 낱말 앞만 막는다 — 뒤를 막으면 「눈금이」·「팔의」처럼 조사가 붙은 꼴을 다 놓친다.
+// `SUBSTRING`은 앞도 안 막아 「실행오라클」처럼 붙여 쓴 꼴까지 잡는다.
 export function wordPattern(type, word) {
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  if (type === "substring") return new RegExp(escaped, "gi");
+  if (type === "SUBSTRING") return new RegExp(escaped, "gi");
   // 영어 낱말은 `_`·숫자 뒤도 막는다 — `[EMPATHY_SEAM]` 같은 식별자 조각이 `seam`으로 걸렸다.
   const before = /^[가-힣]/.test(word) ? H : /^[A-Za-z]/.test(word) ? "(?<![A-Za-z0-9_])" : "";
   return new RegExp(`${before}${escaped}`, "gi");
@@ -197,10 +208,10 @@ export function blockedHits(rows, line) {
   const hits = [];
   for (const row of rows) {
     const excluded = (row.exclusions ?? []).flatMap((phrase) =>
-      [...line.matchAll(wordPattern("substring", phrase))].map((m) => [m.index, m.index + m[0].length]),
+      [...line.matchAll(wordPattern("SUBSTRING", phrase))].map((m) => [m.index, m.index + m[0].length]),
     );
     for (const word of row.words ?? []) {
-      for (const m of line.matchAll(wordPattern(row.type, word))) {
+      for (const m of line.matchAll(wordPattern(row.match, word))) {
         const end = m.index + m[0].length;
         if (excluded.some(([from, to]) => from <= m.index && end <= to)) continue;
         hits.push({ row, word: m[0] });
@@ -216,13 +227,15 @@ const MAX_REPORTS = 20;
 function main() {
   const categories = [...CATEGORIES, GLOSS, BLOCKED, LONG];
   const reports = new Map(categories.map((c) => [c.kind, []]));
-  const rows = loadBlockedRows();
+  const rows = loadBlockedRows().filter((row) => inScope(row, "PROMPT"));
 
   for (const file of stagedMarkdownFiles()) {
     if (!isPromptDoc(file)) continue;
     const content = stagedContent(file);
     if (content === null) continue;
-    for (const report of detectInFile(file, content, rows)) reports.get(report.kind).push(report);
+    for (const report of detectInFile(file, content, rows, stagedAddedLines(file))) {
+      reports.get(report.kind).push(report);
+    }
   }
 
   const found = categories.filter((c) => reports.get(c.kind).length > 0);
@@ -237,7 +250,7 @@ function main() {
 
   // 안내는 "정리해도 된다"가 아니라 "지금 정리한다"로 적는다 — 고를 여지를 남기면 읽고도
   // 사용자에게 되넘긴다(check-count-hardcoding.mjs의 같은 문구 참고).
-  console.log("이번에 고친 줄이 아니어도 같은 파일이면 이 커밋에서 함께 정리한다(긴 한 줄 문단은 그 처방대로).");
+  console.log("이 커밋에서 쓰거나 고친 줄은 이 커밋에서 고친다. 원래 있던 줄도 지금 고치되, 이 커밋에 섞지 말고 별도 커밋으로 나눈다.");
   console.log('      "따로 다룰까요"로 사용자에게 넘기지 않는다. 줄마다 위 판단으로 고칠 것은 고치고,');
   console.log("      그대로 둘 것은 둔 뒤 몇 건을 어떤 사유로 뒀는지만 보고에 한 줄로 적는다.");
   console.log("");
@@ -279,6 +292,26 @@ function stagedMarkdownFiles() {
     }
   }
   return files;
+}
+
+// 이 커밋에서 추가·수정한 줄 번호(스테이징된 내용 기준). `-U0` hunk 머리 `+시작,개수`에서 읽는다.
+// 못 읽으면 null을 내 전체 줄을 보게 한다 — 조용히 빈 집합을 내면 NEEDS_REVIEW가 통째로 사라진다.
+function stagedAddedLines(file) {
+  try {
+    const diff = execFileSync("git", ["diff", "--cached", "-U0", "--no-color", "-M", "--", file], {
+      encoding: "utf8",
+      maxBuffer: 1024 * 1024 * 32,
+    });
+    const added = new Set();
+    for (const m of diff.matchAll(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/gm)) {
+      const start = Number(m[1]);
+      const count = m[2] === undefined ? 1 : Number(m[2]);
+      for (let n = start; n < start + count; n++) added.add(n);
+    }
+    return added;
+  } catch {
+    return null;
+  }
 }
 
 // 작업 트리가 아니라 스테이징된 내용을 본다 — 커밋될 것이 판정 대상이다.
@@ -339,7 +372,10 @@ export function proseLines(content) {
   return lines;
 }
 
-function detectInFile(file, content, rows) {
+// `addedLines`는 이 커밋에서 추가·수정한 줄 번호다. null이면(`--report`) 모든 줄을 이 커밋 것으로 본다.
+function detectInFile(file, content, rows, addedLines = null) {
+  const reviewRows = rows.filter((row) => row.lane === "NEEDS_REVIEW");
+  const bannedRows = rows.filter((row) => row.lane !== "NEEDS_REVIEW");
   const found = [];
   const bodyStart = frontmatterEnd(content);
 
@@ -362,7 +398,8 @@ function detectInFile(file, content, rows) {
       if (hits.length > 0) found.push({ kind: GLOSS.kind, file, lineNo, line: trimmed, hits });
     }
 
-    const blocked = blockedHits(rows, clean);
+    const lineRows = addedLines === null || addedLines.has(lineNo) ? rows : bannedRows;
+    const blocked = blockedHits(lineRows, clean);
     if (blocked.length > 0) {
       const matchedRows = [...new Set(blocked.map((hit) => hit.row))];
       found.push({
@@ -371,7 +408,10 @@ function detectInFile(file, content, rows) {
         lineNo,
         line: raw.trim(),
         hits: blocked.map((hit) => hit.word),
-        notes: matchedRows.map((row) => `「${row.words.join("·")}」 대신: ${row.instead} — ${row.why}`),
+        notes: matchedRows.map((row) => {
+          const instead = Array.isArray(row.instead) ? row.instead.join("·") : row.instead;
+          return `[${row.lane}] 「${row.words.join("·")}」 대신: ${instead} / 까닭: ${row.why}`;
+        }),
       });
     }
   }
@@ -399,7 +439,8 @@ function reportFile(target) {
   }
   process.chdir(path.dirname(abs));
 
-  const found = detectInFile(target, fs.readFileSync(abs, "utf8"), loadBlockedRows());
+  const rows = loadBlockedRows().filter((row) => inScope(row, "PROMPT"));
+  const found = detectInFile(target, fs.readFileSync(abs, "utf8"), rows);
   const where = target;
   for (const category of [...CATEGORIES, GLOSS, BLOCKED, LONG]) {
     const reports = found.filter((r) => r.kind === category.kind);

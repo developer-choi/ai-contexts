@@ -13,7 +13,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { guideFiles } from "./guide-files.mjs";
 import { COMMENT_LINE, fenceTracker, readPackageMeta, stripCodeAndQuotes } from "./package-meta.mjs";
-import { AC_REJECTED, findRejectedHits, loadRejected, rejectedEntries } from "./rejected.mjs";
+import { findListHits, loadDocRows } from "./rejected.mjs";
 
 const REVIEWERS = path.resolve(import.meta.dirname, "..", "reviewers");
 const REPLY = "결과는 `SendMessage`로 `to: \"main\"`에 보낸다. 평문 출력으로만 끝내지 않는다.";
@@ -75,10 +75,11 @@ function readerInstruction() {
 // 모든 글 반려 표현 중 본문에 걸린 것만 낸다. 목록 전체를 넘기면 반려가 쌓일수록 라운드마다 맥락이 는다.
 // NEEDS_REVIEW 레인은 채점 합계에서 빠지고 저장 훅도 보여 주지 않아, 쓰임을 가르는 눈은 리뷰어뿐이다.
 function rejectedHits(body) {
-  if (!fs.existsSync(AC_REJECTED)) return [];
+  const { rows } = loadDocRows();
+  if (!rows) return [];
   // 채점기와 같은 기준으로 코드·인용을 뺀다 — 그 안의 말은 메인이 못 고쳐, 리뷰어가 물면 라운드 상한까지 돈다.
   const { lines } = stripCodeAndQuotes(body.split("\n"));
-  return findRejectedHits(lines, rejectedEntries(loadRejected(AC_REJECTED))).map(
+  return findListHits(lines, rows).map(
     (h) => `- ${h.lane} '${h.word}' — 「${h.line.slice(0, 80)}」 → 대신: ${h.swap}`,
   );
 }
