@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: steps.md (같은 폴더)
+//
 // step 파일 frontmatter(step·session·next …)를 모아 후속 안내·세션 첫 step·흐름도를 낸다.
 //
 // 이 파일이 존재하는 이유: 세션의 진입 조건·후속·권장 모델이 SKILL.md 표 두 개에 모여 있어서
@@ -9,27 +11,6 @@
 // 조건(의존 PR의 realize 여부, PR 종류)은 판정해 찍고, 가릴 수 없는 진입 조건(`entry`)은
 // 「직접 확인」으로 원문을 찍는다. md에 상태를 적고 눈으로 읽던 것을 옮겼다(rules-as-code.md 「md는 사람이 읽기
 // 쉬워야 하고, JSON은 스크립트를 위해 만든다」).
-//
-// 세션 인자(start·next 공통 — resolveArgs): --mode 필수(개인·실무·채용). --prefix는 개인 모드 필수, 실무·채용은 있으면
-// 세션 이름에 붙인다. --plan은 없으면 개인 `plan/<접두어>`, 실무·채용 `plan`이고 상대경로는 메인 레포 루트 기준이다.
-//
-// 사용:
-//   node <이 파일> next <step> --mode <모드> [--prefix <접두어>] [--plan <plan 폴더>] [--pr <N>]
-//       → 그 step 뒤의 후속(같은 세션 이어서 / spawn / 출발 알림). `--pr`이 있으면 그 PR의 진행 단계를 먼저 기록한다
-//         spawn마다 `claude --model … --name …` 실행 명령을 낸다. 인자는 start가 찍은 next 줄의 값을 준다
-//   node <이 파일> start <세션> --mode <모드> [--prefix <접두어>] [--plan <plan 폴더>] [--pr <N>]
-//       → 메인 레포 루트·plan(절대경로)·세션의 첫 step 파일·step 순서·진입 조건·권장 모델·값을 채운 next 줄
-//         (PR_3_IMPL도 받는다 — 이름의 번호를 PR로 쓴다). PR에 종류가 있으면 읽을 종류 문서. BG가 아니면 plan 폴더가 있어야 한다
-//   node <이 파일> chain <세션>         → 세션의 step 순서만 (인자 없이)
-//   node <이 파일> pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps 1,2]   → PR 확정. 번호를 매겨 출력
-//   node <이 파일> pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref> [--repo <레포>]]
-//   node <이 파일> pr list --plan <plan 폴더>
-//   node <이 파일> pr branches --plan <plan 폴더> --repo <레포>
-//       → PR마다 형태(스택·독립)·범위 커밋. 스택인데 아래 브랜치 tip이 안 들어 있으면 어긋남으로 exit 1
-//   node <이 파일> pr links --plan <plan 폴더> --repo <레포> --n <N> --body <PR 본문 md>
-//       → 본문의 커밋 링크마다 그 SHA가 이 PR의 base..branch 범위에 있는지. 어긋난 링크가 있으면 exit 1
-//   node <이 파일> graph                → mermaid 흐름도 초안(stdout). README 흐름도는 이걸 바탕으로 사람이 다듬어 둔다
-//   node <이 파일> check                → `on` 값 ↔ 헤딩 대응
 //
 // frontmatter는 YAML 부분집합만 읽는다(아래 parseFrontmatter). 밖의 문법이면 추측하지 않고 exit 1.
 
@@ -59,6 +40,10 @@ function fail(msg) {
   console.error(msg);
   process.exit(1);
 }
+
+// 인자를 잘못 줬을 때. 사용법은 짝 md 한 곳에만 두고 여기서는 그 경로만 알린다.
+const USAGE_DOC = path.join(path.dirname(fileURLToPath(import.meta.url)), 'steps.md').replace(/\\/g, '/');
+const failUsage = (msg) => fail(`${msg}\n사용법: ${USAGE_DOC}`);
 
 // 세션 인자. 있을 수도 없을 수도 있는 인자가 늘수록 조합마다 분기가 갈려, 빈 자리를 AI가 지어 채웠다
 // (접두어를 작업 내용에서 지어 `TOUR_PR_1_PLAN`). 그래서 필수는 빠지면 멈추고, 선택은 기본값을 여기서 채운다.
@@ -321,19 +306,10 @@ const isRealized = (data, n) => findPr(data, n).stage === 'realized';
 const waitingOn = (data, pr) => pr.deps.filter((d) => !isRealized(data, d));
 
 function cmdPr(sub, opt) {
-  if (!opt.plan) {
-    fail(
-      'pr 명령은 --plan <plan 폴더>가 필요하다. 사용:\n' +
-        '  pr add --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]\n' +
-        '  pr set --plan <plan 폴더> --n <N> [--name <이름>] [--type <종류>] [--deps 1,2] [--branch <브랜치> --base <ref> [--repo <레포>]]\n' +
-        '  pr list --plan <plan 폴더>\n' +
-        '  pr branches --plan <plan 폴더> --repo <레포>\n' +
-        '  pr links --plan <plan 폴더> --repo <레포> --n <N> --body <PR 본문 md>',
-    );
-  }
+  if (!opt.plan) failUsage('pr 명령은 --plan <plan 폴더>가 필요하다');
   const data = readPrs(opt.plan);
   if (sub === 'add') {
-    if (!opt.name) fail('pr add는 --name이 필요하다: --plan <plan 폴더> --name <이름> [--type <종류>] [--deps <선행 번호들, 쉼표 구분>]');
+    if (!opt.name) failUsage('pr add는 --name이 필요하다');
     const n = Math.max(0, ...data.prs.map((p) => p.n)) + 1;
     const pr = {
       n,
@@ -353,7 +329,7 @@ function cmdPr(sub, opt) {
   } else if (sub === 'set') {
     const pr = findPr(data, parseNum(opt.n, '--n'));
     if (!['name', 'type', 'deps', 'branch', 'base'].some((k) => opt[k] !== undefined)) {
-      fail('pr set은 바꿀 값이 필요하다: --name <이름> | --type <종류> | --deps 1,2 | --branch <브랜치> --base <ref>');
+      failUsage('pr set은 바꿀 값이 필요하다');
     }
     let mismatch = null;
     if (opt.name) pr.name = opt.name;
@@ -403,7 +379,7 @@ function cmdPr(sub, opt) {
   } else if (sub === 'links') {
     cmdLinks(data, opt);
   } else {
-    fail('사용: pr (add | set | list | branches | links) --plan <plan 폴더> …');
+    failUsage(`모르는 pr 하위명령: ${sub}`);
   }
 }
 
@@ -815,8 +791,8 @@ function parseArgs(argv, allowed) {
     }
     const key = a.slice(2);
     const value = argv[i + 1];
-    if (!allowed.includes(key)) fail(`모르는 옵션: ${a} (${allowed.map((k) => `--${k}`).join(' ') || '옵션 없음'})`);
-    if (value === undefined || value.startsWith('--')) fail(`${a}에 값이 없다`);
+    if (!allowed.includes(key)) failUsage(`모르는 옵션: ${a} (${allowed.map((option) => `--${option}`).join(' ') || '옵션 없음'})`);
+    if (value === undefined || value.startsWith('--')) failUsage(`${a}에 값이 없다`);
     opt[key] = value;
     i += 1;
   }
@@ -898,19 +874,17 @@ function cmdChain(raw) {
   console.log(`이 세션의 step: ${chain.map((s) => s.step).join(' → ')}`);
 }
 
-const USAGE =
-  '사용: node <이 파일> (next <step> --mode <모드> [--prefix <접두어>] [--plan <p>] [--pr <N>] | start <세션> --mode <모드> [--prefix <접두어>] [--plan <p>] [--pr <N>] | chain <세션> | pr (add|set|list|branches|links) --plan <p> … | graph | check)';
 const [command, ...rest] = process.argv.slice(2);
 if (command === 'next' || command === 'start') {
   const { pos, opt } = parseArgs(rest, ['plan', 'pr', 'mode', 'prefix']);
-  if (pos.length !== 1) fail(USAGE);
+  if (pos.length !== 1) failUsage(`${command}는 위치 인자 하나(<step>·<세션>)를 받는다`);
   if (command === 'next') cmdNext(pos[0], opt);
   else cmdStart(pos[0], opt);
 } else if (command === 'chain' && rest.length === 1) cmdChain(rest[0]);
 else if (command === 'pr') {
   const { pos, opt } = parseArgs(rest, ['plan', 'name', 'type', 'deps', 'n', 'branch', 'base', 'repo', 'body']);
-  if (pos.length !== 1) fail(USAGE);
+  if (pos.length !== 1) failUsage('pr는 하위명령 하나를 받는다');
   cmdPr(pos[0], opt);
 } else if (command === 'graph' && !rest.length) console.log(graph());
 else if (command === 'check' && !rest.length) cmdCheck();
-else fail(USAGE);
+else failUsage(command ? `모르는 명령이거나 인자가 맞지 않는다: ${command}` : '명령이 없다');
