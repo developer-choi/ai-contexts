@@ -1,6 +1,6 @@
 # Installation Guide
 
-이 문서는 AC를 새 머신이나 새 작업 환경(Claude Code 런타임)에 맞출 때의 진입점입니다. 상세 동작은 `meta/guides/` 하위에서 대상별로 관리합니다.
+이 문서는 AC를 새 머신이나 새 작업 환경(Claude Code 런타임)에 맞출 때의 진입점입니다.
 
 ## 새 머신 초기화
 
@@ -11,7 +11,7 @@ npm run sync:system
 npm run sync:local-system
 ```
 
-`plugins/ac/`의 스킬은 sync가 아니라 Claude Code plugin으로 설치한다. 기기마다 한 번 실행한다.
+`plugins/ac/`의 스킬은 sync가 아니라 Claude Code plugin으로 설치합니다. 아래 두 명령을 기기마다 한 번 실행합니다.
 
 ```bash
 claude plugin marketplace add ~/WebstormProjects/main/ai-contexts
@@ -21,8 +21,6 @@ claude plugin install ac@ac
 ## 평소 갱신
 
 전역 에이전트 규칙·hook을 갱신할 때는 시스템 자산만 다시 동기화합니다. 스킬(`plugins/ac/`)은 원본을 고치면 다음 세션에 바로 반영됩니다.
-
-plugin으로 옮기기 전에 초기화한 기기는 `sync:system` 전에 [새 머신 초기화](#새-머신-초기화)의 plugin 등록 명령을 한 번 실행합니다.
 
 ```bash
 npm run sync:system
@@ -38,7 +36,7 @@ npm run sync:local-system
 
 ## 제거
 
-각 동기화 명령에는 대응 제거 명령이 있습니다. 제거 명령은 AC가 만든 산출물만 제거해야 합니다.
+각 동기화 명령에는 대응 제거 명령이 있습니다.
 
 ```bash
 npm run unsync:environment
@@ -48,7 +46,4 @@ npm run unsync:local-system
 
 ## 상세 가이드
 
-- [가이드 인덱스](guides/index.md)
-- [환경 동기화](guides/environment.md)
-- [시스템 자산 동기화](guides/system.md)
-- [로컬 시스템 동기화](guides/local-system.md)
+[가이드 인덱스](guides/index.md)에서 대상별 가이드로 이어집니다.
