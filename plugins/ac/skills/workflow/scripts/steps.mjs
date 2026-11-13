@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 // 사용법: steps.md (같은 폴더)
+// @ts-check
 //
 // step 파일 frontmatter(step·session·next …)를 모아 후속 안내·세션 첫 step·흐름도를 낸다.
 //
@@ -19,13 +20,21 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+// prs.json 꼴. 타입 파일은 배포되지 않지만 JSDoc 안이라 실행에는 영향이 없다.
+/** @typedef {import('../../../../../types/prs.d.mts').Pr} Pr */
+/** @typedef {import('../../../../../types/prs.d.mts').PrsFile} PrsFile */
+/** @typedef {import('../../../../../types/prs.d.mts').Stage} Stage */
+/** @typedef {Record<string, string | undefined>} Opt */
+
 const SKILL_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const STEPS_DIR = path.join(SKILL_DIR, 'steps');
 const PR_TYPES_DIR = path.join(SKILL_DIR, 'conventions', 'pr-types');
 const SIDE_SESSION_DOC = path.join(SKILL_DIR, 'conventions', 'side-session.md');
 
 // 진행 단계. 뒤로 가지 않는다. 어느 step이 끝나면 어느 단계로 올리는지.
+/** @type {readonly Stage[]} */
 const STAGES = ['confirmed', 'consumed', 'realized'];
+/** @type {Record<string, Stage | undefined>} */
 const STAGE_BY_STEP = { plan: 'consumed', 'realize-plan': 'realized' };
 const DIRECTIVE = '안내 규칙: 이 출력에 없는 세션은 언급하지 않는다. 「직접 확인」 항목만 판단해 덧붙인다.';
 const LAUNCH_RULE = '「실행」 줄은 사용자가 그대로 붙여 넣는다 — 줄이거나 자리표시로 바꾸지 않고 글자 그대로 옮긴다(<모델>만 채운다).';
@@ -36,6 +45,7 @@ const MODEL_IDS = { Opus: 'opus', Sonnet: 'sonnet', Haiku: 'haiku' };
 // 별칭으로 못 바꾼 권장 모델 자리 — 안내하는 세션이 채운다(LAUNCH_RULE의 <모델>과 같은 표기).
 const MODEL_PLACEHOLDER = '<모델>';
 
+/** @returns {never} */
 function fail(msg) {
   console.error(msg);
   process.exit(1);
@@ -230,6 +240,7 @@ function describe(edge) {
 
 const prsFile = (plan) => path.join(plan, 'background', 'persistent', 'prs.json');
 
+/** @returns {PrsFile} */
 function readPrs(plan) {
   // 폴더 오타면 빈 상태로 보고 조용히 넘어가거나 엉뚱한 곳에 prs.json을 만든다 — 폴더는 있어야 한다.
   if (!fs.existsSync(plan) || !fs.statSync(plan).isDirectory()) fail(`--plan 폴더가 없다: ${plan}`);
@@ -251,12 +262,14 @@ function parseNum(raw, flag) {
   return Number(raw);
 }
 
+/** @param {string} plan @param {PrsFile} data */
 function writePrs(plan, data) {
   const file = prsFile(plan);
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
 }
 
+/** @param {PrsFile} data @param {number} n @returns {Pr} */
 function findPr(data, n) {
   const pr = data.prs.find((p) => p.n === n);
   if (!pr) fail(`prs.json에 PR ${n}이 없다 (${data.prs.map((p) => p.n).join(', ') || '비어 있음'})`);
@@ -305,12 +318,14 @@ const prLabel = (pr) => `PR ${pr.n}. ${pr.name}`;
 const isRealized = (data, n) => findPr(data, n).stage === 'realized';
 const waitingOn = (data, pr) => pr.deps.filter((d) => !isRealized(data, d));
 
+/** @param {string} sub @param {Opt} opt */
 function cmdPr(sub, opt) {
   if (!opt.plan) failUsage('pr 명령은 --plan <plan 폴더>가 필요하다');
   const data = readPrs(opt.plan);
   if (sub === 'add') {
     if (!opt.name) failUsage('pr add는 --name이 필요하다');
     const n = Math.max(0, ...data.prs.map((p) => p.n)) + 1;
+    /** @type {Pr} */
     const pr = {
       n,
       name: opt.name,
@@ -578,6 +593,7 @@ function cmdLinks(data, opt) {
 }
 
 // `--pr N`으로 부른 step이 끝낸 단계를 기록한다. 이미 그 단계 이상이면 그대로 둔다.
+/** @param {string} plan @param {PrsFile} data @param {Pr} pr @param {string} stepName */
 function recordStage(plan, data, pr, stepName) {
   const to = STAGE_BY_STEP[stepName];
   if (!to || STAGES.indexOf(to) <= STAGES.indexOf(pr.stage)) return;
@@ -780,8 +796,10 @@ function cmdStart(raw, opt) {
 }
 
 // `--키 값` 쌍과 위치 인자를 가른다. 허용하지 않은 키나 값 없는 키는 추측하지 않고 exit 1.
+/** @param {string[]} argv @param {string[]} allowed */
 function parseArgs(argv, allowed) {
   const pos = [];
+  /** @type {Opt} */
   const opt = {};
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];

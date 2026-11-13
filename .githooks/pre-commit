@@ -2,6 +2,11 @@
 # 커밋에 올린 파일만 검사한다 — 규칙을 새로 더해도 손대지 않은 파일의 기존 위반이 커밋을 막지 않게 한다.
 git diff --cached --name-only --diff-filter=ACMR -z -- '*.js' '*.mjs' '*.cjs' \
   | xargs -0 -r node ./node_modules/eslint/bin/eslint.js --no-warn-ignored || exit 1
+# 타입 검사는 tsconfig.json이 정한 범위 전체를 본다 — 올린 파일 때문에 다른 파일(호출부)이 깨진 것도 이 커밋의 오류다.
+# 범위가 `.mts`와 `// @ts-check` 단 `.mjs`라 손대지 않은 파일의 기존 오류는 없다. 스크립트·타입 설정을 올렸을 때만 돈다.
+if git diff --cached --name-only --diff-filter=ACMRD -- '*.mjs' '*.mts' tsconfig.json package.json | grep -q .; then
+  node ./node_modules/typescript/bin/tsc -p . || exit 1
+fi
 node scripts/check-critical-marker.mjs
 node scripts/verify/verify-skill-purpose.mjs || exit 1
 node scripts/verify/verify-skill-script-paths.mjs || exit 1

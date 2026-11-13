@@ -2361,6 +2361,55 @@ const scorePackageGroup = async () => {
   }
 };
 
+// 스크립트 타입 검사 훅은 고친 파일이 든 레포에서 tsc를 돌리므로, 임시 폴더에 AC 꼴 레포(.git·package.json·tsconfig·
+// 이 레포 node_modules를 가리키는 junction)를 만들어 두고 돈다. 오류는 exit 2(stderr를 AI에게 보인다)다.
+// 오류 없는 레포를 따로 두는 이유: 없으면 「오류가 없으면 조용하다」를 못 재고, 늘 exit 2를 내는 훅도 통과한다.
+// `@ts-check` 없는 파일에 오류를 두는 이유: 없으면 검사 범위가 전체로 넓어져 기존 파일 오류가 모든 편집을 막아도 모른다.
+// 정리할 때 fs.rm은 junction을 따라 들어가지 않고 링크만 지운다(원본 node_modules는 남는다).
+const SCRIPT_TYPES_HOOK = 'check-script-types.mjs';
+const TYPE_ERROR = '<훅 비정상 종료: exit 2>';
+const scriptTypesGroup = async () => {
+  const dir = await makeTempDir('hook-script-types-');
+  try {
+    const tsconfig = JSON.stringify({
+      compilerOptions: { noEmit: true, allowJs: true, checkJs: false, module: 'nodenext', moduleResolution: 'nodenext', allowImportingTsExtensions: true, types: ['node'], skipLibCheck: true },
+      include: ['**/*.mjs', '**/*.mts'],
+      exclude: ['node_modules'],
+    });
+    const typo = "import fs from 'node:fs';\nfs.readFileSynk('x');\n";
+    const repos = {
+      // 공통 타입을 'b'로 바꿔 호출부(use.mjs의 'a')가 깨진 상태 — 타입 파일을 고친 편집이 호출부 오류를 받는다.
+      broken: { 'types.d.mts': "export type S = 'b';\n", 'use.mjs': "// @ts-check\n/** @type {import('./types.d.mts').S} */\nexport const s = 'a';\n" },
+      clean: { 'ok.mjs': "// @ts-check\nimport fs from 'node:fs';\nexport const read = fs.readFileSync;\n", 'unchecked.mjs': typo },
+      other: { 'use.mjs': `// @ts-check\n${typo}` },
+    };
+    for (const [name, files] of Object.entries(repos)) {
+      const root = path.join(dir, name);
+      fs.mkdirSync(path.join(root, '.git'), { recursive: true });
+      fs.writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: name === 'other' ? 'not-ai-contexts' : 'ai-contexts' }));
+      fs.writeFileSync(path.join(root, 'tsconfig.json'), tsconfig);
+      fs.symlinkSync(path.join(import.meta.dirname, '..', '..', 'node_modules'), path.join(root, 'node_modules'), 'junction');
+      for (const [file, body] of Object.entries(files)) fs.writeFileSync(path.join(root, file), body);
+    }
+    const edit = (repo, file, tool = 'Edit') => ({ tool_name: tool, tool_input: { file_path: path.join(dir, repo, file) } });
+    const cases = [
+      [edit('broken', 'types.d.mts'), TYPE_ERROR, '공통 타입을 고쳐 호출부가 깨지면 고친 파일이 아니어도 돌려준다'],
+      [edit('broken', 'use.mjs', 'Write'), TYPE_ERROR, 'Write도 같다'],
+      [edit('clean', 'ok.mjs'), 'pass', '@ts-check 없는 파일의 오류는 편집을 막지 않는다'],
+      [edit('other', 'use.mjs'), 'pass', 'AC가 아닌 레포는 검사하지 않는다'],
+      [edit('broken', 'package.json'), 'pass', '스크립트가 아닌 파일은 검사하지 않는다'],
+      [edit('broken', 'use.mjs', 'Read'), 'pass', 'Read는 고친 것이 아니다'],
+    ];
+    return await runCases(cases, async ([payload, expected, note]) => {
+      const { decision, stderr } = await runHookPayload(SCRIPT_TYPES_HOOK, payload);
+      const name = `${path.basename(path.dirname(payload.tool_input.file_path))}/${path.basename(payload.tool_input.file_path)}`;
+      return judge(`${SCRIPT_TYPES_HOOK} :: ${payload.tool_name} ${name} → ${expected} (${note})`, decision, expected, stderr);
+    });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 짝 파일 알림은 실제 파일 유무로 가르므로 임시 폴더에 짝이 있는 파일·없는 파일을 만들어 두고 돈다.
 // 세션당 1회 마커는 tmpdir에 쌓이므로 TEMP를 이 폴더로 돌려 폴더와 함께 지운다.
 // a.sub.sub.md를 두는 이유: 없으면 「짝 파일 자신을 읽으면 조용하다」가 .sub.md 제외 조건이 빠져도
@@ -2797,6 +2846,7 @@ async function main() {
     acMainCommitGroup,
     skillCreatorGroup,
     scorePackageGroup,
+    scriptTypesGroup,
     subFileGroup,
     claudeMdGroup,
     responseLanguageGroup,

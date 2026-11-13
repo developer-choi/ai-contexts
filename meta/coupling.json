@@ -134,6 +134,7 @@
         "deploy/hooks/check-git-*.mjs",
         "deploy/hooks/check-package-frontmatter.mjs",
         "deploy/hooks/score-writing-package.mjs",
+        "deploy/hooks/check-script-types.mjs",
         "deploy/hooks/check-deploy-script-policy.mjs",
         "deploy/hooks/check-shell-policy.mjs",
         "deploy/hooks/check-pr-attribution-policy.mjs",

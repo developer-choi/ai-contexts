@@ -31,6 +31,12 @@
       "msg": "Scoring writing package..."
     },
     {
+      "file": "check-script-types.mjs",
+      "event": "PostToolUse",
+      "on": "edit",
+      "msg": "Type-checking AC scripts..."
+    },
+    {
       "file": "post-enterworktree-install.mjs",
       "event": "PostToolUse",
       "on": "enterworktree",

@@ -5,6 +5,7 @@
   "private": false,
   "scripts": {
     "check:links": "node scripts/check-links.mjs",
+    "check:types": "tsc -p .",
     "scan:code-labels": "node scripts/scan-code-labels.mjs",
     "sync:environment": "node scripts/environment/sync-environment.mjs",
     "sync:local-system": "node scripts/local-system/sync-local-system.mjs",
@@ -27,6 +28,8 @@
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
-    "eslint": "^10.6.0"
+    "@types/node": "^24.19.2",
+    "eslint": "^10.6.0",
+    "typescript": "~5.9.3"
   }
 }
