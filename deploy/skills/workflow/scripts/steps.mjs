@@ -52,6 +52,8 @@ const DIRECTIVE_SESSION_END = '이 step으로 세션을 끝낼 때: 종료 보�
 
 // frontmatter `model:` 값 → `claude --model` 별칭. 조건이 붙은 값(「Sonnet — … 이면 Opus」)은 여기 없다.
 const MODEL_IDS = { Opus: 'opus', Sonnet: 'sonnet', Haiku: 'haiku' };
+// 별칭으로 못 바꾼 권장 모델 자리 — 안내하는 세션이 채운다(LAUNCH_RULE의 <모델>과 같은 표기).
+const MODEL_PLACEHOLDER = '<모델>';
 
 function fail(msg) {
   console.error(msg);
@@ -60,7 +62,9 @@ function fail(msg) {
 
 // 세션 인자. 있을 수도 없을 수도 있는 인자가 늘수록 조합마다 분기가 갈려, 빈 자리를 AI가 지어 채웠다
 // (접두어를 작업 내용에서 지어 `TOUR_PR_1_PLAN`). 그래서 필수는 빠지면 멈추고, 선택은 기본값을 여기서 채운다.
-const MODES = ['개인', '실무', '채용'];
+// 값은 --mode 입력과 맞춘 한국어다. 영어 키로 옮기는 일은 별건(백로그).
+const MODE_PERSONAL = '개인';
+const MODES = [MODE_PERSONAL, '실무', '채용'];
 // 접두어는 세션 이름과 개인 모드 plan 경로(`plan/<접두어>`)의 조각이 된다. 루트 `plan/` 아래 실무·채용 폴더와도 겹치지 않게 막는다.
 const PREFIX_FORM = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 // 대소문자 무시 — Windows 파일시스템은 `Background`와 `background`를 같은 폴더로 본다.
@@ -82,7 +86,7 @@ function mainRoot() {
   }
 }
 
-const defaultPlan = (mode, prefix) => (mode === '개인' ? (prefix ? `plan/${prefix}` : null) : 'plan');
+const defaultPlan = (mode, prefix) => (mode === MODE_PERSONAL ? (prefix ? `plan/${prefix}` : null) : 'plan');
 
 // start·next가 같은 규칙으로 인자를 푼다. 문제는 모아서 돌려주고, 멈출지는 부르는 쪽이 정한다 —
 // start는 멈추기 전에 루트·plan을 먼저 찍어 BG 인자 확정이 그 값으로 제안하게 한다.
@@ -95,7 +99,7 @@ function resolveArgs(opt) {
     problems.push(`--prefix는 영문·숫자로 시작해 영문·숫자·.·_·-만 쓰고 background·archive·pr<숫자>가 아니어야 한다: ${prefix}`);
     prefix = undefined;
   }
-  if (opt.mode === '개인' && opt.prefix === undefined) problems.push('개인 모드인데 --prefix(세션 이름 접두어)가 없다');
+  if (opt.mode === MODE_PERSONAL && opt.prefix === undefined) problems.push('개인 모드인데 --prefix(세션 이름 접두어)가 없다');
   // Windows에서 드라이브 없이 `/`로 시작하는 값(옛 문서의 `--plan /plan`)은 `C:/plan`으로 풀려 엉뚱한 곳에 쓴다.
   if (opt.plan !== undefined && process.platform === 'win32' && /^[\\/](?![\\/])/.test(opt.plan)) {
     problems.push(`--plan 값이 드라이브 없이 /로 시작한다 — 메인 레포 루트 기준 상대경로(예: plan)나 드라이브를 붙인 절대경로로 준다: ${opt.plan}`);
@@ -613,6 +617,9 @@ const NO_MARKUP_FILE = ['background', 'retained', 'no-markup.md'];
 // `코드 대용 아님`(background/retained/code-target.md가 없음), `마크업 생략 아님`(background/retained/no-markup.md가 없음).
 // 쉼표로 이은 조건은 하나라도 어긋나면 어긋난다. 그 밖의 when은 산문이라 그대로 찍는다.
 // 어긋난 첫 조건을 돌려준다(없으면 null).
+// 값은 step frontmatter `when`에 적힌 한국어와 맞춘 것이다. 영어 키로 옮기는 일은 별건(백로그).
+const WHEN_NOT_CODE_TARGET = '코드 대용 아님';
+const WHEN_NOT_NO_MARKUP = '마크업 생략 아님';
 function whenFails(edge, data, pr, plan) {
   if (!edge.when) return null;
   return edge.when.split(/\s*,\s*/).find((cond) => {
@@ -620,8 +627,8 @@ function whenFails(edge, data, pr, plan) {
     if (own) return Boolean(pr && pr.type !== own[1]);
     const none = cond.match(/^([A-Z]+) PR 없음$/);
     if (none) return Boolean(data && data.prs.some((p) => p.type === none[1]));
-    if (cond === '코드 대용 아님') return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
-    if (cond === '마크업 생략 아님') return fs.existsSync(path.join(plan, ...NO_MARKUP_FILE));
+    if (cond === WHEN_NOT_CODE_TARGET) return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
+    if (cond === WHEN_NOT_NO_MARKUP) return fs.existsSync(path.join(plan, ...NO_MARKUP_FILE));
     return false;
   }) ?? null;
 }
@@ -664,7 +671,7 @@ function cmdNext(name, opt) {
   for (const edge of from.next) {
     target(steps, edge, from);
     const failed = whenFails(edge, data, pr, a.plan);
-    if (failed === '마크업 생략 아님') skippedMarkup.push(edge);
+    if (failed === WHEN_NOT_NO_MARKUP) skippedMarkup.push(edge);
     if (failed) continue;
     groups[kindOf(from, edge, steps)].push(edge);
   }
@@ -688,7 +695,7 @@ function cmdNext(name, opt) {
     const keep = head.scope === 'project' ? ' (이미 떠 있으면 그 세션에서 이어서)' : '';
     // PR마다 뜨는 세션의 호출문: IMPL 등은 이 PR 번호로. PLAN은 `--pr`(방금 확정한 PR)이 있으면 그것만,
     // 없으면 아직 안 가져간 PR마다 한 줄씩 — PR 확정마다 전부 찍으면 이미 띄운 PLAN을 또 안내한다.
-    const model = MODEL_IDS[head.model] ?? '<모델>';
+    const model = MODEL_IDS[head.model] ?? MODEL_PLACEHOLDER;
     let calls = [launchCommand(t.session, model, a)];
     if (perPr && t.session !== 'PR_{N}_PLAN') {
       if (pr) calls = [launchCommand(t.session.replace('{N}', pr.n), model, a)];
@@ -706,7 +713,7 @@ function cmdNext(name, opt) {
     spawnLines.push(`    직접 확인: ${head.entry ?? '(없음)'}`);
     spawnLines.push(`    권장 모델: ${head.model ?? '(없음)'}`);
     // 조건이 붙은 권장 모델은 스크립트가 못 가린다 — 안내하는 세션이 조건을 보고 하나를 고른다.
-    if (model === '<모델>') spawnLines.push('    직접 확인: 권장 모델의 조건을 판단해 <모델>을 opus·sonnet 중 하나로 채우고, 고른 근거를 명령 옆에 괄호로 붙인다');
+    if (model === MODEL_PLACEHOLDER) spawnLines.push('    직접 확인: 권장 모델의 조건을 판단해 <모델>을 opus·sonnet 중 하나로 채우고, 고른 근거를 명령 옆에 괄호로 붙인다');
     for (const c of calls) spawnLines.push(`    실행: ${c}`);
   }
   if (spawnLines.length) {
