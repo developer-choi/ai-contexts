@@ -916,7 +916,8 @@
     "words": [
       "가립니다",
       "가리고",
-      "가려"
+      "가려",
+      "가리기"
     ],
     "match": "SUBSTRING",
     "exclusions": [
@@ -928,7 +929,8 @@
     "instead": [
       "알아냅니다",
       "알아내고",
-      "알아내"
+      "알아내",
+      "알기"
     ]
   },
   {
@@ -1283,5 +1285,522 @@
     "lane": "ALWAYS_BANNED",
     "why": "사용자가 일상에서 안 쓰는 말이라 바로 읽히지 않음(api-base PR 본문 코멘트, 채용 지원서 반려)",
     "instead": "비교하다"
+  },
+  {
+    "words": [
+      "문턱을 넘"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "어렵다는 사실을 문턱을 넘는다는 시적 비유로 부른다(채용 지원서 반려)",
+    "instead": "어렵다"
+  },
+  {
+    "words": [
+      "머뭇"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "사람의 행동을 드라마처럼 묘사해 작위적으로 읽힌다(채용 지원서 반려)",
+    "instead": "빼고 쓴다"
+  },
+  {
+    "words": [
+      "온 터라",
+      "한 터라",
+      "인 터라",
+      "던 터라",
+      "는 터라",
+      "운 터라",
+      "은 터라",
+      "된 터라",
+      "난 터라",
+      "을 터라"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "서사체 문어라 담담한 사실체 문장에 안 붙는다(채용 지원서 반려)",
+    "instead": "그래서"
+  },
+  {
+    "words": [
+      "시켜보",
+      "시켜봐",
+      "시켜본",
+      "시켜봤",
+      "시켜볼",
+      "시켜 보",
+      "시켜 봐",
+      "시켜 본",
+      "시켜 봤",
+      "시켜 볼"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "사람을 부리는 결의 말이라 거슬린다(채용 지원서 반려)",
+    "instead": "직접 해 보게 하다"
+  },
+  {
+    "words": [
+      "겨루",
+      "겨뤄",
+      "겨뤘",
+      "겨룰",
+      "겨룹니다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "스포츠 중계·기사에서 쓰는 문어라 담담한 사실체 문장에 안 붙는다(채용 지원서 반려)",
+    "instead": "대회에 나가다"
+  },
+  {
+    "words": [
+      "늡니다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "늡니다는 담담한 사실체 문장에서 구어로 튄다. 목적어를 세워 늘어납니다로 편다(채용 지원서 반려)",
+    "instead": "늘어납니다"
+  },
+  {
+    "words": [
+      "품을 덜",
+      "품이 들",
+      "품이 드",
+      "드는 품",
+      "품이 든"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "드는 품질",
+      "드는 품목"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "수고를 정서적으로 되감는 말이라 오글거린다(채용 지원서 반려)",
+    "instead": "편리하게 만들다"
+  },
+  {
+    "words": [
+      "길을 잃"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "헤맨다는 사실을 시적 비유로 부른다(채용 지원서 반려)",
+    "instead": "헤매다"
+  },
+  {
+    "words": [
+      "거들",
+      "거드는",
+      "거듭니다",
+      "거든다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "도구를 옆에서 손 보태는 사람처럼 부른다(채용 지원서 반려)",
+    "instead": "돕다"
+  },
+  {
+    "words": [
+      "챙겨 주",
+      "챙겨주",
+      "챙겨 줄",
+      "챙겨줄"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "대신 해 주는 일을 챙긴다로 부르면 사용자가 매우 싫어하는 표현이다(채용 지원서 반려)",
+    "instead": "관리해 주다"
+  },
+  {
+    "words": [
+      "본연"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "소개문에서나 쓰는 말이라 담담한 문장에 안 붙는다(채용 지원서 반려)",
+    "instead": "본업·원래"
+  },
+  {
+    "words": [
+      "힘을 빼",
+      "힘을 뺀",
+      "힘을 뺄",
+      "힘을 뺍",
+      "힘 빼",
+      "힘 뺀"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "공을 덜 들인다는 뜻의 관용구는 사용자가 안 쓰는 말이다. 물리적으로 힘을 빼는 쓰임이면 그대로 둔다(채용 지원서 반려)",
+    "instead": "시간을 쓰다"
+  },
+  {
+    "words": [
+      "손이 닿지 않",
+      "손이 안 닿",
+      "손 닿지 않",
+      "손이 닿지 못"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "통제·관리가 안 되는 것을 손이 안 닿는다고 빗댄다. 물리적으로 손이 안 닿는 쓰임이면 그대로 둔다(채용 지원서 반려)",
+    "instead": "직접 관리할 수 없다"
+  },
+  {
+    "words": [
+      "살피",
+      "살필",
+      "살핍",
+      "살폈"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "확인한다는 뜻의 살피다는 사용자가 낱말째 지목해 반려했다. 살펴보다는 따로 반려되지 않아 막지 않는다(채용 지원서 반려)",
+    "instead": "확인하다"
+  },
+  {
+    "words": [
+      "손 안으로 가져오",
+      "손 안으로 가져왔"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "관리하게 된다는 사실을 손에 빗댄다(채용 지원서 반려)",
+    "instead": "직접 관리하다"
+  },
+  {
+    "words": [
+      "꾸리",
+      "꾸려",
+      "꾸린",
+      "꾸릴",
+      "꾸립"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "일·모임·자료를 마련해 운영한다는 뜻의 꾸리다는 사용자가 안 쓰는 말이다(채용 지원서 반려)",
+    "instead": "운영하다"
+  },
+  {
+    "words": [
+      "맞춰 보",
+      "맞춰보",
+      "맞춰 봐",
+      "맞춰봐",
+      "맞춰 본",
+      "맞춰본",
+      "맞춰 볼",
+      "맞춰볼"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇을 무엇에 맞추는지가 안 잡힌다(채용 지원서 반려)",
+    "instead": "확인한다·합친다"
+  },
+  {
+    "words": [
+      "입히",
+      "입혀",
+      "입힌",
+      "입힐"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "피해를 입히",
+      "피해를 입혀",
+      "피해를 입힌",
+      "손해를 입히",
+      "손해를 입혀",
+      "손해를 입힌"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "기능을 옷처럼 입힌다고 빗댄다. 피해·손해를 준다는 쓰임이면 그대로 둔다(채용 지원서 반려)",
+    "instead": "적용한다"
+  },
+  {
+    "words": [
+      "자리에 두",
+      "자리에 둔",
+      "자리에 둬",
+      "자리에 둠",
+      "자리에 놓",
+      "자리에 놔",
+      "자리에 놨"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "자리에 두 개",
+      "자리에 두 번",
+      "자리에 두 가지"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇을 어디에 둔다는 것인지가 안 서서 하려던 얘기가 읽히지 않는다(채용 지원서 반려)",
+    "instead": "그 화면에서 바로 ~하게 한다처럼 화면과 동작으로 쓴다"
+  },
+  {
+    "words": [
+      "이루도록",
+      "이루게",
+      "이루고",
+      "이룰",
+      "이루는",
+      "이룹니다",
+      "이뤄내",
+      "이루려"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "성과·목표를 이루다로 압축한 문어라 오글거린다(채용 지원서 반려)",
+    "instead": "달성하다"
+  },
+  {
+    "words": [
+      "비춰",
+      "비추어",
+      "비추면",
+      "비춘",
+      "비춥니다",
+      "비추는"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "기준을 비추다로 부르는 문어체 동사라 사용자가 매우 싫어하는 표현이다(채용 지원서 반려)",
+    "instead": "~을 기준으로"
+  },
+  {
+    "words": [
+      "잘게"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "나뉜다는 말에 붙인 정도 부사가 어색하다(채용 지원서 반려)",
+    "instead": "빼고 쓴다"
+  },
+  {
+    "words": [
+      "오가는",
+      "오가야",
+      "오가며",
+      "오가고",
+      "오가면",
+      "오갈",
+      "오간",
+      "오갑",
+      "오갔"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "화면·장소 사이를 오간다는 동작 묘사를 사용자가 낱말째 지목해 반려했다(채용 지원서 반려)",
+    "instead": "번갈아 보다"
+  },
+  {
+    "words": [
+      "뒤집니다",
+      "뒤져",
+      "뒤졌"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇을 찾는다는 뜻의 뒤지다는 남의 것을 헤집는 결의 거친 구어라 담담한 사실체 문장에 안 붙는다(채용 지원서 반려)",
+    "instead": "찾아보다"
+  },
+  {
+    "words": [
+      "따지",
+      "따질",
+      "따져",
+      "따졌",
+      "따집"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "된소리가 들어간 말이라 사용자가 싫어한다(채용 지원서 반려)",
+    "instead": "정하다·비교하다"
+  },
+  {
+    "words": [
+      "들이려",
+      "들이는",
+      "들여",
+      "들였",
+      "들입니다",
+      "들일"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "들여쓰",
+      "들여보",
+      "들여다",
+      "들여 적"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "무엇을 새로 갖춘다는 뜻의 들이다가 바로 읽히지 않는다. 시간·공을 들인다는 쓰임이면 대상에 맞게 풀어 쓴다(채용 지원서 반려)",
+    "instead": "구매하다·도입하다"
+  },
+  {
+    "words": [
+      "부품"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "화면을 이루는 단위를 부품으로 부르지 않는다(채용 지원서 반려)",
+    "instead": "컴포넌트"
+  },
+  {
+    "words": [
+      "조각"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "정보·대상을 조각으로 부르는 비유다(채용 지원서 반려)",
+    "instead": "비유를 빼고 실제로 무엇을 나눴는지 쓴다"
+  },
+  {
+    "words": [
+      "담기지",
+      "담기는",
+      "담겨",
+      "담긴",
+      "담길",
+      "담겼"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "데이터·정보가 어딘가에 들어 있다는 뜻의 담기다는 사용자가 낱말째 지목해 반려했다. 장바구니에 담는 동작이면 그대로 둔다(채용 지원서 반려)",
+    "instead": "저장되다·들어 있다·포함되다"
+  },
+  {
+    "words": [
+      "흩어져",
+      "흩어진"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "흩어져있으면",
+      "흩어져 있으면",
+      "흩어져있습니다",
+      "흩어져 있습니다"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "그 자리에서 불필요한 수식어다(채용 지원서 반려)",
+    "instead": "빼고 쓴다"
+  },
+  {
+    "words": [
+      "그리던",
+      "그리는",
+      "그려 둔",
+      "그려 온",
+      "그렸던"
+    ],
+    "match": "PREFIX",
+    "exclusions": [
+      "화면을 그리는"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "머릿속으로 짐작한다는 뜻의 그리다는 바로 읽히지 않는다. 그림·화면을 그린다는 뜻이면 그대로 둔다(채용 지원서 반려)",
+    "instead": "예상하다"
+  },
+  {
+    "words": [
+      "손볼",
+      "손봐",
+      "손보는",
+      "손보고",
+      "손봅니다"
+    ],
+    "match": "PREFIX",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "물건을 만지작거리는 결의 구어라 사용자가 매우 싫어하는 표현이다(채용 지원서 반려)",
+    "instead": "고치다"
+  },
+  {
+    "words": [
+      "마침",
+      "때마침",
+      "거기에",
+      "사실은"
+    ],
+    "match": "SENTENCE_START",
+    "exclusions": [
+      "마침내",
+      "마침표",
+      "마침맞"
+    ],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "문장 첫머리에 붙인 도입어가 오글거린다(채용 지원서 반려)",
+    "instead": "빼고 쓴다"
+  },
+  {
+    "words": [
+      "다행히도",
+      "정말로"
+    ],
+    "match": "SUBSTRING",
+    "exclusions": [],
+    "scope": "BOTH",
+    "lane": "NEEDS_REVIEW",
+    "why": "도입어·강조어가 오글거린다(채용 지원서 반려)",
+    "instead": "빼고 쓴다"
   }
 ]
