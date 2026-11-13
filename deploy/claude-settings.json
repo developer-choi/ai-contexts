@@ -15,7 +15,7 @@
   "permissions": {
     "defaultMode": "acceptEdits",
     "additionalDirectories": [
-      "C:\\Users\\forwo\\Downloads"
+      "~/Downloads"
     ],
     "allow": [
       "Agent",
