@@ -1,6 +1,6 @@
 # Environment Sync
 
-현재 머신의 사용자 환경을 AC 기준으로 맞춥니다.
+현재 머신의 사용자 환경을 AC 기준으로 맞춥니다. 여러 번 실행해도 중복 없이 같은 상태로 수렴합니다.
 
 ```bash
 npm run sync:environment
@@ -9,65 +9,30 @@ npm run sync:environment
 ## 수행 작업
 
 - Windows에서 PowerShell 7 존재 여부를 확인하고, 없으면 `winget`으로 `Microsoft.PowerShell`을 설치합니다.
-- Windows PowerShell과 PowerShell 7의 실제 `$PROFILE` 경로를 확인해 UTF-8 설정 block을 삽입 또는 갱신합니다.
+- Windows PowerShell과 PowerShell 7의 실제 `$PROFILE` 경로를 확인해 UTF-8 설정 block을 삽입 또는 갱신합니다. 기존 `ai-contexts`·`test-playground` marker는 새 AC marker로 이관합니다.
 - `~/.gitignore_global`에 AC 관리 block으로 `backlog/` 패턴을 추가합니다.
 - `core.excludesFile`이 비어 있으면 `~/.gitignore_global`을 등록합니다.
 - Windows에서 `~/autorun.cmd`를 AC 내용으로 생성·갱신하고, `HKCU\Software\Microsoft\Command Processor`의 `AutoRun`을 `@~/autorun.cmd`로 등록합니다. 대화형 cmd 창을 홈 디렉토리에서 열면 `~/WebstormProjects/main`으로 이동시킵니다. `AutoRun`이 다른 값으로 이미 설정돼 있으면 사용자 설정 보호를 위해 건너뜁니다.
-- `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**(`hook.ai-contexts-githooks-<이벤트>.*`)에 이벤트마다 멱등하게 등록합니다. 레포별로 등록하지 않는 이유는 등록이 `.git/config`에 사는데 clone이 그 파일을 안 가져오기 때문입니다. 전역이면 그 뒤로 클론하는 레포도, 새로 파는 워크트리도 아무것도 안 해도 훅이 발동합니다. `.githooks/`가 없는 레포는 조용히 통과하므로 모든 레포에 걸려도 무해합니다.
-  - 옛 방식의 잔재(레포별 `hook.repo-*` 등록)를 발견하면 걷어냅니다. 남겨두면 전역 훅과 둘 다 돌아 같은 검사가 두 번 실행됩니다. 이미 이관된 기기에서는 지울 것이 없어 읽기만 합니다. **`core.hooksPath`는 지우지 않고 보고만 합니다**: 우리가 안 건 값을 가진 레포(훅을 일부러 꺼둔 것, 옛 husky 과제 레포)가 섞여 있어, 지우면 꺼둔 훅이 되살아나거나 husky 배선이 끊깁니다.
-  - `unsync:environment`로는 이 정리를 못 합니다. 그 명령은 레포별 훅 등록을 건드린 적이 없고 PowerShell 7 제거·gitignore·autorun 해제를 합니다.
-- **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 등록하지 않고 중단합니다 (`winget upgrade --id Git.Git -e`).
-- `scripts/hooks/check-count-hardcoding.mjs`를 `~/.ai-contexts/check-count-hardcoding.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-count-hardcode.*`)으로 멱등하게 등록합니다. 스테이징된 프롬프트 md(`/skills/`·`/rules/`·`/contexts/`·`meta/guides/`·`CLAUDE|AGENTS|GEMINI.md`)를 통째로 훑어 개수 하드코딩을 감지해 경고합니다. 어느 레포·어느 도구로 커밋하든 발동하지만 커밋을 막지는 않습니다.
-  - 스텝 번호 범위 호명(`Step 1~3`)도 같은 훅이 별도 문구로 경고합니다. 지는 불변식이 같기 때문입니다. 문서 구조에 묶인 숫자가 구조가 바뀔 때 조용히 낡습니다. 번호 매긴 단계를 헤딩으로 정의하는 파일은 자기 목차를 부르는 것이라 이 검사에서 제외합니다.
-  - 이번 커밋이 고친 줄이 아니라 **건드린 파일 전체**를 봅니다. 추가분만 보면 옛 위반이 그 줄을 직접 건드리기 전까지 남고, 그렇다고 규칙마다 전 파일을 훑으면 규칙 수만큼 비용이 곱해집니다. 건드린 파일만 통째로 보면 손대는 김에 걷히면서 커밋당 비용은 안 늡니다.
-  - 내용 변경 없이 이름만 바뀐 파일(git이 `R100`으로 보고하는 것)은 건드린 파일로 치지 않습니다. 재구성처럼 대량 이동하는 커밋에서 경고가 쏟아지고, "함께 정리한다"는 안내가 이동만 담아야 하는 커밋과 부딪히기 때문입니다. 내용도 바뀐 rename은 검사합니다.
-  - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
-  - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/dev-active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
-  - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 호출 꼴·출력·exit code는 [check-count-hardcoding.md](../../scripts/hooks/check-count-hardcoding.md)에 있습니다.
-- `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다.
-  - 스테이징된 프롬프트 md에서 강조 라벨·약한 어휘·군더더기·영어 용어 뒤에 괄호로 한글 풀이를 단 헤딩·금지 표현(사용자가 못 알아본 말)·줄바꿈 없이 길게 연결된 줄을 감지해 처방과 함께 경고합니다. 커밋을 막지는 않습니다.
-  - 검사 범위·제외(건드린 파일 전체, `R100` 제외, backlog 데이터 제외, `|| true`)는 바로 위 개수 하드코딩 훅과 같습니다.
-  - 낱말 목록과 처방은 스크립트가 정본입니다. 문자열만으로 정탐이 대부분인 낱말만 켭니다. 정상 조건문·명사로 더 많이 쓰이는 낱말(`필요하면`·`옵션` 등)은 뺍니다.
-  - 긴 줄은 낱말이 아니라 줄 길이로 잽니다(문턱은 스크립트가 정본). 다른 범주는 경고 끝에 같은 파일의 기존 위반도 지금 고치되 별도 커밋으로 나누라고 안내합니다. 이 범주는 처방이 같은 내용을 따로 말해 그 꼬리말을 걸지 않습니다.
-  - AC가 아닌 레포에서는 `[CRITICAL]`도 강조 라벨로 경고합니다. AC는 `.githooks`의 `check-critical-marker.mjs`가 막고, 다른 레포에는 이것이 유일한 표면입니다.
-  - `node ~/.ai-contexts/check-wording.mjs --report <md 또는 폴더>`(폴더면 그 아래 md마다)로 커밋 없이 물을 수 있습니다(훑기 회차용). 호출 꼴·출력·exit code는 [check-wording.md](../../scripts/hooks/check-wording.md)에 있습니다.
-  - 금지 표현 범주는 낱말 목록이 스크립트가 아니라 금지 표현 목록 `scripts/hooks/blocked-expressions.json`에 있어, 이 파일도 `~/.ai-contexts/blocked-expressions.json`으로 복사합니다.
-    - 훅은 그 사본에서 `scope`가 PROMPT·BOTH인 행을 읽어 걸린 줄과 행마다의 대신 쓸 말을 `[금지 표현 의심]`으로 경고합니다. 사본이 없으면 이 범주만 건너뜁니다.
-    - 레인이 `NEEDS_REVIEW`인 행은 그 커밋에서 추가·수정한 줄에서만 짚습니다. 쓰임에 따라 맞기도 한 말이라 원래 있던 정상 쓰임까지 매 커밋 끌려오지 않게 합니다.
-    - write-doc 채점과 Claude 커밋 메시지 훅도 같은 사본(AC 체크아웃 안에서는 원본)을 읽습니다. 그쪽은 `scope`가 DOC·BOTH인 행입니다.
-    - 금지 표현 목록은 등록 스크립트(`scripts/hooks/blocked-expressions.mjs`)로만 고칩니다. 이 스크립트는 원본과 사본을 함께 고쳐, 다음 sync 전에도 바로 걸리게 합니다.
-    - 그래서 사본이 원본과 달라질 수 있어, `unsync:environment`는 동일성 비교 없이 사본을 지웁니다(`md-size-seen.json`과 같은 근거: 이름도 자리도 AC 전유입니다).
-- `scripts/hooks/check-coupling-patterns.mjs`를 `~/.ai-contexts/check-coupling-patterns.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-coupling-patterns.*`)으로 멱등하게 등록합니다. 커밋하는 레포에 `meta/coupling.json`이 있으면 등록된 짝꿍 패턴 **하나하나**가 실물 파일을 가리키는지 확인해 경고합니다. 커밋을 막지는 않습니다.
-  - 왜 필요한가: 짝꿍을 띄우는 편집 시점 훅(`surface-coupling`)은 "편집 중인 파일이 어느 묶음에 드는가"만 봅니다. 묶음 쪽 패턴이 낡아 아무 파일도 안 가리키게 되면 그 훅에서는 "이 파일은 짝꿍이 아니다"와 똑같은 모양이 되어, 짝꿍 대조가 통째로 꺼진 상태가 매 편집마다 통과처럼 보입니다([대상 0개는 통과가 아니라 고장이다](../../deploy/contexts/rules-as-code-authoring.md#대상-0개는-통과가-아니라-고장이다)).
-  - 등록부를 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돕니다. 패턴이 죽는 계기는 등록부를 고칠 때가 아니라 다른 파일이 옮겨갈 때라, 등록부를 건드린 커밋만 보면 죽은 뒤 아무도 등록부를 안 여는 동안 계속 안 잡힙니다.
-  - 아직 만들지 않은 짝을 자리만 잡아둔 경우는 그 묶음의 `pending`(패턴 → 사유)으로 면제합니다. 사유는 필수이며 너무 짧으면 형식 오류로 걸립니다. 면제한 패턴에 실물이 생기면 "면제 낡음"으로 걸려 걷을 자리를 알려줍니다.
-  - **면제 건수는 출력할 때마다 함께 냅니다.** 면제가 늘어나는 것이 안 보이면 이 검사는 "죽은 패턴에 면제를 붙인다"로 우회되어 초록불인 채 꺼집니다. 면제가 늘어나는 계기는 등록부를 고치는 것뿐이라, 깨끗해도 `meta/coupling.json`이 스테이징된 커밋에서는 한 줄 요약(묶음·패턴·면제 건수)을 냅니다.
-- `scripts/hooks/check-md-size.mjs`를 `~/.ai-contexts/check-md-size.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-md-size.*`)으로 멱등하게 등록합니다. 커밋하는 레포의 프롬프트·스킬 md(`CLAUDE.md`·`local/`·`deploy/`·`plugins/` 하위와, 거기서 링크·경로로 닿는 md를 위치와 무관하게 재귀로)를 전수로 재서 "무엇을 한 파일로 묶을지는 크기가 정한다"([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘은 문서를 경고합니다. 커밋을 막지는 않습니다.
-  - `SKILL.md`는 닿는 곳과 무관하게 따로 정한 더 낮은 선을 씁니다. 스킬을 부르면 통째로 실리는 진입점이라, 두꺼우면 불러 놓고서야 필요 없는 스킬인 줄 알게 되고 한눈에 무슨 스킬인지도 안 보입니다.
-  - 그 밖의 문서는 선이 둘입니다. 닿는 곳이 기준 수 이상이면 낮은 선, 아니면 높은 선을 씁니다. 같은 크기여도 여러 곳에서 열리는 문서가 비싸기 때문입니다([문서의 비용은 크기가 아니라 "크기 × 불려가는 자리 수"다](../../deploy/contexts/prompt-standards/file-layout.md#문서의-비용은-크기가-아니라-크기--불려가는-자리-수다)). 숫자는 스크립트 상단 상수가 정본입니다.
-  - "닿는 곳"은 재귀로 셉니다. A가 B 하나만 가리켜도 그 A가 여러 곳에서 열리면 B도 결국 그만큼의 경로에서 열리므로, 직접 참조만 세면 그것이 안 보입니다. 확장자 없이 산문으로 부르는 참조는 못 세므로 값이 실제보다 적게 나옵니다. 놓치는 쪽이지 없는 참조를 만들지는 않습니다.
-  - 고친 파일만이 아니라 **전수**로 잽니다. 크기는 이번 세션이 무엇을 건드렸는지와 무관한 사실이라, 고친 파일만 보면 아무도 안 고치는 큰 파일이 영영 안 걸립니다.
-  - 이번 브랜치가 고친 파일은 git 인덱스로, 안 건드린 파일은 **기본 브랜치 끝**의 내용으로 잽니다. 워크트리는 만든 시점에 멈춰 있어서, 인덱스만 보면 그사이 다른 세션이 기본 브랜치에서 줄인 파일을 옛 크기로 재 "선을 새로 넘었다"고 오탐합니다. 기본 브랜치는 로컬 `main`/`master`를 먼저 봅니다. 승인 등급 레포는 사람이 push하기 전까지 로컬이 origin보다 앞서 있기 때문입니다. 못 찾으면 인덱스만 봅니다.
-  - **설정은 검사받는 레포가 아니라 private 레포 `backlog`의 `meta/md-size.json` 한 곳에 삽니다.** 레포별 키 아래에 기준선 목록(`files`)과 제외 목록(`exclude`)이 들어갑니다. 기준선도 제외도 개인 도구의 상태라, 남이 클론할 수 있는 레포에 두면 그 사람 클론에 남의 설정이 얹힙니다. **그 파일이 없는 기기에서는 검사가 통째로 no-op 합니다**: 설정 없이 도는 것은 아무 레포에나 경고를 뿌리는 다른 물건입니다(`deploy/hooks/surface-backlog.mjs`가 같은 판단을 먼저 했습니다). 레포 이름은 `--git-common-dir`로 구해 워크트리에서도 원본과 같은 키를 씁니다.
-  - 이미 선을 넘은 문서는 기준선 목록에 올려 조용히 둡니다(`node ~/.ai-contexts/check-md-size.mjs --write-baseline`). 첫날 수십 건을 매 커밋 쏟으면 그 경고를 안 보게 되고, 그러면 새로 넘는 파일도 함께 묻힙니다. 기준선에 올린 파일은 더 커질 때만 걸리고, 선 아래로 내려오면 알립니다. 그 줄은 `--settle`이 걷습니다(검사가 말없이 고치면 사용자가 낸 적 없는 diff가 `backlog`에 쌓이므로 자동이 아니라 사람이 부르는 명령입니다). 기준선 목록은 크기 × 닿는 곳 순으로 적혀 그대로 문서 전체를 고칠 대상 목록이 됩니다.
-  - **같은 사실은 한 번만 냅니다.** 기준선 목록은 사람이 `--write-baseline`을 부를 때만 바뀌는데 검사는 커밋마다 다시 재므로, 그것만으로는 한 번 커진 파일이 기준선을 갱신할 때까지 똑같은 한 줄을 매 커밋 영원히 찍습니다(실측: AC 당시 `step-4.md`(지금 `realize-plan.md`) 한 줄이 24커밋 연속). 그래서 "이 파일을 이 크기로 알렸다"를 `~/.ai-contexts/md-size-seen.json`에 남기고, 알린 크기 그대로면 조용히 넘어갑니다. 더 커지면 다시 냅니다. 기준선 목록에 합치지 않고 따로 두는 이유는 바로 위와 같습니다(커밋마다 도는 검사가 `backlog`에 사용자가 낸 적 없는 diff를 쌓게 됩니다). 기기별 상태이고 선 아래로 내려온 파일의 기억은 저절로 걷힙니다. 지우면 한 번 더 찍히고 마는 파일이라, `unsync:environment`가 훅과 함께 제거합니다.
-  - 예외는 **기준선에도 안 올린 초과분**입니다. 통째로 침묵시키면 그 파일이 기준선 목록에도 알림에도 안 남으므로, 블록은 한 번만 내고 그 뒤로는 `미등재 초과 N건 — --write-baseline` 한 줄만 남깁니다.
-  - 닿는 md까지 재는 것은, 폴더로만 정하면 규격을 밖으로 떼는 순간 감시에서 빠지기 때문입니다.
-  - `exclude`에 경로 접두사로 적은 자리는 재지 않고, 그 자리가 가리키는 md도 따라가지 않습니다. 산출물이 함께 사는 `local/`(PP의 제출한 자소서 폴더)과 규칙 파일이 예시로 가리키는 보관 글을 적습니다. 어느 것이 산출물·보관 글인지는 사람만 아는 사실이라 검사가 이름으로 못 가릅니다. 기준선을 다시 쓸 때 그 목록과 다른 레포의 항목은 그대로 유지됩니다.
-  - 지식 글·백로그 항목은 규칙 파일이 가리키지 않으면 닿지 않아 재지 않고, 가리켜져 닿게 되면 위 `exclude`로 뺍니다. 한 주제를 길게 쓰는 것이 정상이라 같은 선을 대면 전부 걸리고, 그러면 이 검사가 통째로 무시됩니다.
-  - 선을 넘었는지와 무관하게 파일의 크기·닿는 곳 목록·선을 물을 수도 있습니다(`node ~/.ai-contexts/check-md-size.mjs --report <md 또는 폴더 경로>`, 폴더면 그 아래 md마다). 호출 꼴·출력은 [check-md-size.md](../../scripts/hooks/check-md-size.md)에 있습니다. 이때 크기만은 작업 트리에서 잽니다. 경고와 기준선 올리기는 선을 넘은 파일만 내므로, 손대기 전에 무게를 재려는 세션이 같은 계산을 grep으로 다시 하지 않게 하는 출구입니다. 그 레포 안의 참조만 세므로 다른 레포·자동 로드·훅 주입으로 여는 곳은 안 잡힌다는 것을 출력에 함께 적습니다.
-- `scripts/hooks/check-orphan-md.mjs`를 `~/.ai-contexts/check-orphan-md.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-orphan-md.*`)으로 멱등하게 등록합니다. 이번 커밋 뒤로 아무도 이름을 부르지 않게 된 프롬프트 md(새로 만든 것, 옮긴 것, 지운 줄에 이름이 나오던 것)를 경고합니다. 커밋을 막지는 않습니다.
-  - 레포 전체의 고아는 `scripts/check-links.mjs`가 찾지만 한 번에 1분 가까이 걸려, 이 훅은 이번 커밋이 만든 고아만 봅니다.
-  - 폴더 이름이 폴더 자체로 나오고 그 안의 md가 하나도 이름으로 안 불리면 폴더째 읽는 자리로 보고 넘어갑니다. backlog 레포는 `local/`만 봅니다. 항목은 원래 아무도 안 부릅니다.
-- `scripts/hooks/check-guide-post-pair.mjs`를 `~/.ai-contexts/check-guide-post-pair.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-guide-post-pair.*`)으로 멱등하게 등록합니다. MP `docs/guides/<주제>/step<N>.md`와 블로그 `posts/<주제>-step<N>.md`는 같은 본문을 담는 한 짝인데, 두 레포는 서로를 모릅니다. 한쪽만 올려도 그 레포 안에서는 아무 신호가 안 나고 링크가 깨지지도 않아 렌더링으로도 안 드러납니다. 이번 커밋이 한쪽을 건드렸는데 짝 레포에 다른 쪽이 없으면 경고합니다. 커밋을 막지는 않습니다.
-  - **두 레포 밖에서는 아무 일도 하지 않습니다.** 자기 레포가 그 둘 중 하나인지를 `--git-common-dir`로 구한 원본 경로로 판정하므로, 워크트리에서 커밋해도 같게 갈립니다.
-  - **시리즈 문서(`step<N>`)만 봅니다.** 두 레포에 같은 이름 규칙으로 사는 것은 시리즈뿐이고, 주제 이름이 slug에 안 붙는 묶음까지 덮으려면 어느 쪽 규칙인지를 매번 판단해야 합니다. 판단이 남는 검사는 넓힐수록 오탐으로 무뎌지므로 규칙이 결정론인 범위에서 끊습니다.
-  - **짝 레포를 못 찾으면 조용히 통과하지 않고 그 사실을 냅니다.** 레포가 옮겨가면 이 검사는 아무것도 못 보면서 매 커밋 성공하게 되고, 죽었다는 사실이 아무 데도 안 남습니다. 두 레포의 자리는 스크립트 상단 `REPOS`가 정본입니다.
-- `deploy/hooks/recruitment-commit-guard.mjs`를 `~/.ai-contexts/recruitment-commit-guard.mjs`로 복사하고, `--global` commit-msg·pre-commit 훅(`hook.ai-contexts-recruitment-guard-msg.*`·`hook.ai-contexts-recruitment-guard-staged.*`)으로 멱등하게 등록합니다. `~/WebstormProjects/recruitment/` 아래 채용과제 레포에서만 돌며, 로컬 전용 맥락이 커밋에 실리거나 한국어가 빠지면 **커밋을 막습니다**: 메시지에 `plan/`·`monorepo-playground`·`ai-contexts`·대문자 `MP`/`AC`가 있거나 subject에 한글이 없을 때, 새로 추가된 코드 줄에 긴 이름(`monorepo-playground`·`ai-contexts`)이 있을 때, 레포 루트 `plan/` 아래 파일이 staged 됐을 때입니다. 채용 담당자가 보는 이력이라 흔적 하나도 남으면 안 되고, 과제마다 손으로 넣던 commitlint 한국어 규칙이 과제 대부분에서 빠져 있었습니다.
-  - **채용 레포 안에는 아무것도 남기지 않습니다.** 연결은 `~/.gitconfig`의 설정 훅뿐이라, 레포가 husky로 `core.hooksPath`를 바꿔도 따로 돕니다.
-  - **다른 훅과 달리 `|| true`로 감싸지 않습니다.** 대신 등록 명령이 채용 레포인지를 셸에서 먼저 가려, 사본이 사라지거나 node가 없을 때 막히는 범위를 채용 레포로 한정합니다.
-  - 두 글자 약어와 `plan/`은 코드 줄에서 보지 않습니다. 과제 코드에 `/api/plan/1`·`enum { AC }`가 멀쩡히 나오고, 막히면 우회할 길이 없습니다.
-  - Claude Code가 하는 커밋은 `check-git-commit-policy.mjs`가 같은 판정 함수를 불러 한 번 더 막습니다.
+- `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**(`hook.ai-contexts-githooks-<이벤트>.*`)에 이벤트마다 등록합니다. 레포별 등록은 `.git/config`에 살아 clone이 안 가져오므로, 전역에 걸어 새로 클론한 레포·워크트리에서도 바로 발동하게 합니다. `.githooks/`가 없는 레포는 조용히 통과합니다.
+  - 옛 레포별 등록(`hook.repo-*`)은 걷어냅니다. `core.hooksPath`는 지우지 않고 보고만 합니다. 이유는 `scripts/lib/git-hooks.mjs`의 `clearLegacyRepoHooks` 주석에 있습니다.
+  - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 훅을 등록하지 않고 sync가 오류로 중단합니다 (`winget upgrade --id Git.Git -e`).
+- 아래 전역 검사 훅을 등록합니다. 훅마다 원본을 `~/.ai-contexts/<파일>`로 복사하고 `--global` 설정 훅으로 등록합니다.
+  - 목록은 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, 무엇을 어떤 범위로 왜 그렇게 검사하는지는 각 스크립트 머리 주석이 정본입니다.
+  - 표 마지막 행(채용 레포 커밋 검사)을 뺀 훅은 어느 레포에서 커밋하든 돌며 **커밋을 막지 않고 경고만** 합니다.
+
+| 훅 파일 | 등록 이름 | 검사 | 손으로 묻는 출구 |
+|---|---|---|---|
+| `scripts/hooks/check-count-hardcoding.mjs` | `hook.ai-contexts-count-hardcode.*` | 프롬프트 md의 개수 하드코딩·스텝 번호 범위 호명 | `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>` ([사용법](../../scripts/hooks/check-count-hardcoding.md)) |
+| `scripts/hooks/check-wording.mjs` | `hook.ai-contexts-wording.*` | 프롬프트 md의 강조 라벨·약한 어휘·금지 표현·긴 줄 등 | `node ~/.ai-contexts/check-wording.mjs --report <md 또는 폴더>` ([사용법](../../scripts/hooks/check-wording.md)) |
+| `scripts/hooks/check-coupling-patterns.mjs` | `hook.ai-contexts-coupling-patterns.*` | `meta/coupling.json`의 짝꿍 패턴이 실물 파일을 가리키는지 | 없음 |
+| `scripts/hooks/check-md-size.mjs` | `hook.ai-contexts-md-size.*` | 프롬프트·스킬 md가 [크기 선](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의)을 넘었는지 | `node ~/.ai-contexts/check-md-size.mjs --report <md 또는 폴더>` ([사용법](../../scripts/hooks/check-md-size.md)) |
+| `scripts/hooks/check-orphan-md.mjs` | `hook.ai-contexts-orphan-md.*` | 이번 커밋으로 어디서도 이름이 나오지 않게 된 프롬프트 md | 없음 |
+| `scripts/hooks/check-guide-post-pair.mjs` | `hook.ai-contexts-guide-post-pair.*` | MP 가이드 `step<N>.md`와 블로그 포스트 중 한쪽만 있는지 | 없음 |
+| `deploy/hooks/recruitment-commit-guard.mjs` | commit-msg `hook.ai-contexts-recruitment-guard-msg.*`, pre-commit `hook.ai-contexts-recruitment-guard-staged.*` | 아래 채용 레포 커밋 검사 | 없음 |
+
+- **낱말 훅**이 읽는 금지 표현 목록 `scripts/hooks/blocked-expressions.json`도 `~/.ai-contexts/`로 복사합니다. 사본이 없으면 금지 표현 범주만 건너뜁니다. 목록 고치는 법은 [사용법](../../scripts/hooks/blocked-expressions.md)에 있습니다.
+- **문서 크기 훅**의 기준선·제외 설정은 `backlog` 레포의 `meta/md-size.json`에 있고, 그 파일이 없는 기기에서는 검사가 통째로 no-op 합니다.
+- **채용 레포 커밋 검사**는 `~/WebstormProjects/recruitment/` 아래 레포에서만 돌며, 로컬 전용 맥락이 커밋에 실리거나 커밋 메시지 subject에 한글이 없으면 **커밋을 막습니다**. 판정 조건은 스크립트가 정본입니다.
 - AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
 
 ## 제거
@@ -78,21 +43,7 @@ npm run unsync:environment
 
 제거 명령은 AC marker block만 제거합니다. PowerShell 7은 `sync:environment`가 직접 설치했다고 상태 파일에 기록된 경우에만 제거를 시도합니다. `~/autorun.cmd`는 내용이 AC가 쓴 것과 동일할 때만 삭제하고, `AutoRun` 레지스트리는 상태 파일에 AC 등록 기록이 있고 현재 값이 `@~/autorun.cmd`일 때만 제거합니다.
 
-`.githooks` 배선(`hook.ai-contexts-githooks-*`)은 `unsync:environment`가 **되돌리지 않습니다**: 되돌리면 이 기기의 모든 레포에서 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 되돌릴 환경 오염이 아니라 레포들이 동작하기 위한 배선으로 봅니다.
+`.githooks` 배선(`hook.ai-contexts-githooks-*`)은 `unsync:environment`가 **되돌리지 않습니다**: 되돌리면 이 기기의 모든 레포에서 훅이 통째로 꺼져 커밋 검사가 조용히 사라집니다. 옛 레포별 등록(`hook.repo-*`) 정리도 `sync:environment`만 합니다.
 
-전역 검사 훅(바로 위 `.githooks` 배선을 뺀 나머지 `hook.ai-contexts-*`로, "수행 작업"이 하나씩 설명합니다)은 다른 레포의 자체 기능을 켜는 배선이 아니라 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/`의 스크립트 사본도 제거합니다(AC가 쓴 내용과 동일할 때만: 사용자가 직접 고쳤으면 남겨둡니다). 어느 훅을 이렇게 처리하는지는 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, sync·unsync가 그 표를 함께 읽습니다.
-
-## 반복 실행 기준
-
-`sync:environment`는 여러 번 실행해도 PowerShell profile block이나 global gitignore pattern을 중복 추가하지 않아야 합니다. 기존 `ai-contexts` 또는 `test-playground` marker는 새 AC marker로 이관합니다. `~/autorun.cmd`와 `AutoRun` 레지스트리도 같은 값으로 수렴하며 중복 등록하지 않습니다.
-
-## 새 머신 기준
-
-새 머신에서는 의존성 설치 후 가장 먼저 실행합니다.
-
-```bash
-npm ci
-npm run sync:environment
-```
-
-이 명령은 사용자 환경을 바꾸므로 `unsync:environment`가 되돌릴 수 있는 대상과 되돌리지 않을 대상을 가이드에 함께 기록해야 합니다.
+전역 검사 훅("수행 작업"의 표)은 AC가 얹은 독립 기능이므로, `unsync:environment`가 등록을 해제하고 `~/.ai-contexts/`의 스크립트 사본도 제거합니다(AC가 쓴 내용과 동일할 때만: 사용자가 직접 고쳤으면 남겨둡니다).
+훅 곁에 둔 데이터·상태 사본(`blocked-expressions.json`·`md-size-seen.json`)은 동일성 비교 없이 지웁니다.
