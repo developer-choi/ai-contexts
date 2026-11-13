@@ -56,6 +56,12 @@ export const PRECOMMIT_HOOKS = [
     label: '가이드-포스트 짝 검사 훅',
     stateKey: 'guidePostPairHookSetByAiContexts',
   },
+  {
+    alias: 'cli-usage',
+    file: 'verify-cli-usage.mjs',
+    label: 'CLI 사용법 짝 md 검사 훅',
+    stateKey: 'cliUsageHookSetByAiContexts',
+  },
   // 채용 레포 커밋 검사. 한 파일을 두 이벤트에 건다 — 인자(메시지 파일)가 있으면 메시지를, 없으면
   // staged 변경을 본다. 판정을 Claude 훅(check-git-commit-policy.mjs)도 import하므로 원본은
   // deploy/hooks/에 있다. 위 훅들과 달리 알림이 아니라 차단이 목적이라 `blocking`이다.

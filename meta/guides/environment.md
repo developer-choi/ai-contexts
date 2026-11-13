@@ -29,6 +29,7 @@ npm run sync:environment
 | `scripts/hooks/check-md-size.mjs` | `hook.ai-contexts-md-size.*` | 프롬프트·스킬 md가 [크기 선](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의)을 넘었는지 | `node ~/.ai-contexts/check-md-size.mjs --report <md 또는 폴더>` ([사용법](../../scripts/hooks/check-md-size.md)) |
 | `scripts/hooks/check-orphan-md.mjs` | `hook.ai-contexts-orphan-md.*` | 이번 커밋으로 어디서도 이름이 나오지 않게 된 프롬프트 md | 없음 |
 | `scripts/hooks/check-guide-post-pair.mjs` | `hook.ai-contexts-guide-post-pair.*` | MP 가이드 `step<N>.md`와 블로그 포스트 중 한쪽만 있는지 | 없음 |
+| `scripts/hooks/verify-cli-usage.mjs` | `hook.ai-contexts-cli-usage.*` | 인자 받는 `.mjs`에 사용법 짝 md가 있고 사용법이 그 md에만 있는지 | `node ~/.ai-contexts/verify-cli-usage.mjs <폴더>` ([사용법](../../scripts/hooks/verify-cli-usage.md)) |
 | `deploy/hooks/recruitment-commit-guard.mjs` | commit-msg `hook.ai-contexts-recruitment-guard-msg.*`, pre-commit `hook.ai-contexts-recruitment-guard-staged.*` | 아래 채용 레포 커밋 검사 | 없음 |
 
 - **낱말 훅**이 읽는 금지 표현 목록 `scripts/hooks/blocked-expressions.json`도 `~/.ai-contexts/`로 복사합니다. 사본이 없으면 금지 표현 범주만 건너뜁니다. 목록 고치는 법은 [사용법](../../scripts/hooks/blocked-expressions.md)에 있습니다.

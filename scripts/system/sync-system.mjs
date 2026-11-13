@@ -46,8 +46,6 @@ const VERIFY_STEPS = [
   { file: path.join(scriptsDir, 'verify', 'verify-skill-script-paths.mjs') },
   // 잘못 세는 눈금은 그 자리에서 정상으로 보이고 몇 달 뒤 안 차는 것으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
   { file: path.join(scriptsDir, 'verify', 'verify-source-usage.mjs') },
-  // 사용법 짝 md가 빠진 스크립트가 배포되면, 인자만 알고 싶은 AI가 그 스크립트 소스를 통째로 연다.
-  { file: path.join(scriptsDir, 'verify', 'verify-cli-usage.mjs'), args: ['deploy', 'plugins', 'scripts', 'local'] },
 ];
 
 async function main() {
