@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: session-state.md (같은 폴더)
+//
 // 세션 마감 전에 훑어야 할 상태들 — 사용자 발화 전수, 압축 횟수, 보강 매칭 근거,
 // squash 전후 동일성, 회고 표의 빈칸, 읽고 안 쓴 문서, 시간과 지시 순서, requirement-review 회고 재료.
 //
@@ -33,18 +35,6 @@
 //
 // 판단은 안 한다 — 어느 커밋이 한 작업인지, 발화에서 무엇을 회수할지는 부르는 쪽이 정한다.
 // menu는 예외다: 「이 세션에 해당하는가」까지 낸다. 다만 무엇을 돌릴지는 사용자가 고른다.
-//
-// 사용:
-//   node <이 파일> user-turns --session <session_id>
-//   node <이 파일> menu --session <session_id> --repo <레포 경로> [--cwd <세션 cwd>]
-//   node <이 파일> tasks --session <session_id>
-//   node <이 파일> changed --repo <레포 경로> [--base <ref>]
-//   node <이 파일> squash-check --repo <레포 경로> --before <정리 전 ref>
-//   node <이 파일> read-files --session <session_id>
-//   node <이 파일> review-material --session <session_id>
-//   node <이 파일> read-usage --session <session_id> --from <판정 json>
-//   node <이 파일> retro-table --session <session_id> --table <표를 적은 md>
-//   node <이 파일> timeline --session <session_id> [--notes <요약 json>] [--clip <자를 글자수>] [--html]
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -324,6 +314,13 @@ const RETRO_ITEMS = [
 const AUGMENTATION_PATHS = RETRO_ITEMS.filter(({ file }) => file).map(({ key, file }) => ({ key, re: file }));
 
 const [command, ...rest] = process.argv.slice(2);
+
+// 인자를 잘못 줬을 때. 사용법은 짝 md 한 곳에만 두고 여기서는 사유와 그 경로만 알린다.
+const USAGE_DOC = path.join(import.meta.dirname, 'session-state.md').replace(/\\/g, '/');
+function failUsage(reason) {
+  console.error(`${reason}\n사용법: ${USAGE_DOC}`);
+  process.exit(1);
+}
 const optOf = (name) => {
   const i = rest.indexOf(`--${name}`);
   return i >= 0 ? rest[i + 1] : undefined;
@@ -404,10 +401,7 @@ function collectTurns(file) {
 }
 
 function transcriptOrDie(session, who) {
-  if (!session) {
-    console.error(`${who} 에는 --session <session_id> 가 필요합니다.`);
-    process.exit(1);
-  }
+  if (!session) failUsage(`${who} 에는 --session <session_id> 가 필요합니다.`);
   const file = findTranscript(session);
   if (!file) {
     // 이 폴더는 Claude Code만 쓴다. 같은 스킬이 다른 CLI로도 배포되므로 여기서 죽는 것이
@@ -874,10 +868,7 @@ function printTask(task, note = '') {
 
 if (command === 'tasks') {
   const session = optOf('session');
-  if (!session) {
-    console.error('tasks 에는 --session <session_id> 가 필요합니다.');
-    process.exit(1);
-  }
+  if (!session) failUsage('tasks 에는 --session <session_id> 가 필요합니다.');
   const disk = readDiskTasks(session);
   const file = findTranscript(session);
   const byId = (a, b) => parseInt(a.id, 10) - parseInt(b.id, 10) || a.id.localeCompare(b.id);
@@ -950,10 +941,7 @@ if (command === 'changed') {
 if (command === 'squash-check') {
   const repo = optOf('repo') ?? process.cwd();
   const before = optOf('before');
-  if (!before) {
-    console.error('squash-check 에는 --before <정리 전 ref> 가 필요합니다. 정리를 시작하기 전에 그 SHA를 잡아둔다.');
-    process.exit(1);
-  }
+  if (!before) failUsage('squash-check 에는 --before <정리 전 ref> 가 필요합니다. 정리를 시작하기 전에 그 SHA를 잡아둔다.');
   // 커밋 로그가 아니라 **트리**를 맞댄다. 합치는 일은 히스토리를 바꾸는 것이고, 바뀌면 안 되는
   // 것은 최종 파일 내용이다.
   const diff = git(repo, ['diff', '--stat', before, 'HEAD']);
@@ -1056,10 +1044,7 @@ function knownEntryPoints() {
 
 if (command === 'read-files') {
   const session = optOf('session');
-  if (!session) {
-    console.error('read-files 에는 --session <session_id> 가 필요합니다.');
-    process.exit(1);
-  }
+  if (!session) failUsage('read-files 에는 --session <session_id> 가 필요합니다.');
   const file = findTranscript(session);
   if (!file) {
     console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
@@ -1149,9 +1134,10 @@ function noteChecklist(checklists, norm, at, who) {
 
 if (command === 'review-material') {
   const session = optOf('session');
-  const file = session ? findTranscript(session) : null;
+  if (!session) failUsage('review-material 에는 --session <session_id> 가 필요합니다.');
+  const file = findTranscript(session);
   if (!file) {
-    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session ?? '<session_id>'}.jsonl 없음).`);
+    console.error(`transcript를 못 찾았다 (${TRANSCRIPT_ROOT} 아래에 ${session}.jsonl 없음).`);
     console.error('재료를 기억으로 채우지 않는다 — 못 뽑았다는 사실을 보고하고 requirement-review 보강을 건너뛴다.');
     process.exit(1);
   }
@@ -1284,11 +1270,9 @@ if (command === 'read-usage') {
   const from = optOf('from');
   const session = optOf('session');
   if (!from || !session) {
-    console.error('read-usage 에는 --session <session_id> 와 --from <판정 json> 이 필요합니다.');
-    console.error('형식: { "<진입점>\\t<read-files가 낸 경로>": "used" | "unused" | "excluded" }');
     // 세션 id가 없으면 같은 판정을 여러 번 넣었을 때 가를 방법이 없다 — 한 세션의 13줄이 한꺼번에
     // ×3으로 더해진 적이 있고, 그중 한 줄은 「3번 중 3번 안 씀」으로 가장 강한 후보처럼 보였다.
-    process.exit(1);
+    failUsage('read-usage 에는 --session <session_id> 와 --from <판정 json> 이 필요합니다.');
   }
   if (!fs.existsSync(USAGE_FILE)) {
     // 백로그 레포가 없는 기기에서는 조용히 넘어간다 — 이 기록은 기기 간 공유가 목적이라
@@ -1413,16 +1397,9 @@ if (command === 'source-usage') {
   const from = optOf('from');
   const sectionsPath = optOf('sections');
   const exclude = (optOf('exclude') ?? '').split(',').map((s) => s.trim()).filter(Boolean);
-  if (!from && !exclude.length) {
-    console.error('source-usage 에는 --from <라벨 json> 이나 --exclude <종류> 중 하나가 필요하다.');
-    console.error('라벨 json 형식: { "<site-usage --sections가 낸 절 제목>": "<종류>" }');
-    process.exit(1);
-  }
+  if (!from && !exclude.length) failUsage('source-usage 에는 --from <라벨 json> 이나 --exclude <종류> 중 하나가 필요하다.');
   // 분모(이번 회차가 4단에서 떠온 종류 전부)를 기억으로 채우면 이 장치가 막으려던 일이 그대로 난다.
-  if (from && !sectionsPath) {
-    console.error('--from 을 줄 때는 --sections <site-usage --sections 출력> 도 줘야 한다 — 안 쓴 비율의 분모가 거기서 나온다.');
-    process.exit(1);
-  }
+  if (from && !sectionsPath) failUsage('--from 을 줄 때는 --sections <site-usage --sections 출력> 도 줘야 한다 — 안 쓴 비율의 분모가 거기서 나온다.');
 
   if (!fs.existsSync(SOURCE_FILE)) {
     if (!fs.existsSync(path.dirname(SOURCE_FILE))) {
@@ -1567,10 +1544,7 @@ if (command === 'source-usage') {
 if (command === 'retro-table') {
   const session = optOf('session');
   const table = optOf('table');
-  if (!table) {
-    console.error('retro-table 에는 --table <표가 담긴 md 파일> 이 필요합니다.');
-    process.exit(1);
-  }
+  if (!table) failUsage('retro-table 에는 --table <표가 담긴 md 파일> 이 필요합니다.');
   const file = transcriptOrDie(session, 'retro-table');
   const total = collectTurns(file).turns.length;
 
@@ -1639,5 +1613,4 @@ if (command === 'retro-table') {
   process.exit(0);
 }
 
-console.error(`모르는 명령: ${command ?? '(없음)'}`);
-process.exit(1);
+failUsage(`모르는 명령: ${command ?? '(없음)'}`);

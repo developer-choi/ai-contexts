@@ -1,6 +1,6 @@
 # 클린 환경 실행 확인 — 절차
 
-`node {{skill_dir}}/recruitment/clean-env/clean-env-check.mjs`를 제출 방식(`--github`·`--zip`)에 맞춰 부른다. 인자 없이 부르면 사용 안내가 나온다. 종료 코드 0이면 통과고, 그 밖에는 출력이 원인을 알린다.
+`node {{skill_dir}}/recruitment/clean-env/clean-env-check.mjs`를 제출 방식(`--github`·`--zip`)에 맞춰 실행한다. 인자·종료 코드는 [clean-env-check.md](clean-env-check.md)를 본다. 종료 코드 0이면 통과고, 그 밖에는 출력이 원인을 알린다.
 
 호출 전에 정할 것:
 

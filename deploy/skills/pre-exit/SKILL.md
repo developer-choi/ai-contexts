@@ -28,6 +28,8 @@ argument-hint: "(인자 없음 — 돌릴 회고 항목은 메뉴에서 골라 �
 | 오답노트 | [error-notebook.md](error-notebook.md) |
 | 문제 리스트업 + 규칙화 | [step-1.md](step-1.md) |
 
+항목들이 실행하는 `scripts/session-state.mjs`는 소스를 읽지 않고 실행한다. 명령·인자는 [scripts/session-state.md](scripts/session-state.md)를 본다.
+
 ## 무엇을 돌릴지 고른다
 
 상세 파일을 끝까지 읽기 **전에** 고른다. 세션에 따라 소득 없는 항목이 섞여 있어서, 상세를 먼저 열면 절차를 다 읽은 뒤에야 그걸 알게 된다.

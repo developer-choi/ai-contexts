@@ -58,7 +58,7 @@ stub 본문 주석은 최소로 두고, 사용자 검토나 IMPL의 구체화가
 파일 최상단에 `/* eslint-disable -- ... */` 같은 file-level(blanket) disable 블록을 **새로 다는** 경우(정적분석 도입류 PR에서 리팩토링 전 코드를 격리할 때),
 격리하는 각 파일을 그 자리에서 담당 PR의 TODO로 `{파일}: disable 제거 + 규칙 준수 수정` 한 줄씩 등록한다 ([PR별 TODO 등록처](../pr-split.md#pr별-todo-등록처)).
 
-- 격리 마커에 `리팩토링 전 코드(정적 분석 도입 PR)`를 그대로 넣는다. 정본은 `{{skill_dir}}/scripts/check-pr-comments.mjs`의 `ISOLATION_MARKER`다.
+- 격리 마커에 `리팩토링 전 코드(정적 분석 도입 PR)`를 그대로 넣는다. 정본은 `{{skill_dir}}/scripts/check-pr-comments.mjs`의 `ISOLATION_MARKER`다. 바꾸면 이 줄과 [check-pr-comments.md](../../scripts/check-pr-comments.md)의 같은 문구도 함께 고친다.
 - `{파일}`은 git diff에 나오는 레포 루트 기준 경로 그대로 적는다.
 - verify의 고아 탐지는 둘을 문자열 그대로 대조한다 — 마커가 어긋나면 그 파일이 탐지에서 조용히 빠지고, 경로가 어긋나면 등록한 파일도 고아로 뜬다.
 

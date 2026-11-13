@@ -1,16 +1,10 @@
 #!/usr/bin/env node
+// 사용법: step-gates.md (같은 폴더)
+//
 // step 점검들 — 산출물 존재, `it.todo` 커버리지, 테스트 이름 대조 이후 변경.
 //
 // 셋 다 산문이 "센다"·"확인한다"·"돌 때마다"라 적어놓고 세는 주체가 사람이었다.
 // 점검을 아예 안 돈 세션과 돌아서 0건인 세션은 산출물상 구분되지 않는다.
-//
-// 사용:
-//   node <이 파일> artifacts --plan <plan 루트> --mode <채용|실무|개인>
-//   node <이 파일> todo-coverage (plan | impl) … — 인자는 `todo-coverage`만 부르면 사용 안내가 알린다
-//   node <이 파일> name-check record --repo <레포 경로> --base <기준 ref> --table <대조 표 파일>
-//   node <이 파일> name-check verify --repo <레포 경로> [--base <기준 ref>]
-//
-// 걸린 것이 있으면 exit 1.
 
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -23,12 +17,17 @@ const optOf = (name) => {
   return i >= 0 ? rest[i + 1] : undefined;
 };
 
+function failUsage(why) {
+  console.error(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/step-gates.md`);
+  process.exit(1);
+}
+
 const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
-const MODE_RECRUITMENT = '채용';
-const MODE_PERSONAL = '개인';
+// --mode는 사람이 한국어로 넘긴다. 받자마자 코드로 바꿔 비교는 코드로만 한다.
+const MODE_BY_ARG = { 채용: 'RECRUITMENT', 실무: 'WORK', 개인: 'PERSONAL' };
 
 // ── artifacts: requirement 「자료 받기」 산출물 존재 검사 ──────────────────────────────────────────
 // 「원본 저장 + 디자인 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
@@ -37,19 +36,14 @@ const MODE_PERSONAL = '개인';
 function artifacts() {
   const plan = optOf('plan');
   const mode = optOf('mode');
-  if (!plan || !mode) {
-    console.error('artifacts 에는 --plan 과 --mode 가 필요합니다.');
-    process.exit(1);
-  }
-  if (!['채용', '실무', '개인'].includes(mode)) {
-    console.error(`--mode 는 채용·실무·개인 중 하나입니다 (받은 값: ${mode}).`);
-    process.exit(1);
-  }
+  if (!plan || !mode) failUsage('artifacts 에는 --plan 과 --mode 가 필요합니다.');
+  const modeCode = MODE_BY_ARG[mode];
+  if (!modeCode) failUsage(`--mode 는 채용·실무·개인 중 하나입니다 (받은 값: ${mode}).`);
   const bg = path.join(plan, 'background');
   const required = [
     { label: '컨벤션 인덱스', p: path.join(bg, 'retained', 'conventions-index.md') },
   ];
-  if (mode === MODE_RECRUITMENT) {
+  if (modeCode === 'RECRUITMENT') {
     required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
   }
   // 코드 대용이면 디자인 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
@@ -57,7 +51,7 @@ function artifacts() {
   let figmaUrl;
   if (exists(codeTarget)) {
     required.push({ label: '코드 대용 대상', p: codeTarget });
-  } else if (mode === MODE_PERSONAL) {
+  } else if (modeCode === 'PERSONAL') {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
     // figma가 없으면 캡처가 디자인 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.
@@ -80,12 +74,6 @@ function artifacts() {
 // 표를 **채우는** 일(행동 결정 추출)은 의미 판정이라 사람이 한다. 여기서 보는 것은
 // 안내문이 첫 줄에 있는지, 채워진 표에 빈 행이 있는지, 테스트 경로에 `it.todo`가 남았는지뿐이다.
 // `it.todo` 이름은 PLAN이 고정 문구로 두고 IMPL이 새로 지으므로 문구로 짝을 맞추지 않는다.
-const TODO_COVERAGE_USAGE = [
-  '사용:',
-  '  PLAN 종료: todo-coverage plan --impl <implementation.md> --plan <plan 폴더> [--repo <PR 워크트리>]',
-  '  IMPL 종료: todo-coverage impl --impl <implementation.md> [--stub <stub 커밋>] [--repo <PR 워크트리>]',
-  '  --repo를 빼면 지금 폴더의 레포로 본다. --stub을 빼면 PLAN 종료 때 기록한 커밋(그때의 마지막 커밋)을 쓴다',
-].join('\n');
 
 // 시점을 옵션 유무로 가르면 IMPL 종료에서 --stub을 빠뜨렸을 때 오류 없이 PLAN 모드로 돌아,
 // 남은 it.todo·계획 고정 검사를 건너뛰고 고정 기준까지 지금 내용으로 덮어쓴다. 그래서 시점을 하위 명령으로 받는다.
@@ -93,21 +81,16 @@ function todoCoverage() {
   const phase = rest[0];
   const impl = optOf('impl');
   const stub = optOf('stub');
-  const usageError = (why) => {
-    console.error(`${why}\n${TODO_COVERAGE_USAGE}`);
-    process.exit(1);
-  };
-  if (phase !== 'plan' && phase !== 'impl') usageError(`todo-coverage 의 하위 명령은 plan 또는 impl 이다: ${phase ?? '(없음)'}`);
-  if (!impl) usageError('todo-coverage 에는 --impl 이 필요하다.');
-  if (!exists(impl)) usageError(`implementation.md가 없다: ${impl}`);
-  if (phase === 'plan' && stub) usageError('todo-coverage plan 은 --stub 을 받지 않는다 — IMPL 종료면 impl 로 부른다.');
-  if (phase === 'plan' && !optOf('plan')) usageError('todo-coverage plan 에는 --plan 이 필요하다 — 이 PR의 base를 prs.json에서 읽는다.');
+  if (phase !== 'plan' && phase !== 'impl') failUsage(`todo-coverage 의 하위 명령은 plan 또는 impl 이다: ${phase ?? '(없음)'}`);
+  if (!impl) failUsage('todo-coverage 에는 --impl 이 필요하다.');
+  if (!exists(impl)) failUsage(`implementation.md가 없다: ${impl}`);
+  if (phase === 'plan' && stub) failUsage('todo-coverage plan 은 --stub 을 받지 않는다 — IMPL 종료면 impl 로 부른다.');
+  if (phase === 'plan' && !optOf('plan')) failUsage('todo-coverage plan 에는 --plan 이 필요하다 — 이 PR의 base를 prs.json에서 읽는다.');
   const repo = optOf('repo') ?? process.cwd();
   try {
     execFileSync('git', ['rev-parse', '--git-dir'], { cwd: repo, stdio: 'ignore' });
   } catch {
-    console.error(`git 레포가 아니다: ${repo} — PR 워크트리에서 돌리거나 --repo를 준다\n${TODO_COVERAGE_USAGE}`);
-    process.exit(1);
+    failUsage(`git 레포가 아니다: ${repo} — PR 워크트리에서 돌리거나 --repo를 준다`);
   }
 
   const text = fs.readFileSync(impl, 'utf8');
@@ -442,10 +425,7 @@ function nameCheck() {
   if (sub === 'record') {
     const base = optOf('base');
     const table = optOf('table');
-    if (!base || !table) {
-      console.error('name-check record 에는 --base 와 --table 이 필요합니다.');
-      process.exit(1);
-    }
+    if (!base || !table) failUsage('name-check record 에는 --base 와 --table 이 필요합니다.');
     if (!exists(table)) {
       console.error(`대조 표 파일이 없다: ${table}`);
       process.exit(1);
@@ -513,16 +493,14 @@ function nameCheck() {
     return;
   }
 
-  console.error(`name-check 의 하위 명령은 record 또는 verify 입니다: ${sub ?? '(없음)'}`);
-  process.exit(1);
+  failUsage(`name-check 의 하위 명령은 record 또는 verify 입니다: ${sub ?? '(없음)'}`);
 }
 
 if (command === 'artifacts') artifacts();
 else if (command === 'todo-coverage') todoCoverage();
 else if (command === 'name-check') nameCheck();
 else {
-  console.error(`모르는 명령: ${command ?? '(없음)'}`);
-  process.exit(1);
+  failUsage(`모르는 명령: ${command ?? '(없음)'}`);
 }
 
 if (problems.length) {

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: refresh-projects-scan.md (같은 폴더)
+//
 // `/refresh-projects` 회차 시작 점검 — Phase 1(커밋 탐색·짝꿍 드리프트)의
 // 기계 파트를 낸다. Phase 2 계획을 짜려면 이것들이 한 화면에 있어야 한다.
 //
@@ -18,17 +20,8 @@
 // 레지스트리 표와 정리 대상 루트 표는 SKILL.md의 표를 그대로 읽는다. 여기에 사본을 두면 프로젝트가 늘 때
 // 두 곳을 고쳐야 하고, 한쪽만 고치면 이 점검이 그 프로젝트를 조용히 건너뛴다.
 //
-// 사용법:
-//   node scripts/refresh-projects-scan.mjs --at KA=<워크트리> --at AC=<워크트리> …
-//       → Phase 0이 만든 회차 워크트리를 프로젝트별로 지정한다. **이 회차가 도는 곳이 거기다.**
-//         안 주면 레지스트리 표의 경로(로컬 체크아웃)를 본다 — 그 체크아웃이 원격보다 뒤처져
-//         있으면 다른 기기에서 쌓인 변경이 범위에서 통째로 빠지고, Phase 0이 막으려던 상황이
-//         Phase 1에서 그대로 재현된다.
-//   node scripts/refresh-projects-scan.mjs --state <path> --skill <path>
-//   node scripts/refresh-projects-scan.mjs --worktrees [--at <약어>=<워크트리> …] [--backlog <path>]
-//       → 대상 레포를 fetch --prune한 뒤 안 쓰는 워크트리·브랜치 표만 낸다. `--at`으로 넘긴 워크트리는 뺀다.
-//   node scripts/refresh-projects-scan.mjs --remove <지정값>… [--force]
-//       → 표의 「지정값」으로 고른 것만 지운다. 미커밋이 있는 워크트리는 --force일 때만.
+// Phase 0의 회차 워크트리를 받는 까닭: 로컬 체크아웃이 원격보다 뒤처져 있으면 다른 기기에서 쌓인
+// 변경이 범위에서 통째로 빠지고, Phase 0이 막으려던 상황이 Phase 1에서 그대로 재현된다.
 
 import { execFileSync } from "node:child_process";
 import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, statSync } from "node:fs";
@@ -114,7 +107,7 @@ if (argv.includes("--remove")) {
     else if (collecting) targets.push(a);
   }
   if (!targets.length) {
-    console.error("--remove 뒤에 표의 지정값을 하나 이상 적는다");
+    console.error(`--remove 뒤에 표의 지정값을 하나 이상 적는다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/refresh-projects-scan.md`);
     process.exit(1);
   }
   removeTargets(targets, argv.includes("--force"));

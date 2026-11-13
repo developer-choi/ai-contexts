@@ -1,11 +1,11 @@
 #!/usr/bin/env node
+// 사용법: plan-materials.md (같은 폴더)
+//
 // pr-body 재료 자리 찾기 — 대상 레포 메인 체크아웃의 `plan/` 아래 이름 목록과 todo가 든 md 목록을 낸다.
 //
 // `plan/`은 git 밖이라 워크트리에 따라오지 않아, 워크트리에서 작업해도 메인 체크아웃 쪽을 봐야 한다.
 // 메인 체크아웃 찾기·이름 나열·todo 검색은 판단 없는 명령이라 손으로 돌리지 않는다. 파일 내용은 내지 않는다 —
 // 어느 것이 이 PR의 재료인지는 이름을 보고 메인이 추론하고, 후보마다 열면 쓰지 않을 재료까지 컨텍스트에 실린다.
-//
-// 사용: node plan-materials.mjs <대상 레포 안 아무 경로>
 //
 // todo는 파일 이름에 todo가 든 md(대소문자 무시), 곧 메모 바구니다. 내용은 보지 않는다 — 내용에 낱말이 한 번 나온
 // 계획 문서·회고까지 섞여, 이름 목록만 보고 추론하려던 것이 깨진다.
@@ -41,7 +41,7 @@ function walk(dir, rel = "") {
 function main() {
   const anyPath = process.argv[2];
   if (!anyPath) {
-    console.error("사용: node plan-materials.mjs <대상 레포 안 아무 경로>");
+    console.error(`대상 레포 안 경로가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/plan-materials.md`);
     process.exit(1);
   }
   const root = mainCheckout(anyPath);

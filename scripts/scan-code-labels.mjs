@@ -1,12 +1,11 @@
+// 사용법: scan-code-labels.md (같은 폴더)
+//
 // md 전수를 `check-md-code-labels` 훅에 먹여, 지금 알림이 뜰 토큰을 한 번에 모은다.
 //
 // 훅은 문서를 쓰는 순간 한 건씩 알리므로 "무엇이 얼마나 걸리는지"를 못 보여준다. 예외로
 // 등록할 실존 용어를 고르려면 전수 목록이 필요해서 이 스크립트를 따로 둔다.
 //
 // 판정은 훅을 그대로 실행해서 받는다 — 여기서 규칙을 다시 구현하면 훅과 어긋난다.
-//
-// 사용: npm run scan:code-labels [-- <레포경로>...]
-//       인자를 생략하면 이 레포의 형제 디렉터리 중 git 레포를 전부 훑는다.
 import cp from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";

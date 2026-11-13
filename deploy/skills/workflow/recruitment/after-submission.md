@@ -24,7 +24,7 @@
 
 로컬 작업 저장소를 복사해 제출 레포(collaborator 초대된 실제 제출용)와 별개의 **영구 보존용 private 레포**를 만든다.
 
-복사부터 PR 재생성까지는 2-0과 같은 `archive-repo.mjs`로 `create` → `push` → `relink` → `recreate-prs` 순서로 돌린다. 명령마다 넘길 것과 다음 할 일은 출력이 알린다.
+복사부터 PR 재생성까지는 2-0과 같은 `archive-repo.mjs`로 `create` → `push` → `relink` → `recreate-prs` 순서로 돌린다. 명령마다 넘길 것은 [scripts/archive-repo.md](scripts/archive-repo.md)를 보고, 다음 할 일은 출력이 알린다.
 
 - `create`에 넘길 아카이브 이름의 slug는 회사명·과제명 중 아무거나로 정한다.
 - **전제**: 복사는 로컬 저장소에 더 이상 커밋이 추가되지 않는 시점(게시한 PR 본문·README를 검토해 고친 것까지 반영된 뒤)에 한다. 복사 이후 로컬에 생긴 커밋은 아카이브에 안 들어간다.

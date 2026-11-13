@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-count-hardcoding.md (같은 폴더)
+//
 // 전역 git pre-commit 훅. 이 커밋이 건드린 프롬프트 md를 통째로 훑어 개수 하드코딩을
 // 감지해 경고한다(차단하지 않는다) — `projects/ai-contexts/dev-active/rules/개수-하드코딩-강제수단.md`
 // 확정 설계(갈래 B). ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른
@@ -228,7 +230,7 @@ function detectInFile(file, content) {
 // 범위 밖이어도 지목한 파일이면 본다 — 부른 쪽이 이미 대상을 골랐다.
 function reportFile(target) {
   if (!target) {
-    console.error("사용법: check-count-hardcoding.mjs --report <md 경로>");
+    console.error("--report 뒤에 md 경로가 없다\n사용법: ai-contexts 레포 scripts/hooks/check-count-hardcoding.md");
     process.exitCode = 1;
     return;
   }

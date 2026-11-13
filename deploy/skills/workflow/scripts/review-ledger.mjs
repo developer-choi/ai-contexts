@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: review-ledger.md (같은 폴더)
+//
 // BG 산출물 중 사용자가 아직 리뷰하지 않은 것을 뽑고, 리뷰를 마친 파일을 표시한다.
 //
 // 무엇을 읽었고 그 뒤 무엇이 바뀌었는지를 대화 기억이나 손으로 대조하면, 틀려도 조용하다 —
@@ -7,12 +9,6 @@
 //
 // 같음 판정은 경로가 아니라 내용 지문이다. PR 확정 때 페이지 분석 문서가 `pr{N}/consumable/page.md`로
 // 옮겨져도 내용이 같으면 다시 뽑지 않는다.
-//
-// 사용:
-//   node <이 파일> pending --plan <plan 루트>            → 새 파일(전체 경로)과 바뀐 파일(바뀐 줄)
-//   node <이 파일> mark --plan <plan 루트> <파일...>      → 그 파일의 지금 내용을 리뷰 완료로 기록
-//
-// 파일 인자는 plan 루트 기준 상대경로. pending은 리뷰할 것이 있으면 exit 1.
 
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -23,10 +19,13 @@ const planIdx = rest.indexOf('--plan');
 const plan = planIdx >= 0 ? rest[planIdx + 1] : undefined;
 const fileArgs = rest.filter((_, i) => i !== planIdx && i !== planIdx + 1);
 
-if (!['pending', 'mark'].includes(command) || !plan) {
-  console.error('사용: node <이 파일> <pending|mark> --plan <plan 루트> [파일...]');
+function failUsage(why) {
+  console.error(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/review-ledger.md`);
   process.exit(1);
 }
+
+if (!['pending', 'mark'].includes(command)) failUsage(`명령은 pending 또는 mark 다: ${command ?? '(없음)'}`);
+if (!plan) failUsage('--plan <plan 루트>가 없다');
 
 const LEDGER_DIR = path.join(plan, 'background', '.reviewed');
 const LEDGER = path.join(LEDGER_DIR, 'ledger.json');
@@ -90,10 +89,7 @@ function diffLines(before, after) {
 const ledger = readLedger();
 
 if (command === 'mark') {
-  if (fileArgs.length === 0) {
-    console.error('mark 에는 리뷰를 마친 파일 경로가 필요합니다.');
-    process.exit(1);
-  }
+  if (fileArgs.length === 0) failUsage('mark 에는 리뷰를 마친 파일 경로가 필요합니다.');
   fs.mkdirSync(SNAP_DIR, { recursive: true });
   for (const rel of fileArgs) {
     const abs = path.join(plan, rel);

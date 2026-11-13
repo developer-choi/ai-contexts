@@ -1,23 +1,16 @@
 #!/usr/bin/env node
+// 사용법: guide-files.md (같은 폴더)
+//
 // 단계마다 읽을·넘길 writing-guide 파일 경로를 낸다. 로드 목록의 정본이다.
 //
 // type 폴더에 template.md·guide.md가 있는지, subtype 폴더가 있는지를 세션이 단계마다 손으로 확인하고
 // 절대경로로 풀면, 단계 문서 세 곳(초안·다듬기·표현 리뷰어)에 같은 목록이 사본으로 살다가 한쪽만 고쳐진다.
 // 그 어긋남은 리뷰어가 파일을 못 읽는 것으로만 드러나 조용하다. 있는 파일만 절대경로로 낸다.
 //
-// 사용:
-//   node guide-files.mjs <type> [--subtype <subtype>] --for draft      초안 단계가 Read할 공통 조건·type 템플릿·가이드
-//   node guide-files.mjs <type> [--subtype <subtype>] --for polish     다듬기 단계 메인이 Read할 공통 조건·가이드
-//   node guide-files.mjs <type> [--subtype <subtype>] --for finish     마무리 단계 메인이 Read할 반려 항목 꼴·type 단계 파일
-//   node guide-files.mjs <type> [--subtype <subtype>] --for reviewer   표현 리뷰어가 읽을 경로 (늘 + 조건부, reviewer-input.mjs가 쓴다)
-//   node guide-files.mjs --from <패키지.md> --for <단계>                type·subtype을 패키지 frontmatter에서 읽는다
-//                                                                     (패키지가 생긴 뒤 단계는 이쪽을 쓴다 — 손으로 넘기면 subtype을 빠뜨린다)
-//
 // 스킬 types/<type>/steps.md는 그 type만 더 도는 절차라 메인 단계(draft·polish·finish)에만 낸다.
 // 단계 문서에 type 이름을 박은 분기를 두면 type이 늘 때마다 모든 세션이 남의 type 분기까지 읽는다.
 // steps.md의 `## [OUTLINE_STEP] …` 절은 단계 파일에 같은 절차 ID가 있어야 읽힌다.
 // 단계 파일에서 ID를 바꾸거나 지우면 type 절이 조용히 안 읽히므로, 낼 때마다 대조해 어긋나면 멈춘다.
-//   node guide-files.mjs --check   스킬 types/의 steps.md를 모두 대조하고, writing-guide subtype 폴더에 둔 template.md와 general 폴더를 잡는다
 //
 // 조건부 경로는 판단이 드는 조건(본문에 수치가 있는가 등)이라 고르지 않고 조건과 함께 낸다. 고르는 것은 메인이다.
 import fs from "node:fs";
@@ -149,7 +142,7 @@ function main() {
   if (process.argv.includes("--check")) return check();
   const { type, subtype, step } = parseArgs(process.argv.slice(2));
   if (!type || !FOR.includes(step)) {
-    console.error(`사용: node guide-files.mjs <type> [--subtype <subtype>] | --from <패키지.md>  --for ${FOR.join("|")}`);
+    console.error(`type(또는 --from 패키지)이나 --for ${FOR.join("|")}가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/guide-files.md`);
     process.exit(1);
   }
   const { always, conditional } = guideFiles(type, subtype, step);

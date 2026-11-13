@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: stop-servers.md (같은 폴더)
+//
 // 개발·프리뷰 서버를 찾아 끈다 — 지울 폴더를 붙잡은 서버, 또는 세션이 띄운 포트의 서버.
 //
 // 세션이 띄운 서버는 세션이 닫혀도 안 꺼지고, 그 서버가 파일을 잡고 있으면 폴더 삭제가
@@ -12,13 +14,6 @@
 //
 // 이 스크립트를 부른 명령줄에도 경로가 들어 있으므로, 자기와 자기 조상은 대상에서 뺀다.
 //
-// 사용:
-// (스킬 문서에서는 `{{contexts}}/stop-servers.mjs`로 적는다. 스크립트에서는 import한다.)
-//   node <이 파일> list <경로>...        그 경로를 명령줄에 담은 프로세스와 띄운 쪽(npm 등)을 보여준다
-//   node <이 파일> stop <경로>...        위 목록을 끄고, 다시 조회해 남은 것이 있으면 exit 1
-//   node <이 파일> stop --port <포트>... 그 포트를 듣는 프로세스와 띄운 쪽을 끈다
-//   --worktrees                          경로가 git 저장소면 거기서 뻗은 워크트리 경로도 대상에 넣는다
-//
 // 경로로 못 찾는 서버가 있다 — 명령줄에 상대경로만 적힌 것(node에 `server.js`만 넘긴 것)은 폴더가 cwd여도
 // 명령줄에 경로가 없다. 그래서 끈 뒤에도 폴더가 안 지워지면 삭제 성공으로 넘기지 말고 보고한다.
 import { execFileSync } from 'node:child_process';
@@ -26,6 +21,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const isWindows = process.platform === 'win32';
+
+// 인자를 잘못 줬을 때. 사용법은 짝 md 한 곳에만 두고 여기서는 사유와 그 경로만 알린다.
+function failUsage(reason) {
+  console.error(`${reason}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/stop-servers.md`);
+  process.exit(1);
+}
 
 // 서버를 띄운 쪽으로 보고 함께 끄는 부모. 여기 없는 부모(bash·powershell·에디터·CLI 에이전트
 // 자신)에서는 거슬러 오르기를 멈춘다 — 세션 셸까지 끄면 부른 쪽이 죽는다.
@@ -185,8 +186,7 @@ function parseTargets(args) {
   }
   if (worktrees) paths.splice(0, paths.length, ...withWorktrees(paths));
   if (ports.some((p) => !/^\d+$/.test(p ?? ''))) {
-    console.error('--port 뒤에는 포트 번호를 적는다');
-    process.exit(1);
+    failUsage('--port 뒤에는 포트 번호를 적는다');
   }
   return { paths, ports };
 }
@@ -194,10 +194,8 @@ function parseTargets(args) {
 function main() {
   const [command, ...args] = process.argv.slice(2);
   const targets = parseTargets(args);
-  if (!['list', 'stop'].includes(command) || targets.paths.length + targets.ports.length === 0) {
-    console.error('사용: node <이 파일> <list|stop> <경로>... [--worktrees] [--port <포트>]...');
-    process.exit(1);
-  }
+  if (!['list', 'stop'].includes(command)) failUsage(`모르는 명령: ${command ?? '(없음)'}`);
+  if (targets.paths.length + targets.ports.length === 0) failUsage('대상 경로나 --port <포트>가 없다');
   const label = [...targets.paths.map((p) => path.resolve(p)), ...targets.ports.map((p) => `포트 ${p}`)].join(', ');
 
   if (command === 'list') {

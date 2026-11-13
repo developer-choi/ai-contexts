@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// 사용법: unsync-local-skills.md (같은 폴더)
+//
+// sync-local-skills.mjs가 만든 산출물을 걷는다. sync만 있고 걷는 쪽이 없으면 원본에서 지운 자산이
+// 배포 자리에 남아 계속 읽힌다.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

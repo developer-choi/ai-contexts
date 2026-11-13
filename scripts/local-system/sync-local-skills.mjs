@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+// 사용법: sync-local-skills.md (같은 폴더)
+//
+// 레포마다 local/의 원본을 Claude가 읽는 자리(.claude/)로 복사한다.
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';

@@ -15,7 +15,7 @@
 
 이번 세션의 반려를 다음 글이 처음부터 알게 쌓는다.
 
-반려된 표현은 AC 금지 표현 목록에 행으로 쌓는다. 겹침 확인·넣기·빼기는 AC의 `scripts/hooks/blocked-expressions.mjs`로 한다(인자 없이 돌리면 행의 꼴·scope 정하는 법·사용법이 나온다).
+반려된 표현은 AC 금지 표현 목록에 행으로 쌓는다. 겹침 확인·넣기·빼기는 AC의 `scripts/hooks/blocked-expressions.mjs`로 한다(명령·인자와 scope 정하는 법은 같은 폴더 `blocked-expressions.md`, 행의 꼴은 스크립트 머리 주석).
 
 이 절을 시작할 때 `node {{skill_dir}}/scripts/visibility.mjs <대상 레포 경로 | owner/name>`로 대상 레포가 public인지 private인지 본다.
 

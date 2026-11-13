@@ -1,27 +1,14 @@
 #!/usr/bin/env node
+// 사용법: build-arms.md (같은 폴더)
+//
 // 비교군별 작업 폴더를 만든다 — 원본을 비교군 수만큼 복사하고, 비교군마다 정해진 치환을 적용한다.
 //
 // 측정 대상이 시스템 프롬프트가 아니라 **워커가 열어야 할 파일**일 때 쓴다.
 // 그때는 비교군마다 변형을 적용한 체크아웃을 cwd로 줘야 하고, 그 경로가
 // `bench-ablation.mjs`의 eval-set `variant_cwds`로 들어간다.
 //
-// 사용법: node build-arms.mjs <명세> <출력루트> [묶음필터]
-//   <명세>      .mjs면 default export, .json이면 그 내용을 명세로 읽는다
-//   [묶음필터]  쉼표로 구분한 묶음 이름(비교군 이름의 첫 조각). 준 것만 다시 만든다.
-//               다른 묶음이 측정 중일 때 그 폴더를 안 건드리려고 둔다 — 도는 중에
-//               cwd가 사라지면 그 비교군 전 런이 죽어 「델타 없음」으로 읽힌다.
-//
-// 명세 형식:
-//   {
-//     src: '<원본 폴더 절대경로>',        // 측정 워크트리 안의 폴더. 이 스크립트는 읽기만 한다
-//     arms: {
-//       'k1/w1': [],                      // 현행 비교군 — 치환 없음
-//       'k1/w2': [
-//         { file: 'a/b.md', from: '원문', to: '치환문' },
-//         { file: 'a/b.md', line: '통째로 지울 줄' },   // from: line+개행, to: '' 과 같다
-//       ],
-//     },
-//   }
+// 묶음필터는 다른 묶음이 측정 중일 때 그 폴더를 안 건드리려고 둔다 — 도는 중에
+// cwd가 사라지면 그 비교군 전 런이 죽어 「델타 없음」으로 읽힌다.
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -29,8 +16,8 @@ import { pathToFileURL } from 'node:url';
 
 const [specPath, outRoot, only] = process.argv.slice(2);
 if (!specPath || !outRoot) {
-  process.stderr.write('사용법: node build-arms.mjs <명세> <출력루트> [묶음필터]\n');
-  process.exit(2);
+  process.stderr.write(`<명세>와 <출력루트>가 필요하다\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/build-arms.md\n`);
+  process.exit(1);
 }
 
 const spec = specPath.endsWith('.mjs') || specPath.endsWith('.js')

@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-// 채용과제 제출물을 빈 GitHub Actions 러너에서 설치→빌드→실행→홈페이지 응답까지 돌리고, 흔적을 모두 지운다.
-// 인자는 아래 USAGE. --env-file 내용은 repo secret ENV_LOCAL로 넣는다.
+// 사용법: clean-env-check.md (같은 폴더)
 //
-// 종료 코드: 0 = run 성공, 1 = run 실패, 2 = 절차 오류(인자·gh 권한·push 등), 3 = 정리 실패(흔적 남음),
-// 130 = 중단 후 정리 완료. 어느 쪽이든 끝나면 임시 브랜치·run·secret·임시 레포를 지운다(Ctrl+C로 끊어도).
+// 채용과제 제출물을 빈 GitHub Actions 러너에서 설치→빌드→실행→홈페이지 응답까지 돌리고, 흔적을 모두 지운다.
+// 정리는 Ctrl+C로 끊어도 돈다 — 임시 브랜치·run이 남으면 리뷰어에게 보인다.
 
 import { execFileSync, spawn } from 'node:child_process';
 import { mkdtempSync, copyFileSync, mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
@@ -15,11 +14,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const BRANCH = 'ci-check';
 const WORKFLOW_PATH = '.github/workflows/clean-install.yml';
 
-const USAGE = `사용: node clean-env-check.mjs --github <owner/repo> | --zip <제출 zip 경로> [옵션]
-  --env-file <파일>   메일로 따로 보낼 env 파일. 러너에서 --env-name 이름으로 써 준다
-  --env-name <이름>   러너에 쓸 env 파일명 (기본 .env.local)
-  --node <버전>       기본 24
-  --port <포트>       기본 3000`;
+const USAGE_DOC = join(HERE, 'clean-env-check.md').replace(/\\/g, '/');
 
 class ProcedureError extends Error {}
 class UsageError extends ProcedureError {}
@@ -188,7 +183,7 @@ try {
   code = await main();
 } catch (e) {
   log(e instanceof ProcedureError ? e.message : `절차 오류: ${e.message}`);
-  if (e instanceof UsageError) console.error(USAGE);
+  if (e instanceof UsageError) console.error(`사용법: ${USAGE_DOC}`);
   code = 2;
 }
 if (!interrupted) {

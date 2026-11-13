@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: archive-repo.md (같은 폴더)
+//
 // 채용과제 보관용 아카이브 레포를 뜬다 — 제출 레포가 지워져도 코드·브랜치·PR이 남게 한다.
 //
 // 이 파일이 존재하는 이유: 산문 절차일 때 세션이 단계마다 명령을 손으로 짜서 쳤고, 그중
@@ -10,20 +12,10 @@
 // 판단은 안 한다 — 아카이브 이름의 slug, PR 제목을 서술형으로 바꿀지, 무엇을 plan 브랜치로
 // 옮길지는 부르는 쪽이 정한다.
 //
-// 사용:
-//   node <이 파일> collect <작업폴더>
-//   node <이 파일> create <작업폴더> <recruitment-{slug}-{YYYYMMDD}> [--remote-url <url>]
-//   node <이 파일> push <복사본>
-//   node <이 파일> recreate-prs <복사본> [--title <번호>=<제목>]...
-//   node <이 파일> relink <복사본> [<파일>...]
-//
-// 순서: collect → create → (사람이 git remote -v 확인) → push → relink → recreate-prs.
 // relink를 recreate-prs 앞에 두는 이유: recreate-prs는 회수한 본문 파일을 그대로 PR 본문으로 쓴다.
 // 그 파일의 제출 레포 링크를 먼저 바꾸지 않으면 제출 레포가 지워질 때 아카이브 PR의 링크가 죽는다.
 // create와 push를 가른 이유: 사이의 확인은 사람 몫인데, 한 명령에 넣으면 대화형 입력이 되고
 // 에이전트 실행 환경은 그것을 받을 수 없다.
-//
-// 걸린 것이 있으면 exit 1.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -327,21 +319,12 @@ function optOf(name) {
   return i >= 0 ? rest[i + 1] : undefined;
 }
 
-// md는 「이 시점에 이 하위 명령」까지만 적는다. 무엇을 넘기는지는 여기서 알린다.
-const USAGE = {
-  collect: '<작업폴더> — 브랜치 전부가 든 원본 저장소. 제출 레포의 PR 본문·커밋을 회수한다',
-  create: '<작업폴더> <recruitment-{slug}-{YYYYMMDD}> [--remote-url <url>] — slug는 영문 소문자·숫자·하이픈',
-  push: '<복사본> — create가 만든 폴더. origin이 아카이브 레포인지 다시 보고 브랜치 전부를 올린다',
-  'recreate-prs': '<복사본> [--title <번호>=<제목>]... — 서술형으로 바꿀 PR 제목을 번호마다 넘긴다',
-  relink: '<복사본> [<파일>...] — 회수한 PR 본문은 늘 넣는다. 그 밖에 제출 레포 링크를 바꿀 복사본 안 파일(복사본 기준 경로)',
-};
-if (!command || !target || !USAGE[command]) {
-  const which = USAGE[command] ? [command] : Object.keys(USAGE);
-  console.error('사용: node <이 파일> <하위 명령> <대상> [인자]');
-  which.forEach((name) => console.error(`  ${name} ${USAGE[name]}`));
-  console.error('순서: collect → create → (출력된 git remote -v를 사용자가 확인) → push → relink → recreate-prs');
-  process.exit(1);
+const COMMANDS = ['collect', 'create', 'push', 'recreate-prs', 'relink'];
+function failUsage(why) {
+  fail(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/archive-repo.md`);
 }
+if (!COMMANDS.includes(command)) failUsage(`하위 명령은 ${COMMANDS.join('·')} 중 하나다: ${command ?? '(없음)'}`);
+if (!target) failUsage(`${command}에 대상 폴더가 없다`);
 if (!fs.existsSync(target)) fail(`대상이 없다: ${target}`);
 
 try {

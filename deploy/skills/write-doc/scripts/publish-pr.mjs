@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: publish-pr.md (같은 폴더)
+//
 // 확정한 PR 본문 패키지를 GitHub PR의 제목·본문으로 게시한다.
 //
 // 세션이 frontmatter·H1 떼기를 즉석 명령으로 짜면 매번 꼴이 달라지고, 형제 PR의 생성 표기 줄을 이어 붙여
@@ -13,13 +15,7 @@
 //       채점기의 번호 참조 링크 깨짐 적발, Claude Code 생성 표기 줄. 주석 줄은 반영하면 그 자리에서 지우는 것이라 남았으면
 //       처리 안 된 요청이고, 표기 줄은 사용자가 싣지 않기로 했고, 제목 기준과 링크 깨짐은 판단이 없는 형식이라 —
 //       넷 다 `--accept-residual`로도 넘기지 못한다. 대괄호는 버튼·UI 요소 이름(`[저장] 버튼`)에 쓰여 빈칸으로 보지 않는다.
-//   - 기본은 미리보기다. `--apply`를 줄 때만 `gh pr edit`을 실행한다.
-//
-// 사용:
-//   node publish-pr.mjs <패키지.md> --pr <번호> [--repo owner/name] [--accept-residual] [--apply]
-//
-// `--accept-residual`은 사용자가 잔여 위반을 받아들인 글에 쓴다(채점 합계만 넘긴다).
-// 시험용: 환경변수 PUBLISH_PR_GH에 node 스크립트 경로를 주면 진짜 gh 대신 그것을 node로 부른다.
+//   - 기본은 미리보기다. 게시는 따로 켜야 한다 — 확인 없이 남의 PR 본문을 덮지 않게.
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -89,7 +85,7 @@ function scoreRun(file) {
 function main() {
   const args = parseArgs(process.argv.slice(2));
   if (!args.file || !args.pr) {
-    console.error("사용: node publish-pr.mjs <패키지.md> --pr <번호> [--repo owner/name] [--accept-residual] [--apply]");
+    console.error(`패키지 경로나 --pr 번호가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/publish-pr.md`);
     process.exit(1);
   }
   const raw = fs.readFileSync(args.file, "utf8");

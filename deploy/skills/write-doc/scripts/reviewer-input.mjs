@@ -1,13 +1,11 @@
 #!/usr/bin/env node
+// 사용법: reviewer-input.md (같은 폴더)
+//
 // 다듬기 단계의 리뷰어에게 줄 프롬프트를 패키지에서 조립한다. 출력을 그대로 Agent 프롬프트나 SendMessage에 붙인다.
 //
 // 메인이 손으로 조립하면 틀려도 아무 데서도 안 걸린다. `[//]: #` 주석이 남으면 리뷰어가 사용자 지시문을 본문 표현으로
 // 보고 문다. 독자 리뷰어에게 본문 말고 하나라도 더 넘기면(frontmatter·규칙 파일 경로)
 // 그 리뷰어도 사정을 아는 독자가 되어, 사정을 아는 사람만 읽히는 문장을 못 본다.
-//
-// 사용: node reviewer-input.mjs --from <패키지.md> --for expression|reader
-//   expression  표현 리뷰어 지시 파일 경로, frontmatter 전체, 읽을 파일 경로, 주석을 뺀 본문
-//   reader      독자 리뷰어 지시([리뷰어에게 주는 지시](../reviewers/reader.md#리뷰어에게-주는-지시) 인용), 주석을 뺀 본문
 // 표현 리뷰어는 user_phrases 구절을 면제하므로, 출처 없는 항목이 있으면 멈춘다 — 경고만 내면 메인이 무엇을 정하든 그대로 면제된다.
 import fs from "node:fs";
 import path from "node:path";
@@ -124,7 +122,7 @@ const opt = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : null
 const from = opt("--from");
 const role = opt("--for");
 if (!from || !["expression", "reader"].includes(role)) {
-  console.error("사용: node reviewer-input.mjs --from <패키지.md> --for expression|reader");
+  console.error(`--from 패키지나 --for expression|reader가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/reviewer-input.md`);
   process.exit(1);
 }
 const { fm, body: raw } = split(fs.readFileSync(from, "utf8").replace(/\r\n/g, "\n"));

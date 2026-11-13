@@ -45,5 +45,6 @@ type 없이 부르면 건넨 패키지 frontmatter의 `type`·`subtype`으로, �
 
 ## 모든 단계에 걸리는 것
 
+- **`scripts/`의 `.mjs`는 소스를 읽지 않고 실행한다.** 명령·인자는 같은 폴더의 같은 이름 `.md`를 본다(예: [scripts/score.md](scripts/score.md)). `package-meta.mjs`는 다른 스크립트가 import하는 모듈이라 실행하지 않는다.
 - **사용자가 지운 절·문장은 다시 넣지 않는다.**
 - **사용자가 거부한 것은 그때마다 패키지 frontmatter `rejected`에 적는다.** 마무리 단계가 이 목록으로 쌓을 곳을 가른다.

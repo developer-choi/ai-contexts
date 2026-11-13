@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: plan-folder.md (같은 폴더)
+//
 // `/plan/` 라이프사이클 폴더의 두 손일 — consumable 안내문 찍기와 남은 consumable 조회.
 //
 // 이 파일이 존재하는 이유:
@@ -18,12 +20,6 @@
 //
 // 판단은 안 한다 — 남은 것을 지울지(정말 소비됐는지)는 부르는 쪽이 정한다. 단순 읽기는
 // 소비가 아니므로 남아 있는 것이 정상인 경우가 있다.
-//
-// 사용:
-//   node <이 파일> notice              → 안내문 블록을 표준출력으로 (파일 앞에 붙인다)
-//   node <이 파일> notice <파일>        → 그 파일 맨 앞에 붙인다 (이미 있으면 안 건드린다)
-//   node <이 파일> left <plan 루트>     → 남은 consumable 파일과 안내문 누락분
-//   node <이 파일> requirement-files <plan 루트> → background 아래 파일 전부와 PR 폴더로 옮겨진 page.md
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -38,11 +34,13 @@ const NOTICE = `> 이 파일은 큐 모델로 운영됩니다.
 
 const MARKER = '이 파일은 큐 모델로 운영됩니다.';
 
-const [command, target] = process.argv.slice(2);
-if (!command) {
-  console.error('사용: node <이 파일> <notice|left|requirement-files> [대상]');
+function failUsage(why) {
+  console.error(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/plan-folder.md`);
   process.exit(1);
 }
+
+const [command, target] = process.argv.slice(2);
+if (!command) failUsage('명령이 없다');
 
 function walk(dir, out = []) {
   for (const name of fs.readdirSync(dir)) {
@@ -69,10 +67,7 @@ if (command === 'notice') {
 }
 
 if (command === 'left') {
-  if (!target) {
-    console.error('left 에는 plan 루트 경로가 필요합니다.');
-    process.exit(1);
-  }
+  if (!target) failUsage('left 에는 plan 루트 경로가 필요합니다.');
   const files = walk(target).filter((f) => f.replace(/\\/g, '/').includes('/consumable/'));
   const missing = files.filter((f) => /\.md$/i.test(f) && !fs.readFileSync(f, 'utf8').includes(MARKER));
 
@@ -87,10 +82,7 @@ if (command === 'left') {
 }
 
 if (command === 'requirement-files') {
-  if (!target) {
-    console.error('requirement-files 에는 plan 루트 경로가 필요합니다 (보통 메인 레포의 `plan`, 개인 모드는 `plan/<접두어>`).');
-    process.exit(1);
-  }
+  if (!target) failUsage('requirement-files 에는 plan 루트 경로가 필요합니다.');
   const bg = path.join(target, 'background');
   if (!fs.existsSync(bg)) {
     console.error(`background 폴더가 없습니다: ${bg}`);
@@ -112,5 +104,4 @@ if (command === 'requirement-files') {
   process.exit(0);
 }
 
-console.error(`모르는 명령: ${command}`);
-process.exit(1);
+failUsage(`모르는 명령: ${command}`);

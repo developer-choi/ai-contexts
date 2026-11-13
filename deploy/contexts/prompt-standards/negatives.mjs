@@ -1,12 +1,12 @@
 #!/usr/bin/env node
+// 사용법: negatives.md (같은 폴더)
+//
 // 대상 md에서 부정문(「않는다」·「말고」·「금지」·「없이」 류)을 바로 앞뒤 문장과 함께 빠짐없이 뽑는다. 판정은 하지 않는다.
 //
 // 리뷰어가 긴 문서를 읽으며 지적을 고르면 회차마다 집는 곳이 달라, 군더더기 부정문이 남는다
 // (벤치: 같은 문서에서 리뷰어가 매번 다른 부정문을 건너뛰었다). 후보 고르기는 여기서 하고, 리뷰어는
 // 목록의 줄마다 남길지 지울지만 판정한다. 부르는 곳은 [군더더기를 지운다](trimming.md#군더더기를-지운다)다.
 // 앞뒤 문장을 함께 내는 것은 「옆 문장이 이미 같은 뜻인가」를 리뷰어가 파일을 다시 열지 않고 보게 하려는 것이다.
-//
-// 사용: node <이 파일이 있는 폴더>/negatives.mjs <대상.md> [<대상.md> ...]
 //
 // 코드블록 안은 건너뛴다. 문장은 줄 안에서 「다.」·「다 —」 같은 끝맺음으로 자르고, 앞뒤 문장은 같은 줄이나
 // 바로 이웃한 줄(빈 줄·헤딩을 넘지 않는다)에서 찾는다.
@@ -53,7 +53,7 @@ export function negatives(text) {
 function main() {
   const files = process.argv.slice(2);
   if (!files.length) {
-    console.error("사용: node <이 파일이 있는 폴더>/negatives.mjs <대상.md> [<대상.md> ...]");
+    console.error(`대상 md 경로가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/negatives.md`);
     process.exit(1);
   }
   for (const file of files) {

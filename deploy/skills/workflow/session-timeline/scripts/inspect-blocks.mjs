@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: inspect-blocks.md (같은 폴더)
+//
 // 타임라인 md의 블록 구조를 읽는다 — 어떤 블록이 있고, 어느 AI 블록이 길고, 두 판본이 같은가.
 //
 // 이 파일이 존재하는 이유는 3단계(AI 장문 요약 치환)에 검사기가 없었기 때문이다.
@@ -6,8 +8,6 @@
 // 「다른 블록·헤더·구분자·순서·개수는 그대로 두라」는 보존 조건은 주의문으로만 서 있었다.
 // 서브에이전트가 블록 하나를 통째로 삼켜도 다음 단계(insert-headings)는 **삽입 전후**만
 // 비교하므로, 이미 줄어든 판본이 새 기준선이 되어 유실이 검사를 통과했다.
-//
-// 사용법은 인자 없이 부르면 나온다.
 
 import fs from 'node:fs';
 
@@ -74,11 +74,7 @@ function alignKeys(base, now) {
 
 const args = parseArgs(process.argv.slice(2));
 if (!args.input) {
-  console.error(`사용:
-  node <이 파일> <타임라인.md>                    → 블록 통계
-  node <이 파일> <타임라인.md> --over <글자 수>   → 그 길이를 넘는 AI 블록 목록 (치환 대상)
-  node <이 파일> <타임라인.md> --against <원본.md> → 두 판본의 블록 헤더를 대조 (보존 검사)
-  node <이 파일> <타임라인.md> --stamps           → 블록 시각 목록 (구간 json의 start 재료)`);
+  console.error(`타임라인 md 경로가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/inspect-blocks.md`);
   process.exit(1);
 }
 

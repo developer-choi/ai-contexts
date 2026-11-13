@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-pr-comments.md (같은 폴더)
+//
 // PR diff의 금지 주석·고아 disable 검사 — 금지 주석 잔존과 미배정 blanket disable 고아를 함께 본다.
 //
 // 이 파일이 존재하는 이유: 두 점검 다 정규식인데 산문이 **서브에이전트에게** 시키고 있었다.
@@ -12,15 +14,7 @@
 //
 // 판단은 안 한다 — 걸린 것을 어떻게 처리할지(해소·미룸·어느 PR에 배정)는 부르는 쪽이 정한다.
 //
-// 사용:
-//   node <이 파일> --base <기준 ref>                     → 금지 주석 잔존 점검 (PR diff)
-//   node <이 파일> --base <기준 ref> --plan <plan 루트>     → 미배정 blanket disable 고아까지
-//   node <이 파일> --paths <경로,경로> --marker USER_REVIEW  → 구현 전 미검토 TODO 검사 (구현 대상 경로)
-//   node <이 파일> --paths <경로,경로>                     → 구현 종료 TODO 잔존 검사 (TODO 전부 0건)
-//
-// 어느 모드든 `TODO [AI_IMPL]`·`TODO [USER_REVIEW]`(상단 블록 항목 포함)가 인용한 출처가 소멸 버킷을 가리키거나 `TODO [AI_IMPL]`에 출처가 없으면 함께 짚는다.
-//
-// 걸린 것이 있으면 exit 1.
+// 소멸 버킷 인용·출처 없는 AI_IMPL은 모드와 무관하게 함께 본다 — 마커를 쓰는 순간엔 티가 안 나서다(아래 AI_IMPL_LINE 주석).
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -60,8 +54,8 @@ function parseArgs(argv) {
 // 모르는 인자는 끊는다 — 흘려보내면 옛 플래그 이름으로 부른 쪽이 고아 점검을 조용히 건너뛴다.
 const args = parseArgs(process.argv.slice(2));
 if (args.unknown || (!args.base && !args.paths)) {
-  if (args.unknown) console.error(`모르는 인자: ${args.unknown}`);
-  console.error('사용: node <이 파일> (--base <기준 ref> | --paths <경로,경로>) [--plan <plan 루트>] [--marker USER_REVIEW]');
+  const why = args.unknown ? `모르는 인자: ${args.unknown}` : '--base나 --paths가 없다';
+  console.error(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/check-pr-comments.md`);
   process.exit(1);
 }
 

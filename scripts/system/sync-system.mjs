@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// 사용법: sync-system.md (같은 폴더)
 import fs from 'node:fs';
 import path from 'node:path';
 import { ensureHooksReady } from '../lib/hook-guard.mjs';

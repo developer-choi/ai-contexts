@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-md-size.md (같은 폴더)
+//
 // 전역 git pre-commit 훅. 프롬프트·스킬 md가 「무엇을 한 파일로 묶을지는 크기가 정한다」
 // ([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘었는지
 // 커밋마다 전수로 재서 경고한다(차단하지 않는다).
@@ -564,7 +566,7 @@ function settleBaseline() {
 // 그 파일이 있는 레포에서 잰다 — 부른 폴더가 다른 레포여도 경로만 맞으면 된다.
 function reportFile(target) {
   if (!target) {
-    console.error("사용법: check-md-size.mjs --report <md 또는 폴더 경로>");
+    console.error("--report 뒤에 md 또는 폴더 경로가 없다\n사용법: ai-contexts 레포 scripts/hooks/check-md-size.md");
     process.exitCode = 1;
     return;
   }
@@ -676,7 +678,7 @@ function autoLoadNote(top, rel) {
 
 function readTarget(target, usage) {
   if (!target) {
-    console.error(`사용법: check-md-size.mjs ${usage} <md 경로>`);
+    console.error(`${usage} 뒤에 md 경로가 없다\n사용법: ai-contexts 레포 scripts/hooks/check-md-size.md`);
     process.exitCode = 1;
     return null;
   }

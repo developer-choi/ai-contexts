@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-wording.md (같은 폴더)
+//
 // 전역 git pre-commit 훅. 이 커밋이 건드린 프롬프트 md를 통째로 훑어 강조 라벨·약한 어휘·군더더기·
 // 영어 먼저 한글 풀이 헤딩·금지 표현(사용자가 못 알아본 말)을 감지해 처방과 함께 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
@@ -427,7 +429,7 @@ function patternsOf({ kind, patterns }) {
 // 파일이면 본다 — 부른 쪽이 이미 대상을 골랐다. 그 파일이 있는 레포 기준으로 판정한다.
 function reportFile(target) {
   if (!target) {
-    console.error("사용법: check-wording.mjs --report <md 또는 폴더 경로>");
+    console.error("--report 뒤에 md 또는 폴더 경로가 없다\n사용법: ai-contexts 레포 scripts/hooks/check-wording.md");
     process.exitCode = 1;
     return;
   }

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: extract-timeline.md (같은 폴더)
+//
 // 세션 로그(jsonl)를 평면 타임라인 md로 바꾼다.
 //
 // 이 파일이 존재하는 이유: jsonl을 직접 열어보지 않으면 모르는 함정들(메타 주입, tool_result만 든
@@ -6,10 +8,7 @@
 // 백그라운드 알림의 두 가지 래핑)이 회차마다 같은 자리에서 재발했다. 매번 새로 짜면 매번 그중
 // 몇 개를 빠뜨린다.
 //
-// 사용: node <이 파일> <session.jsonl> [--out <파일>] [--tz <IANA 타임존>]
-//       node <이 파일> --list <cwd 경로> [--tz <IANA 타임존>]
-//         → 그 프로젝트의 세션 후보를 시작·종료·소요·첫 발화와 함께 나열한다
-// 표준출력으로 블록 통계를 찍는다 — 후처리 스크립트가 보존을 검증할 기준선이다.
+// 블록 통계를 함께 찍는 이유: 후처리 스크립트가 보존을 검증할 기준선이다.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -343,8 +342,7 @@ if (args.list) {
   process.exit(0);
 }
 if (!args.input) {
-  console.error('사용: node <이 파일> <session.jsonl> [--out <파일>] [--tz <IANA 타임존>]');
-  console.error('      node <이 파일> --list <cwd 경로>');
+  console.error(`세션 jsonl 경로나 --list <cwd 경로>가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/extract-timeline.md`);
   process.exit(1);
 }
 

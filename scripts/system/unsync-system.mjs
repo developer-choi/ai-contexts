@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// 사용법: unsync-system.md (같은 폴더)
 import readline from 'node:readline';
 
 import {

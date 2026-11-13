@@ -10,7 +10,7 @@ description: 채용과제가 AI 세션 대화 내역 제출을 요구할 때, �
 
 ## 절차
 
-스크립트는 `{{skill_dir}}/session-timeline/scripts/`에 있고, 인자 없이 부르면 사용법이 나온다.
+스크립트는 `{{skill_dir}}/session-timeline/scripts/`에 있고, 소스를 읽지 않고 실행한다. 명령·인자는 같은 폴더의 같은 이름 `.md`를 본다(예: [scripts/extract-timeline.md](scripts/extract-timeline.md)).
 
 1. **대상 세션 jsonl 확정** — `extract-timeline.mjs --list <cwd 경로>`로 세션 후보를 받아, 어느 세션인지를 사용자와 확정한다
 2. **추출** — 같은 스크립트로 확정한 세션을 평면 타임라인 md로 뽑아 대상 프로젝트 `plan/conversation-log/[세션이름].md`에 둔다. 세션 이름은 영문 슬러그(소문자 + 하이픈)다. 이후 단계는 이 파일을 고쳐 가고, 고치기 전마다 그 판본을 따로 남겨 대조에 쓴다

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-links.md (같은 폴더)
+//
 // 등록 레포의 추적되는 .md 전수에서 깨진 링크를 결정적으로 검출한다(diff 무관).
 //
 // refresh-projects가 diff 기반이라, 링크 대상이 발밑에서 사라지면(README는 안 바뀜)

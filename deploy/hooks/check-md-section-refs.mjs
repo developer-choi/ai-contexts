@@ -1,3 +1,5 @@
+// 사용법: check-md-section-refs.md (같은 폴더)
+//
 // 다른 문서의 절·커맨드를 가리키는 인용이 실제로 그 대상에 닿는지 커밋 시점에 본다.
 //
 // 여섯 검사를 한 훅에 담되 세기가 다르다:
@@ -156,19 +158,19 @@ const REPO_ALIASES = {
 // 레포 밖을 훑을 때 `git grep`에 넘기는 파일 꼴. 레포 안 검사와 같은 확장자를 본다.
 const SCANNED_GLOBS = ["*.md", ...[...CODE_EXTENSIONS].map((ext) => `*${ext}`)];
 
-// 전수 실측 모드: `node check-md-section-refs.mjs --scan-cross [워크스페이스]`.
+// 전수 실측 모드(--scan-cross).
 // 레포를 넘는 인용 전부를 대상의 **지금** 앵커로 풀어, 레포 밖 역방향이 볼 모집단과 그 오탐을 센다.
 if (process.argv.includes("--scan-cross")) {
   runScanCross(process.argv[process.argv.indexOf("--scan-cross") + 1] || workspaceRoot());
   process.exit(0);
 }
 
-// 전수 실측 모드: `node check-md-section-refs.mjs --scan <레포경로>`.
+// 전수 실측 모드(--scan).
 // 검사를 켜기 전에 그 레포 전체에서 몇 건이 걸리는지 세는 자리다. 훅 경로와 **같은 수집
 // 함수**를 쓴다 — 재려고 따로 짠 스크립트는 훅과 갈라져, 잰 숫자가 훅의 행동을 안 말해준다.
 if (process.argv.includes("--scan")) {
   runScan(process.argv[process.argv.indexOf("--scan") + 1] || process.cwd());
-  process.exit(0);
+  process.exit(process.exitCode ?? 0);
 }
 
 const payload = readPayload();
@@ -985,7 +987,7 @@ function isFile(p) {
 function runScan(dir) {
   const scanRoot = repoRoot(dir);
   if (!scanRoot) {
-    console.error(`git 레포가 아닙니다: ${dir}`);
+    console.error(`git 레포가 아닙니다: ${dir}\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/check-md-section-refs.md`);
     process.exitCode = 1;
     return;
   }

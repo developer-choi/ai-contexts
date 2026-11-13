@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: check-submission.md (같은 폴더)
+//
 // 채용과제 제출 전후 게이트 — 세 가지를 본다. 셋 다 「틀리면 되돌릴 수 없다」가 공통이다.
 //
 // 이 파일이 존재하는 이유: 셋 다 산문이 눈으로 훑으라고 시키던 것인데, 발견 주체가 우리가
@@ -13,13 +15,6 @@
 //     못 고치고, 다음에 그 본문을 보는 사람이 채용담당자다.
 //
 // 판단은 안 한다 — 걸린 줄을 어떻게 고쳐 쓸지(무엇을 지우고 무엇을 남길지)는 부르는 쪽이 정한다.
-//
-// 사용:
-//   node <이 파일> time-pressure <디렉토리>
-//   node <이 파일> submission <레포 경로>
-//   node <이 파일> pr-body <본문.md> [--submit-remote <제출 레포 URL>] [--check-urls]
-//
-// 걸린 것이 있으면 exit 1.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -65,19 +60,14 @@ const optOf = (name) => {
   return i >= 0 ? rest[i + 1] : undefined;
 };
 
-// md는 「이 시점에 이 하위 명령」까지만 적는다. 무엇을 대상으로 주는지는 여기서 알린다.
-const USAGE = {
-  'time-pressure': '<디렉토리> — 원본 자료를 저장한 폴더 (보통 `plan/background/persistent`)',
-  submission: '<레포 경로> — 제출할 작업 레포 루트',
-  'pr-body': '<본문.md> [--submit-remote <제출 레포 URL>] [--check-urls] — 점검할 PR 본문·README 파일',
-};
-
-if (!command || !target) {
-  const which = USAGE[command] ? [command] : Object.keys(USAGE);
-  console.error('사용: node <이 파일> <하위 명령> <대상> [옵션]');
-  which.forEach((name) => console.error(`  ${name} ${USAGE[name]}`));
+function failUsage(why) {
+  console.error(`${why}\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/check-submission.md`);
   process.exit(1);
 }
+
+const COMMANDS = ['time-pressure', 'submission', 'pr-body'];
+if (!COMMANDS.includes(command)) failUsage(`하위 명령은 ${COMMANDS.join('·')} 중 하나다: ${command ?? '(없음)'}`);
+if (!target) failUsage(`${command}에 대상이 없다`);
 
 function walk(dir, out = []) {
   for (const name of fs.readdirSync(dir)) {
@@ -160,9 +150,6 @@ if (command === 'time-pressure') {
       if (!ok) problems.push(`이미지가 깨진다: ${url}`);
     }
   }
-} else {
-  console.error(`모르는 명령: ${command}`);
-  process.exit(1);
 }
 
 if (problems.length) {

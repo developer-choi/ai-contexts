@@ -23,14 +23,14 @@ npm run sync:environment
   - 내용 변경 없이 이름만 바뀐 파일(git이 `R100`으로 보고하는 것)은 건드린 파일로 치지 않습니다. 재구성처럼 대량 이동하는 커밋에서 경고가 쏟아지고, "함께 정리한다"는 안내가 이동만 담아야 하는 커밋과 부딪히기 때문입니다. 내용도 바뀐 rename은 검사합니다.
   - 등록하는 명령은 `|| true`로 감쌉니다. 전역 훅이라 실패하면 모든 레포의 모든 커밋이 막히는데, 스크립트 파일이 사라지거나 node가 없으면 스크립트가 자기 오류를 삼킬 기회조차 없이 non-zero로 죽기 때문입니다.
   - backlog 레포의 백로그 데이터(`projects/`·`articles/`·`roadmaps/`·`archives/`·`side-income/`·`finance/`)는 제외합니다. `projects/{repo}/dev-active/rules/`처럼 경로에 `/rules/`가 들어가 프롬프트 문서로 오인되지만, 거기 적히는 개수는 측정값이라 일반화하면 기록이 망가집니다. 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사합니다.
-  - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 경로를 주지 않았거나 파일이 없을 때만 exit 1입니다.
+  - `node ~/.ai-contexts/check-count-hardcoding.mjs --report <md>`로 파일 하나를 커밋 없이 물을 수 있습니다(훑기 회차용). 판정 기준이 이 훅의 메시지에만 있어서입니다. 호출 꼴·출력·exit code는 [check-count-hardcoding.md](../../scripts/hooks/check-count-hardcoding.md)에 있습니다.
 - `scripts/hooks/check-wording.mjs`를 `~/.ai-contexts/check-wording.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-wording.*`)으로 멱등하게 등록합니다.
   - 스테이징된 프롬프트 md에서 강조 라벨·약한 어휘·군더더기·영어 용어 뒤에 괄호로 한글 풀이를 단 헤딩·금지 표현(사용자가 못 알아본 말)·줄바꿈 없이 길게 연결된 줄을 감지해 처방과 함께 경고합니다. 커밋을 막지는 않습니다.
   - 검사 범위·제외(건드린 파일 전체, `R100` 제외, backlog 데이터 제외, `|| true`)는 바로 위 개수 하드코딩 훅과 같습니다.
   - 낱말 목록과 처방은 스크립트가 정본입니다. 문자열만으로 정탐이 대부분인 낱말만 켭니다. 정상 조건문·명사로 더 많이 쓰이는 낱말(`필요하면`·`옵션` 등)은 뺍니다.
   - 긴 줄은 낱말이 아니라 줄 길이로 잽니다(문턱은 스크립트가 정본). 다른 범주는 경고 끝에 같은 파일의 기존 위반도 지금 고치되 별도 커밋으로 나누라고 안내합니다. 이 범주는 처방이 같은 내용을 따로 말해 그 꼬리말을 걸지 않습니다.
   - AC가 아닌 레포에서는 `[CRITICAL]`도 강조 라벨로 경고합니다. AC는 `.githooks`의 `check-critical-marker.mjs`가 막고, 다른 레포에는 이것이 유일한 표면입니다.
-  - `node ~/.ai-contexts/check-wording.mjs --report <md 또는 폴더>`(폴더면 그 아래 md마다)로 커밋 없이 물을 수 있습니다(훑기 회차용).
+  - `node ~/.ai-contexts/check-wording.mjs --report <md 또는 폴더>`(폴더면 그 아래 md마다)로 커밋 없이 물을 수 있습니다(훑기 회차용). 호출 꼴·출력·exit code는 [check-wording.md](../../scripts/hooks/check-wording.md)에 있습니다.
   - 금지 표현 범주는 낱말 목록이 스크립트가 아니라 금지 표현 목록 `scripts/hooks/blocked-expressions.json`에 있어, 이 파일도 `~/.ai-contexts/blocked-expressions.json`으로 복사합니다.
     - 훅은 그 사본에서 `scope`가 PROMPT·BOTH인 행을 읽어 걸린 줄과 행마다의 대신 쓸 말을 `[금지 표현 의심]`으로 경고합니다. 사본이 없으면 이 범주만 건너뜁니다.
     - 레인이 `NEEDS_REVIEW`인 행은 그 커밋에서 추가·수정한 줄에서만 짚습니다. 쓰임에 따라 맞기도 한 말이라 원래 있던 정상 쓰임까지 매 커밋 끌려오지 않게 합니다.
@@ -55,7 +55,7 @@ npm run sync:environment
   - 닿는 md까지 재는 것은, 폴더로만 정하면 규격을 밖으로 떼는 순간 감시에서 빠지기 때문입니다.
   - `exclude`에 경로 접두사로 적은 자리는 재지 않고, 그 자리가 가리키는 md도 따라가지 않습니다. 산출물이 함께 사는 `local/`(PP의 제출한 자소서 폴더)과 규칙 파일이 예시로 가리키는 보관 글을 적습니다. 어느 것이 산출물·보관 글인지는 사람만 아는 사실이라 검사가 이름으로 못 가릅니다. 기준선을 다시 쓸 때 그 목록과 다른 레포의 항목은 그대로 유지됩니다.
   - 지식 글·백로그 항목은 규칙 파일이 가리키지 않으면 닿지 않아 재지 않고, 가리켜져 닿게 되면 위 `exclude`로 뺍니다. 한 주제를 길게 쓰는 것이 정상이라 같은 선을 대면 전부 걸리고, 그러면 이 검사가 통째로 무시됩니다.
-  - 선을 넘었는지와 무관하게 파일의 크기·닿는 곳 목록·선을 물을 수도 있습니다(`node ~/.ai-contexts/check-md-size.mjs --report <md 또는 폴더 경로>`, 폴더면 그 아래 md마다). 이때 크기만은 작업 트리에서 잽니다. 경고와 기준선 올리기는 선을 넘은 파일만 내므로, 손대기 전에 무게를 재려는 세션이 같은 계산을 grep으로 다시 하지 않게 하는 출구입니다. 그 레포 안의 참조만 세므로 다른 레포·자동 로드·훅 주입으로 여는 곳은 안 잡힌다는 것을 출력에 함께 적습니다.
+  - 선을 넘었는지와 무관하게 파일의 크기·닿는 곳 목록·선을 물을 수도 있습니다(`node ~/.ai-contexts/check-md-size.mjs --report <md 또는 폴더 경로>`, 폴더면 그 아래 md마다). 호출 꼴·출력은 [check-md-size.md](../../scripts/hooks/check-md-size.md)에 있습니다. 이때 크기만은 작업 트리에서 잽니다. 경고와 기준선 올리기는 선을 넘은 파일만 내므로, 손대기 전에 무게를 재려는 세션이 같은 계산을 grep으로 다시 하지 않게 하는 출구입니다. 그 레포 안의 참조만 세므로 다른 레포·자동 로드·훅 주입으로 여는 곳은 안 잡힌다는 것을 출력에 함께 적습니다.
 - `scripts/hooks/check-orphan-md.mjs`를 `~/.ai-contexts/check-orphan-md.mjs`로 복사하고, `--global` pre-commit 훅(`hook.ai-contexts-orphan-md.*`)으로 멱등하게 등록합니다. 이번 커밋 뒤로 아무도 이름을 부르지 않게 된 프롬프트 md(새로 만든 것, 옮긴 것, 지운 줄에 이름이 나오던 것)를 경고합니다. 커밋을 막지는 않습니다.
   - 레포 전체의 고아는 `scripts/check-links.mjs`가 찾지만 한 번에 1분 가까이 걸려, 이 훅은 이번 커밋이 만든 고아만 봅니다.
   - 폴더 이름이 폴더 자체로 나오고 그 안의 md가 하나도 이름으로 안 불리면 폴더째 읽는 자리로 보고 넘어갑니다. backlog 레포는 `local/`만 봅니다. 항목은 원래 아무도 안 부릅니다.

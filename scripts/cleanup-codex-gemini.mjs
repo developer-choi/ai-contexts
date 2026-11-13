@@ -1,18 +1,10 @@
 #!/usr/bin/env node
+// 사용법: cleanup-codex-gemini.md (같은 폴더)
+//
 // 일회용: 예전 sync가 Codex·Gemini(Antigravity) 쪽에 배포한 AC 산출물을 걷는다.
 //
 // AC는 Claude Code 전용으로 줄었고, sync·unsync는 더 이상 ~/.codex·~/.gemini를 모른다.
 // 그래서 이 커밋 전에 배포해 둔 기기에는 산출물이 그대로 남는다. 각 기기에서 한 번씩 돌린다.
-//
-//   node scripts/cleanup-codex-gemini.mjs           # 지울 목록만 보인다(아무것도 지우지 않음)
-//   node scripts/cleanup-codex-gemini.mjs --apply   # 실제로 지운다
-//   node scripts/cleanup-codex-gemini.mjs --apply <스캔 루트>...  # 레포 스캔 루트 지정
-//
-// 돌린 뒤 확인:
-//   - `ls ~/.codex ~/.gemini`에 contexts/·hooks/·hooks.json·AGENTS.md·GEMINI.md가 없다
-//   - ~/.codex/skills·~/.gemini/skills에 AC 스킬(SKILL.md에 deploy-anchor 표식)이 없다
-//   - `grep -n "hooks.state" ~/.codex/config.toml` 결과에 .codex 아래 hooks.json을 가리키는 줄이 없다
-//   - 각 레포에 .codex/hooks.json·.codex/hooks/·.agents/<local 폴더>·(CLAUDE.md 사본인) AGENTS.md·GEMINI.md가 없다
 //
 // AC 산출물만 지운다. 사용자 소유 파일(auth.json·config.toml의 다른 섹션·sessions/·
 // oauth_creds.json·antigravity-cli/ 등)은 건드리지 않는다.

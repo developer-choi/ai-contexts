@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: insert-headings.md (같은 폴더)
+//
 // 평면 타임라인 md에 구간 헤딩과 상단 조망을 넣고, 넣다 블록이 사라지지 않았는지 검증한다.
 //
 // 이 파일이 존재하는 이유: 삽입 로직을 회차마다 새로 짜다 블록이 조용히 유실된 적이 있고,
@@ -11,8 +13,6 @@
 // 받아 그대로 꽂았으므로 산술이 틀려도 exit 0이었다 — 그런데 이 문서의 존재 이유가
 // 「이걸 이 시간만큼 써서 했다고?」를 드러내는 것이라, 조용히 틀린 숫자가 결론을 오염시킨다.
 // 이제 넘기는 것은 구간의 시작 시각과 한 일 요약뿐이고 나머지는 계산된다.
-//
-// 사용법과 구간.json 꼴은 인자 없이 부르면 나온다.
 
 import fs from 'node:fs';
 
@@ -33,8 +33,7 @@ function parseArgs(argv) {
 
 const args = parseArgs(process.argv.slice(2));
 if (!args.input || !args.segs) {
-  console.error('사용: node <이 파일> <타임라인.md> --segs <구간.json> [--out <파일>(기본: 타임라인.md를 고쳐 쓴다)] [--note "집계 한 줄"]');
-  console.error('구간.json: [{ "start": "8/16 15:31", "summary": "한 일 요약" }, ...] — start는 그 구간 첫 블록의 이름(inspect-blocks.mjs --stamps, 같은 분 두 번째부터 "8/16 15:31 #2")과 정확히 같다');
+  console.error(`타임라인 md 경로나 --segs <구간.json>이 없다\n사용법: ${import.meta.dirname.replace(/\\/g, '/')}/insert-headings.md`);
   process.exit(1);
 }
 

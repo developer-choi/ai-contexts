@@ -27,7 +27,7 @@ node ~/WebstormProjects/main/private-playground/local/contexts/recruitment/scrip
 
 4단(회사 밖 글 — 3단에서도 못 찾았을 때 여는 자리)은 한 회차의 판정으로 안 닫힌다. 회사마다 막히는 자리가 달라 늘 "이번 회사가 특수했나"로 끝나므로, 종류로 접어 **거듭 안 쓰이는지를 회차 너머로 센다.**
 
-`session-state.mjs`의 `source-usage`가 그 자리다.
+`session-state.mjs`의 `source-usage`가 그 자리다. 명령·인자는 [../scripts/session-state.md](../scripts/session-state.md#4단-출처-종류-누계)를 본다.
 회고가 내는 것은 **절마다의 종류 라벨뿐**이고, 인용 여부는 `site-usage.mjs`가 기계로 낸 목록에서 읽는다 — 사람만 아는 것(어느 종류인가)과 기계가 아는 것(인용됐는가)을 섞으면, 기계가 아는 것을 사람이 틀리게 적는다. 받는 종류는 `--kinds`가 낸다.
 
 선을 넘은 종류마다 사용자에게 고르게 한다.

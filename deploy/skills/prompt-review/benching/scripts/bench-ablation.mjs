@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: bench-ablation.md (같은 폴더)
+//
 // 규칙 ablation 벤치 — `claude -p`를 격리 환경에서 돌려 규칙 유무가 응답을 바꾸는지 잰다.
 //
 // 왜 API가 아니라 CLI를 모는가:
@@ -11,38 +13,11 @@
 // - `--append-system-prompt`로 통제된 시스템 프롬프트를 도로 넣는다. 비교군마다 이 텍스트만 다르다.
 // - call마다 빈 임시 cwd에서 돌려 프로젝트 CLAUDE.md가 범위에 안 들어오게 한다.
 //
-// CLI의 기존 OAuth 로그인을 쓴다 — `ANTHROPIC_API_KEY` 불필요.
-//
-// eval-set JSON 스키마:
-// {
-//   "rule_id": "...",
-//   "base_system": "...{TARGET}...",           // {TARGET}이 비교군 텍스트로 치환된다
-//   "variants": {"ZERO": "", "V1": "..."},
-//   "variant_cwds": {"ZERO": "/path/to/wt-zero", "V1": "/path/to/wt-v1"},  // (선택) 비교군별 작업 폴더
-//   "worker_permission_mode": "acceptEdits",    // (선택) 생성 call의 --permission-mode. 없으면 안 붙인다
-
-//   "grader": {                                 // 전 시나리오 기본 채점 분류지
-//     "instruction": "(선택) 채점자에게 줄 추가 지시",
-//     "classes": [{"id": "ONE_AT_A_TIME", "desc": "..."}, {"id": "DUMP_ALL", "desc": "..."}]
-//   },
-//   "scenarios": [
-//     {"id": "P1", "type": "positive", "user": "...", "pass_when": ["ONE_AT_A_TIME"]},
-//     {"id": "M1", "type": "positive", "user": "...",  // 다축 — 한 응답을 독립 항목 여럿으로 잰다
-//      "grader": {"axes": [
-//        {"id": "field_a", "question": "...", "classes": [{"id": "YES", "desc": "..."},
-//                                                          {"id": "NO", "desc": "..."}],
-//         "pass_when": ["YES"]}
-//      ]}}
-//   ],
-//   "inheritance_signatures": ["...", "..."]    // ZERO 응답이 이 문구를 재사용하면 환경 상속 의심
-// }
-//
 // 분류지는 스크립트 상수가 아니라 eval-set이 소유한다 — 측정 대상마다 분류가 다르기 때문이다.
-// 시나리오에 `grader`가 있으면 그것이, 없으면 최상위 `grader`가 쓰인다.
 //
 // `worker_permission_mode`도 같은 이유로 eval-set이 소유한다 — 파일을 고치는 작업을 재는 벤치와
 // 판단만 재는 벤치가 필요로 하는 권한이 다르다. 기본은 안 붙이는 것이라 기존 eval-set의 동작은
-// 그대로다. 유효값은 CLI가 정본이고 틀린 값은 CLI가 거부해 그 call이 실행 실패로 잡힌다.
+// 그대로다.
 //
 // 왜 필요한가: `--setting-sources ''`는 배포된 규칙과 함께 권한 설정도 떼어내, 워커가 파일을
 // 못 고친다. 그런데 그 거부("파일 수정 권한이 필요합니다")는 rc=0에 정상 응답이라 실행 실패로
@@ -55,37 +30,22 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
-const USAGE = `사용법: node bench-ablation.mjs --eval-set <json> --out <json> [옵션]
+const USAGE_DOC = `${import.meta.dirname.replace(/\\/g, '/')}/bench-ablation.md`;
 
-  --eval-set <경로>      측정 명세 JSON (필수)
-  --out <경로>           결과 JSON 출력 경로 (필수)
-  --reps <n>             시나리오×비교군당 반복 수 (기본 3)
-  --target-reps <n>      목표 반복 수 (기본 3, 0이면 끈다). 칸의 반복이 이보다 적으면 「보류(반복 미달)」로 찍는다
-  --model <id>           측정 대상 생성 모델 (기본 sonnet = 그 시점 최신 Sonnet)
-  --grader-model <id>    채점 모델 (기본 sonnet)
-  --workers <n>          동시 실행 상한 (기본 8)
-  --timeout <초>         call당 타임아웃 (기본 180). 타임아웃은 재시도하지 않는다
-  --variants <a,b>       비교군 필터
-  --scenarios <a,b>      시나리오 필터
-  --dump-dir <경로>      run별 원본 JSON 덤프 위치
-  --verbose              진행 로그를 stderr로
-  --allow-over-cap       한 번의 발사 상한(100 call)을 의도적으로 넘길 때
-  --resume               --dump-dir에 이미 성공한 run이 있으면 call 대신 그 파일을 쓴다.
-                         죽은 발사를 같은 명령으로 다시 치면 죽은 run만 나간다
-  --no-smoke             본 발사 전 스모크(시나리오 x 비교군마다 남은 첫 run, 동시성 상한까지 채움)를 건너뛴다.
-                         스모크에서 실행 실패가 한 건이라도 나면 본 발사 없이 종료 코드 1로 나간다
-  --max-fail-streak <n>  실행 실패가 연달아 n건이면 남은 run을 버리고 종료 코드 1로 나간다 (기본 3, 0이면 끔)
-`;
+function failUsage(reason) {
+  process.stderr.write(`${reason}\n사용법: ${USAGE_DOC}\n`);
+  process.exit(1);
+}
 
 function parseArgs(argv) {
   const flags = new Set(['--verbose', '--allow-over-cap', '--resume', '--no-smoke', '--help', '-h']);
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
-    if (!key.startsWith('--') && key !== '-h') throw new Error(`알 수 없는 인자: ${key}`);
+    if (!key.startsWith('--') && key !== '-h') failUsage(`알 수 없는 인자: ${key}`);
     if (flags.has(key)) { args[key.replace(/^-+/, '')] = true; continue; }
     const value = argv[++i];
-    if (value === undefined) throw new Error(`${key}에 값이 없다`);
+    if (value === undefined) failUsage(`${key}에 값이 없다`);
     args[key.slice(2)] = value;
   }
   return args;
@@ -474,8 +434,9 @@ function keepEvalSet(spec) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help || args.h) { process.stdout.write(USAGE); return; }
-  if (!args['eval-set'] || !args.out) { process.stderr.write(USAGE); process.exitCode = 2; return; }
+  if (args.help || args.h) { process.stdout.write(fs.readFileSync(USAGE_DOC, 'utf8')); return; }
+  const missing = ['--eval-set', '--out'].filter((key) => !args[key.slice(2)]);
+  if (missing.length > 0) failUsage(`${missing.join('·')}가 없다`);
 
   args.reps = Number(args.reps ?? 3);
   // 기본을 켜 둔다 — chunk마다 플래그를 붙이는 방식이면 빠뜨린 chunk의 표가 아무 표시 없이 판정을 낸다.

@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+// 사용법: bench-trigger.md (같은 폴더)
+//
 // 스킬 description의 트리거 정확도 측정 — 쿼리마다 `claude -p`를 돌려 대상 스킬이 발동했는지 본다.
 //
 // stream-json을 줄 단위로 읽다가 `Skill` tool_use의 `"skill":"<name>"`을 보는 순간 프로세스를 죽인다.
 // 그래서 트리거되는 쿼리도 스킬 본문 작업이 끝나기를 기다리지 않고 ~10초에 회수된다.
-//
-// eval-set JSON: 최상위 배열, 항목마다 `query`(문자열)와 `should_trigger`(불리언).
 import { spawn, spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
@@ -12,35 +12,22 @@ import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
 
-const USAGE = `사용법: node bench-trigger.mjs --eval-set <json> --skill-path <dir> --out <json> [옵션]
+const USAGE_DOC = `${import.meta.dirname.replace(/\\/g, '/')}/bench-trigger.md`;
 
-  --eval-set <경로>        쿼리 JSON 배열 (필수)
-  --skill-path <경로>      측정 대상 스킬 디렉토리 (필수). 여기서는 이름·description만 읽는다 —
-                           발동을 재는 것은 claude가 발견하는 설치본이고, 둘의 description이
-                           다르면 측정 없이 끝낸다
-  --out <경로>             결과 JSON 출력 경로 (필수)
-  --baseline <경로>        BEFORE 측정의 --out JSON. description이 같거나 측정 모델이 다르면
-                           측정 없이 끝내고, 아니면 쿼리별 rate 변화를 함께 찍는다
-                           (실패가 섞인 행은 보류)
-  --num-workers <n>        동시 실행 상한 (기본 3)
-  --timeout <초>           쿼리당 타임아웃 (기본 240)
-  --runs-per-query <n>     쿼리당 반복 (기본 3)
-  --trigger-threshold <f>  통과 판정 임계 비율 (기본 0.5)
-  --model <id>             측정 모델 (기본 sonnet = 그 시점 최신 Sonnet)
-  --verbose                진행 로그를 stderr로
-
-  환경변수 BENCH_DUMP_DIR=<경로>  쿼리별 원본 stream-json을 그 폴더에 남긴다
-`;
+function failUsage(reason) {
+  process.stderr.write(`${reason}\n사용법: ${USAGE_DOC}\n`);
+  process.exit(1);
+}
 
 function parseArgs(argv) {
   const flags = new Set(['--verbose', '--help', '-h']);
   const args = {};
   for (let i = 0; i < argv.length; i++) {
     const key = argv[i];
-    if (!key.startsWith('--') && key !== '-h') throw new Error(`알 수 없는 인자: ${key}`);
+    if (!key.startsWith('--') && key !== '-h') failUsage(`알 수 없는 인자: ${key}`);
     if (flags.has(key)) { args[key.replace(/^-+/, '')] = true; continue; }
     const value = argv[++i];
-    if (value === undefined) throw new Error(`${key}에 값이 없다`);
+    if (value === undefined) failUsage(`${key}에 값이 없다`);
     args[key.slice(2)] = value;
   }
   return args;
@@ -274,12 +261,9 @@ async function pool(items, limit, worker) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (args.help || args.h) { process.stdout.write(USAGE); return; }
-  if (!args['eval-set'] || !args['skill-path'] || !args.out) {
-    process.stderr.write(USAGE);
-    process.exitCode = 2;
-    return;
-  }
+  if (args.help || args.h) { process.stdout.write(fs.readFileSync(USAGE_DOC, 'utf8')); return; }
+  const missing = ['--eval-set', '--skill-path', '--out'].filter((key) => !args[key.slice(2)]);
+  if (missing.length > 0) failUsage(`${missing.join('·')}가 없다`);
 
   const runsPerQuery = Number(args['runs-per-query'] ?? 3);
   // 기본값이 곧 권장값이다. 예전엔 5·60이었고 산문이 "매번 3·240을 붙여라"로 그 차이를 메웠는데,

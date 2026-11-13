@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: score.md (같은 폴더)
+//
 // write 산출물 채점 하네스 (객관 + 반객관 자동 계측).
 //
 // 주관(만족/불만족·추가교정)은 사람 전속이라 여기서 안 잰다. 점수로 합치지 않는다 —
@@ -18,19 +20,6 @@
 //   읽은 자리나 건너뛴 까닭을 출력 첫머리에 한 줄 남긴다.
 // - 이 글만: 패키지 frontmatter `rejected`의 따옴표 안 낱말·문구. 사유가 쓰임에 걸린 것이 많아 경고로만 낸다.
 //   절·내용 항목은 리뷰어 몫이라 안 잡는다.
-//
-// 사용:
-//   node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]
-//   node score.mjs --rules            무엇을 잡는지 낸다 (낱말·경고 레인·대체어)
-//   node score.mjs <산출물.md> --structure   긴 문단·개수 선언 뒤 리스트 없음만 낸다
-//                                            (톤을 다듬기 전, 내용을 채운 초안의 나눔만 볼 때)
-//   node score.mjs <산출물.md> --residual    남은 `[//]: #` 주석만 낸다. 있으면 exit 1 (발행 직전 확인)
-//   node score.mjs <산출물.md> --json        사람용 출력 끝에 기계용 `@@score {total,titleHits,refHits}` 한 줄을 더한다
-//
-// 줄 번호(L)는 frontmatter를 포함한 파일 기준이다.
-//
-// 명제리스트(--props): 한 줄에 핵심 명제 하나. 본문에 substring으로 들어있는지만 본다.
-// 토큰·턴(--tokens/--turns): 세션에서 얻는 값. 주면 객관 표에 기록만 한다(자동 산출 불가).
 //
 // 반객관 매칭은 한국어 단어 경계가 없어 false positive가 날 수 있다(예: '유사' in '유사성').
 // 그래서 위반마다 해당 줄을 함께 출력해 사람이 눈으로 확인할 수 있게 한다.
@@ -636,11 +625,7 @@ function main() {
     return;
   }
   if (!args.file) {
-    console.error("사용: node score.mjs <산출물.md> [--props 명제리스트.txt] [--tokens N] [--turns N]");
-    console.error("      node score.mjs --rules   (무엇을 잡는지 전부 낸다)");
-    console.error("      node score.mjs <산출물.md> --structure   (긴 문단·개수 선언만 낸다)");
-    console.error("      node score.mjs <산출물.md> --residual    (남은 [//]: # 주석만 본다, 있으면 exit 1)");
-    console.error("      node score.mjs <산출물.md> --json        (끝에 기계용 @@score 한 줄을 더한다)");
+    console.error(`채점할 산출물 경로가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/score.md`);
     process.exit(1);
   }
 

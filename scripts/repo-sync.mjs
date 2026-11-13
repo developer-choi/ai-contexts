@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: repo-sync.md (같은 폴더)
+//
 // 스캔 루트 하위 1뎁스 git 레포를 origin과 양방향 동기화한다 — `/repo-sync` 스킬의 기계 파트.
 //
 // 왜 스크립트인가: 판정이 전부 결정론이다(보호 브랜치인가 · ahead/behind가 몇인가 · ff가 되는가).
@@ -10,17 +12,8 @@
 //   - WIP 커밋 메시지 — 무엇을 하던 중이었는지는 사람·AI가 안다. 그 레포는 `wip-needed`로 내고 멈춘다
 //   - 「사용자 조치 필요」 추천 — blocked/failed 행을 보고 무엇을 하라고 할지
 //
-// 사용법:
-//   node scripts/repo-sync.mjs
-//       → 전 레포 순회. WIP이 필요한 레포는 손대지 않고 변경 목록과 함께 `wip-needed`로 낸다.
-//         순회를 마치면 `sync:environment`를 이어서 돌린다
-//   node scripts/repo-sync.mjs --wip <레포경로> --message "<커밋 메시지>"
-//       → 그 레포만 WIP 커밋하고 이어서 동기화한다
-//   node scripts/repo-sync.mjs --json
-//       → 표 대신 JSON. 결과를 다른 스크립트가 읽을 때
-//   node scripts/repo-sync.mjs --root <dir>
-//       → 스캔 루트를 바꾼다(쉼표로 여럿). 픽스처로 이 판정 자체를 검증할 때 쓴다 —
-//         실제 레포에 대고 돌리면 검증이 곧 push라 되돌릴 수 없다
+// 스캔 루트를 바꾸는 옵션은 픽스처 검증용이다. 실제 레포에 대고 판정을 검증하면 검증이 곧 push라
+// 되돌릴 수 없다.
 //
 // 순서를 이렇게 고정한 이유: 일반 브랜치는 미커밋을 **먼저** 커밋해 ahead로 만든 뒤 판정한다.
 // 그래야 stash가 보호 브랜치 갈래에만 남는다(스킬 「세부 절차」가 정한 제약).
@@ -66,8 +59,8 @@ const AS_JSON = argv.includes("--json");
 const ROOTS = optOf("root") ? optOf("root").split(",").map((s) => s.trim()).filter(Boolean) : DEFAULT_ROOTS;
 
 if (WIP_REPO && !WIP_MESSAGE) {
-  console.error("--wip 에는 --message 가 필요합니다 (WIP 커밋 메시지는 스크립트가 못 정합니다).");
-  process.exit(2);
+  console.error(`--wip 에는 --message 가 필요합니다 (WIP 커밋 메시지는 스크립트가 못 정합니다).\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/repo-sync.md`);
+  process.exit(1);
 }
 
 // git 한 번. 실패를 예외가 아니라 값으로 돌려준다 — 레포 하나가 깨져도 순회는 계속돼야 한다.

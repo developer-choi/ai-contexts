@@ -58,7 +58,7 @@ page.md를 쓴 세션은 직접 대조하지 않는다. page.md·global.md(채�
 
 모든 페이지 루프가 끝난 뒤, 페이지 단위를 넘어 전체 플로우 관점에서 점검한다.
 
-점검은 메인이 하지 않고 일회성 서브에이전트에 맡긴다. `node {{skill_dir}}/scripts/plan-folder.mjs requirement-files`가 낸 산출물 경로(기획 체크리스트를 놓았으면 [cross-page.md](planning/cross-page.md)도)를 넘겨, 페이지끼리 어긋난 곳, 공통화 후보, 남은 미확정·질문을 찾게 한다.
+점검은 메인이 하지 않고 일회성 서브에이전트에 맡긴다. `node {{skill_dir}}/scripts/plan-folder.mjs requirement-files <plan 루트>`가 낸 산출물 경로(기획 체크리스트를 놓았으면 [cross-page.md](planning/cross-page.md)도)를 넘겨, 페이지끼리 어긋난 곳, 공통화 후보, 남은 미확정·질문을 찾게 한다.
 결과는 근거 `파일:줄`과 원문 줄을 붙여 돌려받아, 메인은 page.md를 다시 열지 않고 그 줄로 판단한다.
 
 1. 결과를 사용자에게 알리고, 공통화 후보는 올릴지 정한다. 올리면 global.md(채용과제 분석 산출물이 다루는 것은 그 문서)에, 한 페이지에서만 쓰이면 그 page.md에 둔다. 여러 페이지가 공유하는 레이아웃이면 `/plan/background/consumable/layout.md`를 만들지 정한다.

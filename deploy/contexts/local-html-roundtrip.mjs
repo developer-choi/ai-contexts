@@ -1,3 +1,5 @@
+// 사용법: local-html-roundtrip.md (같은 폴더)
+//
 // 로컬 HTML을 만들어 기본 브라우저로 여는 절차.
 //
 // 다섯 스킬(KA exam·KA digest·PP routine-summary·PP routine-start·AC pre-exit)이 같은 절차를
@@ -25,10 +27,6 @@
 //   그래서 (1) 배터리에서도 돌도록 설정을 얹고, (2) 실행 여부를 Last Result가 아니라
 //   "이번 호출 뒤에 실제로 돈 시각(LastRunTime)"으로 판정한다. 안 돌았으면 실패로 낸다.
 //   schtasks.exe에는 배터리 설정을 켜는 스위치가 없어 등록을 PowerShell 쪽으로 옮겼다.
-//
-// 사용:
-// (부르는 쪽은 `{{contexts}}/local-html-roundtrip.mjs`로 적는다 — 배포가 절대경로로 채운다.)
-//   node <이 파일> open <마커> <html경로|-> [--slug <슬러그>]
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -38,12 +36,9 @@ import path from "node:path";
 const RUN_TIMEOUT_MS = 15000;
 const RUN_POLL_MS = 250;
 
-const USAGE = `사용:
-  open <마커> <html경로|-> [--slug <슬러그>]
-      HTML을 BOM 없는 UTF-8로 임시 폴더에 쓰고 기본 브라우저로 연다.
-      html경로가 '-'이면 표준입력에서 읽는다. 성공 시 열린 절대경로를 stdout에 낸다.
-
-  폼에 채운 값은 사용자가 [복사하기]로 복사해 채팅에 그대로 붙여넣는다 — 여기서 되받지 않는다.`;
+// 인자를 잘못 줬을 때. 사용법은 짝 md 한 곳에만 두고 여기서는 사유와 그 경로만 알린다.
+const USAGE_DOC = path.join(import.meta.dirname, "local-html-roundtrip.md");
+const USAGE_HINT = `사용법: ${USAGE_DOC.replace(/\\/g, "/")}`;
 
 // ---------------------------------------------------------------- 공용
 
@@ -66,14 +61,14 @@ function powershell(command) {
 // 마커를 파일명·작업이름에 넣으므로 경로·명령에서 의미를 갖는 문자를 걸러낸다.
 function safeMarker(marker) {
   if (!marker || !/^[A-Za-z0-9][A-Za-z0-9_-]*$/.test(marker)) {
-    fail(1, `마커는 영숫자·하이픈·밑줄만 쓴다 (받은 값: ${JSON.stringify(marker)})`);
+    fail(1, `마커는 영숫자·하이픈·밑줄만 쓴다 (받은 값: ${JSON.stringify(marker)})\n${USAGE_HINT}`);
   }
   return marker;
 }
 
 function safeSlug(slug) {
   if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(slug)) {
-    fail(1, `슬러그는 영숫자·점·하이픈·밑줄만 쓴다 (받은 값: ${JSON.stringify(slug)})`);
+    fail(1, `슬러그는 영숫자·점·하이픈·밑줄만 쓴다 (받은 값: ${JSON.stringify(slug)})\n${USAGE_HINT}`);
   }
   return slug;
 }
@@ -83,7 +78,7 @@ function safeSlug(slug) {
 function open(argv) {
   const marker = safeMarker(argv[0]);
   const source = argv[1];
-  if (!source) fail(1, `열 HTML 경로가 없다.\n\n${USAGE}`);
+  if (!source) fail(1, `열 HTML 경로가 없다.\n${USAGE_HINT}`);
 
   // 슬러그도 파일명이 되므로 마커와 같게 걸러낸다. 거르지 않으면 `--slug ../../x`가
   // 임시 폴더 밖에 파일을 쓴다.
@@ -183,10 +178,11 @@ function readOption(argv, name) {
 }
 
 const [subcommand, ...rest] = process.argv.slice(2);
-if (!subcommand || subcommand === "--help" || subcommand === "-h") {
-  console.log(USAGE);
-  process.exit(subcommand ? 0 : 1);
+if (subcommand === "--help" || subcommand === "-h") {
+  process.stdout.write(fs.readFileSync(USAGE_DOC, "utf8"));
+  process.exit(0);
 }
+if (!subcommand) fail(1, `서브커맨드가 없다.\n${USAGE_HINT}`);
 
 if (subcommand === "open") open(rest);
-else fail(1, `모르는 서브커맨드: ${subcommand}\n\n${USAGE}`);
+else fail(1, `모르는 서브커맨드: ${subcommand}\n${USAGE_HINT}`);

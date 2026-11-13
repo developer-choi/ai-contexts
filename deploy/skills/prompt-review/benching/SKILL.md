@@ -15,6 +15,8 @@
 | 벤치 산출물 정리, 스킬이 문서를 실제로 읽었는지 확인 | [operations.md](operations.md) |
 | 토큰·비용을 재는 벤치의 추가 점검 | backlog `archives/research/prose-to-script-effect/방법론-벤치운영.md` |
 
+**`scripts/`의 `.mjs`는 소스를 읽지 않고 실행한다.** 명령·인자는 같은 폴더의 같은 이름 `.md`를 본다(예: [scripts/bench-ablation.md](scripts/bench-ablation.md)).
+
 ## 재벤치 — 언제 다시 돌리고 언제 멈추나
 
 문서를 고쳐 다시 잴 때, 아래 중 하나에 닿으면 멈춘다. 고치기 전 측정은 회차로 세지 않고, 첫 수정 뒤 측정이 1회차다. 성과는 직전 측정보다 잔류가 뚜렷이 줄었는가로 본다 — 같은 문서로 돌려도 LLM 결과는 조금씩 오르내리므로, 그 정도 차이는 성과로 보지 않는다. 실행 실패로 보류가 찍힌 회차는 그 run을 다시 재서 채운 뒤 판정한다.

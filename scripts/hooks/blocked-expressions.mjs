@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: blocked-expressions.md (같은 폴더)
+//
 // 사용자가 반려한 말을 금지 표현 목록(`blocked-expressions.json`)에 등재하고, 고치고, 검사한다. 목록은 이
 // 스크립트로만 고친다. 손으로 행을 붙이면 칸이 빠지거나 오타가 나도 아무도 안 잡고, 그 말은
 // 조용히 안 걸린다. 언제 목록에 올리는지는 `deploy/rules/global.md`
@@ -23,15 +25,6 @@
 //   instead    대신 쓸 말. 배열이면 words와 꼴마다 짝짓고(길이가 같아야 한다), 아니면 문자열 하나로 적는다.
 // 누가 언제 반려했는지는 목록에 두지 않는다. 등재 커밋 메시지 본문에 사용자 발화를 적어 git에 남긴다(목록의 낱말은 커밋 메시지 훅이 막으므로 뜻풀이로 바꿔 적는다).
 //
-// usage:
-//   node scripts/hooks/blocked-expressions.mjs --add --match <PREFIX|SUBSTRING> --scope <PROMPT|BOTH|DOC>
-//        --lane <ALWAYS_BANNED|NEEDS_REVIEW> --words 굽지·굽는 --why <왜 막는가> --instead <대신 쓸 말>
-//        [--exclusions 꼴·꼴] [--allow-zero]
-//   node scripts/hooks/blocked-expressions.mjs --exclude --word <등재된 낱말> --exclusions 꼴·꼴
-//   node scripts/hooks/blocked-expressions.mjs --find <표현>... [--scope <PROMPT|BOTH|DOC>] [--lane <ALWAYS_BANNED|NEEDS_REVIEW>]
-//   node scripts/hooks/blocked-expressions.mjs --remove --word <등재된 낱말>
-//   node scripts/hooks/blocked-expressions.mjs --check [<목록 json>]
-//
 // 등재 전에 scope가 PROMPT·BOTH인 행은 이 레포(AC)와 호출한 곳의 레포의 스킬·규칙 md에 실제로 대 본다.
 // 한 줄도 안 걸리면 종류나 꼴을 잘못 적은 것이라 거부한다. 아직 아무 데도 안 쓰인 말을 미리 막으려는
 // 때는 `--allow-zero`로 넘기고, DOC 행은 대 보지 않는다. 대 보는 매칭은 훅(check-wording.mjs)의 것을 그대로 가져다 쓴다.
@@ -51,24 +44,6 @@ const AC_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..",
 const DEPLOYED_LIST = path.join(os.homedir(), ".ai-contexts", path.basename(LIST_FILE));
 
 const KEYS = ["words", "match", "exclusions", "scope", "lane", "why", "instead"];
-
-const USAGE = [
-  "사용법:",
-  "  --add --match <PREFIX|SUBSTRING> --scope <PROMPT|BOTH|DOC> --lane <ALWAYS_BANNED|NEEDS_REVIEW>",
-  "        --words 말·활용형 --why <왜 막는가> --instead <대신 쓸 말> [--exclusions 꼴·꼴] [--allow-zero]",
-  "  --exclude --word <등재된 낱말> --exclusions 꼴·꼴",
-  "  --find <표현>... [--scope <PROMPT|BOTH|DOC>] [--lane <ALWAYS_BANNED|NEEDS_REVIEW>]",
-  "                          새 표현이 기존 행의 낱말·대신 쓸 말과 한쪽이 다른 쪽 속에 든 꼴로 겹치면 그 행과, 표현마다 그 행이",
-  "                          이미 잡는지를 낸다. 이번에 정한 scope·lane을 주면 기존 행이 그만큼 막을 때만 이미 잡음으로 본다",
-  "  --remove --word <등재된 낱말>   그 낱말을 가진 행을 통째로 지운다(지운 행 JSON을 낸다)",
-  "  --check [<목록 json>]   꼴이 어긋난 행을 내고 exit 1",
-  "match: PREFIX = 낱말 앞에 다른 글자가 붙지 않은 자리만 잡는다(뒤의 조사는 함께 잡힌다).",
-  "       SUBSTRING = 앞에 붙어 쓴 꼴까지 문자열이 들어 있으면 잡는다.",
-  "scope: PROMPT = 프롬프트 md, DOC = write-doc 글·커밋 메시지, BOTH = 둘 다. 출신이 아니라 막는 까닭이 어느 글에서 성립하는지로 정한다.",
-  "match·scope·lane 값은 소문자로 줘도 대문자로 저장한다.",
-  "lane: ALWAYS_BANNED = 어떤 쓰임이든 틀린 말, NEEDS_REVIEW = 쓰임에 따라 맞기도 한 말.",
-  "등재·수정 뒤 이 JSON 파일만 지정해 커밋하고, 커밋 메시지 본문에 반려한 사용자 발화를 적는다(목록의 낱말은 커밋 메시지 훅이 막으므로 뜻풀이로 바꿔 적는다).",
-].join("\n");
 
 function loadList(file = LIST_FILE) {
   if (!fs.existsSync(file)) return [];
@@ -357,6 +332,6 @@ function main(args) {
 try {
   main(process.argv.slice(2));
 } catch (error) {
-  console.error(`[금지 표현 목록] ${error.message}\n\n${USAGE}`);
+  console.error(`[금지 표현 목록] ${error.message}\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/blocked-expressions.md`);
   process.exit(1);
 }

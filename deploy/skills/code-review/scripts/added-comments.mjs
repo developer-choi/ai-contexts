@@ -1,3 +1,5 @@
+// 사용법: added-comments.md (같은 폴더)
+//
 // unified diff에서 새로 추가된 주석 후보를 전부 뽑는다.
 //
 // 주석을 놓치면 리뷰가 그 주석을 판정조차 못 하지만, 주석이 아닌 줄을 더 뽑으면 리뷰어가
@@ -6,9 +8,6 @@
 //
 // 추가 줄(+) 중 `//`·`/*`·`*/`·`<!--`·`-->`가 들었거나 `*`로 시작하는 줄이 후보다. `/*`·`<!--`로
 // 열린 블록은 닫힐 때까지 한 행으로 묶는다(가짜 블록 처리는 closeBlock).
-//
-// 사용: git diff <base>...<head> | node added-comments.mjs
-//       node added-comments.mjs <diff 파일>
 import fs from "node:fs";
 
 const CODE_EXT = /\.(?:[cm]?[jt]sx?|s?css|less|vue|svelte)$/;
@@ -20,13 +19,21 @@ const BLOCK_PAIRS = [
 // 뒤 코드 줄을 한 행에 뭉친다.
 const HTML_COMMENT_EXT = /\.(?:vue|svelte)$/;
 
-const input = fs.readFileSync(process.argv[2] ?? 0, "utf8");
+const USAGE_DOC = `${import.meta.dirname.replace(/\\/g, "/")}/added-comments.md`;
+
+let input;
+try {
+  input = fs.readFileSync(process.argv[2] ?? 0, "utf8");
+} catch (error) {
+  console.error(`diff 입력을 읽지 못했다: ${error.message}\n사용법: ${USAGE_DOC}`);
+  process.exit(1);
+}
 const inputLines = input.split(/\r?\n/);
 
 // 앞 명령(git diff 등)이 실패하면 파이프에는 빈 입력만 온다. 「후보 없음」으로 끝내면 리뷰어가
 // 주석이 없다고 판정하므로, diff가 아니면 실패로 끝낸다.
 if (!inputLines.some((raw) => raw.startsWith("diff --git "))) {
-  console.error("diff 입력이 비었다 — diff 명령을 바꿔 다시 돌리지 말고, 받은 명령과 이 오류를 그대로 보고한다");
+  console.error(`diff 입력이 비었다 — diff 명령을 바꿔 다시 돌리지 말고, 받은 명령과 이 오류를 그대로 보고한다\n사용법: ${USAGE_DOC}`);
   process.exit(1);
 }
 

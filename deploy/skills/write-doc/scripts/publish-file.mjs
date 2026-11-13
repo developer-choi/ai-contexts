@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// 사용법: publish-file.md (같은 폴더)
+//
 // 패키지 본문을 발행 파일에 쓴다. 패키지 frontmatter는 떼고, 발행 파일이 원래 가진 frontmatter만 남긴다.
 //
 // 메인이 git 원본과 견줘 손으로 떼면 필드가 하나 더 지워지거나 남아도 아무 데서도 안 걸린다.
@@ -8,8 +10,6 @@
 //     그때는 붙이기 전 커밋을 --base로 준다.
 //   - 다르면 발행 파일이 지금 가진 블록. 파일이 없으면 폴더째 만든다.
 // 남은 `[//]: #` 주석은 보지 않는다 — 마무리 단계의 남은 주석 확인(`score.mjs --residual`)이 모든 발행처에 먼저 돈다.
-//
-// 사용: node publish-file.mjs <패키지.md> <발행 파일> [--base <커밋>]   (두 경로가 같아도 된다)
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -40,7 +40,7 @@ const baseAt = args.indexOf("--base");
 const base = baseAt === -1 ? "HEAD" : args.splice(baseAt, 2)[1];
 const [pkg, dest] = args;
 if (!pkg || !dest || !base) {
-  console.error("사용: node publish-file.mjs <패키지.md> <발행 파일> [--base <커밋>]");
+  console.error(`패키지·발행 파일 경로나 --base 값이 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/publish-file.md`);
   process.exit(1);
 }
 

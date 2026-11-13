@@ -35,7 +35,7 @@ PR과 세션의 관계: 세션은 PR 하나를 맡거나 작업 전체를 맡는
 
 ## 세션 진행
 
-이 스킬 어디서든 `scripts/steps.mjs`는 소스를 읽지 않고 실행한다. 명령·인자는 [scripts/steps.md](scripts/steps.md)를 본다.
+이 스킬 폴더 아래의 `.mjs`는 소스를 읽지 않고 실행한다. 명령·인자는 같은 폴더의 같은 이름 `.md`를 본다(예: [scripts/steps.md](scripts/steps.md)).
 
 ### 시작할 때
 - BG 세션이면 [conventions/session-args.md](conventions/session-args.md)대로 인자를 확정한다

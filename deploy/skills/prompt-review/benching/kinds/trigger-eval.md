@@ -34,7 +34,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 호출
 
-인자 목록은 `--help`가 정본이다. BEFORE/AFTER는 원본을 고치고 배포해 가며 재고, AFTER는 `--baseline`으로 BEFORE 결과를 주고 잰다.
+인자 목록은 [../scripts/bench-trigger.md](../scripts/bench-trigger.md)가 정본이다. BEFORE/AFTER는 원본을 고치고 배포해 가며 재고, AFTER는 `--baseline`으로 BEFORE 결과를 주고 잰다.
 
 벤치 산출물 정리는 [../operations.md](../operations.md)를 따른다.
 
