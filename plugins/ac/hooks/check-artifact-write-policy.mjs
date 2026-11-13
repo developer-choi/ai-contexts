@@ -4,8 +4,9 @@
 //
 // 차단 대상:
 //   - 홈 배포 루트 하위: ~/.claude
-//   - 레포 배포 산출물 세그먼트: .claude/skills, .claude/hooks, .claude/contexts,
-//     .claude/settings.json
+//   - 레포 배포 산출물 세그먼트: .claude/hooks, .claude/contexts, .claude/settings.json
+//
+// 레포의 .claude/skills는 막지 않는다. 각 레포가 커밋한 원본이라 그 자리에서 고친다.
 //
 // 예외: ~/.claude/plans는 plan mode가 계획 파일을 쓰는 자리라 sync 산출물이 아니다.
 //
@@ -14,7 +15,7 @@
 //
 // 경로 트랩: AC 워크트리는 …\ai-contexts\.claude\worktrees\<name>\… 라 'path에 .claude
 // 포함'으로 막으면 워크트리 작업 전체가 막힌다. 그래서 .claude는 바로 다음 세그먼트가
-// skills·hooks이거나 settings.json 파일일 때만 잡는다(.claude\worktrees\…\deploy\… 통과).
+// hooks·contexts이거나 settings.json 파일일 때만 잡는다(.claude\worktrees\…\deploy\… 통과).
 import os from "node:os";
 import path from "node:path";
 import { ask, readPayload } from "./hook-utils.mjs";
@@ -50,7 +51,7 @@ function isArtifact(file) {
     const seg = segs[i];
     if (seg === ".claude") {
       const next = segs[i + 1];
-      if (next === "skills" || next === "hooks" || next === "contexts" || next === "settings.json") return true;
+      if (next === "hooks" || next === "contexts" || next === "settings.json") return true;
     }
   }
   return false;

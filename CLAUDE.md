@@ -1,6 +1,6 @@
 ## 프롬프트 수정 시 규칙 역제안
 
-이 프로젝트의 프롬프트(`deploy/`·`plugins/ac/`·`local/skills/`) 수정 시:
+이 프로젝트의 프롬프트(`deploy/`·`plugins/ac/`·`.claude/skills/`) 수정 시:
 
 1. 패턴성 판단 (동일 요청이 재발할 가능성)
 2. 패턴성이면, 해당 [prompt-standards 문서](plugins/ac/contexts/prompt-standards/)나 prompt-review의 대상별 체크리스트(`plugins/ac/skills/prompt-review/targets/`)에 추가할 규칙을 구체적 문안과 함께 역제안
@@ -37,7 +37,7 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 - `plugins/ac/contexts/` 하위 → 그 영역의 인덱스가 정한 자리에 둔다. 코드 작업 자산의 인덱스는 [`code-map.md`](plugins/ac/contexts/code-map.md), 글쓰기 자산의 인덱스는 [`writing-guide/map.md`](plugins/ac/contexts/writing-guide/map.md)다.
   - 어느 인덱스에도 안 걸리는 자산은 `plugins/ac/contexts/` 바로 아래 단일 파일로 둔다. 인덱스 없는 하위 디렉토리를 새로 만들면 그 안의 문서를 아무도 찾지 못한다.
   - 스킬 SKILL.md의 표에서 출발해 그 디렉토리의 파일에 모두 닿으면 그 표가 인덱스다.
-- 어느 레포에서나 쓸 스킬 → `plugins/ac/skills/`(plugin `ac`), AC 안에서만 쓸 스킬 → `local/skills/`
+- 어느 레포에서나 쓸 스킬 → `plugins/ac/skills/`(plugin `ac`), AC 안에서만 쓸 스킬 → `.claude/skills/`
 
 ## README 관리
 

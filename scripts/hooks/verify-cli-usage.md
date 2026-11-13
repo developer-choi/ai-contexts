@@ -7,7 +7,7 @@
 ## 호출
 
 - `node ~/.ai-contexts/verify-cli-usage.mjs`: 인자 없음. pre-commit 훅이 사용하는 모드라 스테이징된 변경만 본다. 레포 전체를 보려면 폴더 인자를 준다
-- `node ~/.ai-contexts/verify-cli-usage.mjs <폴더|파일>…`: 그 아래 인자 받는 `.mjs`를 본다(`node_modules`·`.git`·`.claude` 제외).
+- `node ~/.ai-contexts/verify-cli-usage.mjs <폴더|파일>…`: 그 아래 인자 받는 `.mjs`를 본다(`node_modules`·`.git`·`.claude` 제외. 커밋된 `.claude/skills`는 본다).
   입력 경로는 cwd 기준이고, 출력하는 파일 경로는 git toplevel 기준이다. AC에서는 `node scripts/hooks/verify-cli-usage.mjs <폴더>…`도 같다
 
 ## 출력·exit code

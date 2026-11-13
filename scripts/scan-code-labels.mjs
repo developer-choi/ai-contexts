@@ -67,6 +67,11 @@ function sampleLine(file, token) {
 function walkMd(dir, out = []) {
   if (!fs.existsSync(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    // .claude 아래는 sync 산출물과 워크트리라 건너뛰되, 레포가 커밋한 스킬(.claude/skills)은 본다.
+    if (e.name === ".claude") {
+      walkMd(path.join(dir, e.name, "skills"), out);
+      continue;
+    }
     if (SKIP_DIRS.has(e.name)) continue;
     const abs = path.join(dir, e.name);
     if (e.isDirectory()) walkMd(abs, out);

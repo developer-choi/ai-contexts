@@ -142,13 +142,18 @@ try {
   uninstallClaudeImports(home, quiet);
   check('import 줄 없는 사용자 CLAUDE.md는 unsync가 지우지 않음', fs.existsSync(path.join(home, 'CLAUDE.md')));
 
-  console.log('로컬 스킬 배포 — 다시 돌리면 아무것도 안 씀');
+  console.log('로컬 자산 배포 — 커밋된 스킬은 건드리지 않고, 다시 돌리면 아무것도 안 씀');
   const repo = path.join(root, 'repo');
   fs.mkdirSync(path.join(repo, '.git'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'skills', 'sample'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'contexts'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'hooks'), { recursive: true });
-  fs.writeFileSync(path.join(repo, 'local', 'skills', 'sample', 'SKILL.md'), '---\ndescription: 설명\n---\n\n# 제목\n');
+  fs.writeFileSync(path.join(repo, 'local', 'skills', 'sample', 'SKILL.md'), '---\ndescription: 남은 옛 원본\n---\n');
+  // 스킬은 레포가 .claude/skills/에 커밋한다. local/skills가 남아 있어도 그것으로 덮어쓰면 안 된다.
+  const committedSkill = path.join(repo, '.claude', 'skills', 'sample', 'SKILL.md');
+  const committedText = '---\ndescription: 설명\n---\n\n# 제목\n';
+  fs.mkdirSync(path.dirname(committedSkill), { recursive: true });
+  fs.writeFileSync(committedSkill, committedText);
   fs.writeFileSync(path.join(repo, 'local', 'contexts', 'a.md'), '# a\n');
   fs.writeFileSync(path.join(repo, 'local', 'hooks', 'h.mjs'), '// hook\n');
   fs.writeFileSync(path.join(repo, 'local', 'base-settings.json'), '{ "hooks": [] }\n');
@@ -167,8 +172,7 @@ try {
     }
   };
   runLocal();
-  check('로컬 스킬이 .claude에 렌더돼 배포됨',
-    /^name: sample$/m.test(fs.readFileSync(path.join(repo, '.claude', 'skills', 'sample', 'SKILL.md'), 'utf8')));
+  check('커밋된 .claude/skills를 local/skills로 덮어쓰지 않음', fs.readFileSync(committedSkill, 'utf8') === committedText);
   check('.agents·AGENTS.md·GEMINI.md를 만들지 않음',
     ['.agents', 'AGENTS.md', 'GEMINI.md'].every((name) => !fs.existsSync(path.join(repo, name))));
   check('로컬 hook이 배포됨', fs.existsSync(path.join(repo, '.claude', 'hooks', 'h.mjs')));
@@ -176,12 +180,10 @@ try {
   runLocal();
   check('모든 파일의 수정 시각이 그대로', changedMtimes(localBefore, snapshotMtimes(repo)).length === 0);
   fs.rmSync(path.join(repo, 'local', 'contexts', 'a.md'));
-  fs.appendFileSync(path.join(repo, 'local', 'skills', 'sample', 'SKILL.md'), '\n추가 줄\n');
   runLocal();
   // 고친 것은 원본(local/)이다 — 배포본 쪽 변화만 센다.
   const localTouched = changedMtimes(localBefore, snapshotMtimes(repo)).filter((rel) => !rel.startsWith(`local${path.sep}`));
-  check('고친 스킬과 지운 contexts만 바뀜', localTouched.length === 2
-    && localTouched.every((rel) => rel.endsWith(path.join('skills', 'sample', 'SKILL.md')) || rel.endsWith(path.join('contexts', 'a.md'))));
+  check('지운 contexts만 바뀜', localTouched.length === 1 && localTouched[0].endsWith(path.join('contexts', 'a.md')));
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

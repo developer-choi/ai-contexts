@@ -1,5 +1,7 @@
 # Claude 배포 산출물·로컬 설정·워크트리 (소스는 local/·deploy/, 트래킹 안 함)
-.claude/
+.claude/*
+# 레포 로컬 스킬은 sync 산출물이 아니라 원본이라 커밋한다
+!.claude/skills/
 .codex/
 .idea
 node_modules

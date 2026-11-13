@@ -37,8 +37,6 @@ const VERIFY_STEPS = [
   { file: path.join(scriptsDir, 'verify', 'verify-hook-policies.mjs') },
   // 목적 없는 스킬이 배포되면 나중에 본문이 목적에서 벗어났는지 판정할 기준이 없다.
   { file: path.join(scriptsDir, 'verify', 'verify-skill-purpose.mjs') },
-  // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
-  { file: path.join(scriptsDir, 'verify', 'verify-skill-render.mjs') },
   // 배포가 바뀌지 않은 파일까지 다시 쓰면, 열려 있던 다른 세션이 그 스킬·문서를 모두 새로 받아 다시 읽는다.
   { file: path.join(scriptsDir, 'verify', 'verify-incremental-deploy.mjs') },
   // 실행 위치에 기대는 스크립트 호출이 배포되면, 그 스킬을 다른 레포에서 부른 순간 엉뚱한 폴더를 뒤진다.

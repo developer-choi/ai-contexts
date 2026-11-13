@@ -57,7 +57,7 @@ function repoSlug(repoRoot) {
   }
 }
 
-// 추적 파일 목록 (node_modules·.claude/.agents 산출물 자동 배제). repo 기준 posix 상대경로.
+// 추적 파일 목록 (node_modules·.claude 아래 sync 산출물은 추적 밖이라 자동 배제, 커밋된 .claude/skills는 포함). repo 기준 posix 상대경로.
 // pathspec 없이 부르면 전체 — 고아 검출은 md를 호명하는 쪽이 json·스크립트일 수 있어 전체가 필요하다.
 function listFiles(repoRoot, ...pathspec) {
   try {

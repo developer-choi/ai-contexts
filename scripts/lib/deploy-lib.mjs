@@ -156,11 +156,6 @@ function importSourceDir() {
   return path.join(mainCheckoutDir(), 'deploy');
 }
 
-// 로컬 스킬의 `{{contexts}}`를 채울 자리. contexts는 plugin `ac` 안에 있고, Claude Code도 그 원본을 읽는다.
-function pluginContextsDir() {
-  return path.join(mainCheckoutDir(), 'plugins', 'ac', 'contexts');
-}
-
 // 홈 아래 경로는 `~/`로 적는다. 기기마다 사용자 이름이 달라도 같은 줄이 된다.
 function importPath(file) {
   const rel = path.relative(os.homedir(), file);
@@ -353,119 +348,8 @@ function listEntries(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name));
 }
 
-// SKILL.md frontmatter에 name이 없으면 폴더명을 주입한 내용을 반환한다.
-// 소스가 name을 빠뜨렸을 때의 안전망이다. 이미 name이 있으면 그대로 둔다(멱등).
-// 원래는 frontmatter name이 있어야 스킬을 인식하던 다른 런타임 때문에 넣었다. Claude는 폴더명으로
-// 잡으므로 지금은 배포본에 name 한 줄을 더할 뿐이고, 걷으면 배포본이 바뀌어 따로 정한다.
-function withSkillName(content, name) {
-  const frontmatter = content.match(/^---\r?\n([\s\S]*?\r?\n)---(\r?\n|$)/);
-  if (!frontmatter) return `---\nname: ${name}\n---\n\n${content}`;
-  if (/^name\s*:/m.test(frontmatter[1])) return content;
-  return `---\n${frontmatter[1]}name: ${name}\n---${frontmatter[2]}${content.slice(frontmatter[0].length)}`;
-}
-
+// 예전 sync가 배포한 스킬 md 맨 앞에 심던 표식. 지금은 남은 옛 사본을 가려내는 데만 쓴다(pluginSkillCopies).
 const ANCHOR_MARK = '<!-- deploy-anchor -->';
-// 앵커는 항상 본문 맨 앞(frontmatter 직후)에만 온다. 위치를 고정하지 않으면 본문이 이 마커를
-// 인용할 때 — 이 메커니즘을 문서화하는 스킬에서 실제로 생긴다 — 그 대목이 조용히 지워진다.
-const ANCHOR_BLOCK = new RegExp(`^${ANCHOR_MARK}\\r?\\n[^\\r\\n]*(?:\\r?\\n)*`);
-
-// 산출물이 배포된 절대 경로를 본문 맨 앞에 심은 내용을 반환한다.
-//
-// 본문의 상대 경로 링크(`../../contexts/x.md`, `specialized/y.md`)를 풀려면 그 파일이 어디
-// 있는지를 알아야 한다. Claude Code는 SKILL.md를 로드할 때 그 경로를 대화에 함께 넣지만,
-// 스킬이 Read로 여는 하위 md에는 그런 안내가 없다. 그래서 배포가 대신 적어둔다 — 배포
-// 시점에는 타겟 경로가 확정돼 있다. SKILL.md에서는 같은 정보가 한 줄 겹칠 뿐이다.
-//
-// SKILL.md만이 아니라 스킬 폴더의 모든 md에 붙인다. 바깥으로 나가는 참조는 오히려 하위
-// 파일에 몰려 있고(`specialized/`·`conventions/` 등), 그쪽이 단계도 더 깊다.
-function withAnchor(content, dir) {
-  const anchor = `${ANCHOR_MARK}\n이 파일은 \`${dir}\`에 있다. 본문의 상대 경로는 이 경로를 기준으로 푼다.`;
-  const frontmatter = content.match(/^---\r?\n[\s\S]*?\r?\n---(\r?\n|$)/);
-  const head = frontmatter ? content.slice(0, frontmatter[0].length) : '';
-  const body = content.slice(head.length).replace(/^\r?\n+/, '').replace(ANCHOR_BLOCK, '');
-  // head가 개행으로 끝나는지는 소스마다 다르므로(frontmatter만 있고 본문이 없는 파일 등)
-  // 잘라낸 뒤 직접 맞춘다. 끝의 개행도 하나로 고정해야 재적용했을 때 같은 결과가 나온다.
-  const prefix = head === '' ? '' : `${head.replace(/\r?\n+$/, '')}\n\n`;
-  return `${prefix}${anchor}\n\n${body}`.replace(/\r?\n*$/, '\n');
-}
-
-// 스킬 본문이 자기 폴더의 스크립트를 실행하라고 할 때 쓰는 자리표시자.
-//
-// 전역 스킬은 어느 레포에서 불릴지 모르는데, `node scripts/foo.mjs`처럼 적으면 그때의 작업
-// 디렉토리가 기준이 돼 엉뚱한 폴더를 뒤진다(2026-08-09 `/backlog` 실패). 맨 앞 앵커가 폴더
-// 경로를 알려주긴 하지만 그건 모델이 읽고 이어붙여 주기를 기대하는 것이고, 여기서 채우면
-// 배포본에 실제 경로가 그대로 박혀 기대할 일이 없어진다. 배포 시점엔 타겟이 확정돼 있다.
-const SKILL_DIR_TOKEN = '{{skill_dir}}';
-
-function withSkillDirPath(content, skillDir) {
-  // 자리표시자 뒤의 `/`까지 함께 바꿔 구분자가 섞이지 않게 한다.
-  return content
-    .split(`${SKILL_DIR_TOKEN}/`).join(`${skillDir}${path.sep}`)
-    .split(SKILL_DIR_TOKEN).join(skillDir);
-}
-
-// 기본값은 스킬이 `<타겟>/skills/<이름>`에 깔릴 때 그 타겟의 contexts(두 단계 위 형제)다.
-// 로컬 스킬은 레포 안(`.claude/skills/`)에 깔리는데 contexts는 레포에 없으므로, 부르는 쪽이
-// plugin `ac`의 contexts(`pluginContextsDir`)를 직접 넘긴다.
-function contextsDirForSkill(skillDir) {
-  return path.resolve(skillDir, '..', '..', 'contexts');
-}
-
-const CONTEXTS_TOKEN = '{{contexts}}';
-
-// 여러 스킬이 함께 쓰는 contexts 스크립트를 부를 때 쓴다. `{{skill_dir}}`은 자기 폴더와 형제 스킬
-// 폴더만 가리킬 수 있어 이 경우를 못 덮는다.
-function withSkillContextsPath(content, contextsDir) {
-  return content
-    .split(`${CONTEXTS_TOKEN}/`).join(`${contextsDir}${path.sep}`)
-    .split(CONTEXTS_TOKEN).join(contextsDir);
-}
-
-// 배포된 SKILL.md의 최종 형태. 소스는 건드리지 않고 산출물만 이 모습이 된다.
-function renderSkillMd(content, skillDir, contextsDir = contextsDirForSkill(skillDir)) {
-  const named = withSkillName(content, path.basename(skillDir));
-  return withSkillContextsPath(withSkillDirPath(withAnchor(named, skillDir), skillDir), contextsDir);
-}
-
-// 스킬 폴더 안의 SKILL.md 아닌 md. 앵커는 자기 디렉토리를 가리키지만 자리표시자는 스킬 루트로
-// 채운다 — 어느 하위 파일에 적든 `{{skill_dir}}/scripts/session-state.mjs`가 같은 곳을 가리키게.
-function renderSkillSubMd(content, fileDir, skillDir, contextsDir = contextsDirForSkill(skillDir)) {
-  return withSkillContextsPath(withSkillDirPath(withAnchor(content, fileDir), skillDir), contextsDir);
-}
-
-// 스킬 폴더 안의 md 중 앵커를 붙이지 않을 것. templates는 사용자 문서로 복사되는 재료라
-// 앵커가 붙으면 그 문서에 그대로 새어 나간다.
-const ANCHOR_EXCLUDED_DIRS = new Set(['templates']);
-
-function anchorExcluded(skillDir, filePath) {
-  return path.relative(skillDir, filePath).split(path.sep).slice(0, -1)
-    .some((segment) => ANCHOR_EXCLUDED_DIRS.has(segment));
-}
-
-// 배포할 skills/ 내용(skills 폴더 기준 상대 경로). 스킬 폴더의 md는 렌더한 결과로 만든다.
-// 최상위의 스킬 폴더가 아닌 파일은 그대로 둔다.
-function skillEntries(srcSkillsDir, targetSkillsDir, contextsFor = contextsDirForSkill) {
-  const entries = new Map();
-  for (const entry of listEntries(srcSkillsDir)) {
-    const src = path.join(srcSkillsDir, entry.name);
-    if (!entry.isDirectory()) {
-      entries.set(entry.name, fs.readFileSync(src));
-      continue;
-    }
-    const skillDir = path.join(targetSkillsDir, entry.name);
-    const contextsDir = contextsFor(skillDir);
-    const rendered = readTreeEntries(src, (rel, buf) => {
-      const file = path.join(skillDir, rel);
-      if (!rel.endsWith('.md') || anchorExcluded(skillDir, file)) return buf;
-      const raw = buf.toString('utf8');
-      return Buffer.from(rel === 'SKILL.md'
-        ? renderSkillMd(raw, skillDir, contextsDir)
-        : renderSkillSubMd(raw, path.dirname(file), skillDir, contextsDir), 'utf8');
-    });
-    for (const [rel, buf] of rendered) entries.set(path.join(entry.name, rel), buf);
-  }
-  return entries;
-}
 
 function collectMarkdown(dir, found = []) {
   if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return found;
@@ -668,16 +552,11 @@ export {
   removeLegacyCategories,
   removePluginSkillCopies,
   pluginSkillCopies,
-  pluginContextsDir,
   pluginSkillsDir,
   acPluginInstalled,
   acPluginEnabled,
-  skillEntries,
   syncTree,
   writeIfChanged,
-  renderSkillMd,
-  renderSkillSubMd,
-  withAnchor,
   removePath,
   unsetWtAddAlias,
   repoDir,

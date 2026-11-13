@@ -4,7 +4,7 @@
 
 ## 인자
 
-- `<레포경로>…` 그 아래 `.md`를 전부 훑는다(`node_modules`·`.git`·`.claude`·`.agents`·`.codex`·`.gemini`·`dist`·`build`·`coverage` 폴더 제외). 없는 경로는 0개로 넘어간다
+- `<레포경로>…` 그 아래 `.md`를 전부 훑는다(`node_modules`·`.git`·`.claude`(커밋된 `.claude/skills`는 훑는다)·`.agents`·`.codex`·`.gemini`·`dist`·`build`·`coverage` 폴더 제외). 없는 경로는 0개로 넘어간다
 - 생략하면 이 레포의 형제 폴더 중 `.git`이 폴더인 레포(워크트리 제외)를 전부 훑는다
 
 ## 출력

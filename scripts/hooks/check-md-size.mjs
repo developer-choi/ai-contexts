@@ -752,7 +752,7 @@ function sectionsReport(t) {
 const DIRECTIVE_RE = /연다|열고|열어|열기|\bRead\b|읽는다|읽고|읽어|읽힌|로드|실행|적용|호출|부른다|불러/;
 // `/스킬명` 호출. 뒤에 `/`가 이어지면 URL·경로 조각이라 뺀다.
 const SKILL_RE = /(?:^|[\s`'"(])\/([a-z][a-z0-9-]*)(?=[`'")\s,.:]|$)/g;
-const SKILL_DIRS = [".claude/skills", "local/skills", "deploy/skills", "plugins/ac/skills"];
+const SKILL_DIRS = [".claude/skills", "deploy/skills", "plugins/ac/skills"];
 
 // AC 전역 스킬은 Claude Code plugin `ac`(directory marketplace)로 설치돼 `~/.claude/skills`에 없다.
 // 등록 정보(known_marketplaces.json)가 가리키는 AC 원본 폴더를 돌려준다. 없으면 null.

@@ -238,11 +238,14 @@ function bashReads(command, cwd) {
 // 홈 아래에 사본이 깔린다. 경로 그대로 키를 잡으면 한 파일의 눈금이 서넛으로 갈려 「열 번 중
 // 여덟 번」이 영영 안 찬다. 그래서 고칠 자리, 곧 **원본의 레포 상대 경로**로 되돌린다.
 const DEPLOYED_ASSET = /\/\.(?:claude|codex|gemini)\/((?:skills|contexts|rules)\/.*)$/;
+// AC 배포본은 홈 아래(`~/.claude` 등)에만 깔린다. 레포 안 `.claude/skills/`는 그 레포가 커밋한 원본이라
+// 아래 레포 상대 경로로 푼다.
+const HOME_PREFIX = `${os.homedir().replaceAll('\\', '/')}/.`.toLowerCase();
 const repoRootCache = new Map();
 
 function sourcePath(file) {
   // 배포 위치의 정본은 AC다(글로벌 규칙 「AI 설정을 고칠 위치」). 고칠 곳을 적어야 회차가 손댄다.
-  const deployed = file.match(DEPLOYED_ASSET);
+  const deployed = file.toLowerCase().startsWith(HOME_PREFIX) ? file.match(DEPLOYED_ASSET) : null;
   // 전역 스킬·contexts는 plugin `ac`가 원본(plugins/ac/)을 그대로 읽어 배포본이 없다. 남은 옛 사본·로컬 배포본 경로도
   // 같은 원본으로 되돌린다. rules만 deploy/가 원본이다.
   if (deployed) return deployed[1].startsWith("rules/") ? `ai-contexts/deploy/${deployed[1]}` : `ai-contexts/plugins/ac/${deployed[1]}`;
@@ -268,7 +271,9 @@ function sourcePath(file) {
   if (!repo || !file.startsWith(`${repo.top}/`)) return file;
   // 워크트리 폴더가 아직 살아 있으면 toplevel이 그쪽을 가리켜 접두사가 안 남지만, 이미 지워졌으면
   // 조상까지 올라오느라 `.claude/worktrees/<브랜치>/`가 상대경로에 남는다. 두 경우를 같게 만든다.
-  const rel = file.slice(repo.top.length + 1).replace(/^\.?(claude\/)?worktrees\/[^/]+\//, '');
+  const rel = file.slice(repo.top.length + 1).replace(/^\.?(claude\/)?worktrees\/[^/]+\//, '')
+    // 레포의 `.claude/contexts/`는 sync가 `local/contexts/`에서 복사한 사본이라 원본 자리로 되돌린다.
+    .replace(/^\.claude\/contexts\//, 'local/contexts/');
   return `${repo.name}/${rel}`;
 }
 
@@ -1038,7 +1043,7 @@ function knownEntryPoints() {
   const dirs = (p) => (fs.existsSync(p) ? fs.readdirSync(p, { withFileTypes: true }).filter((d) => d.isDirectory()) : []);
   for (const group of dirs(projects)) {
     for (const repo of dirs(path.join(projects, group.name))) {
-      walk(path.join(projects, group.name, repo.name, 'local', 'skills'), 2);
+      walk(path.join(projects, group.name, repo.name, '.claude', 'skills'), 2);
     }
   }
   return names;

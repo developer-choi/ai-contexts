@@ -46,7 +46,7 @@ for (let i = 0; i < argv.length; i += 1) {
   if (abbr && rest.length) AT.set(abbr, rest.join('='));
 }
 
-const SKILL = optOf("skill") || join(REPO_ROOT, "local", "skills", "refresh-projects", "SKILL.md");
+const SKILL = optOf("skill") || join(REPO_ROOT, ".claude", "skills", "refresh-projects", "SKILL.md");
 const STATE = optOf("state") || join(homedir(), "WebstormProjects", "main", "backlog", "refresh-projects", "state.json");
 const WORKSPACE = join(homedir(), "WebstormProjects");
 

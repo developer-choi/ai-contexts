@@ -636,8 +636,14 @@ WRITE_CASES.push(
   [
     'check-artifact-write-policy.mjs',
     mdWrite('# 스킬\n', 'C:/repo/.claude/skills/a/SKILL.md'),
+    'pass',
+    '레포의 .claude/skills는 커밋된 원본이다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('{}', 'C:/repo/.claude/settings.json'),
     'ask',
-    '.claude 다음이 skills면 산출물',
+    '레포의 .claude/settings.json은 산출물',
   ],
   [
     'check-artifact-write-policy.mjs',
@@ -2610,7 +2616,7 @@ const responseLanguageCases = async (dir) => {
     '',
     '```bash',
     'git -C C:/x log --oneline -3',
-    'node scripts/refresh-projects-scan.mjs --worktrees --skill local/skills/refresh-projects/SKILL.md',
+    'node scripts/refresh-projects-scan.mjs --worktrees --skill .claude/skills/refresh-projects/SKILL.md',
     '```',
     '',
     '- 두 커밋(`b645c112`, `a2bb98e2`)이 origin/master에 들어갔습니다.',

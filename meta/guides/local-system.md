@@ -1,12 +1,12 @@
 # Local System Sync
 
-전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 스킬**(cross-repo)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
+전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 자산**(cross-repo, contexts 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
 
 ```bash
 npm run sync:local-system
 ```
 
-기본 순회 범위(스킬)는 `~/WebstormProjects/main/`과 `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포입니다. 특정 루트만 지정할 수 있습니다.
+기본 순회 범위(로컬 자산)는 `~/WebstormProjects/main/`과 `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포입니다. 특정 루트만 지정할 수 있습니다.
 
 ```bash
 npm run sync:local-system -- ~/WebstormProjects/main
@@ -18,9 +18,8 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ### 1. 로컬 자산 (cross-repo)
 
-- `local/` 하위 디렉토리(`skills` 등, `hooks` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다.
-- 지우고 다시 쓰지 않습니다. 내용이 다른 파일만 쓰고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 스킬만 새로 뜹니다(1·2 공통).
-- 예외: `skills`의 각 SKILL.md는 배포본 형태로 렌더합니다. frontmatter에 `name`이 없으면 폴더명을 주입하고, 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다.
+- `local/` 하위 디렉토리(`contexts` 등, `hooks`·`skills` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다.
+- 지우고 다시 쓰지 않습니다. 내용이 다른 파일만 쓰고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 파일만 새로 뜹니다(1·2 공통).
 - 원본은 `local/`이며, `.claude/<X>`는 배포 산출물로 봅니다(gitignore).
 
 ### 2. settings/hooks (per-repo)
@@ -39,7 +38,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 npm run unsync:local-system
 ```
 
-- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 스킬도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
+- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 파일도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
 - **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
 
 ## 반복 실행 기준

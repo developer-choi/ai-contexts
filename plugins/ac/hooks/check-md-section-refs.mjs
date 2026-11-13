@@ -637,7 +637,7 @@ function knownCommands(root) {
         if (f.toLowerCase().endsWith(".md")) names.add(f.replace(/\.md$/i, ""));
       }
     }
-    for (const dir of ["skills", ".claude/skills", "local/skills", "deploy/skills", "plugins/ac/skills"]) {
+    for (const dir of ["skills", ".claude/skills", "deploy/skills", "plugins/ac/skills"]) {
       for (const f of listDir(path.join(base, ...dir.split("/")))) names.add(f);
     }
   }

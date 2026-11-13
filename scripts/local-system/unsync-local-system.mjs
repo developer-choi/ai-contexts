@@ -8,7 +8,7 @@ import { repoDir } from '../lib/deploy-lib.mjs';
 import { hasLocalSettings, listLocalRepos, uninstallLocal } from './local-deploy-lib.mjs';
 
 function main() {
-  // 1) 로컬 스킬 (cross-repo).
+  // 1) 로컬 자산 (cross-repo).
   unsyncLocalSkills();
 
   // 2) settings/hooks (per-repo, sync와 동일 대상 집합).

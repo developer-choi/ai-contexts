@@ -1,8 +1,8 @@
 # stop-servers.mjs 사용법
 
-`node <ai-contexts 배포 폴더>/contexts/stop-servers.mjs <list|stop> [<경로>…] [--worktrees] [--port <포트>]…`
+`node <plugins/ac/contexts 폴더>/stop-servers.mjs <list|stop> [<경로>…] [--worktrees] [--port <포트>]…`
 
-스킬 문서에는 `{{contexts}}/stop-servers.mjs`로 적는다. 스크립트에서는 `findServers`·`stopServers`·`withWorktrees`를 import해 사용한다.
+스킬 문서에 이 경로를 적는 꼴은 배포 규약의 [plugin 스킬](../../../meta/deploy-conventions.md#plugin-ac로-옮긴-스킬hookcontexts)·[레포 로컬 스킬](../../../meta/deploy-conventions.md#레포-로컬-스킬-claudeskills-커밋) 절을 따른다. 스크립트에서는 `findServers`·`stopServers`·`withWorktrees`를 import해 사용한다.
 
 ## 대상
 

@@ -1,8 +1,8 @@
 # local-html-roundtrip.mjs 사용법
 
-`node <ai-contexts 배포 폴더>/contexts/local-html-roundtrip.mjs open <마커> <html경로|-> [--slug <슬러그>]`
+`node <plugins/ac/contexts 폴더>/local-html-roundtrip.mjs open <마커> <html경로|-> [--slug <슬러그>]`
 
-스킬 문서에는 `{{contexts}}/local-html-roundtrip.mjs`로 적는다. 배포가 절대경로로 채운다.
+스킬 문서에 이 경로를 적는 꼴은 배포 규약의 [plugin 스킬](../../../meta/deploy-conventions.md#plugin-ac로-옮긴-스킬hookcontexts)·[레포 로컬 스킬](../../../meta/deploy-conventions.md#레포-로컬-스킬-claudeskills-커밋) 절을 따른다.
 
 HTML을 BOM 없는 UTF-8로 임시 폴더에 `<마커>-<슬러그>.html`로 저장하고, Windows 예약작업으로 기본 브라우저에서 연다. 브라우저가 실제로 떴는지까지 확인한다.
 

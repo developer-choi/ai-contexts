@@ -32,7 +32,7 @@ const EXCLUDE = /\/writing-guide\/types\/pr-body\/recruitment\/library\//;
 // backlog 레포의 백로그 데이터. `projects/{repo}/dev-active/rules/` 처럼 경로에 `/rules/`가 들어가
 // 프롬프트 문서로 오인되지만, 여기 적히는 개수는 그날 센 측정값(`V2 적중 40줄 / 26개 파일`)이라
 // 일반화하면 기록 자체가 망가진다. 구조적으로 정탐이 나올 수 없는 자리이므로 들어오지 않게 한다.
-// 같은 레포의 `local/skills/`는 진짜 프롬프트 문서이므로 계속 검사한다.
+// 같은 레포의 `.claude/skills/`는 진짜 프롬프트 문서이므로 계속 검사한다.
 const BACKLOG_REPO = "backlog";
 const BACKLOG_DATA = /^\/(projects|articles|roadmaps|archives|side-income|finance)\//;
 

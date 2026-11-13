@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 로컬 배포(전역 sync:system의 로컬판). 한 명령으로 로컬 산출물 전부를 배포한다:
-//   1) 로컬 자산(스킬 등): 각 레포 local/<X> → .claude/<X>. hooks는 2)가 따로 투영하므로 제외.
+//   1) 로컬 자산(contexts 등): 각 레포 local/<X> → .claude/<X>. hooks는 2)가 따로 투영하므로 제외.
 //   2) settings/hooks: base-settings를 가진 각 레포의 local/ 소스 → 그 레포의 repo-local
 //      .claude/settings.json·.claude/hooks/ (AC + KA 등 per-repo).
 //
@@ -18,18 +18,16 @@ import { hasLocalSettings, listLocalRepos, projectRepoLocalSettings } from './lo
 const VERIFY_STEPS = [
   // 생성 계약이 깨지면 배포 전에 중단(fail-fast).
   { file: path.join(import.meta.dirname, 'verify-local-system.mjs') },
-  // SKILL.md 렌더링이 멱등을 잃으면 매 sync마다 배포본이 달라져 "변경 없음"으로 수렴하지 않는다.
-  { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-render.mjs') },
   // 배포가 바뀌지 않은 파일까지 다시 쓰면, 열려 있던 다른 세션이 그 스킬·문서를 모두 새로 받아 다시 읽는다.
   { file: path.join(import.meta.dirname, '..', 'verify', 'verify-incremental-deploy.mjs') },
-  // 목적 검사는 AC 안에서만 돌고 있었다. 남의 레포 local/skills도 같은 규칙을 받으므로 여기서 함께 본다.
+  // 목적 검사는 AC 안에서만 돌고 있었다. 남의 레포 .claude/skills도 같은 규칙을 받으므로 여기서 함께 본다.
   { file: path.join(import.meta.dirname, '..', 'verify', 'verify-skill-purpose.mjs'), args: ['--local'] },
 ];
 
 async function main() {
   await runVerifications(VERIFY_STEPS, ensureHooksReady);
 
-  // 1) 로컬 스킬 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
+  // 1) 로컬 자산 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
   console.log('');
   syncLocalSkills({ ensureHooks: false });
 
@@ -49,7 +47,7 @@ async function main() {
     for (const f of failures) console.error(`  - ${f}`);
     process.exit(1);
   }
-  console.log('\n로컬 배포 완료 (스킬 + settings/hooks)');
+  console.log('\n로컬 배포 완료 (로컬 자산 + settings/hooks)');
 }
 
 main().catch((error) => {

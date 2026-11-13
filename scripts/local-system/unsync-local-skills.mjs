@@ -43,8 +43,8 @@ function main() {
 }
 
 // 배포 디렉토리 판정은 sync-local-skills.mjs와 같은 제외 집합을 쓴다. hooks는 settings projection이
-// .claude/hooks로 따로 처리하므로 제외.
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks']);
+// .claude/hooks로 따로 처리하므로 제외. skills는 `.claude/skills/`가 커밋된 원본이라 지우면 안 된다.
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills']);
 
 function localDeployDirs(repo) {
   const localDir = path.join(repo, 'local');
@@ -63,7 +63,7 @@ function unsyncRepo(repo) {
     const claudeDir = path.join(repo, '.claude');
 
     // .claude/<X>는 local/<X>에서 배포된 gitignore 산출물이다. 동일성 비교 없이
-    // 카테고리 단위로 통째 제거한다 — 원본에서 사라진 스킬(orphan)도 함께 청소된다. 원본은
+    // 카테고리 단위로 통째 제거한다 — 원본에서 사라진 파일(orphan)도 함께 청소된다. 원본은
     // local/에 남아 re-sync로 복구되므로 사용자 데이터 손실 위험이 없다. (경로 자체가 AC 관리
     // 산출물임을 보장하므로 deploy-conventions의 "AC 관리 여부 확인"을 경로로 충족한다.)
     for (const name of deployDirs) {
@@ -84,7 +84,7 @@ function unsyncRepo(repo) {
 }
 
 function printResults(results) {
-  console.log('로컬 스킬 제거 결과');
+  console.log('로컬 자산 제거 결과');
   console.log('---');
 
   if (results.length === 0) {

@@ -5,8 +5,9 @@
 // 목적이 없으면 "본문이 목적에서 벗어났는가"를 판정할 기준 자체가 없어, 스킬이 조용히 다른 것이 된다.
 // 존재 여부는 결정론적이라 산문 규칙 대신 여기서 잡는다(내용이 적절한지는 사람·리뷰 몫).
 //
-// `--local`로 배포가 닿는 모든 레포까지 보는 까닭: AC만 보면 이 규칙이 AC 안에서만 살아 남의 레포 스킬은 목적 없이 배포된다 — 규칙은 전역인데
+// `--local`로 sync가 훑는 모든 레포까지 보는 까닭: AC만 보면 이 규칙이 AC 안에서만 살아 남의 레포 스킬은 목적 없이 커밋된다 — 규칙은 전역인데
 // 검사만 한 레포였던 것이 구멍이었다.
+import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { listLocalRepos } from '../local-system/local-deploy-lib.mjs';
@@ -14,23 +15,20 @@ import { listLocalRepos } from '../local-system/local-deploy-lib.mjs';
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const HEADING = /^##[ \t]+목적[ \t]*$/m;
 
-function collect(dir, found = []) {
-  if (!fs.existsSync(dir)) return found;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    const full = path.join(dir, entry.name);
-    if (entry.isDirectory()) collect(full, found);
-    else if (entry.name === 'SKILL.md') found.push(full);
-  }
-  return found;
+// git이 추적하는 SKILL.md만 본다. `.claude/skills/`에는 예전 sync가 깔고 원본이 사라진 사본이
+// 무시된 채 남아 있을 수 있는데, 그건 고칠 원본이 없어 검사해도 고칠 길이 없다.
+function collect(repo, dir) {
+  const out = execFileSync('git', ['-C', repo, 'ls-files', '-z', '--', dir], { encoding: 'utf8' });
+  return out.split('\0').filter((file) => path.posix.basename(file) === 'SKILL.md').map((file) => path.join(repo, file));
 }
 
 const local = process.argv.includes('--local');
 const scanned = local
-  ? listLocalRepos().map((repo) => ({ repo, dirs: ['local/skills'] }))
-  : [{ repo: repoRoot, dirs: ['plugins/ac/skills', 'local/skills'] }];
+  ? listLocalRepos().map((repo) => ({ repo, dirs: ['.claude/skills'] }))
+  : [{ repo: repoRoot, dirs: ['plugins/ac/skills', '.claude/skills'] }];
 
 const files = scanned.flatMap(({ repo, dirs }) =>
-  dirs.flatMap((dir) => collect(path.join(repo, dir)).map((file) => ({ repo, file }))),
+  dirs.flatMap((dir) => collect(repo, dir).map((file) => ({ repo, file }))),
 );
 const missing = files.filter(({ file }) => !HEADING.test(fs.readFileSync(file, 'utf8')));
 

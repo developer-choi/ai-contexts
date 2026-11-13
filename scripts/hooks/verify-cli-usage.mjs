@@ -60,6 +60,12 @@ function walk(absolutePath, out) {
     return out;
   }
   for (const entry of fs.readdirSync(absolutePath, { withFileTypes: true })) {
+    // .claude 아래는 sync 산출물과 워크트리라 건너뛰되, 레포가 커밋한 스킬(.claude/skills)은 본다.
+    if (entry.name === '.claude') {
+      const skills = path.join(absolutePath, entry.name, 'skills');
+      if (fs.existsSync(skills)) walk(skills, out);
+      continue;
+    }
     if (SKIP_DIRS.has(entry.name)) continue;
     walk(path.join(absolutePath, entry.name), out);
   }

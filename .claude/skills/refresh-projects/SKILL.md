@@ -17,7 +17,7 @@ description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을
 
 | 약어 | 경로 | Phase 3: Maintain |
 |------|------|-------------------|
-| KA | `~/WebstormProjects/main/knowledge-archive` | validate (`local/skills/validate/SKILL.md`) |
+| KA | `~/WebstormProjects/main/knowledge-archive` | validate (`.claude/skills/validate/SKILL.md`) |
 | AC | `~/WebstormProjects/main/ai-contexts` | — |
 | MP | `~/WebstormProjects/main/monorepo-playground` | — |
 

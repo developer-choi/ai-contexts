@@ -1,6 +1,6 @@
 # refresh-projects-scan.mjs 사용법
 
-`/refresh-projects` 회차의 기계 점검을 낸다. 경로는 ai-contexts 레포 루트 기준이다. 대상 프로젝트와 워크트리 정리 대상은 `local/skills/refresh-projects/SKILL.md`의 표(첫 열 머리가 `약어`인 표, `정리 대상 루트`인 표)에서 읽는다.
+`/refresh-projects` 회차의 기계 점검을 낸다. 경로는 ai-contexts 레포 루트 기준이다. 대상 프로젝트와 워크트리 정리 대상은 `.claude/skills/refresh-projects/SKILL.md`의 표(첫 열 머리가 `약어`인 표, `정리 대상 루트`인 표)에서 읽는다.
 
 ## 회차 점검 (기본 모드)
 
