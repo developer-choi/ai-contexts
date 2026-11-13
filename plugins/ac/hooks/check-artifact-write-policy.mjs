@@ -1,5 +1,5 @@
 // AI 설정 배포 산출물을 Edit/Write로 직접 수정하려 하면 권한 프롬프트(ask)를 띄운다.
-// 수정은 AC 원본(deploy/·local/)에서 하고 sync로 배포해야 하며, 산출물을 직접 고치면
+// 수정은 AC 원본(deploy/·plugins/ac/·local/)에서 하고 sync로 배포해야 하며, 산출물을 직접 고치면
 // 다음 sync에 덮여 사라진다.
 //
 // 차단 대상:
@@ -33,7 +33,7 @@ const filePath =
 
 if (EDIT_TOOLS.has(toolName) && filePath && isArtifact(filePath)) {
   ask(
-    "AI 설정 배포 산출물을 직접 수정하려 합니다. 원본(AC deploy/·local/)에서 고친 뒤 " +
+    "AI 설정 배포 산출물을 직접 수정하려 합니다. 원본(AC deploy/·plugins/ac/·local/)에서 고친 뒤 " +
       "sync로 배포하세요. 테스트 목적 등으로 직접 수정이 필요하면 승인하세요.",
   );
 }

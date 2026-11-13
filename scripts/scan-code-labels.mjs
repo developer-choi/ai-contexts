@@ -12,7 +12,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const HOOK = path.join(HERE, "..", "deploy", "hooks", "check-md-code-labels.mjs");
+const HOOK = path.join(HERE, "..", "plugins", "ac", "hooks", "check-md-code-labels.mjs");
 const SKIP_DIRS = new Set(["node_modules", ".git", ".claude", ".agents", ".codex", ".gemini", "dist", "build", "coverage"]);
 
 const roots = process.argv.slice(2).length ? process.argv.slice(2) : siblingRepos();
@@ -41,7 +41,7 @@ for (const [token, e] of rows) {
 }
 console.log(
   `\n기본은 문서를 고치는 것이다. 여러 문서에서 계속 쓸 실존 용어(V8·S3처럼)로 판명된 것만\n` +
-    `deploy/hooks/check-md-code-labels.mjs의 KNOWN_TERMS에 넣는다 — 한두 번 나오는 토큰은\n` +
+    `plugins/ac/hooks/check-md-code-labels.mjs의 KNOWN_TERMS에 넣는다 — 한두 번 나오는 토큰은\n` +
     `등록 비용이 문서를 고치는 것보다 크다.`,
 );
 

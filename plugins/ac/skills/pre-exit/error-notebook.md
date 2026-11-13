@@ -19,7 +19,7 @@
 채팅에 늘어놓는 대신 질문 하나를 카드 하나로 한 HTML을 만들어 연다.
 
 ```
-node ~/.claude/contexts/local-html-roundtrip.mjs open pre-exit -
+node ${CLAUDE_SKILL_DIR}/../../contexts/local-html-roundtrip.mjs open pre-exit -
 ```
 
 html은 표준입력으로 넘긴다.

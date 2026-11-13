@@ -33,7 +33,7 @@ function isPromptMd(rel, repo) {
   if (!rel.toLowerCase().endsWith(".md")) return false;
   if (rel.startsWith("local/")) return true;
   if (repo === BACKLOG_REPO) return false;
-  return rel.startsWith("deploy/") || /^(CLAUDE|AGENTS|GEMINI)\.md$/i.test(rel);
+  return rel.startsWith("deploy/") || rel.startsWith("plugins/ac/contexts/") || rel.startsWith("plugins/ac/hooks/") || /^(CLAUDE|AGENTS|GEMINI)\.md$/i.test(rel);
 }
 
 function stagedStatus() {

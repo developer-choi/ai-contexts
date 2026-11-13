@@ -9,7 +9,7 @@
 1. 원본을 확인한다. 아래 둘은 원본이 다르다.
    - **마크업 시안 (개인 모드)**: `background/retained/mockup/`과 `background/retained/spec.md`(있으면)가 기획·디자인 원본이다.
    - **기존 코드 (코드 대용)**: `background/retained/code-target.md`가 있으면 그 파일이 적은 기존 구현 코드를 기획·디자인 자료 대신 쓰고, 체크리스트를 코드에 대입해 현재 동작을 역산한다.
-     대상 코드는 메인이 읽지 않고, 리뷰 동안 코드 읽기 팀원(`workflow-code-reader`) 하나에 맡긴다. 이미 떠 있으면 이어 쓴다([team-agent](~/.claude/contexts/team-agent.md#claude-code)).
+     대상 코드는 메인이 읽지 않고, 리뷰 동안 코드 읽기 팀원(`workflow-code-reader`) 하나에 맡긴다. 이미 떠 있으면 이어 쓴다([team-agent](../../../contexts/team-agent.md#claude-code)).
 2. 루프 대상 페이지와 페이지마다 페이지 유형·놓을 체크리스트를 수집된 자료에서 뽑아 사용자에게 확인받는다. 코드 대용이면 팀원에게서 대상 코드의 라우트·화면 목록과, 페이지마다 페이지 유형과 동작 로직·화면 마크업 중 무엇이 있는지를 받아 그것으로 뽑는다. 체크리스트는 아래에서 고른다.
    - 기획 — 화면이 어떻게 동작하나(URL·뒤로가기, 상태 전이, API, 에러·권한): [planning/checklist/](planning/checklist/)
    - 디자인 — 화면이 어떻게 생겼나(크기·줄바꿈, 로딩·빈 상태 화면, 반응형): [design/checklist/](design/checklist/). 컴포넌트 체크리스트는 그 페이지에서 새로 만들 컴포넌트(코드 대용이면 그 페이지의 컴포넌트 전부)에 놓는다.

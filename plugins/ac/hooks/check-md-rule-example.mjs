@@ -23,7 +23,7 @@ const EDIT_TOOLS = new Set(["Edit", "Write"]);
 // 형제 훅과 같은 목록 — 남이 읽지 않는 개인 메모라 예시를 남겨도 손해가 적다.
 const SKIP_REPOS = new Set(["backlog"]);
 
-// 사용자가 승인한 형태는 코드·문장 두 개를 나란히 놓은 짧은 대조다(deploy/contexts/coding-standards).
+// 사용자가 승인한 형태는 코드·문장 두 개를 나란히 놓은 짧은 대조다(plugins/ac/contexts/coding-standards).
 // 사건 서술이 없어 아래 어느 패턴에도 안 걸리므로 경로로 뺄 필요가 없다.
 const PATTERNS = [
   // before/after 쌍. 규칙마다 하나씩 붙어 문서를 덮은 그 형태다.

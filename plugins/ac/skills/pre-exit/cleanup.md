@@ -13,7 +13,7 @@
 
 ## 개발 서버
 
-띄웠으면 끈다 — 셸만 멈추면 npm·node가 포트를 잡고 남으니 `node ~/.claude/contexts/stop-servers.mjs stop --port <포트>`로 끈다.
+띄웠으면 끈다 — 셸만 멈추면 npm·node가 포트를 잡고 남으니 `node ${CLAUDE_SKILL_DIR}/../../contexts/stop-servers.mjs stop --port <포트>`로 끈다.
 
 ## 워크트리
 

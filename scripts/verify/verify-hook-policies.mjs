@@ -21,7 +21,7 @@ import { repoLocalEnvVars } from '../lib/git-env.mjs';
 // process.env를 물려받으므로 시작할 때 한 번이면 된다.
 for (const name of repoLocalEnvVars()) delete process.env[name];
 
-const hooksDir = path.join(import.meta.dirname, '..', '..', 'deploy', 'hooks');
+const hooksDir = path.join(import.meta.dirname, '..', '..', 'plugins', 'ac', 'hooks');
 const hookScriptsDir = path.join(import.meta.dirname, '..', 'hooks');
 
 // 케이스마다 node를 새로 띄우는 검증이라 스폰 개수가 곧 실행시간이다(173건 × 45~105ms ≈ 18초).
@@ -661,7 +661,7 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
-    mdWrite('# 문서\n', 'C:/repo/deploy/contexts/x.md'),
+    mdWrite('# 문서\n', 'C:/repo/plugins/ac/contexts/x.md'),
     'pass',
     '원본 경로는 통과',
   ],
@@ -1030,11 +1030,10 @@ function runHook(file, command, options) {
   return runHookPayload(file, { tool_name: 'Bash', tool_input: { command } }, options);
 }
 
-// settings.json이 전역 훅을 부르는 꼴(settings-projection.mjs hookCommand)과 같게 `node -e "import(...)"`로 띄운다.
-// `node <파일>`로 띄우면 argv[1]이 차서, argv[1]로 직접 실행을 가르는 훅이 실제로는 꺼져 있어도 여기서는 돈다
-// (check-table-render가 그렇게 배포 뒤 한 번도 판정을 안 냈다).
+// plugin ac의 hooks.json이 훅을 부르는 꼴(`node "<파일>"`)과 같게 띄운다. 꼴이 다르면 argv[1]로 직접 실행을 가르는
+// 훅이 실제로는 꺼져 있어도 여기서는 돈다(check-table-render가 그렇게 배포 뒤 한 번도 판정을 안 냈다).
 function hookImportArgs(file) {
-  return ['-e', `import(${JSON.stringify(pathToFileURL(path.join(hooksDir, file)).href)})`];
+  return [path.join(hooksDir, file)];
 }
 
 function runHookPayload(file, payload, { env } = {}) {
@@ -1223,10 +1222,10 @@ async function withFreeRepoFixture(fn) {
         // 프롬프트 md를 더하는 브랜치(prompt-review 줄 요구)와, 그 md가 낱말 검사에 걸리는 브랜치(경고 정리 줄 요구).
         for (const [branch, body] of [['docs-clean', '# 문서\n\n깨끗한 문장이다.\n'], ['docs-warn', '# 문서\n\n대시 — 가 걸린다.\n']]) {
           await runGit(['checkout', '-q', '-b', branch, 'main'], dir);
-          fs.mkdirSync(path.join(dir, 'deploy', 'contexts'), { recursive: true });
-          fs.writeFileSync(path.join(dir, 'deploy', 'contexts', 'probe.md'), body);
-          await runGit(['add', 'deploy/contexts/probe.md'], dir);
-          await runGit([...COMMIT_AS, 'commit', '-q', '-m', `${branch}-probe`, 'deploy/contexts/probe.md'], dir);
+          fs.mkdirSync(path.join(dir, 'plugins', 'ac', 'contexts'), { recursive: true });
+          fs.writeFileSync(path.join(dir, 'plugins', 'ac', 'contexts', 'probe.md'), body);
+          await runGit(['add', 'plugins/ac/contexts/probe.md'], dir);
+          await runGit([...COMMIT_AS, 'commit', '-q', '-m', `${branch}-probe`, 'plugins/ac/contexts/probe.md'], dir);
           await runGit(['checkout', '-q', 'main'], dir);
         }
       }
@@ -1482,7 +1481,7 @@ const freeRepoCases = (repos) => {
     `git -C ${gated} merge docs-clean`,
     'deny',
     '프롬프트 md가 들어가는 머지는 「prompt-review:」 줄이 없으면 그 md 목록과 함께 돌려보낸다',
-    { reasonIncludes: ['prompt-review:', 'deploy/contexts/probe.md'] },
+    { reasonIncludes: ['prompt-review:', 'plugins/ac/contexts/probe.md'] },
   ],
   [
     'check-git-merge-policy.mjs',

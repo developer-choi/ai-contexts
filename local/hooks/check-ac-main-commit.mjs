@@ -5,12 +5,12 @@
 // 있다(2026-10-09). 커밋은 되돌릴 수 있어도 사용자가 그 사이 master를 기준으로 다른 일을 시작하면 엉킨다.
 //
 // 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local `.claude/hooks/`로
-// 배포한다. 배포본의 `../../deploy/hooks`는 같은 레포의 공용 파서를 가리킨다.
+// 배포한다. 배포본의 `../../plugins/ac/hooks`는 같은 레포의 공용 파서를 가리킨다.
 import { execSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { findGitInvocations, invocationCwd } from "../../deploy/hooks/git-command-parser.mjs";
-import { ask, deny, getCommand, getCwd, readPayload } from "../../deploy/hooks/hook-utils.mjs";
+import { findGitInvocations, invocationCwd } from "../../plugins/ac/hooks/git-command-parser.mjs";
+import { ask, deny, getCommand, getCwd, readPayload } from "../../plugins/ac/hooks/hook-utils.mjs";
 
 const REASON_PREFIX = "메인 커밋 사유:";
 const PROTECTED = new Set(["master", "main"]);

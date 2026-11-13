@@ -36,13 +36,13 @@
   - 대괄호 빈칸(`[채울 자리]` 꼴)은 쓰지 않는다.
   - 근거가 애매하면 (나)로 간다.
 
-**사실 점검**: 채운 문장마다 [common.md](~/.claude/contexts/writing-guide/common.md)의 「근거가 있는 사실만 쓴다」를 지키는지 "근거가 어디 있나"로 점검한다.
+**사실 점검**: 채운 문장마다 [common.md](../../../contexts/writing-guide/common.md)의 「근거가 있는 사실만 쓴다」를 지키는지 "근거가 어디 있나"로 점검한다.
 
 - 인용블록(`> `)에 외부 원문을 넣을 때는 1차 소스를 실제로 열어 그 응답에서 문자열을 복사한다. 옛 글에 적힌 인용도 이렇게 다시 대조한다.
 - 옛 글(예전 PR 본문·이전 판 문서 등)을 재료로 쓰면 거기 적힌 사실은 글이 가리키는 시점의 소스(머지 커밋 또는 현재 코드)에서 다시 확인한다.
 - 1인칭 글에 외부 리서치로 얻은 사례를 쓰려면, 저자 확인 전에는 일반화된 표현으로만 쓰거나 그 문장을 빼고 (나)로 묻는다.
 
-**트레이드오프 점검**: 대안을 비교해 하나를 고른 절이 있으면 [tradeoff-guide.md](~/.claude/contexts/writing-guide/tradeoff-guide.md)를 따라 그 선택과 맞바꾼 것을 점검한다.
+**트레이드오프 점검**: 대안을 비교해 하나를 고른 절이 있으면 [tradeoff-guide.md](../../../contexts/writing-guide/tradeoff-guide.md)를 따라 그 선택과 맞바꾼 것을 점검한다.
 
 ### [SAVE_STEP] 5. 패키지 저장
 
@@ -53,7 +53,7 @@
 
 경로가 정해지기 전에는 임시 자리에도 쓰지 않는다 — 지어낸 자리에 썼다가 옮기면 그 자리의 규칙에 걸린다.
 
-받은 경로에 채운 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이후 수정은 이 파일에서 한다. 형식은 [package-format.md](~/.claude/contexts/writing-guide/package-format.md)를 따르고, `key_message`에는 「2. 핵심 문장 합의」에서 합의한 문장을 그대로 옮긴다.
+받은 경로에 채운 본문을 frontmatter + 본문 단일 .md로 저장하고 경로를 안내한다. 이후 수정은 이 파일에서 한다. 형식은 [package-format.md](../../../contexts/writing-guide/package-format.md)를 따르고, `key_message`에는 「2. 핵심 문장 합의」에서 합의한 문장을 그대로 옮긴다.
 
 안내 전에 `node ${CLAUDE_SKILL_DIR}/scripts/score.mjs <패키지>`를 옵션 없이 돌려 적발을 닫는다. 사용자가 처음 읽는 본문에 스크립트가 잡는 표현이 남아 있으면 내용을 보기 전에 표현에 걸려 읽기 힘들다. 다듬기 단계로 미루지 않는다.
 

@@ -71,10 +71,10 @@
 
 | 조건                                                                                                                      | 참고 |
 |-------------------------------------------------------------------------------------------------------------------------|---|
-| 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/`·`plugins/ac/skills/` 하위의 md를 만들거나 고칠 때, 또는 `local/skills/`·AC `deploy/`·`plugins/ac/skills/`의 스킬·규칙이 호출하는 스크립트·json을 고칠 때 | 끝나면 `/prompt-review`로 리뷰한다. 스크립트·json만 고쳤으면 그것을 호출하는 md를 대상으로 넘긴다 |
-| "리뷰어"·"팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시                                                                   | `~/.claude/contexts/team-agent.md` |
-| 브라우저를 열어 산출물을 확인할 때, 또는 "제가 할 수 없으니 직접 하세요"로 작업을 넘기려 할 때(웹 콘솔·대시보드 설정 포함) | `~/.claude/contexts/browser-verification.md` |
-| AI 설정(규칙·스킬·hook·settings)을 고칠 때. 고칠 대상이 배포 위치로 보여 원본을 찾아야 할 때 포함                                                       | `~/.claude/contexts/ai-config-locations.md` |
+| 레포를 가리지 않고 `CLAUDE.md`·`local/skills/`·AC `deploy/`·`plugins/ac/` 하위의 md를 만들거나 고칠 때, 또는 `local/skills/`·AC `deploy/`·`plugins/ac/`의 스킬·규칙이 호출하는 스크립트·json을 고칠 때 | 끝나면 `/prompt-review`로 리뷰한다. 스크립트·json만 고쳤으면 그것을 호출하는 md를 대상으로 넘긴다 |
+| "리뷰어"·"팀 에이전트"·"Agent Teams"·역할 고정·다라운드 소통 요청 시                                                                   | `~/WebstormProjects/main/ai-contexts/plugins/ac/contexts/team-agent.md` |
+| 브라우저를 열어 산출물을 확인할 때, 또는 "제가 할 수 없으니 직접 하세요"로 작업을 넘기려 할 때(웹 콘솔·대시보드 설정 포함) | `~/WebstormProjects/main/ai-contexts/plugins/ac/contexts/browser-verification.md` |
+| AI 설정(규칙·스킬·hook·settings)을 고칠 때. 고칠 대상이 배포 위치로 보여 원본을 찾아야 할 때 포함                                                       | `~/WebstormProjects/main/ai-contexts/plugins/ac/contexts/ai-config-locations.md` |
 
 ## task 키워드는 TaskCreate로
 

@@ -8,7 +8,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
-import { readTreeEntries, resolveUserPath, skillEntries, syncTree } from '../lib/deploy-lib.mjs';
+import { pluginContextsDir, readTreeEntries, resolveUserPath, skillEntries, syncTree } from '../lib/deploy-lib.mjs';
 
 const defaultRoots = [
   path.join(os.homedir(), 'WebstormProjects', 'main'),
@@ -76,8 +76,8 @@ function syncRepo(repo) {
   try {
     const synced = [];
     const claudeDir = path.join(repo, '.claude');
-    // 로컬 스킬이 `{{contexts}}`로 부르는 공용 스크립트는 레포가 아니라 전역 contexts에 산다.
-    const globalContexts = path.join(resolveUserPath('~/.claude'), 'contexts');
+    // 로컬 스킬이 `{{contexts}}`로 부르는 공용 스크립트는 레포가 아니라 plugin `ac`의 contexts에 산다.
+    const contextsDir = pluginContextsDir();
     // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
     let changed = 0;
     for (const name of deployDirs) {
@@ -85,7 +85,7 @@ function syncRepo(repo) {
       const dest = path.join(claudeDir, name);
       // 스킬 md는 렌더해 배포한다(폴더명 name 주입 등 — deploy-lib의 renderSkillMd 참고).
       const entries = name === 'skills'
-        ? skillEntries(source, dest, () => globalContexts)
+        ? skillEntries(source, dest, () => contextsDir)
         : readTreeEntries(source);
       const { written, removed } = syncTree(dest, entries);
       changed += written.length + removed.length;

@@ -5,7 +5,7 @@
       "files": [
         "plugins/ac/skills/write-doc/reviewers/reader.md",
         "plugins/ac/skills/write-doc/scripts/reviewer-input.mjs",
-        "deploy/contexts/writing-guide/common.md"
+        "plugins/ac/contexts/writing-guide/common.md"
       ],
       "note": "reviewer-input.mjs가 reader.md 「리뷰어에게 주는 지시」 절의 > 인용을 긁어 독자 리뷰어 프롬프트로 낸다. 절 이름이나 인용 꼴을 바꾸면 스크립트가 지시를 못 찾아 멈춘다. 지시에 frontmatter 값을 쓰게 바꾸면 스크립트가 그 필드도 넘기게 맞춘다. 지시의 독자(채용담당자)는 common.md 「독자는 채용담당자」의 사본이다 — 리뷰어가 규칙 문서를 못 읽게 막아 두어 사본이 불가피하다. 독자를 바꾸면 지시도 맞춘다."
     },
@@ -24,21 +24,21 @@
       "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅 ↔ 채점기",
       "files": [
         "plugins/ac/skills/write-doc/SKILL.md",
-        "deploy/hooks/writing-package.mjs",
-        "deploy/hooks/check-package-frontmatter.mjs",
+        "plugins/ac/hooks/writing-package.mjs",
+        "plugins/ac/hooks/check-package-frontmatter.mjs",
         "plugins/ac/skills/write-doc/scripts/score.mjs",
         "plugins/ac/skills/write-doc/scripts/publish-file.mjs"
       ],
-      "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅 쪽(패키지 훅들이 함께 쓰는 writing-package.mjs의 PACKAGE_TYPES), 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록과 이모지 금지 type 목록. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 어휘 밖으로 저장이 막힌다(check-package-frontmatter의 looksLikePackage). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type을 더하거나 이름을 바꾸거나 지울 때 함께 맞춘다 — PR·커밋 링크를 근거로 싣는 새 type은 내부 작업이력 면제 목록에 더한다. check-package-frontmatter의 필수 필드(type 밖)를 바꾸면 publish-file.mjs의 PACKAGE_ONLY_FIELDS도 맞춘다 — 커밋된 원본에 패키지 필드가 섞였는지 그 목록으로 가린다."
+      "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅 쪽(패키지 훅들이 함께 쓰는 writing-package.mjs의 PACKAGE_TYPES), 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록과 이모지 금지 type 목록. 훅은 스킬 md를 읽지 않고 사본을 둔다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 어휘 밖으로 저장이 막힌다(check-package-frontmatter의 looksLikePackage). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type을 더하거나 이름을 바꾸거나 지울 때 함께 맞춘다 — PR·커밋 링크를 근거로 싣는 새 type은 내부 작업이력 면제 목록에 더한다. check-package-frontmatter의 필수 필드(type 밖)를 바꾸면 publish-file.mjs의 PACKAGE_ONLY_FIELDS도 맞춘다 — 커밋된 원본에 패키지 필드가 섞였는지 그 목록으로 가린다."
     },
     {
       "name": "짝꿍 glob 해석 — 편집 시점 훅 ↔ 커밋 시점 검사 ↔ 회차 점검",
       "files": [
-        "deploy/hooks/surface-coupling.mjs",
+        "plugins/ac/hooks/surface-coupling.mjs",
         "scripts/hooks/check-coupling-patterns.mjs",
         "scripts/refresh-projects-scan.mjs"
       ],
-      "note": "meta/coupling.json의 files 항목을 glob(*, **, ?)으로 읽는 규칙이 위 파일마다 산다. 서로를 import할 수 없는 자리들이다 — surface-coupling은 ~/.claude/hooks/로 배포돼 나가고, check-coupling-patterns는 ~/.ai-contexts/로 복사돼 나가며, refresh-projects-scan만 AC 안에 남는다. 한쪽만 고치면 편집 시점에는 뜨는 그룹이 커밋 시점 검사나 회차 점검에서 안 뜨거나 그 반대가 되고, 뒤 둘은 앞이 놓친 것을 메우려고 있으므로 그 어긋남은 조용하다. glob 문법 해석을 바꾸면 전부 고친다."
+      "note": "meta/coupling.json의 files 항목을 glob(*, **, ?)으로 읽는 규칙이 위 파일마다 산다. 서로를 import할 수 없는 자리들이다 — check-coupling-patterns는 ~/.ai-contexts/로 복사돼 홀로 돌아 다른 모듈을 import하지 않고, surface-coupling(plugin ac의 hook)과 refresh-projects-scan은 AC 안에 있지만 따로 자랐다. 한쪽만 고치면 편집 시점에는 뜨는 그룹이 커밋 시점 검사나 회차 점검에서 안 뜨거나 그 반대가 되고, 뒤 둘은 앞이 놓친 것을 메우려고 있으므로 그 어긋남은 조용하다. glob 문법 해석을 바꾸면 전부 고친다."
     },
     {
       "name": "refresh-projects 레지스트리 표 ↔ 파서",
@@ -49,14 +49,14 @@
       "note": "스캔이 SKILL.md의 「프로젝트 레지스트리」 표(첫 헤더 `약어`)와 「안 쓰는 워크트리·브랜치 정리」의 루트 표(첫 헤더 `정리 대상 루트`)를 마크다운 그대로 파싱해 대상을 정한다 — 사본을 안 두려고 표를 데이터로 쓴다. 표의 헤더 이름·열 순서를 바꾸면 파서도 함께 고친다. 안 그러면 대상이 목록에서 조용히 빠진다."
     },
     {
-      "name": "settings hook 등록·투영",
+      "name": "hook 등록·투영",
       "files": [
-        "deploy/base-settings.json",
+        "plugins/ac/hooks/hooks.json",
         "scripts/settings/settings-projection.mjs",
         "scripts/settings/verify-settings-projection.mjs",
         "scripts/local-system/verify-local-system.mjs"
       ],
-      "note": "존재 정합(hook 본체 ↔ base 등록)은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: hook을 추가하면 base의 event/on/msg를 정하고, 새 on 토큰을 쓰면 settings-projection의 어댑터 맵을, 등록 구조(매처 fan-out 등)를 바꾸면 verify의 단언을 함께 고친다. settings-projection의 buildHooks·LOCAL_ADAPTERS·localHookCommand는 전역 verify-settings-projection과 로컬 verify-local-system이 함께 소비하므로 투영 export 계약을 바꾸면 두 verify를 같이 맞춘다(생성부 deploy-lib·local-deploy-lib의 buildHooks 오용은 이 verify들이 잡는다)."
+      "note": "전역 hook의 존재 정합(hook 본체 ↔ hooks.json 등록)과 command 꼴은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: 전역 hook을 추가하면 hooks.json의 event·matcher·statusMessage를 정하고, 매처 구조(셸 도구 묶음 등)를 바꾸면 verify-settings-projection의 단언을 함께 고친다. 로컬 hook은 local/base-settings.json의 논리 항목을 settings-projection이 투영한다 — 새 on 토큰을 쓰면 LOCAL_ADAPTERS를, 투영 export 계약(buildHooks·LOCAL_ADAPTERS·localHookCommand)을 바꾸면 소비자인 verify-local-system을 같이 맞춘다."
     },
     {
       "name": "sync:system 동기화·제거·가이드",
@@ -113,16 +113,16 @@
     {
       "name": "coding-standards 탐색 절차 (code-map.md)",
       "files": [
-        "deploy/contexts/code-map.md",
-        "deploy/contexts/coding-standards/**"
+        "plugins/ac/contexts/code-map.md",
+        "plugins/ac/contexts/coding-standards/**"
       ],
       "note": "파일 존재는 code-map.md의 탐색 절차가 Glob으로 찾으므로 목록 관리가 필요 없다(수기 목록·verify 스크립트 없음). 판단이 남는 건 태그뿐: rules·principles 파일을 추가·수정할 때, code-map.md 「태그」 표에 정의된 축(예: file-folder-structure)에 해당하면 그 파일 자신의 frontmatter `tags`에 추가한다. 새 축이 필요하면 code-map.md 「태그」 표에도 정의를 추가한다."
     },
     {
       "name": "writing-guide 로드 목록",
       "files": [
-        "deploy/contexts/writing-guide/map.md",
-        "deploy/contexts/writing-guide/**",
+        "plugins/ac/contexts/writing-guide/map.md",
+        "plugins/ac/contexts/writing-guide/**",
         "plugins/ac/skills/write-doc/scripts/guide-files.mjs",
         "plugins/ac/skills/write-doc/steps/draft.md"
       ],
@@ -131,14 +131,14 @@
     {
       "name": "정책 hook ↔ 판정 회귀 계약",
       "files": [
-        "deploy/hooks/check-git-*.mjs",
-        "deploy/hooks/check-package-frontmatter.mjs",
-        "deploy/hooks/score-writing-package.mjs",
-        "deploy/hooks/check-script-types.mjs",
-        "deploy/hooks/check-deploy-script-policy.mjs",
-        "deploy/hooks/check-shell-policy.mjs",
-        "deploy/hooks/check-pr-attribution-policy.mjs",
-        "deploy/hooks/git-command-parser.mjs",
+        "plugins/ac/hooks/check-git-*.mjs",
+        "plugins/ac/hooks/check-package-frontmatter.mjs",
+        "plugins/ac/hooks/score-writing-package.mjs",
+        "plugins/ac/hooks/check-script-types.mjs",
+        "plugins/ac/hooks/check-deploy-script-policy.mjs",
+        "plugins/ac/hooks/check-shell-policy.mjs",
+        "plugins/ac/hooks/check-pr-attribution-policy.mjs",
+        "plugins/ac/hooks/git-command-parser.mjs",
         "scripts/verify/verify-hook-policies.mjs"
       ],
       "note": "정책 hook은 구멍이 나도 조용하다 — 등록·실행은 정상이고 특정 명령 형태만 검사를 빠져나간다. 그래서 차단·통과 판정을 verify-hook-policies의 케이스 표로 고정한다. hook의 판정 기준을 바꾸거나 새 정책 hook을 추가하면 그 표에 케이스를 함께 넣는다. 명령 해석은 git-command-parser 하나만 쓴다(파일별 정규식 금지 — findGitInvocations·partitionArgs로 git -C·chain·따옴표를 일관되게 처리)."
@@ -165,9 +165,9 @@
       "name": "프로젝트 약어 — 전역 규칙 ↔ 절 인용 훅",
       "files": [
         "deploy/rules/global.md",
-        "deploy/hooks/check-md-section-refs.mjs"
+        "plugins/ac/hooks/check-md-section-refs.mjs"
       ],
-      "note": "레포 약어(AC·KA 등 → 폴더 이름) 목록이 두 곳에 산다 — global.md 「프로젝트 약어」와 훅의 REPO_ALIASES. 훅은 ~/.claude/hooks/로 배포돼 나가 md를 읽을 수 없어 사본이 불가피하다. 약어를 더하고 훅을 안 고치면 그 약어로 다른 레포의 절을 부른 인용(`KA 레포 \\`x.md\\` 「절」`)은 그 절이 지워져도 알림이 안 뜬다 — 엉뚱한 레포로 풀리지는 않아 조용히 빠질 뿐이다."
+      "note": "레포 약어(AC·KA 등 → 폴더 이름) 목록이 두 곳에 산다 — global.md 「프로젝트 약어」와 훅의 REPO_ALIASES. 훅은 md를 읽지 않고 사본을 둔다. 약어를 더하고 훅을 안 고치면 그 약어로 다른 레포의 절을 부른 인용(`KA 레포 \\`x.md\\` 「절」`)은 그 절이 지워져도 알림이 안 뜬다 — 엉뚱한 레포로 풀리지는 않아 조용히 빠질 뿐이다."
     },
     {
       "name": "workflow 세션 인자 규칙 — steps.mjs resolveArgs ↔ 호출 설명·BG 인자 확정",
@@ -206,7 +206,7 @@
     {
       "name": "pr-body 가이드 ↔ 채점기",
       "files": [
-        "deploy/contexts/writing-guide/types/pr-body/guide.md",
+        "plugins/ac/contexts/writing-guide/types/pr-body/guide.md",
         "plugins/ac/skills/write-doc/scripts/score.mjs"
       ],
       "note": "PR 제목의 기계 기준(끝 마침표·conventional commit 접두사·공백 포함 길이 상한)이 두 곳에 산다 — 초안 단계가 제목을 지을 때 읽는 pr-body 가이드 「PR 제목」과, 다듬기 0-루프와 게시 스크립트가 쓰는 score.mjs의 checkTitle(CONVENTIONAL_PREFIX·TITLE_MAX). 가이드는 제목을 짓기 전에 기준을 알아야 해서 숫자를 지울 수 없다. 한쪽만 바꾸면 초안에서 맞춘 제목이 다듬기에서 걸리거나, 기준을 어긴 제목이 그냥 지나간다. 기준을 바꾸면 둘 다 고친다. 가이드 「넣지 않는 것」의 「일반 PR이면」 범위와 항목도 score.mjs internalCounts(채용 PR을 합계에서 빼는 판정)·INTERNAL과 짝이다 — 가이드는 INTERNAL 정규식이 놓치는 꼴이 있는 PR 번호·브랜치명만 적고, 거의 다 잡히는 커밋 해시는 채점기만 본다. 범위나 정규식을 바꾸면 가이드 항목도 맞춘다."

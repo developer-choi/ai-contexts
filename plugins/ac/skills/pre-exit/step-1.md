@@ -27,7 +27,7 @@ node ${CLAUDE_SKILL_DIR}/scripts/session-state.mjs retro-table --session <sessio
 - 내 제안을 사용자가 다르게 고른 것 — 실수가 아니라 선호 신호로 올린다
 - 발화엔 안 나오고 결과로만 드러나는 것 — 내 반박이 확정본에서 뒤집힘, 검수를 통과한 산출물의 반복 반려, 같은 지적의 반복
 - 재작업 — [rework.md](rework.md)
-- 스킬이 데이터를 산문으로 직접 다루게 시킨 자리 — [데이터를 CRUD하는 지시](~/.claude/contexts/rules-as-code.md#데이터를-crud하는-지시-일을-대신한다)
+- 스킬이 데이터를 산문으로 직접 다루게 시킨 자리 — [데이터를 CRUD하는 지시](../../contexts/rules-as-code.md#데이터를-crud하는-지시-일을-대신한다)
 - 읽고 안 쓴 문서 — [read-usage.md](read-usage.md)
 - 걷어낼 규칙 — 문구가 이미 덮는데 어긴 것, 겹치는 규칙, 따랐는데 반려된 것
 

@@ -210,7 +210,7 @@ function verdict(payload) {
   );
 }
 
-// settings.json은 `node -e "import(...)"`로 불러 argv[1]이 비므로 그때도 본체를 돈다.
+// hooks.json은 `node "<이 파일>"`로 부른다. argv[1]이 빈 경우(`node -e "import(...)"`)에도 본체를 돈다.
 // 테스트가 import하면 argv[1]이 러너 스크립트라 돌지 않는다.
 if (!process.argv[1] || import.meta.url === pathToFileURL(process.argv[1]).href) {
   const reason = verdict(readPayload());

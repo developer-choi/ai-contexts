@@ -54,7 +54,7 @@ AI가 작성하는 코드의 양이 늘수록, 사람이 리뷰해야 할 양도
 
 ## 스킬 목록
 
-스킬은 Claude Code plugin `ac`로 설치되고, `/ac:<스킬>`로 호출합니다(설치는 [새 머신 초기화](meta/INSTALLATION_GUIDE.md#새-머신-초기화)).
+스킬은 Claude Code plugin `ac`로 설치되고, `/ac:<스킬>`로 호출합니다(설치는 [새 머신 초기화](meta/INSTALLATION_GUIDE.md#새-머신-초기화)). 정책 hook과 참고 문서(contexts)도 같은 plugin에 들어 있습니다. 공식 기능으로 안 되는 settings(권한·모델·env)와 전역 규칙의 `@` import 줄만 `npm run sync:system`이 만듭니다.
 
 ### 개발 워크플로우
 

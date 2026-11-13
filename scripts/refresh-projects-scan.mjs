@@ -28,7 +28,7 @@ import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, statSync } fr
 import { homedir } from "node:os";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { findServers, stopServers } from "../deploy/contexts/stop-servers.mjs";
+import { findServers, stopServers } from "../plugins/ac/contexts/stop-servers.mjs";
 
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -171,9 +171,8 @@ for (const { abbr, dir } of registry) {
 }
 
 // ── 짝꿍 드리프트 ─────────────────────────────────────────────────────────────
-// 단순 glob(*, **, ?) → 정규식. 같은 규칙을 편집 시점 훅(deploy/hooks/surface-coupling.mjs)도
-// 갖고 있는데, 그쪽은 배포돼 나가는 파일이라 이 스크립트를 import할 수 없다. 두 벌이 갈리지
-// 않게 meta/coupling.json에 짝꿍으로 등록해 뒀다.
+// 단순 glob(*, **, ?) → 정규식. 같은 규칙을 편집 시점 훅(plugins/ac/hooks/surface-coupling.mjs)도
+// 갖고 있다. 두 벌이 갈리지 않게 meta/coupling.json에 짝꿍으로 등록해 뒀다.
 function globToRegExp(glob) {
   let re = "";
   for (let i = 0; i < glob.length; i++) {

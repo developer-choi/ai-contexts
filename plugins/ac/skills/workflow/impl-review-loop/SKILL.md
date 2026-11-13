@@ -9,7 +9,7 @@ description: 구현 대상을 채우고 [정답 대조 + 코딩 스탠다드] �
 
 구현 결과가 정답과 맞는지와 코딩 스탠다드에 맞는지를 지적 0건이 될 때까지 함께 좁힌다.
 
-팀 구성은 [team-agent](~/.claude/contexts/team-agent.md)를 따른다.
+팀 구성은 [team-agent](../../../contexts/team-agent.md)를 따른다.
 
 ## 입력 (호출자가 주입)
 

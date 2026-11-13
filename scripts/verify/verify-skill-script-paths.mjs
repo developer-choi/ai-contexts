@@ -13,17 +13,14 @@ import path from 'node:path';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const SKILL_ROOTS = ['plugins/ac/skills'];
-// contexts·rules도 스킬과 같이 읽힌다. 스킬만 보던 시절 `deploy/contexts/`의
+// contexts·rules도 스킬과 같이 읽힌다. 스킬만 보던 시절 `plugins/ac/contexts/`의
 // 사용법 주석이 `~/.claude/...`를 박아둔 채 남아 있었고, 검사기는 `~`를 앵커로 쳐서 통과시켰다.
-const EXTRA_ROOTS = ['deploy/contexts', 'deploy/rules'];
+const EXTRA_ROOTS = ['plugins/ac/contexts', 'deploy/rules'];
 // 배포 홈을 박은 경로. 자리표시자로 적어야 배포가 실제 위치로 채운다.
 const AGENT_HOME = /^~[\\/]\.claude\b/;
 // rules는 렌더링 없이 `~/.claude/CLAUDE.md`의 import로 원본 그대로 읽혀 자리표시자를 쓸 수 없다.
 // 그래서 배포 홈 경로 검사에서만 뺀다(실행 위치 상대경로 검사는 받는다).
 const NO_PLACEHOLDER_ROOTS = new Set(['deploy/rules']);
-// plugin 스킬은 렌더링을 거치지 않아 `{{contexts}}`를 못 쓴다. contexts가 plugin 안으로 옮겨질
-// 때까지는 sync가 배포한 자리를 홈 기준으로 적는 것만 허용한다.
-const PLUGIN_CONTEXTS = /^~[\\/]\.claude[\\/]contexts[\\/]/;
 // 스킬 루트로 채워지는 앵커. Claude Code가 채운다.
 const SKILL_DIR_ANCHORS = ['${CLAUDE_SKILL_DIR}/'];
 
@@ -67,7 +64,7 @@ for (const root of roots) {
       for (const match of line.matchAll(INVOCATION)) {
         const raw = match[1];
         const where = { file: path.relative(repoRoot, file).replaceAll('\\', '/'), lineNo: index + 1, line: line.trim() };
-        if (AGENT_HOME.test(raw) && !NO_PLACEHOLDER_ROOTS.has(root) && !(isSkillRoot && PLUGIN_CONTEXTS.test(raw))) {
+        if (AGENT_HOME.test(raw) && !NO_PLACEHOLDER_ROOTS.has(root)) {
           agentHome.push(where);
           continue;
         }
@@ -97,7 +94,7 @@ if (unrendered.length > 0) {
   console.error('렌더링되지 않는 곳의 자리표시자:');
   for (const { file, lineNo, line } of unrendered) console.error(`  ${file}:${lineNo}: ${line}`);
   console.error('');
-  console.error('전역 CLAUDE.md·rules는 `@` import로 원본 그대로 읽혀 자리표시자가 채워지지 않는다. contexts는 `~/.claude/contexts/<파일>`로 적는다.');
+  console.error('전역 CLAUDE.md·rules는 `@` import로 원본 그대로 읽혀 자리표시자가 채워지지 않는다. contexts는 그 파일 기준 상대 경로(`../../plugins/ac/contexts/<파일>`)로 적는다.');
 }
 
 if (offenders.length > 0) {
@@ -121,7 +118,7 @@ if (agentHome.length > 0) {
   for (const { file, lineNo, line } of agentHome) console.error(`  ${file}:${lineNo}: ${line}`);
   console.error('');
   console.error('스킬이 깔리는 자리는 `~/.claude/skills/`만이 아니다(레포 로컬 `.claude/`, plugin 설치 폴더).');
-  console.error('스킬은 `${CLAUDE_SKILL_DIR}/<경로>`, contexts는 `~/.claude/contexts/<파일>`로 적는다.');
+  console.error('스킬은 `${CLAUDE_SKILL_DIR}/<경로>`, contexts는 `${CLAUDE_SKILL_DIR}/../../contexts/<파일>`로 적는다.');
 }
 
 if (unrendered.length + offenders.length + missing.length + agentHome.length > 0) process.exit(1);

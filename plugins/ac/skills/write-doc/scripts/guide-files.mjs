@@ -14,15 +14,11 @@
 //
 // 조건부 경로는 판단이 드는 조건(본문에 수치가 있는가 등)이라 고르지 않고 조건과 함께 낸다. 고르는 것은 메인이다.
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { readPackageMeta } from "./package-meta.mjs";
 
-// plugin 루트(plugins/ac) 아래에는 contexts가 없다. contexts가 plugin 안으로 옮겨질 때까지, 이 스크립트가 든 AC
-// 체크아웃의 원본(pre-commit `--check`가 그 브랜치의 writing-guide를 보게)을 먼저 보고, 없으면 sync가 배포한 자리를 읽는다.
-const SOURCE_GUIDE = path.resolve(import.meta.dirname, "..", "..", "..", "..", "..", "deploy", "contexts", "writing-guide");
-const GUIDE = fs.existsSync(SOURCE_GUIDE) ? SOURCE_GUIDE : path.join(os.homedir(), ".claude", "contexts", "writing-guide");
+const GUIDE = path.resolve(import.meta.dirname, "..", "..", "..", "contexts", "writing-guide");
 
 const FOR = ["draft", "polish", "finish", "reviewer"];
 

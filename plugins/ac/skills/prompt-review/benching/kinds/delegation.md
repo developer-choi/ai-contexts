@@ -1,6 +1,6 @@
 # 팀원을 띄우는 스킬 Eval 가이드
 
-skill-creator의 표준 eval은 스킬을 서브에이전트 안에서 돌린다. 서브에이전트만 띄우는 스킬은 그대로 잴 수 있지만, **이름 있는 팀원을 띄우는 스킬**은 그 결과를 받지 못한다 — 서브에이전트가 띄운 팀원의 결과는 메인으로 간다([team-agent](~/.claude/contexts/team-agent.md#claude-code)).
+skill-creator의 표준 eval은 스킬을 서브에이전트 안에서 돌린다. 서브에이전트만 띄우는 스킬은 그대로 잴 수 있지만, **이름 있는 팀원을 띄우는 스킬**은 그 결과를 받지 못한다 — 서브에이전트가 띄운 팀원의 결과는 메인으로 간다([team-agent](../../../../contexts/team-agent.md#claude-code)).
 
 ## 혼합 스킬 분해
 

@@ -1,7 +1,7 @@
 {
   // 타입 검사 전용 — 빌드하지 않는다. Node가 .mts를 타입만 지워 바로 돌린다.
   // .mjs는 checkJs를 켜지 않고 `// @ts-check`를 단 파일만 검사한다 — 전체로 켜면 기존 파일의 오류가 한꺼번에 쏟아진다.
-  // 편집 직후 검사(deploy/hooks/check-script-types.mjs)와 pre-commit이 `tsc -p`로 이 설정을 쓴다.
+  // 편집 직후 검사(plugins/ac/hooks/check-script-types.mjs)와 pre-commit이 `tsc -p`로 이 설정을 쓴다.
   "compilerOptions": {
     "noEmit": true,
     "allowJs": true,

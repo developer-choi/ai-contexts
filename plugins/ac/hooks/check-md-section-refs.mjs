@@ -140,7 +140,7 @@ const PATH_PROSE_REF = new RegExp(
 );
 
 // 산문이 레포를 부르는 약어 → 폴더 이름. [프로젝트 약어](deploy/rules/global.md#프로젝트-약어)의 사본이다 —
-// 배포돼 나가는 훅이라 그 md를 읽을 수 없어 짝꿍(`meta/coupling.json`)으로 묶었다. 이 표가 낡으면
+// 훅이 그 md를 읽지 않아 짝꿍(`meta/coupling.json`)으로 묶었다. 이 표가 낡으면
 // 그 약어로 부른 인용을 **못 볼 뿐** 엉뚱한 레포로 풀지는 않는다 — 재현율만 떨어지고 오탐은 안 생긴다.
 const REPO_ALIASES = {
   ac: "ai-contexts",

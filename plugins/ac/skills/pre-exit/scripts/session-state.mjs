@@ -243,9 +243,9 @@ const repoRootCache = new Map();
 function sourcePath(file) {
   // 배포 위치의 정본은 AC다(글로벌 규칙 「AI 설정을 고칠 위치」). 고칠 곳을 적어야 회차가 손댄다.
   const deployed = file.match(DEPLOYED_ASSET);
-  // 전역 스킬은 plugin `ac`가 원본(plugins/ac/skills)을 그대로 읽어 배포본이 없다. 남은 옛 사본·로컬 배포본 경로도
-  // 같은 원본으로 되돌린다. contexts·rules는 아직 deploy/가 원본이다.
-  if (deployed) return deployed[1].startsWith("skills/") ? `ai-contexts/plugins/ac/${deployed[1]}` : `ai-contexts/deploy/${deployed[1]}`;
+  // 전역 스킬·contexts는 plugin `ac`가 원본(plugins/ac/)을 그대로 읽어 배포본이 없다. 남은 옛 사본·로컬 배포본 경로도
+  // 같은 원본으로 되돌린다. rules만 deploy/가 원본이다.
+  if (deployed) return deployed[1].startsWith("rules/") ? `ai-contexts/deploy/${deployed[1]}` : `ai-contexts/plugins/ac/${deployed[1]}`;
   // 그 회차가 파일을 옮기거나 지웠으면 폴더째 없어져 git 질의가 실패한다 — 남아 있는 가장 가까운
   // 조상에게 묻는다. 레포 소속은 조상이 정하므로 답은 같다.
   let dir = path.dirname(file);

@@ -6,17 +6,16 @@ import { ensureHooksReady } from '../lib/hook-guard.mjs';
 import { runVerifications } from '../lib/verify-runner.mjs';
 
 import {
-  CATEGORIES,
   IMPORTED_ROOT_FILES,
   SOURCE_ONLY_ROOT_FILES,
   claudeSettingsObject,
   comparePaths,
   defaultClaudeDir,
-  deployCategory,
   deployRootFiles,
   removeLegacyCategories,
   removePluginSkillCopies,
   pluginSkillCopies,
+  acPluginEnabled,
   acPluginInstalled,
   ensureDeploySource,
   ensureDir,
@@ -32,7 +31,7 @@ import {
 // mkdtemp 폴더 안에서만 쓰므로, 겹쳐 돌려도 서로 간섭하지 않는다.
 const scriptsDir = path.join(import.meta.dirname, '..');
 const VERIFY_STEPS = [
-  // base-settings.json 생성 계약이 깨지면 배포 전에 중단(fail-fast).
+  // plugin ac의 hook 등록(hooks.json)이나 settings 재료 계약이 깨지면 배포 전에 중단(fail-fast).
   { file: path.join(scriptsDir, 'settings', 'verify-settings-projection.mjs') },
   // 정책 hook은 구멍이 나도 조용하다(등록·실행은 정상, 특정 명령 형태만 통과). 배포 전에 판정을 고정한다.
   { file: path.join(scriptsDir, 'verify', 'verify-hook-policies.mjs') },
@@ -60,11 +59,9 @@ async function main() {
 
   ensureDir(targetDir);
 
-  // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
+  // 내용이 바뀐 파일만 쓴다(이유는 deploy-lib의 writeIfChanged 주석). hook·contexts는 plugin ac가 원본을 읽으므로
+  // 예전 sync가 배포해 둔 사본만 지운다.
   let changed = removeLegacyCategories(targetDir, console.log);
-  for (const category of CATEGORIES) {
-    changed += deployCategory(targetDir, category, console.log);
-  }
   // 전역 스킬은 plugin `ac`가 맡는다. 예전 sync가 배포해 둔 같은 이름의 사본만 지운다.
   changed += removePluginSkillCopies(targetDir, console.log);
   changed += deployRootFiles(targetDir, console.log);
@@ -76,23 +73,18 @@ async function main() {
   console.log('검증 중...');
   const failures = [];
 
-  for (const category of CATEGORIES) {
-    const src = path.join(sourceDir, category);
-    if (!existsDir(src)) continue;
-
-    const target = path.join(targetDir, category);
-    if (!existsDir(target)) {
-      fail(failures, `${category}/ 존재하지 않음`);
-    } else if (comparePaths(src, target)) {
-      console.log(`  PASS  ${category}/`);
-    } else {
-      fail(failures, `${category}/ 내용 불일치`);
-    }
+  // 정책 hook(커밋·쓰기 차단 등)은 plugin ac 안에 있다. 이 기기에서 설치·활성화를 빠뜨리면 아무 신호 없이 꺼진다.
+  const installed = acPluginInstalled(targetDir);
+  const enabled = acPluginEnabled(targetDir);
+  if (installed && enabled) {
+    console.log('  PASS  plugin ac@ac 설치·활성화 (hook·contexts·스킬)');
+  } else {
+    fail(failures, `plugin ac@ac가 ${installed ? '꺼져 있음' : '설치되지 않음'} — 정책 hook·스킬이 동작하지 않는다. meta/INSTALLATION_GUIDE.md의 plugin 등록 명령으로 설치·활성화한 뒤 다시 sync한다`);
   }
 
   const leftCopies = pluginSkillCopies(targetDir);
   if (leftCopies.length > 0) {
-    const why = acPluginInstalled(targetDir) ? '' : ' — plugin ac가 설치되지 않아 두었다(meta/INSTALLATION_GUIDE.md의 plugin 등록 명령)';
+    const why = installed ? '' : ' — plugin ac가 설치되지 않아 두었다(meta/INSTALLATION_GUIDE.md의 plugin 등록 명령)';
     fail(failures, `plugin ac 스킬의 옛 사본이 남음: ${leftCopies.map((name) => `skills/${name}`).join(', ')}${why}`);
   } else {
     console.log('  PASS  skills/ (plugin ac 스킬의 옛 사본 없음)');
@@ -148,10 +140,6 @@ function fail(failures, message) {
 
 function pathExists(target) {
   return fs.existsSync(target);
-}
-
-function existsDir(target) {
-  return fs.existsSync(target) && fs.statSync(target).isDirectory();
 }
 
 main().catch((error) => {

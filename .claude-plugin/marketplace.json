@@ -2,6 +2,6 @@
   "name": "ac",
   "owner": { "name": "developer-choi" },
   "plugins": [
-    { "name": "ac", "source": "./plugins/ac", "description": "ai-contexts 전역 스킬" }
+    { "name": "ac", "source": "./plugins/ac", "description": "ai-contexts 전역 스킬·hook·contexts" }
   ]
 }

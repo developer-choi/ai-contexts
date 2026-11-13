@@ -1,60 +1,12 @@
-// deploy/base-settings.json의 공통 hook 정의를 Claude의 hook 구조로 변환한다.
+// 레포 로컬 local/base-settings.json의 hook 논리 목록(file/event/on/msg)을 그 레포 .claude/settings.json의
+// hook 구조로 변환한다. 어댑터가 on 별칭을 Claude의 도구 matcher로 바꾼다.
 //
-// base.hooks는 논리 목록(file/event/on/msg)이고, 어댑터가 on 별칭을 Claude의 도구
-// matcher로 바꾼다.
-//
-// 비-hook 설정(model·permissions 등)은 base가 아니라 override 파일(deploy/claude-settings.json)에
-// 둔다 (deploy-lib.js가 머지).
+// 전역 hook은 plugin `ac`의 plugins/ac/hooks/hooks.json에 직접 등록하므로 여기를 거치지 않는다.
 
-// matcher() 반환이 undefined면 그 그룹은 matcher 키 없이 출력된다(예: UserPromptSubmit).
-const HOOK_ADAPTERS = {
-  claude: {
-    dir: '.claude',
-    supports: () => true,
-    matcher(event, on) {
-      // Stop은 matcher를 받지 않는 이벤트다(공식 hooks 문서).
-      if (event === 'UserPromptSubmit' || event === 'Stop') return undefined;
-      // PreCompact matcher는 compaction 트리거(manual·auto)로, on이 그 값을 직접 담는다.
-      if (event === 'PreCompact') return on;
-      return {
-        write: 'Write',
-        read: 'Read',
-        edit: ['Edit', 'Write'],
-        bash: 'Bash',
-        // 셸 명령을 실행하는 tool 전부. 정책 훅을 Bash에만 걸면 같은 명령을 PowerShell·
-        // Monitor tool로 돌렸을 때 그대로 통과한다(셋 다 tool_input.command에 명령이 담긴다).
-        shell: ['Bash', 'PowerShell', 'Monitor'],
-        message: 'SendMessage',
-        agent: 'Agent',
-        'agent-spawn': 'Agent',
-        taskstop: 'TaskStop',
-        skill: 'Skill',
-        enterworktree: 'EnterWorktree',
-        search: ['Glob', 'Grep'],
-        // 탐색 + 쓰기 겸용. 별칭 하나로 fan-out한다.
-        'search-edit': ['Glob', 'Grep', 'Edit', 'Write'],
-        // claude-in-chrome 도구 전부. 매처에 '.*'가 있어야 정규식으로 평가된다 — 특수문자가
-        // 없는 'mcp__claude-in-chrome'은 통짜 문자열 비교라 어느 도구와도 안 맞는다(공식 hooks 문서).
-        'browser-track': 'mcp__claude-in-chrome__.*',
-        // 페이지에 쓰는 도구만. computer는 읽기 action도 있어 도구 이름으로는 못 가르므로
-        // action 분기는 훅 안에서 한다. browser_batch는 이 도구들을 담는 그릇이라 같이 건다 —
-        // 빼면 클릭을 배치에 담아 보내는 것만으로 검사가 통째로 비켜간다.
-        'browser-write':
-          'mcp__claude-in-chrome__(computer|form_input|javascript_tool|file_upload|upload_image|shortcuts_execute|browser_batch)',
-      }[on];
-    },
-  },
-};
-
+// matcher가 undefined인 그룹(예: UserPromptSubmit)을 묶을 내부 키. 출력에는 matcher 키 없이 나간다.
 const NO_MATCHER = '\u0000nomatcher';
 
-// 전역판 hook 명령: homedir 절대경로를 file:// URL로 dynamic import.
-// hook이 .mjs(ESM)라 require()로는 못 부른다 — pathToFileURL+import()라야 확장자·OS 무관하게 로드된다.
-function hookCommand(dir, file) {
-  return `node -e "import(require('url').pathToFileURL(require('path').join(require('os').homedir(),'${dir}','hooks','${file}')))"`;
-}
-
-// 로컬판 hook 명령. 전역의 require 형식과 의도적으로 분기한다(산출물이 repo 안에 있음).
+// 로컬판 hook 명령.
 //
 // ${CLAUDE_PROJECT_DIR}(=세션 프로젝트 루트) 치환을 쓴다. 훅은 프로젝트 루트가
 // 아니라 "호출 시점의 cwd"에서 실행되므로(공식 훅 문서), 상대 경로면 워크트리 안에서 워크트리
@@ -64,8 +16,7 @@ function localHookCommand(dir, file) {
   return `node "\${CLAUDE_PROJECT_DIR}/${dir}/hooks/${file}"`;
 }
 
-// 로컬판(repo-local .claude 산출물)용 어댑터. 전역과 메커니즘은 같고 command가
-// repo-relative(localHookCommand)인 것만 다르다.
+// 로컬판(repo-local .claude 산출물)용 어댑터.
 const LOCAL_ADAPTERS = {
   claude: {
     dir: '.claude',
@@ -78,10 +29,10 @@ const LOCAL_ADAPTERS = {
 
 // 논리 hook 목록 → 타겟별 hooks 객체 { event: [ { matcher?, hooks:[...] } ] }
 // base 목록 순서를 보존하고, 같은 (event, matcher)는 한 그룹으로 묶는다.
-// opts로 어댑터·command 생성기를 주입하면 로컬판을 만들 수 있다(미지정 시 전역 동작).
+// opts로 어댑터·command 생성기를 바꿀 수 있다(미지정 시 로컬 어댑터·localHookCommand).
 function buildHooks(logicalHooks, targetName, opts = {}) {
-  const adapters = opts.adapters || HOOK_ADAPTERS;
-  const makeCommand = opts.makeCommand || hookCommand;
+  const adapters = opts.adapters || LOCAL_ADAPTERS;
+  const makeCommand = opts.makeCommand || localHookCommand;
   const adapter = adapters[targetName];
   if (!adapter) throw new Error(`알 수 없는 hook 타겟: ${targetName}`);
 
@@ -120,4 +71,4 @@ function buildHooks(logicalHooks, targetName, opts = {}) {
   return result;
 }
 
-export { HOOK_ADAPTERS, LOCAL_ADAPTERS, buildHooks, hookCommand, localHookCommand };
+export { LOCAL_ADAPTERS, buildHooks, localHookCommand };

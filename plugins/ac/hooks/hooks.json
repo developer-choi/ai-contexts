@@ -1,0 +1,295 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/auto-stage-new-file.mjs\"",
+            "statusMessage": "Auto-staging new file..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell|Monitor",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-worktree-install.mjs\"",
+            "statusMessage": "Installing worktree dependencies..."
+          }
+        ]
+      },
+      {
+        "matcher": "Read",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-skill-creator.mjs\"",
+            "statusMessage": "Checking skill-creator for prompt-review bench..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-sub-file.mjs\"",
+            "statusMessage": "Surfacing paired .sub.md file..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/score-writing-package.mjs\"",
+            "statusMessage": "Scoring writing package..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-script-types.mjs\"",
+            "statusMessage": "Type-checking AC scripts..."
+          }
+        ]
+      },
+      {
+        "matcher": "EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-enterworktree-install.mjs\"",
+            "statusMessage": "Installing worktree dependencies..."
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-subagent-status.mjs\"",
+            "statusMessage": "Starting subagent stall watcher..."
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude-in-chrome__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/record-browser-tab-url.mjs\"",
+            "statusMessage": "Recording browser tab URL..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/hint-browser-disconnect.mjs\"",
+            "statusMessage": "Checking browser connection..."
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-backlog.mjs\"",
+            "statusMessage": "Surfacing related backlog..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-subagent-status.mjs\"",
+            "statusMessage": "Checking background subagent status..."
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Glob|Grep|Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-claude-md.mjs\"",
+            "statusMessage": "Surfacing folder CLAUDE.md..."
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-coupling.mjs\"",
+            "statusMessage": "Surfacing coupled files..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-artifact-write-policy.mjs\"",
+            "statusMessage": "Checking artifact write policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-artifact-tag-policy.mjs\"",
+            "statusMessage": "Checking for stray tool-artifact tags..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-package-frontmatter.mjs\"",
+            "statusMessage": "Checking writing-package frontmatter..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-md-code-labels.mjs\"",
+            "statusMessage": "Checking markdown for invented code labels..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-md-hook-restatement.mjs\"",
+            "statusMessage": "Surfacing rules the hooks already enforce..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-md-rule-as-code.mjs\"",
+            "statusMessage": "Asking whether this rule can be pushed into code..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-md-rule-example.mjs\"",
+            "statusMessage": "Checking for examples attached to rules..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-skill-purpose-section.mjs\"",
+            "statusMessage": "Checking skill purpose section..."
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|PowerShell|Monitor",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-shell-policy.mjs\"",
+            "statusMessage": "Checking shell policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-deploy-script-policy.mjs\"",
+            "statusMessage": "Checking deploy script policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-staging-policy.mjs\"",
+            "statusMessage": "Checking git staging policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-commit-policy.mjs\"",
+            "statusMessage": "Checking git commit policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-md-section-refs.mjs\"",
+            "statusMessage": "Checking markdown section references..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-push-policy.mjs\"",
+            "statusMessage": "Checking git push policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-pr-attribution-policy.mjs\"",
+            "statusMessage": "Checking PR body attribution..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-reset-policy.mjs\"",
+            "statusMessage": "Checking git reset policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-merge-policy.mjs\"",
+            "statusMessage": "Checking git merge policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-worktree-policy.mjs\"",
+            "statusMessage": "Checking worktree location policy..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-ref-slug.mjs\"",
+            "statusMessage": "Checking branch name slug..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-added-comments-caller.mjs\"",
+            "statusMessage": "Checking added-comments caller..."
+          }
+        ]
+      },
+      {
+        "matcher": "EnterWorktree",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-git-ref-slug.mjs\"",
+            "statusMessage": "Checking worktree name slug..."
+          }
+        ]
+      },
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-blind-measure-prompt.mjs\"",
+            "statusMessage": "Checking blind measure prompt..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-company-analysis-agent.mjs\"",
+            "statusMessage": "Checking company-analysis agent call..."
+          }
+        ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-code-review-caller.mjs\"",
+            "statusMessage": "Checking code-review caller..."
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__claude-in-chrome__(computer|form_input|javascript_tool|file_upload|upload_image|shortcuts_execute|browser_batch)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-browser-write-policy.mjs\"",
+            "statusMessage": "Checking browser write policy..."
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-response-language.mjs\"",
+            "statusMessage": "Checking response language..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/check-table-render.mjs\"",
+            "statusMessage": "Checking table rendering..."
+          }
+        ]
+      }
+    ]
+  }
+}

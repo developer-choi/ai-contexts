@@ -84,7 +84,7 @@ function main() {
           "이 도메인에서는 클릭·입력·스크립트 실행 같은 되돌리기 어려운 동작을 하네스가 막습니다. " +
           "화면을 읽고 설명하는 것(screenshot·read_page·get_page_text)은 그대로 됩니다. " +
           "실제 조작은 사용자가 직접 하세요. 이 제한을 풀려면 사용자가 " +
-          "AC deploy/hooks/browser-tab-state.mjs의 BLOCKED_DOMAINS에서 도메인을 빼야 합니다.",
+          "AC plugins/ac/hooks/browser-tab-state.mjs의 BLOCKED_DOMAINS에서 도메인을 빼야 합니다.",
       );
     }
   }

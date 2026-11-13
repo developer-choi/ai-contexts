@@ -40,12 +40,12 @@ sync·unsync 모두 프로필·gitignore·`~/autorun.cmd`·`~/.ai-contexts/`의 
 | `scripts/hooks/check-orphan-md.mjs` | 고아 md 검사 훅 | 스크립트 머리 주석 |
 | `scripts/hooks/check-guide-post-pair.mjs` | 가이드-포스트 짝 검사 훅 | 스크립트 머리 주석 |
 | `scripts/hooks/verify-cli-usage.mjs` | CLI 사용법 짝 md 검사 훅 | [verify-cli-usage.md](../../scripts/hooks/verify-cli-usage.md) |
-| `deploy/hooks/recruitment-commit-guard.mjs` | 채용 레포 커밋 메시지 검사 훅 | 스크립트 머리 주석 |
-| `deploy/hooks/recruitment-commit-guard.mjs` | 채용 레포 staged 변경 검사 훅 | 스크립트 머리 주석 |
+| `plugins/ac/hooks/recruitment-commit-guard.mjs` | 채용 레포 커밋 메시지 검사 훅 | 스크립트 머리 주석 |
+| `plugins/ac/hooks/recruitment-commit-guard.mjs` | 채용 레포 staged 변경 검사 훅 | 스크립트 머리 주석 |
 
 - **낱말 검사 훅**이 읽는 금지 표현 목록 `scripts/hooks/blocked-expressions.json`도 `~/.ai-contexts/`로 복사합니다. 사본이 없으면 금지 표현 범주만 건너뜁니다. 목록 고치는 법은 [사용법](../../scripts/hooks/blocked-expressions.md)에 있습니다.
 - **문서 크기 검사 훅**은 `backlog` 레포가 없는 기기에서는 아무것도 하지 않습니다. 설정 파일 위치는 위 표의 사용법에 있습니다.
-- **채용 레포 커밋 검사 훅** 둘은 `~/WebstormProjects/recruitment/` 아래 레포에서만 돌며 경고가 아니라 **커밋을 막습니다**. 무엇을 막는지는 `deploy/hooks/recruitment-commit-guard.mjs`가 정본입니다.
+- **채용 레포 커밋 검사 훅** 둘은 `~/WebstormProjects/recruitment/` 아래 레포에서만 돌며 경고가 아니라 **커밋을 막습니다**. 무엇을 막는지는 `plugins/ac/hooks/recruitment-commit-guard.mjs`가 정본입니다.
 - PowerShell 7 설치, `core.excludesFile`·`AutoRun` 등록, 전역 검사 훅 등록은 `~/.ai-contexts/environment-state.json`에 기록합니다(`.githooks` 배선은 기록하지 않습니다). sync가 중간에 오류로 멈춰도 그때까지 설치·등록한 것은 기록합니다.
 
 ## 제거

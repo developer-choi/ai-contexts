@@ -2,7 +2,7 @@
 // 사용법: check-md-size.md (같은 폴더)
 //
 // 전역 git pre-commit 훅. 프롬프트·스킬 md가 「무엇을 한 파일로 묶을지는 크기가 정한다」
-// ([바탕 정의](../../deploy/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘었는지
+// ([바탕 정의](../../plugins/ac/contexts/prompt-standards/file-layout.md#바탕-정의))의 선을 넘었는지
 // 커밋마다 전수로 재서 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 //
@@ -156,7 +156,7 @@ function main() {
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
             "사실로 증명된 잘못은 바로 고치고, 나머지 후보는 갈래 가리지 않고 전량 모아 크기와 잃는 것을 함께 낸 뒤 사용자와 정한다.",
-            "판정 기준은 deploy/contexts/prompt-standards/file-layout.md에, 줄일 꼴은 deploy/contexts/prompt-standards/trimming.md, deploy/contexts/prompt-standards/sources-and-links.md(다른 곳과 겹치는 것), deploy/contexts/rules-as-code.md(스크립트·데이터로 옮길 것)에 있다.",
+            "판정 기준은 plugins/ac/contexts/prompt-standards/file-layout.md에, 줄일 꼴은 plugins/ac/contexts/prompt-standards/trimming.md, plugins/ac/contexts/prompt-standards/sources-and-links.md(다른 곳과 겹치는 것), plugins/ac/contexts/rules-as-code.md(스크립트·데이터로 옮길 것)에 있다.",
           ]
         : [
             `기존 초과분을 등재해 조용히 시키려면: node "${path.join(hookHome(), "check-md-size.mjs")}" --write-baseline`,
@@ -671,7 +671,7 @@ function autoLoadNote(top, rel) {
 // --- 세션 적재 재료 --------------------------------------------------------
 //
 // 파일 크기만으로는 그 문서를 따르는 세션이 무엇을 언제까지 짊어지는지 안 보인다
-// ([머무는 시간이 비용이다](../../deploy/contexts/prompt-standards/file-layout.md#한-세션-안에서도-머무는-시간이-비용이다)). 아래 둘은 그 표를 채울 재료만 낸다 —
+// ([머무는 시간이 비용이다](../../plugins/ac/contexts/prompt-standards/file-layout.md#한-세션-안에서도-머무는-시간이-비용이다)). 아래 둘은 그 표를 채울 재료만 낸다 —
 // 어느 절이 어느 시점에 쓰이는지, 링크가 읽으라는 지시인지 참고인지는 사람이 가른다.
 // 링크를 기계로 따라가면 안 읽히는 참고 링크까지 세고, 산문으로만 부르는 두 단계 적재는 놓친다.
 // 둘 다 디스크의 파일을 읽는다 — 옛 커밋을 풀어놓은 폴더에도 돌리려는 것이다.

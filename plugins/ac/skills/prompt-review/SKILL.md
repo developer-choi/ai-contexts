@@ -54,18 +54,17 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 | 리뷰어 | 맡는 기준 | 문서 |
 |---|---|---|
-| BODY | 필요한 것만 짧게 적었나 | [trimming.md](~/.claude/contexts/prompt-standards/trimming.md) |
-| BODY | 코드로 옮길 수 있나 | [rules-as-code.md](~/.claude/contexts/rules-as-code.md) |
-| STRUCTURE | 정본과 참조 | [sources-and-links.md](~/.claude/contexts/prompt-standards/sources-and-links.md) |
-| STRUCTURE | 파일·폴더 나누기, 크기 | [file-layout.md](~/.claude/contexts/prompt-standards/file-layout.md) |
-| AGENT | 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](~/.claude/contexts/prompt-standards/skill-structure.md) |
+| BODY | 필요한 것만 짧게 적었나 | [trimming.md](../../contexts/prompt-standards/trimming.md) |
+| BODY | 코드로 옮길 수 있나 | [rules-as-code.md](../../contexts/rules-as-code.md) |
+| STRUCTURE | 정본과 참조 | [sources-and-links.md](../../contexts/prompt-standards/sources-and-links.md) |
+| STRUCTURE | 파일·폴더 나누기, 크기 | [file-layout.md](../../contexts/prompt-standards/file-layout.md) |
+| AGENT | 에이전트 나누기 (대상이 에이전트를 띄울 때) | [skill-structure.md](../../contexts/prompt-standards/skill-structure.md) |
 | WORKFLOW | workflow 특화 (대상이 workflow 스킬일 때) | [targets/workflow.md](targets/workflow.md) |
-| CODE | 스킬·규칙이 사용하는 코드·데이터의 이름 (대상 md가 호출하는 스크립트·json 중 작업 브랜치에서 바뀐 것이 있을 때. 리뷰어가 직접 선택해 그 파일만 본다) | [naming.md](~/.claude/contexts/coding-standards/rules/personal/naming.md) |
+| CODE | 스킬·규칙이 사용하는 코드·데이터의 이름 (대상 md가 호출하는 스크립트·json 중 작업 브랜치에서 바뀐 것이 있을 때. 리뷰어가 직접 선택해 그 파일만 본다) | [naming.md](../../contexts/coding-standards/rules/personal/naming.md) |
 
 대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 경로를 아래처럼 그 체크아웃 안으로 바꿔 읽는다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
 
 - 상대 경로: 그 체크아웃의 `plugins/ac/skills/prompt-review/` 기준
-- `~/.claude/contexts/`: 그 체크아웃의 `deploy/contexts/`
 - `~/.ai-contexts/<스크립트>`: 그 체크아웃의 `scripts/hooks/<스크립트>`
 
 ## 절차
@@ -76,10 +75,10 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
    - 크기: `node ~/.ai-contexts/check-md-size.mjs --report <대상 경로>`. 잰 값은 STRUCTURE 리뷰어에게 넘긴다.
    - 낱말·긴 줄: `node ~/.ai-contexts/check-wording.mjs --report <대상 경로>`. 걸린 줄은 리뷰어 지적에 추가한다.
 2. 리뷰어를 띄운다.
-   - [기준](#기준) 표에서 조건에 맞는 리뷰어마다 이름 있는 팀원을 하나씩 띄워([team-agent](~/.claude/contexts/team-agent.md#claude-code)) 그 리뷰어가 붙은 행의 기준을 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어 팀원을 하나 더 둔다.
+   - [기준](#기준) 표에서 조건에 맞는 리뷰어마다 이름 있는 팀원을 하나씩 띄워([team-agent](../../contexts/team-agent.md#claude-code)) 그 리뷰어가 붙은 행의 기준을 맡긴다. 규칙에 없는 문제를 보는 자유 리뷰어 팀원을 하나 더 둔다.
    - 리뷰 대상(입력으로 받은 파일·폴더)이 바뀌면 팀원을 모두 끝내고 새로 띄운다. 앞 대상을 본 맥락이 새 대상 판정에 섞이지 않게 하기 위해서다.
-   - 이 절차에서 띄우는 팀원·서브에이전트의 모델은 [에이전트 나누기](~/.claude/contexts/prompt-standards/skill-structure.md#에이전트-설계)대로 선택한다.
-   - BODY는 [how 최소화 원칙](~/.claude/contexts/prompt-standards/trimming.md#how-최소화-원칙)을 적용한 판정을 절마다 표로 결과에 넣는다. 지적이 0건이어도 표가 없으면 다시 맡긴다. 표를 요구하지 않으면 리뷰어가 명령 없는 이 원칙을 건너뛰고 "0건"만 보고한다.
+   - 이 절차에서 띄우는 팀원·서브에이전트의 모델은 [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md#에이전트-설계)대로 선택한다.
+   - BODY는 [how 최소화 원칙](../../contexts/prompt-standards/trimming.md#how-최소화-원칙)을 적용한 판정을 절마다 표로 결과에 넣는다. 지적이 0건이어도 표가 없으면 다시 맡긴다. 표를 요구하지 않으면 리뷰어가 명령 없는 이 원칙을 건너뛰고 "0건"만 보고한다.
    - 회차마다 리뷰어에게 보내는 말에 무엇을 바꿨는지, 어디를 의심하는지, 어디만 볼지는 넣지 않는다. 리뷰어가 그 대목에 쏠려 나머지를 덜 본다.
 3. 지적을 모아 [지적 판단](#지적-판단)대로 처리한다.
 4. 반영하며 사람이 처음 읽어도 바로 이해되게 다듬은 뒤, 기계 검사를 다시 돌리고, 넣지 않기로 했거나 사용자에게 가져갈 지적과 그 근거를 추가해 같은 팀원들에게 다시 리뷰를 맡긴다. 새 지적이 0건이 될 때까지, 최대 10회 돈다.
@@ -98,13 +97,13 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 
 ## 지적 판단
 
-지적은 기본으로 반영하고, 반영해도 되는지 판단이 어려운 것만 사용자에게 가져온다. 고칠 안은 문장을 추가하기 전에 있는 문장을 지우거나 줄여서 풀리는지를 먼저 본다([how 최소화 원칙](~/.claude/contexts/prompt-standards/trimming.md#how-최소화-원칙)). 아래 유형에 해당하면 그 기준을 더 본다.
+지적은 기본으로 반영하고, 반영해도 되는지 판단이 어려운 것만 사용자에게 가져온다. 고칠 안은 문장을 추가하기 전에 있는 문장을 지우거나 줄여서 풀리는지를 먼저 본다([how 최소화 원칙](../../contexts/prompt-standards/trimming.md#how-최소화-원칙)). 아래 유형에 해당하면 그 기준을 더 본다.
 
 | 유형 | 더 볼 기준 |
 |---|---|
 | 문서끼리 어긋남 | 그 문서의 목적에 비춰 어느 쪽을 남길지 정해 맞춘다 |
 | 엣지케이스 보완 | 그 문서가 쓰이는 상황에서 자주 날지, 드물어도 나면 치명적인지 본다 |
-| 코드로 강제 | [rules-as-code](~/.claude/contexts/rules-as-code.md) 기준으로 손익을 따져 합리적이면 넣는다 |
+| 코드로 강제 | [rules-as-code](../../contexts/rules-as-code.md) 기준으로 손익을 따져 합리적이면 넣는다 |
 | 다른 파일과 함께 고칠 것 | 그 파일도 이어서 다룰 예정이면 그 차례로 미룬다 |
 
 ## 후속 작업

@@ -3,37 +3,25 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 
-const CATEGORIES = ['contexts', 'hooks'];
-const LEGACY_CATEGORIES = ['agents'];
-
-import { buildHooks } from '../settings/settings-projection.mjs';
+// 예전 sync가 타겟에 통째로 배포하던 폴더. 지금은 hook·contexts가 plugin `ac` 안(plugins/ac/)에 있어 Claude Code가
+// 원본을 읽으므로, 남아 있으면 지운다. 폴더 전체가 AC 산출물이었다.
+const LEGACY_CATEGORIES = ['agents', 'contexts', 'hooks'];
 
 const repoDir = path.resolve(import.meta.dirname, '..', '..');
 const sourceDir = path.join(repoDir, 'deploy');
-// 전역 스킬은 Claude Code plugin `ac`로 설치된다(meta/deploy-conventions.md 「plugin으로 옮긴 스킬」). sync는 스킬을
+// 전역 스킬은 Claude Code plugin `ac`로 설치된다(meta/deploy-conventions.md 「plugin ac로 옮긴 스킬·hook·contexts」). sync는 스킬을
 // 배포하지 않고, 예전 sync가 `<타겟>/skills/`에 배포해 둔 같은 이름의 사본만 지운다.
 const pluginSkillsDir = path.join(repoDir, 'plugins', 'ac', 'skills');
-const baseSettingsSource = path.join(sourceDir, 'base-settings.json');
-// 직접 복사하지 않고 settings 생성의 재료로만 쓰는 root 파일들.
-// base-settings.json(공통 hook)과 Claude 전용 override(claude-settings.json).
-const SOURCE_ONLY_ROOT_FILES = new Set(['base-settings.json', 'claude-settings.json']);
+const claudeSettingsSource = path.join(sourceDir, 'claude-settings.json');
+// 직접 복사하지 않고 settings.json 생성의 재료로만 쓰는 root 파일.
+const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json']);
 
-// 설정 = base에서 만든 것(hook) + override 파일. override가 우선(키 충돌 시 덮어씀).
-function loadBaseSettings() {
-  if (!fs.existsSync(baseSettingsSource) || !fs.statSync(baseSettingsSource).isFile()) {
-    throw new Error(`base-settings.json을 찾을 수 없습니다: ${baseSettingsSource}`);
-  }
-  return readJson(baseSettingsSource);
-}
-
-// override 파일(없으면 {}). base 재료를 덮어쓰는 설정.
-function loadOverride(name) {
-  const overridePath = path.join(sourceDir, name);
-  return fs.existsSync(overridePath) && fs.statSync(overridePath).isFile() ? readJson(overridePath) : {};
-}
-
+// sync가 settings.json에 합칠 설정(권한·모델·env 등). hook은 plugin `ac`의 hooks.json이 맡는다.
 function claudeSettingsObject() {
-  return { hooks: buildHooks(loadBaseSettings().hooks, 'claude'), ...loadOverride('claude-settings.json') };
+  if (!fs.existsSync(claudeSettingsSource) || !fs.statSync(claudeSettingsSource).isFile()) {
+    throw new Error(`claude-settings.json을 찾을 수 없습니다: ${claudeSettingsSource}`);
+  }
+  return readJson(claudeSettingsSource);
 }
 
 function defaultClaudeDir() {
@@ -60,12 +48,6 @@ function ensureDir(dir) {
 
 function removePath(target) {
   fs.rmSync(target, { recursive: true, force: true });
-}
-
-function copyPath(src, dest) {
-  removePath(dest);
-  ensureDir(path.dirname(dest));
-  fs.cpSync(src, dest, { recursive: true, force: true, errorOnExist: false });
 }
 
 // 배포는 바뀐 파일만 쓴다. 통째로 지우고 다시 쓰면 열려 있던 다른 세션이 바뀌지 않은 스킬까지
@@ -161,12 +143,22 @@ const IMPORTED_ROOT_FILES = new Set(['CLAUDE.md']);
 // AC가 넣은 import 줄. 체크아웃 위치가 달라도 같은 줄로 알아보게 경로 꼬리로 가른다.
 const AC_IMPORT_LINE = /^@\S*\/deploy\/(?:CLAUDE\.md|rules\/\S+\.md)$/;
 
-// import 줄이 가리킬 원본은 본 체크아웃의 `deploy/`다. 워크트리에서 sync해도 워크트리 경로를 박으면,
-// 워크트리를 지우는 순간 전역 규칙이 조용히 사라진다.
-function importSourceDir() {
+// 배포본이 가리킬 원본은 본 체크아웃이다. 워크트리에서 sync해도 워크트리 경로를 박으면,
+// 워크트리를 지우는 순간 가리키던 원본이 조용히 사라진다.
+function mainCheckoutDir() {
   const result = childProcess.spawnSync('git', ['-C', repoDir, 'rev-parse', '--path-format=absolute', '--git-common-dir'], { encoding: 'utf8' });
-  if (result.status !== 0) return sourceDir;
-  return path.join(path.dirname(path.resolve(result.stdout.trim())), 'deploy');
+  if (result.status !== 0) return repoDir;
+  return path.dirname(path.resolve(result.stdout.trim()));
+}
+
+// 전역 CLAUDE.md의 import 줄이 가리킬 원본.
+function importSourceDir() {
+  return path.join(mainCheckoutDir(), 'deploy');
+}
+
+// 로컬 스킬의 `{{contexts}}`를 채울 자리. contexts는 plugin `ac` 안에 있고, Claude Code도 그 원본을 읽는다.
+function pluginContextsDir() {
+  return path.join(mainCheckoutDir(), 'plugins', 'ac', 'contexts');
 }
 
 // 홈 아래 경로는 `~/`로 적는다. 기기마다 사용자 이름이 달라도 같은 줄이 된다.
@@ -412,9 +404,9 @@ function withSkillDirPath(content, skillDir) {
     .split(SKILL_DIR_TOKEN).join(skillDir);
 }
 
-// 전역 스킬은 `<타겟>/skills/<이름>`에 깔리므로 그 타겟의 contexts는 두 단계 위 형제다.
+// 기본값은 스킬이 `<타겟>/skills/<이름>`에 깔릴 때 그 타겟의 contexts(두 단계 위 형제)다.
 // 로컬 스킬은 레포 안(`.claude/skills/`)에 깔리는데 contexts는 레포에 없으므로, 부르는 쪽이
-// 전역 contexts(`~/.claude/contexts`)를 직접 넘긴다.
+// plugin `ac`의 contexts(`pluginContextsDir`)를 직접 넘긴다.
 function contextsDirForSkill(skillDir) {
   return path.resolve(skillDir, '..', '..', 'contexts');
 }
@@ -534,13 +526,6 @@ function deployRootFiles(targetDir, log) {
   return changed;
 }
 
-// contexts·hooks 중 하나를 원본 상태로 맞춘다. 폴더 전체가 AC 소유라 원본에 없는 파일은 지운다.
-function deployCategory(targetDir, category, log, srcRoot = sourceDir) {
-  const src = path.join(srcRoot, category);
-  if (!fs.existsSync(src) || !fs.statSync(src).isDirectory()) return 0;
-  return logTreeChanges(log, `${category}/`, syncTree(path.join(targetDir, category), readTreeEntries(src)));
-}
-
 // 예전 배포에만 있던 카테고리가 남아 있으면 지운다.
 function removeLegacyCategories(targetDir, log) {
   let removed = 0;
@@ -559,6 +544,16 @@ function acPluginInstalled(targetDir) {
   try {
     const installed = readJson(path.join(targetDir, 'plugins', 'installed_plugins.json'));
     return Boolean(installed.plugins?.['ac@ac']?.length);
+  } catch {
+    return false;
+  }
+}
+
+// 설치에 더해 켜져 있는가(`settings.json`의 `enabledPlugins['ac@ac']`). 정책 hook이 plugin 안에 있어, 꺼져 있으면
+// 커밋·쓰기 차단이 아무 신호 없이 멈춘다.
+function acPluginEnabled(targetDir) {
+  try {
+    return readJson(path.join(targetDir, 'settings.json')).enabledPlugins?.['ac@ac'] === true;
   } catch {
     return false;
   }
@@ -602,7 +597,7 @@ function uninstallTarget(targetDir, options = {}) {
   const removeAlias = options.removeAlias ?? true;
   let removed = 0;
 
-  for (const category of [...CATEGORIES, ...LEGACY_CATEGORIES]) {
+  for (const category of LEGACY_CATEGORIES) {
     const target = path.join(targetDir, category);
     if (fs.existsSync(target) && fs.statSync(target).isDirectory()) {
       removePath(target);
@@ -652,19 +647,15 @@ function unsetWtAddAlias(log = console.log) {
 }
 
 export {
-  CATEGORIES,
   IMPORTED_ROOT_FILES,
   SOURCE_ONLY_ROOT_FILES,
-  baseSettingsSource,
   claudeImportLines,
   deployClaudeImports,
   uninstallClaudeImports,
   verifyClaudeImports,
   claudeSettingsObject,
   comparePaths,
-  copyPath,
   defaultClaudeDir,
-  deployCategory,
   deployRootFiles,
   ensureDeploySource,
   ensureDir,
@@ -677,8 +668,10 @@ export {
   removeLegacyCategories,
   removePluginSkillCopies,
   pluginSkillCopies,
+  pluginContextsDir,
   pluginSkillsDir,
   acPluginInstalled,
+  acPluginEnabled,
   skillEntries,
   syncTree,
   writeIfChanged,

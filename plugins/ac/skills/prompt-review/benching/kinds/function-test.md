@@ -17,7 +17,7 @@
 | 역할 | 맡는 쪽 | 책임 |
 |------|------|------|
 | writer | 메인 | assertion 초안 작성. eval setup을 꾸리며 읽은 스킬 맥락을 그대로 쓴다 |
-| critic | 팀원([team-agent](~/.claude/contexts/team-agent.md) 규칙으로 띄운다) | 각 assertion에 아래 「critic 검증 기준」으로 도전. 통과하지 못하면 수정 또는 DROP 요구 |
+| critic | 팀원([team-agent](../../../../contexts/team-agent.md) 규칙으로 띄운다) | 각 assertion에 아래 「critic 검증 기준」으로 도전. 통과하지 못하면 수정 또는 DROP 요구 |
 
 ### critic 검증 기준
 

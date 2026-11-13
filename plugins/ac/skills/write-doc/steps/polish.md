@@ -4,7 +4,7 @@
 
 ## 입력
 
-초안 단계에서 저장한 패키지, 또는 초안 단계에서 건넨 이미 완성된 글. 형식은 [package-format.md](~/.claude/contexts/writing-guide/package-format.md) 참조. 입력 패키지를 제자리에서 Edit한다.
+초안 단계에서 저장한 패키지, 또는 초안 단계에서 건넨 이미 완성된 글. 형식은 [package-format.md](../../../contexts/writing-guide/package-format.md) 참조. 입력 패키지를 제자리에서 Edit한다.
 
 ### 입구 정규화 — 건넨 글에 frontmatter가 없거나 필수 필드가 빠졌을 때
 
@@ -29,7 +29,7 @@
 
 ### [SCAN_STEP] 1. 파악
 
-- 대안을 견줘 하나를 고른 절이 있으면 [tradeoff-guide.md](~/.claude/contexts/writing-guide/tradeoff-guide.md)를 Read한다. 그 선택과 맞바꾼 것이 빠졌으면 채우지 않고 「4. 보고」에서 사용자에게 알리고([저자만 아는 것은 일반론으로 메우지 않는다](~/.claude/contexts/writing-guide/tradeoff-guide.md#저자만-아는-것은-일반론으로-메우지-않는다)), [서술 규칙](~/.claude/contexts/writing-guide/tradeoff-guide.md#서술-규칙) 위반은 다듬기에서 직접 고친다.
+- 대안을 견줘 하나를 고른 절이 있으면 [tradeoff-guide.md](../../../contexts/writing-guide/tradeoff-guide.md)를 Read한다. 그 선택과 맞바꾼 것이 빠졌으면 채우지 않고 「4. 보고」에서 사용자에게 알리고([저자만 아는 것은 일반론으로 메우지 않는다](../../../contexts/writing-guide/tradeoff-guide.md#저자만-아는-것은-일반론으로-메우지-않는다)), [서술 규칙](../../../contexts/writing-guide/tradeoff-guide.md#서술-규칙) 위반은 다듬기에서 직접 고친다.
 
 ### [EDIT_STEP] 2. 직접 다듬기
 
@@ -37,7 +37,7 @@
 
 - 명백한 사실 오류는 「4. 보고」에서 사용자에게 알린다. 표현 리뷰어가 `facts`로 낸 것도 함께 알린다.
 - bullet·섹션·헤딩 개수는 기본 보존한다. 통합·삭제·분할이 필요하면 고치지 않고 「4. 보고」에서 시안과 함께 묻는다.
-- 리뷰어가 물지 않을 구절은 frontmatter `user_phrases`에 적는다([package-format.md](~/.claude/contexts/writing-guide/package-format.md)).
+- 리뷰어가 물지 않을 구절은 frontmatter `user_phrases`에 적는다([package-format.md](../../../contexts/writing-guide/package-format.md)).
 - AI가 쓴 문장을 고쳤으면, 고친 낱말·문구(문장 전체 말고) 중 이 글의 소재와 상관없이 다른 글에서도 되풀이될 것을 앞뒤 글자 그대로 모아 두었다가 「4. 보고」에서 표로 낸다. AI가 쓴 표현이라 다음 글의 초안에도 다시 나온다.
   - 채점기가 잡아 고친 것과 룰에 올라 있어 고친 것은 뺀다.
   - 사용자가 건넨 글·`user_phrases`는 사용자 말투라 모으지 않고, 누가 쓴 문장인지 가려지지 않아도 모으지 않는다.
@@ -47,7 +47,7 @@
 전 절을 다듬은 뒤 본문 전체의 채점 적발을 0으로 닫고 리뷰어 판정을 받는다. 「1. 파악」에서 「4. 보고」로 넘긴 것은 0 닫기에서 뺀다. 채점이 줄지 않거나 리뷰어 상한에 닿으면 남은 것을 「4. 보고」에서 보이고 남길지 묻는다.
 
 - 리뷰어 프롬프트는 `node ${CLAUDE_SKILL_DIR}/scripts/reviewer-input.mjs --from <패키지> --for <expression | reader>`의 출력을 덧붙이는 말 없이 그대로 쓴다.
-- **표현 리뷰어**: [이름 있는 팀원](~/.claude/contexts/team-agent.md) `write-doc-expression`으로 띄운다([reviewers/expression.md](../reviewers/expression.md)). 라운드마다 같은 팀원에게 보낸다.
+- **표현 리뷰어**: [이름 있는 팀원](../../../contexts/team-agent.md) `write-doc-expression`으로 띄운다([reviewers/expression.md](../reviewers/expression.md)). 라운드마다 같은 팀원에게 보낸다.
 - **독자 리뷰어**: `model: sonnet`, name 없이 라운드마다 새로 띄운다([reviewers/reader.md](../reviewers/reader.md)). 앞 라운드를 기억하는 독자는 처음 읽는 독자가 아니다. 추론해야 이해되는 글이면 그 글이 잘못된 것이라 모델을 낮춘다.
 - **라운드**: 한 라운드는 같은 본문을 두 리뷰어에게 함께 보낸다. 표현 `block`이 0이고 독자 반응 중 메인이 고칠 것이 0이면 끝난다. 아니면 고친 뒤 다시 돌린 출력으로 다음 라운드를 돈다. 상한은 3라운드다.
   - `note`는 첫 라운드에 나온 것만 반영한다 — 0이 될 기준이 없다. `note`만 반영해 본문이 바뀐 것으로는 라운드를 더 돌지 않는다.

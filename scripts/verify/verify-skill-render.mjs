@@ -26,7 +26,7 @@ const SOURCES = {
   'contexts 자리표시자 있음': '---\ndescription: 설명\n---\n\n# 제목\n\n`node {{contexts}}/shared.mjs open x`\n',
 };
 
-// 기본값(deploy-lib `contextsDirForSkill`)은 `<타겟>/skills/<이름>`의 두 단계 위 형제 contexts다. 로컬 스킬은 부르는 쪽이 전역 contexts를 넘긴다.
+// 기본값(deploy-lib `contextsDirForSkill`)은 `<타겟>/skills/<이름>`의 두 단계 위 형제 contexts다. 로컬 스킬은 부르는 쪽이 plugin ac의 contexts를 넘긴다.
 const contextsOf = (skillDir) => path.resolve(skillDir, '..', '..', 'contexts');
 
 const anchorCount = (text) => (text.match(/<!-- deploy-anchor -->/g) || []).length;
@@ -93,12 +93,12 @@ check('frontmatter를 만들지 않음', !sub.startsWith('---'));
 check('자리표시자가 스킬 루트로 채워짐', !sub.includes('{{skill_dir}}') && sub.includes(`${CLAUDE_DIR}${path.sep}scripts/x.mjs`));
 
 // 로컬 스킬은 레포 안(`.claude/skills/`)에 깔리는데 공용 스크립트는 레포에 없다. 기본값으로
-// 두면 없는 경로(`<레포>/.claude/contexts`)가 채워지므로, 부르는 쪽이 전역 contexts를 넘긴다.
+// 두면 없는 경로(`<레포>/.claude/contexts`)가 채워지므로, 부르는 쪽이 plugin ac의 contexts를 넘긴다.
 const LOCAL_SKILL_DIR = path.join('C:', 'repo', '.claude', 'skills', 'sample');
-const GLOBAL_CONTEXTS = path.join('C:', 'Users', 'tester', '.claude', 'contexts');
-const local = renderSkillMd(SOURCES['contexts 자리표시자 있음'], LOCAL_SKILL_DIR, GLOBAL_CONTEXTS);
-console.log('로컬 스킬(전역 contexts 명시)');
-check('넘겨준 전역 contexts로 채워짐', local.includes(`${GLOBAL_CONTEXTS}${path.sep}shared.mjs`));
+const PASSED_CONTEXTS = path.join('C:', 'Users', 'tester', '.claude', 'contexts');
+const local = renderSkillMd(SOURCES['contexts 자리표시자 있음'], LOCAL_SKILL_DIR, PASSED_CONTEXTS);
+console.log('로컬 스킬(contexts 명시)');
+check('넘겨준 contexts로 채워짐', local.includes(`${PASSED_CONTEXTS}${path.sep}shared.mjs`));
 check('레포 안 경로로 새지 않음', !local.includes(path.join('C:', 'repo', '.claude', 'contexts')));
 check('앵커는 그대로 자기 위치', anchorLine(local).includes(LOCAL_SKILL_DIR));
 

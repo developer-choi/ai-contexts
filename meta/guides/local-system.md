@@ -56,7 +56,7 @@ npm run unsync:local-system
 npm run verify:local-system
 ```
 
-base-settings를 가진 각 레포(AC + KA 등)에 대해 아래를 검증합니다.
+`local/base-settings.json`을 가진 각 레포(AC + KA 등)에 대해 아래를 검증합니다.
 
 - hooks가 claude에 등록되는지
 - command가 `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`인지

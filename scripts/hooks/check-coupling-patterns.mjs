@@ -3,10 +3,10 @@
 // 하나라도 가리키는지 **패턴 하나하나** 확인해 경고한다(차단하지 않는다).
 // ~/.ai-contexts/에 그대로 복사돼 어느 레포에서든 돌므로 AC의 다른 모듈을 import하지 않는다.
 //
-// 왜 필요한가: 짝꿍을 표면화하는 훅(deploy/hooks/surface-coupling.mjs)은 "편집 중인 파일이
+// 왜 필요한가: 짝꿍을 표면화하는 훅(plugins/ac/hooks/surface-coupling.mjs)은 "편집 중인 파일이
 // 어느 묶음에 드는가"만 본다. 묶음 쪽 패턴이 낡아 아무 파일도 안 가리키게 되면 그 훅에서는
 // 「이 파일은 짝꿍이 아니다」와 똑같은 모양(hits 0건)이 되어, 짝꿍 대조가 통째로 꺼진 상태가
-// 매 편집마다 통과처럼 보인다. `deploy/contexts/rules-as-code-authoring.md` 「대상 0개는 통과가 아니라
+// 매 편집마다 통과처럼 보인다. `plugins/ac/contexts/rules-as-code-authoring.md` 「대상 0개는 통과가 아니라
 // 고장이다」가 세운 규칙을 짝꿍 등록부에 강제하는 쪽이 이 검사다.
 //
 // 언제 도는가: coupling.json을 건드린 커밋만이 아니라 **그 레포의 모든 커밋**에서 돈다.
@@ -34,10 +34,9 @@ const MIN_REASON_LEN = 20;
 const MAX_REPORTS = 20;
 
 // 단순 glob(*, **, ?) → 정규식. **는 / 포함 임의, *는 세그먼트 내 임의, ?는 1자.
-// 같은 규칙을 편집 시점 훅(deploy/hooks/surface-coupling.mjs)과 회차 점검
-// (scripts/refresh-projects-scan.mjs)도 갖고 있다. 서로를 import할 수 없는 자리들이라
-// (이 파일은 ~/.ai-contexts/로 복사돼 나가고, 훅은 배포돼 나간다) meta/coupling.json에
-// 짝꿍으로 등록해 갈리는 것을 막는다.
+// 같은 규칙을 편집 시점 훅(plugins/ac/hooks/surface-coupling.mjs)과 회차 점검
+// (scripts/refresh-projects-scan.mjs)도 갖고 있다. 이 파일은 ~/.ai-contexts/로 복사돼 홀로 돌아
+// 다른 모듈을 import할 수 없으므로 meta/coupling.json에 짝꿍으로 등록해 갈리는 것을 막는다.
 function globToRegExp(glob) {
   let re = "";
   for (let i = 0; i < glob.length; i++) {

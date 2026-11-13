@@ -1,8 +1,7 @@
 // 로컬판 settings/hooks 배포 라이브러리.
 //
-// 전역 배포(deploy/ → ~/.claude)와 **동일한 메커니즘**을 repo-local 산출물
-// (.claude/settings.json·.claude/hooks/)에 적용한다. 소스는 local/(전역 deploy/의
-// 로컬판). settings.json은 통째 덮어쓰지 않고 deploy-lib의 부분키 머지(mergeSettings,
+// local/의 settings 재료와 hook을 repo-local 산출물(.claude/settings.json·.claude/hooks/)로
+// 배포한다. settings.json은 통째 덮어쓰지 않고 deploy-lib의 부분키 머지(mergeSettings,
 // .ac-keys 매니페스트)를 그대로 재사용한다. 분기점은 settings-projection의 LOCAL_ADAPTERS
 // (repo-relative command)뿐이다.
 //

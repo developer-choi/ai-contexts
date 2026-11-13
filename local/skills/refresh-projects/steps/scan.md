@@ -38,4 +38,4 @@ diff와 무관하게 매 회차, 레지스트리 레포 전체를 대상으로 A
 
 Phase 1에서 "변경 있음"으로 확인된 프로젝트의 Phase 3~4 계획을, Phase 1이 Phase 2로 넘긴 후보와 함께 제출한다. 사용자가 조정·승인하면 Phase 3으로 진행한다.
 
-- **README 규칙 변경 감지**: 변경 범위에 `deploy/contexts/writing-guide/`(README 작성 규칙·톤)가 포함되면, 그 규칙이 적용되는 README들이 일괄로 낡았을 수 있다. 상위 경로가 바뀐 README뿐 아니라 규칙 적용 대상 README도 Phase 4-readme 후보로 계획에 올려 scope를 정한다.
+- **README 규칙 변경 감지**: 변경 범위에 `plugins/ac/contexts/writing-guide/`(README 작성 규칙·톤)가 포함되면, 그 규칙이 적용되는 README들이 일괄로 낡았을 수 있다. 상위 경로가 바뀐 README뿐 아니라 규칙 적용 대상 README도 Phase 4-readme 후보로 계획에 올려 scope를 정한다.

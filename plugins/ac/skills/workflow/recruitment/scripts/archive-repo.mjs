@@ -20,13 +20,8 @@
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import os from 'node:os';
-import { fileURLToPath, pathToFileURL } from 'node:url';
-
-// plugin 루트(plugins/ac) 아래에는 contexts가 없다. contexts가 plugin 안으로 옮겨질 때까지 sync가 배포한 자리를 읽는다.
-const { stopServers, withWorktrees } = await import(
-  pathToFileURL(path.join(os.homedir(), '.claude', 'contexts', 'stop-servers.mjs')).href
-);
+import { fileURLToPath } from 'node:url';
+import { stopServers, withWorktrees } from '../../../../contexts/stop-servers.mjs';
 
 // git이 추적하지 않는 재생성 가능 폴더. 추적되는 같은 이름 폴더는 제출물이라 복사한다.
 const REGENERABLE = new Set(['node_modules', '.next', 'dist', 'build', 'out', '.turbo', '.vite', 'coverage']);

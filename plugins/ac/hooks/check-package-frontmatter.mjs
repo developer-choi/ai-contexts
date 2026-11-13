@@ -1,6 +1,6 @@
 // 글쓰기 패키지(frontmatter + 본문 단일 .md)를 저장할 때 필수 필드가 비어 있으면 막는다.
 //
-// 필수 필드 규정은 deploy/contexts/writing-guide/package-format.md에 있었으나 강제 장치가
+// 필수 필드 규정은 plugins/ac/contexts/writing-guide/package-format.md에 있었으나 강제 장치가
 // 프롬프트 지시뿐이었다 — 다듬기 입구의 지시는 (1) 다듬기에 들어가야만 발동하고
 // (2) 실행 AI가 우회할 수 있다(2026-07-25 KA digest 호출에서 실제 우회). 저장 시점 기계
 // 검사가 그 지연·우회를 함께 없앤다.
@@ -33,7 +33,7 @@ if (EDIT_TOOLS.has(getToolName(payload))) {
         deny(
           `글쓰기 패키지(type: ${fields.type})인데 필수 frontmatter 필드가 비어 있습니다: ${missing.join(", ")}. ` +
             `값을 채운 뒤 다시 저장하세요 — 이 필드들은 다음 세션의 write-doc이 대화 기억 없이 출발하는 유일한 단서입니다. ` +
-            `필드 의미는 deploy/contexts/writing-guide/package-format.md 참조.`,
+            `필드 의미는 plugins/ac/contexts/writing-guide/package-format.md 참조.`,
         );
       }
     } else if (fields && looksLikePackage(fields)) {

@@ -4,27 +4,27 @@ AC의 배포 시스템을 수정·추가할 때 따르는 규칙.
 
 ## 목적: 어느 레포·기기에서도 동일하게 동작
 
-이 배포 시스템의 목적은 원본(`deploy/`·`plugins/ac/`·각 레포 `local/`)을 Claude Code가 읽는 자리에 투영해, 어느 레포·기기에서 작업해도 같은 규칙·스킬·hook이 동작하게 만드는 것이다.
+이 배포 시스템의 목적은 원본(`deploy/`·`plugins/ac/`·각 레포 `local/`)을 Claude Code가 읽게 해, 어느 레포·기기에서 작업해도 같은 규칙·스킬·hook이 동작하게 만드는 것이다.
+공식 기능(plugin·`@` import)으로 원본을 그대로 읽게 할 수 있으면 그쪽을 사용하고, sync는 공식 기능이 받지 못하는 것(settings.json 생성, 레포 로컬 자산)만 만든다.
 
-- **자산마다 원본은 하나만 둔다.** 전역 자산은 `deploy/`(스킬은 `plugins/ac/skills/`), 레포 로컬 자산은 그 레포의 `local/`에 두고, 같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 두지 않는다. 수정은 원본에서 하고 `sync:*`로 배포한다.
+- **자산마다 원본은 하나만 둔다.** 전역 자산은 `deploy/`(스킬·hook·contexts는 `plugins/ac/`), 레포 로컬 자산은 그 레포의 `local/`에 두고, 같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 두지 않는다. 수정은 원본에서 하고 `sync:*`로 배포한다.
 - **배포 산출물은 직접 손대지 않는다.** 다음 sync에 덮여 사라진다. 막는 장치는 둘이고, 막는 대상이 달라 서로 대체하지 못한다:
   - **편집 차단**: 전역 `check-artifact-write-policy.mjs`가 AI의 Edit/Write에 `ask`를 띄운다. 모든 레포를 hook 하나가 덮지만 git 커밋은 못 막는다.
   - **커밋 차단**: 각 레포 `.gitignore`. 레포마다 적어야 한다.
 
-## settings는 공통 base와 타겟 override를 합쳐 생성한다
+## 전역 settings는 claude-settings.json 하나로 생성한다
 
-각 타겟 설정은 `deploy/base-settings.json`(공통)과 타겟 override 파일(`deploy/claude-settings.json` 등)을 합쳐 생성하고, 키가 겹치면 override가 이긴다(`scripts/settings/settings-projection.mjs`·`scripts/lib/deploy-lib.mjs`).
+sync는 `deploy/claude-settings.json`(model·env·permissions 등)을 `~/.claude/settings.json`에 top-level 키 단위로 합친다(`scripts/lib/deploy-lib.mjs`). hook은 여기 두지 않는다([hook 작성 위치](#hook-작성-위치)).
 
-- **base에는 모든 타겟이 함께 사용하는 것(정책 hook의 논리 목록)만 두고, 타겟 전용 설정(model·env·permissions 등)은 그 타겟 override 파일에 둔다.**
 - **`permissions.allow`의 도구 이름은 괄호형(`"Bash(*)"`)으로 적는다.** 괄호 없는 `"Bash"`는 그 도구의 `ask`를 "이미 승인됨"으로 흡수한다. 허용 범위는 `"Bash(*)"`와 같은데 승인 창만 죽으므로, 얻는 것 없이 방어선만 잃는다.
   - 괄호 없는 `"Bash"` 아래서 `git push`가 승인 없이 나간 적이 있다.
   - 괄호 없이도 `ask`가 뜨는 경우가 있지만, 어느 `ask`가 흡수될지는 일정하지 않아 괄호 없는 이름을 안전하다고 보지 않는다.
 - **git hook이 스스로 내는 명령(`post-commit`의 자동 `git push` 등)은 도구 호출이 아니라 `permissions.*`도 정책 hook도 관여하지 못한다.** 막으려면 그 레포의 git hook 자체를 고친다.
-- override 파일을 새로 만들면 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사에서 뺀다.
+- settings 재료 파일을 새로 만들면 `SOURCE_ONLY_ROOT_FILES`에 넣어 raw 복사에서 뺀다.
 
 ## 로컬 settings projection (`local/` → repo-local)
 
-settings/hooks는 위 전역 메커니즘을 그대로 미러링한 로컬판으로 배포한다. 소스는 각 레포의 `local/`, 타겟은 그 레포의 `.claude/settings.json`이다.
+레포 로컬 settings/hooks는 `local/base-settings.json`의 논리 hook 목록(`file`·`event`·`on`)을 `scripts/settings/settings-projection.mjs`로 투영해 배포한다. 소스는 각 레포의 `local/`, 타겟은 그 레포의 `.claude/settings.json`이다.
 `local/base-settings.json`을 가진 모든 레포가 `sync:local-system`의 대상이다. 메커니즘은 `scripts/local-system/local-deploy-lib.mjs` 머리 주석이 정본이다.
 
 - 새 로컬 hook은 `local/base-settings.json`에 논리 항목을 추가하고 `local/hooks/`에 `.mjs`를 둔다.
@@ -37,21 +37,20 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 `local/<X>`를 `.claude/<
 
 ## 스킬 md의 자리표시자 렌더링
 
-배포가 로컬 스킬 md의 `{{skill_dir}}`·`{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`). 전역 스킬(plugin `ac`)은 렌더링을 거치지 않는다([plugin으로 옮긴 스킬](#plugin으로-옮긴-스킬)).
+배포가 로컬 스킬 md의 `{{skill_dir}}`·`{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`). 전역 스킬(plugin `ac`)은 렌더링을 거치지 않는다([plugin ac로 옮긴 스킬·hook·contexts](#plugin-ac로-옮긴-스킬hookcontexts)).
 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`가 고정한다.
 
 전역 `CLAUDE.md`·`deploy/rules/`는 `@` import로 원본 그대로 읽혀([system.md](guides/system.md)) 렌더링 단계가 없다.
 
-## plugin으로 옮긴 스킬
+## plugin ac로 옮긴 스킬·hook·contexts
 
-전역 스킬은 모두 `plugins/ac/skills/`에 있고, Claude Code plugin(AC 루트 `.claude-plugin/marketplace.json`의 `ac`)으로 설치한다. sync는 스킬을 배포하지 않는다([가이드](guides/system.md)). 결정 근거는 커밋 `0a55b232` 본문에 있다.
+전역 스킬·hook·contexts는 모두 `plugins/ac/`(`skills/`·`hooks/`·`contexts/`)에 있고, Claude Code plugin(AC 루트 `.claude-plugin/marketplace.json`의 `ac`)으로 설치한다.
+sync는 이것들을 배포하지 않는다([가이드](guides/system.md)). 스킬을 옮긴 결정 근거는 커밋 `0a55b232` 본문에 있다.
 
-- marketplace는 directory 소스로 등록한다. Claude Code가 캐시가 아니라 원본 폴더를 읽어, 원본 수정이 sync·`plugin update` 없이 다음 세션에 반영된다
+- marketplace는 directory 소스로 등록한다. Claude Code가 캐시가 아니라 원본 폴더를 읽어(hook의 `${CLAUDE_PLUGIN_ROOT}`도 원본 폴더다), 원본 수정이 sync·`plugin update` 없이 다음 세션에 반영된다
 - 이 경로에는 렌더링이 없다. 스킬 md에 `{{skill_dir}}` 대신 `${CLAUDE_SKILL_DIR}`를 적는다(Claude Code가 채운다).
-  `{{contexts}}`에 맞는 변수는 없어, sync가 배포한 자리를 `~/.claude/contexts/…` 꼴로 적는다. contexts를 가리키는 md 링크도 같다.
-  plugin 루트(`plugins/ac`) 아래에는 contexts가 없어 `../../contexts/` 상대 링크가 안 닿는다
-- 스킬 스크립트가 contexts를 읽을 때는 `os.homedir()`로 그 자리를 만든다. 정적 `import`는 `~`를 풀지 못한다. 이와 다르게 읽는 스크립트는 그 이유를 주석에 적는다
-- 배포본 hook(`~/.claude/hooks`)이 스킬 스크립트를 부를 때는 `hook-utils.mjs`의 `writeDocScript`처럼 marketplace 등록 정보(`known_marketplaces.json`의 `ac`)로 AC 원본을 찾는다
+  contexts는 md 링크면 그 파일 기준 상대 경로(`../../contexts/…`)로, 실행 명령이면 `${CLAUDE_SKILL_DIR}/../../contexts/…`로 적는다
+- 스킬 스크립트·hook이 contexts나 다른 스킬 폴더를 읽을 때는 `import.meta.dirname` 기준 상대 경로로 찾는다. 셋이 같은 plugin 폴더 안에 있다
 - sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 [새 머신 초기화](INSTALLATION_GUIDE.md#새-머신-초기화)의 plugin 등록 명령으로 한다
 
 ## 배포 스크립트 변경 원칙
@@ -68,17 +67,19 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 `local/<X>`를 `.claude/<
 - 셸 도구로 `git worktree add`를 하거나 `EnterWorktree`를 호출하면 PostToolUse self-heal hook이 새 워크트리에 의존성과 gitignore된 env 파일을 primary에서 채운다. 맨 터미널에서 만든 워크트리는 그 안에서 `npm ci`를 실행한다.
 - 레포에 `prepare`나 훅 설치 스크립트를 두지 않는다. 배선은 `sync:environment` 하나가 기기 전역에 건다(이유는 `scripts/lib/git-hooks.mjs` 머리 주석).
 
-## deploy/hooks 검증 원칙
+## 정책 hook 검증 원칙
 
-`deploy/hooks/`(또는 배포된 `~/.claude/hooks/`)의 정책 hook을 수정·검증할 때:
+`plugins/ac/hooks/`의 정책 hook을 수정·검증할 때:
 
 - **등록·발동은 실제 도구 호출로 검증한다.** hook에 payload를 직접 흘리면 판정 로직만 확인되고 PreToolUse/PostToolUse로 실제 발동하는지는 모른다. git 상태와 무관한 정적 판정은 `scripts/verify/verify-hook-policies.mjs`에 케이스로 등록해 고정한다.
 - **위험 케이스도 안전한 시나리오를 설계해서 실제 명령으로 검증한다.** 막는 경우와 함께, 막으면 안 되는 이웃 대상(같은 도구의 다른 대상)이 그대로 통과하는지도 확인한다.
 - **검증용 임시 산출물(파일·커밋·팀·디버그 로그·임시 브랜치)은 보고 전에 정리한다.**
 - **메인 워크트리에서 검증 작업을 수행하지 않는다.** fix 워크트리 또는 별도 임시 디렉토리에서 진행한다.
-- **레포 등급(브랜치 정책 강도)은 `deploy/hooks/repo-tiers.mjs` 한 곳에서만 정한다.** 등급별 동작과 판정 방식은 그 파일 주석이 정본이다.
-- **새 git 정책 hook은 명령 문자열이 아니라 `deploy/hooks/git-command-parser.mjs`의 파싱 결과로 판정한다.** 인접 정규식은 `git -C`·체인·값을 붙이거나 묶은 짧은 옵션을 놓친다(짧은 옵션은 `commitShortFlagChars`).
+- **레포 등급(브랜치 정책 강도)은 `plugins/ac/hooks/repo-tiers.mjs` 한 곳에서만 정한다.** 등급별 동작과 판정 방식은 그 파일 주석이 정본이다.
+- **새 git 정책 hook은 명령 문자열이 아니라 `plugins/ac/hooks/git-command-parser.mjs`의 파싱 결과로 판정한다.** 인접 정규식은 `git -C`·체인·값을 붙이거나 묶은 짧은 옵션을 놓친다(짧은 옵션은 `commitShortFlagChars`).
 
-## settings.json hook 작성 위치
+## hook 작성 위치
 
-새 hook은 `deploy/base-settings.json`에 논리 항목(`file`·`event`·`on`)을 추가하고 본체를 `deploy/hooks/`의 `.mjs` 파일 하나로 둔다. settings.json에 들어갈 명령 문자열은 `scripts/settings/settings-projection.mjs`가 만든다. 손으로 적지 않는다.
+새 전역 hook은 본체를 `plugins/ac/hooks/`의 `.mjs` 파일 하나로 두고, `plugins/ac/hooks/hooks.json`에 `node "${CLAUDE_PLUGIN_ROOT}/hooks/<파일>.mjs"` 명령으로 등록한다.
+셸 명령을 실행하는 도구에 거는 hook은 매처를 `Bash|PowerShell|Monitor`로 둔다.
+등록 정합과 핵심 매처는 `verify:settings`가 고정한다.

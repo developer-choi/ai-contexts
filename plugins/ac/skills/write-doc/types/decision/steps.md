@@ -6,4 +6,4 @@
 
 ## [SCAN_STEP] 파악
 
-[비교 구조](~/.claude/contexts/writing-guide/types/decision/guide.md#비교-구조)가 요구하는 것이 본문에 있는지 검토한다.
+[비교 구조](../../../../contexts/writing-guide/types/decision/guide.md#비교-구조)가 요구하는 것이 본문에 있는지 검토한다.

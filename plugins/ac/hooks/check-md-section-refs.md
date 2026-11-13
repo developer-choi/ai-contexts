@@ -3,11 +3,11 @@
 Claude Code PreToolUse 훅으로 등록돼 `git commit` 명령마다 stdin payload를 받아 돈다. 그 경로는 인자를 받지 않는다.
 
 아래는 사람이 손으로 실행하는 전수 실측 모드다. 둘 다 읽기만 한다.
-경로는 ai-contexts 레포 루트 기준이고, 배포본(`~/.claude/hooks/check-md-section-refs.mjs`)도 같다.
+경로는 ai-contexts 레포 루트 기준이다.
 
 ## 레포 하나 실측
 
-`node deploy/hooks/check-md-section-refs.mjs --scan [<레포경로>]`
+`node plugins/ac/hooks/check-md-section-refs.mjs --scan [<레포경로>]`
 
 - `<레포경로>` 안의 아무 폴더. 생략하면 현재 폴더
 - 그 레포가 git으로 추적하는 md·코드 파일 전체에 훅의 레포 안 검사를 그대로 돌려 센다(역방향 검사는 빼고)
@@ -16,7 +16,7 @@ Claude Code PreToolUse 훅으로 등록돼 `git commit` 명령마다 stdin paylo
 
 ## 레포를 넘는 인용 실측
 
-`node deploy/hooks/check-md-section-refs.mjs --scan-cross [<워크스페이스>]`
+`node plugins/ac/hooks/check-md-section-refs.mjs --scan-cross [<워크스페이스>]`
 
 - `<워크스페이스>` 생략하면 `SECTION_REFS_WORKSPACE` 환경변수, 없으면 `~/WebstormProjects`
 - 그 아래 깊이 3까지의 git 레포(점 폴더 제외)에서, 다른 레포의 절을 레포 이름 + 경로나 절대 경로로 가리키는 인용을 모아 대상의 지금 헤딩으로 푼다

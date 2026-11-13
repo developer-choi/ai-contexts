@@ -1,8 +1,7 @@
 // write-doc 글쓰기 패키지(frontmatter + 본문 단일 .md)를 알아보는 데 쓰는 어휘와 파서.
 // 패키지를 보는 훅(check-package-frontmatter·score-writing-package)이 함께 쓴다 — 훅마다 어휘 사본을 두면 한쪽만 고쳐진다.
 //
-// 어휘의 정본은 [입력](../skills/write-doc/SKILL.md#입력) 표다. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어
-// 여기에 사본을 둔다(meta/coupling.json 「글쓰기 패키지 type 어휘」).
+// 어휘의 정본은 [입력](../skills/write-doc/SKILL.md#입력) 표이고, 여기에 사본을 둔다(meta/coupling.json 「글쓰기 패키지 type 어휘」).
 
 export const PACKAGE_TYPES = new Set([
   "pr-body",

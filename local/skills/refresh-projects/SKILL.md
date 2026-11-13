@@ -39,7 +39,7 @@ description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을
 
 ## 실행 흐름
 
-[CRITICAL] AC 루트 기준 `deploy/contexts/team-agent.md`의 규칙을 따른다.
+AC 루트 기준 `plugins/ac/contexts/team-agent.md`의 규칙을 따른다.
 
 단계에 들어갈 때 그 단계의 담당 파일을 연다.
 

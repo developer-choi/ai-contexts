@@ -1,6 +1,6 @@
 # Rule Ablation Bench 특화 체크리스트
 
-`deploy/rules/`, `deploy/contexts/coding-standards/` 등 **지침/규칙 문서**에서 "이 규칙을 없애도 되는가"를 재는 ablation 벤치의 점검 항목.
+`deploy/rules/`, `plugins/ac/contexts/coding-standards/` 등 **지침/규칙 문서**에서 "이 규칙을 없애도 되는가"를 재는 ablation 벤치의 점검 항목.
 
 ## 시나리오 시드: 규칙 rationale에서 직접 추출
 

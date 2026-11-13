@@ -2,7 +2,7 @@
 // 사용법: verify-cli-usage.md (같은 폴더)
 //
 // 인자를 받는 스크립트마다 같은 폴더·같은 이름의 사용법 md가 있고, 사용법이 그 md에만 있는지 본다.
-// 짓는 법은 [CLI 스크립트의 사용법은 짝 md에](../../deploy/contexts/rules-as-code-authoring.md#cli-스크립트의-사용법은-짝-md에).
+// 짓는 법은 [CLI 스크립트의 사용법은 짝 md에](../../plugins/ac/contexts/rules-as-code-authoring.md#cli-스크립트의-사용법은-짝-md에).
 //
 // 사용법이 머리 주석에만 있으면 인자만 알고 싶은 AI가 소스를 통째로 연다(steps.mjs 50KB가 그랬다).
 // 주석·USAGE 상수·md에 나눠 두면 한쪽만 고쳐져 어긋난다. 짝 md를 빠뜨린 스크립트는 사람이 눈으로
@@ -20,7 +20,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const RULE_DOC = 'ai-contexts 레포 deploy/contexts/rules-as-code-authoring.md#cli-스크립트의-사용법은-짝-md에';
+const RULE_DOC = 'ai-contexts 레포 plugins/ac/contexts/rules-as-code-authoring.md#cli-스크립트의-사용법은-짝-md에';
 const USAGE_DOC = 'ai-contexts 레포 scripts/hooks/verify-cli-usage.md';
 
 // argv[0]·[1]만 읽는 파일은 진입점 판별일 뿐 인자를 받지 않는다. 그 밖의 읽기(`[2]`·`.slice(`·

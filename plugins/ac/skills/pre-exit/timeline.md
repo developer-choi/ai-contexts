@@ -30,7 +30,7 @@ node ${CLAUDE_SKILL_DIR}/scripts/session-state.mjs timeline --session <session_i
 
 ```
 node ${CLAUDE_SKILL_DIR}/scripts/session-state.mjs timeline --session <session_id> --notes <json 경로> --html \
-  | node ~/.claude/contexts/local-html-roundtrip.mjs open pre-exit -
+  | node ${CLAUDE_SKILL_DIR}/../../contexts/local-html-roundtrip.mjs open pre-exit -
 ```
 
 표는 채팅이 아니라 브라우저로 본다 — 이 산출물의 값은 훑어서 한눈에 몰린 자리가 보이는 데 있다.

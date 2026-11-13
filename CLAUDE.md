@@ -1,13 +1,13 @@
 ## 프롬프트 수정 시 규칙 역제안
 
-이 프로젝트의 프롬프트(`deploy/`·`plugins/ac/skills/`·`local/skills/`) 수정 시:
+이 프로젝트의 프롬프트(`deploy/`·`plugins/ac/`·`local/skills/`) 수정 시:
 
 1. 패턴성 판단 (동일 요청이 재발할 가능성)
-2. 패턴성이면, 해당 [prompt-standards 문서](deploy/contexts/prompt-standards/)나 prompt-review의 대상별 체크리스트(`plugins/ac/skills/prompt-review/targets/`)에 추가할 규칙을 구체적 문안과 함께 역제안
+2. 패턴성이면, 해당 [prompt-standards 문서](plugins/ac/contexts/prompt-standards/)나 prompt-review의 대상별 체크리스트(`plugins/ac/skills/prompt-review/targets/`)에 추가할 규칙을 구체적 문안과 함께 역제안
 
 ## 프롬프트 작성 원칙
 
-- 프롬프트를 추가하기 전에, 더 강한 강제 메커니즘으로 내릴 수 있는지 먼저 검토하고 사용자에게 역제안한다. 기준은 [`deploy/contexts/rules-as-code.md`](deploy/contexts/rules-as-code.md)를 따른다.
+- 프롬프트를 추가하기 전에, 더 강한 강제 메커니즘으로 내릴 수 있는지 먼저 검토하고 사용자에게 역제안한다. 기준은 [`plugins/ac/contexts/rules-as-code.md`](plugins/ac/contexts/rules-as-code.md)를 따른다.
 - 입력 타입 조합 규칙을 추가할 때는 트리거 지점(어느 가이드의 어느 단계에서 판단하는지), 실행 경로(선행 조건이 충족되는지), 판단 기준(어떤 입력이 조합을 활성화하는지)을 함께 정의한다.
 - 단방향 cross-ref 원칙: A가 B를 참조하면 B는 A의 식별자(이름·경로)를 본문에 호명하지 않는다. 호출자는 호출 컨텍스트 쪽, 참조 대상은 일반·재사용 가능한 쪽(컨벤션·메타 룰).
 
@@ -22,21 +22,20 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 다음을 수정·추가할 때 [meta/deploy-conventions.md](meta/deploy-conventions.md)를 먼저 본다.
 
 - sync/unsync 스크립트 또는 sync/unsync 타겟
-- `deploy/hooks/`(전역)·`local/hooks/`(AC 로컬)의 정책 hook
-- `deploy/base-settings.json`·`local/base-settings.json` 등 settings 생성 소스
-- settings.json의 PreToolUse/PostToolUse hook
+- `plugins/ac/hooks/`(전역, 등록은 `hooks.json`)·`local/hooks/`(AC 로컬)의 정책 hook
+- `deploy/claude-settings.json`·`local/base-settings.json` 등 settings 생성 소스
 - AC 작업용 worktree 생성
 
 ## 폴더 규칙
 
 ### 대주제 (이 콘텐츠가 AC에 속하는가)
 
-콘텐츠 추가 전 [`deploy/contexts/placement.md`](deploy/contexts/placement.md)(글로벌 분업 정책)를 본다. AC로 갈지 먼저 판단한다.
+콘텐츠 추가 전 [`plugins/ac/contexts/placement.md`](plugins/ac/contexts/placement.md)(글로벌 분업 정책)를 본다. AC로 갈지 먼저 판단한다.
 
 ### 소주제 (AC 안에서 어디로)
 
-- `deploy/contexts/` 하위 → 그 영역의 인덱스가 정한 자리에 둔다. 코드 작업 자산의 인덱스는 [`code-map.md`](deploy/contexts/code-map.md), 글쓰기 자산의 인덱스는 [`writing-guide/map.md`](deploy/contexts/writing-guide/map.md)다.
-  - 어느 인덱스에도 안 걸리는 자산은 `deploy/contexts/` 바로 아래 단일 파일로 둔다. 인덱스 없는 하위 디렉토리를 새로 만들면 그 안의 문서를 아무도 찾지 못한다.
+- `plugins/ac/contexts/` 하위 → 그 영역의 인덱스가 정한 자리에 둔다. 코드 작업 자산의 인덱스는 [`code-map.md`](plugins/ac/contexts/code-map.md), 글쓰기 자산의 인덱스는 [`writing-guide/map.md`](plugins/ac/contexts/writing-guide/map.md)다.
+  - 어느 인덱스에도 안 걸리는 자산은 `plugins/ac/contexts/` 바로 아래 단일 파일로 둔다. 인덱스 없는 하위 디렉토리를 새로 만들면 그 안의 문서를 아무도 찾지 못한다.
   - 스킬 SKILL.md의 표에서 출발해 그 디렉토리의 파일에 모두 닿으면 그 표가 인덱스다.
 - 어느 레포에서나 쓸 스킬 → `plugins/ac/skills/`(plugin `ac`), AC 안에서만 쓸 스킬 → `local/skills/`
 

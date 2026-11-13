@@ -2,7 +2,7 @@
 
 ## 1. 완성본 라이브러리 갱신 (AI + 사용자)
 
-이번 과제 각 PR의 GitHub 게시본을 주제별 완성본 라이브러리([recruitment/library/](~/.claude/contexts/writing-guide/types/pr-body/recruitment/library/))에 반영한다.
+이번 과제 각 PR의 GitHub 게시본을 주제별 완성본 라이브러리([recruitment/library/](../../../contexts/writing-guide/types/pr-body/recruitment/library/))에 반영한다.
 
 **PR 단위가 아니라 재료(섹션) 단위로 분해해 분류한다.** 한 PR 본문은 여러 `#` 섹션으로 나뉘고 섹션마다 다른 주제(재료)를 담으므로, PR 하나가 완성본 재료 여러 개를 기여할 수 있다. 각 PR 본문을 섹션별 재료로 갈라, 재료마다:
 
@@ -61,7 +61,7 @@
 
 2-1~2-2를 마치면 제출 레포 로컬 작업 폴더는 삭제해도 된다. 채용 마무리의 **마지막 절차**다.
 
-- **서버 종료는 AI가 먼저 한다** — `node ~/.claude/contexts/stop-servers.mjs stop <폴더> --worktrees`로 그 폴더와 거기서 뻗은 워크트리 경로의 서버를 끄고 결과를 보고한다.
+- **서버 종료는 AI가 먼저 한다** — `node ${CLAUDE_SKILL_DIR}/../../contexts/stop-servers.mjs stop <폴더> --worktrees`로 그 폴더와 거기서 뻗은 워크트리 경로의 서버를 끄고 결과를 보고한다.
   - 세션을 닫아도 그 세션이 띄운 서버는 남아 파일을 잡는다.
   - 2-1 이후에 다시 띄운 서버가 있을 수 있으므로 2-1에서 껐어도 다시 돈다.
 - **폴더 삭제는 AI가 실행하지 않는다** — 그 폴더(또는 그 폴더에서 만든 워크트리)를 cwd로 둔 세션이 파일을 잡고 있어 삭제가 막힌다. 사용자가 **해당 세션들을 모두 닫은 뒤** 직접 지운다.

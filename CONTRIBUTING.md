@@ -27,7 +27,7 @@ npm run sync:local-system
 |-----------|------|-----------|
 | `deploy/rules/` | 전역 AI 행동 규칙 | 배포 안 됨(`@` import로 읽힘, [system.md](meta/guides/system.md)) |
 | `plugins/ac/skills/` | 스킬 정의 (workflow, code-review 등) | Claude Code plugin `ac`로 설치됨 |
-| `deploy/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | 배포됨 |
+| `plugins/ac/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | Claude Code plugin `ac`로 설치됨 |
 | `meta/` | 프로젝트 관리 문서 (설치 가이드, 아키텍처 결정) | 배포 안 됨 |
 | `scripts/` | 배포/제거 스크립트 | 배포 안 됨 |
 
@@ -72,4 +72,4 @@ argument-hint: 인자 힌트 (선택)
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 write-doc 스킬의 [guide-files.mjs](plugins/ac/skills/write-doc/scripts/guide-files.mjs)가 단계마다 정합니다.
+[writing-guide](plugins/ac/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 write-doc 스킬의 [guide-files.mjs](plugins/ac/skills/write-doc/scripts/guide-files.mjs)가 단계마다 정합니다.

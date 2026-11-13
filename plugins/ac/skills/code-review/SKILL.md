@@ -44,7 +44,7 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--mode
 "호출 프롬프트에 적힌 문서"에서 Advanced Reviewer 참고 자료([3단계](#3-리뷰-수행))로 넘긴 것은 뺀다.
 
 1. 호출 입력에 **리뷰 대상**이 명시돼 있지 않으면, 추정한 대상을 내보이고 사용자에게 확인받은 뒤 진행한다
-2. **리뷰어가** [code-map.md 기준 문서 고르기](~/.claude/contexts/code-map.md#기준-문서-고르기)대로 기준 문서를 선택한다
+2. **리뷰어가** [code-map.md 기준 문서 고르기](../../contexts/code-map.md#기준-문서-고르기)대로 기준 문서를 선택한다
 
 ### 2. 리뷰 대상 파악
 
@@ -68,11 +68,11 @@ argument-hint: "[PR URL 또는 브랜치] [--coding-standards 경로...] [--mode
 | 모드 | 리뷰어 |
 |---|---|
 | only-standards | 단일 리뷰어(sonnet) 1명이 기준 문서 대조만 한다. 기존 코드를 새 규칙에 맞추는 마이그레이션이라 자유 리뷰가 끼면 범위가 흐려진다 |
-| advanced | 아래 표의 리뷰어를 병렬로 띄우고, 메인이 결과를 합치며 중복을 걷는다. 메인이 다시 말을 걸 리뷰어(기준 문서를 대조해 아래 충돌을 되물을 리뷰어, 호출자가 재검까지 같은 리뷰어에게 맡기라고 한 리뷰어)는 [team-agent](~/.claude/contexts/team-agent.md#claude-code)의 규칙대로 띄우고, 나머지는 `name` 없이 띄운다. 호출자가 맡긴 리뷰어가 앞 호출에서 이미 떠 있으면 새로 띄우지 않고 그 리뷰어에게 보낸다 |
+| advanced | 아래 표의 리뷰어를 병렬로 띄우고, 메인이 결과를 합치며 중복을 걷는다. 메인이 다시 말을 걸 리뷰어(기준 문서를 대조해 아래 충돌을 되물을 리뷰어, 호출자가 재검까지 같은 리뷰어에게 맡기라고 한 리뷰어)는 [team-agent](../../contexts/team-agent.md#claude-code)의 규칙대로 띄우고, 나머지는 `name` 없이 띄운다. 호출자가 맡긴 리뷰어가 앞 호출에서 이미 떠 있으면 새로 띄우지 않고 그 리뷰어에게 보낸다 |
 
 | advanced 리뷰어 | 맡는 일 |
 |---|---|
-| Coding-Standards Reviewer ×N (sonnet) | [code-map.md 기준 문서 고르기](~/.claude/contexts/code-map.md#기준-문서-고르기)가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡는다. 메인은 영역만 정하고, 리뷰어가 자기 영역 안에서 code-map의 기준 문서 고르기대로 문서를 선택한다 |
+| Coding-Standards Reviewer ×N (sonnet) | [code-map.md 기준 문서 고르기](../../contexts/code-map.md#기준-문서-고르기)가 훑는 폴더 중 `rules/`와 MP 베스트 프랙티스를 영역으로 나눠 1명씩 맡는다. 메인은 영역만 정하고, 리뷰어가 자기 영역 안에서 code-map의 기준 문서 고르기대로 문서를 선택한다 |
 | External-Skill Reviewer ×M (sonnet) | 2단계에서 선택한 외부 스킬마다 1명(없으면 0명). 그 스킬 관점으로만 본다 |
 | Official-Way Reviewer (opus) | diff가 직접 구현한 것(다른 목적의 도구를 끌어다 쓴 것 포함)마다 같은 목적의 공식 수단(레포에 설치된 도구, 프레임워크·플랫폼 내장 API, 생태계 표준 라이브러리)이 있는지 공식 문서로 확인한다. 있으면 diff와 비교한 이슈에 공식 문서 URL과 그 페이지 원문을 붙인다. 기준 문서는 고르지 않는다 |
 | Advanced Reviewer (opus) | 규칙에 없는 문제를 자유 리뷰로 짚고, `principles/`는 code-map의 기준 문서 고르기대로 선택한다. 메인은 짚을 주제·관점과 호출 프롬프트가 이 리뷰어에게 주라고 넘긴 참고 자료를 넘길 수 있고, 다른 리뷰어에게 맡긴 관점은 빼고 보라고 지시문에 적어 넘긴다 |

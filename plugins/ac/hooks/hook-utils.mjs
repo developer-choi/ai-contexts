@@ -3,17 +3,10 @@ import os from "node:os";
 import path from "node:path";
 
 // write-doc 스킬 scripts/ 아래 파일의 경로. 없으면 null이다(부르는 쪽이 그 검사만 건너뛴다).
-// write-doc은 plugin `ac`(plugins/ac/skills)에 있고 훅은 아직 sync가 `<타겟>/hooks`에 배포해, 훅 기준 상대 경로로는
-// 안 닿는다. 그래서 차례로 본다: 훅이 plugin 안으로 옮겨진 뒤의 형제 skills, 이 훅이 든 AC 체크아웃 원본(회귀표·개발),
-// Claude Code marketplace 등록 정보(known_marketplaces.json의 `ac`)가 가리키는 AC 원본.
+// 훅과 write-doc 스킬은 같은 plugin `ac` 폴더 안에 있어 형제 skills로 찾는다.
 export function writeDocScript(name) {
-  const candidates = [
-    path.join(import.meta.dirname, "..", "skills", "write-doc", "scripts", name),
-    path.join(import.meta.dirname, "..", "..", "plugins", "ac", "skills", "write-doc", "scripts", name),
-  ];
-  const acRoot = acMarketplaceRoot();
-  if (acRoot) candidates.push(path.join(acRoot, "plugins", "ac", "skills", "write-doc", "scripts", name));
-  return candidates.find((file) => fs.existsSync(file)) ?? null;
+  const file = path.join(import.meta.dirname, "..", "skills", "write-doc", "scripts", name);
+  return fs.existsSync(file) ? file : null;
 }
 
 // Claude Code에 directory marketplace `ac`로 등록된 AC 원본 폴더. 등록 정보가 없는 기기면 null이다.
