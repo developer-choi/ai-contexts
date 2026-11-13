@@ -30,7 +30,7 @@ next:
 
 ## Step 6.1. 금지 주석·고아 disable 검사
 
-통과해야 6.2로 넘어간다. "implement 종료에서 0건이 보장됐으니 건너뛴다"며 생략하지 않는다.
+통과해야 6.2로 넘어간다.
 
 `node {{skill_dir}}/scripts/check-pr-comments.mjs --base <PR 기준 ref> --plan <plan>`
 
@@ -44,10 +44,9 @@ next:
 
 쓰기 전에 [decisions-lifecycle.md](../conventions/artifact/decisions-lifecycle.md)를 처음부터 끝까지 읽는다.
 
-앞 세션 기록은 일회성 서브에이전트(sonnet: 문서 기준대로 원문을 모으는 일이다)에 맡기고 모델과 근거를 사용자에게 알린다. 기록이 수 MB다.
+앞 세션 기록은 수 MB라 일회성 서브에이전트(sonnet: 문서 기준대로 원문을 모으는 일이다)에 맡기고 모델과 근거를 사용자에게 알린다. decisions.md에 이미 있는 결정은 뺀 채 decisions-lifecycle.md 기준대로 가른 원문을 돌려받고, 그 기준이 사용자 확인이나 TODO 등록으로 보내는 항목은 표시해 받는다.
 
-- 기록 경로, decisions.md 경로, decisions-lifecycle.md 경로를 넘겨, decisions.md에 이미 있는 결정은 뺀 채 그 문서 기준대로 가른 원문을 돌려받는다. 그 기준이 사용자 확인이나 TODO 등록으로 보내는 항목은 표시해 받는다. 기록은 다시 열지 않는다.
-- Claude Code면 기록은 `~/.claude/projects/` 아래 이 PR 워크트리 경로를 슬러그로 바꾼 폴더의 jsonl이다. PR마다 워크트리가 따로라, 그 폴더에서 지금 세션이 아닌 것이 이 PR의 앞 세션이다
+Claude Code면 Lead가 PR 워크트리에서 `node {{skill_dir}}/scripts/prior-sessions.mjs`를 돌려 나온 기록 경로를 decisions.md·decisions-lifecycle.md 경로와 함께 서브에이전트에 넘긴다(인자·출력은 [prior-sessions.md](../scripts/prior-sessions.md)).
 
 ---
 
@@ -55,11 +54,7 @@ next:
 
 Lead가 `/code-review`를 advanced 모드로 호출한다. 기준 문서 선별은 [code-review](../../code-review/SKILL.md)가 소유한다.
 
-리뷰어는 모두 이름 있는 팀원으로 띄워, 재검 라운드와 다시 도는 6.2까지 같은 팀원에게 맡긴다.
-
-```
-code-review(advanced) → 이슈 목록 → Lead 수정 → code-review(advanced, 수정 diff만) → 반복 (0건까지)
-```
+이슈가 0건이 될 때까지 고치고 수정 diff를 다시 리뷰한다. 재검 라운드와 다시 도는 6.2까지 같은 리뷰어에게 맡기도록 code-review에 요청한다.
 
 - code-review에 전달하는 입력: PR diff, decisions.md
 - 6.2에서 마크업을 고쳤으면 [modes.md](../conventions/modes.md) 매트릭스의 그 모드 검사 기준으로 원본(피그마 등)과 맞는지 본다
@@ -104,13 +99,13 @@ AI 실행:
 
 ## Step 6.2.5. 커밋 정리 — 사용자 리뷰 전
 
-사용자는 커밋 단위로 리뷰한다. stub·상쇄·리뷰 수정 커밋이 섞인 채 넘기지 않도록, 6.2부터 6.2.2까지를 **처음** 모두 통과하면 사용자 리뷰에 앞서 커밋을 정리한다. 이 환경은 대화형 편집기를 못 띄우므로 rebase는 todo를 고치는 명령(sed 등)을 `GIT_SEQUENCE_EDITOR`에 줘 비대화형으로 돌린다.
+사용자는 커밋 단위로 리뷰한다. stub·상쇄·리뷰 수정 커밋이 섞인 채 넘기지 않도록, 6.2부터 6.2.2까지를 **처음** 모두 통과하면 사용자 리뷰에 앞서 커밋을 정리한다.
 
 - stub 커밋은 [stub 정리](../conventions/artifact/stub.md#정리)대로 처리한다
 - 서로 상쇄되는 커밋은 없앤다
 - 리뷰·동작 테스트 수정 커밋은 고친 대상 커밋에 합친다
 
-정리한 뒤 `git rebase --exec '<그 레포의 타입 검사·테스트 명령>' <PR 기준 ref>`로 커밋마다 통과하는지 본다. 멈추면 멈춘 커밋이 import하는 파일을 채우는 커밋을 그 앞으로 옮기고, 서로 import해 순서로 풀리지 않으면 사용자에게 올린다.
+정리한 뒤 `git rebase --exec '<그 레포의 타입 검사·테스트 명령>' <PR 기준 ref>`로 커밋마다 통과하는지 본다.
 
 ---
 
@@ -134,7 +129,7 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 
 ## 수정이 생기면
 
-동작 테스트에서 실패하거나, 사용자 리뷰·사용자 확인 항목에서 수정을 요청받으면 고치고 다시 6.1부터 순서대로 진행한다. 다시 도는 범위는 각 절을 따른다.
+동작 테스트에서 실패하거나, 사용자 리뷰·사용자 확인 항목에서 수정을 요청받으면 고치고 다시 6.1부터 순서대로 진행한다.
 
 - 커밋 정리(6.2.5) 뒤의 수정은 모두 고친 대상 커밋을 가리키는 `git commit --fixup=<대상>`으로 쌓고 정리한 커밋을 다시 묶지 않는다
 
@@ -147,8 +142,6 @@ Lead는 사용자 리뷰 진입을 안내하고 대기한다:
 ```
 GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash --exec '<그 레포의 타입 검사·테스트 명령>' <PR 기준 ref>
 ```
-
-멈추면 Step 6.2.5와 같이 처리한다.
 
 합친 뒤 `node {{skill_dir}}/scripts/steps.mjs pr branches`를 돌린다. 합치면 이 PR의 커밋이 새로 쓰여, 이 PR 위에 쌓인 PR 브랜치가 옛 커밋 위에 남는다. 그런 브랜치가 어긋남으로 나오면 합친 이 PR 위로 오도록 그 출력의 명령으로 옮겨 달라고 사용자에게 요청한다.
 옮기면 그 위에 쌓인 PR이 새로 어긋나므로, 이 PR 위로 쌓인 PR(위의 위 포함)에 어긋남이 없을 때까지 `pr branches`를 다시 돌린다.
@@ -163,8 +156,8 @@ GIT_SEQUENCE_EDITOR=: git rebase -i --autosquash --exec '<그 레포의 타입 �
 
 1. 이 PR의 implement·verify 대화. [Step 6.1.5](#step-615-리뷰-전-결정-반영)대로 모은다.
 2. 후임자가 코드를 보고 "여기 왜 이렇게 했어요?"라고 물을 만한 질문. PR diff 전체를 훑는 일이라 일회성 서브에이전트에 맡긴다.
-   - PR 기준 ref, decisions.md 경로, 1에서 모은 결정을 넘기고, 이미 있는 결정에 닿는 질문은 뺀 뒤 질문마다 `파일:줄`과 원문 줄만 돌려받는다.
-   - Lead는 그 줄로 사용자에게 묻고 diff를 다시 열지 않는다. 답하기 어려운 질문은 [/discussion](../../discussion/SKILL.md)으로 토론한다.
+   - PR 기준 ref·decisions.md 경로·1에서 모은 결정을 넘기고, 이미 있는 결정에 닿는 질문은 뺀 뒤 질문마다 `파일:줄`과 원문 줄만 돌려받는다.
+   - Lead는 그 줄로 사용자에게 묻는다. 답하기 어려운 질문은 [/discussion](../../discussion/SKILL.md)으로 토론한다.
 
 **6.5와 의존 없음, 병렬 진행 가능.**
 
