@@ -92,7 +92,7 @@
         "scripts/environment/precommit-hooks.mjs",
         "meta/guides/environment.md"
       ],
-      "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다. 전역 pre-commit 검사 훅은 precommit-hooks.mjs의 PRECOMMIT_HOOKS 표가 정본이라 sync·unsync 양쪽이 그 표를 읽는다 — 훅을 더하거나 빼면 그 표를 고치고 가이드 「수행 작업」에도 그 훅이 무엇을 검사하는지 적는다. alias·stateKey는 이미 배포된 기기의 등록·상태 파일과 맞물려 있어 바꾸지 않는다."
+      "note": "sync가 새 환경 설정을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다. 전역 pre-commit 검사 훅은 precommit-hooks.mjs의 PRECOMMIT_HOOKS 표가 정본이라 sync·unsync 양쪽이 그 표를 읽는다 — 훅을 더하거나 빼면 그 표를 고치고 가이드 「수행 작업」 표에 그 훅의 검사 이름과 사용법 링크를 한 행으로 추가한다(사용법 md가 없으면 스크립트 머리 주석으로 적는다). alias·stateKey는 이미 배포된 기기의 등록·상태 파일과 맞물려 있어 바꾸지 않는다."
     },
     {
       "name": "environment 메커니즘 계약",
