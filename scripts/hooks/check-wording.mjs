@@ -21,10 +21,11 @@
 // 낱말 목록은 이 스크립트에만 있어서, 이 출구가 없으면 대조할 재료가 없다.
 //
 // 「금지 표현」 범주만은 낱말이 이 파일이 아니라 옆의 `blocked-expressions.json`에 있다. 사용자가 반려한
-// 말을 세션이 그때그때 등재하는 목록이라 코드 수정 없이 늘어나야 하고, 등재는
-// `blocked-expressions.mjs`로만 한다. 같은 목록을 write-doc 채점과 커밋 메시지 훅도 읽는다(행의 `scope`로
-// 가른다). 그쪽들과 등재 스크립트가 이 파일의 매칭을 그대로 가져다 쓰므로 매칭·판별 함수를 export한다
-// — 등재 때 대 본 결과, 훅이 짚는 결과, 채점 결과가 같은 코드에서 나와야 한다.
+// 말을 세션이 그때그때 등재하는 목록이라 코드 수정 없이 늘어나야 하고, 행의 꼴은
+// `blocked-expressions.mjs`가 검사한다. 같은 목록을 write-doc 채점과 커밋 메시지 훅도 읽는다(행의 `scope`로
+// 가른다). 그쪽들과 겹침 찾기(`blocked-expressions.mjs --find`)가 이 파일의 매칭을 그대로 가져다
+// 쓰므로 매칭·판별 함수를 export한다 — 겹침 찾기의 판정, 훅이 짚는 결과, 채점 결과가 같은 코드에서
+// 나와야 한다.
 import { execFileSync } from "node:child_process";
 import path from "node:path";
 import fs from "node:fs";
@@ -164,8 +165,8 @@ const BLOCKED = {
   advice: [
     "판단: 걸린 말을 줄 아래 「대신」의 말로 바꾼다. 바로 옆에 이미 풀려 있으면 그 말만 지운다.",
     "      NEEDS_REVIEW 줄은 쓰임을 보고, 다른 뜻으로 멀쩡히 쓴 자리면 그대로 둔다.",
-    "      같은 꼴이 또 걸릴 것 같으면 그 꼴을 예외로 올린다:",
-    "      node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --exclude --word <말> --exclusions <꼴>",
+    "      같은 꼴이 또 걸릴 것 같으면 금지 표현 목록에서 그 행의 exclusions에 꼴을 넣는다",
+    "      (고치는 순서: ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.md).",
   ],
 };
 
@@ -335,12 +336,11 @@ function stagedContent(file) {
   }
 }
 
-// `repo`는 cwd가 아닌 레포의 파일을 가릴 때 넘긴다(등재 스크립트가 AC를 훑을 때).
-export function isPromptDoc(file, repo = repoName()) {
+export function isPromptDoc(file) {
   // 앞에 슬래시를 붙여, 레포 루트 바로 아래(`meta/guides/...`)도 `/meta/guides/`로 잡히게 한다.
   const posix = `/${file.replace(/\\/g, "/").replace(/^\/+/, "")}`;
   if (EXCLUDE.test(posix)) return false;
-  if (BACKLOG_DATA.test(posix) && repo === BACKLOG_REPO) return false;
+  if (BACKLOG_DATA.test(posix) && repoName() === BACKLOG_REPO) return false;
   if (PROMPT_DOC.test(posix)) return true;
   return CLAUDE_LIKE.test(posix.split("/").pop());
 }
@@ -490,7 +490,7 @@ function mdFilesUnder(target) {
   return files.sort();
 }
 
-// 등재 스크립트가 함수만 가져다 쓸 때는 검사를 돌리지 않는다. 실제 경로로 견준다 — `import.meta.url`은
+// 다른 스크립트가 함수만 가져다 쓸 때는 검사를 돌리지 않는다. 실제 경로로 견준다 — `import.meta.url`은
 // 정션·링크를 푼 경로라, 부른 경로 그대로 견주면 훅 폴더가 링크 뒤에 있을 때 검사가 말없이 꺼진다.
 // Windows는 드라이브 문자 대소문자가 호출마다 달라질 수 있어 소문자로 맞춘다.
 const realLower = (file) => {

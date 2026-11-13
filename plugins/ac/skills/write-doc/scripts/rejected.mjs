@@ -1,12 +1,12 @@
 // 금지 표현 목록(AC `scripts/hooks/blocked-expressions.json`) 중 write-doc 글과 커밋 메시지에 거는 행
-// (scope가 DOC·BOTH)을 읽고 본문에서 찾는다. 행의 꼴과 등재·수정은 그 목록 옆 `blocked-expressions.mjs`가
+// (scope가 DOC·BOTH)을 읽고 본문에서 찾는다. 행의 꼴은 그 목록 옆 `blocked-expressions.mjs` 머리 주석이
 // 정본이고, 여기서는 읽기만 한다.
 //
 // 목록과 매칭 코드는 프롬프트 md 커밋 훅(check-wording.mjs)과 같은 것을 쓴다. 매칭을 여기 따로 두면
 // 같은 행이 훅과 채점에서 다르게 걸린다. 찾는 자리는 두 곳 중 먼저 있는 쪽이다.
 // - AC 체크아웃 안에서 도는 소스본: 네 단계 위 레포 루트의 `scripts/hooks/`
 // - 스킬 배포본: sync:environment가 훅과 목록을 복사해 두는 `~/.ai-contexts/`
-// 등재 스크립트는 원본과 `~/.ai-contexts/` 사본을 함께 고치므로 배포본도 등재 즉시 새 행을 본다.
+// 배포본은 sync:environment가 사본을 다시 복사한 뒤에 새 행을 본다.
 //
 // 목록은 스크립트(채점기·리뷰어 입력 조립·커밋 메시지 훅)만 읽는다. 세션이 목록을 통째로 Read하면 쌓일수록
 // 모든 회차의 맥락이 늘어난다. 리뷰어에게는 본문에 걸린 행만 넘긴다.

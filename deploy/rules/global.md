@@ -12,7 +12,7 @@
 
 사용자가 스킬·규칙 md의 말을 알아보지 못하면, 그 말을 금지 표현 목록에 등록할지 묻는다.
 
-목록에 올리는 명령: `node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs` (명령·인자는 `~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.md`를 본다)
+목록에 올리는 법: `~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.md`
 
 ## 사용자에게 답변, 보고 시
 
