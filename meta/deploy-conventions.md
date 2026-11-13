@@ -44,7 +44,7 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 `local/<X>`를 `.claude/<
 
 - marketplace는 directory 소스로 등록한다. Claude Code가 캐시가 아니라 원본 폴더를 읽어, 원본 수정이 sync·`plugin update` 없이 다음 세션에 반영된다
 - 이 경로에는 렌더링이 없다. 스킬 md에 `{{skill_dir}}` 대신 `${CLAUDE_SKILL_DIR}`를 적는다(Claude Code가 채운다). `{{contexts}}`에 맞는 변수는 없어, sync가 배포한 자리를 `~/.claude/contexts/…` 꼴로 적는다
-- sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 `meta/INSTALLATION_GUIDE.md` 「새 머신 초기화」의 두 줄로 한다
+- sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 [새 머신 초기화](INSTALLATION_GUIDE.md#새-머신-초기화)의 두 줄로 한다
 
 ## 배포 스크립트 변경 원칙
 
