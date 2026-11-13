@@ -1,12 +1,12 @@
 # 배포 시스템 수정 규약
 
-AC의 배포 시스템(`scripts/` 하위 sync·unsync 스크립트, `deploy/hooks/`, settings.json hook, AC worktree)을 수정·추가할 때 따르는 규칙.
+AC의 배포 시스템을 수정·추가할 때 따르는 규칙.
 
 ## 목적: 어느 레포·기기에서도 동일하게 동작
 
-이 배포 시스템의 목적은 원본 한 벌(`deploy/`·각 레포 `local/`)을 Claude Code가 읽는 자리에 투영해, 어느 레포·기기에서 작업해도 같은 규칙·스킬·hook이 동작하게 만드는 것이다.
+이 배포 시스템의 목적은 원본 한 벌(`deploy/`·`plugins/ac/`·각 레포 `local/`)을 Claude Code가 읽는 자리에 투영해, 어느 레포·기기에서 작업해도 같은 규칙·스킬·hook이 동작하게 만드는 것이다.
 
-- **원본은 한 벌만 둔다.** 전역 자산은 `deploy/`, 레포 로컬 자산은 그 레포의 `local/`에 두고, 같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 쓰지 않는다. 수정은 원본에서 하고 `sync:*`로 배포한다.
+- **원본은 한 벌만 둔다.** 전역 자산은 `deploy/`(스킬은 `plugins/ac/skills/`, sync 없이 plugin으로 읽힌다), 레포 로컬 자산은 그 레포의 `local/`에 두고, 같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 쓰지 않는다. 수정은 원본에서 하고 `sync:*`로 배포한다.
 - **배포 산출물은 직접 손대지 않는다.** 다음 sync에 덮여 사라진다. 막는 장치는 둘이고, 막는 대상이 달라 서로 대체하지 못한다:
   - **편집 차단** — 전역 `check-artifact-write-policy.mjs`가 AI의 Edit/Write에 `ask`를 띄운다. 모든 레포를 hook 하나가 덮지만 git 커밋은 못 막는다.
   - **커밋 차단** — 각 레포 `.gitignore`. 레포마다 적어야 하고 hook이 대신하지 못한다.
@@ -32,21 +32,23 @@ settings/hooks는 위 전역 메커니즘을 그대로 미러링한 로컬판으
 
 settings/hooks를 뺀 repo-local 자산(스킬 등)은 `local/<X>`를 `.claude/<X>`에 동일 복사한다(`scripts/local-system/sync-local-skills.mjs`). 새 자산 종류는 `local/`에 디렉토리만 두면 된다.
 
-- 예외로 스킬 폴더의 md는 렌더링해 배포한다(`deploy-lib.mjs`의 `renderSkillMd`·`renderSkillSubMd` — 전역 `sync:system`도 같다). 무엇을 바꾸는지와 그 이유는 그 함수 주석이 정본이고, 배포 검증은 렌더 결과와 대조한다.
+- 예외로 스킬 폴더의 md는 렌더링해 배포한다(`deploy-lib.mjs`의 `renderSkillMd`·`renderSkillSubMd`). 무엇을 바꾸는지와 그 이유는 그 함수 주석이 정본이고, 배포 검증은 렌더 결과와 대조한다.
 
 ## 스킬 md의 자리표시자 렌더링
 
-배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`가 고정한다. 렌더링을 바꾸면 그 검사를 함께 맞춘다.
+배포가 로컬 스킬 md의 `{{skill_dir}}`·`{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`). 전역 스킬(plugin `ac`)은 렌더링을 거치지 않는다([plugin으로 옮긴 스킬](#plugin으로-옮긴-스킬)). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`가 고정한다.
 
 전역 `CLAUDE.md`·`deploy/rules/`는 `@` import로 원본 그대로 읽혀([system.md](guides/system.md)) 렌더링 단계가 없다.
 
 ## plugin으로 옮긴 스킬
 
-`plugins/ac/skills/`의 스킬은 Claude Code plugin(AC 루트 `.claude-plugin/marketplace.json`의 `ac`)으로 설치되고 sync가 배포하지 않는다. 결정 근거는 커밋 `0a55b232` 본문에 있다.
+전역 스킬은 모두 `plugins/ac/skills/`에 있고 Claude Code plugin(AC 루트 `.claude-plugin/marketplace.json`의 `ac`)으로 설치되고, sync는 스킬을 배포하지 않는다([가이드](guides/system.md)). 결정 근거는 커밋 `0a55b232` 본문에 있다.
 
 - marketplace는 directory 소스로 등록한다. Claude Code가 캐시가 아니라 원본 폴더를 읽어, 원본 수정이 sync·`plugin update` 없이 다음 세션에 반영된다
-- 이 경로에는 렌더링이 없다. 스킬 md에 `{{skill_dir}}` 대신 `${CLAUDE_SKILL_DIR}`를 적는다(Claude Code가 채운다). `{{contexts}}`에 맞는 변수는 없어, sync가 배포한 자리를 `~/.claude/contexts/…` 꼴로 적는다
-- sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 [새 머신 초기화](INSTALLATION_GUIDE.md#새-머신-초기화)의 두 줄로 한다
+- 이 경로에는 렌더링이 없다. 스킬 md에 `{{skill_dir}}` 대신 `${CLAUDE_SKILL_DIR}`를 적는다(Claude Code가 채운다). `{{contexts}}`에 맞는 변수는 없어, sync가 배포한 자리를 `~/.claude/contexts/…` 꼴로 적는다. contexts를 가리키는 md 링크도 같다. plugin 루트(`plugins/ac`) 아래에는 contexts가 없어 `../../contexts/` 상대 링크가 안 닿는다
+- 스킬 스크립트가 contexts를 읽을 때는 `os.homedir()`로 그 자리를 만든다. 정적 `import`는 `~`를 풀지 못한다. 이와 다르게 읽는 스크립트는 그 이유를 주석에 적는다
+- 배포본 hook(`~/.claude/hooks`)이 스킬 스크립트를 부를 때는 `hook-utils.mjs`의 `writeDocScript`처럼 marketplace 등록 정보(`known_marketplaces.json`의 `ac`)로 AC 원본을 찾는다
+- sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 [새 머신 초기화](INSTALLATION_GUIDE.md#새-머신-초기화)의 plugin 등록 명령으로 한다
 
 ## 배포 스크립트 변경 원칙
 

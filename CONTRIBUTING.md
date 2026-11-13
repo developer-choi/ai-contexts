@@ -26,7 +26,7 @@ npm run sync:local-system
 | 디렉터리 | 역할 | 배포 여부 |
 |-----------|------|-----------|
 | `deploy/rules/` | 전역 AI 행동 규칙 | 배포 안 됨(`@` import로 읽힘, [system.md](meta/guides/system.md)) |
-| `deploy/skills/` | 스킬 정의 (workflow, code-review 등) | 배포됨 |
+| `plugins/ac/skills/` | 스킬 정의 (workflow, code-review 등) | Claude Code plugin `ac`로 설치됨 |
 | `deploy/contexts/` | 보조 참조 문서 (코딩 컨벤션, 셀프헬프) | 배포됨 |
 | `meta/` | 프로젝트 관리 문서 (설치 가이드, 아키텍처 결정) | 배포 안 됨 |
 | `scripts/` | 배포/제거 스크립트 | 배포 안 됨 |
@@ -38,7 +38,7 @@ npm run sync:local-system
 새 스킬을 추가할 때는 아래 구조를 따릅니다.
 
 ```
-deploy/skills/<스킬명>/
+plugins/ac/skills/<스킬명>/
 ├── SKILL.md        # 필수. AI가 로드하는 스킬 정의
 ├── README.md       # 루트 README가 소개하는 스킬만. 사람용 설명 (AI 지시 금지)
 └── ...             # SKILL.md에서 참조하는 보조 파일
@@ -72,4 +72,4 @@ argument-hint: 인자 힌트 (선택)
 
 md 파일을 작성하거나 수정할 때, 아래 문서를 참고합니다.
 
-[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 write-doc 스킬의 [guide-files.mjs](deploy/skills/write-doc/scripts/guide-files.mjs)가 단계마다 정합니다.
+[writing-guide](deploy/contexts/writing-guide/)에서 찾습니다. 어느 문서를 언제 여는지는 write-doc 스킬의 [guide-files.mjs](plugins/ac/skills/write-doc/scripts/guide-files.mjs)가 단계마다 정합니다.

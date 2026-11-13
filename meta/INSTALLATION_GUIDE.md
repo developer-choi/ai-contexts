@@ -20,11 +20,15 @@ claude plugin install ac@ac
 
 ## 평소 갱신
 
-전역 에이전트 규칙·스킬·hook을 갱신할 때는 시스템 자산만 다시 동기화합니다.
+전역 에이전트 규칙·hook을 갱신할 때는 시스템 자산만 다시 동기화합니다. 스킬(`plugins/ac/`)은 원본을 고치면 다음 세션에 바로 반영됩니다.
+
+plugin으로 옮기기 전에 초기화한 기기는 `sync:system` 전에 [새 머신 초기화](#새-머신-초기화)의 plugin 등록 명령을 한 번 실행합니다.
 
 ```bash
 npm run sync:system
 ```
+
+git 검사 훅 스크립트를 고쳤으면 `npm run sync:environment`로 갱신합니다(원본 위치는 [ai-config-locations.md](../deploy/contexts/ai-config-locations.md)).
 
 프로젝트 로컬 산출물(로컬 스킬 + AC settings/hooks)까지 맞출 때는 로컬 시스템 동기화를 함께 실행합니다.
 

@@ -10,7 +10,7 @@ AI 시대 개발자의 가치는 두 가지라고 생각합니다. **일을 만�
 
 ### 일하는 방식을 옮긴 워크플로우
 
-예를 들어 [workflow](deploy/skills/workflow/README.md)는 제가 일하는 방식 자체를 프롬프트로 옮긴 것입니다. 기획서나 피그마 같은 자료에서 출발해, 단계마다 제가 방향을 정하며 PR까지 갑니다.
+예를 들어 [workflow](plugins/ac/skills/workflow/README.md)는 제가 일하는 방식 자체를 프롬프트로 옮긴 것입니다. 기획서나 피그마 같은 자료에서 출발해, 단계마다 제가 방향을 정하며 PR까지 갑니다.
 
 작업은 여러 단계로 나뉘어 각각 독립된 맥락에서 진행됩니다. 먼저 자료를 읽고 무엇을 왜 해야 하는지 정리한 뒤, 할 일을 PR 단위로 쪼갭니다.
 
@@ -20,7 +20,7 @@ AI 시대 개발자의 가치는 두 가지라고 생각합니다. **일을 만�
 
 ### 회고를 옮긴 마무리 절차
 
-[pre-exit](deploy/skills/pre-exit/README.md)는 한 번의 작업이 끝날 때 회고를 수행하는 스킬입니다. 그 회고를 통해 스킬 자체도 개선합니다.
+[pre-exit](plugins/ac/skills/pre-exit/README.md)는 한 번의 작업이 끝날 때 회고를 수행하는 스킬입니다. 그 회고를 통해 스킬 자체도 개선합니다.
 
 회고하는 방법 자체도 프롬프트가 된 셈입니다.
 
@@ -30,7 +30,7 @@ AI 시대 개발자의 가치는 두 가지라고 생각합니다. **일을 만�
 
 미리 방향을 정해두면, AI가 그 안에서 제가 미처 보지 못한 것을 찾아냅니다.
 
-[requirement-review](deploy/skills/workflow/requirement-review/README.md)는 기획서, 디자인 시안, 채용 과제를 개발에 들어가기 전에 개발자 관점에서 점검하는 스킬입니다.
+[requirement-review](plugins/ac/skills/workflow/requirement-review/README.md)는 기획서, 디자인 시안, 채용 과제를 개발에 들어가기 전에 개발자 관점에서 점검하는 스킬입니다.
 
 기획서는 화면 목적과 사용자 동선, 예외 상황을 짚고, 디자인 시안은 화면 크기와 상태에 따라 달라지는 모습을 살피고, 채용 과제는 숨은 평가 포인트를 역으로 추론합니다.
 
@@ -56,31 +56,33 @@ AI가 작성하는 코드의 양이 늘수록, 사람이 리뷰해야 할 양도
 
 자동 검사가 잡지 못하는 문제는 AI 리뷰가 맡습니다. 화면을 그리는 코드와 데이터를 다루는 코드가 섞여 있어 나눠야 하는 경우가 그렇습니다.
 
-이 저장소에서는 [code-review](deploy/skills/code-review/README.md)가 그 역할을 합니다.
+이 저장소에서는 [code-review](plugins/ac/skills/code-review/README.md)가 그 역할을 합니다.
 
 반복된 지적은 규칙으로 쌓아 두어, 사람이 리뷰에 쓰는 시간이 점점 줄어듭니다.
 
 ## 스킬 목록
 
+스킬은 Claude Code plugin `ac`로 설치되고, `/ac:<스킬>`로 호출합니다(설치는 [새 머신 초기화](meta/INSTALLATION_GUIDE.md#새-머신-초기화)).
+
 ### 개발 워크플로우
 
-- [workflow](deploy/skills/workflow/README.md): 기획서나 피그마 같은 자료에서 출발해 단계마다 방향을 정하며 PR을 만드는 프로세스
-  - [requirement-review](deploy/skills/workflow/requirement-review/README.md): 기획서, 디자인 시안, 채용 과제를 개발에 들어가기 전에 개발자 관점에서 점검
+- [workflow](plugins/ac/skills/workflow/README.md): 기획서나 피그마 같은 자료에서 출발해 단계마다 방향을 정하며 PR을 만드는 프로세스
+  - [requirement-review](plugins/ac/skills/workflow/requirement-review/README.md): 기획서, 디자인 시안, 채용 과제를 개발에 들어가기 전에 개발자 관점에서 점검
   - [bug-investigation](plugins/ac/skills/bug-investigation/README.md): 버그의 근본 원인을 추적하고 수정 방안을 제안
 
 ### 리뷰
 
-- [code-review](deploy/skills/code-review/README.md): 코드 변경을 규칙과 품질 기준으로 리뷰하고 고칠 거리를 목록으로 정리
+- [code-review](plugins/ac/skills/code-review/README.md): 코드 변경을 규칙과 품질 기준으로 리뷰하고 고칠 거리를 목록으로 정리
 
 ### 학습
 
-- [simplify](deploy/skills/simplify/README.md): 오픈소스 코드를 학습 목적으로 간단하게 줄이기
+- [simplify](plugins/ac/skills/simplify/README.md): 오픈소스 코드를 학습 목적으로 간단하게 줄이기
 
 ### 커뮤니케이션
 
-- [discussion](deploy/skills/discussion/README.md): 기술 주제에 대해 비판적으로 토론
+- [discussion](plugins/ac/skills/discussion/README.md): 기술 주제에 대해 비판적으로 토론
 
 ### 유틸리티
 
-- [pre-exit](deploy/skills/pre-exit/README.md): 작업이 끝날 때 회고하고 스킬을 개선
-- [backlog](deploy/skills/backlog/README.md): 스킬 아이디어를 수집하고 분류
+- [pre-exit](plugins/ac/skills/pre-exit/README.md): 작업이 끝날 때 회고하고 스킬을 개선
+- [backlog](plugins/ac/skills/backlog/README.md): 스킬 아이디어를 수집하고 분류

@@ -15,7 +15,7 @@
 
 ## 정비 작업
 
-각 작업은 `/backlog`의 [영역 분류](../../../../deploy/skills/backlog/SKILL.md#1-영역-분류)·[기존 항목 대조](../../../../deploy/skills/backlog/SKILL.md#3-기존-항목-대조)와 backlog 레포 `CLAUDE.md`의 「영역별 경로·파일명」을 적용만 한다.
+각 작업은 `/backlog`의 [영역 분류](../../../../plugins/ac/skills/backlog/SKILL.md#1-영역-분류)·[기존 항목 대조](../../../../plugins/ac/skills/backlog/SKILL.md#3-기존-항목-대조)와 backlog 레포 `CLAUDE.md`의 「영역별 경로·파일명」을 적용만 한다.
 
 - **파일 분리** — 한 파일이 서로 독립적인 여러 subtopic·주제를 담아 비대해졌으면 backlog 레포 `CLAUDE.md` 「projects 영역」에 따라 단위별 파일로 쪼갠다. 분량의 절대 기준을 두지 않고, 한 파일이 단일 주제로 읽히는지로 판단한다.
 - **디렉토리 구조화** — 한 디렉토리에 파일이 쌓여 탐색이 어려우면 결이 가까운 것끼리 하위 그룹으로 묶거나 subtopic 단위로 정돈한다.
