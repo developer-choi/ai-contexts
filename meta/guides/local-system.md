@@ -1,6 +1,6 @@
 # Local System Sync
 
-전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 자산**(cross-repo, PP `agents` 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
+전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다. 대상은 **로컬 자산**(cross-repo, PP `agents` 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포, AC + KA 등)입니다.
 
 ```bash
 npm run sync:local-system
@@ -14,12 +14,12 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ## 수행 작업
 
-시작 시 AC git hook 준비 상태와 `verify:*` 계약을 먼저 확인합니다(fail-fast). 어느 검사를 부르는지는 `scripts/local-system/sync-local-system.mjs`가 정본입니다.
+시작 시 AC git hook 준비 상태와 `verify:*` 계약을 먼저 확인합니다(fail-fast). 어느 검사를 호출하는지는 `scripts/local-system/sync-local-system.mjs`가 정본입니다.
 
 ### 1. 로컬 자산 (cross-repo)
 
 - `local/` 하위 디렉토리(`agents` 등, `hooks`·`skills`·`contexts` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다. 옛 `.claude/contexts` 사본이 남아 있으면 지웁니다.
-- 지우고 다시 쓰지 않습니다. 내용이 다른 파일만 쓰고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 파일만 새로 뜹니다(1·2 공통).
+- 지우고 다시 기록하지 않습니다. 내용이 다른 파일만 기록하고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 파일만 새로 뜹니다(1·2 공통).
 - 원본은 `local/`이며, `.claude/<X>`는 배포 산출물로 봅니다(gitignore).
 
 ### 2. settings/hooks (per-repo)
@@ -38,7 +38,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 npm run unsync:local-system
 ```
 
-- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거 — 원본에서 사라진 파일도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
+- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거하고, 원본에서 사라진 파일도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
 - **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
 
 ## 반복 실행 기준
@@ -46,7 +46,7 @@ npm run unsync:local-system
 여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다.
 
 - 로컬 자산은 `local/<X>` 기준으로, settings/hooks는 `local/` 기준으로 맞춥니다(원본에서 사라진 파일은 지우고, settings의 고아 키는 `.ac-keys`로 걷음).
-- 원본이 그대로면 두 번째 실행에서 아무 파일도 쓰지 않습니다(`verify:incremental-deploy`가 고정).
+- 원본이 그대로면 두 번째 실행에서 아무 파일도 기록하지 않습니다(`verify:incremental-deploy`가 고정).
 - 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 `.claude/<X>` 카테고리 통째(gitignore 산출물)에 적용합니다.
 
 ## 생성 계약 검증

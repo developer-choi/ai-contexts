@@ -7,7 +7,8 @@ AC의 배포 시스템을 수정·추가할 때 따르는 규칙.
 이 배포 시스템의 목적은 원본(`deploy/`·`plugins/ac/`·각 레포 `local/`·`.claude/skills/`)을 Claude Code가 읽게 해, 어느 레포·기기에서 작업해도 같은 규칙·스킬·hook이 동작하게 만드는 것이다.
 공식 기능(plugin·`@` import)으로 원본을 그대로 읽게 할 수 있으면 그쪽을 사용하고, sync는 공식 기능이 받지 못하는 것(settings.json 생성, 스킬을 뺀 레포 로컬 자산)만 만든다.
 
-- **자산마다 원본은 하나만 둔다.** 전역 자산은 `deploy/`(스킬·hook·contexts는 `plugins/ac/`), 레포 로컬 자산은 그 레포의 `local/`(스킬은 `.claude/skills/`)에 두고, 같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 두지 않는다. 수정은 원본에서 하고, `local/` 자산은 `sync:*`로 배포한다.
+- **자산마다 원본은 하나만 둔다.** 전역 자산은 `deploy/`(스킬·hook·contexts는 `plugins/ac/`), 레포 로컬 자산은 그 레포의 `local/`(스킬은 `.claude/skills/`)에 둔다.
+  같은 로직(hook js·정책 목록·스킬)을 레포마다 따로 두지 않는다. 수정은 원본에서 하고, `local/` 자산은 `sync:*`로 배포한다.
 - **배포 산출물은 직접 손대지 않는다.** 다음 sync에 덮여 사라진다. 막는 장치는 둘이고, 막는 대상이 달라 서로 대체하지 못한다:
   - **편집 차단**: 전역 `check-artifact-write-policy.mjs`가 AI의 Edit/Write에 `ask`를 띄운다. 모든 레포를 hook 하나가 덮지만 git 커밋은 못 막는다.
   - **커밋 차단**: 각 레포 `.gitignore`. 레포마다 적어야 한다.
