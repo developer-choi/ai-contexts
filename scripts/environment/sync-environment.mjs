@@ -55,26 +55,35 @@ if ($Host.Name -eq 'ConsoleHost') {
 `;
 
 function main() {
+  // 어떤 변경보다 먼저 검사한다. 훅 등록 단계에서야 던지면 PowerShell·gitignore·AutoRun만
+  // 적용된 채 멈춰, 훅 없이 반쯤 설치된 기기가 남는다.
+  assertGitSupportsConfigHooks();
+
   const state = readState();
 
-  console.log('--- PowerShell ---');
-  syncPowerShell(state);
+  // 플래그는 실제로 바꾼 단계에서만 서므로, 중간에 예외로 멈춰도 그때까지 선 것을 남긴다.
+  // 정상 종료 때만 쓰면 그 실행이 설치·등록한 것이 AC 기록에서 빠져 unsync가 되돌리지 못하고,
+  // 재실행해도 이미 설치·등록돼 있어 플래그가 다시 서지 않는다.
+  try {
+    console.log('--- PowerShell ---');
+    syncPowerShell(state);
 
-  console.log('--- Global gitignore ---');
-  syncGlobalGitignore(state);
+    console.log('--- Global gitignore ---');
+    syncGlobalGitignore(state);
 
-  console.log('--- cmd autorun ---');
-  syncCmdAutorun(state);
+    console.log('--- cmd autorun ---');
+    syncCmdAutorun(state);
 
-  console.log('--- git 설정 훅 등록 ---');
-  syncRepoHookWiring();
+    console.log('--- git 설정 훅 등록 ---');
+    syncRepoHookWiring();
 
-  for (const hook of PRECOMMIT_HOOKS) {
-    console.log(`--- ${hook.label} ---`);
-    syncPrecommitHook(state, hook);
+    for (const hook of PRECOMMIT_HOOKS) {
+      console.log(`--- ${hook.label} ---`);
+      syncPrecommitHook(state, hook);
+    }
+  } finally {
+    writeState(state);
   }
-
-  writeState(state);
   console.log('Environment sync complete.');
 }
 

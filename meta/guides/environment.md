@@ -19,7 +19,7 @@ npm run sync:environment
   대화형 cmd 창을 홈 디렉토리에서 열면 `~/WebstormProjects/main`으로 이동시킵니다. `AutoRun`이 다른 값으로 이미 설정돼 있으면 사용자 설정 보호를 위해 건너뜁니다.
 - `.githooks/<이벤트>`가 있으면 실행하는 훅을 **기기 전역**(`hook.ai-contexts-githooks-<이벤트>.*`)에 이벤트마다 등록합니다. 레포별 등록은 `.git/config`에 살아 clone이 안 가져오므로, 전역에 걸어 새로 클론한 레포·워크트리에서도 바로 발동하게 합니다. `.githooks/`가 없는 레포는 조용히 통과합니다.
   - `~/WebstormProjects/<그룹>/<레포>`의 기본 워크트리에 남은 옛 레포별 등록(`hook.repo-*`)은 걷어냅니다. 그 밖의 경로에 둔 레포는 정리하지 않습니다. `core.hooksPath`는 지우지 않고 보고만 합니다. 이유는 `scripts/lib/git-hooks.mjs`의 `clearLegacyRepoHooks` 주석에 있습니다.
-  - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, 훅을 등록하지 않고 sync가 오류로 중단합니다 (`winget upgrade --id Git.Git -e`).
+  - **git 2.54 이상이 필요합니다.** 낮은 버전은 설정 훅을 경고 없이 무시하므로, sync는 맨 앞에서 버전을 검사해, 위 PowerShell·gitignore·autorun 단계를 포함해 아무것도 바꾸지 않고(상태 파일도 기록하지 않고) 오류로 중단합니다 (`winget upgrade --id Git.Git -e`).
 - 아래 전역 검사 훅을 등록합니다. 훅마다 원본을 `~/.ai-contexts/<파일>`로 복사하고 `--global` 설정 훅으로 등록합니다.
   - 목록은 `scripts/environment/precommit-hooks.mjs`의 `PRECOMMIT_HOOKS`가 정본이고, 무엇을 어떤 범위로 왜 그렇게 검사하는지는 각 스크립트 머리 주석이 정본입니다.
   - 채용 레포 커밋 검사를 뺀 훅은 어느 레포에서 커밋하든 돌며 **커밋을 막지 않고 경고만** 합니다.
@@ -38,7 +38,7 @@ npm run sync:environment
 - **낱말 훅**이 읽는 금지 표현 목록 `scripts/hooks/blocked-expressions.json`도 `~/.ai-contexts/`로 복사합니다. 사본이 없으면 금지 표현 범주만 건너뜁니다. 목록 고치는 법은 [사용법](../../scripts/hooks/blocked-expressions.md)에 있습니다.
 - **문서 크기 훅**의 기준선·제외 설정은 `backlog` 레포의 `meta/md-size.json`에 있고, 그 파일이 없는 기기에서는 검사가 통째로 no-op 합니다.
 - **채용 레포 커밋 검사**는 `~/WebstormProjects/recruitment/` 아래 레포에서만 돌며, 로컬 전용 맥락이 커밋에 실리거나 커밋 메시지 subject에 한글이 없으면 **커밋을 막습니다**. 판정 조건은 스크립트가 정본입니다.
-- AC가 설치하거나 등록한 상태는 `~/.ai-contexts/environment-state.json`에 기록합니다.
+- PowerShell 7 설치, `core.excludesFile`·`AutoRun` 등록, 전역 검사 훅 등록은 `~/.ai-contexts/environment-state.json`에 기록합니다(`.githooks` 배선은 기록하지 않습니다). sync가 중간에 오류로 멈춰도 그때까지 설치·등록한 것은 기록합니다.
 
 ## 제거
 
