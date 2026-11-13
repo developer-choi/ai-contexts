@@ -2361,6 +2361,99 @@ const scorePackageGroup = async () => {
   }
 };
 
+// force push 검사는 push 대상 브랜치를 그 브랜치의 origin 쪽과 트리로 비교한다 — 실행 폴더에 무엇이
+// 체크아웃돼 있는지와 무관해야 한다. 그래서 실행 폴더를 상태별로 워크트리로 나눠 둔다.
+//   ahead: origin보다 앞선 브랜치 / even: origin과 같은 브랜치 / local-only: origin에 없는 브랜치
+//   on-reword·on-code: push 대상 브랜치 자신을 체크아웃한 폴더
+// 원격의 feature/reword·feature/code는 같은 커밋에서 출발하고, 로컬은 reword가 메시지만, code가 내용을 바꿨다.
+// 훅이 같은 레포에서 fetch하므로 병렬로 돌리면 ref 잠금이 부딪쳐 fetch가 실패하고 검사가 건너뛰어진다 — 직렬로 돈다.
+// 레포 이름은 FREE 목록 밖이어야 한다(FREE면 정책이 통째로 빠진다).
+const PUSH_HOOK = 'check-git-push-policy.mjs';
+const forcePushGroup = async () => {
+  const root = await makeTempDir('hook-force-push-');
+  try {
+    const bare = path.join(root, 'origin.git');
+    const repo = path.join(root, 'force-client');
+    const git = (args, cwd = repo) => runGit(args, cwd);
+    const commitFile = async (name, body, message) => {
+      fs.writeFileSync(path.join(repo, name), body);
+      await git(['add', name]);
+      await git([...COMMIT_AS, 'commit', '-q', '-m', message, name]);
+    };
+    await runGit(['init', '-q', '--bare', '-b', 'main', bare], root);
+    fs.mkdirSync(repo);
+    await git(['init', '-q', '-b', 'main']);
+    await git(['remote', 'add', 'origin', bare]);
+    await commitFile('a.txt', 'a\n', 'init');
+    await git(['checkout', '-q', '-b', 'feature/reword']);
+    await commitFile('b.txt', 'b\n', 'feat: b');
+    await git(['branch', 'feature/code']);
+    for (const b of ['ahead', 'even']) await git(['branch', b, 'main']);
+    await git(['push', '-q', 'origin', 'main', 'feature/reword', 'feature/code', 'ahead', 'even']);
+    const remoteReword = (await git(['rev-parse', 'feature/reword'])).stdout.trim();
+    // reword: 같은 트리로 메시지만 바꾼 커밋. code: 내용을 바꾼 커밋.
+    await git([...COMMIT_AS, 'commit', '-q', '--amend', '-m', 'feat: b (reworded)']);
+    await git(['checkout', '-q', 'feature/code']);
+    await commitFile('b.txt', 'changed\n', 'change code');
+    // 두 번째 원격 upstream: feature/reword 자리에 내용이 바뀐 커밋이 있다 — origin과 비교하면 통과로 샌다.
+    const upstream = path.join(root, 'upstream.git');
+    await runGit(['init', '-q', '--bare', '-b', 'main', upstream], root);
+    await git(['remote', 'add', 'upstream', upstream]);
+    await git(['push', '-q', 'upstream', 'feature/code:refs/heads/feature/reword']);
+    // 추적 ref를 일부러 낡게 둔다. 훅이 이것을 갱신하면 값 없는 --force-with-lease가 무력해진다.
+    const mainSha = (await git(['rev-parse', 'main'])).stdout.trim();
+    await git(['update-ref', 'refs/remotes/origin/feature/reword', mainSha]);
+    await git(['checkout', '-q', 'ahead']);
+    await commitFile('c.txt', 'c\n', 'ahead of origin');
+    await git(['checkout', '-q', '--detach', 'main']);
+    await git(['branch', 'feature/new', 'feature/code']);
+    const dirs = { repo: repo.replace(/\\/g, '/') };
+    for (const [name, branch] of [['ahead', 'ahead'], ['even', 'even'], ['on-reword', 'feature/reword'], ['on-code', 'feature/code']]) {
+      const wt = path.join(root, `wt-${name}`);
+      await git(['worktree', 'add', '-q', wt, branch]);
+      dirs[name] = wt.replace(/\\/g, '/');
+    }
+    const localOnly = path.join(root, 'wt-local-only');
+    await git(['worktree', 'add', '-q', '-b', 'local-only', localOnly, 'main']);
+    dirs['local-only'] = localOnly.replace(/\\/g, '/');
+
+    const lease = '--force-with-lease';
+    const cases = [
+      [`git -C ${dirs.ahead} push ${lease} origin feature/reword`, 'pass', 'origin보다 앞선 폴더에서 메시지만 바꾼 브랜치는 통과'],
+      [`git -C ${dirs.even} push ${lease} origin feature/code`, 'deny', 'origin과 같은 폴더에서도 내용을 바꾼 브랜치는 차단'],
+      [`git -C ${dirs['local-only']} push --force origin feature/code`, 'deny', 'origin에 없는 브랜치의 폴더에서도 내용을 바꾼 브랜치는 차단'],
+      [`git -C ${dirs['local-only']} push --force origin feature/reword`, 'pass', 'origin에 없는 브랜치의 폴더에서 메시지만 바꾼 브랜치는 통과'],
+      [`git -C ${dirs['on-reword']} push -f origin feature/reword`, 'pass', '대상 브랜치 폴더에서 메시지만 바꿨으면 통과'],
+      [`git -C ${dirs['on-code']} push -f origin feature/code`, 'deny', '대상 브랜치 폴더에서 내용을 바꿨으면 차단'],
+      [`git -C ${dirs['on-reword']} push ${lease} origin HEAD:feature/reword`, 'pass', 'HEAD:대상이면 실행 폴더 HEAD를 소스로 비교 — 메시지만'],
+      [`git -C ${dirs['on-code']} push ${lease} origin HEAD:feature/code`, 'deny', 'HEAD:대상이면 실행 폴더 HEAD를 소스로 비교 — 내용 변경'],
+      [`git -C ${dirs['on-code']} push --force`, 'deny', 'refspec이 없으면 현재 브랜치를 그 origin 쪽과 비교'],
+      [`git -C ${dirs.even} push --force origin feature/code:feature/reword`, 'deny', 'src:dst면 src를 dst의 origin 쪽과 비교'],
+      [`git -C ${dirs.even} push --force origin +feature/reword`, 'pass', '앞의 +를 벗겨 같은 이름 브랜치와 비교'],
+      [`git -C ${dirs.ahead} push --force-with-lease=feature/reword origin feature/reword`, 'pass', '--force-with-lease=이름 꼴도 같은 기준'],
+      [`git -C ${dirs.ahead} push --force-with-lease=feature/reword:${remoteReword} origin feature/reword`, 'pass', '--force-with-lease=이름:sha 꼴도 같은 기준'],
+      [`git -C ${dirs.even} push --force origin feature/new`, 'pass', 'origin에 없는 대상(첫 push)은 통과'],
+      [`git -C ${dirs.even} push --force upstream feature/reword`, 'deny', 'push 원격이 origin이 아니면 그 원격의 대상과 비교'],
+      [`git -C ${dirs.ahead} push --force origin :feature/code`, 'pass', '삭제 refspec은 트리 비교 대상이 아니다'],
+      [`git -C ${dirs.even} push --force origin no-such-ref:feature/reword`, 'deny', '소스를 못 풀면 막는다(비교 실패 사유로)', '비교하지 못했습니다'],
+    ];
+    const report = await runCases(cases, async ([command, expected, note, reasonWord = '']) => {
+      const { decision, reason = '', stderr } = await runHookPayload(PUSH_HOOK, { tool_name: 'Bash', tool_input: { command }, cwd: dirs.repo });
+      const label = `${PUSH_HOOK} :: ${command.replace(root.replace(/\\/g, '/'), '<tmp>')} → ${expected} (${note})`;
+      return judge(label, decision, expected, stderr, {
+        ok: decision === expected && reason.includes(reasonWord),
+        failLine: `  FAIL  ${label} — 판정: ${decision} / 사유: ${reason.slice(0, 120)}`,
+      });
+    }, { concurrency: 1 });
+    const tracking = (await git(['rev-parse', 'refs/remotes/origin/feature/reword'])).stdout.trim();
+    const label = `${PUSH_HOOK} :: force 검사가 추적 ref(origin/feature/reword)를 갱신하지 않는다(값 없는 --force-with-lease 보존)`;
+    const extra = toReport([judge(label, tracking === mainSha ? 'kept' : `moved to ${tracking}`, 'kept')]);
+    return { lines: [...report.lines, ...extra.lines], failures: [...report.failures, ...extra.failures] };
+  } finally {
+    await removeTempDir(root);
+  }
+};
+
 // 스크립트 타입 검사 훅은 고친 파일이 든 레포에서 tsc를 돌리므로, 임시 폴더에 AC 꼴 레포(.git·package.json·tsconfig·
 // 이 레포 node_modules를 가리키는 junction)를 만들어 두고 돈다. 오류는 exit 2(stderr를 AI에게 보인다)다.
 // 오류 없는 레포를 따로 두는 이유: 없으면 「오류가 없으면 조용하다」를 못 재고, 늘 exit 2를 내는 훅도 통과한다.
@@ -2847,6 +2940,7 @@ async function main() {
     skillCreatorGroup,
     scorePackageGroup,
     scriptTypesGroup,
+    forcePushGroup,
     subFileGroup,
     claudeMdGroup,
     responseLanguageGroup,

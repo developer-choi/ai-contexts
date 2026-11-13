@@ -110,17 +110,27 @@ for (const inv of pushInvocations) {
     // No PR, gh unavailable, or no GitHub remote. Continue with local checks.
   }
 
+  // 비교는 push가 실제로 올리는 것(refspec 소스)과 올라갈 자리(push 원격의 대상 브랜치)로 한다.
+  // 실행 폴더의 HEAD 브랜치로 비교하면 `git -C <폴더> push origin <다른 브랜치>`에서 엉뚱한 두 브랜치를
+  // 비교해, 메시지만 고친 push를 막고 코드를 바꾼 push를 통과시킨다. 원격도 origin으로 고정하지 않는다.
   if (inv.args.some((t) => /^(--force|--force-with-lease|-f)$|^--force-with-lease=/.test(t))) {
-    try {
-      execSync(`git fetch origin ${branch}`, gitOptsQuiet);
-    } catch {
-      continue;
-    }
+    const source = extractPushSourceRef(inv.args);
+    // 삭제(`:dst`)는 이력을 다시 쓰는 것이 아니라 트리 비교 대상이 아니다. 보호 브랜치 삭제는 위에서 막혔다.
+    if (source === null) continue;
 
-    try {
-      execSync(`git diff origin/${branch} HEAD --quiet`, gitOptsQuiet);
-    } catch {
-      deny(`force push 차단: origin/${branch}과 코드가 다릅니다. 히스토리 정리(squash, reword)만 허용됩니다.`);
+    // FETCH_HEAD로 받고 `--refmap=`로 추적 ref(origin/<브랜치>)는 건드리지 않는다 — 건드리면 값 없는
+    // --force-with-lease가 방금 받은 값을 기준으로 삼아, 그사이 남이 올린 커밋을 덮어도 막지 못한다.
+    // 대상 브랜치가 원격에 없으면(첫 push) 덮어쓸 것이 없으므로 통과한다.
+    const remote = pushPositionals(inv.args)[0] || "origin";
+    const fetched = spawnSync("git", ["fetch", "--quiet", "--no-tags", "--refmap=", remote, `refs/heads/${targetBranch}`], gitOptsQuiet);
+    if (fetched.status !== 0) continue;
+
+    const diff = spawnSync("git", ["diff", "--quiet", "FETCH_HEAD", source], gitOptsQuiet);
+    if (diff.status === 1) {
+      deny(`force push 차단: ${source}이(가) ${remote}의 ${targetBranch}과 코드가 다릅니다. 히스토리 정리(squash, reword)만 허용됩니다.`);
+    }
+    if (diff.status !== 0) {
+      deny(`force push 차단: ${source}을(를) ${remote}의 ${targetBranch}과 비교하지 못했습니다(소스 ref를 확인하세요): ${String(diff.stderr).trim()}`);
     }
   }
 }
@@ -194,6 +204,19 @@ function extractPushSource(args, currentBranch) {
   if (!refspec) return currentBranch;
   const src = (refspec.includes(":") ? refspec.split(":")[0] : refspec).replace(/^\+/, "").replace(/^refs\/heads\//, "");
   return !src || src === "HEAD" ? currentBranch : src;
+}
+
+// force 검사가 diff에 넘길 소스 ref. extractPushSource와 달리 브랜치 이름으로 바꾸지 않고 refspec에 적힌
+// 그대로(sha·HEAD 포함) 돌려준다 — git -C 폴더에서 풀리므로 `HEAD`는 그 폴더의 HEAD다.
+// 삭제 refspec(`:dst`)은 보낼 소스가 없어 null이다.
+function extractPushSourceRef(args) {
+  const refspec = pushPositionals(args)[1];
+  if (!refspec) return "HEAD";
+  const bare = refspec.replace(/^\+/, "");
+  if (!bare.includes(":")) return bare;
+  const [src, dst] = bare.split(":");
+  if (!src) return dst ? null : "HEAD";
+  return src;
 }
 
 function extractPushTargetBranch(args) {
