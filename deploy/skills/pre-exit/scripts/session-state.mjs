@@ -1179,7 +1179,7 @@ if (command === 'review-material') {
         const norm = normPath(block.input.file_path);
         if (block.name === 'Read') {
           if (RR_CHECKLIST.test(norm)) noteChecklist(checklists, norm, entry.timestamp, who);
-          if (who === '메인' && RR_SKILL.test(norm) && !rrStart) rrStart = entry.timestamp;
+          if (f === file && RR_SKILL.test(norm) && !rrStart) rrStart = entry.timestamp;
           continue;
         }
         if (block.name !== 'Write' && block.name !== 'Edit') continue;

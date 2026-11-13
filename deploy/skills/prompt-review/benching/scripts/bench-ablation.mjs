@@ -680,21 +680,33 @@ async function main() {
   //
   // 경계 수치는 여기에만 둔다 — 차이가 반복의 2/3 이상이고 최소 2. 문서는 판정 라벨별 처리만
   // 정한다. 같은 수를 두 곳에 두면 한쪽만 바뀌어 손판정과 이 출력이 모르는 채로 갈라진다.
+  // 판정은 코드로 비교하고, 사람에게 보일 라벨은 결과 JSON·요약 표에 쓸 때만 붙인다.
+  const VERDICT_LABEL = {
+    RETEST: '보류(재측정)',
+    INCOMPARABLE: '비교 불가(비교군 1개 — --variants 확인)',
+    SHORT_REPS: '보류(반복 미달)',
+    SPLIT: '갈림',
+    NO_DELTA: '델타 없음',
+    FLOOR: '바닥(양 비교군 다 실패)',
+    NOT_SPLIT: '안 갈림',
+    ABORTED: '보류(중단)',
+    INHERITED: '보류(상속 의심)',
+  };
   function verdictOf(row, names) {
-    if (row.failed_total > 0) return '보류(재측정)';
+    if (row.failed_total > 0) return 'RETEST';
     const cells = names.map((v) => row.variants[v]).filter((c) => c.n > 0);
-    if (cells.length < 2) return '비교 불가(비교군 1개 — --variants 확인)';
+    if (cells.length < 2) return 'INCOMPARABLE';
     const n = Math.max(...cells.map((c) => c.n));
     // chunk 중간의 표는 반복이 덜 찬 n으로 갈려, n=1의 「델타 없음」이 삭제 근거로 읽힌다.
-    if (Math.min(...cells.map((c) => c.n)) < targetReps) return '보류(반복 미달)';
+    if (Math.min(...cells.map((c) => c.n)) < targetReps) return 'SHORT_REPS';
     const ratios = cells.map((c) => c.pass / c.n);
     const gap = Math.max(...cells.map((c) => c.pass)) - Math.min(...cells.map((c) => c.pass));
-    if (gap >= Math.max(2, Math.ceil((n * 2) / 3))) return '갈림';
+    if (gap >= Math.max(2, Math.ceil((n * 2) / 3))) return 'SPLIT';
     // 차이가 0이어도 양 비교군이 다 바닥이면 잰 것이 없다 — 「델타 없음」과 구분해야
     // 시나리오가 압박을 못 준 것이 규칙 불필요로 읽히지 않는다.
-    if (gap === 0 && ratios.every((r) => r >= 2 / 3)) return '델타 없음';
-    if (gap === 0 && ratios.every((r) => r <= 1 / 3)) return '바닥(양 비교군 다 실패)';
-    return '안 갈림';
+    if (gap === 0 && ratios.every((r) => r >= 2 / 3)) return 'NO_DELTA';
+    if (gap === 0 && ratios.every((r) => r <= 1 / 3)) return 'FLOOR';
+    return 'NOT_SPLIT';
   }
 
   // 행 = 시나리오(단축) 또는 시나리오#축(다축). 다축은 축마다 독립 판정이므로 행을 나눈다.
@@ -746,18 +758,21 @@ async function main() {
   }
 
   let failedTotal = 0;
+  const verdictCode = new Map();
   for (const row of Object.values(table)) {
     // 중단된 발사는 칸마다 반복이 덜 찼다. 실패 없는 행도 판정을 찍으면 JSON을 읽는 쪽이
     // 몇 run만 잰 칸을 「델타 없음」으로 받아 쓴다.
-    row.verdict = abort ? '보류(중단)' : verdictOf(row, variantNames);
-    row.verdict_withheld = row.failed_total > 0 || abort !== null || row.verdict === '보류(반복 미달)';
+    const code = abort ? 'ABORTED' : verdictOf(row, variantNames);
+    verdictCode.set(row, code);
+    row.verdict = VERDICT_LABEL[code];
+    row.verdict_withheld = row.failed_total > 0 || abort !== null || code === 'SHORT_REPS';
     failedTotal += row.failed_total;
   }
   // ZERO가 제거한 규칙의 어휘를 쓰면 규칙을 다른 경로로 받은 것이라, 그 행의 「델타 없음」은 삭제 근거가 못 된다.
   const inherited = new Set(inheritance.map((f) => f.scenario));
   for (const row of Object.values(table)) {
-    if (inherited.has(row.scenario) && ['델타 없음', '안 갈림', '바닥'].some((v) => row.verdict.startsWith(v))) {
-      row.verdict = '보류(상속 의심)';
+    if (inherited.has(row.scenario) && ['NO_DELTA', 'NOT_SPLIT', 'FLOOR'].includes(verdictCode.get(row))) {
+      row.verdict = VERDICT_LABEL.INHERITED;
       row.verdict_withheld = true;
     }
   }

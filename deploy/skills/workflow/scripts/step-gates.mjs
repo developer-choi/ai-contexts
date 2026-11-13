@@ -27,6 +27,9 @@ const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
+const MODE_RECRUITMENT = '채용';
+const MODE_PERSONAL = '개인';
+
 // ── artifacts: requirement 「자료 받기」 산출물 존재 검사 ──────────────────────────────────────────
 // 「원본 저장 + 디자인 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
 // 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement의 요구사항 리뷰는 그대로 굴러가고, MARKUP이
@@ -46,7 +49,7 @@ function artifacts() {
   const required = [
     { label: '컨벤션 인덱스', p: path.join(bg, 'retained', 'conventions-index.md') },
   ];
-  if (mode === '채용') {
+  if (mode === MODE_RECRUITMENT) {
     required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
   }
   // 코드 대용이면 디자인 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
@@ -54,7 +57,7 @@ function artifacts() {
   let figmaUrl;
   if (exists(codeTarget)) {
     required.push({ label: '코드 대용 대상', p: codeTarget });
-  } else if (mode === '개인') {
+  } else if (mode === MODE_PERSONAL) {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
     // figma가 없으면 캡처가 디자인 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.

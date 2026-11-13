@@ -57,6 +57,15 @@ const SKILL = optOf("skill") || join(REPO_ROOT, "local", "skills", "refresh-proj
 const STATE = optOf("state") || join(homedir(), "WebstormProjects", "main", "backlog", "refresh-projects", "state.json");
 const WORKSPACE = join(homedir(), "WebstormProjects");
 
+// 안 쓰는 워크트리·브랜치 후보의 종류. 비교는 영어 값으로 하고, 표에는 KIND_LABEL의 말을 낸다.
+const KIND = { WORKTREE: "WORKTREE", PRUNABLE: "PRUNABLE", FOLDER_ONLY: "FOLDER_ONLY", BRANCH_ONLY: "BRANCH_ONLY" };
+const KIND_LABEL = {
+  [KIND.WORKTREE]: "워크트리",
+  [KIND.PRUNABLE]: "기록만(prunable)",
+  [KIND.FOLDER_ONLY]: "폴더만",
+  [KIND.BRANCH_ONLY]: "브랜치만",
+};
+
 function git(cwd, args) {
   try {
     return execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
@@ -454,7 +463,7 @@ function collectCandidates({ fetch }) {
       const alive = !w.prunable && existsSync(w.path);
       rows.push({
         ...base,
-        kind: alive ? "워크트리" : "기록만(prunable)",
+        kind: alive ? KIND.WORKTREE : KIND.PRUNABLE,
         path: w.path,
         branch: w.branch ?? null,
         ...branchInfo(w.branch, w.head),
@@ -475,12 +484,12 @@ function collectCandidates({ fetch }) {
       } catch {
         continue;
       }
-      folderRows.push({ ...base, kind: "폴더만", path: dir });
+      folderRows.push({ ...base, kind: KIND.FOLDER_ONLY, path: dir });
     }
 
     for (const [branch] of refs) {
       if (branch === def || checkedOut.has(branch) || excludedBranches.has(branch)) continue;
-      rows.push({ ...base, kind: "브랜치만", branch, ...branchInfo(branch) });
+      rows.push({ ...base, kind: KIND.BRANCH_ONLY, branch, ...branchInfo(branch) });
     }
   }
 
@@ -532,7 +541,7 @@ function scanWorktrees() {
     const procs = r.path && existsSync(r.path) ? (procCount.get(r.path) ?? 0) : null;
     const refsTo = pointers(r);
     out.push(
-      `| ${[i + 1, targetOf(r), r.repo, r.kind, r.branch ?? (r.path && r.kind !== "폴더만" ? "(detached)" : null), r.date, r.subject, r.mtime, r.dirty, r.merged, r.remote, r.locked, procs, refsTo.length ? refsTo.join("<br>") : null].map(cell).join(" | ")} |`,
+      `| ${[i + 1, targetOf(r), r.repo, KIND_LABEL[r.kind], r.branch ?? (r.path && r.kind !== KIND.FOLDER_ONLY ? "(detached)" : null), r.date, r.subject, r.mtime, r.dirty, r.merged, r.remote, r.locked, procs, refsTo.length ? refsTo.join("<br>") : null].map(cell).join(" | ")} |`,
     );
   });
   out.push("", "지우려면 고른 행의 지정값을 `--remove`에 넘긴다.");
@@ -580,7 +589,7 @@ function removeTargets(targets, force) {
         continue;
       }
     }
-    if (row.kind === "워크트리" || row.kind === "기록만(prunable)") {
+    if (row.kind === KIND.WORKTREE || row.kind === KIND.PRUNABLE) {
       if (row.locked) gitTry(row.repoDir, ["worktree", "unlock", row.path]);
       // `worktree prune`은 그 레포의 prunable을 전부 지우므로 쓰지 않는다. remove는 한 건만 지운다.
       const res = gitTry(row.repoDir, ["worktree", "remove", ...(force ? ["--force"] : []), row.path]);
@@ -601,7 +610,7 @@ function removeTargets(targets, force) {
     if (row.branch) {
       const res = gitTry(row.repoDir, ["branch", "-D", row.branch]);
       if (!res.ok) {
-        fail(`${row.kind === "브랜치만" ? "" : "폴더는 지웠으나 "}branch -D 실패: ${res.err}`);
+        fail(`${row.kind === KIND.BRANCH_ONLY ? "" : "폴더는 지웠으나 "}branch -D 실패: ${res.err}`);
         continue;
       }
     }

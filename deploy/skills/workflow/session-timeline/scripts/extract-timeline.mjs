@@ -78,6 +78,7 @@ function unwrapCommand(text) {
 // 기준으로 삼는 `inspect-blocks.mjs --against` 대조도 그만큼 어긋난다. 래퍼 쪽을 걷고 평문 쪽을 남긴다 — 사용자가 실제로 친 시각이
 // 그쪽이다. 인자가 붙는 사용자 정의 명령은 래퍼만 들어오므로 짝이 없어 그대로 남는다.
 const COMMAND_PAIR_WINDOW_MS = 5000;
+const SPEAKER_USER = '사용자';
 
 function dropDuplicateCommands(blocks) {
   return blocks.filter((block, i) => {
@@ -85,7 +86,7 @@ function dropDuplicateCommands(blocks) {
     return !blocks.some(
       (other, j) =>
         j !== i &&
-        other.speaker === '사용자' &&
+        other.speaker === SPEAKER_USER &&
         !other.command &&
         other.text === block.command &&
         Math.abs(new Date(other.at) - new Date(block.at)) <= COMMAND_PAIR_WINDOW_MS,
@@ -250,8 +251,8 @@ function mergeResends(blocks) {
     const prev = merged.at(-1);
     const isResend =
       prev &&
-      prev.speaker === '사용자' &&
-      block.speaker === '사용자' &&
+      prev.speaker === SPEAKER_USER &&
+      block.speaker === SPEAKER_USER &&
       !block.queued &&
       new Date(block.at) - new Date(prev.at) <= RESEND_WINDOW_MS &&
       (block.text.startsWith(prev.text) || prev.text.startsWith(block.text));
@@ -314,7 +315,7 @@ function listSessions(cwd, tz) {
       const first = blocks[0];
       const last = blocks[blocks.length - 1];
       const minutes = Math.round((new Date(last.at) - new Date(first.at)) / 60000);
-      const opener = blocks.find((b) => b.speaker === '사용자') ?? first;
+      const opener = blocks.find((b) => b.speaker === SPEAKER_USER) ?? first;
       return {
         name,
         blocks: blocks.length,
