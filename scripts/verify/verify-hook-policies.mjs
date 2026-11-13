@@ -1043,6 +1043,9 @@ function runHookPayload(file, payload, { env } = {}) {
       stdio: ['pipe', 'pipe', 'pipe'],
       shell: false,
       windowsHide: true,
+      // 셸 폴더를 물려받으면 payload에 cwd가 없는 사례의 레포 등급이 검증을 돌린 폴더로 정해진다.
+      // FREE 레포(backlog 등)에서는 push 정책이 통째로 빠져 결과가 갈리므로 비-git 폴더로 고정한다.
+      cwd: os.tmpdir(),
       // 반드시 merge한다. 치환하면 PATH·SystemRoot·USERPROFILE이 사라져 훅 안의 git 호출이 전부
       // 실패하는데, 그 실패를 삼키고 통과시키는 훅이 있어(check-md-section-refs) 증상이 FAIL이
       // 아니라 '조용한 pass'로 나타난다.
