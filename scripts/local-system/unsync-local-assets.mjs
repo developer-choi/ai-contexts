@@ -44,7 +44,8 @@ function main() {
 
 // 배포 디렉토리 판정은 sync-local-assets.mjs와 같은 제외 집합을 쓴다. hooks는 settings projection이
 // .claude/hooks로 따로 처리하므로 제외. skills는 `.claude/skills/`가 커밋된 원본이라 지우면 안 된다.
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills']);
+// contexts는 배포하지 않으므로 지울 산출물이 없다(옛 사본은 sync가 지운다).
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills', 'contexts']);
 
 function localDeployDirs(repo) {
   const localDir = path.join(repo, 'local');

@@ -1,6 +1,6 @@
 # Local System Sync
 
-전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 자산**(cross-repo, contexts 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
+전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다 — **로컬 자산**(cross-repo, PP `agents` 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포 — AC + KA 등).
 
 ```bash
 npm run sync:local-system
@@ -18,7 +18,7 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ### 1. 로컬 자산 (cross-repo)
 
-- `local/` 하위 디렉토리(`contexts` 등, `hooks`·`skills` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다.
+- `local/` 하위 디렉토리(`agents` 등, `hooks`·`skills`·`contexts` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다. 옛 `.claude/contexts` 사본이 남아 있으면 지웁니다.
 - 지우고 다시 쓰지 않습니다. 내용이 다른 파일만 쓰고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 파일만 새로 뜹니다(1·2 공통).
 - 원본은 `local/`이며, `.claude/<X>`는 배포 산출물로 봅니다(gitignore).
 

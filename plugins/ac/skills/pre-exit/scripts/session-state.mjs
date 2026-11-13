@@ -271,9 +271,7 @@ function sourcePath(file) {
   if (!repo || !file.startsWith(`${repo.top}/`)) return file;
   // 워크트리 폴더가 아직 살아 있으면 toplevel이 그쪽을 가리켜 접두사가 안 남지만, 이미 지워졌으면
   // 조상까지 올라오느라 `.claude/worktrees/<브랜치>/`가 상대경로에 남는다. 두 경우를 같게 만든다.
-  const rel = file.slice(repo.top.length + 1).replace(/^\.?(claude\/)?worktrees\/[^/]+\//, '')
-    // 레포의 `.claude/contexts/`는 sync가 `local/contexts/`에서 복사한 사본이라 원본 자리로 되돌린다.
-    .replace(/^\.claude\/contexts\//, 'local/contexts/');
+  const rel = file.slice(repo.top.length + 1).replace(/^\.?(claude\/)?worktrees\/[^/]+\//, '');
   return `${repo.name}/${rel}`;
 }
 

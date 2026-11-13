@@ -647,6 +647,18 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
+    mdWrite('// hook\n', 'C:/repo/.claude/hooks/a.mjs'),
+    'ask',
+    '레포의 .claude/hooks는 산출물',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 문서\n', 'C:/repo/.claude/contexts/a.md'),
+    'pass',
+    '레포의 .claude/contexts는 더 이상 배포하지 않아 산출물이 아니다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
     mdWrite('# 규칙\n', 'C:/repo/AGENTS.md'),
     'pass',
     'AGENTS.md는 더 이상 배포 산출물이 아니다(레포가 손수 쓴 파일일 수 있다)',

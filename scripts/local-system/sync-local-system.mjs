@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // 로컬 배포(전역 sync:system의 로컬판). 한 명령으로 로컬 산출물 전부를 배포한다:
-//   1) 로컬 자산(contexts 등): 각 레포 local/<X> → .claude/<X>. hooks는 2)가 따로 투영하므로 제외.
+//   1) 로컬 자산(agents 등): 각 레포 local/<X> → .claude/<X>. hooks는 2)가 따로 투영하므로 제외.
 //   2) settings/hooks: base-settings를 가진 각 레포의 local/ 소스 → 그 레포의 repo-local
 //      .claude/settings.json·.claude/hooks/ (AC + KA 등 per-repo).
 //

@@ -146,15 +146,21 @@ try {
   const repo = path.join(root, 'repo');
   fs.mkdirSync(path.join(repo, '.git'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'skills', 'sample'), { recursive: true });
+  fs.mkdirSync(path.join(repo, 'local', 'agents'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'contexts'), { recursive: true });
   fs.mkdirSync(path.join(repo, 'local', 'hooks'), { recursive: true });
+  // contexts는 배포를 멈췄다. 그전에 배포된 옛 사본이 남아 있으면 sync가 지워야 한다.
+  const retiredCopy = path.join(repo, '.claude', 'contexts', 'old.md');
+  fs.mkdirSync(path.dirname(retiredCopy), { recursive: true });
+  fs.writeFileSync(retiredCopy, '# 옛 사본\n');
   fs.writeFileSync(path.join(repo, 'local', 'skills', 'sample', 'SKILL.md'), '---\ndescription: 남은 옛 원본\n---\n');
   // 스킬은 레포가 .claude/skills/에 커밋한다. local/skills가 남아 있어도 그것으로 덮어쓰면 안 된다.
   const committedSkill = path.join(repo, '.claude', 'skills', 'sample', 'SKILL.md');
   const committedText = '---\ndescription: 설명\n---\n\n# 제목\n';
   fs.mkdirSync(path.dirname(committedSkill), { recursive: true });
   fs.writeFileSync(committedSkill, committedText);
-  fs.writeFileSync(path.join(repo, 'local', 'contexts', 'a.md'), '# a\n');
+  fs.writeFileSync(path.join(repo, 'local', 'agents', 'a.md'), '# a\n');
+  fs.writeFileSync(path.join(repo, 'local', 'contexts', 'c.md'), '# c\n');
   fs.writeFileSync(path.join(repo, 'local', 'hooks', 'h.mjs'), '// hook\n');
   fs.writeFileSync(path.join(repo, 'local', 'base-settings.json'), '{ "hooks": [] }\n');
   fs.writeFileSync(path.join(repo, 'CLAUDE.md'), '# 레포\n');
@@ -176,14 +182,16 @@ try {
   check('.agents·AGENTS.md·GEMINI.md를 만들지 않음',
     ['.agents', 'AGENTS.md', 'GEMINI.md'].every((name) => !fs.existsSync(path.join(repo, name))));
   check('로컬 hook이 배포됨', fs.existsSync(path.join(repo, '.claude', 'hooks', 'h.mjs')));
+  check('local/agents가 배포됨', fs.existsSync(path.join(repo, '.claude', 'agents', 'a.md')));
+  check('local/contexts는 배포하지 않고 옛 .claude/contexts 사본은 지움', !fs.existsSync(path.join(repo, '.claude', 'contexts')));
   const localBefore = snapshotMtimes(repo);
   runLocal();
   check('모든 파일의 수정 시각이 그대로', changedMtimes(localBefore, snapshotMtimes(repo)).length === 0);
-  fs.rmSync(path.join(repo, 'local', 'contexts', 'a.md'));
+  fs.rmSync(path.join(repo, 'local', 'agents', 'a.md'));
   runLocal();
   // 고친 것은 원본(local/)이다 — 배포본 쪽 변화만 센다.
   const localTouched = changedMtimes(localBefore, snapshotMtimes(repo)).filter((rel) => !rel.startsWith(`local${path.sep}`));
-  check('지운 contexts만 바뀜', localTouched.length === 1 && localTouched[0].endsWith(path.join('contexts', 'a.md')));
+  check('지운 agents 파일만 바뀜', localTouched.length === 1 && localTouched[0].endsWith(path.join('agents', 'a.md')));
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

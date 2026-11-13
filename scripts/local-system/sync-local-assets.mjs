@@ -50,14 +50,27 @@ function main(opts = {}) {
 
 // local/ 하위에서 .claude/로 배포하는 디렉토리. hooks는 settings projection이 .claude/hooks로
 // 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
-// contexts는 배포한다. 원래 이유는 스킬 본문의 `../../contexts/...`가 배포본 옆에서 풀려야 해서였는데, 레포 스킬이
-// 원본 `local/contexts/`를 직접 가리키게 된 뒤로는 그 이유가 없어졌다. 배포를 걷을지는 따로 정한다.
-// 한때 사본이 세 벌 되는 것을 피하려 제외했는데, 제외해도 그전에 배포된 사본은 남고 sync가 더는
-// 덮어쓰지 않아 조용히 낡는다. KA가 그 상태로 2026-06-14자 규칙을 두 달간 읽었다(2026-08-14 발견).
-// 배포하면 sync마다 원본과 맞춰져 낡을 수 없고, 원본에서 사라진 파일은 sync가 지운다.
 // skills는 원본을 각 레포 `.claude/skills/`에 커밋해 Claude Code가 그대로 읽으므로 배포하지 않는다.
 // `local/skills`가 다시 생겨도 커밋된 스킬을 덮어쓰지 않게 막는다.
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills']);
+// contexts는 배포하지 않는다. 스킬 본문의 `../../contexts/...`가 배포본 옆에서 풀려야 해서 복사했는데,
+// 레포 스킬이 원본 `local/contexts/`를 직접 가리키게 된 뒤로 사본을 읽는 곳이 없다.
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills', 'contexts']);
+
+// 배포를 멈춘 폴더의 옛 사본. 제외만 하면 그전에 배포된 사본이 남고 아무도 덮어쓰지 않아 조용히 낡는다
+// (KA가 그 상태로 낡은 사본의 옛 규칙을 두 달간 읽었다). 그래서 sync가 지운다. 기기마다 sync를 한 번씩
+// 돌면 할 일이 끝나므로, 쓰는 기기 모두에서 사본이 사라진 뒤에는 이 목록과 removeRetiredDeployDirs를 걷어도 된다.
+const RETIRED_DEPLOY_DIRS = ['contexts'];
+
+function removeRetiredDeployDirs(repo) {
+  const removed = [];
+  for (const name of RETIRED_DEPLOY_DIRS) {
+    const target = path.join(repo, '.claude', name);
+    if (!existsDir(target)) continue;
+    fs.rmSync(target, { recursive: true, force: true });
+    removed.push(`.claude/${name}`);
+  }
+  return removed;
+}
 
 function localDeployDirs(repo) {
   const localDir = path.join(repo, 'local');
@@ -70,17 +83,19 @@ function localDeployDirs(repo) {
 }
 
 function syncRepo(repo) {
-  const deployDirs = localDeployDirs(repo);
-
-  if (deployDirs.length === 0) {
-    return { repo, status: 'skipped', detail: 'no local/ deploy dirs' };
-  }
-
   try {
+    const retired = removeRetiredDeployDirs(repo).map((directory) => `removed ${directory}`);
+    const deployDirs = localDeployDirs(repo);
+
+    if (deployDirs.length === 0) {
+      if (retired.length > 0) return { repo, status: 'synced', detail: retired.join(', ') };
+      return { repo, status: 'skipped', detail: 'no local/ deploy dirs' };
+    }
+
     const synced = [];
     const claudeDir = path.join(repo, '.claude');
     // 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일만 지운다(이유는 deploy-lib의 writeIfChanged 주석).
-    let changed = 0;
+    let changed = retired.length;
     for (const name of deployDirs) {
       const source = path.join(repo, 'local', name);
       const dest = path.join(claudeDir, name);
@@ -88,8 +103,9 @@ function syncRepo(repo) {
       changed += written.length + removed.length;
       synced.push(`local/${name} -> .claude/${name}`);
     }
-    if (changed === 0) return { repo, status: 'unchanged', detail: synced.join(', ') };
-    return { repo, status: 'synced', detail: synced.join(', ') };
+    const detail = [...synced, ...retired].join(', ');
+    if (changed === 0) return { repo, status: 'unchanged', detail };
+    return { repo, status: 'synced', detail };
   } catch (error) {
     return { repo, status: 'failed', detail: error.message };
   }
