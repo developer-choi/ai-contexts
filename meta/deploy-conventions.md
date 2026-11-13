@@ -39,6 +39,14 @@ settings/hooks를 뺀 repo-local 자산(스킬 등)은 claude·codex 공통이�
 
 배포가 스킬 md의 `{{skill_dir}}`·`{{contexts}}`와 규칙 md의 `{{contexts}}`를 타겟 절대 경로로 채운다(`deploy-lib.mjs`의 `withSkillDirPath`·`withSkillContextsPath`·`withContextsPath`). 자리표시자마다 왜 있고 어디로 채워지는지는 그 함수들과 `contextsDirForSkill` 위 주석이 정본이고, 계약은 `verify:skill-render`·`verify:skill-script-paths`·`compareRulePaths`가 고정한다. 렌더링을 바꾸면 그 검사를 함께 맞춘다.
 
+## plugin으로 옮긴 스킬
+
+`plugins/ac/skills/`의 스킬은 Claude Code plugin(AC 루트 `.claude-plugin/marketplace.json`의 `ac`)으로 설치되고 sync가 배포하지 않는다. 결정 근거는 커밋 `0a55b232` 본문에 있다.
+
+- marketplace는 directory 소스로 등록한다. Claude Code가 캐시가 아니라 원본 폴더를 읽어, 원본 수정이 sync·`plugin update` 없이 다음 세션에 반영된다
+- 이 경로에는 렌더링이 없다. 스킬 md에 `{{skill_dir}}`·`{{contexts}}` 대신 `${CLAUDE_SKILL_DIR}`를 적는다(Claude Code가 채운다)
+- sync는 settings.json에 `enabledPlugins`를 기록하지 않는다. `mergeSettings`가 top-level 키를 통째로 덮어 사용자가 켠 다른 plugin을 지우기 때문이다. 등록은 기기마다 `meta/INSTALLATION_GUIDE.md` 「새 머신 초기화」의 두 줄로 한다
+
 ## 배포 스크립트 변경 원칙
 
 - `sync:*`의 대상·동작이 바뀌면 같은 커밋에서 대응 `unsync:*`와 `meta/guides/`의 해당 가이드를 함께 맞춘다. 새 대상을 추가하면 `package.json`·`meta/guides/<target>.md`·`meta/guides/index.md`·`meta/INSTALLATION_GUIDE.md`도 맞추고, 가이드에는 수행 작업·제거 기준·반복 실행 기준을 적는다.

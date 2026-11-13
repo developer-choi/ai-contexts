@@ -11,6 +11,13 @@ npm run sync:system
 npm run sync:local-system
 ```
 
+`plugins/ac/`의 스킬은 sync가 아니라 Claude Code plugin으로 설치한다. 기기마다 한 번 실행한다.
+
+```bash
+claude plugin marketplace add ~/WebstormProjects/main/ai-contexts
+claude plugin install ac@ac
+```
+
 ## 평소 갱신
 
 전역 에이전트 규칙·스킬·hook을 갱신할 때는 시스템 자산만 다시 동기화합니다.
