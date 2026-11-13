@@ -10,12 +10,12 @@
 //   - frontmatter(`---`~`---`)를 뗀다. 첫 H1은 제목, 나머지는 본문이다.
 //   - frontmatter `type`이 pr-body가 아니면 멈춘다. 이 스크립트는 PR의 제목·본문을 통째로 덮어쓰므로,
 //     PR 코멘트처럼 같은 PR에 올리는 다른 글을 여기 넣으면 남의 PR 본문이 코멘트로 바뀐다.
-//   - 아래 중 하나라도 걸리면 게시하지 않고 멈춘다.
-//       `[//]: #` 주석 줄(채점기 --residual), 줄 중간에 남은 `[//]`, 채점기 기계 적발 합계 0 초과, 채점기의 PR 제목 적발,
-//       채점기의 번호 참조 링크 깨짐 적발, Claude Code 생성 표기 줄. 주석 줄은 반영하면 그 자리에서 지우는 것이라 남았으면
-//       처리 안 된 요청이고, 표기 줄은 사용자가 싣지 않기로 했고, 제목 기준과 링크 깨짐은 판단이 없는 형식이라 —
-//       넷 다 `--accept-residual`로도 넘기지 못한다. 대괄호는 버튼·UI 요소 이름(`[저장] 버튼`)에 쓰여 빈칸으로 보지 않는다.
+//   - 멈추는 조건 목록은 publish-pr.md에 있다. `--accept-residual`로도 못 넘기는 것은 처리 안 된 요청(남은 `[//]: #` 주석)이거나,
+//     사용자가 싣지 않기로 한 것(생성 표기 줄)이거나, 판단 없는 형식(제목 기준·번호 참조 링크 깨짐·렌더에 남은 기호)이라서다.
+//     대괄호는 버튼·UI 요소 이름(`[저장] 버튼`)에 쓰여 빈칸으로 보지 않는다.
 //   - 기본은 미리보기다. 게시는 따로 켜야 한다 — 확인 없이 남의 PR 본문을 덮지 않게.
+//
+// 시험용: PUBLISH_PR_GH=<node 스크립트 경로>를 설정하면 gh 대신 그 스크립트를 node로 실행한다(렌더 검사의 gh api markdown 포함).
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -82,10 +82,28 @@ function scoreRun(file) {
   return { total, titleLines: titleHits.map((h) => ` ${h}`), refLines: refHits.map((h) => ` ${h}`) };
 }
 
+// GitHub이 실제로 그린 본문에서 글자로 남은 `**`·`__`를 찾는다. 채점기는 원문만 읽어, 닫는 `**` 앞이 문장부호이고
+// 뒤에 글자가 붙은 자리(`**"…"**는`)처럼 GitHub에서 굵게가 닫히지 않는 꼴을 못 잡는다. 코드 안의 기호는 빼고 본다.
+function renderLeftovers(body, repo, gh) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "publish-pr-render-"));
+  const file = path.join(dir, "body.md");
+  fs.writeFileSync(file, body);
+  const ghArgs = ["api", "markdown", "-f", "mode=gfm", "-F", `text=@${file}`];
+  if (repo) ghArgs.push("-f", `context=${repo}`);
+  const run = gh(ghArgs, { encoding: "utf8" });
+  fs.rmSync(dir, { recursive: true, force: true });
+  if (run.error || run.status !== 0) return { error: (run.error?.message ?? run.stderr ?? "").trim() || `exit ${run.status}` };
+  const text = (run.stdout ?? "")
+    .replace(/<pre\b[^>]*>[\s\S]*?<\/pre>/g, "")
+    .replace(/<code\b[^>]*>[\s\S]*?<\/code>/g, "")
+    .replace(/<[^>]+>/g, "");
+  return { lines: text.split("\n").filter((line) => /\*\*|__/.test(line)).map((line) => line.trim()) };
+}
+
 function main() {
   const args = parseArgs(process.argv.slice(2));
-  if (!args.file || !args.pr) {
-    console.error(`패키지 경로나 --pr 번호가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/publish-pr.md`);
+  if (!args.file || (args.apply && !args.pr)) {
+    console.error(`패키지 경로가 없거나, --apply인데 --pr 번호가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/publish-pr.md`);
     process.exit(1);
   }
   const raw = fs.readFileSync(args.file, "utf8");
@@ -123,6 +141,19 @@ function main() {
         "--accept-residual로도 못 넘긴다. 형제 PR 본문 끝에 있던 것을 양식으로 보고 따라 붙였다면 패키지에서 그 줄을 지운다.",
     );
   }
+  const fakeGhScriptPath = process.env.PUBLISH_PR_GH;
+  const gh = (ghArgs, opts) =>
+    fakeGhScriptPath ? spawnSync(process.execPath, [fakeGhScriptPath, ...ghArgs], opts) : spawnSync("gh", ghArgs, opts);
+  const rendered = renderLeftovers(body, args.repo, gh);
+  if (rendered.error) {
+    stops.push(`GitHub 렌더 검사(gh api markdown)를 못 했다 — gh 로그인·네트워크를 확인하고 다시 실행한다: ${rendered.error}`);
+  }
+  for (const line of rendered.lines ?? []) {
+    stops.push(
+      `GitHub에서 마크다운 기호가 글자로 남는다 — --accept-residual로도 못 넘긴다.\n      ${line}\n      ` +
+        '닫는 `**` 바로 앞이 문장부호이고 뒤에 글자가 붙었으면 닫는 `**`를 글자 뒤로 옮긴다(`**"…"는 조건**을`).',
+    );
+  }
   if (total - titleLines.length - refLines.length > 0 && !args.acceptResidual) {
     stops.push(`채점기 기계 적발 합계가 ${total}건이다 — 고치거나, 사용자가 잔여를 받아들였으면 --accept-residual.`);
   }
@@ -134,9 +165,10 @@ function main() {
     process.exit(1);
   }
 
-  const target = [`#${args.pr}`, args.repo].filter(Boolean).join(" · ");
+  const target = [args.pr ? `#${args.pr}` : "PR 미정", args.repo].filter(Boolean).join(" · ");
   if (!args.apply) {
-    console.log(`\n미리보기다(${target}). 게시하려면 같은 명령에 --apply를 붙여 다시 실행한다.`);
+    const howToPublish = args.pr ? "같은 명령에 --apply를" : "PR을 연 뒤 같은 명령에 --pr <번호> --apply를";
+    console.log(`\n미리보기다(${target}). 게시하려면 ${howToPublish} 붙여 다시 실행한다.`);
     return;
   }
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "publish-pr-"));
@@ -144,10 +176,7 @@ function main() {
   fs.writeFileSync(bodyFile, body);
   const ghArgs = ["pr", "edit", String(args.pr), "--title", title, "--body-file", bodyFile];
   if (args.repo) ghArgs.push("--repo", args.repo);
-  const fake = process.env.PUBLISH_PR_GH;
-  const run = fake
-    ? spawnSync(process.execPath, [fake, ...ghArgs], { stdio: "inherit" })
-    : spawnSync("gh", ghArgs, { stdio: "inherit" });
+  const run = gh(ghArgs, { stdio: "inherit" });
   fs.rmSync(dir, { recursive: true, force: true });
   if (run.error) throw run.error;
   process.exit(run.status ?? 1);
