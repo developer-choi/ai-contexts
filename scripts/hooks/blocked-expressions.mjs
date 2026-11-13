@@ -14,6 +14,7 @@
 //   words      찾을 글자. 활용형은 저절로 늘지 않으니 잡을 꼴을 하나씩 적는다.
 //   match      PREFIX = 낱말 앞에 다른 글자가 붙지 않은 자리만 잡는다(뒤의 조사는 함께 잡힌다).
 //              SUBSTRING = 앞에 붙여 쓴 꼴까지 문자열이 들어 있으면 잡는다.
+//              SENTENCE_START = 문장 첫머리에서만 잡는다(경계는 check-wording.mjs `SENTENCE_START_BOUNDARY`).
 //   exclusions 걸려도 넘길 정상 쓰임. 각 꼴은 그 행의 낱말 하나를 품어야 한다.
 //   scope      PROMPT = 프롬프트 md(커밋 훅), DOC = write-doc 글과 커밋 메시지, BOTH = 둘 다.
 //              출신이 아니라 막는 까닭이 어느 글에서 성립하는지로 정한다(예: 물결표는 GitHub 렌더링 때문이라 DOC).
@@ -107,9 +108,9 @@ function checkList(rows) {
       const hit = seen.find(([other]) => overlaps(word, other));
       if (hit) problems.push(`${tag}: "${word}"가 ${hit[1]}의 "${hit[0]}"와 겹친다. 같은 자리가 두 번 걸린다`);
     }
-    // 한 행 안에서도 한 꼴이 다른 꼴이 이미 잡는 자리를 또 잡으면 두 번 걸린다. PREFIX는 앞이 같은 꼴만 겹친다.
+    // 한 행 안에서도 한 꼴이 다른 꼴이 이미 잡는 자리를 또 잡으면 두 번 걸린다. PREFIX·SENTENCE_START는 앞이 같은 꼴만 겹친다.
     words.forEach((word, wordIndex) => {
-      const covering = words.find((other, otherIndex) => otherIndex !== wordIndex && (row.match === "PREFIX" ? word.startsWith(other) : word.includes(other)));
+      const covering = words.find((other, otherIndex) => otherIndex !== wordIndex && (row.match === "SUBSTRING" ? word.includes(other) : word.startsWith(other)));
       if (covering) problems.push(`${tag}: "${word}"는 같은 행의 "${covering}"가 이미 잡는다. 빼거나 "${covering}"만 둔다`);
     });
     for (const word of words) seen.push([word, tag]);
@@ -249,12 +250,18 @@ function main(args) {
         .map((query) => {
           if (blockedHits([row], query).length > 0) {
             const weak = limits(row);
+            // 표현 하나를 한 줄로 대 보므로, 표현이 낱말로 시작하면 첫머리 행은 늘 걸린다. 문장 중간 쓰임까지 막는다고 읽히지 않게 알린다.
+            const startOnlyNotice =
+              row.match === "SENTENCE_START" ? ". 이 행은 문장 첫머리에서만 잡는다. 문장 중간에 쓴 말이면 앞말을 붙여 다시 --find한다" : "";
             return weak.length
-              ? `  "${query}": 잡지만 약함(이 행은 ${weak.join(", ")}). 더 세게 막으려면 --remove로 꺼내 고쳐 다시 넣는다`
-              : `  "${query}": 이미 잡음`;
+              ? `  "${query}": 잡지만 약함(이 행은 ${weak.join(", ")}). 더 세게 막으려면 --remove로 꺼내 고쳐 다시 넣는다${startOnlyNotice}`
+              : `  "${query}": 이미 잡음${startOnlyNotice}`;
           }
           if (hitsWord(row, query)) {
-            return `  "${query}": 겹치지만 안 잡음. --add는 겹침으로 거부하니, 이 행을 --remove로 꺼내 고쳐 다시 넣는다`;
+            // 첫머리 행이 문장 중간 쓰임을 안 잡는 것은 의도한 구분이다. 고치라고만 하면 행을 PREFIX로 넓혀 그 구분이 사라진다.
+            return row.match === "SENTENCE_START"
+              ? `  "${query}": 겹치지만 안 잡음. 이 행은 문장 첫머리에서만 잡으니 이 쓰임은 안 막힌다. --add는 같은 낱말을 겹침으로 거부하므로, 이 쓰임까지 막을지(--remove로 꺼내 match를 바꿔 다시 넣는다) 사용자에게 묻는다`
+              : `  "${query}": 겹치지만 안 잡음. --add는 겹침으로 거부하니, 이 행을 --remove로 꺼내 고쳐 다시 넣는다`;
           }
           return `  "${query}": 이 행의 대신 쓸 말과 겹친다(기존 것과 반대). 이 행의 instead를 고치는 안을 낸다`;
         });

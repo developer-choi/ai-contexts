@@ -172,7 +172,7 @@ const BLOCKED = {
 // 원본(AC `scripts/hooks/`)에서 돌든 사본(`~/.ai-contexts/`)에서 돌든 금지 표현 목록은 바로 옆에 있다.
 export const LIST_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "blocked-expressions.json");
 
-export const MATCH_TYPES = ["PREFIX", "SUBSTRING"];
+export const MATCH_TYPES = ["PREFIX", "SUBSTRING", "SENTENCE_START"];
 export const SCOPES = ["PROMPT", "BOTH", "DOC"];
 export const LANES = ["ALWAYS_BANNED", "NEEDS_REVIEW"];
 
@@ -195,11 +195,18 @@ export function loadBlockedRows(file = LIST_FILE) {
   }
 }
 
+// 문장 첫머리: 줄 맨 앞(목록 번호 `1.`·`1)`는 건너뛴다), 문장을 끝낸 `.!?` 뒤, 뒤에 공백·닫는 따옴표·괄호가 오는 `…` 뒤.
+// 그 사이에 낀 공백·따옴표·괄호·목록 기호도 건너뛴다. 「버전 2.사실은」(숫자 뒤 마침표)과 「그 일이…사실은」(문장 안
+// 말줄임표)은 경계로 보지 않는다. PP 채용 검사(cringe-corpus의 `^` 낱말)와 같은 경계다.
+const SENTENCE_START_BOUNDARY = String.raw`(?:^(?:\d+[.)])?|(?<!\d)[.!?]|…(?=[\s"'“”‘’)\]]))[\s"'“”‘’()\[\]\-–*]*`;
+
 // `PREFIX`는 낱말 앞만 막는다 — 뒤를 막으면 「눈금이」·「팔의」처럼 조사가 붙은 꼴을 다 놓친다.
 // `SUBSTRING`은 앞도 안 막아 「실행오라클」처럼 붙여 쓴 꼴까지 잡는다.
+// `SENTENCE_START`는 문장 첫머리에서만 잡는다. 「사실은」·「거기에」처럼 문장 한복판에서는 멀쩡한 말을 첫머리에서만 거른다.
 export function wordPattern(type, word) {
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   if (type === "SUBSTRING") return new RegExp(escaped, "gi");
+  if (type === "SENTENCE_START") return new RegExp(`(?<=${SENTENCE_START_BOUNDARY})${escaped}`, "gi");
   // 영어 낱말은 `_`·숫자 뒤도 막는다 — `[EMPATHY_SEAM]` 같은 식별자 조각이 `seam`으로 걸렸다.
   const before = /^[가-힣]/.test(word) ? H : /^[A-Za-z]/.test(word) ? "(?<![A-Za-z0-9_])" : "";
   return new RegExp(`${before}${escaped}`, "gi");

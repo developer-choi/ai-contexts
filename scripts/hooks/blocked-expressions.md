@@ -6,11 +6,12 @@
 
 ### 목록에 올리기
 
-`node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --add --match <PREFIX|SUBSTRING> --scope <PROMPT|BOTH|DOC> --lane <ALWAYS_BANNED|NEEDS_REVIEW> --words <말·활용형> --why <왜 막는가> --instead <대신 쓸 말> [--exclusions <꼴·꼴>] [--allow-zero]`
+`node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --add --match <PREFIX|SUBSTRING|SENTENCE_START> --scope <PROMPT|BOTH|DOC> --lane <ALWAYS_BANNED|NEEDS_REVIEW> --words <말·활용형> --why <왜 막는가> --instead <대신 쓸 말> [--exclusions <꼴·꼴>] [--allow-zero]`
 
 - `--match`
   - `PREFIX` 낱말 앞에 다른 글자가 붙지 않은 자리만 잡는다(뒤의 조사는 함께 잡힌다)
   - `SUBSTRING` 앞에 붙어 쓴 꼴까지, 문자열이 들어 있으면 잡는다
+  - `SENTENCE_START` 문장 첫머리에서만 잡는다(경계는 `check-wording.mjs`의 `SENTENCE_START_BOUNDARY`)
 - `--scope` `PROMPT` = 프롬프트 md, `DOC` = write-doc 글·커밋 메시지, `BOTH` = 둘 다. 출신이 아니라 막는 까닭이 어느 글에서 성립하는지로 정한다
 - `--lane` `ALWAYS_BANNED` = 어떤 쓰임이든 틀린 말, `NEEDS_REVIEW` = 쓰임에 따라 맞기도 한 말
 - `--match`·`--scope`·`--lane` 값은 소문자로 줘도 대문자로 저장한다
@@ -21,13 +22,13 @@
 
 scope가 `PROMPT`·`BOTH`이면 올리기 전에 그 행을 AC와, 현재 폴더가 속한 git 레포에서 커밋된 스킬·규칙 md에 대조한다. 한 줄도 안 걸리면 꼴이나 match를 잘못 적은 것으로 보고 거부한다. `DOC` 행은 대조하지 않는다.
 
-성공하면 `등재했다: <행> → <목록 경로>`를 내고, `DOC`이 아니면 `지금 걸리는 줄 N개`와 걸린 줄(10줄까지)을 낸다. 새로 막은 말을 다른 행이 대신 쓸 말로 권하고 있으면 `알림:` 줄로 그 행을 낸다.
+성공하면 `등재했다: <행> → <목록 경로>`를 출력하고, `DOC`이 아니면 `지금 걸리는 줄 N개`와 걸린 줄(10줄까지)을 출력한다. 새로 막은 말을 다른 행이 대신 쓸 말로 권하고 있으면 `알림:` 줄로 그 행을 출력한다.
 
 ### 겹침 찾기
 
 `node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --find <표현>... [--scope <PROMPT|BOTH|DOC>] [--lane <ALWAYS_BANNED|NEEDS_REVIEW>]`
 
-새 표현이 기존 행의 낱말과 한쪽이 다른 쪽 속에 든 꼴로 겹치거나 대신 쓸 말 하나와 같으면 그 행과, 표현마다 그 행이 이미 잡는지를 낸다. 이번에 정한 scope·lane을 주면 기존 행이 그만큼 막을 때만 이미 잡음으로 본다. 겹치는 행이 없으면 `겹치는 행 없음`.
+새 표현이 기존 행의 낱말과 한쪽이 다른 쪽 속에 든 꼴로 겹치거나 대신 쓸 말 하나와 같으면 그 행과, 표현마다 그 행이 이미 잡는지를 출력한다. 이번에 정한 scope·lane을 넘기면 기존 행이 그만큼 막을 때만 이미 잡음으로 본다. 겹치는 행이 없으면 `겹치는 행 없음`.
 
 ### 예외 꼴 추가
 
@@ -39,7 +40,7 @@ scope가 `PROMPT`·`BOTH`이면 올리기 전에 그 행을 AC와, 현재 폴더
 
 `node ~/WebstormProjects/main/ai-contexts/scripts/hooks/blocked-expressions.mjs --remove --word <목록에 있는 낱말>`
 
-그 낱말을 가진 행을 통째로 지우고, 지운 행 JSON을 낸다. 행을 고칠 때는 꺼내 고쳐 `--add`로 다시 넣는다.
+그 낱말을 가진 행을 통째로 지우고, 지운 행 JSON을 출력한다. 행을 고칠 때는 꺼내 고쳐 `--add`로 다시 넣는다.
 
 ### 검사
 
