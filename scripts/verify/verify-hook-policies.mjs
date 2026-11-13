@@ -22,6 +22,7 @@ import { repoLocalEnvVars } from '../lib/git-env.mjs';
 for (const name of repoLocalEnvVars()) delete process.env[name];
 
 const hooksDir = path.join(import.meta.dirname, '..', '..', 'deploy', 'hooks');
+const hookScriptsDir = path.join(import.meta.dirname, '..', 'hooks');
 
 // 케이스마다 node를 새로 띄우는 검증이라 스폰 개수가 곧 실행시간이다(173건 × 45~105ms ≈ 18초).
 // 서로 독립인 케이스를 겹쳐 돌리되, 훅은 그대로 별도 프로세스로 띄운다 — 훅을 import해서
@@ -1216,6 +1217,15 @@ async function withFreeRepoFixture(fn) {
         await runGit(['add', 'b.txt'], dir);
         await runGit([...COMMIT_AS, 'commit', '-q', '-m', 'tidy-probe', 'b.txt'], dir);
         await runGit(['checkout', '-q', 'main'], dir);
+        // 프롬프트 md를 더하는 브랜치(prompt-review 줄 요구)와, 그 md가 낱말 검사에 걸리는 브랜치(경고 정리 줄 요구).
+        for (const [branch, body] of [['docs-clean', '# 문서\n\n깨끗한 문장이다.\n'], ['docs-warn', '# 문서\n\n대시 — 가 걸린다.\n']]) {
+          await runGit(['checkout', '-q', '-b', branch, 'main'], dir);
+          fs.mkdirSync(path.join(dir, 'deploy', 'contexts'), { recursive: true });
+          fs.writeFileSync(path.join(dir, 'deploy', 'contexts', 'probe.md'), body);
+          await runGit(['add', 'deploy/contexts/probe.md'], dir);
+          await runGit([...COMMIT_AS, 'commit', '-q', '-m', `${branch}-probe`, 'deploy/contexts/probe.md'], dir);
+          await runGit(['checkout', '-q', 'main'], dir);
+        }
       }
       made[name] = dir.replace(/\\/g, '/');
     }));
@@ -1461,6 +1471,36 @@ const freeRepoCases = (repos) => {
     'deny',
     '요약이 넉넉해도 「커밋 정리:」 줄이 없으면 커밋 목록과 함께 돌려보낸다',
     { description: '무엇: feature\n왜: 시험\n확인: 통과\n되돌리기: revert', reasonIncludes: ['커밋 정리:', 'tidy-probe'] },
+  ],
+  // 프롬프트 md가 들어가는 머지는 「prompt-review:」 줄을, 경고형 검사에 걸리는 파일이 들어가는 머지는
+  // 「경고 정리:」 줄을 요구한다. md가 없는 feature 머지는 위 케이스처럼 두 줄 없이 승인 창이 뜬다.
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge docs-clean`,
+    'deny',
+    '프롬프트 md가 들어가는 머지는 「prompt-review:」 줄이 없으면 그 md 목록과 함께 돌려보낸다',
+    { reasonIncludes: ['prompt-review:', 'deploy/contexts/probe.md'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge docs-clean`,
+    'ask',
+    '「prompt-review:」 줄이 있고 경고가 없으면 승인 창',
+    { description: `${MERGE_SUMMARY}\nprompt-review: probe.md 새 지적 0건` },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge docs-warn`,
+    'deny',
+    '경고형 검사에 걸리는 파일이 들어가면 「경고 정리:」 줄이 없을 때 걸린 내용과 함께 돌려보낸다',
+    { description: `${MERGE_SUMMARY}\nprompt-review: probe.md 새 지적 0건`, reasonIncludes: ['경고 정리:', 'check-wording.mjs', 'probe.md'] },
+  ],
+  [
+    'check-git-merge-policy.mjs',
+    `git -C ${gated} merge docs-warn`,
+    'ask',
+    '「경고 정리:」 줄이 있으면 승인 창',
+    { description: `${MERGE_SUMMARY}\nprompt-review: probe.md 새 지적 0건\n경고 정리: 대시는 별도 커밋으로 고침` },
   ],
   [
     'check-git-merge-policy.mjs',
@@ -1927,7 +1967,8 @@ const freeRepoGroup = () => withFreeRepoFixture((repos) =>
       ...(agentId ? { agent_id: agentId } : {}),
       ...(sessionCwd ? { cwd: sessionCwd } : {}),
     };
-    const { decision, reason = '', stderr } = await runHookPayload(file, payload);
+    // 머지 훅이 다시 돌리는 경고형 검사는 기기의 배포 사본이 아니라 이 체크아웃의 원본으로 잰다.
+    const { decision, reason = '', stderr } = await runHookPayload(file, payload, { env: { AI_CONTEXTS_HOOK_SCRIPTS_DIR: hookScriptsDir } });
     const label = `${file} :: ${command}${agentId ? ' [서브에이전트]' : ''}${sessionCwd ? ` [세션 ${sessionCwd}]` : ''} → ${expected} (${note})`;
     const missing = reasonIncludes.filter((word) => !reason.includes(word));
     return judge(label, decision, expected, stderr, {

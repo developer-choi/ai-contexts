@@ -1,5 +1,7 @@
-import { execFileSync, execSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { execFileSync, execSync, spawnSync } from "node:child_process";
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { allInFreeRepos, originRepoName, repoTier } from "./repo-tiers.mjs";
 import { findGitInvocations, invocationCwd } from "./git-command-parser.mjs";
 import { ask, deny, getCommand, getCwd, lacksTidyLine, readPayload, tidyRequest } from "./hook-utils.mjs";
@@ -61,6 +63,40 @@ const lacksSummary = (payload) => {
 
 // 머지로 들어갈 커밋을 정리했다는 줄(hook-utils의 lacksTidyLine)도 요구한다. 작업 중 쌓인
 // 「앞 커밋 문구를 고치는 커밋」이 그대로 보호 브랜치에 들어갈 뻔한 적이 있다(2026-09-30 AC, 승인 창에서 사용자가 거절).
+
+// 프롬프트·문서 md가 들어가는 머지는 prompt-review를 거쳤다는 줄을 요구한다. 절차(run-backlog 실행 모드의
+// 점검 단계)가 정해 둔 리뷰를 건너뛰고 머지한 적이 있다(2026-11-13 AC 048787da, 사용자가 롤백).
+// 리뷰를 실제로 했는지는 훅이 판정하지 못한다 — 막는 것은 결과를 적지 않고 머지하는 것까지다.
+const REVIEW_LINE = /^\s*prompt-review:/m;
+const REVIEW_REQUEST = (docs) =>
+  "머지로 들어갈 변경에 프롬프트·문서 md가 있습니다. 머지 전에 이 md들을 /prompt-review로 리뷰하고 새 지적이 0건이 될 때까지 반영한 뒤, " +
+  "description에 `prompt-review:`로 시작하는 줄로 리뷰한 md와 결과를 적어 같은 명령을 다시 내세요. " +
+  "넣지 않은 지적이 있으면 지적마다 근거를 적습니다. 판단이 어려운 것만 사용자에게 가져가고, 사실 오류는 묻지 않고 고칩니다.\n" +
+  [...new Set(docs)].map((doc) => `  ${doc}`).join("\n");
+// 레포를 가리지 않고 프롬프트·문서로 보는 md. 스크립트 짝 md도 사용법 문서라 넣는다.
+const PROMPT_DOC_DIRS = /^(deploy|plugins|local|meta\/guides)\/|\/(skills|rules|contexts|scripts)\//;
+const PROMPT_DOC_NAMES = /(^|\/)(CLAUDE|AGENTS|GEMINI|SKILL)\.md$/i;
+function isPromptDoc(file) {
+  return file.endsWith(".md") && (PROMPT_DOC_DIRS.test(file) || PROMPT_DOC_NAMES.test(file) || /^scripts\//.test(file));
+}
+
+// 커밋 때 경고만 하는 전역 훅(scripts/environment/precommit-hooks.mjs)은 걸려도 커밋이 그대로 들어가,
+// 경고를 안 고친 채 머지된다. 머지로 들어갈 파일에 같은 검사를 다시 돌려, 걸린 것이 있으면 별도 커밋으로
+// 고쳤거나 남긴 근거를 적은 줄을 요구한다. 파일 내용은 들어갈 브랜치 끝의 것으로 잰다.
+const WARNING_LINE = /^\s*경고 정리:/m;
+const WARNING_REQUEST = (warnings) =>
+  "머지로 들어갈 파일에 커밋 때 경고만 하고 넘어간 검사가 걸립니다. 고칠 것은 별도 커밋으로 고친 뒤, " +
+  "description에 `경고 정리:`로 시작하는 줄로 무엇을 고쳤고 무엇을 왜 남겼는지 적어 같은 명령을 다시 내세요. " +
+  "고칠 일이 크게 늘면 그 범위를 사용자에게 먼저 알립니다.\n" +
+  warnings.join("\n");
+// 검사 사본 자리. 회귀 검사(verify-hook-policies)는 배포 전 원본으로 돌리려고 환경 변수로 바꾼다.
+const AI_CONTEXTS_DIR = process.env.AI_CONTEXTS_HOOK_SCRIPTS_DIR || path.join(os.homedir(), ".ai-contexts");
+// 「적중 없음」을 내는 report 모드 검사와, 의심이 있으면 exit 1인 폴더 모드 검사. 사본이 없는 검사는 건너뛴다.
+const WARNING_CHECKS = [
+  { script: "check-wording.mjs", files: (f) => f.endsWith(".md"), args: (f) => ["--report", f], hit: (r) => !r.stdout.includes("적중 없음") },
+  { script: "check-count-hardcoding.mjs", files: (f) => f.endsWith(".md"), args: (f) => ["--report", f], hit: (r) => !r.stdout.includes("적중 없음") },
+  { script: "verify-cli-usage.mjs", files: (f) => f.endsWith(".mjs"), args: (f) => [f], hit: (r) => r.status === 1 && r.stderr.includes("의심") },
+];
 
 // 판정 불가로 차단할 때의 안내. MERGE_MSG·MERGE_ASK와 분리한다 — 그 둘은 보호 브랜치를 건드린다고 판정된
 // 뒤의 안내이고, 여기서 걸린 명령은 아직 그걸 모르는 상태라 "경로를 통째로 적어 다시 실행하라"가 답이다.
@@ -135,6 +171,13 @@ for (const sub of ["merge", "pull", "rebase", "cherry-pick"]) {
 // 서브에이전트는 ask()가 어차피 거부하고 메인에 넘기므로 요약을 요구하지 않는다.
 if (merges.length > 0 && !payload.agent_id && lacksSummary(payload)) deny(MERGE_NEEDS_SUMMARY);
 if (merges.length > 0 && !payload.agent_id && lacksTidyLine(payload)) deny(tidyRequest("머지", merges.map(incomingCommits)));
+if (merges.length > 0 && !payload.agent_id) {
+  const changed = merges.map((merge) => ({ merge, files: incomingFiles(merge) }));
+  const promptDocs = changed.flatMap(({ files }) => files.filter(isPromptDoc));
+  if (promptDocs.length > 0 && !descriptionHas(payload, REVIEW_LINE)) deny(REVIEW_REQUEST(promptDocs));
+  const warnings = changed.flatMap(({ merge, files }) => warningsAt(merge, files));
+  if (warnings.length > 0 && !descriptionHas(payload, WARNING_LINE)) deny(WARNING_REQUEST(warnings));
+}
 if (merges.length > 0) ask(merges.map(MERGE_ASK).join(" / "));
 
 process.exit(0);
@@ -153,6 +196,66 @@ function incomingCommits({ repo, branch, source, gitOpts }) {
     return `${head} (목록을 못 뽑았습니다 — \`git log --oneline ${branch}..${source}\`로 직접 보세요)`;
   }
 }
+function descriptionHas(payload, line) {
+  const description = payload.tool_input?.description;
+  return line.test(typeof description === "string" ? description : "");
+}
+
+// 머지로 들어갈 브랜치가 보호 브랜치와 갈라진 뒤 더하거나 바꾼 파일. 못 읽으면 빈 목록이다 — 이 검사는
+// 머지 판정이 아니라 요구할 줄을 고르는 데만 쓰여, 못 읽었다고 막지 않는다.
+function incomingFiles({ branch, source, gitOpts }) {
+  if (source === "upstream" || source.includes(",")) return [];
+  try {
+    const out = execFileSync("git", ["diff", "--name-only", "--diff-filter=ACMR", `${branch}...${source}`], gitOpts).toString();
+    return out.split("\n").map((line) => line.trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+// 들어갈 브랜치 끝의 파일을 임시 폴더에 꺼내(짝 md도 함께) 경고형 검사를 돌린다. 걸린 출력만 모은다.
+function warningsAt({ source, gitOpts }, files) {
+  const checks = WARNING_CHECKS.filter((check) => existsSync(path.join(AI_CONTEXTS_DIR, check.script)));
+  const targets = files.filter((file) => checks.some((check) => check.files(file)));
+  if (checks.length === 0 || targets.length === 0) return [];
+  const dir = mkdtempSync(path.join(os.tmpdir(), "merge-warnings-"));
+  try {
+    const extract = (file) => {
+      try {
+        const body = execFileSync("git", ["show", `${source}:${file}`], { ...gitOpts, maxBuffer: 1024 * 1024 * 32 });
+        const out = path.join(dir, file);
+        mkdirSync(path.dirname(out), { recursive: true });
+        writeFileSync(out, body);
+        return out;
+      } catch {
+        return null;
+      }
+    };
+    for (const file of targets) {
+      extract(file);
+      if (file.endsWith(".mjs")) extract(file.replace(/\.mjs$/, ".md"));
+    }
+    const found = [];
+    for (const check of checks) {
+      for (const file of targets.filter(check.files)) {
+        const local = path.join(dir, file);
+        if (!existsSync(local)) continue;
+        const result = spawnSync(process.execPath, [path.join(AI_CONTEXTS_DIR, check.script), ...check.args(local)], {
+          cwd: dir,
+          encoding: "utf8",
+          timeout: 20000,
+        });
+        if (result.error || !check.hit(result)) continue;
+        const text = `${result.stdout}${result.stderr}`.split(dir).join("").replace(/\\/g, "/");
+        found.push(`[${check.script}] ${file}\n${text.trim().split("\n").slice(0, 12).join("\n")}`);
+      }
+    }
+    return found;
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 function stripRef(value) {
   return value.replace(/^refs\/heads\//, "");
 }
