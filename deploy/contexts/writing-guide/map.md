@@ -10,5 +10,5 @@
 - 글 종류 하나에만 거는 것: `types/<type>/`
   - 골격 예시: `template.md` (`guide.md`에 함께 두어도 된다)
   - 그 종류의 작성 규칙: `guide.md`
-  - 그 종류의 파일이 쓰는 자료: 그 type 폴더 안
+  - 그 종류의 파일이 사용하는 자료: 그 type 폴더 안
   - subtype에만 거는 작성 규칙: `types/<type>/<subtype>/guide.md`
