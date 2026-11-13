@@ -226,6 +226,16 @@ function classify(target, slugMap) {
   return { kind: "in-repo", filePath: decodeURIComponent(filePath), anchor };
 }
 
+// plugin 스킬은 contexts를 sync 배포 자리(`~/.claude/contexts/…`)로 가리킨다. 그 배포본의 원본은 이 레포의
+// `deploy/contexts/`이므로 그리로 풀어 파일·앵커를 본다. 원본이 없는 레포에서는 레포 상대경로로 둔다.
+const DEPLOYED_CONTEXTS = /^~\/\.claude\/contexts(?=\/|$)/;
+function resolveLinkPath(fromAbs, filePath, root) {
+  if (DEPLOYED_CONTEXTS.test(filePath) && fs.existsSync(path.join(root, "deploy", "contexts"))) {
+    return path.join(root, "deploy", "contexts", filePath.replace(DEPLOYED_CONTEXTS, ""));
+  }
+  return path.resolve(path.dirname(fromAbs), filePath);
+}
+
 // ── 검사 ────────────────────────────────────────────────────
 // 헤딩 슬러그 캐시(파일 절대경로 → Set). 없는 파일은 null 캐시.
 function makeSlugCache() {
@@ -288,7 +298,7 @@ function scan(repoRoots) {
       for (const { target, line } of extractLinks(text)) {
         const c = classify(target, slugMap);
         if (c.kind === "in-repo") {
-          const to = toPosix(path.relative(root, path.resolve(path.dirname(abs), c.filePath)));
+          const to = toPosix(path.relative(root, resolveLinkPath(abs, c.filePath, root)));
           addRef(rel, to, line, "링크");
           if (fs.existsSync(path.join(root, to)) && fs.statSync(path.join(root, to)).isDirectory()) linkedDirs.add(to);
         }
@@ -306,7 +316,7 @@ function scan(repoRoots) {
           continue;
         }
         if (c.kind === "in-repo") {
-          const targetAbs = path.resolve(path.dirname(abs), c.filePath);
+          const targetAbs = resolveLinkPath(abs, c.filePath, root);
           const targetRel = toPosix(path.relative(root, targetAbs));
           if (targetRel.startsWith("..")) {
             broken.push({ ...rec, category: "in-repo", reason: "repo 경계 밖 상대경로" });

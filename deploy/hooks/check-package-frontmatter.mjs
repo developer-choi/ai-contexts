@@ -9,7 +9,7 @@
 // 없다. 저장 결과 텍스트의 맨 앞 frontmatter에 type이 있고 값이 패키지 어휘일 때만 발동한다.
 // 코드펜스 안의 예시(package-format.md의 샘플)는 맨 앞이 아니므로 걸리지 않는다.
 //
-// 어휘의 단일 출처: type 목록은 deploy/skills/write-doc/SKILL.md
+// 어휘의 단일 출처: type 목록은 plugins/ac/skills/write-doc/SKILL.md
 // 「입력」 표, 필드 목록은 package-format.md. 둘이 바뀌면 여기도 함께 고친다.
 //
 // deny(ask 아님)인 이유: 필수 필드가 빈 패키지는 다음 세션에서 write-doc으로 이 패키지를 다시 다듬을 때 출발할 수 없어

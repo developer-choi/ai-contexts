@@ -27,7 +27,7 @@ function collect(dir, found = []) {
 const local = process.argv.includes('--local');
 const scanned = local
   ? listLocalRepos().map((repo) => ({ repo, dirs: ['local/skills'] }))
-  : [{ repo: repoRoot, dirs: ['deploy/skills', 'local/skills'] }];
+  : [{ repo: repoRoot, dirs: ['plugins/ac/skills', 'local/skills'] }];
 
 const files = scanned.flatMap(({ repo, dirs }) =>
   dirs.flatMap((dir) => collect(path.join(repo, dir)).map((file) => ({ repo, file }))),

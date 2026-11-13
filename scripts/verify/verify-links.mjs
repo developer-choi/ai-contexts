@@ -73,6 +73,13 @@ function setupFixture() {
   fs.mkdirSync(path.join(TMP, "types"), { recursive: true });
   for (const n of ["x", "y", "z", "w"]) fs.writeFileSync(path.join(TMP, "types", `${n}.md`), `# ${n}\n`);
   fs.writeFileSync(path.join(TMP, "types-index.md"), "[types/](types/) 중 types/x.md, types/y.md, types/z.md\n");
+  // plugin 스킬이 쓰는 contexts 배포 자리 링크. 이 레포의 deploy/contexts로 풀려 파일·앵커가 검사돼야 한다.
+  fs.mkdirSync(path.join(TMP, "deploy", "contexts"), { recursive: true });
+  fs.writeFileSync(path.join(TMP, "deploy", "contexts", "ctx.md"), "# Ctx\n\n## Part\n");
+  fs.writeFileSync(
+    path.join(TMP, "skill", "ctx-ref.md"),
+    "[ok](~/.claude/contexts/ctx.md#part) [bad](~/.claude/contexts/ctx.md#none) [gone](~/.claude/contexts/gone.md)\n",
+  );
   execFileSync("git", ["init", "-q", TMP], { stdio: "pipe" });
   git(["remote", "add", "origin", "https://github.com/developer-choi/fixture-repo.git"], TMP);
   git(["add", "-A"], TMP);
@@ -143,6 +150,15 @@ check("오탐 없음 — 이중 백틱 인라인 코드 안 링크 미검사", (
 );
 check("인라인 코드 뒤 진짜 링크는 여전히 검사", () =>
   assert.ok(broken.some((b) => b.category === "in-repo" && b.target === "docs/gone-after-code.md"), JSON.stringify(broken)),
+);
+check("~/.claude/contexts 링크 — deploy/contexts로 풀려 유효 앵커는 통과", () =>
+  assert.ok(!broken.some((b) => b.target === "~/.claude/contexts/ctx.md#part"), JSON.stringify(broken)),
+);
+check("~/.claude/contexts 링크 — 없는 앵커 검출", () =>
+  assert.ok(broken.some((b) => b.target === "~/.claude/contexts/ctx.md#none"), JSON.stringify(broken)),
+);
+check("~/.claude/contexts 링크 — 없는 파일 검출", () =>
+  assert.ok(broken.some((b) => b.target === "~/.claude/contexts/gone.md" && b.category === "in-repo"), JSON.stringify(broken)),
 );
 check("README 깨진 링크는 readme=true로 분류", () =>
   assert.ok(broken.filter((b) => b.target === "#nonexistent").every((b) => b.readme)),

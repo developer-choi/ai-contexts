@@ -3,8 +3,8 @@
     {
       "name": "독자 리뷰어 지시 — reader.md 인용 ↔ 입력 조립",
       "files": [
-        "deploy/skills/write-doc/reviewers/reader.md",
-        "deploy/skills/write-doc/scripts/reviewer-input.mjs",
+        "plugins/ac/skills/write-doc/reviewers/reader.md",
+        "plugins/ac/skills/write-doc/scripts/reviewer-input.mjs",
         "deploy/contexts/writing-guide/common.md"
       ],
       "note": "reviewer-input.mjs가 reader.md 「리뷰어에게 주는 지시」 절의 > 인용을 긁어 독자 리뷰어 프롬프트로 낸다. 절 이름이나 인용 꼴을 바꾸면 스크립트가 지시를 못 찾아 멈춘다. 지시에 frontmatter 값을 쓰게 바꾸면 스크립트가 그 필드도 넘기게 맞춘다. 지시의 독자(채용담당자)는 common.md 「독자는 채용담당자」의 사본이다 — 리뷰어가 규칙 문서를 못 읽게 막아 두어 사본이 불가피하다. 독자를 바꾸면 지시도 맞춘다."
@@ -15,19 +15,19 @@
         "scripts/hooks/blocked-expressions.mjs",
         "scripts/hooks/blocked-expressions.json",
         "scripts/hooks/check-wording.mjs",
-        "deploy/skills/write-doc/scripts/rejected.mjs",
-        "deploy/skills/write-doc/steps/finish.md"
+        "plugins/ac/skills/write-doc/scripts/rejected.mjs",
+        "plugins/ac/skills/write-doc/steps/finish.md"
       ],
       "note": "blocked-expressions.mjs 머리 주석의 행 꼴이 정본이고 같은 스크립트가 목록을 검사한다(pre-commit). 커밋 훅(check-wording.mjs)은 scope PROMPT·BOTH 행을, rejected.mjs는 DOC·BOTH 행을 같은 매칭(blockedHits)으로 읽는다. 키나 값(scope·lane·match)을 바꾸면 검사·두 읽는 쪽·기존 행을 함께 맞춘다. 검사만 고치면 기존 행이 커밋에서 막히고, 읽는 쪽만 고치면 행이 조용히 안 걸린다. finish.md 반려 적재의 화면 꼴(레인을 항상 막음과 쓰임을 보고 고침으로 옮긴 말)도 이 꼴의 사본이라 레인을 바꾸면 함께 고친다."
     },
     {
       "name": "글쓰기 패키지 type 어휘 — 표 ↔ 훅 ↔ 채점기",
       "files": [
-        "deploy/skills/write-doc/SKILL.md",
+        "plugins/ac/skills/write-doc/SKILL.md",
         "deploy/hooks/writing-package.mjs",
         "deploy/hooks/check-package-frontmatter.mjs",
-        "deploy/skills/write-doc/scripts/score.mjs",
-        "deploy/skills/write-doc/scripts/publish-file.mjs"
+        "plugins/ac/skills/write-doc/scripts/score.mjs",
+        "plugins/ac/skills/write-doc/scripts/publish-file.mjs"
       ],
       "note": "type 어휘가 세 곳에 산다 — write-doc SKILL.md 「입력」 표(정본), 훅 쪽(패키지 훅들이 함께 쓰는 writing-package.mjs의 PACKAGE_TYPES), 채점기(score.mjs)의 내부 작업이력 면제 type·subtype 목록과 이모지 금지 type 목록. 훅은 배포돼 나가는 파일이라 스킬 md를 읽어 쓸 수 없어 사본이 불가피하다. 표에 type을 더하고 훅을 안 고치면 그 type의 패키지는 어휘 밖으로 저장이 막힌다(check-package-frontmatter의 looksLikePackage). 반대로 훅에만 더하면 어휘가 문서에 없어 아무도 그 값을 안 쓴다. 어휘를 바꾸면 표와 훅을 함께 고치고 verify-hook-policies에 케이스를 넣는다. 채점기 목록은 type을 더하거나 이름을 바꾸거나 지울 때 함께 맞춘다 — PR·커밋 링크를 근거로 싣는 새 type은 내부 작업이력 면제 목록에 더한다. check-package-frontmatter의 필수 필드(type 밖)를 바꾸면 publish-file.mjs의 PACKAGE_ONLY_FIELDS도 맞춘다 — 커밋된 원본에 패키지 필드가 섞였는지 그 목록으로 가린다."
     },
@@ -123,8 +123,8 @@
       "files": [
         "deploy/contexts/writing-guide/map.md",
         "deploy/contexts/writing-guide/**",
-        "deploy/skills/write-doc/scripts/guide-files.mjs",
-        "deploy/skills/write-doc/steps/draft.md"
+        "plugins/ac/skills/write-doc/scripts/guide-files.mjs",
+        "plugins/ac/skills/write-doc/steps/draft.md"
       ],
       "note": "이 폴더의 파일을 언제 읽을지는 write-doc `scripts/guide-files.mjs`가 정본이다 — 초안·다듬기·마무리 메인이 Read할 파일(write-doc `types/<type>/steps.md` 포함)과 표현 리뷰어에게 넘길 경로(늘 넘길 것과 조건부)를 단계마다 낸다. 예외로 본문을 보고 고르는 파일은 고르는 쪽 문서에 남는다 — tradeoff-guide는 초안 단계(steps/draft.md)와 다듬기 「1. 파악」(steps/polish.md)에도 있다. 이 폴더에 파일을 더하거나 지우거나 여는 조건을 바꾸면 스크립트를 고치고, 초안 단계의 남은 참조가 실제 파일과 맞는지 본다 — 어긋나면 리뷰어가 그 파일을 못 읽는 것으로만 드러나 조용하다. 탐색을 전제한 절차는 검색이 막히는 CLI에서 통째로 불발되므로(`contexts/prompt-standards/cross-cli.md`) map.md에 로드 목록도 분류 태그도 두지 않는다 — map.md가 정하는 것은 새 자산을 어디에 두는가(「역할」)뿐이다. 아무도 안 부르는 파일은 이 폴더에 있어도 안 읽힌다."
     },
@@ -145,8 +145,8 @@
     {
       "name": "세션 transcript 파싱 함정 목록",
       "files": [
-        "deploy/skills/workflow/session-timeline/scripts/extract-timeline.mjs",
-        "deploy/skills/pre-exit/scripts/session-state.mjs"
+        "plugins/ac/skills/workflow/session-timeline/scripts/extract-timeline.mjs",
+        "plugins/ac/skills/pre-exit/scripts/session-state.mjs"
       ],
       "note": "jsonl을 직접 열어보지 않으면 모르는 함정들(메타 주입·tool_result만 든 user 엔트리·래퍼 태그째 들어오는 슬래시 명령·백그라운드 알림의 두 가지 래핑·local-command 출력·입력창 재전송·작업 중 큐로 들어와 type=user 줄이 안 생기는 메시지)이 두 파일에 각각 적혀 있다. extract-timeline은 AI 발화까지 담은 타임라인을 렌더하고 session-state의 user-turns는 사용자 발화만 번호 붙여 내는지라 출력과 병합 정책이 달라 한 함수로 못 묶었다 — 게다가 둘 다 배포돼 나가는 스킬 스크립트라 공용 모듈을 둘 자리가 없다. 새 함정을 한쪽에서 발견하면 다른 쪽에도 넣는다. 안 그러면 한쪽 산출물에만 주입이 '사용자 발화'로 새고, 그 사실은 산출물을 눈으로 훑기 전까지 안 드러난다. 주입 목록은 양쪽 모두 파일 안에 INJECTED 상수로 서 있고, 줄 첫머리 마커만 잡는다 — 본문 중간에 인용된 같은 글자에는 안 걸린다. 두 목록이 어긋나면 같은 세션에 두 산출물이 다른 발화 수를 낸다. 다만 **글자까지 같아야 하는 것은 아니다** — 한쪽에만 있는 꼴을 다른 쪽에서는 앞선 분기가 이미 덮기도 한다(extract-timeline의 stripLocalCommandOutput·COMPACT_PREFIX가 그렇다). 목록을 나란히 놓고 차이를 어긋남으로 판정하지 말고, 그 꼴이 실제로 산출물에 발화로 실리는지 돌려서 확인한 뒤 옮긴다. 안 그러면 중복이 들어가고 먼저 있던 분기가 죽은 코드가 된다."
     },
@@ -171,30 +171,30 @@
     {
       "name": "workflow 세션 인자 규칙 — steps.mjs resolveArgs ↔ 호출 설명·BG 인자 확정",
       "files": [
-        "deploy/skills/workflow/scripts/steps.mjs",
-        "deploy/skills/workflow/SKILL.md",
-        "deploy/skills/workflow/conventions/session-args.md"
+        "plugins/ac/skills/workflow/scripts/steps.mjs",
+        "plugins/ac/skills/workflow/SKILL.md",
+        "plugins/ac/skills/workflow/conventions/session-args.md"
       ],
       "note": "세션 인자 규칙(모드 값 셋, 개인 모드 접두어 필수, plan 기본값 개인 `plan/<접두어>`·그 밖 `plan`, 메인 레포 루트 기준)의 정본은 steps.mjs resolveArgs·defaultPlan이다. 사용자가 `/workflow`를 칠 때 넣을 값을 알아야 해서 SKILL.md 「호출」과 argument-hint에 요약을 두고, BG 인자 확정(session-args.md)은 무엇이 필수인지를 보고 묻는다. 스크립트 규칙을 바꾸면 두 문서의 요약도 맞춘다. 안 맞추면 사용자가 옛 규칙대로 값을 넣다가 start에서 막히거나, 확정 구간이 필수 값을 빼고 물어 start가 실패하는 왕복이 생긴다."
     },
     {
       "name": "requirement-review 회고 재료 — review-material 출력·파일 패턴 ↔ 회고 보강의 인용",
       "files": [
-        "deploy/skills/pre-exit/scripts/session-state.mjs",
-        "deploy/skills/pre-exit/augmentations/requirement-review.md",
-        "deploy/skills/workflow/requirement-review/free-review.md",
-        "deploy/skills/workflow/requirement-review/SKILL.md",
-        "deploy/skills/workflow/requirement-review/page-review.md",
-        "deploy/skills/workflow/requirement-review/recruitment/step.md"
+        "plugins/ac/skills/pre-exit/scripts/session-state.mjs",
+        "plugins/ac/skills/pre-exit/augmentations/requirement-review.md",
+        "plugins/ac/skills/workflow/requirement-review/free-review.md",
+        "plugins/ac/skills/workflow/requirement-review/SKILL.md",
+        "plugins/ac/skills/workflow/requirement-review/page-review.md",
+        "plugins/ac/skills/workflow/requirement-review/recruitment/step.md"
       ],
       "note": "회고 보강이 `review-material`의 절 라벨(「적용한 체크리스트」·「page·global 이력」·「자유 검토 보고」)을 글자 그대로 인용해 재료를 읽는다. 스크립트는 requirement-review 쪽 파일 이름을 패턴으로 박아 둔다 — `RR_SKILL`(스킬 본문 경로, 메뉴 판정의 read와 한 벌)·`RR_STEP`(step 파일 page-review.md·recruitment/step.md, 편집 감지만)·`RR_CHECKLIST`(기획·디자인별 `checklist/`와 `page-type/`)·`RR_FREE_REVIEW`(자유 검토 문서 이름, 옛 이름 retrospect.md 포함)·`RR_PAGE`(plan 산출물 이름). requirement-review는 이 회고를 모르는 단방향이라 그쪽에는 알릴 자리가 없다. 그래서 스킬 본문·자유 검토 문서·체크리스트 폴더(새 체크리스트 폴더를 더할 때 포함)·page 산출물의 이름이나 위치를 바꾸거나 출력 라벨을 바꾸면 스크립트 패턴과 보강 문구를 함께 고친다. 안 고치면 재료가 「없음」으로 나와 회고가 건너뛰거나 메뉴에서 항목이 사라지고, 그 사실은 아무 데도 안 남는다."
     },
     {
       "name": "workflow 별도 세션 방아쇠 — 정본 ↔ 요약 두 곳 ↔ 전역 예 두 곳",
       "files": [
-        "deploy/skills/workflow/conventions/side-session.md",
-        "deploy/skills/workflow/SKILL.md",
-        "deploy/skills/workflow/scripts/steps.mjs",
+        "plugins/ac/skills/workflow/conventions/side-session.md",
+        "plugins/ac/skills/workflow/SKILL.md",
+        "plugins/ac/skills/workflow/scripts/steps.mjs",
         "deploy/CLAUDE.md",
         "deploy/rules/global.md"
       ],
@@ -204,7 +204,7 @@
       "name": "pr-body 가이드 ↔ 채점기",
       "files": [
         "deploy/contexts/writing-guide/types/pr-body/guide.md",
-        "deploy/skills/write-doc/scripts/score.mjs"
+        "plugins/ac/skills/write-doc/scripts/score.mjs"
       ],
       "note": "PR 제목의 기계 기준(끝 마침표·conventional commit 접두사·공백 포함 길이 상한)이 두 곳에 산다 — 초안 단계가 제목을 지을 때 읽는 pr-body 가이드 「PR 제목」과, 다듬기 0-루프와 게시 스크립트가 쓰는 score.mjs의 checkTitle(CONVENTIONAL_PREFIX·TITLE_MAX). 가이드는 제목을 짓기 전에 기준을 알아야 해서 숫자를 지울 수 없다. 한쪽만 바꾸면 초안에서 맞춘 제목이 다듬기에서 걸리거나, 기준을 어긴 제목이 그냥 지나간다. 기준을 바꾸면 둘 다 고친다. 가이드 「넣지 않는 것」의 「일반 PR이면」 범위와 항목도 score.mjs internalCounts(채용 PR을 합계에서 빼는 판정)·INTERNAL과 짝이다 — 가이드는 INTERNAL 정규식이 놓치는 꼴이 있는 PR 번호·브랜치명만 적고, 거의 다 잡히는 커밋 해시는 채점기만 본다. 범위나 정규식을 바꾸면 가이드 항목도 맞춘다."
     }

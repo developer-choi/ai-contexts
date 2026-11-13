@@ -839,10 +839,11 @@ const TOOL_CASES = [
   ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: '파일-정리' } }, 'deny', 'EnterWorktree 한글 이름'],
   ['check-git-ref-slug.mjs', { tool_name: 'EnterWorktree', tool_input: { name: 'file-layout' } }, 'pass', 'EnterWorktree 영문 슬러그'],
   // code-review는 메인만 돈다. 서브에이전트의 도구 호출에만 agent_id가 실려 온다.
-  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' }, agent_id: 'a4bec0644659e5080', agent_type: 'general-purpose' }, 'deny', '서브에이전트가 code-review → 차단'],
-  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: '/code-review' }, agent_id: 'areviewer-e97f90164e618f3d' }, 'deny', '앞에 슬래시가 붙어도 차단'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'ac:code-review' }, agent_id: 'a4bec0644659e5080', agent_type: 'general-purpose' }, 'deny', '서브에이전트가 ac:code-review → 차단'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: '/ac:code-review' }, agent_id: 'areviewer-e97f90164e618f3d' }, 'deny', '앞에 슬래시가 붙어도 차단'],
   ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'apps/web:code-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '접두가 붙은 다른 code-review는 통과'],
-  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' } }, 'pass', '메인이 code-review → 통과'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'ac:code-review' } }, 'pass', '메인이 ac:code-review → 통과'],
+  ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'code-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '접두 없는 code-review(Claude Code 내장)는 통과'],
   ['check-code-review-caller.mjs', { tool_name: 'Skill', tool_input: { skill: 'prompt-review' }, agent_id: 'a4bec0644659e5080' }, 'pass', '서브에이전트의 다른 스킬 → 통과'],
   // added-comments.mjs는 code-review 리뷰어만 돌린다. 레포 원본을 시험하는 실행은 통과.
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff main...HEAD | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', '메인이 배포된 스크립트 실행 → 차단'],
@@ -850,11 +851,11 @@ const TOOL_CASES = [
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff main...HEAD | node --no-warnings /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', 'node 옵션이 끼어도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'PowerShell', tool_input: { command: 'git diff main...HEAD | node "C:\\Users\\John Doe\\.claude\\skills\\code-review\\scripts\\added-comments.mjs"' } }, 'deny', '따옴표 안 경로에 공백이 있어도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff main...HEAD | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' }, agent_id: 'areviewer-e97f90164e618f3d' }, 'pass', '리뷰어 팀원의 실행 → 통과'],
-  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff HEAD~1 | node deploy/skills/code-review/scripts/added-comments.mjs' } }, 'pass', '레포 원본 시험 실행 → 통과'],
-  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git log --oneline -- deploy/skills/code-review/scripts/added-comments.mjs' } }, 'pass', '스크립트 이름만 든 git 명령 → 통과'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff HEAD~1 | node plugins/ac/skills/code-review/scripts/added-comments.mjs' } }, 'pass', '레포 원본 시험 실행 → 통과'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git log --oneline -- plugins/ac/skills/code-review/scripts/added-comments.mjs' } }, 'pass', '스크립트 이름만 든 git 명령 → 통과'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git commit a.md -m "메인은 node {{skill_dir}}/scripts/added-comments.mjs 를 돌리지 않는다"' } }, 'pass', '커밋 메시지 안의 인용은 실행이 아니다'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'rg -n "node .*added-comments.mjs" deploy' } }, 'pass', '검색어 안의 인용은 실행이 아니다'],
-  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs; ls deploy/skills/code-review/scripts/added-comments.mjs' } }, 'deny', '원본 경로를 곁들여 적어도 배포본 실행은 차단'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs; ls plugins/ac/skills/code-review/scripts/added-comments.mjs' } }, 'deny', '원본 경로를 곁들여 적어도 배포본 실행은 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'Monitor', tool_input: { command: 'git diff | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', 'Monitor로 실행해도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'PowerShell', tool_input: { command: 'git diff | & node "C:\\Users\\u\\.claude\\skills\\code-review\\scripts\\added-comments.mjs"' } }, 'deny', 'PowerShell 호출 연산자를 붙여도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | NODE_NO_WARNINGS=1 node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', '환경변수를 앞에 붙여도 차단'],
@@ -862,7 +863,10 @@ const TOOL_CASES = [
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'env FOO=1 node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', 'env로 감싸도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: '(git diff | node /home/u/.claude/skills/code-review/scripts/added-comments.mjs)' } }, 'deny', '서브셸 괄호 안이어도 차단'],
   ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | time node /home/u/.claude/skills/code-review/scripts/added-comments.mjs' } }, 'deny', 'time으로 감싸도 차단'],
-  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: '(git diff | node deploy/skills/code-review/scripts/added-comments.mjs)' } }, 'pass', '서브셸 안의 레포 원본 시험 실행 → 통과'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: '(git diff | node plugins/ac/skills/code-review/scripts/added-comments.mjs)' } }, 'pass', '서브셸 안의 레포 원본 시험 실행 → 통과'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | node /c/Users/u/WebstormProjects/main/ai-contexts/plugins/ac/skills/code-review/scripts/added-comments.mjs' } }, 'deny', 'plugin 원본을 절대 경로로(스킬이 내는 꼴) 실행 → 차단'],
+  ['check-added-comments-caller.mjs', { tool_name: 'PowerShell', tool_input: { command: 'git diff | node "C:\\Users\\u\\WebstormProjects\\main\\ai-contexts\\plugins\\ac\\skills\\code-review\\scripts\\added-comments.mjs"' } }, 'deny', 'plugin 원본 절대 경로를 PowerShell로 실행 → 차단'],
+  ['check-added-comments-caller.mjs', { tool_name: 'Bash', tool_input: { command: 'git diff | node ./plugins/ac/skills/code-review/scripts/added-comments.mjs' } }, 'pass', './로 시작하는 레포 상대 경로 시험 실행 → 통과'],
 
   // 측정 에이전트에 기대가 새는 것을 막는다. 「측정 지시서」로 여는 프롬프트는 표만 담아야 한다.
   [
@@ -2262,7 +2266,7 @@ const skillCreatorGroup = async () => {
     const bench = 'C:/Users/u/.claude/skills/prompt-review/benching/SKILL.md';
     const cases = [
       [read(bench, fresh), 'context', '안 부른 세션이 벤치 문서를 열면 알린다'],
-      [read('C:/repo/deploy/skills/prompt-review/benching/SKILL.md', fresh), 'context', '원본 경로로 열어도 알린다'],
+      [read('C:/repo/plugins/ac/skills/prompt-review/benching/SKILL.md', fresh), 'context', '원본 경로로 열어도 알린다'],
       [read(bench, loaded), 'pass', '이미 부른 세션은 조용하다'],
       [read(bench, path.join(dir, 'none.jsonl')), 'context', '기록을 못 읽으면 알리는 쪽으로 기운다'],
       [read('C:/Users/u/.claude/skills/prompt-review/SKILL.md', fresh), 'pass', 'prompt-review 본문만 연 것은 벤치 회차가 아니다'],

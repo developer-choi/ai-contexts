@@ -11,7 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-const script = path.join(import.meta.dirname, '..', '..', 'deploy', 'skills', 'pre-exit', 'scripts', 'session-state.mjs');
+const script = path.join(import.meta.dirname, '..', '..', 'plugins', 'ac', 'skills', 'pre-exit', 'scripts', 'session-state.mjs');
 
 const THRESHOLD = { read: 3, unusedRatio: 0.4 };
 const today = new Date().toISOString().slice(0, 10);

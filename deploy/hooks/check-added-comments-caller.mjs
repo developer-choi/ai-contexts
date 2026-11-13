@@ -6,13 +6,15 @@ import { deny, getCommand, readPayload } from "./hook-utils.mjs";
 // 서브에이전트·in-process 팀원의 도구 호출에만 payload에 agent_id가 실려 오므로 그것으로 가른다
 // (2026-11-11 실측: 메인·이름 없는 서브에이전트·이름 있는 팀원이 같은 셸 훅에서 갈림).
 // 실행만 본다 — 명령 단위로 나눠 앞붙임을 걷은 뒤 첫 토큰이 node인 것만 잡아, 커밋 메시지·검색어 안의 인용은 통과시킨다.
-// 레포 원본 경로(deploy/skills/code-review/…)를 적어 돌리는 것은 스크립트를 고치며 시험하는 일이라 막지 않는다.
+// AC 안에서 레포 상대 경로(plugins/ac/skills/code-review/…)로 돌리는 것은 스크립트를 고치며 시험하는 일이라 막지 않는다.
+// 절대 경로는 막는다 — code-review는 plugin 원본을 `${CLAUDE_SKILL_DIR}`(절대 경로)로 부르므로, 원본 폴더 이름으로
+// 가르면 스킬이 내는 실행까지 통과한다.
 // 명령 치환·`bash -c`·단일 `&` 안의 실행과, 옵션·인자가 붙은 감싸기 명령(`time -p`·`timeout 60` 등)은 보지 않는다 — 메인이 미리 볼 때 쓰는 모양은 code-review가 리뷰어
 // 지시문에 넣는 완성 명령이라, 그 꼴이 바뀌면 이 판정 범위도 다시 본다.
 const NODE = /(?:^|[\\/])node(?:\.exe)?$/i;
 const SCRIPT = /added-comments\.mjs$/;
 const WRAPPERS = new Set(["", "&", "env", "time", "command", "exec"]);
-const SOURCE = /deploy[\\/]skills[\\/]code-review[\\/]scripts[\\/]added-comments\.mjs$/;
+const SOURCE = /^(?:\.[\\/])?plugins[\\/]ac[\\/]skills[\\/]code-review[\\/]scripts[\\/]added-comments\.mjs$/;
 
 function runsDeployedScript(command) {
   return splitSegments(command).some((seg) => {

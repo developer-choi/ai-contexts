@@ -54,7 +54,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import { findGitInvocations, normalizeCwd } from "./git-command-parser.mjs";
-import { addContext, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { acMarketplaceRoot, addContext, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
 
 // `[절 이름](상대경로.md#앵커)` — 앵커가 대상 파일에 없으면 차단 대상.
 const ANCHOR_LINK = /\[([^\]]*)\]\(([^)\s#]+\.md)#([^)\s]+)\)/g;
@@ -622,21 +622,22 @@ function sectionResolves(section, loose) {
   return loose.has(slug(cleaned)) || loose.has(slug(cutTail(cleaned))) || loose.has(slug(headOf(cleaned)));
 }
 
-// 이 기기에서 `/이름`으로 부를 수 있는 것 — 레포·전역의 커맨드 파일과 스킬 폴더.
-// 빌트인 커맨드(`/compact` 등)와 플러그인 스킬은 여기에 안 잡히므로 이 검사는 차단이 아니라
+// 이 기기에서 `/이름`으로 부를 수 있는 것 — 레포·전역의 커맨드 파일과 스킬 폴더, AC plugin(`ac`) 스킬.
+// 빌트인 커맨드(`/compact` 등)와 다른 플러그인 스킬은 여기에 안 잡히므로 이 검사는 차단이 아니라
 // 알림이다. 목록을 손으로 채우면 하네스가 커맨드를 늘릴 때마다 조용히 낡는다.
 function knownCommands(root) {
   if (commandCache && commandCache.root === root) return commandCache.names;
   const names = new Set(BUILTIN_COMMANDS);
   const home = process.env.USERPROFILE || process.env.HOME || "";
-  const roots = [root, ...(home ? [path.join(home, ".claude")] : [])];
+  const acRoot = acMarketplaceRoot();
+  const roots = [root, ...(home ? [path.join(home, ".claude")] : []), ...(acRoot ? [acRoot] : [])];
   for (const base of roots) {
     for (const dir of ["commands", ".claude/commands"]) {
       for (const f of listDir(path.join(base, ...dir.split("/")))) {
         if (f.toLowerCase().endsWith(".md")) names.add(f.replace(/\.md$/i, ""));
       }
     }
-    for (const dir of ["skills", ".claude/skills", "local/skills", "deploy/skills"]) {
+    for (const dir of ["skills", ".claude/skills", "local/skills", "deploy/skills", "plugins/ac/skills"]) {
       for (const f of listDir(path.join(base, ...dir.split("/")))) names.add(f);
     }
   }

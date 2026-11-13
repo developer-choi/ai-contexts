@@ -1,5 +1,31 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
+
+// write-doc 스킬 scripts/ 아래 파일의 경로. 없으면 null이다(부르는 쪽이 그 검사만 건너뛴다).
+// write-doc은 plugin `ac`(plugins/ac/skills)에 있고 훅은 아직 sync가 `<타겟>/hooks`에 배포해, 훅 기준 상대 경로로는
+// 안 닿는다. 그래서 차례로 본다: 훅이 plugin 안으로 옮겨진 뒤의 형제 skills, 이 훅이 든 AC 체크아웃 원본(회귀표·개발),
+// Claude Code marketplace 등록 정보(known_marketplaces.json의 `ac`)가 가리키는 AC 원본.
+export function writeDocScript(name) {
+  const candidates = [
+    path.join(import.meta.dirname, "..", "skills", "write-doc", "scripts", name),
+    path.join(import.meta.dirname, "..", "..", "plugins", "ac", "skills", "write-doc", "scripts", name),
+  ];
+  const acRoot = acMarketplaceRoot();
+  if (acRoot) candidates.push(path.join(acRoot, "plugins", "ac", "skills", "write-doc", "scripts", name));
+  return candidates.find((file) => fs.existsSync(file)) ?? null;
+}
+
+// Claude Code에 directory marketplace `ac`로 등록된 AC 원본 폴더. 등록 정보가 없는 기기면 null이다.
+export function acMarketplaceRoot() {
+  try {
+    const configDir = process.env.CLAUDE_CONFIG_DIR ?? path.join(os.homedir(), ".claude");
+    const marketplaces = JSON.parse(fs.readFileSync(path.join(configDir, "plugins", "known_marketplaces.json"), "utf8"));
+    return marketplaces.ac?.installLocation ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // ask()가 호출자를 가르려고 기억해 둔다. 훅마다 페이로드를 넘기게 하면 빠뜨린 훅에서 조용히 ask가 남는다.
 let lastPayload = null;

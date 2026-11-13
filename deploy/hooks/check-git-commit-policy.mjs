@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   COMMIT_VALUED_FLAGS,
   commitShortFlagChars,
@@ -11,7 +12,7 @@ import {
   splitSegments,
   stripRedirections,
 } from "./git-command-parser.mjs";
-import { ask, deny, getCommand, getCwd, readPayload } from "./hook-utils.mjs";
+import { ask, deny, getCommand, getCwd, readPayload, writeDocScript } from "./hook-utils.mjs";
 import { findLeaks, isUnderRecruitment } from "./recruitment-commit-guard.mjs";
 
 // 커밋 명령 자체의 정책. staging 대상 지정(add/-a)은 check-git-staging-policy.mjs 담당.
@@ -161,9 +162,9 @@ async function rejectedInMessage() {
   let rows;
   let findListHits;
   try {
-    // 소스(deploy/hooks)와 배포본(<타겟>/hooks) 둘 다 한 단계 위가 skills의 부모다. 정적 import로 두면 write-doc이
-    // 없는 기기에서 훅 전체가 죽어 위의 커밋 정책까지 함께 꺼진다 — 그래서 이 검사만 건너뛰게 동적으로 읽는다.
-    const mod = await import("../skills/write-doc/scripts/rejected.mjs");
+    // 정적 import로 두면 write-doc이 없는 기기에서 훅 전체가 죽어 위의 커밋 정책까지 함께 꺼진다 — 그래서 이 검사만
+    // 건너뛰게 동적으로 읽는다.
+    const mod = await import(pathToFileURL(writeDocScript("rejected.mjs")).href);
     rows = mod.loadDocRows().rows;
     findListHits = mod.findListHits;
   } catch {

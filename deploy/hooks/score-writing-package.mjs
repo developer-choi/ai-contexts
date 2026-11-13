@@ -9,11 +9,10 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { addContext, getToolName, readPayload } from "./hook-utils.mjs";
+import { addContext, getToolName, readPayload, writeDocScript } from "./hook-utils.mjs";
 import { PACKAGE_TYPES, parseFrontmatter } from "./writing-package.mjs";
 
-// 소스(deploy/hooks)와 배포본(<타겟>/hooks) 둘 다 한 단계 위가 skills의 부모다.
-const SCORE = path.resolve(import.meta.dirname, "..", "skills", "write-doc", "scripts", "score.mjs");
+const SCORE = writeDocScript("score.mjs");
 
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
@@ -43,7 +42,7 @@ function pickBlocks(out) {
 const payload = readPayload();
 const file = payload?.tool_input?.file_path;
 if (!EDIT_TOOLS.has(getToolName(payload)) || typeof file !== "string" || !/\.md$/i.test(file)) process.exit(0);
-if (!fs.existsSync(SCORE)) process.exit(0);
+if (!SCORE) process.exit(0);
 
 let text;
 try {

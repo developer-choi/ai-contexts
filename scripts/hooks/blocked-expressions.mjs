@@ -7,7 +7,7 @@
 // 「사용자가 못 알아본 말은 금지 표현 목록에 올릴지 묻는다」와 write-doc 마무리 단계가 정한다.
 //
 // 이 목록 하나를 세 곳이 읽는다. 프롬프트 md 커밋 훅(check-wording.mjs), write-doc 채점과 리뷰어 입력
-// (`deploy/skills/write-doc/scripts/rejected.mjs`), Claude 커밋 메시지 훅(check-git-commit-policy.mjs).
+// (`plugins/ac/skills/write-doc/scripts/rejected.mjs`), Claude 커밋 메시지 훅(check-git-commit-policy.mjs).
 // 목적은 모두 사람이 읽기 쉬운 글이고, 어느 글에 거는지는 행의 `scope`가 정한다.
 //
 // 행의 꼴 (키는 이 일곱 개뿐이다):

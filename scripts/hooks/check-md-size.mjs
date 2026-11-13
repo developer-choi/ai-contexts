@@ -72,7 +72,7 @@ const MAX_REPORTS = 20;
 // 규격이 아닌 md(보관 글·지식 글 예시)는 `exclude`로 뺀다. 빠진 자리는 가리키는 것도 세지 않는다.
 function isRoot(rel) {
   const isRuleFile = rel === "CLAUDE.md" || rel.endsWith("/CLAUDE.md");
-  return isRuleFile || rel.startsWith("local/") || rel.startsWith("deploy/");
+  return isRuleFile || rel.startsWith("local/") || rel.startsWith("deploy/") || rel.startsWith("plugins/");
 }
 
 // 잴 후보 = exclude 밖의 md 전부. 실제로 잴지는 measure가 참조를 따라가 정한다.
@@ -589,7 +589,7 @@ function reportFile(target) {
   // 설정이 없어도 재는 데는 지장이 없다 — 제외 목록만 비는 것이라 그 사실을 함께 낸다.
   const config = readConfig(repo);
   const exclude = config?.exclude ?? [];
-  const outOfScope = `${rel} — 검사 대상 밖이다 (CLAUDE.md·local/·deploy/ 하위 md와 그 md들이 가리키는 md만 재고, 설정의 exclude는 뺀다).`;
+  const outOfScope = `${rel} — 검사 대상 밖이다 (CLAUDE.md·local/·deploy/·plugins/ 하위 md와 그 md들이 가리키는 md만 재고, 설정의 exclude는 뺀다).`;
   if (!isCandidate(rel, exclude)) {
     console.log(outOfScope);
     return;
@@ -752,7 +752,19 @@ function sectionsReport(t) {
 const DIRECTIVE_RE = /연다|열고|열어|열기|\bRead\b|읽는다|읽고|읽어|읽힌|로드|실행|적용|호출|부른다|불러/;
 // `/스킬명` 호출. 뒤에 `/`가 이어지면 URL·경로 조각이라 뺀다.
 const SKILL_RE = /(?:^|[\s`'"(])\/([a-z][a-z0-9-]*)(?=[`'")\s,.:]|$)/g;
-const SKILL_DIRS = [".claude/skills", "local/skills", "deploy/skills"];
+const SKILL_DIRS = [".claude/skills", "local/skills", "deploy/skills", "plugins/ac/skills"];
+
+// AC 전역 스킬은 Claude Code plugin `ac`(directory marketplace)로 설치돼 `~/.claude/skills`에 없다.
+// 등록 정보(known_marketplaces.json)가 가리키는 AC 원본 폴더를 돌려준다. 없으면 null.
+function acMarketplaceRoot(home) {
+  try {
+    const configDir = process.env.CLAUDE_CONFIG_DIR ?? path.join(home, ".claude");
+    const file = path.join(configDir, "plugins", "known_marketplaces.json");
+    return JSON.parse(fs.readFileSync(file, "utf8")).ac?.installLocation ?? null;
+  } catch {
+    return null;
+  }
+}
 
 // 레포 루트. `.git`이 없는 폴더(옛 커밋을 풀어놓은 곳)는 스킬·문서 폴더(`local/`·`deploy/`)가
 // 있는 가장 가까운 위 폴더를 루트로 친다(`.claude/`는 홈 폴더에도 있어 뺀다). 못 찾으면 null이고, 그때는 대상 파일의 폴더 밖으로 안 나간다 —
@@ -811,8 +823,10 @@ function traceReport(t) {
     return { shown: clean, size: null };
   };
   const resolveSkill = (name) => {
+    const acRoot = acMarketplaceRoot(home);
     const cands = [
       ...(root ? SKILL_DIRS.map((p) => [path.join(root, p), ""]) : []),
+      ...(acRoot ? [[path.join(acRoot, "plugins", "ac", "skills"), " (plugin ac)"]] : []),
       [path.join(home, ".claude", "skills"), " (설치본)"],
     ];
     for (const [base, note] of cands) {

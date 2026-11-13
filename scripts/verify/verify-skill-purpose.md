@@ -4,8 +4,8 @@
 
 ## 인자
 
-- 없음 — AC 자신의 `deploy/skills`·`local/skills` 아래 `SKILL.md`를 본다
-- `--local` 배포가 닿는 모든 레포(`~/WebstormProjects/main`·`~/WebstormProjects/my-else`의 직속 git 레포)의 `local/skills`를 본다. AC 자신의 `deploy/skills`는 안 본다
+- 없음 — AC 자신의 `plugins/ac/skills`·`local/skills` 아래 `SKILL.md`를 본다
+- `--local` 배포가 닿는 모든 레포(`~/WebstormProjects/main`·`~/WebstormProjects/my-else`의 직속 git 레포)의 `local/skills`를 본다. AC 자신의 `plugins/ac/skills`는 안 본다
 
 그 밖의 인자는 읽지 않는다.
 

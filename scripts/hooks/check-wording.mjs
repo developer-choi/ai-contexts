@@ -98,7 +98,7 @@ const CATEGORIES = [
 ];
 
 // 엔터 없이 한 줄로 길게 몰아 쓴 문단·리스트 항목. 낱말이 아니라 줄 길이를 재서 패턴 범주와 따로 둔다.
-// 셈법은 write-doc 채점기(`deploy/skills/write-doc/scripts/score.mjs` `checkLongLines`)와 같다 —
+// 셈법은 write-doc 채점기(`plugins/ac/skills/write-doc/scripts/score.mjs` `checkLongLines`)와 같다 —
 // 링크 URL·HTML 태그는 읽히지 않으니 빼고, 리스트 기호도 뺀다. 이 파일은 홀로 복사돼 돌아 사본으로 둔다.
 //
 // 문턱 200자: AC 프롬프트 md의 실제 줄 표본(154~412자)을 사용자가 보고 정했다. 채점기(180자)보다
