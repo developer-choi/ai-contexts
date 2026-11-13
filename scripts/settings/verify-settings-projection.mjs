@@ -90,7 +90,7 @@ function main() {
     'claude: PreToolUse가 Bash/Agent로 분리됨');
 
   // search-edit(on) 항목은 배열 매처 fan-out으로 탐색·쓰기 네 도구 전부에 등록된다
-  // (쓰기는 백스톱 — Write/Edit으로는 폴더 CLAUDE.md가 자동 로드되지 않는다)
+  // (쓰기는 대상이 cwd 안이면 훅이 건너뛰고 밖일 때만 알린다 — 다른 레포의 CLAUDE.md는 Write/Edit으로 로드되지 않는다)
   check(['Glob', 'Grep', 'Edit', 'Write'].every((m) =>
     claudePre.some((h) => h.matcher === m && h.file === 'surface-claude-md.mjs')),
     'claude: surface-claude-md가 Glob·Grep·Edit·Write 매처로 fan-out 등록됨');

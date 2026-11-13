@@ -4,13 +4,14 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { readPayload, getCwd, getSessionId, addContext } from "./hook-utils.mjs";
 
-// 하위 디렉터리 CLAUDE.md는 그 폴더 파일을 Read할 때만 로드된다(실측 2026-06-12~13:
-// Glob/Grep·Write·서브에이전트로는 미로드). 배치·네이밍을 결정하는 계획 단계의 주력
-// 도구가 Glob/Grep이라 폴더 규칙이 결정보다 늦게 도착한다 — 탐색 시점에 대상 경로의
-// 미로드 CLAUDE.md "경로만" 주입해(본문 0) 선읽기를 유도한다. 도구는 차단하지 않는다.
+// cwd 아래 하위 디렉터리 CLAUDE.md는 그 폴더 파일을 Read·Write할 때 본문째 로드되고
+// (Edit은 Read를 선행한다), Glob/Grep으로는 로드되지 않는다. cwd 밖 다른 레포의 CLAUDE.md는
+// Read·Write로도 로드되지 않는다(실측 Claude Code 2.1.323, 2026-11-13). 배치·네이밍을 결정하는
+// 계획 단계의 주력 도구가 Glob/Grep이라 폴더 규칙이 결정보다 늦게 도착한다 — 탐색 시점에 대상
+// 경로의 미로드 CLAUDE.md "경로만" 주입해(본문 0) 선읽기를 유도한다. 도구는 차단하지 않는다.
 //
-// Write/Edit도 잡는 이유(백스톱): 탐색을 한 번도 거치지 않고 경로를 지어내 바로 쓰면
-// 규격이 아예 도착하지 않는다. 세션·경로당 1회 주입이라 탐색 때 이미 떴으면 조용하다.
+// Write/Edit은 대상이 cwd 밖일 때만 잡는다. cwd 안이면 기본 동작이 본문을 싣고, cwd 밖이면
+// 이 훅 말고는 그 레포 규칙이 도착할 길이 없다. 세션·경로당 1회 주입이라 탐색 때 이미 떴으면 조용하다.
 
 const MARKER_PREFIX = "claude-md-surface-";
 const CLEANUP_SENTINEL = path.join(os.tmpdir(), `${MARKER_PREFIX}last-cleanup`);
@@ -49,6 +50,11 @@ function resolveTarget(payload) {
     if (prefix) base = path.resolve(base, prefix);
   }
   return base;
+}
+
+function isInside(target, dir) {
+  const rel = path.relative(path.resolve(dir), path.resolve(target));
+  return rel === "" || (rel !== ".." && !rel.startsWith(`..${path.sep}`) && !path.isAbsolute(rel));
 }
 
 // target부터 위로 올라가며 실재하는 CLAUDE.md를 모은다.
@@ -137,18 +143,20 @@ try {
   const cwd = getCwd(payload);
   if (!cwd) process.exit(0);
 
-  const mds = collectClaudeMds(resolveTarget(payload), cwd);
+  const target = resolveTarget(payload);
+  if (["Write", "Edit"].includes(payload.tool_name) && isInside(target, cwd)) process.exit(0);
+  const mds = collectClaudeMds(target, cwd);
   if (!mds.length) process.exit(0);
   const fresh = takeUnseen(mds, getSessionId(payload) || "nosession");
   if (!fresh.length) process.exit(0);
   cleanupStaleMarkers();
 
   addContext(
-    `[폴더 규칙] 대상 경로에 적용되는 CLAUDE.md가 있다 (하위 디렉터리·다른 레포의 CLAUDE.md는 Read 전까지 자동 로드되지 않는다):\n` +
+    `[폴더 규칙] 대상 경로에 적용되는 CLAUDE.md가 있다 (하위 디렉터리 CLAUDE.md는 Read·Write 전까지, 다른 레포의 CLAUDE.md는 Read·Write로도 자동 로드되지 않는다):\n` +
       fresh.map((p) => `  ${p}`).join("\n") +
       `\n이 폴더 하위에 파일을 만들거나 배치·네이밍·구조를 결정하기 전에 위 파일을 Read로 읽는다. ` +
       `내용이 다른 문서를 가리키는 포인터면 그 문서를 끝까지 따라가 본문 규칙을 확인한다 — 한 줄 포인터에서 멈추지 않는다. ` +
-      `쓰기 도구에서 이 안내를 받았다면 이미 정한 경로·파일명·양식이 그 규칙에 맞는지 다시 확인한 뒤 쓴다.`,
+      `쓰기 도구에서 이 안내를 받았다면 그 쓰기는 이미 끝났다 — 방금 쓴 경로·파일명·양식이 그 규칙에 맞는지 확인하고 어긋나면 고친다.`,
     "PreToolUse",
   );
 } catch (_e) {

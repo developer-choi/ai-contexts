@@ -2362,6 +2362,44 @@ const subFileGroup = async () => {
   }
 };
 
+// 폴더 CLAUDE.md 표면화는 탐색이면 cwd 안팎을 가리지 않고, 쓰기면 cwd 밖일 때만 알린다
+// (cwd 안 하위 CLAUDE.md는 Write·Edit 때 기본 동작이 본문을 싣는다). cwd 밖 쓰기가 조용해지면
+// 다른 레포 규칙이 도착할 길이 끊기므로 그 케이스로 고정한다.
+const CLAUDE_MD_HOOK = 'surface-claude-md.mjs';
+const claudeMdGroup = async () => {
+  const dir = await makeTempDir('hook-claude-md-');
+  try {
+    const proj = path.join(dir, 'proj');
+    const other = path.join(dir, 'other');
+    for (const d of [path.join(proj, '.git'), path.join(proj, 'sub'), path.join(proj, '..sub'), path.join(other, '.git'), path.join(other, 'deep')]) {
+      fs.mkdirSync(d, { recursive: true });
+    }
+    // ..sub에도 CLAUDE.md를 둬야 cwd 밖으로 오판했을 때 알림이 나가 케이스가 깨진다.
+    for (const d of ['sub', '..sub']) fs.writeFileSync(path.join(proj, d, 'CLAUDE.md'), '# x\n');
+    fs.writeFileSync(path.join(other, 'CLAUDE.md'), '# x\n');
+    const env = { TEMP: dir, TMP: dir, TMPDIR: dir };
+    // 세션·경로당 1회 마커가 서로 간섭하지 않게 케이스마다 세션을 따로 준다.
+    const call = (tool_name, tool_input, id) => ({ tool_name, tool_input, cwd: proj, session_id: `verify-${id}` });
+    const cases = [
+      [call('Glob', { path: path.join(proj, 'sub'), pattern: '**/*' }, 'glob-in'), path.join(proj, 'sub', 'CLAUDE.md'), '탐색은 cwd 안 하위 CLAUDE.md를 알린다'],
+      [call('Grep', { path: other, pattern: 'x' }, 'grep-out'), path.join(other, 'CLAUDE.md'), '탐색은 cwd 밖 레포 CLAUDE.md를 알린다'],
+      [call('Write', { file_path: path.join(proj, 'sub', 'new.txt') }, 'write-in'), null, 'cwd 안 쓰기는 기본 동작이 싣으므로 조용하다'],
+      [call('Edit', { file_path: path.join(proj, 'sub', 'a.txt') }, 'edit-in'), null, 'cwd 안 고치기는 선행 Read가 싣으므로 조용하다'],
+      [call('Write', { file_path: path.join(proj, '..sub', 'new.txt') }, 'write-dotdot'), null, '..로 시작하는 이름의 cwd 안 폴더도 cwd 안이다'],
+      [call('Write', { file_path: path.join(other, 'deep', 'new.txt') }, 'write-out'), path.join(other, 'CLAUDE.md'), 'cwd 밖 쓰기는 그 레포 CLAUDE.md를 알린다'],
+      [call('Edit', { file_path: path.join(other, 'deep', 'a.txt') }, 'edit-out'), path.join(other, 'CLAUDE.md'), 'cwd 밖 고치기도 알린다'],
+    ];
+    return await runCases(cases, async ([payload, md, note]) => {
+      const expected = md ? 'context' : 'pass';
+      const { decision, reason, stderr } = await runHookPayload(CLAUDE_MD_HOOK, payload, { env });
+      const named = !md || (reason ?? '').includes(md);
+      return judge(`${CLAUDE_MD_HOOK} :: ${payload.session_id} → ${expected} (${note})`, decision, expected, stderr, { ok: decision === expected && named });
+    });
+  } finally {
+    await removeTempDir(dir);
+  }
+};
+
 // 응답 언어 훅은 마지막 응답만 본다. 사용자 발화로 면제하지 않는다 — 그 면제가 되살아나면 잡히도록
 // 마지막 발화가 `ㅇㅋ`·`ok`인 기록 파일을 주고도 되돌리는지 본다(2026-10-01 누수).
 // 영어 보고는 실제로 샌 보고의 한 토막이다.
@@ -2730,6 +2768,7 @@ async function main() {
     skillCreatorGroup,
     scorePackageGroup,
     subFileGroup,
+    claudeMdGroup,
     responseLanguageGroup,
     tableRenderGroup,
     subagentGroup,
