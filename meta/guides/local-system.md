@@ -25,7 +25,8 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ### 2. settings/hooks (per-repo)
 
-전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다. 소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
+전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다.
+소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
 
 - `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
 - `local/hooks/*.mjs` → `.claude/hooks/`에 맞춥니다.

@@ -14,8 +14,21 @@ npm run sync:system -- <target>
 
 ## 수행 작업
 
-- AC git hook 준비 상태를 확인합니다. 훅 파일(`.githooks`)은 추적돼 체크아웃에 항상 딸려오므로 존재만 보고, git이 못 나르는 전역 설정 훅 배선(`hook.ai-contexts-githooks-*`)이 빠져 있으면 재등록으로 복구합니다. 옛 방식의 잔재(레포별 `hook.repo-*` 등록)는 **남아 있으면 안 됩니다** — 전역 훅과 둘 다 돌아 같은 검사가 두 번 실행되므로 어긋남으로 잡습니다. 전 레포 정리는 `sync:environment`가 합니다. git 버전이 설정 훅 미만이거나 `commitlint` 의존성이 없으면 실패합니다.
-- 생성·판정 계약도 함께 확인합니다: settings 생성 계약(`verify:settings`), git 정책 hook의 판정(`verify:hook-policies`), AC 안 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose` — 남의 레포 `local/skills`는 `sync:local-system`이 본다), 배포본 md 렌더링의 멱등(`verify:skill-render`), 배포가 바뀐 파일만 쓰는지(`verify:incremental-deploy`), 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`), 3단 종류 누계의 집계·거부·알림 판정(`verify:source-usage`). 깨져도 조용하기 때문에 배포 전에 막습니다. 이 검사들은 서로 독립인 읽기 전용이라 위의 hook 준비 확인과 겹쳐 돌지만, 출력은 위 순서대로 모아서 냅니다. 하나라도 실패하면 배포를 시작하기 전에 끊고, 첫 실패에서 멈추지 않으므로 실패한 검사를 한 번에 모두 보여줍니다.
+- AC git hook 준비 상태를 확인합니다.
+  - 훅 파일(`.githooks`)은 추적돼 체크아웃에 항상 딸려오므로 존재만 봅니다.
+  - git이 못 나르는 전역 설정 훅 배선(`hook.ai-contexts-githooks-*`)이 빠져 있으면 재등록으로 복구합니다.
+  - 옛 방식의 잔재(레포별 `hook.repo-*` 등록)는 **남아 있으면 안 됩니다**. 전역 훅과 둘 다 돌아 같은 검사가 두 번 실행되므로 어긋남으로 잡습니다. 전 레포 정리는 `sync:environment`가 합니다.
+  - git 버전이 설정 훅 미만이거나 `commitlint` 의존성이 없으면 실패합니다.
+- 생성·판정 계약도 함께 확인합니다. 깨져도 조용하기 때문에 배포 전에 막습니다.
+  - settings 생성 계약(`verify:settings`)
+  - git 정책 hook의 판정(`verify:hook-policies`)
+  - AC 안 `SKILL.md`의 목적 진술 존재(`verify:skill-purpose`). 남의 레포 `local/skills`는 `sync:local-system`이 봅니다.
+  - 배포본 md 렌더링의 멱등(`verify:skill-render`)
+  - 배포가 바뀐 파일만 쓰는지(`verify:incremental-deploy`)
+  - 전역 스킬의 스크립트 호출이 실행 위치에 안 기대는지(`verify:skill-script-paths`)
+  - 3단 종류 누계의 집계·거부·알림 판정(`verify:source-usage`)
+
+  이 검사들은 서로 독립인 읽기 전용이라 위의 hook 준비 확인과 겹쳐 돌지만, 출력은 위 순서대로 모아서 냅니다. 하나라도 실패하면 배포를 시작하기 전에 끊고, 첫 실패에서 멈추지 않으므로 실패한 검사를 한 번에 모두 보여줍니다.
 - 배포본을 지우고 다시 쓰지 않습니다. 배포할 내용을 메모리에서 만든 뒤 기존 파일과 비교해, 내용이 다른 파일만 쓰고 원본에서 사라진 AC 관리 파일만 지웁니다. 스킬 하나만 고쳤으면 그 스킬의 바뀐 파일만 다시 쓰여, 열려 있던 다른 세션에도 그 스킬만 새로 뜹니다. 바뀐 것이 없으면 `변경 없음`을 출력합니다.
 - `deploy/rules`, `deploy/contexts`, `deploy/hooks`는 폴더 전체가 AC 관리 대상입니다.
 - `deploy/skills`는 외부 스킬과 공존해야 하므로 보존 목록(`SKILLS_PRESERVE`)의 스킬은 건드리지 않습니다. 각 스킬의 md는 배포본 형태로 렌더합니다. frontmatter에 `name`이 없으면 폴더명을 주입하고, 본문 맨 앞에 그 스킬이 배포된 절대 경로를 한 줄 심습니다. 검증도 이 결과를 기준으로 대조합니다.
@@ -38,7 +51,8 @@ npm run unsync:system -- <target>
 
 ## 반복 실행 기준
 
-`sync:system`은 원본에서 사라진 AC 관리 파일을 지워 고아를 남기지 않아야 하고, 원본이 그대로면 두 번째 실행에서 아무 파일도 쓰지 않아야 합니다(`verify:incremental-deploy`가 고정). 사용자 동적 설정은 `settings.json` 병합 규칙으로 보존하고, 외부 스킬과 공존해야 하는 `skills`는 항목 단위로 관리합니다.
+`sync:system`은 원본에서 사라진 AC 관리 파일을 지워 고아를 남기지 않아야 하고, 원본이 그대로면 두 번째 실행에서 아무 파일도 쓰지 않아야 합니다(`verify:incremental-deploy`가 고정).
+사용자 동적 설정은 `settings.json` 병합 규칙으로 보존하고, 외부 스킬과 공존해야 하는 `skills`는 항목 단위로 관리합니다.
 
 ## Hook 준비 상태
 
@@ -48,7 +62,9 @@ npm run unsync:system -- <target>
 npm run verify:hooks
 ```
 
-AC는 추적되는 `.githooks` 붙박이 훅을 쓰므로 훅 파일은 새 worktree 체크아웃에 항상 딸려옵니다. `git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성과 gitignore된 env 파일을 primary에서 자동으로 채웁니다(편의). 하네스 밖(맨 터미널)에서 만든 worktree는 그 안에서 `npm ci`를 실행해 `commitlint` 등 deps를 채운 뒤 커밋합니다.
+AC는 추적되는 `.githooks` 붙박이 훅을 쓰므로 훅 파일은 새 worktree 체크아웃에 항상 딸려옵니다.
+`git worktree add`나 `EnterWorktree`로 만들면 직후 self-heal hook이 의존성과 gitignore된 env 파일을 primary에서 자동으로 채웁니다(편의).
+하네스 밖(맨 터미널)에서 만든 worktree는 그 안에서 `npm ci`를 실행해 `commitlint` 등 deps를 채운 뒤 커밋합니다.
 
 ## Windows 참고
 
