@@ -6,7 +6,9 @@
 
 ## artifacts
 
-`artifacts --plan <plan 루트> --mode <채용|실무|개인>`
+`artifacts --plan <plan 루트> --mode <recruit|work|personal>`
+
+`--mode`는 `recruit`(채용)·`work`(실무)·`personal`(개인)이고, 한국어 이름도 받는다.
 
 requirement "자료 받기" 산출물이 다 있는지 센다. 항목마다 `✓`·`✗`와 경로를 출력한다.
 

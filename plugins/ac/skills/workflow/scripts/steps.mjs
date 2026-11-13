@@ -19,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { MODE_CHOICES, MODE_PERSONAL, toModeKey } from './modes.mjs';
 
 // prs.json 꼴. 타입 파일은 배포되지 않지만 JSDoc 안이라 실행에는 영향이 없다.
 /** @typedef {import('../../../../../types/prs.d.mts').Pr} Pr */
@@ -57,9 +58,6 @@ const failUsage = (msg) => fail(`${msg}\n사용법: ${USAGE_DOC}`);
 
 // 세션 인자. 있을 수도 없을 수도 있는 인자가 늘수록 조합마다 분기가 갈려, 빈 자리를 AI가 지어 채웠다
 // (접두어를 작업 내용에서 지어 `TOUR_PR_1_PLAN`). 그래서 필수는 빠지면 멈추고, 선택은 기본값을 여기서 채운다.
-// 값은 --mode 입력과 맞춘 한국어다. 영어 키로 옮기는 일은 별건(백로그).
-const MODE_PERSONAL = '개인';
-const MODES = [MODE_PERSONAL, '실무', '채용'];
 // 접두어는 세션 이름과 개인 모드 plan 경로(`plan/<접두어>`)의 조각이 된다. 루트 `plan/` 아래 실무·채용 폴더와도 겹치지 않게 막는다.
 const PREFIX_FORM = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 // 대소문자 무시 — Windows 파일시스템은 `Background`와 `background`를 같은 폴더로 본다.
@@ -87,24 +85,26 @@ const defaultPlan = (mode, prefix) => (mode === MODE_PERSONAL ? (prefix ? `plan/
 // start는 멈추기 전에 루트·plan을 먼저 찍어 BG 인자 확정이 그 값으로 제안하게 한다.
 function resolveArgs(opt) {
   const problems = [];
-  if (opt.mode === undefined) problems.push('--mode가 없다(개인·실무·채용)');
-  else if (!MODES.includes(opt.mode)) problems.push(`--mode 값이 개인·실무·채용 중 하나가 아니다: ${opt.mode}`);
+  // 한국어로 받은 모드도 키로 바꿔, 이후 비교·실행 명령에는 키만 실린다.
+  const mode = toModeKey(opt.mode);
+  if (opt.mode === undefined) problems.push(`--mode가 없다(${MODE_CHOICES})`);
+  else if (mode === undefined) problems.push(`--mode 값이 ${MODE_CHOICES} 중 하나가 아니다: ${opt.mode}`);
   let prefix = opt.prefix;
   if (prefix !== undefined && (!PREFIX_FORM.test(prefix) || PREFIX_RESERVED.test(prefix))) {
     problems.push(`--prefix는 영문·숫자로 시작해 영문·숫자·.·_·-만 쓰고 background·archive·pr<숫자>가 아니어야 한다: ${prefix}`);
     prefix = undefined;
   }
-  if (opt.mode === MODE_PERSONAL && opt.prefix === undefined) problems.push('개인 모드인데 --prefix(세션 이름 접두어)가 없다');
+  if (mode === MODE_PERSONAL && opt.prefix === undefined) problems.push('개인 모드인데 --prefix(세션 이름 접두어)가 없다');
   // Windows에서 드라이브 없이 `/`로 시작하는 값(옛 문서의 `--plan /plan`)은 `C:/plan`으로 풀려 엉뚱한 곳에 쓴다.
   if (opt.plan !== undefined && process.platform === 'win32' && /^[\\/](?![\\/])/.test(opt.plan)) {
     problems.push(`--plan 값이 드라이브 없이 /로 시작한다 — 메인 레포 루트 기준 상대경로(예: plan)나 드라이브를 붙인 절대경로로 준다: ${opt.plan}`);
   }
   const root = mainRoot();
-  const planRel = opt.plan ?? defaultPlan(opt.mode, prefix);
+  const planRel = opt.plan ?? defaultPlan(mode, prefix);
   const plan = planRel === null ? null : slash(path.resolve(root, planRel));
   // 실행 명령의 따옴표 안에 그대로 넣는 값이라 공백·따옴표가 섞이면 셸에서 인자가 갈라진다. 루트를 붙인 최종 경로로 본다.
   if (plan !== null && /[\s"'`$]/.test(plan)) problems.push(`plan 경로에 공백·따옴표·$가 있으면 실행 명령에 실을 수 없다: ${plan}`);
-  return { mode: opt.mode, prefix, root: slash(root), plan, problems };
+  return { mode, prefix, root: slash(root), plan, problems };
 }
 
 const askFail = (problems) => fail(`${problems.join('\n')}${ASK}`);
@@ -232,7 +232,7 @@ function chainOf(steps, session) {
 // 사건은 여러 번(PR 확정)일 수 있어 횟수는 적지 않는다.
 function describe(edge) {
   const parts = [edge.on ? `세션 도중 사건: ${edge.on} (사건이 일어나면 — 세션은 계속)` : 'step 종료 시점'];
-  if (edge.when) parts.push(`조건: ${edge.when}`);
+  if (edge.when) parts.push(`조건: ${whenText(edge.when)}`);
   return parts.join(' / ');
 }
 
@@ -606,21 +606,26 @@ function recordStage(plan, data, pr, stepName) {
 const NO_MARKUP_FILE = ['background', 'retained', 'no-markup.md'];
 
 // 파일로 판정되는 조건만 판정한다 — `종류 FOUNDATION`(이 PR의 종류), `FOUNDATION PR 없음`(확정된 PR 중에),
-// `코드 대용 아님`(background/retained/code-target.md가 없음), `마크업 생략 아님`(background/retained/no-markup.md가 없음).
+// 영어 키 `NOT_CODE_TARGET`·`MARKUP_NOT_SKIPPED`(뜻은 steps.md).
 // 쉼표로 이은 조건은 하나라도 어긋나면 어긋난다. 그 밖의 when은 산문이라 그대로 찍는다.
 // 어긋난 첫 조건을 돌려준다(없으면 null).
-// 값은 step frontmatter `when`에 적힌 한국어와 맞춘 것이다. 영어 키로 옮기는 일은 별건(백로그).
-const WHEN_NOT_CODE_TARGET = '코드 대용 아님';
-const WHEN_NOT_NO_MARKUP = '마크업 생략 아님';
+// 파일 판정 조건은 영어 키로 비교하고, 출력에 보일 말은 WHEN_LABELS에서 꺼낸다(whenText).
+// `종류 <TYPE>`·`<TYPE> PR 없음`은 PR 종류를 끼워 읽는 구문이라 키로 옮기지 않고 정규식으로 둔다.
+const WHEN_NOT_CODE_TARGET = 'NOT_CODE_TARGET';
+const WHEN_MARKUP_NOT_SKIPPED = 'MARKUP_NOT_SKIPPED';
+const WHEN_LABELS = { [WHEN_NOT_CODE_TARGET]: '코드 대용 아님', [WHEN_MARKUP_NOT_SKIPPED]: '마크업 생략 아님' };
+function whenText(when) {
+  return when.split(/\s*,\s*/).map((condition) => WHEN_LABELS[condition] ?? condition).join(', ');
+}
 function whenFails(edge, data, pr, plan) {
   if (!edge.when) return null;
-  return edge.when.split(/\s*,\s*/).find((cond) => {
-    const own = cond.match(/^종류 ([A-Z]+)$/);
+  return edge.when.split(/\s*,\s*/).find((condition) => {
+    const own = condition.match(/^종류 ([A-Z]+)$/);
     if (own) return Boolean(pr && pr.type !== own[1]);
-    const none = cond.match(/^([A-Z]+) PR 없음$/);
+    const none = condition.match(/^([A-Z]+) PR 없음$/);
     if (none) return Boolean(data && data.prs.some((p) => p.type === none[1]));
-    if (cond === WHEN_NOT_CODE_TARGET) return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
-    if (cond === WHEN_NOT_NO_MARKUP) return fs.existsSync(path.join(plan, ...NO_MARKUP_FILE));
+    if (condition === WHEN_NOT_CODE_TARGET) return fs.existsSync(path.join(plan, 'background', 'retained', 'code-target.md'));
+    if (condition === WHEN_MARKUP_NOT_SKIPPED) return fs.existsSync(path.join(plan, ...NO_MARKUP_FILE));
     return false;
   }) ?? null;
 }
@@ -663,7 +668,7 @@ function cmdNext(name, opt) {
   for (const edge of from.next) {
     target(steps, edge, from);
     const failed = whenFails(edge, data, pr, a.plan);
-    if (failed === WHEN_NOT_NO_MARKUP) skippedMarkup.push(edge);
+    if (failed === WHEN_MARKUP_NOT_SKIPPED) skippedMarkup.push(edge);
     if (failed) continue;
     groups[kindOf(from, edge, steps)].push(edge);
   }
@@ -846,7 +851,7 @@ function graph() {
   }
   for (const s of order) {
     for (const e of s.next) {
-      const when = e.when?.replace(/\s*\([^)]*\)/g, '');
+      const when = e.when && whenText(e.when.replace(/\s*\([^)]*\)/g, ''));
       const label = [e.notice === 'go' ? '출발 알림' : '', e.on ? `on: ${e.on}` : '', when ? `when: ${when}` : '']
         .filter(Boolean)
         .join(' · ')
@@ -876,6 +881,19 @@ function cmdCheck() {
       const on = e.on.trim();
       if (on.length < 2 || !headings.some((h) => h.includes(on))) {
         problems.push(`${rel(s.file)}: on '${e.on}'에 맞는 헤딩이 없다`);
+      }
+    }
+  }
+
+  // when의 영어 키는 손으로 적는 값인데, 모르는 키는 whenFails가 산문으로 보고 통과시켜 오타가 조용히 조건을 지운다.
+  for (const s of steps.values()) {
+    for (const e of s.next) {
+      for (const cond of e.when?.split(/\s*,\s*/) ?? []) {
+        const oldKey = Object.keys(WHEN_LABELS).find((key) => WHEN_LABELS[key] === cond);
+        if (oldKey) problems.push(`${rel(s.file)}: when '${cond}'는 옛 표기다. 키 ${oldKey}로 바꾼다`);
+        else if (/^\w+$/.test(cond) && !Object.hasOwn(WHEN_LABELS, cond)) {
+          problems.push(`${rel(s.file)}: when '${cond}'는 모르는 키다 (${Object.keys(WHEN_LABELS).join(', ')})`);
+        }
       }
     }
   }

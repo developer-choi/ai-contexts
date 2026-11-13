@@ -10,6 +10,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { MODE_CHOICES, MODE_LABELS, MODE_PERSONAL, MODE_RECRUIT, toModeKey } from './modes.mjs';
 
 const [command, ...rest] = process.argv.slice(2);
 const optOf = (name) => {
@@ -26,24 +27,21 @@ const problems = [];
 const exists = (p) => fs.existsSync(p);
 const nonEmptyDir = (p) => exists(p) && fs.statSync(p).isDirectory() && fs.readdirSync(p).length > 0;
 
-// --mode는 사람이 한국어로 넘긴다. 받자마자 코드로 바꿔 비교는 코드로만 한다.
-const MODE_BY_ARG = { 채용: 'RECRUITMENT', 실무: 'WORK', 개인: 'PERSONAL' };
-
 // ── artifacts: requirement 「자료 받기」 산출물 존재 검사 ──────────────────────────────────────────
 // 「원본 저장 + 디자인 원본 + 컨벤션 인덱스가 다 나왔는가」. 전부 리터럴 경로이고
 // 모드 분기도 닫혀 있다. 하나를 안 만들고 넘어가도 requirement의 요구사항 리뷰는 그대로 굴러가고, MARKUP이
 // 디자인 원본·인덱스를 못 찾는 시점에야 드러난다 — 그 시차가 이 검사를 코드로 내리는 이유다.
 function artifacts() {
   const plan = optOf('plan');
-  const mode = optOf('mode');
-  if (!plan || !mode) failUsage('artifacts 에는 --plan 과 --mode 가 필요합니다.');
-  const modeCode = MODE_BY_ARG[mode];
-  if (!modeCode) failUsage(`--mode 는 채용·실무·개인 중 하나입니다 (받은 값: ${mode}).`);
+  const rawMode = optOf('mode');
+  if (!plan || !rawMode) failUsage(`artifacts 에는 --plan 과 --mode(${MODE_CHOICES}) 가 필요합니다.`);
+  const mode = toModeKey(rawMode);
+  if (mode === undefined) failUsage(`--mode 는 ${MODE_CHOICES} 중 하나입니다 (받은 값: ${rawMode}).`);
   const bg = path.join(plan, 'background');
   const required = [
     { label: '컨벤션 인덱스', p: path.join(bg, 'retained', 'conventions-index.md') },
   ];
-  if (modeCode === 'RECRUITMENT') {
+  if (mode === MODE_RECRUIT) {
     required.unshift({ label: '원본 자료', p: path.join(bg, 'persistent'), dir: true });
   }
   // 코드 대용이면 디자인 원본 대신 기존 코드를 읽으므로 figma·시안을 요구하지 않는다.
@@ -51,7 +49,7 @@ function artifacts() {
   let figmaUrl;
   if (exists(codeTarget)) {
     required.push({ label: '코드 대용 대상', p: codeTarget });
-  } else if (modeCode === 'PERSONAL') {
+  } else if (mode === MODE_PERSONAL) {
     required.push({ label: '마크업 시안', p: path.join(bg, 'retained', 'mockup'), dir: true });
   } else {
     // figma가 없으면 캡처가 디자인 원본이라 figma URL은 요구하지 않는다. 대신 아래에서 어느 쪽으로 판정됐는지 보여 기록 누락이 눈에 띄게 한다.
@@ -59,7 +57,7 @@ function artifacts() {
     figmaUrl = exists(path.join(bg, 'retained', 'figma-url.md'));
   }
 
-  console.log(`[requirement 「자료 받기」 산출물 존재 검사] 모드: ${mode}${exists(codeTarget) ? ' (코드 대용 — 디자인 원본은 세지 않는다)' : ''}`);
+  console.log(`[requirement 「자료 받기」 산출물 존재 검사] 모드: ${mode}(${MODE_LABELS[mode]})${exists(codeTarget) ? ' (코드 대용: 디자인 원본은 세지 않는다)' : ''}`);
   for (const r of required) {
     const ok = r.dir ? nonEmptyDir(r.p) : exists(r.p);
     console.log(`  ${ok ? '✓' : '✗'} ${r.label} — ${r.p}`);

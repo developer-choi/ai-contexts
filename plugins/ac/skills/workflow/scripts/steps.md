@@ -6,7 +6,7 @@
 
 ## 세션 인자 (`next`·`start` 공통)
 
-- `--mode <모드>` 필수. `개인`·`실무`·`채용`
+- `--mode <모드>` 필수. `recruit`(채용)·`work`(실무)·`personal`(개인). 한국어 이름도 받는다
 - `--prefix <접두어>` 개인 모드 필수. 실무·채용은 있으면 세션 이름에 붙인다
 - `--plan <plan 폴더>` 없으면 개인 `plan/<접두어>`, 실무·채용 `plan`. 상대경로는 메인 레포 루트 기준
 - `--pr <N>` 명령마다 뜻이 다르다(아래 각 절)
@@ -55,4 +55,13 @@ PR 진행 상태는 `<plan>/background/persistent/prs.json`에 있고 이 명령
 
 ## check
 
-`check` — step frontmatter의 `on` 값과 헤딩의 대응을 검사한다. 어긋나면 건수와 함께 exit 1.
+`check`: step frontmatter의 `on` 값과 헤딩의 대응, `when`의 표기를 검사한다. 어긋나면 건수와 함께 exit 1.
+
+## step frontmatter의 `when`
+
+`next`가 판정하는 영어 키:
+
+- `NOT_CODE_TARGET`(코드 대용 아님): `background/retained/code-target.md`가 없다
+- `MARKUP_NOT_SKIPPED`(마크업 생략 아님): `background/retained/no-markup.md`가 없다
+
+쉼표로 나열한 조건은 모두 맞아야 한다. 키·`종류 <TYPE>`·`<TYPE> PR 없음` 밖의 `when`은 판정하지 않고 그대로 찍는다.

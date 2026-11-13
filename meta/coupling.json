@@ -173,10 +173,12 @@
       "name": "workflow 세션 인자 규칙 — steps.mjs resolveArgs ↔ 호출 설명·BG 인자 확정",
       "files": [
         "plugins/ac/skills/workflow/scripts/steps.mjs",
+        "plugins/ac/skills/workflow/scripts/modes.mjs",
+        "plugins/ac/skills/workflow/scripts/steps.md",
         "plugins/ac/skills/workflow/SKILL.md",
         "plugins/ac/skills/workflow/conventions/session-args.md"
       ],
-      "note": "세션 인자 규칙(모드 값 셋, 개인 모드 접두어 필수, plan 기본값 개인 `plan/<접두어>`·그 밖 `plan`, 메인 레포 루트 기준)의 정본은 steps.mjs resolveArgs·defaultPlan이다. 사용자가 `/workflow`를 칠 때 넣을 값을 알아야 해서 SKILL.md 「호출」과 argument-hint에 요약을 두고, BG 인자 확정(session-args.md)은 무엇이 필수인지를 보고 묻는다. 스크립트 규칙을 바꾸면 두 문서의 요약도 맞춘다. 안 맞추면 사용자가 옛 규칙대로 값을 넣다가 start에서 막히거나, 확정 구간이 필수 값을 빼고 물어 start가 실패하는 왕복이 생긴다."
+      "note": "세션 인자 규칙(개인 모드 접두어 필수, plan 기본값 개인 `plan/<접두어>`·그 밖 `plan`, 메인 레포 루트 기준)의 정본은 steps.mjs resolveArgs·defaultPlan이고, 모드 값 셋(키와 한국어 말)의 정본은 modes.mjs다. 사용자가 `/workflow`를 칠 때 넣을 값을 알아야 해서 SKILL.md 「호출」과 argument-hint에 요약을 두고, BG 인자 확정(session-args.md)은 무엇이 필수인지를 보고 묻는다. 스크립트 규칙을 바꾸면 두 문서의 요약도 맞춘다. 안 맞추면 사용자가 옛 규칙대로 값을 넣다가 start에서 막히거나, 확정 구간이 필수 값을 빼고 물어 start가 실패하는 왕복이 생긴다."
     },
     {
       "name": "requirement-review 회고 재료 — review-material 출력·파일 패턴 ↔ 회고 보강의 인용",

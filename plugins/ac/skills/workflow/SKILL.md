@@ -1,7 +1,7 @@
 ---
 name: workflow
 description: 기획서, 피그마, 피그마 디자인토큰, 채용과제를 PR로 변환하는 워크플로우. 배경 파악 → PR 분할 → 구현 → 코드리뷰 → PR 작성까지 단계별 진행. 커밋, PR 작성, 코드리뷰 요청 시 이 스킬을 사용한다.
-argument-hint: <세션 이름> <채용|실무|개인> [--prefix <접두어>] [--plan <plan 경로>]
+argument-hint: <세션 이름> <recruit|work|personal> [--prefix <접두어>] [--plan <plan 경로>]
 ---
 
 # 워크플로우
@@ -18,7 +18,7 @@ argument-hint: <세션 이름> <채용|실무|개인> [--prefix <접두어>] [--
 
 - 세션 이름·모드는 기본값이 없다. 사용자가 직접 넘긴다.
 - 세션 이름: `BG` / `MARKUP` / `PR_{N}_PLAN` / `PR_{N}_IMPL` / `FINALIZE`
-- 모드: `채용` / `실무` / `개인`
+- 모드: `recruit`(채용) / `work`(실무) / `personal`(개인). 한국어로 넘겨도 받는다
 - 접두어: 후속 세션 이름 앞에 붙는다(`<접두어>_PR_1_PLAN`). 세션 이름 인자에는 붙이지 않고 `--prefix`로 따로 준다. 개인 모드는 필수다 — 개인 작업 여러 건을 나란히 돌리면 세션 이름과 plan 폴더가 겹친다
 - plan 경로: 이 작업의 plan 폴더. 생략하면 개인 모드는 `plan/<접두어>`, 실무·채용 모드는 `plan`이다(메인 레포 루트 기준)
 

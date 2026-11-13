@@ -8,7 +8,7 @@ model: Opus
 next:
   - to: markup
     on: 레포 확보
-    when: FOUNDATION PR 없음, 코드 대용 아님, 마크업 생략 아님
+    when: FOUNDATION PR 없음, NOT_CODE_TARGET, MARKUP_NOT_SKIPPED
   - to: plan
     on: PR 확정
 ---
