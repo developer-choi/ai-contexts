@@ -469,7 +469,8 @@ function checkCountDeclaration(lines) {
 //
 // 문턱 180자: 한 줄이라 읽기 어렵다고 반려된 문단이 200자, 같은 원고의 승인본에서
 // 가장 긴 줄이 159자였다. 실측(코드·표·인용·헤딩 밖 줄): 블로그 발행본 136줄 중 0건, writing-guide
-// 567줄 중 11건(1.9%). 한 논지를 길게 편 멀쩡한 문단도 걸릴 수 있어 합계에는 안 넣는다.
+// 567줄 중 11건(1.9%). 한 논지를 길게 편 문단도 문장 사이에서 끊으면 풀리므로 합계에 넣는다 —
+// 초안부터 사용자가 내용을 쉽게 파악하게 하려는 것이다.
 const LONG_LINE = 180;
 const LIST_ITEM = /^(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?/;
 
@@ -502,7 +503,7 @@ function checkLongLines(lines) {
 
 function printStructure(lines) {
   const longHits = checkLongLines(lines);
-  console.log(`\n[긴 문단] ${longHits.length}건 (눈으로 확인 — ${LONG_LINE}자 이상)`);
+  console.log(`\n[긴 문단] ${longHits.length}건 (${LONG_LINE}자 이상)`);
   for (const [lineno, len, ln] of longHits) console.log(`   L${lineno} (${len}자): ${ln.slice(0, 70)}`);
   if (longHits.length) {
     console.log(
@@ -826,7 +827,7 @@ function main() {
   console.log(`[빈 섹션] 확정 헤딩 ${nheads}개 중 ${empties.length}개 빈 섹션`);
   for (const [head, why] of empties) console.log(`   ${head}  ← ${why}`);
   console.log(
-    `\n[남은 주석] ${comments.length}건 (눈으로 확인 — 사용자에게 묻는 자리라 합계에서 뺀다. ` +
+    `\n[남은 주석] ${comments.length}건 (합계에서 뺌 — 사용자에게 묻는 자리라 답을 받기 전에는 지우지 않는다. ` +
       "남은 채로는 게시가 막힌다)",
   );
   for (const [lineno, ln] of comments) console.log(`   L${lineno}: ${ln.trim().slice(0, 70)}`);
@@ -882,15 +883,16 @@ function main() {
     emojiHits.length +
     fullNameHits.length +
     empties.length +
-    caseLinkHits.length;
+    caseLinkHits.length +
+    longHits.length;
   console.log(
     `\n>> 기계 적발 합계(참고용, 점수 아님): ${total}건` +
       ` + 눈으로 확인 후보 ${
-        politeHits.length + contextHits.length + rejectedWarn.length + pkgRejectedHits.length + longHits.length + countHits.length + hanjaHits.length +
+        politeHits.length + contextHits.length + rejectedWarn.length + pkgRejectedHits.length + countHits.length + hanjaHits.length +
         (internalInTotal ? 0 : internalHits.length)
       }건` +
       `(습니다체 ${politeHits.length} · 문맥 ${contextHits.length} · 반려 경고 ${rejectedWarn.length} · 이 글 반려 ${pkgRejectedHits.length}` +
-      ` · 긴 문단 ${longHits.length} · 개수 선언 ${countHits.length} · ~화 ${hanjaHits.length}` +
+      ` · 개수 선언 ${countHits.length} · ~화 ${hanjaHits.length}` +
       (internalInTotal ? "" : ` · 작업이력 ${internalHits.length}`) +
       ")",
   );

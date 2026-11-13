@@ -2315,7 +2315,7 @@ const scorePackageGroup = async () => {
       [edit('clean'), 'pass', '적발이 없으면 조용하다'],
       [edit('lost'), 'context', '합계가 0이어도 사용자 구절이 사라졌으면 알린다'],
       [edit('readme'), 'pass', 'readme의 이모지는 적발이 아니다'],
-      [edit('long'), 'context', '합계가 0이어도 빈 줄 없이 이어진 긴 문단이면 알린다'],
+      [edit('long'), 'context', '빈 줄 없이 이어진 긴 문단은 합계에 들어 알린다'],
       [edit('plain'), 'pass', '패키지가 아닌 md는 채점하지 않는다'],
       [edit('hit', 'Read'), 'pass', 'Read는 고친 것이 아니다'],
     ];
