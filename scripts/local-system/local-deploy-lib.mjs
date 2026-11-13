@@ -137,7 +137,7 @@ const defaultLocalRoots = [
 ];
 
 // scanRoots 아래의 git 워크트리(직속 자식, 또는 root 자체가 워크트리면 그것)를 나열한다.
-// sync-local-skills의 스캔과 동일 규칙. .claude/worktrees 같은 중첩은 재귀하지 않는다.
+// sync-local-assets의 스캔과 동일 규칙. .claude/worktrees 같은 중첩은 재귀하지 않는다.
 function listLocalRepos(scanRoots = defaultLocalRoots) {
   const isDir = (t) => fs.existsSync(t) && fs.statSync(t).isDirectory();
   const isGitWorktree = (r) => fs.existsSync(path.join(r, '.git'));

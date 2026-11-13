@@ -22,7 +22,7 @@ import {
   verifyClaudeImports,
 } from '../lib/deploy-lib.mjs';
 import { copyLocalHooks } from '../local-system/local-deploy-lib.mjs';
-import { syncLocalSkills } from '../local-system/sync-local-skills.mjs';
+import { syncLocalAssets } from '../local-system/sync-local-assets.mjs';
 
 const quiet = () => {};
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ac-incremental-deploy-'));
@@ -164,7 +164,7 @@ try {
     process.argv = [argv[0], argv[1], repo];
     console.log = quiet;
     try {
-      syncLocalSkills({ ensureHooks: false });
+      syncLocalAssets({ ensureHooks: false });
       copyLocalHooks(quiet, repo);
     } finally {
       process.argv = argv;

@@ -1,8 +1,8 @@
-# unsync-local-skills.mjs 사용법
+# unsync-local-assets.mjs 사용법
 
-`node scripts/local-system/unsync-local-skills.mjs [<폴더>…]` — ai-contexts 레포 루트 기준 경로다. 보통은 `npm run unsync:local-system`이 함수로 실행한다.
+`node scripts/local-system/unsync-local-assets.mjs [<폴더>…]` — ai-contexts 레포 루트 기준 경로다. 보통은 `npm run unsync:local-system`이 함수로 실행한다.
 
-`sync-local-skills.mjs`가 만든 산출물을 레포마다 지운다. `local/` 아래 폴더(`hooks`·`skills` 제외)와 같은 이름의 `.claude/<폴더>`를 통째로 지우고, 원본 `local/`은 건드리지 않는다.
+`sync-local-assets.mjs`가 만든 산출물을 레포마다 지운다. `local/` 아래 폴더(`hooks`·`skills` 제외)와 같은 이름의 `.claude/<폴더>`를 통째로 지우고, 원본 `local/`은 건드리지 않는다.
 
 ## 인자
 

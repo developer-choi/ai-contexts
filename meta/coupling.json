@@ -77,10 +77,10 @@
       "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
     },
     {
-      "name": "sync:local-skills 동기화·제거 쌍",
+      "name": "sync:local-assets 동기화·제거 쌍",
       "files": [
-        "scripts/local-system/sync-local-skills.mjs",
-        "scripts/local-system/unsync-local-skills.mjs"
+        "scripts/local-system/sync-local-assets.mjs",
+        "scripts/local-system/unsync-local-assets.mjs"
       ],
       "note": "로컬 자산 배포가 새 카테고리/경로를 다루면 제거도 같은 기준으로 맞춘다 (sync만 되고 unsync 후 잔여물 남는 구조 금지)."
     },

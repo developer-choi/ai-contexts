@@ -3,13 +3,13 @@
 //   1) 로컬 자산: .claude/<X>는 카테고리 통째 제거(gitignore 산출물, orphan 포함)
 //   2) settings/hooks: base-settings를 가진 각 레포에서 .claude/settings.json은 AC 키만
 //      부분 제거(사용자 키 보존), .claude/hooks는 통째 제거, .ac-keys 정리
-import { unsyncLocalSkills } from './unsync-local-skills.mjs';
+import { unsyncLocalAssets } from './unsync-local-assets.mjs';
 import { repoDir } from '../lib/deploy-lib.mjs';
 import { hasLocalSettings, listLocalRepos, uninstallLocal } from './local-deploy-lib.mjs';
 
 function main() {
   // 1) 로컬 자산 (cross-repo).
-  unsyncLocalSkills();
+  unsyncLocalAssets();
 
   // 2) settings/hooks (per-repo, sync와 동일 대상 집합).
   const repos = [repoDir, ...listLocalRepos().filter((repo) => repo !== repoDir && hasLocalSettings(repo))];

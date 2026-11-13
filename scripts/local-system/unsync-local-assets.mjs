@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// 사용법: unsync-local-skills.md (같은 폴더)
+// 사용법: unsync-local-assets.md (같은 폴더)
 //
-// sync-local-skills.mjs가 만든 산출물을 걷는다. sync만 있고 걷는 쪽이 없으면 원본에서 지운 자산이
+// sync-local-assets.mjs가 만든 산출물을 걷는다. sync만 있고 걷는 쪽이 없으면 원본에서 지운 자산이
 // 배포 자리에 남아 계속 읽힌다.
 import fs from 'node:fs';
 import os from 'node:os';
@@ -42,7 +42,7 @@ function main() {
   printResults(results);
 }
 
-// 배포 디렉토리 판정은 sync-local-skills.mjs와 같은 제외 집합을 쓴다. hooks는 settings projection이
+// 배포 디렉토리 판정은 sync-local-assets.mjs와 같은 제외 집합을 쓴다. hooks는 settings projection이
 // .claude/hooks로 따로 처리하므로 제외. skills는 `.claude/skills/`가 커밋된 원본이라 지우면 안 된다.
 const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills']);
 
@@ -113,7 +113,7 @@ function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
 }
 
-export { main as unsyncLocalSkills };
+export { main as unsyncLocalAssets };
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();

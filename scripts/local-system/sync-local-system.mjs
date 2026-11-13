@@ -11,7 +11,7 @@ import path from 'node:path';
 import { ensureHooksReady } from '../lib/hook-guard.mjs';
 import { runVerifications } from '../lib/verify-runner.mjs';
 import { repoDir } from '../lib/deploy-lib.mjs';
-import { syncLocalSkills } from './sync-local-skills.mjs';
+import { syncLocalAssets } from './sync-local-assets.mjs';
 import { hasLocalSettings, listLocalRepos, projectRepoLocalSettings } from './local-deploy-lib.mjs';
 
 // 배포 전 fail-fast 게이트. 전부 읽기 전용이라 겹쳐 돌린다.
@@ -29,7 +29,7 @@ async function main() {
 
   // 1) 로컬 자산 (cross-repo). hooksReady는 위에서 이미 확인했으므로 생략.
   console.log('');
-  syncLocalSkills({ ensureHooks: false });
+  syncLocalAssets({ ensureHooks: false });
 
   // 2) settings/hooks (per-repo). AC 먼저, 그다음 base-settings를 가진 다른 레포(KA 등).
   const failures = [];

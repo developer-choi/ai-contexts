@@ -1,6 +1,6 @@
-# sync-local-skills.mjs 사용법
+# sync-local-assets.mjs 사용법
 
-`node scripts/local-system/sync-local-skills.mjs [<폴더>…]` — ai-contexts 레포 루트 기준 경로다. 보통은 `npm run sync:local-system`이 함수로 실행한다.
+`node scripts/local-system/sync-local-assets.mjs [<폴더>…]` — ai-contexts 레포 루트 기준 경로다. 보통은 `npm run sync:local-system`이 함수로 실행한다.
 
 레포마다 `local/` 아래 폴더(`hooks`·`skills` 제외)를 `.claude/<폴더>`로 복사한다. 내용이 바뀐 파일만 쓰고, 원본에서 사라진 파일은 지운다.
 

@@ -31,7 +31,7 @@ sync는 `deploy/claude-settings.json`(model·env·permissions 등)을 `~/.claude
 
 ## 로컬 자산 배포 (`local/<X>` → `.claude/<X>`)
 
-settings/hooks와 스킬을 뺀 repo-local 자산(contexts 등)은 `local/<X>`를 `.claude/<X>`에 동일 복사한다(`scripts/local-system/sync-local-skills.mjs`). 새 자산 종류는 `local/`에 디렉토리만 두면 된다.
+settings/hooks와 스킬을 뺀 repo-local 자산(contexts 등)은 `local/<X>`를 `.claude/<X>`에 동일 복사한다(`scripts/local-system/sync-local-assets.mjs`). 새 자산 종류는 `local/`에 디렉토리만 두면 된다.
 
 ## 레포 로컬 스킬 (`.claude/skills/` 커밋)
 

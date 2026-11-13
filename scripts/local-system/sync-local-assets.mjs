@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 사용법: sync-local-skills.md (같은 폴더)
+// 사용법: sync-local-assets.md (같은 폴더)
 //
 // 레포마다 local/의 원본을 Claude가 읽는 자리(.claude/)로 복사한다.
 import fs from 'node:fs';
@@ -122,7 +122,7 @@ function existsDir(target) {
   return fs.existsSync(target) && fs.statSync(target).isDirectory();
 }
 
-export { main as syncLocalSkills };
+export { main as syncLocalAssets };
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   try {
