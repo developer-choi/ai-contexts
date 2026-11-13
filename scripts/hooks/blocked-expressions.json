@@ -1802,5 +1802,22 @@
     "lane": "NEEDS_REVIEW",
     "why": "도입어·강조어가 오글거린다(채용 지원서 반려)",
     "instead": "빼고 쓴다"
+  },
+  {
+    "words": [
+      "\\p{Emoji_Presentation}\\uFE0F?|\\p{Emoji}\\uFE0F"
+    ],
+    "match": "REGEX",
+    "exclusions": [
+      "✅",
+      "✅️",
+      "❌",
+      "❌️",
+      "⚠️"
+    ],
+    "scope": "BOTH",
+    "lane": "ALWAYS_BANNED",
+    "why": "장식용 이모지는 사용자가 허용하지 않았다. 허용은 경고 ⚠·체크 ✅·엑스 ❌ 셋뿐이다. 이모지로 그려지는 글자만 잡고, 글자 모양으로 그려지는 ↔·→·⚠ 같은 기호는 잡지 않는다",
+    "instead": "허용 이모지(⚠·✅·❌)로 바꾸거나 글자로 적는다"
   }
 ]

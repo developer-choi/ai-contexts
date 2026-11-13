@@ -173,7 +173,7 @@ const BLOCKED = {
 // 원본(AC `scripts/hooks/`)에서 돌든 사본(`~/.ai-contexts/`)에서 돌든 금지 표현 목록은 바로 옆에 있다.
 export const LIST_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "blocked-expressions.json");
 
-export const MATCH_TYPES = ["PREFIX", "SUBSTRING", "SENTENCE_START"];
+export const MATCH_TYPES = ["PREFIX", "SUBSTRING", "SENTENCE_START", "REGEX"];
 export const SCOPES = ["PROMPT", "BOTH", "DOC"];
 export const LANES = ["ALWAYS_BANNED", "NEEDS_REVIEW"];
 
@@ -204,7 +204,10 @@ const SENTENCE_START_BOUNDARY = String.raw`(?:^(?:\d+[.)])?|(?<!\d)[.!?]|…(?=[
 // `PREFIX`는 낱말 앞만 막는다 — 뒤를 막으면 「눈금이」·「팔의」처럼 조사가 붙은 꼴을 다 놓친다.
 // `SUBSTRING`은 앞도 안 막아 「실행오라클」처럼 붙여 쓴 꼴까지 잡는다.
 // `SENTENCE_START`는 문장 첫머리에서만 잡는다. 「사실은」·「거기에」처럼 문장 한복판에서는 멀쩡한 말을 첫머리에서만 거른다.
+// `REGEX`는 낱말을 정규식 원문으로 쓴다. 「⚠·✅·❌ 말고 이모지 전부」처럼 글자를 하나하나 적을 수 없는 규칙을 위해서다.
+// 유니코드 속성(`\p{…}`)을 쓰도록 `u` 플래그를 건다.
 export function wordPattern(type, word) {
+  if (type === "REGEX") return new RegExp(word, "giu");
   const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   if (type === "SUBSTRING") return new RegExp(escaped, "gi");
   if (type === "SENTENCE_START") return new RegExp(`(?<=${SENTENCE_START_BOUNDARY})${escaped}`, "gi");
@@ -419,7 +422,9 @@ function detectInFile(file, content, rows, addedLines = null) {
         hits: blocked.map((hit) => hit.word),
         notes: matchedRows.map((row) => {
           const instead = Array.isArray(row.instead) ? row.instead.join("·") : row.instead;
-          return `[${row.lane}] 「${row.words.join("·")}」 대신: ${instead} / 까닭: ${row.why}`;
+          // REGEX 행의 낱말은 정규식 원문이라 읽는 사람에게 뜻이 없다. 이 줄에서 실제로 걸린 글자를 보인다.
+          const label = row.match === "REGEX" ? [...new Set(blocked.filter((hit) => hit.row === row).map((hit) => hit.word))] : row.words;
+          return `[${row.lane}] 「${label.join("·")}」 대신: ${instead} / 까닭: ${row.why}`;
         }),
       });
     }

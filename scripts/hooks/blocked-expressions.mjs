@@ -12,7 +12,9 @@
 //   match      PREFIX = 낱말 앞에 다른 글자가 붙지 않은 자리만 잡는다(뒤의 조사는 함께 잡힌다).
 //              SUBSTRING = 앞에 붙여 쓴 꼴까지 문자열이 들어 있으면 잡는다.
 //              SENTENCE_START = 문장 첫머리에서만 잡는다(경계는 check-wording.mjs `SENTENCE_START_BOUNDARY`).
-//   exclusions 걸려도 넘길 정상 쓰임. 각 꼴은 그 행의 낱말 하나를 품어야 한다.
+//              REGEX = words가 정규식 원문이다(`giu` 플래그). 글자를 하나씩 적을 수 없는 규칙(이모지 전부 등)에만 쓴다.
+//              문자열 행과의 겹침 검사는 하지 않는다.
+//   exclusions 걸려도 넘길 정상 쓰임. 각 꼴은 그 행의 낱말 하나를 품어야 한다(REGEX 행이면 정규식 하나에 통째로 맞아야 한다).
 //   scope      PROMPT = 프롬프트 md(커밋 훅), DOC = write-doc 글과 커밋 메시지, BOTH = 둘 다.
 //              출신이 아니라 막는 까닭이 어느 글에서 성립하는지로 정한다(예: 물결표는 GitHub 렌더링 때문이라 DOC).
 //   lane       ALWAYS_BANNED = 어떤 쓰임이든 틀린 말. 커밋 훅은 건드린 파일 전체에서, 채점은 합계에 넣어 게시를 막는다.
@@ -58,7 +60,22 @@ function rowProblems(row) {
     problems.push("instead가 비었다");
   }
   if (!Array.isArray(row.exclusions)) problems.push("exclusions가 배열이 아니다");
-  else if (wordsOk) {
+  else if (wordsOk && row.match === "REGEX") {
+    // 깨진 정규식이 목록에 들어가면 커밋 훅이 내부 오류로 통째로 건너뛰어 다른 범주까지 꺼진다.
+    const compiled = row.words.flatMap((word) => {
+      try {
+        return [new RegExp(`^(?:${word})$`, "iu")];
+      } catch (error) {
+        problems.push(`정규식 "${word}"가 안 된다: ${error.message}`);
+        return [];
+      }
+    });
+    if (compiled.length === row.words.length) {
+      for (const phrase of row.exclusions) {
+        if (!compiled.some((regex) => regex.test(phrase))) problems.push(`예외 "${phrase}"가 어느 정규식에도 통째로 안 맞는다. 아무것도 안 빼준다`);
+      }
+    }
+  } else if (wordsOk) {
     for (const phrase of row.exclusions) {
       if (!row.words.some((word) => phrase.toLowerCase().includes(word.toLowerCase()))) {
         problems.push(`예외 "${phrase}"가 낱말을 안 품는다. 아무것도 안 빼준다`);
@@ -75,7 +92,8 @@ function checkList(rows) {
   rows.forEach((row, index) => {
     const tag = `#${index + 1}(${Array.isArray(row?.words) ? row.words[0] : "?"})`;
     for (const p of rowProblems(row)) problems.push(`${tag}: ${p}`);
-    const words = Array.isArray(row?.words) ? row.words : [];
+    // REGEX 행의 낱말은 정규식 원문이라 글자 포함으로 겹침을 볼 수 없다.
+    const words = Array.isArray(row?.words) && row.match !== "REGEX" ? row.words : [];
     for (const word of words) {
       const hit = seen.find(([other]) => overlaps(word, other));
       if (hit) problems.push(`${tag}: "${word}"가 ${hit[1]}의 "${hit[0]}"와 겹친다. 같은 자리가 두 번 걸린다`);
@@ -131,7 +149,11 @@ function main(args) {
       .flatMap((text) => text.split(/[/·,]| 또는 /))
       .map((part) => part.trim().toLowerCase())
       .filter(Boolean);
-  const hitsWord = (row, query) => row.words.some((word) => overlaps(word, query));
+  // REGEX 행은 원문 글자로 겹침을 볼 수 없어, 예외를 빼고 정규식이 표현에 맞는지로 본다.
+  const hitsWord = (row, query) =>
+    row.match === "REGEX"
+      ? blockedHits([{ ...row, exclusions: [] }], query).length > 0
+      : row.words.some((word) => overlaps(word, query));
   const hitsInstead = (row, query) => alternatives(row).includes(query.toLowerCase());
   const touches = (row, query) => hitsWord(row, query) || hitsInstead(row, query);
   const found = rows.filter((row) => queries.some((query) => touches(row, query)));
@@ -158,6 +180,9 @@ function main(args) {
           return weak.length
             ? `  "${query}": 잡지만 약함(이 행은 ${weak.join(", ")}). 더 세게 막으려면 이 행의 scope·lane을 고친다${startOnlyNotice}`
             : `  "${query}": 이미 잡음${startOnlyNotice}`;
+        }
+        if (hitsWord(row, query) && row.match === "REGEX") {
+          return `  "${query}": 정규식에는 맞지만 이 행의 exclusions가 허용한다. 막으려면 exclusions에서 뺀다`;
         }
         if (hitsWord(row, query)) {
           // 첫머리 행이 문장 중간 쓰임을 안 잡는 것은 의도한 구분이다. 고치라고만 하면 행을 PREFIX로 넓혀 그 구분이 사라진다.
