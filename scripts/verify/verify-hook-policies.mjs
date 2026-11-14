@@ -642,14 +642,20 @@ WRITE_CASES.push(
   [
     'check-artifact-write-policy.mjs',
     mdWrite('{}', 'C:/repo/.claude/settings.json'),
-    'ask',
-    '레포의 .claude/settings.json은 산출물',
+    'pass',
+    '레포의 .claude/settings.json은 커밋된 원본이다',
   ],
   [
     'check-artifact-write-policy.mjs',
     mdWrite('// hook\n', 'C:/repo/.claude/hooks/a.mjs'),
-    'ask',
-    '레포의 .claude/hooks는 산출물',
+    'pass',
+    '레포의 .claude/hooks는 커밋된 원본이다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 에이전트\n', 'C:/repo/.claude/agents/a.md'),
+    'pass',
+    '레포의 .claude/agents는 커밋된 원본이다',
   ],
   [
     'check-artifact-write-policy.mjs',
@@ -2267,7 +2273,7 @@ const recruitmentGuardGroup = async () => {
 // AC 로컬 훅 check-ac-main-commit은 「자기가 놓인 레포」를 AC로 본다. 프로세스로 띄우면 그 레포가 늘
 // 진짜 AC라 fixture를 못 넣으므로, 판정 함수를 import해 homeMain에 fixture 레포를 넘긴다.
 // 레포는 진짜 git이어야 한다 — 가짜 경로면 메인 루트를 못 구해 전부 fail-open→pass가 된다.
-const AC_MAIN_COMMIT_HOOK = path.join(import.meta.dirname, '..', '..', 'local', 'hooks', 'check-ac-main-commit.mjs');
+const AC_MAIN_COMMIT_HOOK = path.join(import.meta.dirname, '..', '..', '.claude', 'hooks', 'check-ac-main-commit.mjs');
 const acMainCommitGroup = async () => {
   const { judgeMainCommit } = await import(pathToFileURL(AC_MAIN_COMMIT_HOOK).href);
   const root = await makeTempDir('hook-ac-main-commit-');

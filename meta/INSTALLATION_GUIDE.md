@@ -22,12 +22,6 @@ npm run sync:local-system
 
 무엇을 고쳤을 때 다시 동기화하는지는 [ai-config-locations.md](../plugins/ac/contexts/ai-config-locations.md)의 반영 명령 칸을 따릅니다.
 
-프로젝트 로컬 산출물(로컬 자산 + AC settings/hooks)을 맞출 때는 로컬 시스템 동기화를 실행합니다.
-
-```bash
-npm run sync:local-system
-```
-
 ## 제거
 
 각 동기화 명령에는 대응 제거 명령이 있습니다.

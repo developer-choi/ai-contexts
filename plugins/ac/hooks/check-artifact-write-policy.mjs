@@ -1,12 +1,10 @@
 // AI 설정 배포 산출물을 Edit/Write로 직접 수정하려 하면 권한 프롬프트(ask)를 띄운다.
-// 수정은 AC 원본(deploy/·plugins/ac/·local/)에서 하고 sync로 배포해야 하며, 산출물을 직접 고치면
+// 수정은 AC 원본(deploy/·plugins/ac/)에서 하고 sync로 배포해야 하며, 산출물을 직접 고치면
 // 다음 sync에 덮여 사라진다.
 //
-// 차단 대상:
-//   - 홈 배포 루트 하위: ~/.claude
-//   - 레포 배포 산출물 세그먼트: .claude/hooks, .claude/settings.json
+// 차단 대상: 홈 배포 루트 하위(~/.claude)
 //
-// 레포의 .claude/skills는 막지 않는다. 각 레포가 커밋한 원본이라 그 자리에서 고친다.
+// 레포의 .claude/(skills·hooks·settings.json·agents)는 막지 않는다. 각 레포가 커밋한 원본이라 그 자리에서 고친다.
 //
 // 예외: ~/.claude/plans는 plan mode가 계획 파일을 쓰는 자리라 sync 산출물이 아니다.
 //
@@ -14,8 +12,7 @@
 // 규칙에 있어, 그 순간 사용자가 승인할 수 있어야 한다.
 //
 // 경로 트랩: AC 워크트리는 …\ai-contexts\.claude\worktrees\<name>\… 라 'path에 .claude
-// 포함'으로 막으면 워크트리 작업 전체가 막힌다. 그래서 .claude는 바로 다음 세그먼트가
-// hooks이거나 settings.json 파일일 때만 잡는다(.claude\worktrees\…\deploy\… 통과).
+// 포함'으로 막으면 워크트리 작업 전체가 막힌다. 그래서 홈 배포 루트와 같은 접두어만 잡는다.
 import os from "node:os";
 import path from "node:path";
 import { ask, readPayload } from "./hook-utils.mjs";
@@ -34,7 +31,7 @@ const filePath =
 
 if (EDIT_TOOLS.has(toolName) && filePath && isArtifact(filePath)) {
   ask(
-    "AI 설정 배포 산출물을 직접 수정하려 합니다. 원본(AC deploy/·plugins/ac/·local/)에서 고친 뒤 " +
+    "AI 설정 배포 산출물을 직접 수정하려 합니다. 원본(AC deploy/·plugins/ac/)에서 고친 뒤 " +
       "sync로 배포하세요. 테스트 목적 등으로 직접 수정이 필요하면 승인하세요.",
   );
 }
@@ -45,14 +42,6 @@ function isArtifact(file) {
   if (abs.startsWith(PLANS_DIR + path.sep)) return false;
   for (const root of HOME_DEPLOY_DIRS) {
     if (abs === root || abs.startsWith(root + path.sep)) return true;
-  }
-  const segs = abs.split(path.sep);
-  for (let i = 0; i < segs.length; i++) {
-    const seg = segs[i];
-    if (seg === ".claude") {
-      const next = segs[i + 1];
-      if (next === "hooks" || next === "settings.json") return true;
-    }
   }
   return false;
 }

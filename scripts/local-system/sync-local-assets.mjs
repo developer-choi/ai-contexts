@@ -48,13 +48,15 @@ function main(opts = {}) {
   }
 }
 
-// local/ 하위에서 .claude/로 배포하는 디렉토리. hooks는 settings projection이 .claude/hooks로
-// 따로 투영하므로 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
+// local/ 하위에서 .claude/로 배포하는 디렉토리. hooks는 원본을 각 레포 `.claude/hooks/`에 커밋하므로
+// 제외한다(settings/.json 파일은 디렉토리가 아니라 자연 제외).
 // skills는 원본을 각 레포 `.claude/skills/`에 커밋해 Claude Code가 그대로 읽으므로 배포하지 않는다.
 // `local/skills`가 다시 생겨도 커밋된 스킬을 덮어쓰지 않게 막는다.
 // contexts는 배포하지 않는다. 스킬 본문의 `../../contexts/...`가 배포본 옆에서 풀려야 해서 복사했는데,
 // 레포 스킬이 원본 `local/contexts/`를 직접 가리키게 된 뒤로 사본을 읽는 곳이 없다.
-const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills', 'contexts']);
+// agents도 원본을 각 레포 `.claude/agents/`에 커밋하므로 배포하지 않는다. skills와 같은 이유로 막는다.
+// RETIRED_DEPLOY_DIRS에 넣으면 sync가 커밋한 `.claude/agents/`를 지우므로 넣지 않는다.
+const LOCAL_DEPLOY_EXCLUDE = new Set(['hooks', 'skills', 'contexts', 'agents']);
 
 // 배포를 멈춘 폴더의 옛 사본. 제외만 하면 그전에 배포된 사본이 남고 아무도 덮어쓰지 않아 조용히 낡는다
 // (KA가 그 상태로 낡은 사본의 옛 규칙을 두 달간 읽었다). 그래서 sync가 지운다. 기기마다 sync를 한 번씩

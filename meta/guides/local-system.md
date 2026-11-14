@@ -1,12 +1,14 @@
 # Local System Sync
 
-전역 `sync:system`의 로컬판. 한 명령으로 repo-local 산출물 전부를 배포합니다. 대상은 **로컬 자산**(cross-repo, PP `agents` 등)과 **settings/hooks**(per-repo: `local/base-settings.json`을 가진 각 레포, AC + KA 등)입니다.
+전역 `sync:system`의 로컬판. 각 레포 `local/`의 원본을 그 레포 `.claude/`로 복사·투영합니다.
+
+레포 로컬 스킬·hook·settings·에이전트는 각 레포가 `.claude/`에 원본을 커밋하고 Claude Code가 그대로 읽습니다([배포 규약](../deploy-conventions.md)). 그래서 이 명령이 복사·투영할 대상 레포가 없습니다.
 
 ```bash
 npm run sync:local-system
 ```
 
-기본 순회 범위(로컬 자산)는 `~/WebstormProjects/main/`과 `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포입니다. 특정 루트만 지정할 수 있습니다.
+기본 순회 범위는 `~/WebstormProjects/main/`과 `~/WebstormProjects/my-else/` 하위 1뎁스 git 레포입니다. 특정 루트만 지정할 수 있습니다.
 
 ```bash
 npm run sync:local-system -- ~/WebstormProjects/main
@@ -18,19 +20,12 @@ npm run sync:local-system -- ~/WebstormProjects/main
 
 ### 1. 로컬 자산 (cross-repo)
 
-- `local/` 하위 디렉토리(`agents` 등, `hooks`·`skills`·`contexts` 제외)를 `.claude/<X>`에 맞춥니다. hooks는 2)에서 따로 투영합니다. 옛 `.claude/contexts` 사본이 남아 있으면 지웁니다.
+- `local/` 하위 디렉토리를 `.claude/<X>`에 맞춥니다. 커밋한 원본이 있는 `hooks`·`skills`·`agents`와 배포를 멈춘 `contexts`는 제외합니다. 옛 `.claude/contexts` 사본이 남아 있으면 지웁니다.
 - 지우고 다시 기록하지 않습니다. 내용이 다른 파일만 기록하고 원본에서 사라진 파일만 지워서, 열려 있던 다른 세션에는 실제로 바뀐 파일만 새로 뜹니다(1·2 공통).
-- 원본은 `local/`이며, `.claude/<X>`는 배포 산출물로 봅니다(gitignore).
 
 ### 2. settings/hooks (per-repo)
 
-전역 `sync:system`과 **동일한 메커니즘**(base+override 부분키 머지·`.ac-keys` 매니페스트·생성 계약 fail-fast·배포 후 대조)을 repo-local에 적용합니다.
-소스는 각 레포의 `local/`(전역 `deploy/`의 로컬판). `local/base-settings.json`을 가진 모든 레포(AC + KA 등)가 대상이며, 각 레포는 자기 `.claude/`로 배포됩니다.
-
-- `local/base-settings.json`(논리 hook) + `local/claude-settings.json`(override) → `.claude/settings.json`에 **부분 머지**(사용자 키 보존).
-- `local/hooks/*.mjs` → `.claude/hooks/`에 맞춥니다.
-
-산출물(`.claude/settings.json`·`.claude/hooks/`)은 **gitignore**되며 트래킹하지 않습니다. 소스(`local/`)만 커밋합니다.
+`local/`에 settings 재료(논리 hook 목록)를 가진 레포만 대상입니다. 메커니즘은 `scripts/local-system/local-deploy-lib.mjs` 머리 주석이 정본입니다.
 
 ## 제거
 
@@ -38,16 +33,12 @@ npm run sync:local-system -- ~/WebstormProjects/main
 npm run unsync:local-system
 ```
 
-- **로컬 자산**: `.claude/<X>`를 카테고리 단위로 통째 삭제합니다(gitignore 산출물이라 동일성 비교 없이 제거하고, 원본에서 사라진 파일도 함께 청소). 원본은 `local/<X>`에 남아 있어 re-sync로 복구됩니다.
-- **settings/hooks**: `.claude/settings.json`은 AC가 넣은 top-level 키만 부분 제거(사용자 키 보존), `.claude/hooks`는 AC 전유라 통째 제거, `.ac-keys` 매니페스트까지 정리합니다.
+- **로컬 자산**: 1의 대상 `.claude/<X>`를 카테고리 단위로 통째 삭제합니다. 커밋한 `.claude/hooks`·`skills`·`agents`는 건드리지 않습니다.
+- **settings/hooks**: 2의 대상 레포에서만 AC가 넣은 키와 `.claude/hooks`를 걷습니다.
 
 ## 반복 실행 기준
 
-여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다.
-
-- 로컬 자산은 `local/<X>` 기준으로, settings/hooks는 `local/` 기준으로 맞춥니다(원본에서 사라진 파일은 지우고, settings의 고아 키는 `.ac-keys`로 걷음).
-- 원본이 그대로면 두 번째 실행에서 아무 파일도 기록하지 않습니다(`verify:incremental-deploy`가 고정).
-- 제거는 settings는 `.ac-keys` 추적 키, 로컬 자산은 `.claude/<X>` 카테고리 통째(gitignore 산출물)에 적용합니다.
+여러 번 실행해도 현재 소스 내용을 기준으로 같은 상태로 수렴해야 합니다. 원본이 그대로면 두 번째 실행에서 아무 파일도 기록하지 않습니다(`verify:incremental-deploy`가 고정).
 
 ## 생성 계약 검증
 
@@ -55,10 +46,4 @@ npm run unsync:local-system
 npm run verify:local-system
 ```
 
-`local/base-settings.json`을 가진 각 레포(AC + KA 등)에 대해 아래를 검증합니다.
-
-- hooks가 claude에 등록되는지
-- command가 `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`인지
-- Stop이 매처 없이 등록되는지
-
-이벤트별 단언은 해당 이벤트가 있을 때만 적용합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.
+2의 대상 레포마다 hook 등록과 command 꼴(`node "${CLAUDE_PROJECT_DIR}/.claude/hooks/"`)을 검증합니다. 대상이 없으면 통과합니다. `sync:local-system` 시작 시 fail-fast로 호출됩니다.

@@ -1,0 +1,21 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block-ac-sync.mjs\"",
+            "statusMessage": "Checking for sync:* commands..."
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/check-ac-main-commit.mjs\"",
+            "statusMessage": "Checking AC main-worktree commit..."
+          }
+        ]
+      }
+    ]
+  }
+}

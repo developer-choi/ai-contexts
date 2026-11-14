@@ -6,7 +6,6 @@
 import path from 'node:path';
 
 import { buildHooks, LOCAL_ADAPTERS, localHookCommand } from '../settings/settings-projection.mjs';
-import { repoDir } from '../lib/deploy-lib.mjs';
 import { hasLocalSettings, listLocalRepos, loadLocalBaseSettings } from './local-deploy-lib.mjs';
 
 const buildOpts = { adapters: LOCAL_ADAPTERS, makeCommand: localHookCommand };
@@ -59,7 +58,7 @@ function main() {
 
   console.log('로컬 settings 생성 계약 검증 중...');
 
-  const repos = [repoDir, ...listLocalRepos().filter((repo) => repo !== repoDir && hasLocalSettings(repo))];
+  const repos = listLocalRepos().filter(hasLocalSettings);
   for (const repo of repos) {
     verifyBase(loadLocalBaseSettings(repo), path.basename(repo), check);
   }

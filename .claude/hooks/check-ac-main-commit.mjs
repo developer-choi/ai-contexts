@@ -4,8 +4,8 @@
 // 리뷰 회차가 「master이고 깨끗하면 워크트리 불필요」 조건을 따라 메인 master에 커밋 27개를 바로 넣은 적이
 // 있다(2026-10-09). 커밋은 되돌릴 수 있어도 사용자가 그 사이 master를 기준으로 다른 일을 시작하면 엉킨다.
 //
-// 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local `.claude/hooks/`로
-// 배포한다. 배포본의 `../../plugins/ac/hooks`는 같은 레포의 공용 파서를 가리킨다.
+// 이 파일은 커밋한 원본이고, `.claude/settings.json`의 등록을 Claude Code가 그대로 읽는다.
+// `../../plugins/ac/hooks`는 같은 레포의 공용 파서를 가리킨다.
 import { execSync } from "node:child_process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -66,7 +66,7 @@ function samePath(a, b) {
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const payload = readPayload();
-  // 이 훅이 놓인 레포(<repo>/local/hooks 또는 <repo>/.claude/hooks)의 메인 루트가 AC다.
+  // 이 훅이 놓인 레포(<repo>/.claude/hooks)의 메인 루트가 AC다.
   const homeMain = findMainRoot(path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".."));
   const { decision, reason } = judgeMainCommit({
     cmd: getCommand(payload),

@@ -22,8 +22,8 @@ md 파일을 고친 직후, 바뀐 식별자(헤딩 이름·룰 명칭·인용�
 다음을 수정·추가할 때 [meta/deploy-conventions.md](meta/deploy-conventions.md)를 먼저 본다.
 
 - sync/unsync 스크립트 또는 sync/unsync 타겟
-- `plugins/ac/hooks/`(전역, 등록은 `hooks.json`)·`local/hooks/`(AC 로컬)의 정책 hook
-- `deploy/claude-settings.json`·`local/base-settings.json` 등 settings 생성 소스
+- `plugins/ac/hooks/`(전역, 등록은 `hooks.json`)·`.claude/hooks/`(AC 로컬, 등록은 `.claude/settings.json`)의 정책 hook
+- `deploy/claude-settings.json` 등 settings 생성 소스
 - AC 작업용 worktree 생성
 
 ## 폴더 규칙

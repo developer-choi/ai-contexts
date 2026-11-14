@@ -56,7 +56,7 @@
         "scripts/settings/verify-settings-projection.mjs",
         "scripts/local-system/verify-local-system.mjs"
       ],
-      "note": "전역 hook의 존재 정합(hook 본체 ↔ hooks.json 등록)과 command 꼴은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: 전역 hook을 추가하면 hooks.json의 event·matcher·statusMessage를 정하고, 매처 구조(셸 도구 묶음 등)를 바꾸면 verify-settings-projection의 단언을 함께 고친다. 로컬 hook은 local/base-settings.json의 논리 항목을 settings-projection이 투영한다 — 새 on 토큰을 쓰면 LOCAL_ADAPTERS를, 투영 export 계약(buildHooks·LOCAL_ADAPTERS·localHookCommand)을 바꾸면 소비자인 verify-local-system을 같이 맞춘다."
+      "note": "전역 hook의 존재 정합(hook 본체 ↔ hooks.json 등록)과 command 꼴은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: 전역 hook을 추가하면 hooks.json의 event·matcher·statusMessage를 정하고, 매처 구조(셸 도구 묶음 등)를 바꾸면 verify-settings-projection의 단언을 함께 고친다. 레포 로컬 hook은 각 레포가 .claude/settings.json에 직접 등록한다. settings-projection의 투영 export 계약(buildHooks·LOCAL_ADAPTERS·localHookCommand)을 바꾸면 소비자인 verify-local-system을 같이 맞춘다."
     },
     {
       "name": "sync:system 동기화·제거·가이드",

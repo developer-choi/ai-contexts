@@ -2,8 +2,7 @@
 // 못하게 막는다. sync 스크립트는 사용자만 실행한다. 사용자는 `! npm run sync:...`로
 // 직접 실행할 수 있다.
 //
-// 이 파일은 `local/hooks/`의 원본이며, `npm run sync:local-system`이 repo-local
-// `.claude/hooks/`로 배포한다. 직접 산출물을 수정하지 말 것.
+// 이 파일은 커밋한 원본이고, `.claude/settings.json`의 등록을 Claude Code가 그대로 읽는다.
 import fs from "node:fs";
 
 function readInput() {

@@ -2,7 +2,7 @@
 
 `node scripts/local-system/sync-local-assets.mjs [<폴더>…]`: ai-contexts 레포 루트 기준 경로다. 보통은 `npm run sync:local-system`이 함수로 실행한다.
 
-레포마다 `local/` 아래 폴더(`hooks`·`skills`·`contexts` 제외)를 `.claude/<폴더>`로 복사한다. 내용이 바뀐 파일만 기록하고, 원본에서 사라진 파일은 지운다. 배포를 멈춘 폴더의 옛 사본(`.claude/contexts`)이 남아 있으면 통째로 지운다.
+레포마다 `local/` 아래 폴더(`hooks`·`skills`·`contexts`·`agents` 제외)를 `.claude/<폴더>`로 복사한다. 내용이 바뀐 파일만 기록하고, 원본에서 사라진 파일은 지운다. 배포를 멈춘 폴더의 옛 사본(`.claude/contexts`)이 남아 있으면 통째로 지운다.
 
 ## 인자
 
