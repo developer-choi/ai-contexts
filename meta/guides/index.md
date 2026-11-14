@@ -4,7 +4,6 @@
 
 - [환경 동기화](environment.md): 현재 사용자 환경을 AC 기준으로 맞춥니다.
 - [시스템 자산 동기화](system.md): Claude Code 전역 시스템 자산을 AC 기준으로 맞춥니다.
-- [로컬 시스템 동기화](local-system.md): 각 레포 `local/`의 원본을 `.claude/`로 복사·투영합니다.
 
 ## 명령 이름 기준
 

@@ -18,17 +18,16 @@
 // 순서를 이렇게 고정한 이유: 일반 브랜치는 미커밋을 **먼저** 커밋해 ahead로 만든 뒤 판정한다.
 // 그래야 stash가 보호 브랜치 갈래에만 남는다(스킬 「세부 절차」가 정한 제약).
 //
-// 전 레포 순회를 마치면 배포 세 벌을 이어서 돌린다. 다른 기기에서 받아온 설정(전역 git 훅 배선·
-// 규칙·스킬·레포 로컬 자산)이 이 기기에 반영되지 않으면, 받기만 하고 도는 것은 옛것인 상태가 된다.
+// 전 레포 순회를 마치면 배포 두 단계를 이어서 돌린다. 다른 기기에서 받아온 설정(전역 git 훅 배선·
+// 규칙·스킬)이 이 기기에 반영되지 않으면, 받기만 하고 도는 것은 옛것인 상태가 된다.
 // 배포는 사용자가 부른다는 정책의 예외로 사용자가 직접 정했다(2026-09-14) — 이 스크립트를 부르는 것
 // 자체가 그 배포까지 하겠다는 뜻이다. 레포를 다 받은 **뒤에** 돌려야 받아온 최신 설정이 반영된다.
 // `--root`(픽스처 검증)와 `--wip`(한 레포 후속 호출)에서는 돌리지 않는다.
 //
 // 순서는 뒤가 앞에 기대므로 고정이다:
-//   1. environment — 전역 git 훅 배선을 건다. 2·3이 시작하자마자 `ensureHooksReady()`로 이 배선을
+//   1. environment — 전역 git 훅 배선을 건다. 2가 시작하자마자 `ensureHooksReady()`로 이 배선을
 //      확인하고 없으면 멈추므로, 새 기기·새 이벤트 추가 회차에서는 이것이 먼저여야 나머지가 산다
 //   2. system      — `deploy/claude-settings.json`과 전역 규칙 import 줄을 `~/.claude`로
-//   3. local-system — 각 레포 `local/`을 그 레포 `.claude/`로
 //
 // 앞이 실패해도 뒤를 건너뛰지 않는다 — 한 벌이 깨졌을 때 나머지도 낡았는지를 한 번에 봐야 하고,
 // 실패한 것만 골라 다시 부르면 되기 때문이다. 실패는 결과 표 아래에 단계별로 모아 낸다.
@@ -269,7 +268,6 @@ function syncRepo(dir, { wipMessage } = {}) {
 const DEPLOY_STEPS = [
   { name: "sync:environment", entry: ["environment", "sync-environment.mjs"] },
   { name: "sync:system", entry: ["system", "sync-system.mjs"] },
-  { name: "sync:local-system", entry: ["local-system", "sync-local-system.mjs"] },
 ];
 
 // 배포 한 벌. 출력은 그대로 흘리되, JSON 모드에서는 stdout을 JSON만 남기려 stderr로 돌린다.

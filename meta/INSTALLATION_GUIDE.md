@@ -15,7 +15,6 @@ claude plugin install ac@ac
 npm ci
 npm run sync:environment
 npm run sync:system
-npm run sync:local-system
 ```
 
 ## 평소 갱신
@@ -29,7 +28,6 @@ npm run sync:local-system
 ```bash
 npm run unsync:environment
 npm run unsync:system
-npm run unsync:local-system
 ```
 
 ## 상세 가이드

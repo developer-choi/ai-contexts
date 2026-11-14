@@ -1,7 +1,7 @@
 // AC ESLint flat config.
 //
 // 목적: CJS 금지, 버전이 박힌 Claude 모델 ID 금지. AC는 전부 ESM(.mjs)이라 require()/module.exports/exports.X는
-// 회귀다. AST 기반이라 settings-projection이 node -e 명령을 만드느라 문자열 안에 담는 require(
+// 회귀다. AST 기반이라 hook 명령 문자열 안에 담긴 require(
 // 같은 정당한 사례는 오탐하지 않는다(문자열은 CallExpression이 아님).
 //
 // recommended 프리셋은 일부러 켜지 않는다 — unused-vars 등 무관한 규칙까지 켜면 기존 코드가

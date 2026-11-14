@@ -49,14 +49,12 @@
       "note": "스캔이 SKILL.md의 「프로젝트 레지스트리」 표(첫 헤더 `약어`)와 「안 쓰는 워크트리·브랜치 정리」의 루트 표(첫 헤더 `정리 대상 루트`)를 마크다운 그대로 파싱해 대상을 정한다 — 사본을 안 두려고 표를 데이터로 쓴다. 표의 헤더 이름·열 순서를 바꾸면 파서도 함께 고친다. 안 그러면 대상이 목록에서 조용히 빠진다."
     },
     {
-      "name": "hook 등록·투영",
+      "name": "hook 등록·검증",
       "files": [
         "plugins/ac/hooks/hooks.json",
-        "scripts/settings/settings-projection.mjs",
-        "scripts/settings/verify-settings-projection.mjs",
-        "scripts/local-system/verify-local-system.mjs"
+        "scripts/settings/verify-settings-projection.mjs"
       ],
-      "note": "전역 hook의 존재 정합(hook 본체 ↔ hooks.json 등록)과 command 꼴은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: 전역 hook을 추가하면 hooks.json의 event·matcher·statusMessage를 정하고, 매처 구조(셸 도구 묶음 등)를 바꾸면 verify-settings-projection의 단언을 함께 고친다. 레포 로컬 hook은 각 레포가 .claude/settings.json에 직접 등록한다. settings-projection의 투영 export 계약(buildHooks·LOCAL_ADAPTERS·localHookCommand)을 바꾸면 소비자인 verify-local-system을 같이 맞춘다."
+      "note": "전역 hook의 존재 정합(hook 본체 ↔ hooks.json 등록)과 command 꼴은 verify:settings가 자동으로 잡으니 여기선 결정 면만 챙긴다: 전역 hook을 추가하면 hooks.json의 event·matcher·statusMessage를 정하고, 매처 구조(셸 도구 묶음 등)를 바꾸면 verify-settings-projection의 단언을 함께 고친다. 레포 로컬 hook은 각 레포가 .claude/settings.json에 직접 등록한다."
     },
     {
       "name": "sync:system 동기화·제거·가이드",
@@ -66,23 +64,6 @@
         "meta/guides/system.md"
       ],
       "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드(에이전트가 코드 안 읽고 따르는 절차)도 함께 갱신한다."
-    },
-    {
-      "name": "sync:local-system 동기화·제거·가이드",
-      "files": [
-        "scripts/local-system/sync-local-system.mjs",
-        "scripts/local-system/unsync-local-system.mjs",
-        "meta/guides/local-system.md"
-      ],
-      "note": "sync가 새 경로/파일을 다루면 unsync도 같은 기준으로, 동작이 바뀌면 가이드도 함께 갱신한다."
-    },
-    {
-      "name": "sync:local-assets 동기화·제거 쌍",
-      "files": [
-        "scripts/local-system/sync-local-assets.mjs",
-        "scripts/local-system/unsync-local-assets.mjs"
-      ],
-      "note": "로컬 자산 배포가 새 카테고리/경로를 다루면 제거도 같은 기준으로 맞춘다 (sync만 되고 unsync 후 잔여물 남는 구조 금지)."
     },
     {
       "name": "sync:environment 동기화·제거·가이드",
@@ -156,10 +137,9 @@
       "files": [
         "scripts/sync-on-push.mjs",
         "scripts/environment/sync-environment.mjs",
-        "scripts/system/sync-system.mjs",
-        "scripts/local-system/sync-local-system.mjs"
+        "scripts/system/sync-system.mjs"
       ],
-      "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-environment·sync-system·sync-local-system을 이 순서로 실행·게이트하며, 세 진입 경로(scripts/environment/sync-environment.mjs·scripts/system/sync-system.mjs·scripts/local-system/sync-local-system.mjs)를 하드코딩한다. 이 세 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
+      "note": "pre-push 훅 sync-on-push는 master 푸시 때 sync-environment·sync-system을 이 순서로 실행·게이트하며, 두 진입 경로(scripts/environment/sync-environment.mjs·scripts/system/sync-system.mjs)를 하드코딩한다. 이 두 진입점 파일을 옮기거나 이름을 바꾸면 sync-on-push의 steps 경로도 함께 고친다(안 그러면 pre-push가 없는 파일을 execFileSync해 푸시가 조용히 깨진다)."
     },
     {
       "name": "프로젝트 약어 — 전역 규칙 ↔ 절 인용 훅",

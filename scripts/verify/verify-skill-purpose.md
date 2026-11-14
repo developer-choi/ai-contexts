@@ -5,7 +5,7 @@
 ## 인자
 
 - 없음 — AC 자신의 `plugins/ac/skills`·`.claude/skills` 아래 `SKILL.md`를 본다
-- `--local` sync가 훑는 모든 레포(`~/WebstormProjects/main`·`~/WebstormProjects/my-else`의 직속 git 레포)의 `.claude/skills`를 본다. AC 자신의 `plugins/ac/skills`는 안 본다
+- `--local` 이 기기의 로컬 레포(`~/WebstormProjects/main`·`~/WebstormProjects/my-else`의 직속 git 레포)의 `.claude/skills`를 본다. AC 자신의 `plugins/ac/skills`는 안 본다
 
 그 밖의 인자는 읽지 않는다.
 

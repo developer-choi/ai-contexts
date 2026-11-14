@@ -21,8 +21,6 @@ import {
   uninstallTarget,
   verifyClaudeImports,
 } from '../lib/deploy-lib.mjs';
-import { copyLocalHooks } from '../local-system/local-deploy-lib.mjs';
-import { syncLocalAssets } from '../local-system/sync-local-assets.mjs';
 
 const quiet = () => {};
 const root = fs.mkdtempSync(path.join(os.tmpdir(), 'ac-incremental-deploy-'));
@@ -141,65 +139,6 @@ try {
   fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${USER_NOTE}\n`);
   uninstallClaudeImports(home, quiet);
   check('import 줄 없는 사용자 CLAUDE.md는 unsync가 지우지 않음', fs.existsSync(path.join(home, 'CLAUDE.md')));
-
-  console.log('로컬 자산 배포 — 커밋된 스킬·에이전트는 건드리지 않고, 다시 돌리면 아무것도 안 씀');
-  const repo = path.join(root, 'repo');
-  fs.mkdirSync(path.join(repo, '.git'), { recursive: true });
-  fs.mkdirSync(path.join(repo, 'local', 'skills', 'sample'), { recursive: true });
-  fs.mkdirSync(path.join(repo, 'local', 'agents'), { recursive: true });
-  fs.mkdirSync(path.join(repo, 'local', 'assets'), { recursive: true });
-  fs.mkdirSync(path.join(repo, 'local', 'contexts'), { recursive: true });
-  fs.mkdirSync(path.join(repo, 'local', 'hooks'), { recursive: true });
-  // contexts는 배포를 멈췄다. 그전에 배포된 옛 사본이 남아 있으면 sync가 지워야 한다.
-  const retiredCopy = path.join(repo, '.claude', 'contexts', 'old.md');
-  fs.mkdirSync(path.dirname(retiredCopy), { recursive: true });
-  fs.writeFileSync(retiredCopy, '# 옛 사본\n');
-  fs.writeFileSync(path.join(repo, 'local', 'skills', 'sample', 'SKILL.md'), '---\ndescription: 남은 옛 원본\n---\n');
-  // 스킬은 레포가 .claude/skills/에 커밋한다. local/skills가 남아 있어도 그것으로 덮어쓰면 안 된다.
-  const committedSkill = path.join(repo, '.claude', 'skills', 'sample', 'SKILL.md');
-  const committedText = '---\ndescription: 설명\n---\n\n# 제목\n';
-  fs.mkdirSync(path.dirname(committedSkill), { recursive: true });
-  fs.writeFileSync(committedSkill, committedText);
-  // 에이전트도 레포가 .claude/agents/에 커밋한다. local/agents가 남아 있어도 그것으로 덮어쓰면 안 된다.
-  const committedAgent = path.join(repo, '.claude', 'agents', 'a.md');
-  fs.mkdirSync(path.dirname(committedAgent), { recursive: true });
-  const committedAgentText = '# committed agent\n';
-  fs.writeFileSync(committedAgent, committedAgentText);
-  fs.writeFileSync(path.join(repo, 'local', 'agents', 'a.md'), '# 남은 옛 원본\n');
-  fs.writeFileSync(path.join(repo, 'local', 'assets', 'a.md'), '# a\n');
-  fs.writeFileSync(path.join(repo, 'local', 'contexts', 'c.md'), '# c\n');
-  fs.writeFileSync(path.join(repo, 'local', 'hooks', 'h.mjs'), '// hook\n');
-  fs.writeFileSync(path.join(repo, 'local', 'base-settings.json'), '{ "hooks": [] }\n');
-  fs.writeFileSync(path.join(repo, 'CLAUDE.md'), '# 레포\n');
-  const runLocal = () => {
-    const argv = process.argv;
-    const log = console.log;
-    process.argv = [argv[0], argv[1], repo];
-    console.log = quiet;
-    try {
-      syncLocalAssets({ ensureHooks: false });
-      copyLocalHooks(quiet, repo);
-    } finally {
-      process.argv = argv;
-      console.log = log;
-    }
-  };
-  runLocal();
-  check('커밋된 .claude/skills를 local/skills로 덮어쓰지 않음', fs.readFileSync(committedSkill, 'utf8') === committedText);
-  check('.agents·AGENTS.md·GEMINI.md를 만들지 않음',
-    ['.agents', 'AGENTS.md', 'GEMINI.md'].every((name) => !fs.existsSync(path.join(repo, name))));
-  check('로컬 hook이 배포됨', fs.existsSync(path.join(repo, '.claude', 'hooks', 'h.mjs')));
-  check('커밋된 .claude/agents를 local/agents로 덮어쓰지 않음', fs.readFileSync(committedAgent, 'utf8') === committedAgentText);
-  check('제외 목록 밖 local/<X>는 배포됨', fs.existsSync(path.join(repo, '.claude', 'assets', 'a.md')));
-  check('local/contexts는 배포하지 않고 옛 .claude/contexts 사본은 지움', !fs.existsSync(path.join(repo, '.claude', 'contexts')));
-  const localBefore = snapshotMtimes(repo);
-  runLocal();
-  check('모든 파일의 수정 시각이 그대로', changedMtimes(localBefore, snapshotMtimes(repo)).length === 0);
-  fs.rmSync(path.join(repo, 'local', 'assets', 'a.md'));
-  runLocal();
-  // 고친 것은 원본(local/)이다 — 배포본 쪽 변화만 센다.
-  const localTouched = changedMtimes(localBefore, snapshotMtimes(repo)).filter((rel) => !rel.startsWith(`local${path.sep}`));
-  check('지운 assets 파일만 바뀜', localTouched.length === 1 && localTouched[0].endsWith(path.join('assets', 'a.md')));
 } finally {
   fs.rmSync(root, { recursive: true, force: true });
 }

@@ -5,12 +5,12 @@
 // 목적이 없으면 "본문이 목적에서 벗어났는가"를 판정할 기준 자체가 없어, 스킬이 조용히 다른 것이 된다.
 // 존재 여부는 결정론적이라 산문 규칙 대신 여기서 잡는다(내용이 적절한지는 사람·리뷰 몫).
 //
-// `--local`로 sync가 훑는 모든 레포까지 보는 까닭: AC만 보면 이 규칙이 AC 안에서만 살아 남의 레포 스킬은 목적 없이 커밋된다 — 규칙은 전역인데
+// `--local`로 이 기기의 로컬 레포(scripts/lib/local-repos.mjs)까지 보는 까닭: AC만 보면 이 규칙이 AC 안에서만 살아 남의 레포 스킬은 목적 없이 커밋된다 — 규칙은 전역인데
 // 검사만 한 레포였던 것이 구멍이었다.
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
-import { listLocalRepos } from '../local-system/local-deploy-lib.mjs';
+import { listLocalRepos } from '../lib/local-repos.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 const HEADING = /^##[ \t]+목적[ \t]*$/m;

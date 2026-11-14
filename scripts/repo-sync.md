@@ -6,7 +6,7 @@
 
 - `node scripts/repo-sync.mjs` — 전 레포 순회
   - 스캔 루트는 `~/WebstormProjects/main`·`~/WebstormProjects/my-else`·`~/WebstormProjects/simplify`
-  - 순회를 마치면 `sync:environment` → `sync:system` → `sync:local-system`을 이 순서로 이어서 돌린다(앞이 실패해도 뒤를 돌린다)
+  - 순회를 마치면 `sync:environment` → `sync:system`을 이 순서로 이어서 돌린다(앞이 실패해도 뒤를 돌린다)
 - `node scripts/repo-sync.mjs --wip <레포경로> --message "<커밋 메시지>"` — 그 레포 하나만 미커밋을 이 메시지로 커밋하고 이어서 동기화한다. 배포는 안 돌린다. 순회 출력의 `[WIP 커밋 필요]` 아래 줄을 메시지만 채워 실행한다
 - `--json` 표 대신 행 배열 JSON을 stdout에 낸다. 배포 출력은 stderr로 간다
 - `--root <dir>[,<dir>…]` 스캔 루트를 바꾼다. 배포는 안 돌린다. 픽스처로 판정을 검증할 때만 쓴다 — 실제 레포에 대면 검증이 곧 push라 되돌릴 수 없다

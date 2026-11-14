@@ -181,7 +181,7 @@ const CASES = [
 
   // --- 배포 가드: sync 계열만 끊고 읽기 전용은 통과 ---
   ['check-deploy-script-policy.mjs', 'npm run sync:system', 'deny', '전역 배포'],
-  ['check-deploy-script-policy.mjs', 'npm run unsync:local-system', 'deny', '제거도 배포 조작이다'],
+  ['check-deploy-script-policy.mjs', 'npm run unsync:system', 'deny', '제거도 배포 조작이다'],
   ['check-deploy-script-policy.mjs', 'npm run --prefix ~/ac sync:system', 'deny', '--prefix로 다른 레포에서 돌려도 잡는다'],
   ['check-deploy-script-policy.mjs', 'yarn sync:environment', 'deny', '패키지 매니저를 바꿔도 잡는다'],
   ['check-deploy-script-policy.mjs', 'node scripts/system/sync-system.mjs', 'deny', 'npm을 우회한 직접 호출'],
@@ -189,7 +189,6 @@ const CASES = [
   ['check-deploy-script-policy.mjs', 'npm run sync:something-new', 'deny', '나중에 생길 sync 타겟도 접두사로 잡는다'],
   ['check-deploy-script-policy.mjs', 'echo x && $(npm run sync:system)', 'deny', '명령 치환으로 감싸도 잡는다'],
   ['check-deploy-script-policy.mjs', 'npm run verify:hook-policies', 'pass', '읽기 전용 검증은 통과'],
-  ['check-deploy-script-policy.mjs', 'npm run verify:local-system', 'pass', 'local-system도 verify는 통과'],
   ['check-deploy-script-policy.mjs', 'node scripts/verify/verify-hook-policies.mjs', 'pass', '직접 호출도 verify면 통과'],
   ['check-deploy-script-policy.mjs', 'git commit a.md -m "npm run sync:system 금지 훅 추가"', 'pass', '메시지 안의 명령은 실행이 아니다'],
 

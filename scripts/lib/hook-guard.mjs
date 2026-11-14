@@ -10,7 +10,7 @@ import {
   registerRepoHookWiring,
   unwiredHookEvents,
 } from './git-hooks.mjs';
-import { defaultLocalRoots, listLocalRepos } from '../local-system/local-deploy-lib.mjs';
+import { defaultLocalRoots, listLocalRepos } from './local-repos.mjs';
 
 const repoRoot = path.resolve(import.meta.dirname, '..', '..');
 
@@ -83,7 +83,7 @@ function checkHooks() {
   return { ok: issues.length === 0, issues, repairable };
 }
 
-// 전역 배선은 기기의 모든 레포에 닿으므로, 로컬 sync가 훑는 곳에 더해 채용 과제 레포까지 본다.
+// 전역 배선은 기기의 모든 레포에 닿으므로, 기본 로컬 레포 폴더에 더해 채용 과제 레포까지 본다.
 const HOOK_SCAN_ROOTS = [...defaultLocalRoots, path.join(os.homedir(), 'WebstormProjects', 'recruitment')];
 
 function commitlintBin() {
