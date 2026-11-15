@@ -111,10 +111,14 @@ try {
   check('rules/의 원본 이름 사본만 지워지고 사용자 rule은 남음',
     ruleNames.every((name) => !fs.existsSync(path.join(homeRules, name))) && fs.existsSync(path.join(homeRules, 'mine.md')));
   check('대조 통과', verifyClaudeImports(home));
-  fs.appendFileSync(path.join(home, 'CLAUDE.md'), `\n${USER_LINE}\n`);
   const homeBefore = snapshotMtimes(home);
-  check('다시 돌리면 아무것도 안 씀(사용자 줄 포함)', deployClaudeImports(home, quiet) === 0
+  check('다시 돌리면 아무것도 안 씀', deployClaudeImports(home, quiet) === 0
     && changedMtimes(homeBefore, snapshotMtimes(home)).length === 0);
+  fs.appendFileSync(path.join(home, 'CLAUDE.md'), `\n${USER_LINE}\n`);
+  check('import 줄 밖의 줄이 있으면 대조 실패', !verifyClaudeImports(home));
+  deployClaudeImports(home, quiet);
+  check('import 줄 밖의 줄은 sync가 지움', fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n`);
+  fs.appendFileSync(path.join(home, 'CLAUDE.md'), `\n${USER_LINE}\n`);
   uninstallClaudeImports(home, quiet);
   check('unsync 뒤 사용자 줄만 남음', fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${USER_LINE}\n`);
   check('unsync 뒤 사용자 rule이 남음', fs.existsSync(path.join(homeRules, 'mine.md')));
@@ -134,8 +138,8 @@ try {
   check('전환 뒤 만든 같은 이름 rule은 지우지 않음', fs.existsSync(ownRule));
   fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${USER_NOTE}\n`);
   deployClaudeImports(home, quiet);
-  check('사용자가 쓴 CLAUDE.md는 import 줄 아래에 남음',
-    fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n\n${USER_NOTE}\n`);
+  check('사용자가 쓴 CLAUDE.md도 import 줄로 덮어씀',
+    fs.readFileSync(path.join(home, 'CLAUDE.md'), 'utf8') === `${imports.join('\n')}\n`);
   fs.writeFileSync(path.join(home, 'CLAUDE.md'), `${USER_NOTE}\n`);
   uninstallClaudeImports(home, quiet);
   check('import 줄 없는 사용자 CLAUDE.md는 unsync가 지우지 않음', fs.existsSync(path.join(home, 'CLAUDE.md')));

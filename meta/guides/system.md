@@ -27,7 +27,7 @@ npm run sync:system -- <target>
 - `deploy/CLAUDE.md`와 `deploy/rules/`는 복사하지 않습니다. 타겟 `CLAUDE.md`에 원본 파일마다 `@` import 줄을 두어 Claude Code가 원본을 직접 읽게 합니다.
   - 기존 파일의 내용을 고치면 sync 없이 다음 세션에 실립니다. 규칙 파일을 추가·삭제·개명하면 import 줄 목록이 달라지므로 sync를 돌려야 합니다.
   - import 줄과 그 목록은 워크트리에서 돌려도 본 체크아웃의 `deploy/` 기준입니다. 워크트리를 지워도 전역 규칙이 사라지지 않게 하기 위해서이고, 그래서 워크트리에서 고친 규칙은 본 체크아웃에 병합되기 전에는 실리지 않습니다.
-  - 타겟 `CLAUDE.md`에 사용자가 적은 줄은 import 줄 아래에 남깁니다. 기존 사본을 알아내 걷는 방식은 `deploy-lib.mjs`의 `deployClaudeImports`·`uninstallClaudeImports`가 정본입니다. 그 밖의 타겟 `rules/` 파일은 사용자 영역이라 건드리지 않습니다.
+  - 타겟 `CLAUDE.md`는 import 줄만으로 통째로 덮어씁니다. 사용자가 적은 줄도 남기지 않습니다. 전역에만 둘 규칙은 `deploy/`에 넣습니다. 기존 사본을 알아내 걷는 방식은 `deploy-lib.mjs`의 `deployClaudeImports`·`uninstallClaudeImports`가 정본입니다. 그 밖의 타겟 `rules/` 파일은 사용자 영역이라 건드리지 않습니다.
 - `deploy/claude-settings.json`(권한·모델·env 등)을 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존합니다.
 - 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
 

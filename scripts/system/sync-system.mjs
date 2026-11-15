@@ -108,7 +108,7 @@ async function main() {
   if (verifyClaudeImports(targetDir)) {
     console.log('  PASS  CLAUDE.md (import)');
   } else {
-    fail(failures, 'CLAUDE.md의 ai-contexts import 줄이 원본 목록과 다름');
+    fail(failures, 'CLAUDE.md가 ai-contexts import 줄 목록과 다름(빠진 줄이나 다른 줄이 있음)');
   }
 
   const targetSettings = path.join(targetDir, 'settings.json');

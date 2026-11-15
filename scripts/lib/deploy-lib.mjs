@@ -204,15 +204,10 @@ function userRows(content) {
   return trimBlankEdges(content.split(/\r?\n/).filter((row) => !AC_IMPORT_LINE.test(row.trim())));
 }
 
-// 타겟 CLAUDE.md의 새 내용. 예전 사본이면 import 줄로 바꾸고(남기면 같은 규칙이 두 번 실린다),
-// 사용자가 쓴 줄은 import 줄 아래에 남긴다.
-function claudeMdContent(current, lines) {
-  const head = `${lines.join('\n')}\n`;
-  if (current === null) return head;
-  const kept = hasAcImportLine(current) ? userRows(current)
-    : isPastClaudeMdCopy(current) ? []
-      : trimBlankEdges(current.split(/\r?\n/));
-  return kept.length > 0 ? `${head}\n${kept.join('\n')}\n` : head;
+// 타겟 CLAUDE.md는 AC 산출물이다. 무엇이 있었든 import 줄만으로 덮어쓴다. 남은 줄을 살리면
+// 원본에 없는 규칙이 AC 밖에서 조용히 실린다.
+function claudeMdContent(lines) {
+  return `${lines.join('\n')}\n`;
 }
 
 // 예전 sync가 타겟 `rules/`에 복사한 원본 이름의 파일을 지운다. 남기면 import와 함께 두 번 실린다.
@@ -240,16 +235,15 @@ function deployClaudeImports(targetDir, log, srcRoot = importSourceDir()) {
   const file = path.join(targetDir, 'CLAUDE.md');
   const current = fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
   const transition = current === null || !hasAcImportLine(current);
-  const changed = writeFileLogged(file, claudeMdContent(current, claudeImportLines(srcRoot)), log, 'CLAUDE.md (import)');
+  const changed = writeFileLogged(file, claudeMdContent(claudeImportLines(srcRoot)), log, 'CLAUDE.md (import)');
   return changed + (transition ? retireRuleCopies(targetDir, log) : 0);
 }
 
-// 대조: AC import 줄이 원본 목록과 같은 순서로 다 있다.
+// 대조: 타겟 CLAUDE.md가 import 줄 목록과 글자까지 같다(다른 줄이 끼어 있으면 불일치).
 function verifyClaudeImports(targetDir, srcRoot = importSourceDir()) {
   const file = path.join(targetDir, 'CLAUDE.md');
   if (!fs.existsSync(file)) return false;
-  const actual = fs.readFileSync(file, 'utf8').split(/\r?\n/).map((row) => row.trim()).filter((row) => AC_IMPORT_LINE.test(row));
-  return actual.join('\n') === claudeImportLines(srcRoot).join('\n');
+  return fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n') === claudeMdContent(claudeImportLines(srcRoot));
 }
 
 // AC import 줄만 걷는다. 사용자가 적은 줄이 남으면 파일을 두고, 없으면 지운다. import 줄 없는 파일은
