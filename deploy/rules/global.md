@@ -58,14 +58,11 @@
 ### 프로젝트 약어
 - 기본 경로: `~/WebstormProjects/main/`
 - AC = ai-contexts
-- DP = dsa-playground
 - KA = knowledge-archive
 - MP = monorepo-playground
 - PFM = plan-for-myself
-- DC = developer-choi (`~/WebstormProjects/my-else/developer-choi`)
 - PP = private-playground
 - TP = test-playground
-- AP = assignment-playground (`~/WebstormProjects/recruitment/assignment-playground`)
 
 ## 상황별 참고 문서
 
