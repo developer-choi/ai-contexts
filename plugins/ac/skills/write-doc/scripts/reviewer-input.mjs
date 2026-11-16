@@ -2,6 +2,7 @@
 // 사용법: reviewer-input.md (같은 폴더)
 //
 // 다듬기 단계의 리뷰어에게 줄 프롬프트를 패키지에서 조립한다. 출력을 그대로 Agent 프롬프트나 SendMessage에 붙인다.
+// 한 라운드에 두 리뷰어를 함께 기다리므로 결과는 --out 파일로 받는다(team-agent의 여럿을 기다릴 때 절차).
 //
 // 메인이 손으로 조립하면 틀려도 아무 데서도 안 걸린다. `[//]: #` 주석이 남으면 리뷰어가 사용자 지시문을 본문 표현으로
 // 보고 문다. 독자 리뷰어에게 본문 말고 하나라도 더 넘기면(frontmatter·규칙 파일 경로)
@@ -14,7 +15,11 @@ import { COMMENT_LINE, fenceTracker, readPackageMeta, stripCodeAndQuotes } from 
 import { findListHits, loadDocRows } from "./rejected.mjs";
 
 const REVIEWERS = path.resolve(import.meta.dirname, "..", "reviewers");
-const REPLY = "결과는 `SendMessage`로 `to: \"main\"`에 보낸다. 평문 출력으로만 끝내지 않는다.";
+// team-agent 「여럿을 한 번에 기다릴 때」 2의 문안. 파일이 생긴 것이 메인의 완료 신호다.
+const reply = (out) =>
+  `맡은 일을 다 마친 뒤 마지막 단계에서 결과를 \`${out}\`에 작성한다. 결과를 \`SendMessage\`로 보내지 않는다. ` +
+  "물어볼 것이 생겨도 답을 기다리지 말고, 가정을 정해 진행한 뒤 그 가정을 파일 첫머리에 적는다. " +
+  "끝내지 못하고 멈춰야 하면 멈춘 이유와 거기까지 한 일을 이 파일에 작성하고 멈춘다.";
 
 function split(text) {
   const m = /^---\n([\s\S]*?)\n---\n/.exec(text);
@@ -82,7 +87,7 @@ function rejectedHits(body) {
   );
 }
 
-function expression(file, fm, body) {
+function expression(file, fm, body, out) {
   const { type, subtype } = readPackageMeta(file);
   const { always, conditional } = guideFiles(type, subtype, "reviewer");
   const unsourced = phrasesWithoutSource(fm);
@@ -109,22 +114,23 @@ function expression(file, fm, body) {
     "## 본문",
     body,
     "",
-    REPLY,
+    reply(out),
   ].join("\n");
 }
 
-function reader(body) {
-  return [readerInstruction(), "", REPLY, "", "## 본문", body].join("\n");
+function reader(body, out) {
+  return [readerInstruction(), "", reply(out), "", "## 본문", body].join("\n");
 }
 
 const argv = process.argv.slice(2);
 const opt = (name) => (argv.includes(name) ? argv[argv.indexOf(name) + 1] : null);
 const from = opt("--from");
 const role = opt("--for");
-if (!from || !["expression", "reader"].includes(role)) {
-  console.error(`--from 패키지나 --for expression|reader가 없다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/reviewer-input.md`);
+const out = opt("--out");
+if (!from || !["expression", "reader"].includes(role) || !out) {
+  console.error(`--from 패키지, --for expression|reader, --out 결과 파일 중 빠진 것이 있다\n사용법: ${import.meta.dirname.replace(/\\/g, "/")}/reviewer-input.md`);
   process.exit(1);
 }
 const { fm, body: raw } = split(fs.readFileSync(from, "utf8").replace(/\r\n/g, "\n"));
 const body = stripComments(raw);
-console.log(role === "expression" ? expression(from, fm, body) : reader(body));
+console.log(role === "expression" ? expression(from, fm, body, out) : reader(body, out));
