@@ -13,7 +13,6 @@
 | 규칙 문장을 넣고 뺀 효과 | [kinds/rule-ablation.md](kinds/rule-ablation.md) |
 | 이름 있는 팀원을 띄우는 스킬 | [kinds/delegation.md](kinds/delegation.md) |
 | 벤치 산출물 정리, 스킬이 문서를 실제로 읽었는지 확인 | [operations.md](operations.md) |
-| 토큰·비용을 재는 벤치의 추가 점검 | backlog `archives/research/prose-to-script-effect/방법론-벤치운영.md` |
 
 **`scripts/`의 `.mjs`는 소스를 읽지 않고 실행한다.** 명령·인자는 같은 폴더의 같은 이름 `.md`를 본다(예: [scripts/bench-ablation.md](scripts/bench-ablation.md)).
 
