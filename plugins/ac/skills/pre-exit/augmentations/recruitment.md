@@ -64,7 +64,7 @@ node ~/WebstormProjects/main/private-playground/local/contexts/recruitment/scrip
 
 ## 반영 위치
 
-4단 종류 누계는 이 세션에서 쓴다 — 백로그 레포 `pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 누계로만 드러난다).
+4단 종류 누계는 이 세션에서 쓴다 — 백로그 레포 `maintenance/pre-exit/source-usage.json` (`source-usage`가 쓴다. 손으로 열어 더하지 않는다 — 한 칸 잘못 세도 그 자리에서는 아무 일도 안 일어나고 몇 달 뒤 안 차는 누계로만 드러난다).
 
 그 밖에는 아래 자리를 target으로 백로그 `projects/private-playground/dev-active/recruitment/`에 항목을 낸다.
 

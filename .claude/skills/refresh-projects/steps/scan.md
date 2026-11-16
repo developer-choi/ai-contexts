@@ -4,7 +4,7 @@
 
 회차는 레지스트리 프로젝트마다 `origin/<기본브랜치>`에서 딴 워크트리를 만들어 그 안에서 돈다. 만드는 규칙은 [dispatch 워크트리 분리](../dispatch.md#dispatch-워크트리-분리)와 같다. 이후 Phase가 말하는 `HEAD`는 이 워크트리의 것이다.
 
-회차 시작 시점에 `refresh-projects/dispatch/`가 비어 있어야 한다. 남아 있으면 직전 회차 정리 누락이므로 먼저 정리한다.
+회차 시작 시점에 `maintenance/refresh-projects/dispatch/`가 비어 있어야 한다. 남아 있으면 직전 회차 정리 누락이므로 먼저 정리한다.
 
 ## Phase 1: 커밋 탐색
 

@@ -9,7 +9,7 @@
 읽기만 한다(fetch도 안 한다).
 
 - `--at <약어>=<워크트리>` 그 프로젝트를 레지스트리 표의 경로 대신 이 폴더에서 본다. Phase 0이 만든 회차 워크트리를 프로젝트마다 준다. 여러 번 줄 수 있다
-- `--state <path>` 프로젝트별 직전 최신화 해시. 기본 `~/WebstormProjects/main/backlog/refresh-projects/state.json`
+- `--state <path>` 프로젝트별 직전 최신화 해시. 기본 `~/WebstormProjects/main/backlog/maintenance/refresh-projects/state.json`
 - `--skill <path>` 표를 읽을 SKILL.md. 기본은 위 SKILL.md
 
 출력 `[Phase 1 · 커밋 탐색]`은 프로젝트마다 한 줄이다.

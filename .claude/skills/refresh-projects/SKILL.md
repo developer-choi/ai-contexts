@@ -23,7 +23,7 @@ description: 내 프로젝트들을 한 회차로 갱신한다. 커밋 이력을
 
 ## state.json
 
-진행 상태는 backlog 레포의 `refresh-projects/state.json`에 기록하고 그 레포에 커밋한다(squash 불필요).
+진행 상태는 backlog 레포의 `maintenance/refresh-projects/state.json`에 기록하고 그 레포에 커밋한다(squash 불필요).
 
 형식:
 

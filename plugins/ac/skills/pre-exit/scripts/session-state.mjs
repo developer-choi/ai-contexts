@@ -54,12 +54,12 @@ const TASK_ROOT = path.join(os.homedir(), '.claude', 'tasks');
 // refresh-projects 상태가 그 옆에 있다). 레포가 없는 기기에서는 no-op 한다.
 // 환경변수는 실제 누계를 안 건드리고 사본으로 돌려보기 위한 것이다.
 const USAGE_FILE =
-  process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'read-usage.json');
+  process.env.READ_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'maintenance', 'pre-exit', 'read-usage.json');
 
 // 지원동기 회차가 4단(회사 밖 글 — 3단에서도 못 찾았을 때 여는 자리)에서 떠온 종류의 누계. 위 문서 누계의 형제다 —
 // 저쪽은 이 세션이 연 프롬프트 문서를, 이쪽은 회사를 조사해 떠온 바깥 출처를 센다.
 const SOURCE_FILE =
-  process.env.SOURCE_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'pre-exit', 'source-usage.json');
+  process.env.SOURCE_USAGE_FILE ?? path.join(os.homedir(), 'WebstormProjects', 'main', 'backlog', 'maintenance', 'pre-exit', 'source-usage.json');
 
 // 종류 이름을 세션이 지어 붙이면 같은 종류가 여러 줄로 갈려 눈금이 영영 안 찬다. 문서 누계에서
 // 실제로 그렇게 깨졌다 — 진입점 이름이 35가지로 흩어져 한 문서의 횟수가 9·3·1로 나뉘었다.

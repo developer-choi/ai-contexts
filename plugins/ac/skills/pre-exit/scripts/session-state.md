@@ -56,7 +56,7 @@
   - 진입점과 사용 여부는 세션이 채운다
 - `read-usage --session <id> --from <판정 json>`: 판정을 누계 파일에 반영한다
   - 판정 json: `{ "<진입점>\t<read-files가 낸 경로>": "used" | "unused" | "excluded" }`. 진입점은 스킬 폴더 이름이나 `전역규칙`만 받는다. `excluded`가 아닌 줄의 경로는 이 세션이 연 것이어야 한다
-  - 누계 파일은 `READ_USAGE_FILE` 환경변수, 없으면 `~/WebstormProjects/main/backlog/pre-exit/read-usage.json`. 파일이 없으면 건너뛰었다고 출력하고 exit 0
+  - 누계 파일은 `READ_USAGE_FILE` 환경변수, 없으면 `~/WebstormProjects/main/backlog/maintenance/pre-exit/read-usage.json`. 파일이 없으면 건너뛰었다고 출력하고 exit 0
   - 판정에 문제가 있으면 전부 stderr에 출력하고(모르는 진입점이면 받는 진입점 목록도) 아무것도 반영하지 않은 채 exit 1
   - 같은 세션을 다시 넣으면 `excluded`만 반영한다. `[배치 의심]` 줄이 나오면 그 목록을 회고 문제 목록에 올린다
 - `review-material --session <id>`: requirement-review 보강 재료. 적용한 체크리스트, page·global 이력, 자유 검토 보고, 그 사이의 사용자 발화를 절로 나눠 출력한다
@@ -70,5 +70,5 @@
   - `--sections` 출력에 `slug`·`date`가 있어야 한다
   - 같은 회차(날짜/슬러그)를 다시 넣으면 이미 센 종류는 다시 세지 않고, 앞에서 안 쓰였다고 센 종류가 이번에 쓰였으면 그것만 고친다
 - `source-usage --exclude <종류,…>`: 그 종류를 누계에서 빼고 다시 안 띄운다. `--from` 없이도 된다
-- 누계 파일은 `SOURCE_USAGE_FILE` 환경변수, 없으면 `~/WebstormProjects/main/backlog/pre-exit/source-usage.json`. 폴더가 없으면 건너뛰고 exit 0, 폴더만 있으면 파일을 새로 만든다
+- 누계 파일은 `SOURCE_USAGE_FILE` 환경변수, 없으면 `~/WebstormProjects/main/backlog/maintenance/pre-exit/source-usage.json`. 폴더가 없으면 건너뛰고 exit 0, 폴더만 있으면 파일을 새로 만든다
 - `[4단 낭비 의심]` 줄이 나오면 그 목록을 회고 문제 목록에 올린다

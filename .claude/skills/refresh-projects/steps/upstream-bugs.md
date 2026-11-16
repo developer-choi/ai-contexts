@@ -1,6 +1,6 @@
 # 업스트림 버그 점검
 
-외부 도구 버그를 우리 수단으로 막은 땜빵은 업스트림이 고친 뒤에도 누가 보지 않으면 그대로 남는다. 목록은 backlog 레포 `archives/upstream-bugs/`에 버그당 한 파일로 있고, 형식과 재시험 뒤처리는 그 레포 `archives/CLAUDE.md` 「upstream-bugs」가 정한다.
+외부 도구 버그를 우리 수단으로 막은 땜빵은 업스트림이 고친 뒤에도 누가 보지 않으면 그대로 남는다. 목록은 backlog 레포 `maintenance/upstream-bugs/`에 버그당 한 파일로 있고, 형식과 재시험 뒤처리는 그 레포 `maintenance/CLAUDE.md` 「upstream-bugs」가 정한다.
 
 ## 절차
 

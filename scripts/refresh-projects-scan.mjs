@@ -47,7 +47,7 @@ for (let i = 0; i < argv.length; i += 1) {
 }
 
 const SKILL = optOf("skill") || join(REPO_ROOT, ".claude", "skills", "refresh-projects", "SKILL.md");
-const STATE = optOf("state") || join(homedir(), "WebstormProjects", "main", "backlog", "refresh-projects", "state.json");
+const STATE = optOf("state") || join(homedir(), "WebstormProjects", "main", "backlog", "maintenance", "refresh-projects", "state.json");
 const WORKSPACE = join(homedir(), "WebstormProjects");
 
 // 안 쓰는 워크트리·브랜치 후보의 종류. 비교는 영어 값으로 하고, 표에는 KIND_LABEL의 말을 낸다.
