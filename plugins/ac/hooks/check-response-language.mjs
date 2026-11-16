@@ -9,7 +9,7 @@ import { readPayload } from "./hook-utils.mjs";
 // 전제: settings `language`가 korean이다. 목표 언어를 바꾸면 이 훅의 한글 판정과 안내 문구도 바꾼다.
 //
 // 판정: 코드·경로·URL·인용·식별자 모양 낱말을 걷어낸 산문에서 한글 비율을 잰다. 기준값은 지난
-// 세션 기록의 실제 최종 응답 분포로 정했다(backlog archives/incident/response-language-incident.md).
+// 세션 기록의 실제 최종 응답 분포로 정했다(근거 기록은 backlog 레포에서 삭제됨 — git 이력의 archives/incident/response-language-incident.md).
 //
 // 통과시키는 것:
 //   - 어느 Stop 훅이든 턴을 이어가는 중(stop_hook_active) — 이 훅이 한 번 되돌린 뒤도 여기 든다.
