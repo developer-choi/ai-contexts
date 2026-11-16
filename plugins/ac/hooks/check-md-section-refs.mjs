@@ -15,7 +15,7 @@
 //     check-md-code-labels.mjs가 같은 사유로 알림을 택했다.
 //   [알림] 본문이 인자와 함께 호명한 슬래시 커맨드가 어디에도 없으면 알린다.
 //     절 이름은 개명될 때 흔적이 남지만 커맨드는 **대상이 통째로 사라져 grep으로도 안 걸린다**
-//     — 가리키는 쪽만 읽으면 멀쩡해 보인다(DP 16회차에 없는 `/scaffold` 실행 안내가 그렇게
+//     — 가리키는 쪽만 읽으면 멀쩡해 보인다(한 레포에서 16회차에 없는 `/scaffold` 실행 안내가 그렇게
 //     살아 있었다). 차단이 아닌 이유는 아는 이름 목록이 원리상 안 닫히기 때문이다 —
 //     빌트인·플러그인 커맨드와 다른 레포의 로컬 스킬은 이 레포 안에서 셀 수가 없다.
 //   [차단] 위 넷과 **반대 방향** — 이 커밋이 헤딩을 개명한 md를 가리키던 인용이 안 닿게 됐으면
@@ -144,14 +144,11 @@ const PATH_PROSE_REF = new RegExp(
 // 그 약어로 부른 인용을 **못 볼 뿐** 엉뚱한 레포로 풀지는 않는다 — 재현율만 떨어지고 오탐은 안 생긴다.
 const REPO_ALIASES = {
   ac: "ai-contexts",
-  dp: "dsa-playground",
   ka: "knowledge-archive",
   mp: "monorepo-playground",
   pfm: "plan-for-myself",
-  dc: "developer-choi",
   pp: "private-playground",
   tp: "test-playground",
-  ap: "assignment-playground",
   백로그: "backlog",
 };
 

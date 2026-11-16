@@ -19,10 +19,8 @@ import { normalizeCwd } from "./git-command-parser.mjs";
 const FREE_REPOS = new Set(["private-playground", "test-playground", "backlog", "finance-os"]);
 const APPROVAL_GATED_REPOS = new Set([
   "ai-contexts",
-  "dsa-playground",
   "knowledge-archive",
   "monorepo-playground",
-  "developer-choi",
 ]);
 
 // 레포 이름 → 등급. 빈 이름(레포를 못 정함)도 목록 밖이라 PR 전용이 된다 —
