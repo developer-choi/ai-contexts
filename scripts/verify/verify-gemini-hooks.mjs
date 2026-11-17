@@ -43,25 +43,39 @@ function main() {
 
   const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'ac-gemini-deploy-'));
   try {
+    const configDir = path.join(tmpRoot, 'config');
+    const cliDir = path.join(tmpRoot, 'antigravity-cli');
+    fs.mkdirSync(configDir, { recursive: true });
+    fs.mkdirSync(cliDir, { recursive: true });
+
     // 사용자 기존 설정이 보존되는지 확인하기 위해 시드 파일 작성
-    fs.writeFileSync(path.join(tmpRoot, 'hooks.json'), JSON.stringify({ 'user-custom-hook': { PreToolUse: [] } }, null, 2));
-    fs.writeFileSync(path.join(tmpRoot, 'mcp_config.json'), JSON.stringify({ mcpServers: { 'user-mcp': { command: 'echo' } } }, null, 2));
+    fs.writeFileSync(path.join(configDir, 'hooks.json'), JSON.stringify({ 'user-custom-hook': { PreToolUse: [] } }, null, 2));
+    fs.writeFileSync(path.join(configDir, 'mcp_config.json'), JSON.stringify({ mcpServers: { 'user-mcp': { command: 'echo' } } }, null, 2));
+    fs.writeFileSync(path.join(cliDir, 'settings.json'), JSON.stringify({ colorScheme: 'light', model: 'Gemini 4 Argon (Medium)' }, null, 2));
 
-    const first = deployGeminiTarget(tmpRoot, quiet);
-    check(first === 3, `첫 배포 시 3개 파일 기록 (hooks.json, mcp_config.json, GEMINI.md) (실제: ${first})`);
+    const first = deployGeminiTarget(configDir, quiet);
+    check(first === 4, `첫 배포 시 4개 파일 기록 (hooks.json, mcp_config.json, GEMINI.md, settings.json) (실제: ${first})`);
 
-    const second = deployGeminiTarget(tmpRoot, quiet);
+    const second = deployGeminiTarget(configDir, quiet);
     check(second === 0, `재실행 시 변경 없음 (실제: ${second})`);
 
-    const verifyFailures = verifyGeminiTarget(tmpRoot);
+    const verifyFailures = verifyGeminiTarget(configDir);
     check(verifyFailures.length === 0, `verifyGeminiTarget 통과 (${verifyFailures.join(', ') || '없음'})`);
 
-    uninstallGeminiTarget(tmpRoot, quiet);
-    const remainingHooks = JSON.parse(fs.readFileSync(path.join(tmpRoot, 'hooks.json'), 'utf8'));
-    const remainingMcp = JSON.parse(fs.readFileSync(path.join(tmpRoot, 'mcp_config.json'), 'utf8'));
+    uninstallGeminiTarget(configDir, quiet);
+    const remainingHooks = JSON.parse(fs.readFileSync(path.join(configDir, 'hooks.json'), 'utf8'));
+    const remainingMcp = JSON.parse(fs.readFileSync(path.join(configDir, 'mcp_config.json'), 'utf8'));
+    const remainingSettings = JSON.parse(fs.readFileSync(path.join(cliDir, 'settings.json'), 'utf8'));
     check('user-custom-hook' in remainingHooks && !('ac-global-shell-policy' in remainingHooks), 'unsync 시 사용자 hooks.json 항목 보존 및 AC 훅 제거');
     check('user-mcp' in (remainingMcp.mcpServers ?? {}) && !('chrome-devtools' in (remainingMcp.mcpServers ?? {})), 'unsync 시 사용자 MCP 보존 및 AC MCP 제거');
-    check(!fs.existsSync(path.join(tmpRoot, 'GEMINI.md')), 'unsync 시 AC GEMINI.md 제거');
+    check(!fs.existsSync(path.join(configDir, 'GEMINI.md')), 'unsync 시 AC GEMINI.md 제거');
+    check(
+      remainingSettings.colorScheme === 'light'
+      && !('permissions' in remainingSettings)
+      && !('toolPermission' in remainingSettings)
+      && !('enableTerminalSandbox' in remainingSettings),
+      'unsync 시 사용자 settings.json 키 보존 및 AC 설정 키 제거',
+    );
   } finally {
     removePath(tmpRoot);
   }

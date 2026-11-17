@@ -622,6 +622,24 @@ WRITE_CASES.push(
   ],
   [
     'check-artifact-write-policy.mjs',
+    mdWrite('{}', homeDeploy('.gemini', 'config', 'hooks.json')),
+    'ask',
+    'Gemini 전역 config 하위 산출물',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('{}', homeDeploy('.gemini', 'antigravity-cli', 'settings.json')),
+    'ask',
+    'Gemini CLI settings.json 산출물',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
+    mdWrite('# 스크래치\n', homeDeploy('.gemini', 'antigravity-cli', 'brain', 'conv', 'scratch', 'x.md')),
+    'pass',
+    'Gemini brain/scratch 하위는 배포 산출물이 아니다',
+  ],
+  [
+    'check-artifact-write-policy.mjs',
     mdWrite('# 계획\n', homeDeploy('.claude', 'plans', 'x.md')),
     'pass',
     'plan mode 계획 파일은 산출물이 아니다',

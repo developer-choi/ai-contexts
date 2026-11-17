@@ -13,8 +13,8 @@ const sourceDir = path.join(repoDir, 'deploy');
 // 배포하지 않고, 예전 sync가 `<타겟>/skills/`에 배포해 둔 같은 이름의 사본만 지운다.
 const pluginSkillsDir = path.join(repoDir, 'plugins', 'ac', 'skills');
 const claudeSettingsSource = path.join(sourceDir, 'claude-settings.json');
-// 직접 복사하지 않고 settings.json / Gemini MCP 설정 생성의 재료로만 쓰는 root 파일.
-const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json', 'gemini-mcp.json']);
+// 직접 복사하지 않고 settings.json / Gemini 설정·MCP 생성의 재료로만 쓰는 root 파일.
+const SOURCE_ONLY_ROOT_FILES = new Set(['claude-settings.json', 'gemini-mcp.json', 'gemini-settings.json']);
 
 // sync가 settings.json에 합칠 설정(권한·모델·env 등). hook은 plugin `ac`의 hooks.json이 맡는다.
 function claudeSettingsObject() {

@@ -31,10 +31,11 @@ npm run sync:system -- <target>
     전역에만 둘 규칙은 `deploy/`에 넣습니다.
   - 기존 사본을 알아내 걷는 방식은 `deploy-lib.mjs`의 `deployClaudeImports`·`uninstallClaudeImports`가 정본입니다. 그 밖의 타겟 `rules/` 파일은 사용자 영역이라 건드리지 않습니다.
 - `deploy/claude-settings.json`(권한·모델·env 등)을 `settings.json`에 얕게 머지해 사용자 동적 필드를 보존합니다.
-- 기본 타겟(`~/.claude`)으로 실행하면 Antigravity(Gemini) 전역 설정(`~/.gemini/config/`) 3종도 함께 동기화합니다(`scripts/lib/gemini-deploy.mjs`).
+- 기본 타겟(`~/.claude`)으로 실행하면 Antigravity(Gemini) 전역 자산(`~/.gemini/config/`·`~/.gemini/antigravity-cli/`) 4종도 함께 동기화합니다(`scripts/lib/gemini-deploy.mjs`).
   - `hooks.json`: `plugins/ac/hooks/hooks.json`에서 Antigravity 지원 훅만 `ac-global-shell-policy` 키로 투영·머지합니다(본 체크아웃 경로 기준).
   - `mcp_config.json`: `deploy/gemini-mcp.json`의 `mcpServers`를 머지해 사용자 서버를 보존합니다.
   - `GEMINI.md`: `deploy/CLAUDE.md`와 `deploy/rules/*.md`를 합쳐 투영합니다.
+  - `antigravity-cli/settings.json`: `deploy/gemini-settings.json`(권한·샌드박스 등)을 얕게 머지해 사용자 동적 필드를 보존합니다.
 - 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
 
 ## 제거
@@ -51,7 +52,7 @@ npm run unsync:system -- <target>
 
 제거 명령은 `sync:system`이 배포한 전역 시스템 자산(예전 배포가 남긴 `agents/`·`hooks/`·`contexts/` 폴더 포함), plugin 스킬과 이름이 같은 `skills/` 옛 사본, 구버전 `wt-add` alias를 제거합니다.
 타겟 `CLAUDE.md`에서는 AC import 줄만 걷고 사용자가 적은 줄은 남깁니다. 타겟 `rules/`의 사용자 파일은 건드리지 않습니다. 기존 사본을 걷는 기준은 `uninstallClaudeImports`가 정본입니다.
-기본 타겟으로 제거하면 `~/.gemini/config/`의 AC 훅(`ac-global-shell-policy`), AC MCP 서버, AC `GEMINI.md`도 사용자 설정을 보존한 채 함께 제거합니다.
+기본 타겟으로 제거하면 `~/.gemini/config/`의 AC 훅(`ac-global-shell-policy`)·AC MCP 서버·AC `GEMINI.md`와 `~/.gemini/antigravity-cli/settings.json`의 AC 관리 키도 사용자 설정을 보존한 채 함께 제거합니다.
 plugin `ac`는 남깁니다. 걷으려면 `claude plugin uninstall ac@ac`와 `claude plugin marketplace remove ac`를 직접 실행합니다.
 
 ## 반복 실행 기준

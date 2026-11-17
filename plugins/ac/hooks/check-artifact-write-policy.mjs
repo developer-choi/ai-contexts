@@ -2,7 +2,7 @@
 // 수정은 AC 원본(deploy/·plugins/ac/)에서 하고 sync로 배포해야 하며, 산출물을 직접 고치면
 // 다음 sync에 덮여 사라진다.
 //
-// 차단 대상: 홈 배포 루트 하위(~/.claude)
+// 차단 대상: 홈 배포 루트 하위(~/.claude, ~/.gemini/config, ~/.gemini/antigravity-cli/settings.json)
 //
 // 레포의 .claude/(skills·hooks·settings.json·agents)는 막지 않는다. 각 레포가 커밋한 원본이라 그 자리에서 고친다.
 //
@@ -20,7 +20,13 @@ import { ask, readPayload } from "./hook-utils.mjs";
 // 파일을 생성·수정하는 도구만 본다.
 const EDIT_TOOLS = new Set(["Edit", "Write"]);
 
-const HOME_DEPLOY_DIRS = [".claude"].map((d) => norm(path.join(os.homedir(), d)));
+const HOME_DEPLOY_DIRS = [
+  [".claude"],
+  [".gemini", "config"],
+].map((segs) => norm(path.join(os.homedir(), ...segs)));
+const HOME_DEPLOY_FILES = new Set([
+  norm(path.join(os.homedir(), ".gemini", "antigravity-cli", "settings.json")),
+]);
 // plan mode가 계획 파일을 쓰는 자리. sync 산출물이 아니라 막으면 계획을 고칠 때마다 승인 창이 뜬다.
 const PLANS_DIR = norm(path.join(os.homedir(), ".claude", "plans"));
 
@@ -40,6 +46,7 @@ process.exit(0);
 function isArtifact(file) {
   const abs = norm(path.resolve(file));
   if (abs.startsWith(PLANS_DIR + path.sep)) return false;
+  if (HOME_DEPLOY_FILES.has(abs)) return true;
   for (const root of HOME_DEPLOY_DIRS) {
     if (abs === root || abs.startsWith(root + path.sep)) return true;
   }

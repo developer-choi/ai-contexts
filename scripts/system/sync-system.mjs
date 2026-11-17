@@ -137,7 +137,7 @@ async function main() {
   if (!targetArg) {
     const geminiFailures = verifyGeminiTarget(defaultGeminiConfigDir());
     if (geminiFailures.length === 0) {
-      console.log('  PASS  Gemini (~/.gemini/config: hooks.json, mcp_config.json, GEMINI.md)');
+      console.log('  PASS  Gemini (~/.gemini/config: hooks.json, mcp_config.json, GEMINI.md / ~/.gemini/antigravity-cli: settings.json)');
     } else {
       for (const msg of geminiFailures) fail(failures, msg);
     }

@@ -1,0 +1,16 @@
+{
+  "allowNonWorkspaceAccess": true,
+  "toolPermission": "always-proceed",
+  "enableTerminalSandbox": false,
+  "permissions": {
+    "allow": [
+      "command(*)",
+      "read_file(*)",
+      "write_file(*)",
+      "read_url(*)",
+      "execute_url(*)",
+      "download_url(*)",
+      "mcp(*)"
+    ]
+  }
+}

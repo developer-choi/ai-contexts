@@ -5,10 +5,13 @@ import path from 'node:path';
 import {
   collectMarkdown,
   mainCheckoutDir,
+  mergeSettings,
   readJson,
   removePath,
   repoDir,
   sourceDir,
+  splitSettings,
+  verifySettings,
   writeIfChanged,
 } from './deploy-lib.mjs';
 
@@ -76,6 +79,11 @@ function defaultGeminiConfigDir() {
   return path.join(os.homedir(), '.gemini', 'config');
 }
 
+/** Returns the default Antigravity CLI directory (~/.gemini/antigravity-cli). */
+function defaultGeminiCliDir(geminiConfigDir = defaultGeminiConfigDir()) {
+  return path.join(path.dirname(geminiConfigDir), 'antigravity-cli');
+}
+
 function toPosixPath(p) {
   return p.split(path.sep).join('/');
 }
@@ -86,6 +94,10 @@ function claudeHooksSourcePath() {
 
 function geminiMcpSourcePath() {
   return path.join(sourceDir, 'gemini-mcp.json');
+}
+
+function geminiSettingsSourcePath() {
+  return path.join(sourceDir, 'gemini-settings.json');
 }
 
 /**
@@ -184,6 +196,10 @@ function geminiMcpObject() {
   return readJson(geminiMcpSourcePath());
 }
 
+function geminiSettingsObject() {
+  return readJson(geminiSettingsSourcePath());
+}
+
 function mcpManifestPath(targetPath) {
   return path.join(path.dirname(targetPath), `.${path.basename(targetPath)}.ac-keys`);
 }
@@ -203,8 +219,8 @@ function writeJsonIfChanged(file, obj) {
   return writeIfChanged(file, `${JSON.stringify(obj, null, 2)}\n`);
 }
 
-/** Deploys global hooks, MCP config, and GEMINI.md to ~/.gemini/config. */
-function deployGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log = console.log, acRoot = mainCheckoutDir()) {
+/** Deploys global hooks, MCP config, GEMINI.md to ~/.gemini/config and merges settings.json into ~/.gemini/antigravity-cli. */
+function deployGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log = console.log, acRoot = mainCheckoutDir(), geminiCliDir = defaultGeminiCliDir(geminiConfigDir)) {
   let changed = 0;
 
   const hooksFile = path.join(geminiConfigDir, 'hooks.json');
@@ -239,11 +255,17 @@ function deployGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log = co
     changed += 1;
   }
 
+  const settingsFile = path.join(geminiCliDir, 'settings.json');
+  if (mergeSettings(geminiSettingsObject(), settingsFile)) {
+    log('  MERGE settings.json (gemini)');
+    changed += 1;
+  }
+
   return changed;
 }
 
-/** Verifies that ~/.gemini/config matches the projected hooks, MCP servers, and GEMINI.md. */
-function verifyGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), acRoot = mainCheckoutDir()) {
+/** Verifies that ~/.gemini/config and ~/.gemini/antigravity-cli/settings.json match the projected assets. */
+function verifyGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), acRoot = mainCheckoutDir(), geminiCliDir = defaultGeminiCliDir(geminiConfigDir)) {
   const failures = [];
 
   const hooksFile = path.join(geminiConfigDir, 'hooks.json');
@@ -280,11 +302,18 @@ function verifyGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), acRoot =
     }
   }
 
+  const settingsFile = path.join(geminiCliDir, 'settings.json');
+  if (!fs.existsSync(settingsFile)) {
+    failures.push('gemini settings.json 존재하지 않음');
+  } else if (!verifySettings(geminiSettingsObject(), settingsFile)) {
+    failures.push('gemini settings.json 머지 결과 키 불일치');
+  }
+
   return failures;
 }
 
-/** Removes AC-managed entries from ~/.gemini/config while preserving user entries. */
-function uninstallGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log = console.log) {
+/** Removes AC-managed entries from ~/.gemini/config and ~/.gemini/antigravity-cli/settings.json while preserving user entries. */
+function uninstallGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log = console.log, geminiCliDir = defaultGeminiCliDir(geminiConfigDir)) {
   let removed = 0;
 
   const hooksFile = path.join(geminiConfigDir, 'hooks.json');
@@ -343,6 +372,12 @@ function uninstallGeminiTarget(geminiConfigDir = defaultGeminiConfigDir(), log =
     }
   }
 
+  const settingsFile = path.join(geminiCliDir, 'settings.json');
+  if (splitSettings(geminiSettingsObject(), settingsFile)) {
+    log('  SPLIT gemini/settings.json');
+    removed += 1;
+  }
+
   return removed;
 }
 
@@ -352,9 +387,11 @@ export {
   GEMINI_HOOK_GROUP_KEY,
   buildGeminiHooksObject,
   buildGeminiRulesContent,
+  defaultGeminiCliDir,
   defaultGeminiConfigDir,
   deployGeminiTarget,
   findUnclassifiedGeminiHooks,
+  geminiSettingsObject,
   uninstallGeminiTarget,
   verifyGeminiTarget,
 };
