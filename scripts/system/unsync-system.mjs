@@ -8,6 +8,10 @@ import {
   resolveUserPath,
   uninstallTarget,
 } from '../lib/deploy-lib.mjs';
+import {
+  defaultGeminiConfigDir,
+  uninstallGeminiTarget,
+} from '../lib/gemini-deploy.mjs';
 
 async function main() {
   ensureDeploySource();
@@ -19,7 +23,10 @@ async function main() {
   console.log(`타겟: ${targetDir}`);
   console.log('---');
 
-  const removed = uninstallTarget(targetDir);
+  let removed = uninstallTarget(targetDir);
+  if (!explicitTarget && targetDir === resolveUserPath(defaultClaudeDir())) {
+    removed += uninstallGeminiTarget(defaultGeminiConfigDir());
+  }
 
   console.log('---');
   console.log(`완료: ${removed}개 제거`);

@@ -12,6 +12,7 @@
     "unsync:environment": "node scripts/environment/unsync-environment.mjs",
     "unsync:system": "node scripts/system/unsync-system.mjs",
     "verify:environment": "node scripts/environment/verify-environment.mjs",
+    "verify:gemini-hooks": "node scripts/verify/verify-gemini-hooks.mjs",
     "verify:hook-policies": "node scripts/verify/verify-hook-policies.mjs",
     "verify:hooks": "node scripts/verify/verify-hooks.mjs",
     "verify:incremental-deploy": "node scripts/verify/verify-incremental-deploy.mjs",

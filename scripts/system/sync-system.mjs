@@ -26,6 +26,11 @@ import {
   verifyClaudeImports,
   verifySettings,
 } from '../lib/deploy-lib.mjs';
+import {
+  defaultGeminiConfigDir,
+  deployGeminiTarget,
+  verifyGeminiTarget,
+} from '../lib/gemini-deploy.mjs';
 
 // 배포 전 fail-fast 게이트. 디스크에 쓰는 것은 verify-source-usage 하나뿐이고 그것도 자기
 // mkdtemp 폴더 안에서만 쓰므로, 겹쳐 돌려도 서로 간섭하지 않는다.
@@ -45,6 +50,8 @@ const VERIFY_STEPS = [
   { file: path.join(scriptsDir, 'verify', 'verify-skill-script-paths.mjs') },
   // 잘못 세는 눈금은 그 자리에서 정상으로 보이고 몇 달 뒤 안 차는 것으로만 드러난다. 그때는 어느 회차가 틀렸는지 못 되짚는다.
   { file: path.join(scriptsDir, 'verify', 'verify-source-usage.mjs') },
+  // Gemini 전역 훅 투영·제외 분류와 배포 멱등성이 깨지면 sync 전에 중단한다.
+  { file: path.join(scriptsDir, 'verify', 'verify-gemini-hooks.mjs') },
 ];
 
 async function main() {
@@ -65,6 +72,13 @@ async function main() {
   // 전역 스킬은 plugin `ac`가 맡는다. 예전 sync가 배포해 둔 같은 이름의 사본만 지운다.
   changed += removePluginSkillCopies(targetDir, console.log);
   changed += deployRootFiles(targetDir, console.log);
+
+  if (!targetArg) {
+    const geminiDir = defaultGeminiConfigDir();
+    console.log('---');
+    console.log(`Gemini 타겟: ${geminiDir}`);
+    changed += deployGeminiTarget(geminiDir, console.log);
+  }
 
   console.log('---');
   console.log(changed === 0 ? '변경 없음' : `바뀐 파일: ${changed}개`);
@@ -118,6 +132,15 @@ async function main() {
     console.log('  PASS  settings.json (merged)');
   } else {
     fail(failures, 'settings.json 머지 결과 키 불일치');
+  }
+
+  if (!targetArg) {
+    const geminiFailures = verifyGeminiTarget(defaultGeminiConfigDir());
+    if (geminiFailures.length === 0) {
+      console.log('  PASS  Gemini (~/.gemini/config: hooks.json, mcp_config.json, GEMINI.md)');
+    } else {
+      for (const msg of geminiFailures) fail(failures, msg);
+    }
   }
 
   console.log('---');
