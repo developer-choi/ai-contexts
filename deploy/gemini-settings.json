@@ -1,7 +1,6 @@
 {
   "allowNonWorkspaceAccess": true,
   "toolPermission": "always-proceed",
-  "enableTerminalSandbox": false,
   "permissions": {
     "allow": [
       "command(*)",

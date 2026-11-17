@@ -35,7 +35,7 @@ npm run sync:system -- <target>
   - `hooks.json`: `plugins/ac/hooks/hooks.json`에서 Antigravity 지원 훅만 `ac-global-shell-policy` 키로 투영·머지합니다(본 체크아웃 경로 기준).
   - `mcp_config.json`: `deploy/gemini-mcp.json`의 `mcpServers`를 머지해 사용자 서버를 보존합니다.
   - `GEMINI.md`: `deploy/CLAUDE.md`와 `deploy/rules/*.md`를 합쳐 투영합니다.
-  - `antigravity-cli/settings.json`: `deploy/gemini-settings.json`(권한·샌드박스 등)을 얕게 머지해 사용자 동적 필드를 보존합니다.
+  - `antigravity-cli/settings.json`: `deploy/gemini-settings.json`(권한 등)을 얕게 머지해 사용자 동적 필드를 보존합니다.
 - 구버전 글로벌 git alias `wt-add`가 남아 있으면 제거합니다 (워크트리 의존성 복구는 self-heal hook이 전담합니다).
 
 ## 제거
