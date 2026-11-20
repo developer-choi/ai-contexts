@@ -30,18 +30,23 @@ const FAILURE_INSTRUCTION = "이 사유를 사용자에게 보이고 멈춘다. 
 
 // 모델은 버전 없이 이름과 effort만 적고, 데몬이 요청마다 agy 모델 목록에서 그 이름의 가장 높은 버전을 선택한다.
 // agy에는 Claude의 sonnet처럼 최신 버전을 가리키는 별칭이 없다(--model flash는 "not recognized").
-// families의 첫 값이 --model을 안 줬을 때의 기본값이다.
+// families의 첫 값이 --model을 안 줬을 때의 기본값이다. ask-llm.md 「인자」의 모델 목록·기본값과 같은 값이다. 바꾸면 그 문서도 같이 고친다.
 const VENDORS = {
-  gemini: { families: ["Hydrogen", "Argon"], effort: "Medium" },
+  gemini: { families: ["Hydrogen", "Argon", "Neon"], effort: "Medium" },
 };
 
 const AGY_EXECUTABLE_PATH = path.join(process.env.LOCALAPPDATA ?? "", "agy", "bin", "agy.exe");
 
-// 한 번 묻는 데 쓸 시간 한도. ask-llm.md 머리말의 대기 시간(100초)과 같은 값이다. 바꾸면 그 문서도 같이 고친다.
-const ANSWER_TIMEOUT_MS = 100_000;
-// 데몬 기동까지 합친 전체 한도. Claude Code Bash 도구의 기본 타임아웃(120초)보다 짧게 둬서,
-// 도구가 프로세스를 먼저 죽여 사유 없이 끝나는 일이 없게 한다. 기동이 길어지면 답 한도를 그만큼 줄인다.
-const TOTAL_TIMEOUT_MS = 112_000;
+// --timeout을 안 줬을 때 답을 기다리는 한도(초). ask-llm.md 「인자」의 기본값과 같은 값이다. 바꾸면 그 문서도 같이 고친다.
+const DEFAULT_ANSWER_TIMEOUT_SECONDS = 100;
+// --timeout 상한(초). 셸 도구 timeout 최대 600초에서 ask-llm.md 「인자」가 더하라는 여유 20초를 뺐다. 그 여유를 바꾸면 이 값도 같이 고친다.
+// 이보다 크면 도구가 먼저 끊어 실패 사유 없이 끝나므로 받지 않는다.
+const MAX_ANSWER_TIMEOUT_SECONDS = 580;
+// 데몬 기동에 따로 잡아 두는 몫. 답 한도에 더해 전체 한도가 된다.
+// 이 값과 request()의 응답 대기 여유(3초)를 합한 것이 ask-llm.md 「인자」의 여유 20초 안에 들어야 한다. 키우면 그 문서도 같이 고친다.
+// 기본값이면 전체 112초로 Claude Code 셸 도구(Bash·PowerShell)의 기본 타임아웃(120초)보다 짧아,
+// 도구가 프로세스를 먼저 죽여 사유 없이 끝나는 일이 없다. 기동이 길어지면 답 한도를 그만큼 줄인다.
+const DAEMON_START_ALLOWANCE_MS = 12_000;
 // 데몬이 없을 때 띄워서 pipe가 열리기까지 기다리는 한도. 데몬의 initialize 한도(10초)보다 조금 길게 둔다.
 // 보통은 1초 안에 열린다(2026-11-15 실측: 데몬을 띄우는 첫 호출 전체 4~5초).
 const DAEMON_START_TIMEOUT_MS = 12_000;
@@ -59,7 +64,7 @@ function usageFail(message) {
   process.exit(1);
 }
 
-const VALUE_OPTIONS = ["--vendor", "--model", "--schema"];
+const VALUE_OPTIONS = ["--vendor", "--model", "--schema", "--timeout"];
 
 function readOption(argv, name) {
   const optionIndex = argv.indexOf(name);
@@ -122,7 +127,18 @@ if (wantsHelp) {
 const vendorName = readOption(argv, "--vendor");
 const modelArgument = readOption(argv, "--model");
 const schemaArgument = readOption(argv, "--schema");
+const timeoutArgument = readOption(argv, "--timeout");
 const promptSource = argv[0];
+
+let answerTimeoutSeconds = DEFAULT_ANSWER_TIMEOUT_SECONDS;
+if (timeoutArgument !== undefined) {
+  answerTimeoutSeconds = Number(timeoutArgument);
+  if (!Number.isInteger(answerTimeoutSeconds) || answerTimeoutSeconds <= 0 || answerTimeoutSeconds > MAX_ANSWER_TIMEOUT_SECONDS) {
+    usageFail(`--timeout은 1~${MAX_ANSWER_TIMEOUT_SECONDS} 사이의 정수(초)여야 한다: ${timeoutArgument}`);
+  }
+}
+const ANSWER_TIMEOUT_MS = answerTimeoutSeconds * 1000;
+const TOTAL_TIMEOUT_MS = ANSWER_TIMEOUT_MS + DAEMON_START_ALLOWANCE_MS;
 
 if (!vendorName) usageFail(`--vendor가 없다.`);
 const vendor = VENDORS[vendorName];
