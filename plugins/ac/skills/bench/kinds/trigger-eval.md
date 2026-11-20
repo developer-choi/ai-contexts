@@ -26,7 +26,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 표준 도구가 broken이라 자체 도구 `${CLAUDE_SKILL_DIR}/scripts/bench-trigger.mjs`를 쓴다.
 
-측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 설치된 `SKILL.md`를 그대로 측정한다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
+측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 `claude -p`가 발견하는 `SKILL.md`(plugin 스킬은 원본, 그 밖은 설치본)를 그대로 측정한다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다.
 
 ## 입력 eval set
 
@@ -34,20 +34,8 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 호출
 
-인자 목록은 [../scripts/bench-trigger.md](../scripts/bench-trigger.md)가 정본이다. BEFORE/AFTER는 원본을 고치고 배포해 가며 측정하고, AFTER는 `--baseline`으로 BEFORE 결과를 주고 측정한다.
-
-벤치 산출물 정리는 [../operations.md](../operations.md)를 따른다.
+전제(설치·배포가 필요한지)와 인자는 [../scripts/bench-trigger.md](../scripts/bench-trigger.md)를 따른다. AFTER는 `--baseline`으로 BEFORE 결과를 주고 측정한다.
 
 ## 결과 해석
 
-FAIL이 **추상 쿼리**(예: "description 너무 길어")에서 났으면 description보다 eval set을 먼저 의심한다(skill-creator "How skill triggering works").
-
-## 함정
-
-| 함정 | 증상 | 예방 |
-|---|---|---|
-| non-trigger run이 cwd 오염 | 트리거 안 되는 액션형 쿼리는 `claude -p`가 본문 작업까지 수행 → 파일 생성·`git add`까지 함(early-kill은 트리거 시에만 발동) | 로컬 스킬은 레포 안에서 돌 수밖에 없으니 측정 직후 `git status`로 stray 파일·staging을 점검·정리한다 |
-
-## Limitations
-
-- 트리거 결정은 모델별로 다름. 측정 모델과 사용자 환경 모델 다르면 결과 해석 주의.
+FAIL이 **추상 쿼리**에서 났으면 description보다 eval set을 먼저 의심한다(skill-creator "How skill triggering works").

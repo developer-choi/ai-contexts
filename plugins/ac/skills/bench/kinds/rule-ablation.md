@@ -6,9 +6,8 @@
 
 ### 앞선 eval-set부터 찾는다
 
-`bench-ablation.mjs`는 돌 때마다 eval-set에서 변형을 뺀 사본을 `%TEMP%\prompt-review-evals\<rule_id>.json`에 남긴다.
 `rule_id`는 `<스킬·문서 이름>-<절 이름>`으로 지어, 다른 문서의 같은 이름 절과 겹치지 않고 파일명만으로 찾게 한다.
-eval-set을 준비하기 전에 그 폴더에서 그 이름의 파일을 찾는다.
+eval-set을 준비하기 전에 `bench-ablation.mjs`가 남긴 eval-set 사본([출력](../scripts/bench-ablation.md#출력))에서 그 이름의 파일을 찾는다. 이 사본은 다음 벤치가 다시 사용하는 재료라 벤치가 끝나도 지우지 않는다.
 
 - 있으면: 채점 축(`grader`·시나리오별 축)과 `inheritance_signatures`가 지금 대상 문안과 맞는지 대조해 낡은 것을 고친 뒤, 이번 변형만 끼워 쓴다
 - 없으면: 아래 절차대로 새로 만든다
@@ -19,7 +18,6 @@ eval-set을 준비하기 전에 그 폴더에서 그 이름의 파일을 찾는�
   - rationale이 짧으면 commit log, 관련 backlog, 과거 사용자 대화에서 추가 단서를 찾는다
 - 추출한 맥락을 positive 시나리오 시드로 사용한다
 - 일반 예시로 대체 금지. 규칙이 방어하려는 구체 상황이 아닌 프롬프트로 측정하면 결과는 "일반 문체·행동 경향"만 보여주고 **규칙의 효과는 측정하지 않는다**
-- **채점 정답 선존재 차단**: 시나리오의 채점 정답이 워커가 읽을 수 있는 환경(타겟 파일·cwd)에 이미 있으면 ZERO가 "읽고 확인"만으로 통과해 ablation 변별력을 잃는다. 정답이 환경에 박혀있지 않은(빈/오답) 타겟으로 시나리오를 구성한다.
 
 측정 대상이 시스템 프롬프트가 아니라 워커가 열 파일이면, 비교군별 변형본 폴더는 `${CLAUDE_SKILL_DIR}/scripts/build-arms.mjs`가 만든다. 손으로 만들지 않는다. 명세 꼴·인자는 [../scripts/build-arms.md](../scripts/build-arms.md)를 본다.
 
@@ -48,7 +46,7 @@ ZERO 비교군 워커가 제거한 규칙의 특징 어휘·구절을 응답에�
 
 ## 한 패스로 닫는다: 안 갈린 것은 다시 측정하지 않는다
 
-회차를 거듭하며 애매한 후보만 잘라 다시 측정하는 대신, 한 번 돌려 확실한 것만 판정하고 닫는다. 축마다 판정은 `bench-ablation.mjs` 요약 표의 `판정` 열이 찍고, 여기서는 처리만 정한다.
+회차를 거듭하며 애매한 후보만 잘라 다시 측정하는 대신, 한 번 돌려 확실한 것만 판정하고 닫는다. `bench-ablation.mjs` 요약 표의 `판정` 열을 보고 아래대로 처리한다.
 
 | 판정 | 처리 |
 |---|---|
@@ -80,4 +78,4 @@ ZERO 비교군 워커가 제거한 규칙의 특징 어휘·구절을 응답에�
 
 ## workspace
 
-벤치 workspace는 `bench/workspace/<target>/<rule-id>/runs/`다. 벤치 산출물 정리는 [../operations.md](../operations.md)를 따른다.
+벤치 workspace는 `bench/workspace/<target>/<rule-id>/runs/`다.

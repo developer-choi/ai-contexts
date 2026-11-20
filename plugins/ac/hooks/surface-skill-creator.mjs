@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import { readPayload, addContext } from "./hook-utils.mjs";
 
-// bench 스킬 문서를 연 세션이 skill-creator를 아직 안 불렀으면 부르라고 알린다. 도구는 차단하지 않는다.
+// bench 스킬에서 스킬·규칙 벤치 종류 파일을 연 세션이 skill-creator를 아직 안 불렀으면 부르라고 알린다.
+// 도구는 차단하지 않는다. Gemini 비교(kinds/gemini-handoff.md)는 skill-creator 틀을 쓰지 않아 걸지 않는다 —
+// 그래서 SKILL.md가 아니라 종류를 고른 뒤 처음 여는 종류 파일에 건다.
 //
 // 문장으로는 안 먹혔다. bench/SKILL.md 맨 위·라우팅 표·도구 이름까지 적은 판 셋을 벤치로
 // 쟀더니(2026-09-23, sonnet, 팔당 2회) 워커 8명이 전부 그 문장을 Read하고도 Skill 도구를 안 불렀다.
@@ -11,7 +13,7 @@ import { readPayload, addContext } from "./hook-utils.mjs";
 // 이미 불렀으면 조용하다. 대화 기록에서 Skill 호출의 인자에 skill-creator가 있는지로 본다 —
 // 플러그인이면 `anthropic-skills:skill-creator`처럼 접두가 붙어 이름 전체 일치로는 못 잡는다.
 
-const BENCH_DOC = /[\\/]skills[\\/]bench[\\/]SKILL\.md$/i;
+const BENCH_DOC = /[\\/]skills[\\/]bench[\\/]kinds[\\/](function-test|trigger-eval|rule-ablation|delegation)\.md$/i;
 
 function alreadyLoaded(transcriptPath) {
   if (typeof transcriptPath !== "string" || !transcriptPath) return false;
@@ -44,7 +46,7 @@ if (payload?.tool_name !== "Read" || typeof file !== "string" || !BENCH_DOC.test
 if (alreadyLoaded(payload.transcript_path)) process.exit(0);
 
 addContext(
-  "[skill-creator 미로드] bench 스킬 문서를 열었는데 이 세션은 skill-creator를 아직 안 불렀다. " +
+  "[skill-creator 미로드] bench 스킬의 스킬·규칙 벤치 종류 문서를 열었는데 이 세션은 skill-creator를 아직 안 불렀다. " +
     "벤치를 설계하기 전에 Skill 도구로 skill-creator를 부른다(플러그인으로 깔려 있으면 `anthropic-skills:skill-creator`). " +
     "시험 프롬프트·baseline 비교·채점의 틀은 그쪽이 갖고, bench 스킬은 그 위에 문장 단위 측정을 얹는다.",
   "PostToolUse",
