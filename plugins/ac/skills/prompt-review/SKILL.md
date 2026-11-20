@@ -69,7 +69,6 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
 대상이 ai-contexts 체크아웃(워크트리 포함) 안에 있으면 이 문서의 경로를 아래처럼 그 체크아웃 안으로 바꿔 읽는다. 그 브랜치에서 고친 기준으로 리뷰하기 위해서다.
 
 - 상대 경로: 그 체크아웃의 `plugins/ac/skills/prompt-review/` 기준
-- `~/.ai-contexts/<스크립트>`: 그 체크아웃의 `scripts/hooks/<스크립트>`
 - `${CLAUDE_SKILL_DIR}`: 그 체크아웃의 `plugins/ac/skills/prompt-review`
 
 ## 절차

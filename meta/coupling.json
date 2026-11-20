@@ -190,6 +190,15 @@
         "plugins/ac/skills/write-doc/scripts/score.mjs"
       ],
       "note": "PR 제목의 기계 기준(끝 마침표·conventional commit 접두사·공백 포함 길이 상한)이 두 곳에 산다 — 초안 단계가 제목을 지을 때 읽는 pr-body 가이드 「PR 제목」과, 다듬기 0-루프와 게시 스크립트가 쓰는 score.mjs의 checkTitle(CONVENTIONAL_PREFIX·TITLE_MAX). 가이드는 제목을 짓기 전에 기준을 알아야 해서 숫자를 지울 수 없다. 한쪽만 바꾸면 초안에서 맞춘 제목이 다듬기에서 걸리거나, 기준을 어긴 제목이 그냥 지나간다. 기준을 바꾸면 둘 다 고친다. 가이드 「넣지 않는 것」의 「일반 PR이면」 범위와 항목도 score.mjs internalCounts(채용 PR을 합계에서 빼는 판정)·INTERNAL과 짝이다 — 가이드는 INTERNAL 정규식이 놓치는 꼴이 있는 PR 번호·브랜치명만 적고, 거의 다 잡히는 커밋 해시는 채점기만 본다. 범위나 정규식을 바꾸면 가이드 항목도 맞춘다."
+    },
+    {
+      "name": "AC 체크아웃 판정 — 기계 검사 위임 ↔ 리뷰 요청 묶기",
+      "files": [
+        "scripts/hooks/check-md-size.mjs",
+        "scripts/hooks/check-wording.mjs",
+        "plugins/ac/skills/prompt-review/scripts/build-review-request.mjs"
+      ],
+      "note": "세 스크립트가 같은 기준(대상의 레포 루트에 plugins/ac/skills/prompt-review/SKILL.md가 있으면 ai-contexts 체크아웃)으로 체크아웃을 판정한다. 두 검사 스크립트의 delegateToCheckout은 ~/.ai-contexts/에 홀로 복사돼 돌아 import하지 못하고 같은 함수를 하나씩 들고 있다. 판정 기준이나 넘기는 방식을 바꾸면 셋을 함께 맞춘다. 어긋나면 리뷰 요청은 체크아웃 기준으로, 메인의 기계 검사는 배포본 기준으로 돌아 같은 대상을 다른 버전으로 잰다."
     }
   ]
 }

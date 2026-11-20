@@ -35,10 +35,11 @@
 // 문서 전체를 고칠 대상 목록이고 이 기억은 기계 상태다. 합치면 커밋마다 도는 검사가 backlog에 사용자가
 // 낸 적 없는 diff를 쌓게 되고(그 레포는 커밋마다 자동 push한다), 그건 아래 settleBaseline 주석이
 // 이미 거부한 설계다. 기기별로 따로 기억하고, 파일이 없어지면 한 번 더 찍고 마는 것이 전부다.
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const BACKLOG_ROOT = path.join(os.homedir(), "WebstormProjects", "main", "backlog");
 const CONFIG_FILE = path.join(BACKLOG_ROOT, "meta", "md-size.json");
@@ -894,10 +895,37 @@ function argOf(flag) {
   return process.argv.slice(2).find((a) => !a.startsWith("--")) ?? null;
 }
 
+// 지목한 대상이 ai-contexts 체크아웃(워크트리 포함) 안이면 그 체크아웃의 같은 스크립트로 넘겨 돌린다.
+// `~/.ai-contexts/`는 기본 브랜치에서 복사한 사본이라, 브랜치에서 고친 선·낱말로 재려면 부르는 쪽이
+// 경로를 손으로 바꿔야 했고, 빠뜨리면 사본 기준으로 돌아도 출력에 티가 안 났다.
+// 커밋 훅(대상 없이 부름)은 넘기지 않는다 — 브랜치에서 깨진 스크립트가 전역 훅으로 돌면 안 된다.
+// 체크아웃 판정은 prompt-review `build-review-request.mjs`와 같다(레포 루트에 prompt-review SKILL.md).
+// check-wording.mjs에 같은 함수가 있다(meta/coupling.json 짝꿍) — 이 파일은 홀로 복사돼 돌아 import하지 않는다.
+function delegateToCheckout(target) {
+  if (!target || process.env.AC_HOOK_DELEGATED === "1") return;
+  let root = path.resolve(target);
+  while (!fs.existsSync(path.join(root, ".git"))) {
+    if (path.dirname(root) === root) return;
+    root = path.dirname(root);
+  }
+  if (!fs.existsSync(path.join(root, "plugins", "ac", "skills", "prompt-review", "SKILL.md"))) return;
+  const self = fileURLToPath(import.meta.url);
+  const own = path.join(root, "scripts", "hooks", path.basename(self));
+  const real = (file) => fs.realpathSync(file).toLowerCase();
+  if (!fs.existsSync(own) || real(own) === real(self)) return;
+  const result = spawnSync(process.execPath, [own, ...process.argv.slice(2)], {
+    stdio: "inherit",
+    env: { ...process.env, AC_HOOK_DELEGATED: "1" },
+  });
+  if (result.error) console.error(`체크아웃의 ${own}를 실행하지 못했다: ${result.error.message}`);
+  process.exit(result.status ?? 1);
+}
+
 try {
   const sections = argOf("--sections");
   const trace = argOf("--trace");
   const report = argOf("--report");
+  delegateToCheckout(report ?? sections ?? trace);
   if (sections !== undefined || trace !== undefined) {
     // 파일을 먼저 읽는다 — `--report`가 잰 파일의 폴더로 chdir해 뒤의 상대경로가 어긋난다.
     const s = sections !== undefined ? readTarget(sections, "--sections") : null;
