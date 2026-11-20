@@ -13,13 +13,10 @@ import path from "node:path";
 import { guideFiles } from "./guide-files.mjs";
 import { COMMENT_LINE, fenceTracker, readPackageMeta, stripCodeAndQuotes } from "./package-meta.mjs";
 import { findListHits, loadDocRows } from "./rejected.mjs";
+// team-agent 「여럿을 한 번에 기다릴 때」의 작성 문안. 문안은 그 스크립트 한 곳에만 둔다.
+import { replyText as reply } from "../../../contexts/team-agent-results.mjs";
 
 const REVIEWERS = path.resolve(import.meta.dirname, "..", "reviewers");
-// team-agent 「여럿을 한 번에 기다릴 때」 2의 문안. 파일이 생긴 것이 메인의 완료 신호다.
-const reply = (out) =>
-  `맡은 일을 다 마친 뒤 마지막 단계에서 결과를 \`${out}\`에 작성한다. 결과를 \`SendMessage\`로 보내지 않는다. ` +
-  "물어볼 것이 생겨도 답을 기다리지 말고, 가정을 정해 진행한 뒤 그 가정을 파일 첫머리에 적는다. " +
-  "끝내지 못하고 멈춰야 하면 멈춘 이유와 거기까지 한 일을 이 파일에 작성하고 멈춘다.";
 
 function split(text) {
   const m = /^---\n([\s\S]*?)\n---\n/.exec(text);
