@@ -27,7 +27,7 @@
           {
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/surface-skill-creator.mjs\"",
-            "statusMessage": "Checking skill-creator for prompt-review bench..."
+            "statusMessage": "Checking skill-creator for bench skill..."
           },
           {
             "type": "command",

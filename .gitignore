@@ -16,4 +16,6 @@ nul
 __pycache__/
 *.pyc
 bench/
+# 벤치 산출물 폴더를 막는 위 줄이 스킬 원본까지 막지 않게 한다
+!plugins/ac/skills/bench/
 cache/

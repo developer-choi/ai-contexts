@@ -1,6 +1,6 @@
 # build-arms.mjs 사용법
 
-`node <prompt-review 스킬 폴더>/benching/scripts/build-arms.mjs <명세> <출력루트> [묶음필터]`
+`node <bench 스킬 폴더>/scripts/build-arms.mjs <명세> <출력루트> [묶음필터]`
 
 비교군마다 원본 폴더를 `<출력루트>/<비교군 이름>`에 복사하고, 명세에 적힌 치환을 적용한다.
 만든 폴더 경로를 `bench-ablation.mjs` eval-set의 `variant_cwds`에 넣는다.

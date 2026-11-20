@@ -1,7 +1,7 @@
 # bench-trigger.mjs 사용법
 
-`node <prompt-review 스킬 폴더>/benching/scripts/bench-trigger.mjs --eval-set <json> --skill-path <dir> --out <json> [옵션]`
-`node <prompt-review 스킬 폴더>/benching/scripts/bench-trigger.mjs --help`
+`node <bench 스킬 폴더>/scripts/bench-trigger.mjs --eval-set <json> --skill-path <dir> --out <json> [옵션]`
+`node <bench 스킬 폴더>/scripts/bench-trigger.mjs --help`
 
 쿼리마다 `claude -p`를 돌려 대상 스킬이 발동했는지 보고, 쿼리별 발동 비율과 판정을 매긴다. `--help`(`-h`)는 이 문서를 stdout에 출력한다.
 

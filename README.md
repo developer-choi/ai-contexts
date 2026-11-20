@@ -66,6 +66,7 @@ AI가 작성하는 코드의 양이 늘수록, 사람이 리뷰해야 할 양도
 
 - [code-review](plugins/ac/skills/code-review/README.md): 코드 변경을 규칙과 품질 기준으로 리뷰하고 고칠 거리를 목록으로 정리
 - [prompt-review](plugins/ac/skills/prompt-review/SKILL.md): 스킬·규칙·프롬프트 문서를 기준으로 리뷰하고 지적을 반영해 고침
+- [bench](plugins/ac/skills/bench/SKILL.md): 스킬·규칙을 여러 번 돌려 고친 효과를 측정
 
 ### 학습
 

@@ -2347,10 +2347,10 @@ const skillCreatorGroup = async () => {
     // 본문에 이름만 나오고 Skill 호출은 없는 기록 — 읽은 문서에 이름이 적혀 있는 것은 부른 것이 아니다
     fs.writeFileSync(fresh, `${toolUse('Read', { file_path: 'C:/x/skill-creator/SKILL.md' })}\n`);
     const read = (file, transcript) => ({ tool_name: 'Read', tool_input: { file_path: file }, transcript_path: transcript });
-    const bench = 'C:/Users/u/.claude/skills/prompt-review/benching/SKILL.md';
+    const bench = 'C:/Users/u/.claude/skills/bench/SKILL.md';
     const cases = [
       [read(bench, fresh), 'context', '안 부른 세션이 벤치 문서를 열면 알린다'],
-      [read('C:/repo/plugins/ac/skills/prompt-review/benching/SKILL.md', fresh), 'context', '원본 경로로 열어도 알린다'],
+      [read('C:/repo/plugins/ac/skills/bench/SKILL.md', fresh), 'context', '원본 경로로 열어도 알린다'],
       [read(bench, loaded), 'pass', '이미 부른 세션은 조용하다'],
       [read(bench, path.join(dir, 'none.jsonl')), 'context', '기록을 못 읽으면 알리는 쪽으로 기운다'],
       [read('C:/Users/u/.claude/skills/prompt-review/SKILL.md', fresh), 'pass', 'prompt-review 본문만 연 것은 벤치 회차가 아니다'],

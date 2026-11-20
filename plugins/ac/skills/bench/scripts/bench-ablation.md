@@ -1,7 +1,7 @@
 # bench-ablation.mjs 사용법
 
-`node <prompt-review 스킬 폴더>/benching/scripts/bench-ablation.mjs --eval-set <json> --out <json> [옵션]`
-`node <prompt-review 스킬 폴더>/benching/scripts/bench-ablation.mjs --help`
+`node <bench 스킬 폴더>/scripts/bench-ablation.mjs --eval-set <json> --out <json> [옵션]`
+`node <bench 스킬 폴더>/scripts/bench-ablation.mjs --help`
 
 eval-set의 시나리오 × 비교군 × 반복마다 격리된 `claude -p`로 응답을 받고, 채점 모델로 분류해 축마다 판정을 매긴다. `--help`(`-h`)는 이 문서를 stdout에 출력한다.
 

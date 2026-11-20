@@ -24,7 +24,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 측정 도구: bench-trigger.mjs
 
-표준 도구가 broken이라 자체 도구 `${CLAUDE_SKILL_DIR}/benching/scripts/bench-trigger.mjs`를 쓴다.
+표준 도구가 broken이라 자체 도구 `${CLAUDE_SKILL_DIR}/scripts/bench-trigger.mjs`를 쓴다.
 
 측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 설치된 `SKILL.md`를 그대로 잰다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
 

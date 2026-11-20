@@ -21,7 +21,7 @@ eval-set을 꾸리기 전에 그 폴더에서 그 이름의 파일을 찾는다.
 - 일반 예시로 대체 금지. 규칙이 방어하려는 구체 상황이 아닌 프롬프트로 측정하면 결과는 "일반 문체·행동 경향"만 보여주고 **규칙의 효과는 측정하지 않는다**
 - **채점 정답 선존재 차단**: 시나리오의 채점 정답이 워커가 읽을 수 있는 환경(타겟 파일·cwd)에 이미 있으면 ZERO가 "읽고 확인"만으로 통과해 ablation 변별력을 잃는다. 정답이 환경에 박혀있지 않은(빈/오답) 타겟으로 시나리오를 구성한다.
 
-측정 대상이 시스템 프롬프트가 아니라 워커가 열 파일이면, 비교군별 변형본 폴더는 `${CLAUDE_SKILL_DIR}/benching/scripts/build-arms.mjs`가 만든다. 손으로 만들지 않는다. 명세 꼴·인자는 [../scripts/build-arms.md](../scripts/build-arms.md)를 본다.
+측정 대상이 시스템 프롬프트가 아니라 워커가 열 파일이면, 비교군별 변형본 폴더는 `${CLAUDE_SKILL_DIR}/scripts/build-arms.mjs`가 만든다. 손으로 만들지 않는다. 명세 꼴·인자는 [../scripts/build-arms.md](../scripts/build-arms.md)를 본다.
 
 ## ZERO negative control + 환경 상속 탐지
 
@@ -34,7 +34,7 @@ ZERO 비교군 워커가 제거한 규칙의 특징 어휘·구절을 응답에�
 ### 상속 경로 (구체 메커니즘)
 
 일반 세션·서브에이전트 워커는 사용자 메모리(`~/.claude/CLAUDE.md`와 그 import, `~/.claude/rules/`)와 cwd `CLAUDE.md`를 자동 로드해 ZERO가 성립하지 않는다.
-전역 규칙은 `${CLAUDE_SKILL_DIR}/benching/scripts/bench-ablation.mjs`로 잰다. 격리는 스크립트가 맡고, 인자·eval-set 스키마는 [../scripts/bench-ablation.md](../scripts/bench-ablation.md)를 본다.
+전역 규칙은 `${CLAUDE_SKILL_DIR}/scripts/bench-ablation.mjs`로 잰다. 격리는 스크립트가 맡고, 인자·eval-set 스키마는 [../scripts/bench-ablation.md](../scripts/bench-ablation.md)를 본다.
 배포본을 비교군마다 갈아끼우지 않는다(다른 세션까지 오염).
 
 ### 단일 측정만으로는 확정 불가
