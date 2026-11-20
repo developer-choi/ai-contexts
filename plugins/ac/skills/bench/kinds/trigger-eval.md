@@ -20,13 +20,13 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 > User-invoked skills like `/commit` and built-in commands are only available in interactive mode. In `-p` mode, describe the task you want to accomplish instead.
 
-`run_eval.py`(`run_single_query`)가 test artifact를 `.claude/commands/`에 쓰는데 `claude -p`는 commands를 안 본다 → 구조적 broken. 윈도우 patch만으로 해결 안 된다.
+`run_eval.py`(`run_single_query`)가 test artifact를 `.claude/commands/`에 작성하는데 `claude -p`는 commands를 안 본다 → 구조적 broken. 윈도우 patch만으로 해결 안 된다.
 
 ## 측정 도구: bench-trigger.mjs
 
 표준 도구가 broken이라 자체 도구 `${CLAUDE_SKILL_DIR}/scripts/bench-trigger.mjs`를 쓴다.
 
-측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 설치된 `SKILL.md`를 그대로 잰다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
+측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 설치된 `SKILL.md`를 그대로 측정한다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다. 나머지 구현은 스크립트가 정본이다.
 
 ## 입력 eval set
 
@@ -34,7 +34,7 @@ frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 �
 
 ## 호출
 
-인자 목록은 [../scripts/bench-trigger.md](../scripts/bench-trigger.md)가 정본이다. BEFORE/AFTER는 원본을 고치고 배포해 가며 재고, AFTER는 `--baseline`으로 BEFORE 결과를 주고 잰다.
+인자 목록은 [../scripts/bench-trigger.md](../scripts/bench-trigger.md)가 정본이다. BEFORE/AFTER는 원본을 고치고 배포해 가며 측정하고, AFTER는 `--baseline`으로 BEFORE 결과를 주고 측정한다.
 
 벤치 산출물 정리는 [../operations.md](../operations.md)를 따른다.
 

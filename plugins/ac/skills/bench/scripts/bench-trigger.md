@@ -8,10 +8,10 @@
 ## 전제
 
 - `claude` CLI가 PATH에 있고 로그인되어 있다. 쿼리마다 실제 call이 나간다(쿼리 수 × `--runs-per-query`)
-- `--skill-path`가 plugin 안의 스킬(`<plugin 루트>/skills/<이름>`, 루트에 `.claude-plugin/plugin.json`)이면 그 plugin을 `--plugin-dir`로 읽혀 잰다. 설치·배포가 필요 없다. 트리거는 `<plugin>:<이름>`으로만 센다
+- `--skill-path`가 plugin 안의 스킬(`<plugin 루트>/skills/<이름>`, 루트에 `.claude-plugin/plugin.json`)이면 그 plugin을 `--plugin-dir`로 읽혀 측정한다. 설치·배포가 필요 없다. 트리거는 `<plugin>:<이름>`으로만 센다
 - 그 밖의 스킬은 설치되어 있어야 한다. 설치본은 cwd에서 위로 올라가며 처음 만나는 `.claude`가 있는 폴더(홈이 아닐 때)의 `.claude/skills/<이름>`, 없으면 `~/.claude/skills/<이름>`이다
-  - 설치본의 description이 `--skill-path`의 description과 같아야 한다. 원본을 고쳤으면 배포한 뒤 잰다
-- description은 frontmatter에 한 줄 값으로 적혀 있어야 한다(`>`·`|`·이어지는 줄은 못 잰다)
+  - 설치본의 description이 `--skill-path`의 description과 같아야 한다. 원본을 고쳤으면 배포한 뒤 측정한다
+- description은 frontmatter에 한 줄 값으로 적혀 있어야 한다(`>`·`|`·이어지는 줄은 측정하지 못한다)
 
 ## 인자
 
