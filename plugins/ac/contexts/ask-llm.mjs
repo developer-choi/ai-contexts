@@ -25,13 +25,14 @@ const USAGE_HINT = `사용법: ${USAGE_DOC.replace(/\\/g, "/")}`;
 const DAEMON_SCRIPT_PATH = path.join(import.meta.dirname, "ask-llm-daemon.mjs");
 const DAEMON_LOG_PATH = path.join(os.tmpdir(), "ask-llm-daemon.log");
 
-// 실패를 받은 호출 쪽 AI가 직접 대신 해 버리지 않게, 실패할 때마다 stderr 끝에 붙인다.
+// 실패를 받은 호출 쪽 AI가 직접 대신 해 버리지 않게, 인자 오류(usageFail)가 아닌 실패마다 stderr 끝에 붙인다.
 const FAILURE_INSTRUCTION = "이 사유를 사용자에게 보이고 멈춘다. 이 일을 직접 대신하면 사용자는 다른 회사 모델이 사용되지 않은 것을 모른다.";
 
 // 모델은 버전 없이 이름과 effort만 적고, 데몬이 요청마다 agy 모델 목록에서 그 이름의 가장 높은 버전을 선택한다.
 // agy에는 Claude의 sonnet처럼 최신 버전을 가리키는 별칭이 없다(--model flash는 "not recognized").
+// families의 첫 값이 --model을 안 줬을 때의 기본값이다.
 const VENDORS = {
-  gemini: { family: "Hydrogen", effort: "Medium" },
+  gemini: { families: ["Hydrogen", "Argon"], effort: "Medium" },
 };
 
 const AGY_EXECUTABLE_PATH = path.join(process.env.LOCALAPPDATA ?? "", "agy", "bin", "agy.exe");
@@ -51,13 +52,20 @@ function fail(message) {
   process.exit(1);
 }
 
-const VALUE_OPTIONS = ["--vendor", "--schema"];
+// 호출 쪽이 인자를 잘못 준 실패. 다른 회사 모델에 아직 보내지 않았으니 FAILURE_INSTRUCTION(멈춘다)을 붙이지 않는다.
+// 붙이면 모델 이름 대소문자 하나 틀린 것에 작업이 선다.
+function usageFail(message) {
+  console.error(`${message}\n${USAGE_HINT}\n인자를 고쳐 다시 호출한다.`);
+  process.exit(1);
+}
+
+const VALUE_OPTIONS = ["--vendor", "--model", "--schema"];
 
 function readOption(argv, name) {
   const optionIndex = argv.indexOf(name);
   if (optionIndex === -1) return undefined;
   const value = argv[optionIndex + 1];
-  if (value === undefined || value.startsWith("--")) fail(`${name} 뒤에 값이 없다.\n${USAGE_HINT}`);
+  if (value === undefined || value.startsWith("--")) usageFail(`${name} 뒤에 값이 없다.`);
   argv.splice(optionIndex, 2);
   return value;
 }
@@ -112,22 +120,25 @@ if (wantsHelp) {
 }
 
 const vendorName = readOption(argv, "--vendor");
+const modelArgument = readOption(argv, "--model");
 const schemaArgument = readOption(argv, "--schema");
 const promptSource = argv[0];
 
-if (!vendorName) fail(`--vendor가 없다.\n${USAGE_HINT}`);
+if (!vendorName) usageFail(`--vendor가 없다.`);
 const vendor = VENDORS[vendorName];
-if (!vendor) fail(`모르는 벤더: ${vendorName} (지원: ${Object.keys(VENDORS).join(", ")})\n${USAGE_HINT}`);
-if (!promptSource) fail(`보낼 내용이 없다. 파일 경로나 -(stdin)를 준다.\n${USAGE_HINT}`);
-if (argv.length > 1) fail(`모르는 인자: ${argv.slice(1).join(" ")}\n${USAGE_HINT}`);
+if (!vendor) usageFail(`모르는 벤더: ${vendorName} (지원: ${Object.keys(VENDORS).join(", ")})`);
+const family = modelArgument ?? vendor.families[0];
+if (!vendor.families.includes(family)) usageFail(`${vendorName}에 없는 모델: ${family} (지원: ${vendor.families.join(", ")})`);
+if (!promptSource) usageFail(`보낼 내용이 없다. 파일 경로나 -(stdin)를 준다.`);
+if (argv.length > 1) usageFail(`모르는 인자: ${argv.slice(1).join(" ")}`);
 
 let prompt;
 try {
   prompt = (promptSource === "-" ? fs.readFileSync(0, "utf8") : fs.readFileSync(promptSource, "utf8")).replace(/^﻿/, "");
 } catch (error) {
-  fail(`보낼 내용을 읽지 못했다: ${promptSource}\n${error.message}`);
+  usageFail(`보낼 내용을 읽지 못했다: ${promptSource}\n${error.message}`);
 }
-if (!prompt.trim()) fail(`보낼 내용이 비어 있다.\n${USAGE_HINT}`);
+if (!prompt.trim()) usageFail(`보낼 내용이 비어 있다.`);
 
 let schema;
 if (schemaArgument) {
@@ -135,7 +146,7 @@ if (schemaArgument) {
   try {
     schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
   } catch (error) {
-    fail(`스키마 파일을 읽지 못했다: ${schemaPath}\n${error.message}\n${USAGE_HINT}`);
+    usageFail(`스키마 파일을 읽지 못했다: ${schemaPath}\n${error.message}`);
   }
 }
 
@@ -203,7 +214,7 @@ function request(socket, payload) {
 
 const socket = await connectOrStartDaemon();
 const answerTimeoutMs = Math.min(ANSWER_TIMEOUT_MS, TOTAL_TIMEOUT_MS - (Date.now() - startedAt));
-const response = await request(socket, { prompt: requestPrompt, family: vendor.family, effort: vendor.effort, timeoutMs: answerTimeoutMs });
+const response = await request(socket, { prompt: requestPrompt, family, effort: vendor.effort, timeoutMs: answerTimeoutMs });
 
 // 선택한 모델을 사람이 볼 수 있게 남긴다. stdout은 호출한 쪽이 답으로 읽으므로 stderr에 출력한다.
 if (response.model) console.error(`ask-llm: ${vendorName} 모델 ${response.model}`);

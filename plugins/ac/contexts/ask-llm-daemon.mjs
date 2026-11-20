@@ -142,7 +142,7 @@ async function ask({ prompt, family, effort, timeoutMs }) {
   try {
     const availableModels = session.models?.availableModels ?? [];
     const model = pickLatestModel(availableModels, family, effort);
-    // 다른 이름(Argon·Flash 등)으로 조용히 넘어가지 않는다. 이름이 바뀌었으면 사람이 ask-llm.mjs의 VENDORS를 고친다.
+    // 요청받은 이름이 없으면 다른 이름(Flash 등)으로 조용히 넘어가지 않는다. 이름이 바뀌었으면 사람이 ask-llm.mjs의 VENDORS를 고친다.
     if (!model) {
       return { ok: false, reason: `agy 모델 목록에 "Gemini <버전> ${family} (${effort})"가 없다.\n${availableModels.map((m) => m.name).join("\n")}` };
     }
