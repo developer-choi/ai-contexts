@@ -38,7 +38,7 @@ const VENDORS = {
 const AGY_EXECUTABLE_PATH = path.join(process.env.LOCALAPPDATA ?? "", "agy", "bin", "agy.exe");
 
 // --timeout을 안 줬을 때 답을 기다리는 한도(초). ask-llm.md 「인자」의 기본값과 같은 값이다. 바꾸면 그 문서도 같이 고친다.
-const DEFAULT_ANSWER_TIMEOUT_SECONDS = 100;
+const DEFAULT_ANSWER_TIMEOUT_SECONDS = 240;
 // --timeout 상한(초). 셸 도구 timeout 최대 600초에서 ask-llm.md 「인자」가 더하라는 여유 20초를 뺐다. 그 여유를 바꾸면 이 값도 같이 고친다.
 // 이보다 크면 도구가 먼저 끊어 실패 사유 없이 끝나므로 받지 않는다.
 const MAX_ANSWER_TIMEOUT_SECONDS = 580;
