@@ -79,10 +79,10 @@ argument-hint: "[대상 파일/디렉토리 경로] [--simplify]"
    - 크기: `node ~/.ai-contexts/check-md-size.mjs --report <대상 경로>`.
    - 낱말·긴 줄: `node ~/.ai-contexts/check-wording.mjs --report <대상 경로>`. 걸린 줄은 리뷰어 지적에 추가한다.
 2. 리뷰어에게 맡긴다.
-   - [기준](#기준) 표에서 조건에 맞는 리뷰어마다 Gemini Argon에 그 리뷰어가 붙은 행의 기준을 맡긴다.
+   - [기준](#기준) 표에서 조건에 맞는 리뷰어마다 Gemini Neon에 그 리뷰어가 붙은 행의 기준을 맡긴다.
      - 보낼 내용은 `node "${CLAUDE_SKILL_DIR}/scripts/build-review-request.mjs"`로 파일 하나로 묶는다. 인자는 [scripts/build-review-request.md](scripts/build-review-request.md)를 본다.
-     - 묶은 파일은 읽지 않고 `node "${CLAUDE_SKILL_DIR}/../../contexts/ask-llm.mjs" --vendor gemini --model Argon --timeout 480 <그 파일>`로 보낸다(셸 도구 `timeout`은 [ask-llm.md](../../contexts/ask-llm.md#인자)대로). 메인이 재료를 읽으면 절약하려던 Claude 토큰이 그대로 든다.
-     - 호출이 실패하면 다른 모델로 바꾸거나 대신 리뷰하지 않고 사유를 사용자에게 보이고 멈춘다. 어느 모델로 리뷰됐는지 사용자가 알아야 해서다. 사용자가 다른 모델(예: Neon)을 대면 그 모델로 다시 보낸다.
+     - 묶은 파일은 읽지 않고 `node "${CLAUDE_SKILL_DIR}/../../contexts/ask-llm.mjs" --vendor gemini --model Neon --timeout 480 <그 파일>`로 보낸다(셸 도구 `timeout`은 [ask-llm.md](../../contexts/ask-llm.md#인자)대로). 메인이 재료를 읽으면 절약하려던 Claude 토큰이 그대로 든다.
+     - 호출이 실패하면 다른 모델로 바꾸거나 대신 리뷰하지 않고 사유를 사용자에게 보이고 멈춘다. 어느 모델로 리뷰됐는지 사용자가 알아야 해서다. 사용자가 다른 모델(예: Argon)을 대면 그 모델로 다시 보낸다.
    - 규칙에 없는 문제를 보는 자유 리뷰어는 이름 있는 팀원으로 띄운다([team-agent](../../contexts/team-agent.md#claude-code)). 레포의 다른 파일을 직접 찾아 읽어야 다른 규칙과의 충돌이 보이는데, Gemini는 보낸 것만 본다.
    - 리뷰 대상(입력으로 받은 파일·폴더)이 바뀌면 팀원을 끝내고 새로 띄운다. 앞 대상을 본 맥락이 새 대상 판정에 섞이지 않게 하기 위해서다.
    - 이 절차에서 띄우는 팀원·서브에이전트의 모델은 [에이전트 나누기](../../contexts/prompt-standards/skill-structure.md#에이전트-설계)대로 선택한다.
