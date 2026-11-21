@@ -1,8 +1,8 @@
 # check-md-size.mjs 사용법
 
-sync가 이 파일을 `~/.ai-contexts/check-md-size.mjs`로 복사하고 전역 git pre-commit 훅으로 등록한다. 아래 호출은 그 사본 기준이다. AC에서는 `node scripts/hooks/check-md-size.mjs …`도 같다.
+sync가 이 파일을 `~/.ai-contexts/check-md-size.mjs`로 복사하고 전역 git pre-commit 훅으로 등록한다. 아래 호출은 그 사본 기준이다. 단 `--report`·`--sections`·`--trace`의 대상이 AC 체크아웃(워크트리 포함) 안이면 사본이 그 체크아웃의 같은 스크립트로 넘겨 돌린다. AC에서는 `node scripts/hooks/check-md-size.mjs …`도 같다.
 
-- 잴 대상: 레포의 `CLAUDE.md`·`local/`·`deploy/` 아래 md와, 거기서 링크·`.md` 경로로 재귀로 닿는 md
+- 잴 대상: 레포의 `CLAUDE.md`(하위 폴더 것 포함)와 `local/`·`deploy/`·`plugins/` 아래 md, 거기서 링크·`.md` 경로로 재귀로 닿는 md
 - 선: SKILL.md 10000B, 닿는 곳이 4 이상이면 15000B, 아니면 20000B
 - 기준선 목록(이미 넘은 파일)·제외 설정: `~/WebstormProjects/main/backlog/meta/md-size.json`
 
