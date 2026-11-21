@@ -72,7 +72,7 @@ function main() {
     check(
       remainingSettings.colorScheme === 'light'
       && !('permissions' in remainingSettings)
-      && !('toolPermission' in remainingSettings)
+      && !('agentMode' in remainingSettings)
       && !('allowNonWorkspaceAccess' in remainingSettings),
       'unsync 시 사용자 settings.json 키 보존 및 AC 설정 키 제거',
     );

@@ -1,9 +1,8 @@
 {
+  "agentMode": "accept-edits",
   "allowNonWorkspaceAccess": true,
-  "toolPermission": "always-proceed",
   "permissions": {
     "allow": [
-      "command(*)",
       "read_file(*)",
       "write_file(*)",
       "read_url(*)",
