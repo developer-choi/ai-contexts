@@ -4,29 +4,12 @@
 
 frontmatter에 `disable-model-invocation: true`가 있는 스킬은 대상이 아니다. 그 description은 모델 컨텍스트에 올라가지 않아 측정할 트리거가 없다. 사용자만 호출하게 하려는 스킬은 재려 하지 말고 그 필드를 켠다.
 
-## 현재 상태 (2026-10-17 재확인)
-
-**skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 현재 broken**이고 공식 fix가 없다.
-
-알려진 별개 문제:
-
-| 문제 | 영향 | 출처 |
-|---|---|---|
-| `claude -p`가 `.claude/commands/` 로드 안 함 (architectural) | 모든 OS: 모든 should-trigger 쿼리 0% recall | [anthropics/skills#556](https://github.com/anthropics/skills/issues/556) OPEN. [anthropics/claude-code#36570](https://github.com/anthropics/claude-code/issues/36570)은 `NOT_PLANNED`로 닫힘(미수정) |
-| Parallel worker UUID 충돌 (`--num-workers 10` default) | 모든 OS: `--num-workers 1`은 100%, default는 11% | [PR #794 OPEN](https://github.com/anthropics/skills/pull/794) |
-| 윈도우 `select.select` pipe fd 비호환 (WinError 10038) | 윈도우만: 모든 쿼리 실패 | 미보고 |
-
-**근거**: 공식 docs https://code.claude.com/docs/en/headless 원문.
-
-> User-invoked skills like `/commit` and built-in commands are only available in interactive mode. In `-p` mode, describe the task you want to accomplish instead.
-
-`run_eval.py`(`run_single_query`)가 test artifact를 `.claude/commands/`에 작성하는데 `claude -p`는 commands를 안 본다 → 구조적 broken. 윈도우 patch만으로 해결 안 된다.
-
 ## 측정 도구: bench-trigger.mjs
 
-표준 도구가 broken이라 자체 도구 `${CLAUDE_SKILL_DIR}/scripts/bench-trigger.mjs`를 쓴다.
+skill-creator 표준 도구(`run_eval.py`, `run_loop.py`)는 `claude -p`가 `.claude/commands/`를 읽지 않는 구조적 문제 등으로 동작하지 않아 자체 도구 `${CLAUDE_SKILL_DIR}/scripts/bench-trigger.mjs`를 쓴다.
+이슈·재시험 이력은 backlog `maintenance/upstream-bugs/skill-creator-trigger-eval.md`에 있다.
 
-측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 `claude -p`가 발견하는 `SKILL.md`(plugin 스킬은 원본, 그 밖은 설치본)를 그대로 측정한다**(skills 디렉토리는 `claude -p`도 인식). 위 architectural 이슈를 비켜가는 지점이 여기다.
+측정 타당성에 걸리는 차이는 하나다: **`.claude/commands/` 임시 파일을 안 만들고 `claude -p`가 발견하는 `SKILL.md`(plugin 스킬은 원본, 그 밖은 설치본)를 그대로 측정한다**(skills 디렉토리는 `claude -p`도 인식). 위 구조적 문제를 비켜가는 지점이 여기다.
 
 ## 입력 eval set
 

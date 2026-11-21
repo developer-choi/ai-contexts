@@ -8,14 +8,7 @@
 
 ## assertion 사전 검증
 
-채점 전, 메인이 assertion 초안을 작성하고 critic 팀원이 검증한다.
-
-### 팀 구성
-
-| 역할 | 맡는 쪽 | 책임 |
-|------|------|------|
-| writer | 메인 | assertion 초안 작성. eval setup을 준비하며 읽은 스킬 맥락을 그대로 사용한다 |
-| critic | 팀원([team-agent](../../../contexts/team-agent.md#claude-code) 규칙으로 띄운다) | 각 assertion에 아래 "critic 검증 기준"으로 도전. 통과하지 못하면 수정 또는 DROP 요구 |
+채점 전, 메인이 assertion 초안을 작성하고 팀원 critic([team-agent](../../../contexts/team-agent.md#claude-code) 규칙으로 띄운다)이 아래 기준으로 검증해 통과하지 못하면 수정·DROP을 요구한다.
 
 ### critic 검증 기준
 
