@@ -85,30 +85,30 @@ function isCandidate(rel, exclude) {
 // 스캔 한 벌. 검사·등재·해제가 같은 계산을 쓴다 — 두 벌이 되면 선 해석이 갈린다.
 function measure(config) {
   const entries = effectiveMd(config.exclude); // [{ sha, rel }]
-  const sizes = objectSizes(entries.map((e) => e.sha));
-  const bodies = objectBodies(entries.map((e) => e.sha));
-  const candidates = entries.map((e, i) => ({ rel: e.rel, size: sizes[i], body: bodies[i] }));
+  const sizes = objectSizes(entries.map((entry) => entry.sha));
+  const bodies = objectBodies(entries.map((entry) => entry.sha));
+  const candidates = entries.map((entry, index) => ({ rel: entry.rel, size: sizes[index], body: bodies[index] }));
   // 참조는 후보 전체로 한 번만 푼다 — 범위와 닿는 곳을 다른 집합으로 따로 풀면, 파일명만 적힌
   // 참조가 한쪽에서는 유일해 이어지고 다른 쪽에서는 겹쳐 끊겨 「재는가」와 「누가 여는가」가 갈린다.
   const allParents = directParents(candidates);
   const scoped = reachableFromRoots(candidates, allParents);
-  const files = candidates.filter((f) => scoped.has(f.rel));
+  const files = candidates.filter((candidate) => scoped.has(candidate.rel));
 
   // 닿는 곳은 잴 대상끼리만 센다 — 후보 전체로 세면 규격도 아닌 지식 글이 여는 곳까지 선을 낮춘다.
-  const parents = new Map(files.map((f) => [f.rel, new Set([...allParents.get(f.rel)].filter((p) => scoped.has(p)))]));
+  const parents = new Map(files.map((file) => [file.rel, new Set([...allParents.get(file.rel)].filter((parent) => scoped.has(parent)))]));
   const ancestors = ancestorsOf(files, parents);
   const reach = new Map([...ancestors].map(([rel, set]) => [rel, set.size]));
   const limitFor = (rel) =>
     path.basename(rel) === "SKILL.md" ? SKILL_LIMIT : reach.get(rel) >= FANOUT ? BUSY_LIMIT : LONE_LIMIT;
   // 잴 내용에는 있는데 아무 뿌리에서도 안 닿은 md — `--report`가 「인덱스에 없다」와 가르는 데 쓴다.
-  const unreached = new Set(candidates.filter((f) => !scoped.has(f.rel)).map((f) => f.rel));
-  return { files, unreached, parents, ancestors, reach, limitFor, over: files.filter((f) => f.size >= limitFor(f.rel)) };
+  const unreached = new Set(candidates.filter((candidate) => !scoped.has(candidate.rel)).map((candidate) => candidate.rel));
+  return { files, unreached, parents, ancestors, reach, limitFor, over: files.filter((file) => file.size >= limitFor(file.rel)) };
 }
 
 // 선 아래로 내려온 등재분. 파일이 지워졌을 때도 걷을 자리다.
 function settledOf(baseline, files, limitFor) {
   return Object.keys(baseline).filter((rel) => {
-    const f = files.find((x) => x.rel === rel);
+    const f = files.find((file) => file.rel === rel);
     return !f || f.size < limitFor(rel);
   });
 }
@@ -127,15 +127,15 @@ function main() {
   const seenWhole = readSeen();
   const seen = seenOf(seenWhole, repo);
   // 알린 적 없거나, 알린 크기보다 더 커졌을 때만 낸다. 같은 크기 그대로면 새 사실이 아니다.
-  const untold = (f) => seen.notified[f.rel] === undefined || f.size > seen.notified[f.rel];
+  const untold = (file) => seen.notified[file.rel] === undefined || file.size > seen.notified[file.rel];
 
   // 미등재 = 선을 넘었는데 기준선에 없는 것. 레포 등재가 통째로 없을 때도 같은 집합이다.
-  const unregistered = over.filter((f) => !baseline || baseline[f.rel] === undefined);
+  const unregistered = over.filter((file) => !baseline || baseline[file.rel] === undefined);
   const fresh = unregistered.filter(untold);
   const grown = baseline
     ? over
-        .filter((f) => baseline[f.rel] !== undefined && f.size > baseline[f.rel] && untold(f))
-        .map((f) => ({ ...f, was: baseline[f.rel] }))
+        .filter((file) => baseline[file.rel] !== undefined && file.size > baseline[file.rel] && untold(file))
+        .map((file) => ({ ...file, was: baseline[file.rel] }))
     : [];
   // 선 아래로 내려온 등재분은 기준선에서 걷을 자리다. 안 걷으면 다시 커져도 「등재분」으로 조용하다.
   const settledAll = baseline ? settledOf(baseline, files, limitFor) : [];
@@ -143,7 +143,7 @@ function main() {
 
   saveSeen(seenWhole, repo, {
     // `over`에서 다시 만들므로 선 아래로 내려온 파일의 기억은 저절로 걷힌다.
-    notified: Object.fromEntries(over.map((f) => [f.rel, Math.max(f.size, seen.notified[f.rel] ?? 0)])),
+    notified: Object.fromEntries(over.map((file) => [file.rel, Math.max(file.size, seen.notified[file.rel] ?? 0)])),
     settled: Object.fromEntries(settledAll.map((rel) => [rel, baseline[rel]])),
   });
 
@@ -152,7 +152,7 @@ function main() {
       baseline
         ? "[문서 크기] 선을 새로 넘은 프롬프트·스킬 md:"
         : `[문서 크기] 선을 넘은 md가 있는데 이 레포("${repo}")의 등재가 ${CONFIG_FILE}에 없다:`,
-      fresh.map((f) => `${f.rel} — ${f.size}B (닿는 곳 ${reach.get(f.rel)}, 선 ${limitFor(f.rel)}B)`),
+      fresh.map((file) => `${file.rel} — ${file.size}B (닿는 곳 ${reach.get(file.rel)}, 선 ${limitFor(file.rel)}B)`),
       baseline
         ? [
             "지금 하던 작업을 여기서 멈추지 않는다. 하던 것을 마무리한 뒤 사용자에게 이 파일과 크기를 알린다.",
@@ -176,7 +176,7 @@ function main() {
   if (grown.length) {
     report(
       "[문서 크기] 이미 선을 넘은 md가 더 커졌다:",
-      grown.map((f) => `${f.rel} — ${f.was}B → ${f.size}B (선 ${limitFor(f.rel)}B)`),
+      grown.map((file) => `${file.rel} — ${file.was}B → ${file.size}B (선 ${limitFor(file.rel)}B)`),
       [
         "등재된 초과분에 더 얹는 중이다. 하던 작업은 마무리하고, 끝난 뒤 사용자에게 알린다.",
         "이 파일을 줄이기로 했다면 기준선 등재를 함께 걷는다.",
@@ -232,11 +232,11 @@ function ancestorsOf(files, parents) {
 
 // 잴 대상 = 뿌리 자리(isRoot)의 md와, 거기서 참조를 따라 정방향으로 닿는 md 전부.
 function reachableFromRoots(candidates, parents) {
-  const children = new Map(candidates.map((f) => [f.rel, []]));
+  const children = new Map(candidates.map((candidate) => [candidate.rel, []]));
   for (const [child, ps] of parents) for (const p of ps) children.get(p).push(child);
 
   const scoped = new Set();
-  const stack = candidates.filter((f) => isRoot(f.rel)).map((f) => f.rel);
+  const stack = candidates.filter((candidate) => isRoot(candidate.rel)).map((candidate) => candidate.rel);
   while (stack.length) {
     const n = stack.pop();
     if (scoped.has(n)) continue;
@@ -248,7 +248,7 @@ function reachableFromRoots(candidates, parents) {
 
 // 파일마다 그 파일을 직접 가리키는 파일 집합.
 function directParents(files) {
-  const set = new Set(files.map((f) => f.rel));
+  const set = new Set(files.map((file) => file.rel));
   const byBase = new Map();
   for (const f of files) {
     const b = path.posix.basename(f.rel);
@@ -270,7 +270,7 @@ function directParents(files) {
     return null;
   };
 
-  const parents = new Map(files.map((f) => [f.rel, new Set()]));
+  const parents = new Map(files.map((file) => [file.rel, new Set()]));
   for (const f of files) {
     for (const re of [LINK_RE, PATH_RE]) {
       re.lastIndex = 0;
@@ -328,7 +328,7 @@ function effectiveMd(exclude) {
     else if (tipBlobs.has(e.rel)) entries.push({ rel: e.rel, sha: tipBlobs.get(e.rel) });
   }
   // 갈라진 뒤 기본 브랜치에 새로 생긴 파일. 갈라진 지점에 있었는데 인덱스에 없으면 이 브랜치가 지운 것이다.
-  const inIndex = new Set(indexed.map((e) => e.rel));
+  const inIndex = new Set(indexed.map((entry) => entry.rel));
   for (const [rel, sha] of tipBlobs) if (!inIndex.has(rel) && !forkBlobs.has(rel)) entries.push({ rel, sha });
   return entries;
 }
@@ -438,7 +438,7 @@ function readSeen() {
 
 function seenOf(whole, repo) {
   const entry = whole.repos[repo];
-  const map = (v) => (v && typeof v === "object" ? v : {});
+  const map = (value) => (value && typeof value === "object" ? value : {});
   return { notified: map(entry?.notified), settled: map(entry?.settled) };
 }
 
@@ -476,7 +476,7 @@ function configOf(whole, repo) {
   const entry = whole.repos[repo];
   return {
     files: entry && typeof entry.files === "object" && entry.files ? entry.files : null,
-    exclude: Array.isArray(entry?.exclude) ? entry.exclude.filter((x) => typeof x === "string") : [],
+    exclude: Array.isArray(entry?.exclude) ? entry.exclude.filter((item) => typeof item === "string") : [],
   };
 }
 
@@ -516,7 +516,7 @@ function writeBaseline() {
 
   // 큰 것부터가 아니라 「크기 × 닿는 곳」이 큰 것부터 적는다 — 그 순서가 곧 손댈 순서다.
   const over = [...unsorted].sort(
-    (a, b) => b.size * Math.max(reach.get(b.rel), 1) - a.size * Math.max(reach.get(a.rel), 1),
+    (left, right) => right.size * Math.max(reach.get(right.rel), 1) - left.size * Math.max(reach.get(left.rel), 1),
   );
 
   // `exclude`는 사람이 적은 것이라 다시 쓸 때 그대로 들고 간다 — 안 그러면 등재를 갱신할 때마다
@@ -553,7 +553,7 @@ function settleBaseline() {
 
   console.log(`${CONFIG_FILE}의 "${repo}"에서 ${settled.length}건을 걷었다:`);
   for (const rel of settled) {
-    const f = files.find((x) => x.rel === rel);
+    const f = files.find((file) => file.rel === rel);
     const now = f ? `${f.size}B (선 ${limitFor(rel)}B)` : "검사 대상에 없음 (삭제·이름 변경·제외·아무 규칙 파일도 안 가리킴)";
     console.log(`  ${rel} — 등재 ${config.files[rel]}B → ${now}`);
     delete whole.repos[repo].files[rel];
@@ -597,7 +597,7 @@ function reportFile(target) {
   }
 
   const { files, unreached, parents, ancestors, limitFor } = measure({ exclude });
-  const f = files.find((x) => x.rel === rel);
+  const f = files.find((file) => file.rel === rel);
   if (unreached.has(rel)) {
     console.log(outOfScope);
     return;
@@ -695,7 +695,7 @@ function readTarget(target, usage) {
 // 닫는 `#` 줄은 앞에 공백이 있어야 닫는 표시다 — `## C#`의 `#`은 제목의 일부다.
 const HEADING_RE = /^(#{1,6})\s+(.*?)(?:\s+#+)?\s*$/;
 // 마지막 조각은 개행 뒤의 빈 꼬리라 개행을 더하지 않는다. 더하면 파일 크기보다 1바이트 커진다.
-const lineBytes = (lines, i) => Buffer.byteLength(i < lines.length - 1 ? lines[i] + "\n" : lines[i], "utf8");
+const lineBytes = (lines, index) => Buffer.byteLength(index < lines.length - 1 ? lines[index] + "\n" : lines[index], "utf8");
 
 // 줄마다 코드 펜스·frontmatter 안인지 낸다. 그 안의 `#`은 헤딩이 아니다.
 // 펜스는 같은 기호가 여는 것보다 짧지 않게 와야 닫힌다 — 4백틱 안의 3백틱 예시가 펜스를 닫지 않게.
@@ -703,7 +703,7 @@ function fencedOf(lines) {
   const inside = new Array(lines.length).fill(false);
   let i = 0;
   if (lines[0]?.trim() === "---") {
-    const end = lines.findIndex((l, k) => k > 0 && l.trim() === "---");
+    const end = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
     if (end !== -1) for (; i <= end; i++) inside[i] = true;
   }
   let open = null; // { ch, len }
@@ -721,8 +721,8 @@ function fencedOf(lines) {
 }
 
 function headingsOf(lines, fenced) {
-  return lines.map((line, i) => {
-    if (fenced[i]) return null;
+  return lines.map((line, index) => {
+    if (fenced[index]) return null;
     const m = HEADING_RE.exec(line);
     return m ? { level: m[1].length, title: m[2] } : null;
   });
@@ -733,19 +733,19 @@ function headingsOf(lines, fenced) {
 function sectionsReport(t) {
   const heads = headingsOf(t.lines, fencedOf(t.lines));
   const sections = [{ line: 0, level: 0, title: "(첫 헤딩 앞)", own: 0 }];
-  t.lines.forEach((line, i) => {
-    if (heads[i]) sections.push({ line: i + 1, level: heads[i].level, title: heads[i].title, own: 0 });
-    sections[sections.length - 1].own += lineBytes(t.lines, i);
+  t.lines.forEach((line, index) => {
+    if (heads[index]) sections.push({ line: index + 1, level: heads[index].level, title: heads[index].title, own: 0 });
+    sections[sections.length - 1].own += lineBytes(t.lines, index);
   });
-  const total = sections.reduce((sum, s) => sum + s.own, 0);
+  const total = sections.reduce((sum, section) => sum + section.own, 0);
   console.log(`${t.abs} — ${total}B, 절 ${sections.length - 1}개 (제 몫 = 다음 헤딩 직전까지, 하위 포함 = 같은 급 이상 헤딩 직전까지)`);
-  sections.forEach((s, i) => {
-    if (i === 0 && s.own === 0) return;
-    let sub = s.own;
-    for (let j = i + 1; j < sections.length && sections[j].level > s.level && s.level > 0; j++) sub += sections[j].own;
-    const indent = "  ".repeat(Math.max(s.level - 1, 0));
-    const where = s.line ? `L${s.line}` : "L1";
-    console.log(`  ${where.padEnd(6)} ${String(s.own).padStart(6)}B  하위 포함 ${String(sub).padStart(6)}B  ${indent}${s.title}`);
+  sections.forEach((section, index) => {
+    if (index === 0 && section.own === 0) return;
+    let sub = section.own;
+    for (let j = index + 1; j < sections.length && sections[j].level > section.level && section.level > 0; j++) sub += sections[j].own;
+    const indent = "  ".repeat(Math.max(section.level - 1, 0));
+    const where = section.line ? `L${section.line}` : "L1";
+    console.log(`  ${where.padEnd(6)} ${String(section.own).padStart(6)}B  하위 포함 ${String(sub).padStart(6)}B  ${indent}${section.title}`);
   });
 }
 
@@ -777,7 +777,7 @@ function repoRootOf(dir) {
   }
   for (let d = dir; ; d = path.dirname(d)) {
     // 이름을 글자 그대로 대조한다 — Windows의 existsSync는 대소문자를 안 가려 `AppData/Local`도 잡는다.
-    if (entriesOf(d).some((n) => n === "local" || n === "deploy")) return d;
+    if (entriesOf(d).some((name) => name === "local" || name === "deploy")) return d;
     if (path.dirname(d) === d) return null;
   }
 }
@@ -826,7 +826,7 @@ function traceReport(t) {
   const resolveSkill = (name) => {
     const acRoot = acMarketplaceRoot(home);
     const cands = [
-      ...(root ? SKILL_DIRS.map((p) => [path.join(root, p), ""]) : []),
+      ...(root ? SKILL_DIRS.map((skillDir) => [path.join(root, skillDir), ""]) : []),
       ...(acRoot ? [[path.join(acRoot, "plugins", "ac", "skills"), " (plugin ac)"]] : []),
       [path.join(home, ".claude", "skills"), " (설치본)"],
     ];
@@ -842,15 +842,15 @@ function traceReport(t) {
   const heads = headingsOf(t.lines, fenced);
   let section = "(첫 헤딩 앞)";
   const rows = [];
-  t.lines.forEach((line, i) => {
-    if (heads[i]) section = heads[i].title;
+  t.lines.forEach((line, index) => {
+    if (heads[index]) section = heads[index].title;
     const seen = new Set();
     // 코드 블록 안의 경로도 명령으로 여는 것일 수 있어 빼지 않고 표시만 단다.
-    const kind = (k) => (fenced[i] ? `${k}(코드 블록)` : k);
-    const add = (k, hit) => {
+    const kind = (label) => (fenced[index] ? `${label}(코드 블록)` : label);
+    const add = (label, hit) => {
       if (!hit || seen.has(hit.shown)) return;
       seen.add(hit.shown);
-      rows.push({ line: i + 1, section, kind: kind(k), directive: DIRECTIVE_RE.test(line), ...hit });
+      rows.push({ line: index + 1, section, kind: kind(label), directive: DIRECTIVE_RE.test(line), ...hit });
     };
     for (const [re, kind] of [[LINK_RE, "링크"], [PATH_RE, "경로"]]) {
       re.lastIndex = 0;
@@ -892,7 +892,7 @@ function argOf(flag) {
   if (at === -1) return undefined;
   const next = process.argv[at + 1];
   if (next !== undefined && !next.startsWith("--")) return next;
-  return process.argv.slice(2).find((a) => !a.startsWith("--")) ?? null;
+  return process.argv.slice(2).find((arg) => !arg.startsWith("--")) ?? null;
 }
 
 // 지목한 대상이 ai-contexts 체크아웃(워크트리 포함) 안이면 그 체크아웃의 같은 스크립트로 넘겨 돌린다.

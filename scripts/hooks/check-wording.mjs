@@ -135,7 +135,7 @@ const LONG_SKIP = /^(?:#|\||>|\[\/\/\]: #)/;
 function frontmatterEnd(content) {
   const lines = content.split("\n");
   if (lines[0]?.trim() !== "---") return 0;
-  const close = lines.findIndex((line, i) => i > 0 && line.trim() === "---");
+  const close = lines.findIndex((line, index) => index > 0 && line.trim() === "---");
   return close === -1 ? 0 : close + 1;
 }
 
@@ -221,7 +221,7 @@ export function blockedHits(rows, line) {
   const hits = [];
   for (const row of rows) {
     const excluded = (row.exclusions ?? []).flatMap((phrase) =>
-      [...line.matchAll(wordPattern("SUBSTRING", phrase))].map((m) => [m.index, m.index + m[0].length]),
+      [...line.matchAll(wordPattern("SUBSTRING", phrase))].map((match) => [match.index, match.index + match[0].length]),
     );
     for (const word of row.words ?? []) {
       for (const m of line.matchAll(wordPattern(row.match, word))) {
@@ -239,7 +239,7 @@ const MAX_REPORTS = 20;
 
 function main() {
   const categories = [...CATEGORIES, GLOSS, BLOCKED, LONG];
-  const reports = new Map(categories.map((c) => [c.kind, []]));
+  const reports = new Map(categories.map((category) => [category.kind, []]));
   const rows = loadBlockedRows().filter((row) => inScope(row, "PROMPT"));
 
   for (const file of stagedMarkdownFiles()) {
@@ -251,7 +251,7 @@ function main() {
     }
   }
 
-  const found = categories.filter((c) => reports.get(c.kind).length > 0);
+  const found = categories.filter((category) => reports.get(category.kind).length > 0);
   if (found.length === 0) return;
 
   for (const category of found) {
@@ -259,7 +259,7 @@ function main() {
   }
 
   // 긴 줄 범주는 처방이 커밋을 나누는 법을 따로 말한다 — 그것만 걸렸으면 꼬리말을 찍지 않는다.
-  if (found.every((c) => c.kind === LONG.kind)) return;
+  if (found.every((category) => category.kind === LONG.kind)) return;
 
   // 안내는 "정리해도 된다"가 아니라 "지금 정리한다"로 적는다 — 고를 여지를 남기면 읽고도
   // 사용자에게 되넘긴다(check-count-hardcoding.mjs의 같은 문구 참고).
@@ -401,12 +401,12 @@ function detectInFile(file, content, rows, addedLines = null) {
     }
 
     for (const category of CATEGORIES) {
-      const hits = patternsOf(category).flatMap((pattern) => [...clean.matchAll(pattern)].map((m) => m[0]));
+      const hits = patternsOf(category).flatMap((pattern) => [...clean.matchAll(pattern)].map((match) => match[0]));
       if (hits.length > 0) found.push({ kind: category.kind, file, lineNo, line: raw.trim(), hits });
     }
 
     if (lineNo > bodyStart && trimmed.startsWith("#")) {
-      const hits = [...clean.matchAll(GLOSS_HEADING)].map((m) => m[0]);
+      const hits = [...clean.matchAll(GLOSS_HEADING)].map((match) => match[0]);
       if (hits.length > 0) found.push({ kind: GLOSS.kind, file, lineNo, line: trimmed, hits });
     }
 
@@ -457,7 +457,7 @@ function reportFile(target) {
   const found = detectInFile(target, fs.readFileSync(abs, "utf8"), rows);
   const where = target;
   for (const category of [...CATEGORIES, GLOSS, BLOCKED, LONG]) {
-    const reports = found.filter((r) => r.kind === category.kind);
+    const reports = found.filter((report) => report.kind === category.kind);
     if (reports.length > 0) printReports(category, reports, where);
   }
   if (found.length === 0) console.log(`${where} — 적중 없음.`);
